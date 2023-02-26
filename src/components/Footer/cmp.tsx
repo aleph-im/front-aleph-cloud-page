@@ -1,7 +1,7 @@
 import React from 'react'
 import { Col, Icon, Logo, Row } from '@aleph-front/aleph-core'
 import Container from '../Container'
-import { StyledAnchor, StyledButton, StyledFooter, StyledLogoContainer } from './styles'
+import { StyledAnchor, StyledButton, StyledFooter, StyledIcon, StyledLogoContainer } from './styles'
 import { FooterProps } from './types'
 
 export const Footer = (props: FooterProps) => {
@@ -32,9 +32,9 @@ export const Footer = (props: FooterProps) => {
               <StyledAnchor>Token</StyledAnchor>
             </Col>
             <Col>
-              <StyledAnchor><Icon name="twitter" size='lg' />Twitter</StyledAnchor>
-              <StyledAnchor><Icon name="telegram" size='lg' />Telegram</StyledAnchor>
-              <StyledAnchor><Icon name="medium" size='lg' />Medium</StyledAnchor>
+              <StyledAnchor target="_blank" href='https://twitter.com/aleph_im'><StyledIcon name="twitter" />Twitter</StyledAnchor>
+              <StyledAnchor target="_blank" href='https://t.me/alephim'><StyledIcon name="telegram" />Telegram</StyledAnchor>
+              <StyledAnchor target="_blank" href='https://medium.com/aleph-im'><StyledIcon name="medium" />Medium</StyledAnchor>
             </Col>
           </Row>
         </nav>

@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { Navbar, TextGradient } from '@aleph-front/aleph-core'
+import { Button, Icon, Navbar, TextGradient } from '@aleph-front/aleph-core'
 import Container from '@/components/Container'
 
 export default function Home() {
@@ -12,13 +12,22 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Navbar />
+        <Container>
+          <Navbar
+            navLinks={[
+              <a key="solutions" href="#">Solutions</a>,
+              <a key="dashboard" href="#">Dashboard</a>,
+            ]}
+            navButtons={[
+              <Button key="link" as="a" color="main0" kind="neon" size="regular" variant="tertiary" disabled><Icon name="link-simple-slash" /></Button>,
+              <Button key="connect" as="a" color="main0" kind="neon" size="regular" variant="tertiary">Connect <Icon name="meteor" size='lg' className='ml-xs' /></Button>
+            ]}
+          />
+        </Container>
         <Container>
           <TextGradient type='h1' color='main1'>Computing</TextGradient>
           <p>With Aleph.im&apos;s computing services, you can process data quickly and securely using on-demand and persistent functions, virtual machine instances, and confidential VMs.</p>
         </Container>
-
-
       </main>
     </>
   )
