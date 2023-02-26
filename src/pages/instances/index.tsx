@@ -14,11 +14,8 @@ export default function Home() {
       <main>
         <Navbar />
         <Container>
-          <TextGradient type='h1' color='main1'>Computing</TextGradient>
-          <p>With Aleph.im&apos;s computing services, you can process data quickly and securely using on-demand and persistent functions, virtual machine instances, and confidential VMs.</p>
+          <TextGradient type='h1' color='main1'>Instances</TextGradient>
         </Container>
-
-
       </main>
     </>
   )
