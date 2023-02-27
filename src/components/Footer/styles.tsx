@@ -1,12 +1,14 @@
-import { Button, getResponsiveCss, getTypoCss, Icon } from '@aleph-front/aleph-core'
+import { Button, Icon } from '@aleph-front/aleph-core'
 import styled, {
   css,
 } from 'styled-components'
 
 export const StyledFooter = styled.footer`
   background-color: #00000033;
+  box-sizing: border-box;
   width: 100%;
-  padding: 82px 62px;
+  padding-top: 82px;
+  padding-bottom: 82px;
 `
 
 export const StyledLogoContainer = styled.div`
@@ -20,7 +22,7 @@ export const StyledButton = styled(Button).attrs(props => {
     variant: 'tertiary',
     color: 'main0',
     size: 'regular',
-    className: `${props.className} mb-lg`
+    className: `${props.className || ''} mb-lg`
   }
 })`
   display: block;
@@ -34,7 +36,7 @@ export const StyledAnchor = styled.a.attrs(props => {
   return {
     ...props,
     href: props.href || '#',
-    className: `${props.className} mb-lg tp-nav`
+    className: `${props.className || ''} mb-lg tp-nav`
   }
 })`
   ${({ theme }) => css`
@@ -56,6 +58,6 @@ export const StyledIcon = styled(Icon).attrs(props => {
   return {
     ...props,
     size: 'lg',
-    className: `${props.className} mr-xs`
+    className: `${props.className || ''} mr-xs`
   }
 })``

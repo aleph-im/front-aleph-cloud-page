@@ -10,6 +10,7 @@ import { ThemeProvider } from 'styled-components'
 import { themes, GlobalStyle } from '@aleph-front/aleph-core'
 import Footer from '@/components/Footer'
 import { GlobalStylesOverride } from '@/styles/global'
+import Header from '@/components/Header'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -17,6 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={themes.dark}>
         <GlobalStyle />
         <GlobalStylesOverride />
+        <Header />
         <Component {...pageProps} />
         <Footer />
       </ThemeProvider>

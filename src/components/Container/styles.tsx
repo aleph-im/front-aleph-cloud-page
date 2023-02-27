@@ -1,19 +1,17 @@
-import { getResponsiveCss } from '@aleph-front/aleph-core'
-import styled, {
-  css,
-} from 'styled-components'
+import styled, { css } from 'styled-components'
 
-export const StyledContainer = styled.div`
+export const StyledContainer = styled.div.attrs(props => {
+  return {
+    ...props,
+    className: `${props.className || ''} px-xs-xs px-sm-sm px-md-md px-lg-lg px-xl-xl px-xxl-xxl`
+  }
+})`
   ${({ theme }) => {
-    const responsiveWidth = Object.entries(theme.breakpoint).sort(([, av], [, bv]) => av - bv)
-    const responsiveCss = responsiveWidth.map(([k, v]) => getResponsiveCss(k as any, css`
-      max-width: ${v}rem;
-    `))
-
     return css`
+      box-sizing: border-box;
       width: 100%;
       margin: 0 auto;
-      ${responsiveCss}
+      max-width: ${theme.breakpoint.xxl}rem;
     `
   }}
 `
