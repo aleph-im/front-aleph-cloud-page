@@ -12,9 +12,16 @@ import Footer from '@/components/Footer'
 import { GlobalStylesOverride } from '@/styles/global'
 import Header from '@/components/Header'
 
+import { createContext, useReducer, Dispatch } from 'react'
+import { Action, initialState, reducer, State } from '@/helpers/store'
+
+export const AppStateContext = createContext<{state: State, dispatch: Dispatch<any>}>({state: initialState, dispatch: () => null})
+
 export default function App({ Component, pageProps }: AppProps) {
+  const [state, dispatch] = useReducer(reducer, initialState)
+
   return (
-    <>
+    <AppStateContext.Provider value={{ state, dispatch }}>
       <ThemeProvider theme={themes.dark}>
         <GlobalStyle />
         <GlobalStylesOverride />
@@ -22,6 +29,6 @@ export default function App({ Component, pageProps }: AppProps) {
         <Component {...pageProps} />
         <Footer />
       </ThemeProvider>
-    </>
+    </AppStateContext.Provider>
   )
 }
