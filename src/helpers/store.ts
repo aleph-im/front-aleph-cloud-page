@@ -1,15 +1,20 @@
 import { Account } from "aleph-sdk-ts/dist/accounts/account";
+import { ProgramMessage } from "aleph-sdk-ts/dist/messages/message";
 
 export enum ActionTypes {
   connect,
   disconnect,
-  getAccountBalance,
+  setAccountBalance,
+  setProducts,
 }
 
 export type State = {
   account?: Account;
-  account_meta: {
-    balance?: number;
+  account_balance?: number;
+  products: {
+    databases?: ProgramMessage[];
+    instances?: ProgramMessage[];
+    functions?: ProgramMessage[];
   };
 };
 
@@ -20,8 +25,11 @@ export type Action = {
 
 export const initialState: State = {
   account: undefined,
-  account_meta: {
-    balance: undefined,
+  account_balance: undefined,
+  products: {
+    databases: undefined,
+    instances: undefined,
+    functions: undefined,
   },
 };
 
@@ -42,13 +50,16 @@ export const reducer = (
         account: undefined,
       };
 
-    case ActionTypes.getAccountBalance:
+    case ActionTypes.setAccountBalance:
       return {
         ...state,
-        account_meta: {
-          ...state.account_meta,
-          balance: payload.balance,
-        },
+        account_balance: payload.balance,
+      };
+
+    case ActionTypes.setProducts:
+      return {
+        ...state,
+        products: payload.products,
       };
 
     default:
