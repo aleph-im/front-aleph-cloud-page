@@ -64,27 +64,20 @@ export const getERC20Balance = async (address: string) => {
  * @returns The Aleph balance of the address
  */
 export const getSOLBalance = async (address: string) => {
-  const connection = new SOLUtils.Connection(
-    "https://api.mainnet-beta.solana.com",
-    "confirmed"
-  );
-  const mint = new SOLUtils.PublicKey(
-    "3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x"
-  );
-  const account = new SOLUtils.PublicKey(address);
-
+  // FIXME: This is a temporary solution
   try {
-    const query = await connection.getTokenAccountsByOwner(account, { mint });
-    if (query.value.length === 0) {
-      return 0;
-    }
-    const b = query.value[0].account.data.toJSON();
-    return b.parsed.info.tokenAmount.uiAmount;
+    const query = await fetch(
+      `https://solrpc3.aleph.cloud/balance/solana/${address}`
+    );
+
+    const { balance } = await query.json();
+    return balance;
   } catch (error) {
     throw E_.RequestFailed(error);
   }
 };
 
+// TODO: define products definition
 export const msgIsFunction = (msg: ProgramMessage) => {
   return msg.content.on?.persistent === true;
 };
