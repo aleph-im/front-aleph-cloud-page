@@ -67,7 +67,7 @@ export const getSOLBalance = async (address: string) => {
   // FIXME: This is a temporary solution
   try {
     const query = await fetch(
-      `https://solrpc3.aleph.cloud/balance/solana/${address}`
+      `https://balance1.api.aleph.cloud/solana/${address}`
     );
 
     const { balance } = await query.json();
