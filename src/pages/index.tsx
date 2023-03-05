@@ -1,28 +1,29 @@
 import Head from 'next/head'
-import styled, { css } from 'styled-components'
-import { Button, Card, Col, Row, TextGradient, Tag } from '@aleph-front/aleph-core'
+import styled from 'styled-components'
+import { Button, Col, Row, TextGradient, Tag } from '@aleph-front/aleph-core'
 import Container from '@/components/Container'
 import { IndexingImg } from '@/components/Imgs/IndexingImg'
+import FeatureCard from '@/components/FeatureCard'
 
 const StyledSection = styled.section`
   padding: 82px 0;
 `
 
-const StyledCard = styled(Card).attrs(props => {
+const StyledButton = styled(Button).attrs(props => {
   return {
     ...props,
-    variant: "block",
-    buttonColor: "main0",
-    buttonVariant: "secondary",
-    buttonHref: "#",
-    buttonOnClick: () => { },
+    kind: 'neon',
+    variant: 'text-only',
+    size: 'big',
+    color: 'main0',
+    className: `${props.className || ''} d-block my-lg`
   }
 })``
 
 const StyledTag = styled(Tag).attrs(props => {
   return {
     ...props,
-    className: `${props.className} mt-md mr-sm`
+    className: `${props.className || ''} mt-md mr-sm`
   }
 })``
 
@@ -46,7 +47,7 @@ export default function Home() {
           <Container>
             <Row count={4}>
               <Col>
-                <StyledCard
+                <FeatureCard
                   title="Function"
                   text="An isolated environment  created for a  function to execute in response to an event and can run in two modes: on-demand or persistent."
                   buttonLabel="Setup function"
@@ -54,7 +55,7 @@ export default function Home() {
                 />
               </Col>
               <Col>
-                <StyledCard
+                <FeatureCard
                   title="Instance"
                   text="A virtual machine that runs on a Aleph.im's infrastructure that can be configured with CPUs, memory, storage, and networking."
                   buttonLabel="Setup instance"
@@ -62,11 +63,12 @@ export default function Home() {
                 />
               </Col>
               <Col>
-                <StyledCard
+                <FeatureCard
                   title="Confidential VM"
                   text="A virtual machine running for an extended period with their memory, storage, and execution fully encrypted and isolated from the host."
                   buttonLabel="Create Confidential VM"
                   headerImg="Object7"
+                  disable
                 />
               </Col>
             </Row>
@@ -96,35 +98,36 @@ export default function Home() {
           <Container>
             <Row count={4}>
               <Col>
-                <StyledCard
-                  title="Immutable volume"
-                  text="Immutable volumes store unchangeable data on IPFS, pinned to multiple nodes for reliable access."
-                  buttonLabel="Create volume"
+                <FeatureCard
+                  title="Persistent storage"
+                  text="Designed to hold data or files of an instance for an extended period of time and persist between restarts."
+                  buttonLabel="Create storage"
                   headerImg="Object6"
                 />
               </Col>
               <Col>
-                <StyledCard
-                  title="Persistent volume"
-                  text="Designed to hold data or files over an extended period of time and can also be mounted and accessed by multiple instances."
-                  buttonLabel="Create volume"
+                <FeatureCard
+                  title="Package dependencies"
+                  text="Package your dependencies to an immutable volume upfront to reference it easily and speed up creation time of an instance or function."
+                  buttonLabel="Create package"
                   headerImg="Object7"
                 />
               </Col>
               <Col>
-                <StyledCard
-                  title="Database"
-                  text="The network enables the use of databases that store data as key-value pairs for easy data retrieval and management."
+                <FeatureCard
+                  title="Distributed database"
+                  text="Use distributed database for high resiliency and enables the use to store data as key-value pairs for easy data retrieval and management."
                   buttonLabel="Create database"
                   headerImg="Object2"
                 />
               </Col>
               <Col>
-                <StyledCard
+                <FeatureCard
                   title="Temporarily volume"
                   text="A volume that is created temporarily to hold data or files for a short period of time. After this time the volume is deleted."
                   buttonLabel="Create volume"
                   headerImg="Object5"
+                  disable
                 />
               </Col>
             </Row>
@@ -136,17 +139,17 @@ export default function Home() {
             <Row count={2}>
               <Col>
                 <h2 className='tp-h6 my-xxl'>How-to’s</h2>
-                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Host a website</Button>
-                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Store files now</Button>
-                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Pin a file</Button>
-                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Local VM’s for testing</Button>
-                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Start indexing</Button>
+                <StyledButton>Host a website</StyledButton>
+                <StyledButton>Store files now</StyledButton>
+                <StyledButton>Pin a file</StyledButton>
+                <StyledButton>Local VM’s for testing</StyledButton>
+                <StyledButton>Start indexing</StyledButton>
               </Col>
               <Col>
                 <h2 className='tp-h6 my-xxl'>Learn best practice</h2>
-                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Trigger your VM</Button>
-                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Aggregates vs posts</Button>
-                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Encrypt your data</Button>
+                <StyledButton>Trigger your VM</StyledButton>
+                <StyledButton>Aggregates vs posts</StyledButton>
+                <StyledButton>Encrypt your data</StyledButton>
               </Col>
             </Row>
           </Container>
