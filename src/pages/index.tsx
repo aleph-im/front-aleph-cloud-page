@@ -131,7 +131,7 @@ export default function Home() {
             </Row>
           </Container>
         </StyledSection>
-        <StyledSection className='pb-0'>
+        <StyledSection>
           <Container>
             <h1 className='tp-h3 mb-lg'>Put it to work</h1>
             <Row count={2}>
