@@ -1,5 +1,5 @@
 import React from 'react'
-import { Icon } from '@aleph-front/aleph-core'
+import { Button, Icon } from '@aleph-front/aleph-core'
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
 import { HeaderProps } from './types'
 
@@ -12,8 +12,8 @@ export const Header = (props: HeaderProps) => {
           <a key="dashboard" href="#">Dashboard</a>,
         ]}
         navButtons={[
-          <StyledButton key="link" as="a" disabled><Icon name="link-simple-slash" /></StyledButton>,
-          <StyledButton key="connect" as="a">Connect <Icon name="meteor" size='lg' className='ml-xs' /></StyledButton>
+          <StyledButton key="link" forwardedAs="a" disabled><Icon name="link-simple-slash" /></StyledButton>,
+          <StyledButton key="connect" forwardedAs="a">Connect <Icon name="meteor" size='lg' className='ml-xs' /></StyledButton>,
         ]}
       />
     </StyledHeader>
