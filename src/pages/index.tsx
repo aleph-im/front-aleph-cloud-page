@@ -1,9 +1,8 @@
 import Head from 'next/head'
-import styled from 'styled-components'
-import { Button, Card, Col, Row, TextGradient } from '@aleph-front/aleph-core'
+import styled, { css } from 'styled-components'
+import { Button, Card, Col, Row, TextGradient, Tag } from '@aleph-front/aleph-core'
 import Container from '@/components/Container'
 import { IndexingImg } from '@/components/Imgs/IndexingImg'
-import Tag from '@/components/Tag'
 
 const StyledSection = styled.section`
   padding: 82px 0;
