@@ -68,7 +68,7 @@ export default function Home() {
                   text="A virtual machine running for an extended period with their memory, storage, and execution fully encrypted and isolated from the host."
                   buttonLabel="Create Confidential VM"
                   headerImg="Object7"
-                  disable
+                  disabled
                 />
               </Col>
             </Row>
@@ -127,7 +127,7 @@ export default function Home() {
                   text="A volume that is created temporarily to hold data or files for a short period of time. After this time the volume is deleted."
                   buttonLabel="Create volume"
                   headerImg="Object5"
-                  disable
+                  disabled
                 />
               </Col>
             </Row>
