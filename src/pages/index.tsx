@@ -1,7 +1,9 @@
 import Head from 'next/head'
-import { Card, Col, Row, TextGradient } from '@aleph-front/aleph-core'
-import Container from '@/components/Container'
 import styled from 'styled-components'
+import { Button, Card, Col, Row, TextGradient } from '@aleph-front/aleph-core'
+import Container from '@/components/Container'
+import { IndexingImg } from '@/components/Imgs/IndexingImg'
+import Tag from '@/components/Tag'
 
 const StyledSection = styled.section`
   padding: 82px 0;
@@ -18,6 +20,12 @@ const StyledCard = styled(Card).attrs(props => {
   }
 })``
 
+const StyledTag = styled(Tag).attrs(props => {
+  return {
+    ...props,
+    className: `${props.className} mt-md mr-sm`
+  }
+})``
 
 export default function Home() {
   return (
@@ -32,7 +40,7 @@ export default function Home() {
         <StyledSection className='pb-0'>
           <Container>
             <TextGradient type='h1' color='main1'>Computing</TextGradient>
-            <p>With Aleph.im&apos;s computing services, you can process data quickly and securely using on-demand and persistent functions, virtual machine instances, and confidential VMs.</p>
+            <p className='fs-md'>With Aleph.im&apos;s computing services, you can process data quickly and securely using on-demand and persistent functions, virtual machine instances, and confidential VMs.</p>
           </Container>
         </StyledSection>
         <StyledSection>
@@ -65,10 +73,24 @@ export default function Home() {
             </Row>
           </Container>
         </StyledSection>
+        <StyledSection className='fx-noise-light'>
+          <Container>
+            <Row count={2}>
+              <Col><IndexingImg /></Col>
+              <Col>
+                <span className="tp-info mb-0">SOLANA - ETHEREUM - BINANCE SMART CHAIN</span>
+                <TextGradient type='h3' as='h1' color='main0'>Indexing framework</TextGradient>
+                <p className='fs-md mb-xxl'>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris convallis, quam quis vehicula pulvinar, nisl elit finibus sem.</p>
+                <Button kind='neon' variant='primary' size='big' color='main0' className='my-lg'>Get in touch with us</Button>
+                <p className='fs-xs m-0'>By clicking the button you confirming that you’re agree with our following  .</p>
+              </Col>
+            </Row>
+          </Container>
+        </StyledSection>
         <StyledSection className='pb-0'>
           <Container>
             <TextGradient type='h1' color='main1'>Storage</TextGradient>
-            <p>With support for immutable, temporary, and persistent volumes, as well as databases using key-value pairs, Aleph.im provides a flexible and powerful storage solution for a wide range of use cases.</p>
+            <p className='fs-md'>With support for immutable, temporary, and persistent volumes, as well as databases using key-value pairs, Aleph.im provides a flexible and powerful storage solution for a wide range of use cases.</p>
           </Container>
         </StyledSection>
         <StyledSection>
@@ -105,6 +127,52 @@ export default function Home() {
                   buttonLabel="Create volume"
                   headerImg="Object5"
                 />
+              </Col>
+            </Row>
+          </Container>
+        </StyledSection>
+        <StyledSection className='pb-0'>
+          <Container>
+            <h1 className='tp-h3 mb-lg'>Put it to work</h1>
+            <Row count={2}>
+              <Col>
+                <h2 className='tp-h6 my-xxl'>How-to’s</h2>
+                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Host a website</Button>
+                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Store files now</Button>
+                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Pin a file</Button>
+                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Local VM’s for testing</Button>
+                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Start indexing</Button>
+              </Col>
+              <Col>
+                <h2 className='tp-h6 my-xxl'>Learn best practice</h2>
+                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Trigger your VM</Button>
+                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Aggregates vs posts</Button>
+                <Button className="d-block my-lg" kind='neon' variant='text-only' size='big' color='main0'>Encrypt your data</Button>
+              </Col>
+            </Row>
+          </Container>
+        </StyledSection>
+        <StyledSection className='fx-noise-light'>
+          <Container>
+            <h1 className='tp-h3 mb-lg'>Resources</h1>
+            <Row count={12}>
+              <Col span={8}>
+                <h2 className='tp-h6 mb-sm'>Documentation</h2>
+                <StyledTag>VMs</StyledTag>
+                <StyledTag>Functions</StyledTag>
+                <StyledTag>Native storage</StyledTag>
+                <StyledTag>IPFS</StyledTag>
+                <StyledTag>Databases</StyledTag>
+                <StyledTag>Persistent VMs</StyledTag>
+                <StyledTag>Persistent storage</StyledTag>
+                <StyledTag>Use cases</StyledTag>
+              </Col>
+              <Col span={4}>
+                <h2 className='tp-h6 mb-sm'>Indexing Framework</h2>
+                <StyledTag>Ethereum</StyledTag>
+                <StyledTag>Solana</StyledTag>
+                <StyledTag>Tezos</StyledTag>
+                <StyledTag>Binance Smart Chain</StyledTag>
               </Col>
             </Row>
           </Container>
