@@ -66,16 +66,16 @@ export const getAccountProducts = async (account: Account) => {
   };
 
   query.messages.forEach((msg) => {
-    if (msgIsFunction(msg as ProgramMessage)) {
-      products.functions.push(msg as ProgramMessage);
-    } else {
-      products.instances.push(msg as ProgramMessage);
-    }
+    // if (msgIsFunction(msg as ProgramMessage)) {
+    //   products.functions.push(msg as ProgramMessage);
+    // } else {
+    //   products.instances.push(msg as ProgramMessage);
+    // }
+
+    products.functions.push(msg as ProgramMessage);
   });
 
   return products;
 };
-
-export const createInstance = async (account: Account) => {};
 
 export const createFunction = async (account: Account) => {};

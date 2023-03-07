@@ -81,3 +81,14 @@ export const getSOLBalance = async (address: string) => {
 export const msgIsFunction = (msg: ProgramMessage) => {
   return msg.content.on?.persistent === true;
 };
+
+/**
+ * Converts a UNIX timestamp to an ISO date, or returns a default value if the timestamp is invalid
+ *
+ * @param timeStamp A UNIX timestamp
+ */
+export const ISODate = (timeStamp?: number, noDate: string = "n/a") => {
+  if (!timeStamp) return noDate;
+  const date = new Date(timeStamp * 1000);
+  return date.toISOString().split("T")[0];
+};

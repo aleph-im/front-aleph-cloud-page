@@ -13,7 +13,7 @@ import { GlobalStylesOverride } from '@/styles/global'
 import Header from '@/components/Header'
 
 import { createContext, useReducer, Dispatch } from 'react'
-import { Action, initialState, reducer, State } from '@/helpers/store'
+import { initialState, reducer, State } from '@/helpers/store'
 
 export const AppStateContext = createContext<{state: State, dispatch: Dispatch<any>}>({state: initialState, dispatch: () => null})
 
