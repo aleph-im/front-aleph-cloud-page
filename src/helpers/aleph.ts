@@ -4,11 +4,26 @@ import {
   ProgramMessage,
 } from "aleph-sdk-ts/dist/messages/message";
 import { Account } from "aleph-sdk-ts/dist/accounts/account";
-import { any } from "aleph-sdk-ts/dist/messages";
+import { any, program, forget } from "aleph-sdk-ts/dist/messages";
 import { GetAccountFromProvider as getETHAccount } from "aleph-sdk-ts/dist/accounts/ethereum";
 import { GetAccountFromProvider as getSOLAccount } from "aleph-sdk-ts/dist/accounts/solana";
-import { getERC20Balance, getSOLBalance, msgIsFunction } from "./utils";
+import {
+  getERC20Balance,
+  getFunctionSpecsByComputeUnits,
+  getSOLBalance,
+} from "./utils";
 import E_ from "./errors";
+import {
+  Encoding,
+  MachineVolume,
+  PersistentVolume,
+  FunctionRuntime,
+} from "aleph-sdk-ts/dist/messages/program/programModel";
+import {
+  defaultFileExtension,
+  defaultMimetype,
+  LanguageType,
+} from "./constants";
 
 /**
  * Connects to a web3 provider and returns an Aleph account object
@@ -48,6 +63,27 @@ export const getAccountBalance = async (account: Account): Promise<number> => {
   }
 };
 
+/**
+ * Returns an aleph program message for a given hash
+ */
+export const getMessage = async (hash: string) => {
+  try {
+    const msg = await any.GetMessage({
+      hash: hash,
+    });
+
+    return msg;
+  } catch (error) {
+    throw E_.RequestFailed(error);
+  }
+};
+
+/**
+ * Get all the products (databases, instances, functions) for a given account
+ *
+ * @param account
+ * @returns An object containing the products
+ */
 export const getAccountProducts = async (account: Account) => {
   let query;
   try {
@@ -65,17 +101,90 @@ export const getAccountProducts = async (account: Account) => {
     functions: [],
   };
 
-  query.messages.forEach((msg) => {
-    // if (msgIsFunction(msg as ProgramMessage)) {
-    //   products.functions.push(msg as ProgramMessage);
-    // } else {
-    //   products.instances.push(msg as ProgramMessage);
-    // }
+  query.messages
+    .filter((msg) => msg.content) // removes forgotten messages
+    .forEach((msg) => {
+      // TODO:
+      // if (msgIsFunction(msg as ProgramMessage)) {
+      //   products.functions.push(msg as ProgramMessage);
+      // } else {
+      //   products.instances.push(msg as ProgramMessage);
+      // }
 
-    products.functions.push(msg as ProgramMessage);
-  });
+      products.functions.push(msg as ProgramMessage);
+    });
 
   return products;
 };
 
-export const createFunction = async (account: Account) => {};
+/**
+ * Transforms a string into a File object
+ */
+export const stringToFile = (str: string, fileType: LanguageType) => {
+  const mime = { type: defaultMimetype[fileType] };
+  const filename = "app." + defaultFileExtension[fileType];
+  const blob = new Blob([str], mime);
+  return new File([blob], filename, mime);
+};
+
+type CreateFunctionParams = {
+  account: Account;
+  file: File;
+  name: string;
+  entrypoint: string;
+  isPersistent: boolean;
+  runtime: string;
+  encoding: Encoding;
+  volumes: Array<MachineVolume | PersistentVolume>;
+  computeUnits: number;
+};
+export const createFunctionProgram = async ({
+  account,
+  file,
+  name,
+  entrypoint,
+  isPersistent,
+  runtime,
+  volumes,
+  computeUnits,
+}: CreateFunctionParams) => {
+  const { memory, cpu } = getFunctionSpecsByComputeUnits(
+    computeUnits,
+    isPersistent
+  );
+
+  try {
+    const msg = await program.publish({
+      channel: "ALEPH-CLOUDSOLUTIONS",
+      account,
+      isPersistent,
+      file,
+      volumes,
+      metadata: { name },
+      runtime,
+      entrypoint,
+      memory,
+    });
+
+    return msg;
+  } catch (err) {
+    throw E_.RequestFailed(err);
+  }
+};
+
+/**
+ * Deletes a VM using a forget message
+ */
+export const deleteVM = async (account: Account, message: ProgramMessage) => {
+  try {
+    const msg = await forget.Publish({
+      account,
+      hashes: [message.item_hash],
+      channel: message.channel,
+    });
+
+    return msg;
+  } catch (err) {
+    throw E_.RequestFailed(err);
+  }
+};

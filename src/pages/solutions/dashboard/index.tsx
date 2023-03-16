@@ -1,4 +1,4 @@
-import { useContext, useMemo } from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import { Col, Row, Table, Tabs, TextGradient } from '@aleph-front/aleph-core'
 
 import useConnected from '@/helpers/hooks/useConnected'
@@ -6,48 +6,82 @@ import { AppStateContext } from '@/pages/_app'
 import ButtonLink from '@/components/ButtonLink'
 import CenteredSection from '@/components/CenteredSection'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
-import { ISODate } from '@/helpers/utils'
+import { unixToISODateString } from '@/helpers/utils'
+import { ProgramMessage } from 'aleph-sdk-ts/dist/messages/message'
+import { getAccountProducts } from '@/helpers/aleph'
+import { ActionTypes } from '@/helpers/store'
 
 export default function Home(){
     useConnected()
     const { state, dispatch } = useContext(AppStateContext)
     const allProducts = useMemo(() => Object.values(state.products).flat(), [state])
 
-    const TabContent = ({data}) => (
+    useEffect(() => {
+      const dipatchMessages = async () => {
+        // Account instanciation is protected by useConnected hook
+        // @ts-ignore
+        const products = await getAccountProducts(state.account)
+        dispatch({ type: ActionTypes.setProducts, payload: {products} })
+      }
+
+      dipatchMessages()
+    }, [])
+
+    // FIXME: Selector function signature
+    const TabContent = ({data}: { data: ProgramMessage[]}) => (
       <div className="pt-md">
+        { allProducts.length > 0 ?
         <Table border="none" oddRowNoise data={data} columns={[
           {
             label: "Type",
-            selector: (row) => (row?.content?.on?.persistent ? 'Instance' : 'Function'),
+            // @ts-ignore 
+            selector: (row: ProgramMessage) => (row?.content?.on?.persistent ? 'Instance' : 'Function'),
             sortable: true,
           },
           {
             label: "Name",
-            selector: (row) => (row?.content?.metadata?.name || row?.item_hash),
+            // @ts-ignore 
+            selector: (row: ProgramMessage) => (row?.content?.metadata?.name || row?.item_hash),
             sortable: true,
           },
           {
             label: "Cores",
-            selector: (row) => (row?.content?.resources?.vcpus || 0),
+            // @ts-ignore 
+            selector: (row: ProgramMessage) => (row?.content?.resources?.vcpus || 0),
             sortable: true,
           },
           {
             label: "Memory",
-            selector: (row) => (row?.content?.resources?.memory || 0),
+            // @ts-ignore 
+            selector: (row: ProgramMessage) => (row?.content?.resources?.memory || 0),
             sortable: true,
           },
           {
             label: "Size",
-            selector: (row) => (row.content?.volumes.length || 0),
-            cell: () => 'n/a',
+            // @ts-ignore 
+            selector: (row: ProgramMessage) => (row.content?.volumes.length || 0),
             sortable: true,
           },
           {
             label: "Date",
-            selector: (row) => ISODate(row?.content?.time),
+            // @ts-ignore 
+            selector: (row: ProgramMessage) => unixToISODateString(row?.content?.time),
             sortable: true,
+          },
+          {
+            label: "",
+            selector: () => '',
+            // @ts-ignore 
+            cell: (row: ProgramMessage) => (
+              <ButtonLink href={`/solutions/dashboard/manage?hash=${row?.item_hash}`}>
+                &gt;
+              </ButtonLink>
+            )
           }
         ]} />
+
+        : <p>No products yet</p>
+        }
       </div>
     )
 
@@ -68,19 +102,19 @@ export default function Home(){
               },
               { 
                 name: 'Functions', 
-                component: <TabContent data={state.products.functions} />,
+                component: <TabContent data={state.products.functions || []} />,
                 label: `(${state.products.functions?.length || 0})`,
                 labelPosition: 'bottom'
               },
               { 
                 name: 'Instance', 
-                component: <TabContent data={state.products.instances} />,
+                component: <TabContent data={state.products.instances || []} />,
                 disabled: true,
                 label: '(Soon)'
               },
               { 
                 name: 'Database', 
-                component: <TabContent data={state.products.databases} />,
+                component: <TabContent data={state.products.databases || []} />,
                 disabled: true,
                 label: '(Soon)'
               },
