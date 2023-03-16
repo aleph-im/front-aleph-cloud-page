@@ -1,5 +1,4 @@
 import { providers, Contract } from "ethers";
-import * as SOLUtils from "@solana/web3.js";
 import E_ from "./errors";
 import { ProgramMessage } from "aleph-sdk-ts/dist/messages/message";
 
@@ -11,6 +10,14 @@ import { ProgramMessage } from "aleph-sdk-ts/dist/messages/message";
  */
 export const ellipseAddress = (address: string) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
+/**
+ * Checks if a string is a valid Aleph message item hash
+ */
+export const isValidItemHash = (hash: string) => {
+  const regex = /^[0-9a-f]{64}$/;
+  return regex.test(hash);
 };
 
 /**
@@ -77,18 +84,97 @@ export const getSOLBalance = async (address: string) => {
   }
 };
 
-// TODO: define products definition
-export const msgIsFunction = (msg: ProgramMessage) => {
-  return msg.content.on?.persistent === true;
-};
+/**
+ * Returns a link to the Aleph explorer for a given message
+ */
+export const getExplorerURL = ({ item_hash, chain, sender }: ProgramMessage) =>
+  `https://explorer.aleph.im/address/${chain}/${sender}/message/PROGRAM/${item_hash}`;
 
 /**
  * Converts a UNIX timestamp to an ISO date, or returns a default value if the timestamp is invalid
  *
  * @param timeStamp A UNIX timestamp
+ * @param noDate A default value to return if the timestamp is invalid
  */
-export const ISODate = (timeStamp?: number, noDate: string = "n/a") => {
+export const unixToISODateString = (
+  timeStamp?: number,
+  noDate: string = "n/a"
+) => {
   if (!timeStamp) return noDate;
   const date = new Date(timeStamp * 1000);
   return date.toISOString().split("T")[0];
+};
+
+/**
+ * Converts a UNIX timestamp to an ISO date and time, or returns a default value if the timestamp is invalid
+ *
+ * @param timeStamp A UNIX timestamp
+ * @param noDate A default value to return if the timestamp is invalid
+ */
+export const unixToISODateTimeString = (
+  timeStamp?: number,
+  noDate: string = "n/a"
+) => {
+  if (!timeStamp) return noDate;
+  const date = new Date(timeStamp * 1000);
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeZoneName: "short",
+    timeStyle: "short",
+    timeZone: "UTC",
+  }).format(date);
+};
+
+type MachineSpecs = {
+  cpu: number;
+  memory: number;
+  storage: number;
+};
+export const getFunctionSpecsByComputeUnits = (
+  computeUnits: number,
+  isPersistent: boolean
+): MachineSpecs => {
+  return {
+    cpu: 1 * computeUnits,
+    memory: 2 * computeUnits * 1024,
+    storage: 2 * 10 ** Number(isPersistent) * computeUnits * 1024,
+  };
+};
+
+type CapabilitiesConfig = {
+  internetAccess?: boolean;
+  blockchainRPC?: boolean;
+  enableSnapshots?: boolean;
+};
+type FunctionPriceConfig = {
+  computeUnits: number;
+  storage: number;
+  isPersistent: boolean;
+  capabilities: CapabilitiesConfig;
+};
+/**
+ * Calculates the amount of tokens required to deploy a function
+ */
+export const getFunctionPrice = ({
+  computeUnits,
+  storage,
+  isPersistent,
+  capabilities,
+}: FunctionPriceConfig) => {
+  const baseComputePrice = isPersistent ? 2_000 : 200;
+  const capabilitiesMultiplier = Object.values(capabilities).reduce(
+    (ac, cv) => (ac += cv ? 1 : 0),
+    1
+  );
+
+  /* Storage costs are calculated based on the base storage allowance for the given compute units,
+  We would first subtract the used storage from the different volumes from the base storage allowance,
+  If there is no remaininng storage in the allowance, we would then calculate the cost of the remaining storage using the following formula:
+  */
+  const baseStorageAllowance = getFunctionSpecsByComputeUnits(
+    computeUnits,
+    isPersistent
+  ).storage;
+
+  return baseComputePrice * computeUnits * capabilitiesMultiplier;
 };
