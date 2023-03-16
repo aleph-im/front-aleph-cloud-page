@@ -11,6 +11,7 @@ import { FormState, initialFormState, runtimeRefs } from "./form";
 import { isValidItemHash } from "@/helpers/utils";
 import { createFunctionProgram } from "@/helpers/aleph";
 import { AppStateContext } from "@/pages/_app";
+import JSZip from "jszip";
 
 export default function Home( ) { 
   useConnected()
@@ -41,10 +42,13 @@ export default function Home( ) {
 
     let file
     if(formState.codeOrFile === "code" && textareaRef.current?.value){
-      file = new File([textareaRef.current?.value], "app.py", { type: "text/python" })
+      const jsZip = new JSZip()
+      jsZip.file("main.py", textareaRef.current?.value)
+      const zip = await jsZip.generateAsync({ type: "blob" })
+      file = new File([zip], "main.py.zip", { type: "application/zip" })
     }
     else if(formState.codeOrFile === "file" && formState.functionFile !== undefined){
-      console.log(formState.functionFile)
+      file = formState.functionFile
     }
     else {
       return alert("Invalid code or file")
@@ -63,15 +67,16 @@ export default function Home( ) {
         account: globalState.account,
         name: formState.functionName.trim() || 'Untitled function',
         isPersistent: formState.isPersistent,
-        file: file,
-        runtime,
+        file,
+        runtime, // FIXME: lazy initialisation is a shitty pattern
         volumes: [], // TODO: Volumes
-        entrypoint: 'app', // TODO: Entrypoint
+        entrypoint: 'main:app', // TODO: Entrypoint
         computeUnits: 1 // TODO: Compute units
       })
       alert('function created')
     }
     catch(err){
+      console.error(err)
       alert("Error")
     }
   }
@@ -97,9 +102,12 @@ export default function Home( ) {
           {
             name : 'Upload code', 
             component: (
-              <div className="py-md">
+              <div className="py-md text-center">
+                <p>Please select a zip archive</p>
+
                 <input 
                   type="file"
+                  accept=".zip"
                   onChange={(e) => setFormValue('functionFile', e.target.files?.[0])} />
               </div>
             ) 
