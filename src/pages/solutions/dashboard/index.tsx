@@ -6,14 +6,14 @@ import { AppStateContext } from '@/pages/_app'
 import ButtonLink from '@/components/ButtonLink'
 import CenteredSection from '@/components/CenteredSection'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
-import { unixToISODateString } from '@/helpers/utils'
+import { convertBitUnits, unixToISODateString } from '@/helpers/utils'
 import { ProgramMessage } from 'aleph-sdk-ts/dist/messages/message'
 import { getAccountProducts } from '@/helpers/aleph'
 import { ActionTypes } from '@/helpers/store'
 
 export default function Home(){
     useConnected()
-    const { state, dispatch } = useContext(AppStateContext)
+    const [ state, dispatch ] = useContext(AppStateContext)
     const allProducts = useMemo(() => Object.values(state.products).flat(), [state])
 
     useEffect(() => {
@@ -53,7 +53,7 @@ export default function Home(){
           {
             label: "Memory",
             // @ts-ignore 
-            selector: (row: ProgramMessage) => (row?.content?.resources?.memory || 0),
+            selector: (row: ProgramMessage) => convertBitUnits(row?.content?.resources?.memory || 0, { from: 'mb', to: 'gb' }),
             sortable: true,
           },
           {

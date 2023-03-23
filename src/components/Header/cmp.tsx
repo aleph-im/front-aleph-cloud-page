@@ -11,7 +11,7 @@ import { ellipseAddress } from '@/helpers/utils'
 import { AppStateContext } from '@/pages/_app'
 
 export const Header = (props: HeaderProps) => {
-  const { state, dispatch } = useContext(AppStateContext)
+  const [ state, dispatch ] = useContext(AppStateContext)
 
   const login = async () => {
     const account = await web3Connect(Chain.ETH, window?.ethereum)

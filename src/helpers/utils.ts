@@ -84,6 +84,34 @@ export const getSOLBalance = async (address: string) => {
   }
 };
 
+type BitUnit = "kb" | "mb" | "gb" | "tb";
+type ConvertBitUnitOptions = {
+  from: BitUnit;
+  to: BitUnit;
+  displayUnit: boolean;
+};
+export const convertBitUnits = (
+  value: number,
+  { from = "mb", to = "gb", displayUnit = true }: Partial<ConvertBitUnitOptions>
+) => {
+  const options: ConvertBitUnitOptions = { from, to, displayUnit };
+  const units = {
+    kb: 1024,
+    mb: 1024 ** 2,
+    gb: 1024 ** 3,
+    tb: 1024 ** 4,
+  };
+
+  const result = (value * units[options.from]) / units[options.to];
+  return options.displayUnit ? `${result} ${options.to.toUpperCase()}` : result;
+};
+
+/**
+ * Returns a short cryptographically secure hexadecimal random ID
+ */
+export const uniqId = () =>
+  crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+
 /**
  * Returns a link to the Aleph explorer for a given message
  */

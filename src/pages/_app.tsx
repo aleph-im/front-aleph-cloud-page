@@ -15,13 +15,13 @@ import Header from '@/components/Header'
 import { createContext, useReducer, Dispatch } from 'react'
 import { initialState, reducer, State } from '@/helpers/store'
 
-export const AppStateContext = createContext<{state: State, dispatch: Dispatch<any>}>({state: initialState, dispatch: () => null})
+export const AppStateContext = createContext<[state: State, dispatch: Dispatch<any>]>([initialState, () => null])
 
 export default function App({ Component, pageProps }: AppProps) {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   return (
-    <AppStateContext.Provider value={{ state, dispatch }}>
+    <AppStateContext.Provider value={[ state, dispatch ]}>
       <ThemeProvider theme={themes.dark}>
         <GlobalStyle />
         <GlobalStylesOverride />
