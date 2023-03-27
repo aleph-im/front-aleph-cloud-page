@@ -4,6 +4,7 @@ import { Button, Col, Row, TextGradient, Tag } from '@aleph-front/aleph-core'
 import Container from '@/components/Container'
 import { IndexingImg } from '@/components/Imgs/IndexingImg'
 import FeatureCard from '@/components/FeatureCard'
+import H1 from '@/components/H1'
 
 const StyledSection = styled.section`
   padding: 82px 0;
@@ -39,7 +40,7 @@ export default function Home() {
       <main>
         <StyledSection className='pb-0'>
           <Container>
-            <TextGradient type='h1' color='main1'>Computing</TextGradient>
+            <H1>Computing</H1>
             <p className='fs-md'>With Aleph.im&apos;s computing services, you can process data quickly and securely using on-demand and persistent functions, virtual machine instances, and confidential VMs.</p>
           </Container>
         </StyledSection>
@@ -90,7 +91,7 @@ export default function Home() {
         </StyledSection>
         <StyledSection className='pb-0'>
           <Container>
-            <TextGradient type='h1' color='main1'>Storage</TextGradient>
+            <H1 color='main1'>Storage</H1>
             <p className='fs-md'>With support for immutable, temporary, and persistent volumes, as well as databases using key-value pairs, Aleph.im provides a flexible and powerful storage solution for a wide range of use cases.</p>
           </Container>
         </StyledSection>

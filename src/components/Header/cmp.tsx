@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { Button, Icon } from '@aleph-front/aleph-core'
+import { Button, Icon, Logo, NavbarLink, NavbarLinkList } from '@aleph-front/aleph-core'
 import { Chain } from 'aleph-sdk-ts/dist/messages/message'
 import Link from 'next/link'
 
@@ -15,41 +15,45 @@ export const Header = (props: HeaderProps) => {
 
   const login = async () => {
     const account = await web3Connect(Chain.ETH, window?.ethereum)
-    dispatch({ type: ActionTypes.connect, payload: {account} })
+    dispatch({ type: ActionTypes.connect, payload: { account } })
 
     const balance = await getAccountBalance(account)
-    dispatch({ type: ActionTypes.setAccountBalance, payload: {balance} })
+    dispatch({ type: ActionTypes.setAccountBalance, payload: { balance } })
 
     const products = await getAccountProducts(account)
-    dispatch({ type: ActionTypes.setProducts, payload: {products} })
+    dispatch({ type: ActionTypes.setProducts, payload: { products } })
   }
 
   return (
     <StyledHeader>
-      {
-        state.account?.address ?
-        <StyledNavbar
-          navLinks={[
-            <Link key="solutions" href="/">Solutions</Link>,
-            <Link key="dashboard" href="/solutions/dashboard">Dashboard</Link>
-          ]}
-          navButtons={[
-            <StyledButton key="link" forwardedAs="button" disabled><Icon name="ethereum" /></StyledButton>,
-            <Button as="button" variant="secondary" color="main1" kind="neon" size="regular">{ellipseAddress(state.account?.address)} <Icon name="meteor" size="lg" className="ml-xs" /></Button> 
-          ]} />
-        :
-        <StyledNavbar 
-          navLinks={[
-            <Link key="solutions" href="/">Solutions</Link>,
-            <span key="dashboard" style={{opacity: .5}}>Dashboard</span>
-          ]}
-          navButtons={[
-            <StyledButton key="link" forwardedAs="button" disabled><Icon name="link-simple-slash" /></StyledButton>,
-            <StyledButton onClick={login} forwardedAs="button">Connect <Icon name="meteor" size="lg" className="ml-xs" /></StyledButton>
-          ]} />
-
-      }
-    </StyledHeader>
+      <StyledNavbar logo={<Logo size="2rem" />}>
+        {(state.account?.address ? (
+          <>
+            <NavbarLinkList>
+              <NavbarLink withSlash><Link key="solutions" href="/">Solutions</Link></NavbarLink>
+              <NavbarLink withSlash><Link key="dashboard" href="/solutions/dashboard">Dashboard</Link></NavbarLink>
+            </NavbarLinkList>
+            <NavbarLinkList>
+              <NavbarLink><StyledButton key="link" forwardedAs="button" disabled><Icon name="ethereum" /></StyledButton></NavbarLink>
+              <NavbarLink><Button as="button" variant="secondary" color="main1" kind="neon" size="regular">{ellipseAddress(state.account?.address)} <Icon name="meteor" size="lg" className="ml-xs" /></Button></NavbarLink>
+            </NavbarLinkList>
+          </>
+        )
+          : (
+            <>
+              <NavbarLinkList>
+                <NavbarLink withSlash><Link key="solutions" href="/">Solutions</Link></NavbarLink>
+                <NavbarLink withSlash><span key="dashboard" style={{ opacity: .5 }}>Dashboard</span></NavbarLink>
+              </NavbarLinkList>
+              <NavbarLinkList>
+                <NavbarLink><StyledButton key="link" forwardedAs="button" disabled><Icon name="link-simple-slash" /></StyledButton></NavbarLink>
+                <NavbarLink><StyledButton onClick={login} forwardedAs="button">Connect <Icon name="meteor" size="lg" className="ml-xs" /></StyledButton></NavbarLink>
+              </NavbarLinkList>
+            </>
+          )
+        )}
+      </StyledNavbar>
+    </StyledHeader >
   )
 }
 
