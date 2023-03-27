@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components'
 export const StyledContainer = styled.div.attrs(props => {
   return {
     ...props,
-    className: `${props.className || ''} px-xs-xs px-sm-sm px-md-md px-lg-lg px-xl-xl px-xxl-xxl`
+    className: `${props.className || ''} px-md-xs px-lg-lg px-xl-xl px-xxl-xxl`
   }
 })`
   ${({ theme }) => {
