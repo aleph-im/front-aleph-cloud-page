@@ -118,6 +118,21 @@ export default function Home( ){
           </div>
 
           <Separator />
+
+          <TextGradient type="h6" color="main1">Linked storage</TextGradient>
+          {
+            message.content?.volumes.map((volume, i) => (
+              <div className="my-md" key={i}>
+                <TextGradient type="info">
+                  { volume?.persistence === 'host' ? "Persistent " : "Immutable "} volume 
+                </TextGradient>
+
+                <pre>
+                  { JSON.stringify(volume, null, 2) }
+                </pre>
+              </div>
+            ))
+          }
         </NoisyContainer>
       </CenteredSection>
     </>

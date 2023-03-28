@@ -4,7 +4,7 @@ import {
   ProgramMessage,
 } from "aleph-sdk-ts/dist/messages/message";
 import { Account } from "aleph-sdk-ts/dist/accounts/account";
-import { any, program, forget } from "aleph-sdk-ts/dist/messages";
+import { any, program, forget, store } from "aleph-sdk-ts/dist/messages";
 import { GetAccountFromProvider as getETHAccount } from "aleph-sdk-ts/dist/accounts/ethereum";
 import { GetAccountFromProvider as getSOLAccount } from "aleph-sdk-ts/dist/accounts/solana";
 import {
@@ -17,13 +17,7 @@ import {
   Encoding,
   MachineVolume,
   PersistentVolume,
-  FunctionRuntime,
 } from "aleph-sdk-ts/dist/messages/program/programModel";
-import {
-  defaultFileExtension,
-  defaultMimetype,
-  LanguageType,
-} from "./constants";
 
 /**
  * Connects to a web3 provider and returns an Aleph account object
@@ -101,18 +95,9 @@ export const getAccountProducts = async (account: Account) => {
     functions: [],
   };
 
-  query.messages
-    .filter((msg) => msg.content) // removes forgotten messages
-    .forEach((msg) => {
-      // TODO:
-      // if (msgIsFunction(msg as ProgramMessage)) {
-      //   products.functions.push(msg as ProgramMessage);
-      // } else {
-      //   products.instances.push(msg as ProgramMessage);
-      // }
-
-      products.functions.push(msg as ProgramMessage);
-    });
+  products.functions = [
+    ...(query.messages.filter((msg) => msg.content) as ProgramMessage[]),
+  ];
 
   return products;
 };
@@ -121,22 +106,26 @@ type CreateFunctionParams = {
   account: Account;
   file: File;
   name: string;
+  tags: string[];
   entrypoint: string;
   isPersistent: boolean;
   runtime: string;
   encoding: Encoding;
   volumes: Array<MachineVolume | PersistentVolume>;
   computeUnits: number;
+  variables: Record<string, string>;
 };
 export const createFunctionProgram = async ({
   account,
   file,
   name,
+  tags,
   entrypoint,
   isPersistent,
   runtime,
   volumes,
   computeUnits,
+  variables,
 }: CreateFunctionParams) => {
   const { memory, cpu } = getFunctionSpecsByComputeUnits(
     computeUnits,
@@ -150,11 +139,15 @@ export const createFunctionProgram = async ({
       isPersistent,
       file,
       volumes,
-      metadata: { name },
+      metadata: {
+        name,
+        tags,
+      },
       runtime,
       entrypoint,
       memory,
       vcpus: cpu,
+      variables,
     });
 
     return msg;
@@ -175,6 +168,19 @@ export const deleteVM = async (account: Account, message: ProgramMessage) => {
     });
 
     return msg;
+  } catch (err) {
+    throw E_.RequestFailed(err);
+  }
+};
+
+// TODO: implement
+export const createVolume = async (account: Account, size: number) => {
+  try {
+    // const msg = await store.Publish({
+    //   account,
+    //   size,
+    // });
+    // return msg;
   } catch (err) {
     throw E_.RequestFailed(err);
   }

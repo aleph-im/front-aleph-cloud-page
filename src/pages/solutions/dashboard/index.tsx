@@ -29,16 +29,19 @@ export default function Home(){
 
     // FIXME: Selector function signature
     const TabContent = ({data}: { data: ProgramMessage[]}) => (
-      <div className="pt-md">
+      <div className="py-md">
         { allProducts.length > 0 ?
         <Table 
           border="none" 
-          oddRowNoise data={data} 
+          oddRowNoise
+          //@ts-ignore
+          keySelector={(row: ProgramMessage) => row?.item_hash}
+          data={data}
           columns={[
           {
             label: "Type",
             // @ts-ignore 
-            selector: (row: ProgramMessage) => (row?.content?.on?.persistent ? 'Instance' : 'Function'),
+            selector: () => 'Function',
             sortable: true,
           },
           {
@@ -62,7 +65,16 @@ export default function Home(){
           {
             label: "Size",
             // @ts-ignore 
-            selector: (row: ProgramMessage) => (row.content?.volumes.length || 0),
+            selector: (row: ProgramMessage) => (
+              convertBitUnits(
+                row.content?.volumes.reduce((ac, cv) => (ac += (cv?.size_mib || 0)), 0),
+                {
+                  from: 'mb',
+                  to: 'gb',
+                  displayUnit: true
+                }
+              )
+            ),
             sortable: true,
           },
           {
@@ -90,11 +102,11 @@ export default function Home(){
 
     return (
     <>
-      <section className="p-lg">
+      <section className="py-lg">
         <AutoBreadcrumb /> 
       </section>
 
-      <CenteredSection className="p-lg">
+      <CenteredSection className="py-lg">
         <Tabs tabs={
             [
               { 
@@ -125,7 +137,7 @@ export default function Home(){
           } />
       </CenteredSection>
 
-      <section className="fx-noise-light p-lg">
+      <section className="fx-noise-light py-lg">
           <TextGradient type="h3">Setup a new service</TextGradient>
           <Row count={4}>
             <Col>

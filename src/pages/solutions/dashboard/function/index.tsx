@@ -1,37 +1,35 @@
+import { FormEvent, useContext, useMemo, useReducer } from "react";
 import { Button, ChipInput, CodeEditor, Icon, Radio, RadioGroup, Table, Tabs, TextGradient, TextInput } from "@aleph-front/aleph-core";
+import JSZip from "jszip";
 
 import AutoBreadcrumb from "@/components/AutoBreadcrumb";
 import CenteredSection from "@/components/CenteredSection";
 import CompositeTitle from "@/components/CompositeTitle";
 import NoisyContainer from "@/components/NoisyContainer";
 import useConnected from "@/helpers/hooks/useConnected";
-import { FormEvent, useContext, useMemo, useReducer } from "react";
-import { displayVolumesToAlephVolumes, FormState, initialFormState, runtimeRefs, Volume, VolumeTypes } from "./form";
-import { getFunctionCost, isValidItemHash } from "@/helpers/utils";
+import HiddenFileInput from "@/components/HiddenFileInput";
+import { convertBitUnits, getFunctionCost, getFunctionSpecsByComputeUnits, isValidItemHash, safeCollectionToObject } from "@/helpers/utils";
 import { createFunctionProgram } from "@/helpers/aleph";
 import { AppStateContext } from "@/pages/_app";
-import JSZip from "jszip";
-import HiddenFileInput from "@/components/HiddenFileInput";
+import { displayVolumesToAlephVolumes, FormState, initialFormState, runtimeRefs, Volume, VolumeTypes } from "./form";
 
 export default function Home( ) { 
   useConnected()
   const [ globalState, dispatchGlobal ] = useContext(AppStateContext)
 
   const [formState, dispatchForm] = useReducer( (state: FormState, action: { type: string, payload: any}): FormState => {
-    switch (action.type) {
-    case 'SET_VALUE':
-      return {
-        ...state,
-        [action.payload.name]: action.payload.value
+      switch (action.type) {
+      case 'SET_VALUE':
+        return {
+          ...state,
+          [action.payload.name]: action.payload.value
+        }
+      
+      default:
+        return state
       }
-    
-    default:
-      return state
-  }
-  }, initialFormState)
-
-  const setFormValue = (name: string, value: any) => (
-    dispatchForm({ type: 'SET_VALUE', payload: { name, value } })
+    }, 
+    initialFormState
   )
 
   const handleSubmit = async (e: FormEvent) => {
@@ -60,23 +58,52 @@ export default function Home( ) {
       return alert("Invalid runtime hash")
 
     try{
+      const alephVolumes = await displayVolumesToAlephVolumes(globalState.account, formState.volumes)
       const msg = await createFunctionProgram({
         // @ts-ignore
         account: globalState.account,
         name: formState.functionName.trim() || 'Untitled function',
+        tags: formState.metaTags,
         isPersistent: formState.isPersistent,
         file,
         runtime, // FIXME: lazy initialisation is a shitty pattern
-        volumes: displayVolumesToAlephVolumes(formState.volumes), // TODO: Volumes
+        volumes: alephVolumes, // TODO: Volumes
         entrypoint: 'main:app', // TODO: Entrypoint
-        computeUnits: formState.computeUnits
+        computeUnits: formState.computeUnits,
+        variables: safeCollectionToObject(formState.environmentVariables)
       })
+
+      console.log(alephVolumes)
       alert('function created')
     }
     catch(err){
       console.error(err)
       alert("Error")
     }
+  }
+
+  const setFormValue = (name: keyof FormState, value: any) => (
+    dispatchForm({ type: 'SET_VALUE', payload: { name, value } })
+  )
+
+  const addEnvironmentVariable = () => {
+    setFormValue('environmentVariables', [...formState.environmentVariables, {
+      name: '',
+      value: ''
+    }])
+  }
+
+  const setEnvironmentVariable = (variableIndex: number, variableKey: string, variableValue: string) => {
+    const variables = [...formState.environmentVariables]
+    variables[variableIndex] = {
+      ...variables[variableIndex],
+      [variableKey]: variableValue
+    }
+    setFormValue('environmentVariables', variables)
+  }
+
+  const removeEnvironmentVariable = (variableIndex: number) => {
+    setFormValue('environmentVariables', formState.environmentVariables.filter((_, i) => i !== variableIndex))
   }
 
   const addVolume = () => {
@@ -137,16 +164,41 @@ export default function Home( ) {
 
       <CenteredSection>
         <CompositeTitle number="1" title="Code to execute" type="h4" color="main1" />
+
+        <p>If your code has any dependency, you can upload them separatly in the volume section below to ensure a faster creation.</p>
+
         <Tabs tabs={[
           {
             name : 'Online editor', 
             component: (
+            <>
+              <div className="py-md">
+                <NoisyContainer>
+                  <RadioGroup direction="row">
+                    <Radio
+                      checked={formState.codeLanguage === "python"}
+                      label="Python 3.9"
+                      name="__config_code_language"
+                      onChange={() => setFormValue('codeLanguage', false)}
+                      value="on-demand"
+                    />
+                    <Radio
+                      checked={formState.codeLanguage === "javascript"}
+                      label="Node.js"
+                      disabled
+                      name="__config_code_language"
+                      onChange={() => setFormValue('codeLanguage', true)}
+                      value="persistent"
+                    />
+                  </RadioGroup>
+                </NoisyContainer>
+              </div>
               <div className="py-md">
                 <CodeEditor onChange={value => setFormValue('functionCode', value)} 
                             value={formState.functionCode}
                             language="python" />
               </div>
-            )
+            </>)
           },
           {
             name : 'Upload code', 
@@ -154,7 +206,7 @@ export default function Home( ) {
               <div className="py-md text-center">
                 <p>Please select a zip archive</p>
 
-                <HiddenFileInput accept=".zip" onChange={(e) => setFormValue('functionFile', e.target.files?.[0])}>
+                <HiddenFileInput accept=".zip" onChange={(file) => setFormValue('functionFile', file)}>
                   Upload zip archive <Icon name="arrow-up" className="ml-sm" />
                 </HiddenFileInput>
               </div>
@@ -169,41 +221,43 @@ export default function Home( ) {
 
       <CenteredSection>
         <CompositeTitle number="2" title="Choose runtime" type="h4" color="main1" />
-          <NoisyContainer>
-            <RadioGroup direction="column">
-              <Radio
-                checked={formState.runtime === 'default_interpreted'}
-                label="Official Aleph runtime with Python 3.8 & Node.js 14"
-                name="__config_runtime"
-                onChange={() => setFormValue('runtime', 'default_interpreted')}
-                value="default" />
-              <Radio
-                checked={formState.runtime === 'default_binary'}
-                label="Official Aleph runtime for binary executables"
-                name="__config_runtime"
-                onChange={() => setFormValue('runtime', 'default_binary')}
-                value="default" />
-              <Radio
-                checked={formState.runtime === 'custom'}
-                label="Custom runtime"
-                name="__config_runtime"
-                onChange={() => setFormValue('runtime', 'custom')}
-                value="custom" />
-            </RadioGroup>
+        
+        <p>Select the optimal environment for executing your functions tailored to your specific requirements. Below are the available options</p>
 
-            <div className={"my-md " + (formState.runtime !== 'custom' ? "unavailable-content" : "")}>
-              <TextInput 
-                label="Runtime hash" 
-                placeholder={"3335ad270a571b..."} 
-                name="__config_runtime_hash" 
-                onChange={e => setFormValue('customRuntimeHash', e.target.value)}
-                disabled={formState.runtime !== 'custom'}
-                error={
-                  (formState.customRuntimeHash && !isValidItemHash(formState.customRuntimeHash)) ? {message: "Invalid hash"} : undefined
-                } />
-                
-            </div>
-          </NoisyContainer>
+        <NoisyContainer>
+          <RadioGroup direction="column">
+            <Radio
+              checked={formState.runtime === 'default_interpreted'}
+              label="Official runtime with Debian 11, Python 3.9 & Node.js 14"
+              name="__config_runtime"
+              onChange={() => setFormValue('runtime', 'default_interpreted')}
+              value="default" />
+            <Radio
+              checked={formState.runtime === 'default_binary'}
+              label="Official min. runtime for binaries x86_64 (Rust, Go)"
+              name="__config_runtime"
+              onChange={() => setFormValue('runtime', 'default_binary')}
+              value="default" />
+            <Radio
+              checked={formState.runtime === 'custom'}
+              label="Custom runtime"
+              name="__config_runtime"
+              onChange={() => setFormValue('runtime', 'custom')}
+              value="custom" />
+          </RadioGroup>
+
+          <div className={"my-md " + (formState.runtime !== 'custom' ? "unavailable-content" : "")}>
+            <TextInput 
+              label="Runtime hash" 
+              placeholder={"3335ad270a571b..."} 
+              name="__config_runtime_hash" 
+              onChange={e => setFormValue('customRuntimeHash', e.target.value)}
+              disabled={formState.runtime !== 'custom'}
+              error={
+                (formState.customRuntimeHash && !isValidItemHash(formState.customRuntimeHash)) ? {message: "Invalid hash"} : undefined
+              } />
+          </div>
+        </NoisyContainer>
       </CenteredSection>
 
       <CenteredSection>
@@ -233,6 +287,8 @@ export default function Home( ) {
 
       <CenteredSection>
         <CompositeTitle number="4" title="Select an instance size" type="h4" color="main1" />
+
+        <p>Select the hardware resources allocated to your functions, ensuring optimal performance and efficient resource usage tailored to your specific needs.</p>
 
         <Table 
           border="none"
@@ -278,15 +334,25 @@ export default function Home( ) {
               )
             }
           ]}
-          data={[
-            { cpu: 1, memory: '2gb', price: '2000 Aleph' },
-            { cpu: 2, memory: '4gb', price: '4000 Aleph' },
-            { cpu: 4, memory: '8gb', price: '8000 Aleph' },
-          ]} />
+          data={
+            // TODO: Memoize this
+            [1, 2, 4, 6, 8, 12]
+            .map(computeUnits => {
+              const specs = getFunctionSpecsByComputeUnits(computeUnits, formState.isPersistent)
+              const price = getFunctionCost({ capabilities: {}, computeUnits, isPersistent: formState.isPersistent, storage: 0})
+              
+              return ({
+                cpu: specs.cpu,
+                memory: convertBitUnits(specs.memory, {from: 'mb', to: 'gb', displayUnit: true}),
+                price: price.compute + ' ALEPH'
+              })
+            })
+          } />
       </CenteredSection>
 
       <CenteredSection>
         <CompositeTitle number="5" title="Name and tags" type="h4" color="main1" />
+        <p>Organize and identify your functions more effectively by assigning a unique name, obtaining a hash reference, and defining multiple tags. This helps streamline your development process and makes it easier to manage your web3 functions.</p>
 
         <NoisyContainer>
           <div className="my-md">
@@ -299,15 +365,54 @@ export default function Home( ) {
           </div>
 
           <div className="my-md">
-            <ChipInput label="Examples of use" placeholder="Tags (press enter to add a new tag)" />
+            <ChipInput 
+              label="Examples of use"
+              placeholder="Tags (press enter to add a new tag)"
+              name="__config_function_tags"
+              value={formState.metaTags}
+              onChange={val => setFormValue('metaTags', val)} />
           </div>
         </NoisyContainer>
       </CenteredSection>
 
-      <CenteredSection className="unavailable-content">
-        <CompositeTitle number="6" title="Custom domain" type="h4" color="main1" label="(SOON)" />
+      <CenteredSection>
+        <CompositeTitle number="7" title="Define environment variables" type="h4" color="main1" />
 
-        <p>Configure a custom domain for your function (coming soon)</p>
+        <p>Define key-value pairs that act as configuration settings for your web3 function. Environment variables offer a convenient and secure way to store sensitive information, manage configurations, and modify your application's behaviour without altering the source code.</p>
+        
+        { formState.environmentVariables.length > 0 &&
+          <NoisyContainer>
+            {
+              formState.environmentVariables.map((variable, index) => (
+                <div className="my-md d-flex flex-jc-sb">
+                  <TextInput 
+                    name={`__config_env_var_${index}_name`} 
+                    placeholder="Name" 
+                    value={variable.name}
+                    onChange={e => setEnvironmentVariable(index, 'name', e.target.value)} />
+                  <TextInput 
+                    name={`__config_env_var_${index}_value`} 
+                    placeholder="Value" 
+                    value={variable.value}
+                    onChange={e => setEnvironmentVariable(index, 'value', e.target.value)} />
+                  <Button color="main2" variant="secondary" kind="neon" size="regular" type="button" onClick={() => removeEnvironmentVariable(index)}><Icon name="trash" /></Button>
+                </div>
+              ))
+            }
+          </NoisyContainer>
+        }
+
+        <div className="my-md">
+          <Button type="button" onClick={addEnvironmentVariable} color="main0" variant="secondary" kind="neon" size="regular">
+            Add variable
+          </Button>
+        </div>
+      </CenteredSection>
+
+      <CenteredSection className="unavailable-content">
+        <CompositeTitle number="8" title="Custom domain" type="h4" color="main1" label="(SOON)" />
+
+        <p>Configure a user-friendly domain name for your web3 function, providing a more accessible and professional way for users to interact with your application.</p>
 
         <TextInput
           button={<Button color="main0" kind="neon" size="regular" variant="secondary">Use</Button>}
@@ -320,18 +425,28 @@ export default function Home( ) {
       </CenteredSection>
 
       <CenteredSection>
-        <CompositeTitle number="7" title="Add volumes" type="h4" color="main1" />
+        <CompositeTitle number="9" title="Add volumes" type="h4" color="main1" />
         { formState.volumes.map((volume, iVolume) => (
             <Tabs tabs={[
               { 
                 name: 'New volume', 
                 component: (
                   <div className="my-lg">
+                    <p>Create and configure new volumes for your web3 function by either uploading a dependency file or a squashfs volume. Volumes play a crucial role in managing dependencies and providing a volume within your application.</p>
+
                     <NoisyContainer>
-                      <div className="my-md">
-                        <HiddenFileInput onChange={(e) => setVolumeValue(iVolume, 'src', e.target.files?.[0])} accept=".squashfs">
+                      <div className="my-md d-flex flex-jc-sb">
+                        <HiddenFileInput onChange={(file) => setVolumeValue(iVolume, 'src', file)}>
                           Upload squashfs volume <Icon name="arrow-up" className="ml-sm" />
                         </HiddenFileInput>
+
+                        <strong>or</strong>
+
+                        <div className="unavailable-content">
+                          <HiddenFileInput onChange={(file) => setVolumeValue(iVolume, 'src', file)} accept=".tar.gz, .tgz, .tar, .zip">
+                            Upload dependency file <Icon name="arrow-up" className="ml-sm" />
+                          </HiddenFileInput>
+                        </div>
                       </div>
 
                       <div className="my-md">
@@ -365,6 +480,8 @@ export default function Home( ) {
                 name: 'Existing volume', 
                 component: (
                 <div className="my-lg">
+                  <p>Link existing volumes to your web3 function by pasting the reference hash associated with each volume. Volumes are an essential component for managing persistent data storage and dependencies within your application.</p>
+
                   <NoisyContainer>
                     <div className="my-md">
                       <TextInput 
@@ -400,6 +517,8 @@ export default function Home( ) {
                 name: 'Persistent storage', 
                 component: (
                 <div className="my-lg">
+                  <p>Create and configure persistent storage for your web3 functions, enabling your application to maintain data across multiple invocations or sessions. You can set up a customized storage solution tailored to your application's requirements.</p>
+
                   <NoisyContainer>
                     <div className="my-md">
                       <TextInput 

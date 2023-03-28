@@ -20,6 +20,24 @@ export const isValidItemHash = (hash: string) => {
   return regex.test(hash);
 };
 
+export type EnvironmentVariable = {
+  name: string;
+  value: string;
+};
+/**
+ * Takes a collection of environment variables and returns an object with the name and value of each variable.
+ */
+export const safeCollectionToObject = (collection: EnvironmentVariable[]) => {
+  const ret: Record<string, string> = {};
+  for (const { name, value } of collection) {
+    if (name.trim().length > 0 && value.trim().length > 0) {
+      ret[name] = value;
+    }
+  }
+
+  return ret;
+};
+
 /**
  * Get the Aleph balance for a given Ethereum address
  *
