@@ -214,7 +214,7 @@ export const getFunctionCost = ({
   ).storage;
 
   if (storage > storageAllowance) {
-    extraStorageCost = (storage - storageAllowance) * 3;
+    extraStorageCost = ((storage - storageAllowance) * 1024) / 3;
   }
 
   const basePrice = isPersistent ? 2_000 : 200;
