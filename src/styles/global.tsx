@@ -35,6 +35,10 @@ export const GlobalStylesOverride = createGlobalStyle`
     text-align: center;
   }
 
+  .text-right{
+    text-align: right;
+  }
+
   /* FIXME: */
   textarea{
     width: 100%;

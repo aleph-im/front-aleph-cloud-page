@@ -3,6 +3,7 @@ import CenteredSection from "@/components/CenteredSection";
 import NoisyContainer from "@/components/NoisyContainer";
 import { deleteVM, getMessage } from "@/helpers/aleph";
 import { defaultVMURL, programStorageURL } from "@/helpers/constants";
+import { ActionTypes } from "@/helpers/store";
 import { ellipseAddress, getExplorerURL } from "@/helpers/utils";
 import { AppStateContext } from "@/pages/_app";
 import { Button, Icon, Tag, TextGradient } from "@aleph-front/aleph-core";
@@ -44,16 +45,13 @@ export default function Home( ){
     </>
   )
 
-  const globalStateContext = useContext(AppStateContext)
-  const globalState = globalStateContext.state
-  const globalDispatch = globalStateContext.dispatch
+  const [ globalState, dispatchGlobal ] = useContext(AppStateContext)
+  
   
   const handleDelete = async () => {
     // Account is instanciated in useConnected hook
     // @ts-ignore
     await deleteVM(globalState.account, message);
-
-    alert("Deleted!")
   }
 
   return (
@@ -120,8 +118,6 @@ export default function Home( ){
           </div>
 
           <Separator />
-          
-
         </NoisyContainer>
       </CenteredSection>
     </>

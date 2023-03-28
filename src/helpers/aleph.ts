@@ -117,16 +117,6 @@ export const getAccountProducts = async (account: Account) => {
   return products;
 };
 
-/**
- * Transforms a string into a File object
- */
-export const stringToFile = (str: string, fileType: LanguageType) => {
-  const mime = { type: defaultMimetype[fileType] };
-  const filename = "app." + defaultFileExtension[fileType];
-  const blob = new Blob([str], mime);
-  return new File([blob], filename, mime);
-};
-
 type CreateFunctionParams = {
   account: Account;
   file: File;
@@ -164,6 +154,7 @@ export const createFunctionProgram = async ({
       runtime,
       entrypoint,
       memory,
+      vcpus: cpu,
     });
 
     return msg;
