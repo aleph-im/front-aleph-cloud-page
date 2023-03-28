@@ -1,16 +1,17 @@
-import { Button, ChipInput, CodeEditor, Radio, RadioGroup, Tabs, TextGradient, TextInput } from "@aleph-front/aleph-core";
+import { Button, ChipInput, CodeEditor, Icon, Radio, RadioGroup, Table, Tabs, TextGradient, TextInput } from "@aleph-front/aleph-core";
 
 import AutoBreadcrumb from "@/components/AutoBreadcrumb";
 import CenteredSection from "@/components/CenteredSection";
 import CompositeTitle from "@/components/CompositeTitle";
 import NoisyContainer from "@/components/NoisyContainer";
 import useConnected from "@/helpers/hooks/useConnected";
-import { FormEvent, useContext, useReducer, useRef } from "react";
-import { FormState, initialFormState, runtimeRefs } from "./form";
-import { isValidItemHash } from "@/helpers/utils";
+import { FormEvent, useContext, useMemo, useReducer } from "react";
+import { displayVolumesToAlephVolumes, FormState, initialFormState, runtimeRefs, Volume, VolumeTypes } from "./form";
+import { getFunctionCost, isValidItemHash } from "@/helpers/utils";
 import { createFunctionProgram } from "@/helpers/aleph";
 import { AppStateContext } from "@/pages/_app";
 import JSZip from "jszip";
+import HiddenFileInput from "@/components/HiddenFileInput";
 
 export default function Home( ) { 
   useConnected()
@@ -66,9 +67,9 @@ export default function Home( ) {
         isPersistent: formState.isPersistent,
         file,
         runtime, // FIXME: lazy initialisation is a shitty pattern
-        volumes: [], // TODO: Volumes
+        volumes: displayVolumesToAlephVolumes(formState.volumes), // TODO: Volumes
         entrypoint: 'main:app', // TODO: Entrypoint
-        computeUnits: 1 // TODO: Compute units
+        computeUnits: formState.computeUnits
       })
       alert('function created')
     }
@@ -78,15 +79,54 @@ export default function Home( ) {
     }
   }
 
-  const addVolume = (e: FormEvent) => {
-    e.preventDefault()
-    setFormValue('volumes', [...formState.volumes, {}])
+  const addVolume = () => {
+    setFormValue('volumes', [...formState.volumes, {
+      size: 2,
+    }])
   }
 
-  const removeVolume = (e: FormEvent, index: number) => {
-    e.preventDefault()
-    setFormValue('volumes', formState.volumes.filter((_, i) => i !== index))
+  const removeVolume = (volumeIndex: number) => {
+    setFormValue('volumes', formState.volumes.filter((_, i) => i !== volumeIndex))
   }
+
+  const setVolumeType = (volumeIndex:number, volumeType:number) => {
+    const volumeTypes: VolumeTypes[] = ['new', 'existing', 'persistent']
+    const volumes = [... formState.volumes]
+
+    volumes[volumeIndex] = {
+      ...volumes[volumeIndex],
+      type: volumeTypes[volumeType]
+    }
+    setFormValue('volumes', volumes)
+  }
+
+  const setVolumeValue = (volumeIndex:number, volumekey:string, volumeValue: string) => {
+    const volumes = [... formState.volumes]
+    volumes[volumeIndex] = {
+      ...volumes[volumeIndex],
+      [volumekey]: volumeValue
+    }
+
+    setFormValue('volumes', volumes)
+  }
+
+  const functionCost = useMemo(() => 
+    getFunctionCost({
+      computeUnits: formState.computeUnits,
+      isPersistent: formState.isPersistent,
+      storage: formState.volumes.reduce((acc: number, volume: Volume) => {
+        if(volume.type === 'new' || volume.type === 'persistent'){
+          return acc + (volume.size || 0) * 1024 
+        }
+        return acc
+      }, 0),
+      capabilities: {
+        internetAccess: true,
+        blockchainRPC: false,
+        enableSnapshots: false,
+      }
+    })
+  , [formState.volumes, formState.computeUnits, formState.isPersistent])
 
   return (
     <>
@@ -103,7 +143,8 @@ export default function Home( ) {
             component: (
               <div className="py-md">
                 <CodeEditor onChange={value => setFormValue('functionCode', value)} 
-                            value={formState.functionCode} />
+                            value={formState.functionCode}
+                            language="python" />
               </div>
             )
           },
@@ -113,10 +154,9 @@ export default function Home( ) {
               <div className="py-md text-center">
                 <p>Please select a zip archive</p>
 
-                <input 
-                  type="file"
-                  accept=".zip"
-                  onChange={(e) => setFormValue('functionFile', e.target.files?.[0])} />
+                <HiddenFileInput accept=".zip" onChange={(e) => setFormValue('functionFile', e.target.files?.[0])}>
+                  Upload zip archive <Icon name="arrow-up" className="ml-sm" />
+                </HiddenFileInput>
               </div>
             ) 
           },
@@ -192,7 +232,61 @@ export default function Home( ) {
       </CenteredSection>
 
       <CenteredSection>
-        <CompositeTitle number="4" title="Name and tags" type="h4" color="main1" />
+        <CompositeTitle number="4" title="Select an instance size" type="h4" color="main1" />
+
+        <Table 
+          border="none"
+          oddRowNoise
+          keySelector={row => row.cpu}
+          columns={[
+            {
+              label: 'Cores',
+              selector: row => row.cpu,
+              cell: row => (
+                formState.computeUnits === row.cpu ? 
+                <TextGradient as="span" type="body">{row.cpu} x86 64bit</TextGradient>
+                : <span>{row.cpu} x86 64bit</span>
+              )
+            },
+            {
+              label: 'Memory',
+              selector: row => row.memory,
+              cell: row => (
+                formState.computeUnits === row.cpu ? 
+                <TextGradient as="span" type="body">{row.memory}</TextGradient>
+                : <span>{row.memory}</span>
+              )
+            },
+            {
+              label: 'Price',
+              selector: row => row.price,
+              cell: row => (
+                formState.computeUnits === row.cpu ?
+                <TextGradient as="span" type="body">{row.price}</TextGradient>
+                : <span>{row.price}</span>
+              )
+            },
+            {
+              label: '',
+              selector: () => null,
+              cell: (row) => (
+                formState.computeUnits === row.cpu ?
+                <Button color="main0" variant={"secondary"} kind={"flat"} size={"regular"} disabled>
+                  <Icon name="check" />
+                </Button>
+                : <Button color="main0" variant={"secondary"} kind={"flat"} size={"regular"} onClick={() => setFormValue('computeUnits', row.cpu)}>&gt;</Button>
+              )
+            }
+          ]}
+          data={[
+            { cpu: 1, memory: '2gb', price: '2000 Aleph' },
+            { cpu: 2, memory: '4gb', price: '4000 Aleph' },
+            { cpu: 4, memory: '8gb', price: '8000 Aleph' },
+          ]} />
+      </CenteredSection>
+
+      <CenteredSection>
+        <CompositeTitle number="5" title="Name and tags" type="h4" color="main1" />
 
         <NoisyContainer>
           <div className="my-md">
@@ -211,7 +305,7 @@ export default function Home( ) {
       </CenteredSection>
 
       <CenteredSection className="unavailable-content">
-        <CompositeTitle number="5" title="Custom domain" type="h4" color="main1" label="(SOON)" />
+        <CompositeTitle number="6" title="Custom domain" type="h4" color="main1" label="(SOON)" />
 
         <p>Configure a custom domain for your function (coming soon)</p>
 
@@ -226,7 +320,7 @@ export default function Home( ) {
       </CenteredSection>
 
       <CenteredSection>
-        <CompositeTitle number="6" title="Add volumes" type="h4" color="main1" />
+        <CompositeTitle number="7" title="Add volumes" type="h4" color="main1" />
         { formState.volumes.map((volume, iVolume) => (
             <Tabs tabs={[
               { 
@@ -235,25 +329,31 @@ export default function Home( ) {
                   <div className="my-lg">
                     <NoisyContainer>
                       <div className="my-md">
-                        <Button type="button" color="main0" kind="neon" size="regular" variant="primary">Upload squashfs volume</Button>
+                        <HiddenFileInput onChange={(e) => setVolumeValue(iVolume, 'src', e.target.files?.[0])} accept=".squashfs">
+                          Upload squashfs volume <Icon name="arrow-up" className="ml-sm" />
+                        </HiddenFileInput>
                       </div>
 
                       <div className="my-md">
                         <TextInput 
                           label="Mount" 
                           placeholder="/mount/opt"
-                          name="__config_volume_mount" />
+                          onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
+                          value={formState.volumes[iVolume].mountpoint}
+                          name={`__config_volume_${iVolume}_mount`} />
                       </div>
 
                       <div className="my-md">
                         <TextInput 
                         label="Size (GB)"
                         placeholder="2"
-                        name="__config_volume_size" />
+                        onChange={e => setVolumeValue(iVolume, 'size', e.target.value)}
+                        value={formState.volumes[iVolume].size}
+                        name={`__config_volume_${iVolume}_size`} />
                       </div>
 
                       <div className="my-md text-right">
-                        <Button type="button" onClick={e => removeVolume(e, iVolume)} color="main2" variant="secondary" kind="neon" size="regular">
+                        <Button type="button" onClick={() => removeVolume(iVolume)} color="main2" variant="secondary" kind="neon" size="regular">
                           Remove
                         </Button>
                       </div>
@@ -270,18 +370,25 @@ export default function Home( ) {
                       <TextInput 
                         label="Mount" 
                         placeholder="/mount/opt"
-                        name="__config_volume_mount" />
+                        onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
+                        value={formState.volumes[iVolume].mountpoint}
+                        name={`__config_volume_${iVolume}_mount`} />
                     </div>
 
                     <div className="my-md">
                       <TextInput 
-                        label="Item hash" 
+                        label="Item hash"
                         placeholder="3335ad270a571b..."
-                        name="__config_volume_name" />
+                        onChange={e => setVolumeValue(iVolume, 'refHash', e.target.value)}
+                        value={formState.volumes[iVolume].refHash}
+                        error={
+                          (formState.volumes[iVolume].refHash && !isValidItemHash(formState.volumes[iVolume].refHash || '')) ? {message: "Invalid hash"} : undefined
+                        }
+                        name={`__config_volume_${iVolume}_name`} />
                     </div>
                     
                     <div className="my-md text-right">
-                      <Button type="button" onClick={e => removeVolume(e, iVolume)} color="main2" variant="secondary" kind="neon" size="regular">
+                      <Button type="button" onClick={() => removeVolume(iVolume)} color="main2" variant="secondary" kind="neon" size="regular">
                         Remove
                       </Button>
                     </div>
@@ -296,27 +403,34 @@ export default function Home( ) {
                   <NoisyContainer>
                     <div className="my-md">
                       <TextInput 
-                        label="Size (GB)"
-                        placeholder="2"
-                        name="__config_volume_size" />
+                        label="Volume name" 
+                        placeholder="Redis volume"
+                        onChange={e => setVolumeValue(iVolume, 'name', e.target.value)}
+                        value={formState.volumes[iVolume].name}
+                        name={`__config_volume_${iVolume}_name`}
+                        error={formState.volumes[iVolume].name === "" && {message: "Please provide a name"}} />
                     </div>
 
                     <div className="my-md">
                       <TextInput 
                         label="Mount" 
                         placeholder="/mount/opt"
-                        name="__config_volume_mount" />
+                        onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
+                        value={formState.volumes[iVolume].mountpoint}
+                        name={`__config_volume_${iVolume}_mount`} />
                     </div>
 
                     <div className="my-md">
                       <TextInput 
-                        label="Volume name" 
-                        placeholder="Redis volume"
-                        name="__config_volume_name" />
+                        label="Size (GB)"
+                        placeholder="2"
+                        onChange={e => setVolumeValue(iVolume, 'size', e.target.value)}
+                        value={formState.volumes[iVolume].size}
+                        name={`__config_volume_${iVolume}_size`} />
                     </div>
                     
                     <div className="my-md text-right">
-                      <Button type="button" onClick={e => removeVolume(e, iVolume)} color="main2" variant="secondary" kind="neon" size="regular">
+                      <Button type="button" onClick={() => removeVolume(iVolume)} color="main2" variant="secondary" kind="neon" size="regular">
                         Remove
                       </Button>
                     </div>
@@ -324,7 +438,8 @@ export default function Home( ) {
                 </div> 
                 )
               },
-            ]} />
+            ]} 
+            onTabChange={(_fromIndex, toIndex) => setVolumeType(iVolume, toIndex)} />
         )) }
 
         <Button type="button" onClick={addVolume} color="main0" variant="secondary" kind="neon" size="regular">
@@ -335,6 +450,14 @@ export default function Home( ) {
       <section className="fx-noise-light p-md">
         <CenteredSection>
           <TextGradient type="h4">Estimated holding requirements</TextGradient>
+
+          <div className="my-md">
+            Compute: { functionCost.compute } Aleph
+          </div>
+
+          <div className="my-md">
+            Storage: { functionCost.storage } Aleph
+          </div>
           
           <div className="my-md text-center">
             <Button type="submit" color="main0" kind="neon" size="big" variant="primary">Create function</Button>

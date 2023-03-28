@@ -31,7 +31,10 @@ export default function Home(){
     const TabContent = ({data}: { data: ProgramMessage[]}) => (
       <div className="pt-md">
         { allProducts.length > 0 ?
-        <Table border="none" oddRowNoise data={data} columns={[
+        <Table 
+          border="none" 
+          oddRowNoise data={data} 
+          columns={[
           {
             label: "Type",
             // @ts-ignore 

@@ -183,26 +183,30 @@ type FunctionPriceConfig = {
 /**
  * Calculates the amount of tokens required to deploy a function
  */
-export const getFunctionPrice = ({
+export const getFunctionCost = ({
   computeUnits,
   storage,
   isPersistent,
   capabilities,
 }: FunctionPriceConfig) => {
-  const baseComputePrice = isPersistent ? 2_000 : 200;
-  const capabilitiesMultiplier = Object.values(capabilities).reduce(
-    (ac, cv) => (ac += cv ? 1 : 0),
-    1
-  );
-
-  /* Storage costs are calculated based on the base storage allowance for the given compute units,
-  We would first subtract the used storage from the different volumes from the base storage allowance,
-  If there is no remaininng storage in the allowance, we would then calculate the cost of the remaining storage using the following formula:
-  */
-  const baseStorageAllowance = getFunctionSpecsByComputeUnits(
+  let extraStorageCost = 0;
+  const storageAllowance = getFunctionSpecsByComputeUnits(
     computeUnits,
     isPersistent
   ).storage;
 
-  return baseComputePrice * computeUnits * capabilitiesMultiplier;
+  if (storage > storageAllowance) {
+    extraStorageCost = (storage - storageAllowance) * 3;
+  }
+
+  const basePrice = isPersistent ? 2_000 : 200;
+
+  return {
+    compute: basePrice * computeUnits,
+    capabilities: Object.values(capabilities).reduce(
+      (ac, cv) => (ac += cv ? 1 : 0),
+      1
+    ),
+    storage: extraStorageCost,
+  };
 };

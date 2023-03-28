@@ -154,6 +154,7 @@ export const createFunctionProgram = async ({
       runtime,
       entrypoint,
       memory,
+      vcpus: cpu,
     });
 
     return msg;
