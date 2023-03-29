@@ -1,7 +1,8 @@
 import { createVolume } from "@/helpers/aleph"
 import { EnvironmentVariable } from "@/helpers/utils"
 import { Account } from "aleph-sdk-ts/dist/accounts/account"
-import { MachineVolume } from "aleph-sdk-ts/dist/messages/program/programModel"
+import { StoreMessage } from "aleph-sdk-ts/dist/messages/message"
+import { ImmutableVolume, MachineVolume, PersistentVolume } from "aleph-sdk-ts/dist/messages/program/programModel"
 
 const samplePythonCode = `from fastapi import FastAPI
 
@@ -25,6 +26,12 @@ export type Volume = {
   useLatest?: boolean
 }
 
+export const defaultVolume: Volume = {
+  type: 'new',
+  size: 2,
+  useLatest: true
+}
+
 export const runtimeRefs: Record<Exclude<AvailableRuntimes, "custom">, string> = {
   default_interpreted: 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
   default_binary: 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
@@ -46,11 +53,6 @@ export type FormState = {
   metaTags: string[]
 }
 
-const defaultVolume: Volume = {
-  type: 'new',
-  size: 2
-}
-
 export const initialFormState: FormState = {
   runtime: 'default_interpreted',
   isPersistent: false,
@@ -70,30 +72,32 @@ export const initialFormState: FormState = {
 /**
  * Convert a list of volume objects from the form to a list of volume objects for the Aleph API
  */
-export const displayVolumesToAlephVolumes = async (account: Account, volumes: Volume[]): any => {
-  // TODO: implement this function
-  const ret = volumes.map((volume) => {
-    if(volume.type === 'new') {
-      // const createdVolume = await createVolume(account, volume.size || 2);
-
-      // return {
-      //   refHash: createdVolume.item_hash
-      // }
+export const displayVolumesToAlephVolumes = async (account: Account, volumes: Volume[]) => {
+  const ret = []
+  for(const volume of volumes) {
+    if(volume.type === 'new' && volume.src) {
+      const createdVolume = await createVolume(account, volume.src);
+      ret.push({
+        ref: createdVolume.item_hash,
+        mount: volume.mountpoint || "",
+        use_latest: false
+      })
     } else if(volume.type === 'existing') {
-      return {
+      ret.push({
         ref: volume.refHash || "",
         mount: volume.mountpoint || "",
-        useLatest: volume.useLatest || false
-      }
+        useLatest: volume.useLatest || false,
+        size_mib: (volume.size || 2) * 1024,
+      })
     } else if(volume.type === 'persistent') {
-      return {
+      ret.push({
         persistence: "host",
         mount: volume.mountpoint || "",
         size_mib: (volume.size || 2) * 1024,
         name: volume.name || ""
-      }
+      })
     }
-  })
+  }
 
   return ret
 }

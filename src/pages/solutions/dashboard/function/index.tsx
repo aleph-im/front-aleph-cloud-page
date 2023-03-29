@@ -1,5 +1,5 @@
 import { FormEvent, useContext, useMemo, useReducer } from "react";
-import { Button, ChipInput, CodeEditor, Icon, Radio, RadioGroup, Table, Tabs, TextGradient, TextInput } from "@aleph-front/aleph-core";
+import { Button, Checkbox, ChipInput, CodeEditor, Icon, Radio, RadioGroup, Table, Tabs, TextGradient, TextInput } from "@aleph-front/aleph-core";
 import JSZip from "jszip";
 
 import AutoBreadcrumb from "@/components/AutoBreadcrumb";
@@ -8,10 +8,10 @@ import CompositeTitle from "@/components/CompositeTitle";
 import NoisyContainer from "@/components/NoisyContainer";
 import useConnected from "@/helpers/hooks/useConnected";
 import HiddenFileInput from "@/components/HiddenFileInput";
-import { convertBitUnits, getFunctionCost, getFunctionSpecsByComputeUnits, isValidItemHash, safeCollectionToObject } from "@/helpers/utils";
+import { convertBitUnits, getFunctionCost, getFunctionSpecsByComputeUnits, isValidItemHash, humanReadableSize, safeCollectionToObject } from "@/helpers/utils";
 import { createFunctionProgram } from "@/helpers/aleph";
 import { AppStateContext } from "@/pages/_app";
-import { displayVolumesToAlephVolumes, FormState, initialFormState, runtimeRefs, Volume, VolumeTypes } from "./form";
+import { defaultVolume, displayVolumesToAlephVolumes, FormState, initialFormState, runtimeRefs, Volume, VolumeTypes } from "./form";
 
 export default function Home( ) { 
   useConnected()
@@ -73,7 +73,7 @@ export default function Home( ) {
         variables: safeCollectionToObject(formState.environmentVariables)
       })
 
-      console.log(alephVolumes)
+      console.log(msg)
       alert('function created')
     }
     catch(err){
@@ -93,7 +93,7 @@ export default function Home( ) {
     }])
   }
 
-  const setEnvironmentVariable = (variableIndex: number, variableKey: string, variableValue: string) => {
+  const setEnvironmentVariable = (variableIndex: number, variableKey: "name" | "value", variableValue: string) => {
     const variables = [...formState.environmentVariables]
     variables[variableIndex] = {
       ...variables[variableIndex],
@@ -108,7 +108,7 @@ export default function Home( ) {
 
   const addVolume = () => {
     setFormValue('volumes', [...formState.volumes, {
-      size: 2,
+      ... defaultVolume
     }])
   }
 
@@ -116,7 +116,7 @@ export default function Home( ) {
     setFormValue('volumes', formState.volumes.filter((_, i) => i !== volumeIndex))
   }
 
-  const setVolumeType = (volumeIndex:number, volumeType:number) => {
+  const setVolumeType = (volumeIndex: number, volumeType: number) => {
     const volumeTypes: VolumeTypes[] = ['new', 'existing', 'persistent']
     const volumes = [... formState.volumes]
 
@@ -127,7 +127,7 @@ export default function Home( ) {
     setFormValue('volumes', volumes)
   }
 
-  const setVolumeValue = (volumeIndex:number, volumekey:string, volumeValue: string) => {
+  const setVolumeValue = (volumeIndex:number, volumekey: keyof Volume, volumeValue: any) => {
     const volumes = [... formState.volumes]
     volumes[volumeIndex] = {
       ...volumes[volumeIndex],
@@ -142,8 +142,11 @@ export default function Home( ) {
       computeUnits: formState.computeUnits,
       isPersistent: formState.isPersistent,
       storage: formState.volumes.reduce((acc: number, volume: Volume) => {
-        if(volume.type === 'new' || volume.type === 'persistent'){
-          return acc + (volume.size || 0) * 1024 
+        if(volume.type === 'persistent'){
+          return acc + ((volume.size || 0) * 1024 ** 3) 
+        }
+        if(volume.type === 'new'){
+          return acc + (volume?.src?.size || 0)
         }
         return acc
       }, 0),
@@ -460,11 +463,17 @@ export default function Home( ) {
 
                       <div className="my-md">
                         <TextInput 
-                        label="Size (GB)"
-                        placeholder="2"
-                        onChange={e => setVolumeValue(iVolume, 'size', e.target.value)}
-                        value={formState.volumes[iVolume].size}
+                        label="Size"
+                        disabled
+                        value={humanReadableSize(formState.volumes[iVolume]?.src?.size)}
                         name={`__config_volume_${iVolume}_size`} />
+                      </div>
+
+                      <div className="my-md">
+                        <Checkbox 
+                          label="Use latest version" 
+                          checked={formState.volumes[iVolume].useLatest}
+                          onChange={e => setVolumeValue(iVolume, 'useLatest', e)} />
                       </div>
 
                       <div className="my-md text-right">
@@ -502,6 +511,13 @@ export default function Home( ) {
                           (formState.volumes[iVolume].refHash && !isValidItemHash(formState.volumes[iVolume].refHash || '')) ? {message: "Invalid hash"} : undefined
                         }
                         name={`__config_volume_${iVolume}_name`} />
+                    </div>
+
+                    <div className="my-md">
+                      <Checkbox 
+                        label="Use latest version" 
+                        checked={formState.volumes[iVolume].useLatest}
+                        onChange={e => setVolumeValue(iVolume, 'useLatest', e)} />
                     </div>
                     
                     <div className="my-md text-right">

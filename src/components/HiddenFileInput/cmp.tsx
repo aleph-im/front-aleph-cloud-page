@@ -13,7 +13,12 @@ const HiddenFileInput = ({ onChange, accept, children }: HiddenFileInputProps) =
       inputRef.current.click();
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | null) => {
+    if(e === null){
+      setInMemoryFile(null);
+      return onChange(undefined);
+    }
+
     // This is verbose to avoid a type error on e.target.files[0] being undefined
     const target = e.target as HTMLInputElement;
     const { files } = target;
@@ -30,7 +35,7 @@ const HiddenFileInput = ({ onChange, accept, children }: HiddenFileInputProps) =
     <>
       {
         inMemoryFile ?
-        <Button onClick={() => setInMemoryFile(null)} type="button" color="main2" kind="neon" size="regular" variant="tertiary">
+        <Button onClick={() => handleChange(null)} type="button" color="main2" kind="neon" size="regular" variant="tertiary">
           {ellipseAddress(inMemoryFile.name)} <Icon name="trash" className="ml-md" />
         </Button>
         :

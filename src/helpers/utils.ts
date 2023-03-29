@@ -102,7 +102,7 @@ export const getSOLBalance = async (address: string) => {
   }
 };
 
-type BitUnit = "kb" | "mb" | "gb" | "tb";
+type BitUnit = "b" | "kb" | "mb" | "gb" | "tb";
 type ConvertBitUnitOptions = {
   from: BitUnit;
   to: BitUnit;
@@ -114,6 +114,7 @@ export const convertBitUnits = (
 ) => {
   const options: ConvertBitUnitOptions = { from, to, displayUnit };
   const units = {
+    b: 1,
     kb: 1024,
     mb: 1024 ** 2,
     gb: 1024 ** 3,
@@ -122,6 +123,21 @@ export const convertBitUnits = (
 
   const result = (value * units[options.from]) / units[options.to];
   return options.displayUnit ? `${result} ${options.to.toUpperCase()}` : result;
+};
+
+/**
+ * Converts a number of bytes to a human readable size
+ */
+export const humanReadableSize = (value?: number) => {
+  if (!value) return "n/a";
+
+  const units = ["b", "kb", "mb", "gb", "tb"];
+  let i = 0;
+  while (value > 1000 ** i && i < units.length) {
+    i++;
+  }
+
+  return (value / 1000 ** (i - 1)).toFixed(2) + units[i - 1];
 };
 
 /**
@@ -183,7 +199,7 @@ export const getFunctionSpecsByComputeUnits = (
   return {
     cpu: 1 * computeUnits,
     memory: 2 * computeUnits * 1024,
-    storage: 2 * 10 ** Number(isPersistent) * computeUnits * 1024,
+    storage: 2 * 10 ** Number(isPersistent) * computeUnits * 1024 ** 3,
   };
 };
 

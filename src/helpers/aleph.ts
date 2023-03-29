@@ -2,6 +2,7 @@ import {
   Chain,
   MessageType,
   ProgramMessage,
+  StoreMessage,
 } from "aleph-sdk-ts/dist/messages/message";
 import { Account } from "aleph-sdk-ts/dist/accounts/account";
 import { any, program, forget, store } from "aleph-sdk-ts/dist/messages";
@@ -174,14 +175,13 @@ export const deleteVM = async (account: Account, message: ProgramMessage) => {
 };
 
 // TODO: implement
-export const createVolume = async (account: Account, size: number) => {
-  try {
-    // const msg = await store.Publish({
-    //   account,
-    //   size,
-    // });
-    // return msg;
-  } catch (err) {
-    throw E_.RequestFailed(err);
-  }
+export const createVolume = async (
+  account: Account,
+  file: File
+): Promise<StoreMessage> => {
+  return store.Publish({
+    account,
+    fileObject: file,
+    channel: "ALEPH-CLOUDSOLUTIONS",
+  });
 };
