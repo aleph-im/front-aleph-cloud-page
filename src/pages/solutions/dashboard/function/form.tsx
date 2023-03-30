@@ -87,17 +87,23 @@ export const displayVolumesToAlephVolumes = async (account: Account, volumes: Vo
         ref: volume.refHash || "",
         mount: volume.mountpoint || "",
         useLatest: volume.useLatest || false,
-        size_mib: (volume.size || 2) * 1024,
+        size_mib: (volume.size || 2) * 1000,
       })
     } else if(volume.type === 'persistent') {
       ret.push({
         persistence: "host",
         mount: volume.mountpoint || "",
-        size_mib: (volume.size || 2) * 1024,
+        size_mib: (volume.size || 2) * 1000,
         name: volume.name || ""
       })
     }
   }
 
   return ret
+}
+
+export const nonEmptyString = (s: string) => s.trim().length > 0
+
+export const validateHash = (hash: string) => {
+
 }

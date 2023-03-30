@@ -143,7 +143,7 @@ export default function Home( ) {
       isPersistent: formState.isPersistent,
       storage: formState.volumes.reduce((acc: number, volume: Volume) => {
         if(volume.type === 'persistent'){
-          return acc + ((volume.size || 0) * 1024 ** 3) 
+          return acc + ((volume.size || 0) * 1000 ** 3) 
         }
         if(volume.type === 'new'){
           return acc + (volume?.src?.size || 0)

@@ -115,10 +115,10 @@ export const convertBitUnits = (
   const options: ConvertBitUnitOptions = { from, to, displayUnit };
   const units = {
     b: 1,
-    kb: 1024,
-    mb: 1024 ** 2,
-    gb: 1024 ** 3,
-    tb: 1024 ** 4,
+    kb: 1000,
+    mb: 1000 ** 2,
+    gb: 1000 ** 3,
+    tb: 1000 ** 4,
   };
 
   const result = (value * units[options.from]) / units[options.to];
@@ -198,8 +198,8 @@ export const getFunctionSpecsByComputeUnits = (
 ): MachineSpecs => {
   return {
     cpu: 1 * computeUnits,
-    memory: 2 * computeUnits * 1024,
-    storage: 2 * 10 ** Number(isPersistent) * computeUnits * 1024 ** 3,
+    memory: 2 * computeUnits * 1000,
+    storage: 2 * 10 ** Number(isPersistent) * computeUnits * 1000 ** 3,
   };
 };
 
@@ -230,7 +230,7 @@ export const getFunctionCost = ({
   ).storage;
 
   if (storage > storageAllowance) {
-    extraStorageCost = ((storage - storageAllowance) * 1024) / 3;
+    extraStorageCost = ((storage - storageAllowance) * 1000) / 3;
   }
 
   const basePrice = isPersistent ? 2_000 : 200;
