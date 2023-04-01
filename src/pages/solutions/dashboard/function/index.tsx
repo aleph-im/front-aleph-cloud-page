@@ -73,7 +73,6 @@ export default function Home( ) {
         variables: safeCollectionToObject(formState.environmentVariables)
       })
 
-      console.log(msg)
       alert('function created')
     }
     catch(err){
@@ -170,7 +169,7 @@ export default function Home( ) {
 
         <p>If your code has any dependency, you can upload them separatly in the volume section below to ensure a faster creation.</p>
 
-        <Tabs tabs={[
+        <Tabs align="left" tabs={[
           {
             name : 'Online editor', 
             component: (
@@ -209,7 +208,7 @@ export default function Home( ) {
               <div className="py-md text-center">
                 <p>Please select a zip archive</p>
 
-                <HiddenFileInput accept=".zip" onChange={(file) => setFormValue('functionFile', file)}>
+                <HiddenFileInput value={formState.functionFile} accept=".zip" onChange={(file) => setFormValue('functionFile', file)}>
                   Upload zip archive <Icon name="arrow-up" className="ml-sm" />
                 </HiddenFileInput>
               </div>
@@ -369,7 +368,7 @@ export default function Home( ) {
 
           <div className="my-md">
             <ChipInput 
-              label="Examples of use"
+              label="Tags"
               placeholder="Tags (press enter to add a new tag)"
               name="__config_function_tags"
               value={formState.metaTags}
@@ -430,7 +429,7 @@ export default function Home( ) {
       <CenteredSection>
         <CompositeTitle number="9" title="Add volumes" type="h4" color="main1" />
         { formState.volumes.map((volume, iVolume) => (
-            <Tabs tabs={[
+            <Tabs align="left" tabs={[
               { 
                 name: 'New volume', 
                 component: (
@@ -439,7 +438,7 @@ export default function Home( ) {
 
                     <NoisyContainer>
                       <div className="my-md d-flex flex-jc-sb">
-                        <HiddenFileInput onChange={(file) => setVolumeValue(iVolume, 'src', file)}>
+                        <HiddenFileInput value={formState.volumes[iVolume].src} onChange={(file) => setVolumeValue(iVolume, 'src', file)}>
                           Upload squashfs volume <Icon name="arrow-up" className="ml-sm" />
                         </HiddenFileInput>
 
@@ -456,7 +455,7 @@ export default function Home( ) {
                         <TextInput 
                           label="Mount" 
                           placeholder="/mount/opt"
-                          onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
+                          onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.checked)}
                           value={formState.volumes[iVolume].mountpoint}
                           name={`__config_volume_${iVolume}_mount`} />
                       </div>
@@ -472,8 +471,7 @@ export default function Home( ) {
                       <div className="my-md">
                         <Checkbox 
                           label="Use latest version" 
-                          checked={formState.volumes[iVolume].useLatest}
-                          onChange={e => setVolumeValue(iVolume, 'useLatest', e)} />
+                          onChange={e => setVolumeValue(iVolume, 'useLatest', e.target.checked)} />
                       </div>
 
                       <div className="my-md text-right">
@@ -516,8 +514,7 @@ export default function Home( ) {
                     <div className="my-md">
                       <Checkbox 
                         label="Use latest version" 
-                        checked={formState.volumes[iVolume].useLatest}
-                        onChange={e => setVolumeValue(iVolume, 'useLatest', e)} />
+                        onChange={e => setVolumeValue(iVolume, 'useLatest', e.target.value)} />
                     </div>
                     
                     <div className="my-md text-right">

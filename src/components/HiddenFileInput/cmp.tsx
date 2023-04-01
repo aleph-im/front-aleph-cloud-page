@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Icon } from '@aleph-front/aleph-core';
 import { HiddenFileInputProps } from './types';
 import { StyledHiddenFileInput } from './styles';
 import { ellipseAddress } from '@/helpers/utils';
 
-const HiddenFileInput = ({ onChange, accept, children }: HiddenFileInputProps) => {
+const HiddenFileInput = ({ onChange, accept, value, children }: HiddenFileInputProps) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [inMemoryFile, setInMemoryFile] = React.useState<File | null>(null);
 
@@ -30,6 +30,12 @@ const HiddenFileInput = ({ onChange, accept, children }: HiddenFileInputProps) =
       onChange(fileUploaded);
     }
   };
+
+  useEffect(() => {
+    if(value)
+      setInMemoryFile(value);
+  },
+  [value])
 
   return (
     <>

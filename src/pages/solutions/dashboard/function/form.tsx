@@ -104,6 +104,4 @@ export const displayVolumesToAlephVolumes = async (account: Account, volumes: Vo
 
 export const nonEmptyString = (s: string) => s.trim().length > 0
 
-export const validateHash = (hash: string) => {
-
-}
+export const validateHash = (hash: string) => {}
