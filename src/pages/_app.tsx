@@ -7,28 +7,27 @@ config.autoAddCss = false
 
 import type { AppProps } from 'next/app'
 import { ThemeProvider } from 'styled-components'
-import { themes, GlobalStyle } from '@aleph-front/aleph-core'
+import { themes, GlobalStyle, Notification } from '@aleph-front/aleph-core'
 import Footer from '@/components/Footer'
 import { GlobalStylesOverride } from '@/styles/global'
 import Header from '@/components/Header'
 
-import { createContext, useReducer, Dispatch } from 'react'
-import { initialState, reducer, State } from '@/helpers/store'
+import NotificationProvider from '@/components/NotificationProvider'
+import { AppStateProvider } from '@/contexts/appState'
 
-export const AppStateContext = createContext<[state: State, dispatch: Dispatch<any>]>([initialState, () => null])
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [state, dispatch] = useReducer(reducer, initialState)
-
   return (
-    <AppStateContext.Provider value={[ state, dispatch ]}>
+    <AppStateProvider>
       <ThemeProvider theme={themes.dark}>
-        <GlobalStyle />
-        <GlobalStylesOverride />
-        <Header />
-        <Component {...pageProps} />
-        <Footer />
+        <NotificationProvider>
+          <GlobalStyle />
+          <GlobalStylesOverride />
+          <Header />
+          <Component {...pageProps} />
+          <Footer />
+        </NotificationProvider>
       </ThemeProvider>
-    </AppStateContext.Provider>
+    </AppStateProvider>
   )
 }

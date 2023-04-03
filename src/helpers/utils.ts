@@ -208,12 +208,20 @@ type CapabilitiesConfig = {
   blockchainRPC?: boolean;
   enableSnapshots?: boolean;
 };
-type FunctionPriceConfig = {
+
+export type FunctionPriceConfig = {
   computeUnits: number;
   storage: number;
   isPersistent: boolean;
   capabilities: CapabilitiesConfig;
 };
+
+export type FunctionCost = {
+  compute: number
+  capabilities: number
+  storage: number
+};
+
 /**
  * Calculates the amount of tokens required to deploy a function
  */
@@ -222,7 +230,7 @@ export const getFunctionCost = ({
   storage,
   isPersistent,
   capabilities,
-}: FunctionPriceConfig) => {
+}: FunctionPriceConfig): FunctionCost => {
   let extraStorageCost = 0;
   const storageAllowance = getFunctionSpecsByComputeUnits(
     computeUnits,

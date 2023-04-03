@@ -1,17 +1,15 @@
 import AutoBreadcrumb from "@/components/AutoBreadcrumb";
 import CenteredSection from "@/components/CenteredSection";
 import NoisyContainer from "@/components/NoisyContainer";
+import { useAppState } from "@/contexts/appState";
 import { deleteVM, getMessage } from "@/helpers/aleph";
 import { defaultVMURL, programStorageURL } from "@/helpers/constants";
-import { ActionTypes } from "@/helpers/store";
 import { ellipseAddress, getExplorerURL } from "@/helpers/utils";
-import { AppStateContext } from "@/pages/_app";
 import { Button, Icon, Tag, TextGradient } from "@aleph-front/aleph-core";
 import { ProgramMessage } from "aleph-sdk-ts/dist/messages/message";
 import { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
-
 
 const Separator = styled.hr.attrs({ className: 'my-md' })`
   border: 0;
@@ -19,13 +17,13 @@ const Separator = styled.hr.attrs({ className: 'my-md' })`
   opacity: .25;
 `
 
-export default function Home( ){
+export default function Home() {
   const router = useRouter()
   const { hash } = router.query
-  if(!hash || typeof hash !== 'string') 
+  if (!hash || typeof hash !== 'string')
     router.replace('../')
 
-  const [ message, setMessage ] = useState<ProgramMessage | undefined>(undefined)
+  const [message, setMessage] = useState<ProgramMessage | undefined>(undefined)
 
   useEffect(() => {
     const dispatchMsg = async () => {
@@ -35,7 +33,9 @@ export default function Home( ){
     dispatchMsg()
   }, [])
 
-  if(!message) return (
+  const [globalState, dispatchGlobal] = useAppState()
+
+  if (!message) return (
     <>
       <AutoBreadcrumb name="..." />
 
@@ -45,9 +45,7 @@ export default function Home( ){
     </>
   )
 
-  const [ globalState, dispatchGlobal ] = useContext(AppStateContext)
-  
-  
+
   const handleDelete = async () => {
     // Account is instanciated in useConnected hook
     // @ts-ignore
@@ -65,25 +63,25 @@ export default function Home( ){
             <div>{message.content?.metadata?.name}</div>
           </div>
           <div>
-            <Button 
-              size="regular" 
-              variant="tertiary" 
-              color="main0" 
-              kind="neon" 
-              className="mr-sm" 
-              as="a" 
+            <Button
+              size="regular"
+              variant="tertiary"
+              color="main0"
+              kind="neon"
+              className="mr-sm"
+              as="a"
               href={programStorageURL + message.item_hash}>
               Download
             </Button>
-            <Button 
-            size="regular" 
-            variant="tertiary" 
-            color="main2" 
-            kind="neon"
-            onClick={handleDelete}>Delete</Button>
+            <Button
+              size="regular"
+              variant="tertiary"
+              color="main2"
+              kind="neon"
+              onClick={handleDelete}>Delete</Button>
           </div>
         </div>
-        
+
         <NoisyContainer>
           <div className="d-flex flex-ai-s">
             <Tag className="tp-body2 fs-sm mr-sm">Function</Tag>
@@ -124,11 +122,11 @@ export default function Home( ){
             message.content?.volumes.map((volume, i) => (
               <div className="my-md" key={i}>
                 <TextGradient type="info">
-                  { volume?.persistence === 'host' ? "Persistent " : "Immutable "} volume 
+                  {volume?.persistence === 'host' ? "Persistent " : "Immutable "} volume
                 </TextGradient>
 
                 <pre>
-                  { JSON.stringify(volume, null, 2) }
+                  {JSON.stringify(volume, null, 2)}
                 </pre>
               </div>
             ))
