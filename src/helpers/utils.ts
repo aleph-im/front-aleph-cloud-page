@@ -1,6 +1,9 @@
 import { providers, Contract } from "ethers";
 import E_ from "./errors";
-import { ProgramMessage } from "aleph-sdk-ts/dist/messages/message";
+import {
+  ProgramMessage,
+  StoreMessage,
+} from "aleph-sdk-ts/dist/messages/message";
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -244,3 +247,15 @@ export const getFunctionCost = ({
     storage: extraStorageCost,
   };
 };
+
+/**
+ * Returns true if the provided aleph message is a volume message
+ */
+export const isVolume = (msg: ProgramMessage | StoreMessage) =>
+  msg.type === "STORE";
+
+/**
+ * Returns true if the provided aleph message is a program message
+ */
+export const isProgram = (msg: ProgramMessage | StoreMessage) =>
+  msg.type === "PROGRAM";

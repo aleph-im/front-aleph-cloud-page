@@ -19,3 +19,7 @@ export const defaultFileExtension: Record<LanguageType, string> = {
   go: "go",
   c: "c",
 };
+
+export const defaultVolumeChannel = "ALEPH-VOLUME";
+
+export const defaultVMChannel = "ALEPH-CLOUDSOLUTIONS";
