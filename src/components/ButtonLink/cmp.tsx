@@ -8,8 +8,8 @@ import { ButtonLinkProps } from './types'
 */
 export default function ButtonLink({ href, children }: ButtonLinkProps) {
   return (
-    <Link href={href} passHref>
-      <Button as="a" href={href} variant="secondary" color="main0" kind="neon" size="regular">
+    <Link href={href} passHref legacyBehavior>
+      <Button as="a" variant="secondary" color="main0" kind="neon" size="regular">
         { children }
       </Button>
     </Link>
