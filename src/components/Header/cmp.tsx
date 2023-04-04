@@ -8,10 +8,10 @@ import { HeaderProps } from './types'
 import { web3Connect, getAccountBalance, getAccountProducts } from '@/helpers/aleph'
 import { ActionTypes } from '@/helpers/store'
 import { ellipseAddress } from '@/helpers/utils'
-import { AppStateContext } from '@/pages/_app'
+import { useAppState } from '@/contexts/appState'
 
 export const Header = (props: HeaderProps) => {
-  const [ state, dispatch ] = useContext(AppStateContext)
+  const [ state, dispatch ] = useAppState()
 
   const login = async () => {
     const account = await web3Connect(Chain.ETH, window?.ethereum)
