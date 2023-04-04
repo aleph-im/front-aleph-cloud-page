@@ -70,7 +70,7 @@ export default function Home() {
               kind="neon"
               className="mr-sm"
               as="a"
-              href={programStorageURL + message.item_hash}>
+              href={programStorageURL + message.content.code.ref}>
               Download
             </Button>
             <Button

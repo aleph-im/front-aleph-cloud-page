@@ -124,7 +124,7 @@ type CreateFunctionParams = {
   isPersistent: boolean;
   runtime: string;
   encoding: Encoding;
-  volumes: Array<MachineVolume | PersistentVolume>;
+  volumes: (MachineVolume | PersistentVolume)[];
   computeUnits: number;
   variables: Record<string, string>;
 };

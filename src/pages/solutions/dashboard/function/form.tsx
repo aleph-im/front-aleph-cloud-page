@@ -1,8 +1,6 @@
 import { createVolume } from "@/helpers/aleph"
 import { EnvironmentVariable } from "@/helpers/utils"
 import { Account } from "aleph-sdk-ts/dist/accounts/account"
-import { StoreMessage } from "aleph-sdk-ts/dist/messages/message"
-import { ImmutableVolume, MachineVolume, PersistentVolume } from "aleph-sdk-ts/dist/messages/program/programModel"
 
 const samplePythonCode = `from fastapi import FastAPI
 
@@ -86,7 +84,7 @@ export const displayVolumesToAlephVolumes = async (account: Account, volumes: Vo
       ret.push({
         ref: volume.refHash || "",
         mount: volume.mountpoint || "",
-        useLatest: volume.useLatest || false,
+        use_latest: volume.useLatest || false,
         size_mib: (volume.size || 2) * 1000,
       })
     } else if(volume.type === 'persistent') {

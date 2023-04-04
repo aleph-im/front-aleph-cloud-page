@@ -7,7 +7,7 @@ import { ProgramMessage } from 'aleph-sdk-ts/dist/messages/message'
 import { useHomePage } from '@/hooks/pages/useHomePage'
 
 export default function Home() {
-  const { products, functions, instances, databases } = useHomePage()
+  const { products, functions, volumes } = useHomePage()
 
   // FIXME: Selector function signature
   const TabContent = ({ data }: { data: ProgramMessage[] }) => (
@@ -102,18 +102,6 @@ export default function Home() {
               component: <TabContent data={functions || []} />,
               label: `(${functions?.length || 0})`,
               labelPosition: 'bottom'
-            },
-            {
-              name: 'Instance',
-              component: <TabContent data={instances || []} />,
-              disabled: true,
-              label: '(Soon)'
-            },
-            {
-              name: 'Database',
-              component: <TabContent data={databases || []} />,
-              disabled: true,
-              label: '(Soon)'
             },
           ]
         } />
