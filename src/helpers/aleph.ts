@@ -94,7 +94,9 @@ export const getAccountProducts = async (account: Account) => {
         channels: [defaultVMChannel],
       })
       .then((msgs) => {
-        products.functions = msgs.messages as ProgramMessage[];
+        products.functions = msgs.messages.filter(
+          (x) => x.content != undefined
+        ) as ProgramMessage[];
       })
   );
 
@@ -106,7 +108,9 @@ export const getAccountProducts = async (account: Account) => {
         channels: [defaultVolumeChannel],
       })
       .then((msgs) => {
-        products.volumes = msgs.messages as StoreMessage[];
+        products.volumes = msgs.messages.filter(
+          (x) => x.content != undefined
+        ) as StoreMessage[];
       })
   );
 

@@ -4,9 +4,9 @@ import NoisyContainer from "@/components/NoisyContainer";
 import { useAppState } from "@/contexts/appState";
 import { deleteVM, getMessage } from "@/helpers/aleph";
 import { defaultVMURL, programStorageURL } from "@/helpers/constants";
-import { ellipseAddress, getExplorerURL } from "@/helpers/utils";
+import { ellipseAddress, getExplorerURL, isVolume } from "@/helpers/utils";
 import { Button, Icon, Tag, TextGradient } from "@aleph-front/aleph-core";
-import { ProgramMessage } from "aleph-sdk-ts/dist/messages/message";
+import { ProgramMessage, StoreMessage } from "aleph-sdk-ts/dist/messages/message";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
@@ -23,12 +23,15 @@ export default function Home() {
   if (!hash || typeof hash !== 'string')
     router.replace('../')
 
-  const [message, setMessage] = useState<ProgramMessage | undefined>(undefined)
+  const [message, setMessage] = useState<ProgramMessage | StoreMessage | undefined>(undefined)
 
   useEffect(() => {
     const dispatchMsg = async () => {
       const msg = await getMessage(hash as string)
-      setMessage(msg as ProgramMessage)
+      if(isVolume(msg as StoreMessage | ProgramMessage))
+        setMessage(msg as StoreMessage)
+      else
+        setMessage(msg as ProgramMessage)
     }
     dispatchMsg()
   }, [])
@@ -52,15 +55,38 @@ export default function Home() {
     await deleteVM(globalState.account, message);
   }
 
+  type DisplayedInformation = {
+    name: string,
+    downloadLink: string,
+    itemType: string,
+    linkedVolumes: any[]
+  }
+  const displayedInformation: DisplayedInformation = {
+    name: "",
+    downloadLink: "",
+    itemType: "",
+    linkedVolumes: []
+  }
+  if(isVolume(message)) {
+    displayedInformation.name = ellipseAddress(message.item_hash)
+    displayedInformation.downloadLink = programStorageURL + message.item_hash
+    displayedInformation.itemType = "Volume"
+  } else {
+    displayedInformation.name = (message as ProgramMessage).content?.metadata?.name || "<Unknown>"
+    displayedInformation.downloadLink = programStorageURL + (message as ProgramMessage).content.code.ref
+    displayedInformation.itemType = "Function"
+    displayedInformation.linkedVolumes = (message as ProgramMessage).content.volumes
+  }
+
   return (
     <>
-      <AutoBreadcrumb name={message.content?.metadata?.name} />
+      <AutoBreadcrumb name={displayedInformation.name} />
 
       <CenteredSection>
         <div className="d-flex flex-jc-sb py-sm">
           <div className="d-flex flex-ai-c">
             <Icon name="alien-8bit" className="mr-sm" />
-            <div>{message.content?.metadata?.name}</div>
+            <div>{displayedInformation.name}</div>
           </div>
           <div>
             <Button
@@ -70,7 +96,7 @@ export default function Home() {
               kind="neon"
               className="mr-sm"
               as="a"
-              href={programStorageURL + message.content.code.ref}>
+              href={displayedInformation.downloadLink}>
               Download
             </Button>
             <Button
@@ -84,7 +110,7 @@ export default function Home() {
 
         <NoisyContainer>
           <div className="d-flex flex-ai-s">
-            <Tag className="tp-body2 fs-sm mr-sm">Function</Tag>
+            <Tag className="tp-body2 fs-sm mr-sm">{displayedInformation.itemType}</Tag>
             <div>
               <TextGradient type="info">ITEM HASH</TextGradient>
               <div>{hash}</div>
@@ -115,23 +141,26 @@ export default function Home() {
             </div>
           </div>
 
-          <Separator />
+          { displayedInformation.linkedVolumes.length > 0 &&
+            <>
+              <Separator />
 
-          <TextGradient type="h6" color="main1">Linked storage</TextGradient>
-          {
-            message.content?.volumes.map((volume, i) => (
-              <div className="my-md" key={i}>
-                <TextGradient type="info">
-                  {volume?.persistence === 'host' ? "Persistent " : "Immutable "} volume
-                </TextGradient>
+              <TextGradient type="h6" color="main1">Linked storage</TextGradient>
+              { displayedInformation.linkedVolumes.map((volume, i) => (
+                  <div className="my-md" key={i}>
+                    <TextGradient type="info">
+                      {volume?.persistence === 'host' ? "Persistent " : "Immutable "} volume
+                    </TextGradient>
 
-                <pre>
-                  {JSON.stringify(volume, null, 2)}
-                </pre>
-              </div>
-            ))
+                    <pre>
+                      {JSON.stringify(volume, null, 2)}
+                    </pre>
+                  </div>
+                ))
+              }
+          </>
           }
-        </NoisyContainer>
+          </NoisyContainer>
       </CenteredSection>
     </>
   )

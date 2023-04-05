@@ -2,7 +2,7 @@ import { Col, Row, Table, Tabs, TextGradient } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/ButtonLink'
 import CenteredSection from '@/components/CenteredSection'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
-import { convertBitUnits, unixToISODateString } from '@/helpers/utils'
+import { convertBitUnits, ellipseAddress, humanReadableSize, isVolume, unixToISODateString } from '@/helpers/utils'
 import { ProgramMessage } from 'aleph-sdk-ts/dist/messages/message'
 import { useHomePage } from '@/hooks/pages/useHomePage'
 
@@ -23,13 +23,13 @@ export default function Home() {
             {
               label: "Type",
               // @ts-ignore 
-              selector: () => 'Function',
+              selector: (row) => isVolume(row) ? 'Volume' : 'Function',
               sortable: true,
             },
             {
               label: "Name",
               // @ts-ignore 
-              selector: (row: ProgramMessage) => (row?.content?.metadata?.name || row?.item_hash),
+              selector: (row: ProgramMessage) => (row?.content?.metadata?.name || ellipseAddress(row?.item_hash || '')),
               sortable: true,
             },
             {
@@ -48,7 +48,9 @@ export default function Home() {
               label: "Size",
               // @ts-ignore 
               selector: (row: ProgramMessage) => (
-                convertBitUnits(
+                isVolume(row)
+                ? humanReadableSize(row.size)
+                : convertBitUnits(
                   row.content?.volumes.reduce((ac, cv) => (ac += (cv?.size_mib || 0)), 0),
                   {
                     from: 'mb',
