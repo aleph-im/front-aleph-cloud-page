@@ -3,22 +3,45 @@ import ButtonLink from '@/components/ButtonLink'
 import CenteredSection from '@/components/CenteredSection'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
 import { convertBitUnits, ellipseAddress, humanReadableSize, isVolume, unixToISODateString } from '@/helpers/utils'
-import { ProgramMessage } from 'aleph-sdk-ts/dist/messages/message'
+import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/message'
 import { useHomePage } from '@/hooks/pages/useHomePage'
+import { useMemo } from 'react'
 
 export default function Home() {
   const { products, functions, volumes } = useHomePage()
 
   // FIXME: Selector function signature
-  const TabContent = ({ data }: { data: ProgramMessage[] }) => (
-    <div className="py-md">
-      {products.length > 0 ?
+  const TabContent = ({ data }: { data: (ProgramMessage | StoreMessage)[] }) => {
+    const flattenedSizeData = useMemo(
+      () => data.map(
+        product => {
+          if (isVolume(product)) {
+            return {
+              ...product,
+              size: (product as StoreMessage).size
+            }
+          }
+          return {
+            ...product,
+            size: (product as ProgramMessage).content?.volumes
+                  .reduce((ac, cv) => (
+                    // FIXME: Volume is not properly defined in aleph-sdk-ts
+                    // @ts-ignore
+                    ac += (cv?.size_mib || 0)
+                  ), 0)
+          }
+        }
+      ), [data]
+    )
+
+    return (
+      <div className="py-md">
         <Table
           border="none"
           oddRowNoise
           //@ts-ignore
           keySelector={(row: ProgramMessage) => row?.item_hash}
-          data={data}
+          data={flattenedSizeData}
           columns={[
             {
               label: "Type",
@@ -47,18 +70,7 @@ export default function Home() {
             {
               label: "Size",
               // @ts-ignore 
-              selector: (row: ProgramMessage) => (
-                isVolume(row)
-                ? humanReadableSize(row.size)
-                : convertBitUnits(
-                  row.content?.volumes.reduce((ac, cv) => (ac += (cv?.size_mib || 0)), 0),
-                  {
-                    from: 'mb',
-                    to: 'gb',
-                    displayUnit: true
-                  }
-                )
-              ),
+              selector: (row: ProgramMessage) => (humanReadableSize(row.size)),
               sortable: true,
             },
             {
@@ -78,11 +90,9 @@ export default function Home() {
               )
             }
           ]} />
-
-        : <p>No products yet</p>
-      }
-    </div>
-  )
+      </div>
+    )
+  }
 
   return (
     <>
@@ -105,51 +115,17 @@ export default function Home() {
               label: `(${functions?.length || 0})`,
               labelPosition: 'bottom'
             },
+            {
+              name: 'Volumes',
+              component: <TabContent data={volumes || []} />,
+              label: `(${volumes?.length || 0})`,
+              labelPosition: 'bottom'
+            }
           ]
         } />
+
+        <p>Acquire aleph.im tokens for versatile access to resources within a defined duration. These tokens remain in your wallet without being locked or consumed, providing you with flexibility in utilizing aleph.im's infrastructure. If you choose to remove the tokens from your wallet, the allocated resources will be efficiently reclaimed. Feel free to use or hold the tokens according to your needs, even when not actively using Aleph.im's resources.</p>
       </CenteredSection>
-
-      <section className="fx-noise-light py-lg">
-        <TextGradient type="h3">Setup a new service</TextGradient>
-        <Row count={4}>
-          <Col>
-            <div className="p-lg">
-              <h5>Function</h5>
-              <ButtonLink href="/solutions/dashboard/function">Setup Function</ButtonLink>
-            </div>
-          </Col>
-
-          <Col>
-            <div className="unavailable-content p-lg">
-              <h5>Instance</h5>
-              <ButtonLink href="/solutions/dashboard/instance">Setup Instance</ButtonLink>
-            </div>
-          </Col>
-        </Row>
-
-        <Row count={4}>
-          <Col>
-            <div className="unavailable-content p-lg">
-              <h5>Immutable Volume</h5>
-              <ButtonLink href="/solutions/dashboard/immutable-volume">Create volume</ButtonLink>
-            </div>
-          </Col>
-
-          <Col>
-            <div className="unavailable-content p-lg">
-              <h5>Persistent Volume</h5>
-              <ButtonLink href="/solutions/dashboard/persistent-volume">Create volume</ButtonLink>
-            </div>
-          </Col>
-
-          <Col>
-            <div className="unavailable-content p-lg">
-              <h5>Distributed database</h5>
-              <ButtonLink href="/solutions/dashboard/database">Create database</ButtonLink>
-            </div>
-          </Col>
-        </Row>
-      </section>
     </>
   )
 }
