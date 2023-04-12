@@ -1,6 +1,6 @@
 import { useAppState } from "@/contexts/appState"
 import { FunctionCost, getFunctionCost, isValidItemHash, safeCollectionToObject } from "@/helpers/utils"
-import { defaultVolume, displayVolumesToAlephVolumes, FormState, initialFormState, runtimeRefs, Volume, VolumeTypes } from "@/pages/solutions/dashboard/function/form"
+import { defaultVolume, displayVolumesToAlephVolumes, FormState, initialFormState, runtimeRefs, Volume, VolumeTypes } from "@/helpers/form"
 import JSZip from "jszip"
 import { FormEvent, useMemo, useReducer } from "react"
 import useConnected from "../useConnected"

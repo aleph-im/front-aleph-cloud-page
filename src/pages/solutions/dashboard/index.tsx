@@ -4,10 +4,10 @@ import CenteredSection from '@/components/CenteredSection'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
 import { convertBitUnits, unixToISODateString } from '@/helpers/utils'
 import { ProgramMessage } from 'aleph-sdk-ts/dist/messages/message'
-import { useHomePage } from '@/hooks/pages/useHomePage'
+import { useDashboardHomePage } from '@/hooks/pages/useDashboardHomePage'
 
-export default function Home() {
-  const { products, functions, instances, databases } = useHomePage()
+export default function DashboardHome() {
+  const { products, functions, instances, databases } = useDashboardHomePage()
 
   // FIXME: Selector function signature
   const TabContent = ({ data }: { data: ProgramMessage[] }) => (
