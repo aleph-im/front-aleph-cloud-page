@@ -19,6 +19,7 @@ import {
   MachineVolume,
   PersistentVolume,
 } from "aleph-sdk-ts/dist/messages/program/programModel";
+import { defaultVMChannel, defaultVolumeChannel } from "./constants";
 
 /**
  * Connects to a web3 provider and returns an Aleph account object
@@ -74,31 +75,46 @@ export const getMessage = async (hash: string) => {
 };
 
 /**
- * Get all the products (databases, instances, functions) for a given account
+ * Get all the products (databases, instances, functions, volumes) for a given account
  *
  * @param account
  * @returns An object containing the products
  */
 export const getAccountProducts = async (account: Account) => {
-  let query;
-  try {
-    query = await any.GetMessages({
-      addresses: [account.address],
-      messageType: MessageType.program,
-      pagination: 1000, // FIXME
-    });
-  } catch (error) {
-    throw E_.RequestFailed(error);
-  }
-  const products: Record<string, ProgramMessage[]> = {
-    databases: [],
-    instances: [],
+  const products: Record<string, ProgramMessage[] | StoreMessage[]> = {
     functions: [],
+    volumes: [],
   };
+  const queries = [];
+  queries.push(
+    any
+      .GetMessages({
+        addresses: [account.address],
+        messageType: MessageType.program,
+        channels: [defaultVMChannel],
+      })
+      .then((msgs) => {
+        products.functions = msgs.messages.filter(
+          (x) => x.content != undefined
+        ) as ProgramMessage[];
+      })
+  );
 
-  products.functions = [
-    ...(query.messages.filter((msg) => msg.content) as ProgramMessage[]),
-  ];
+  queries.push(
+    any
+      .GetMessages({
+        addresses: [account.address],
+        messageType: MessageType.store,
+        channels: [defaultVolumeChannel],
+      })
+      .then((msgs) => {
+        products.volumes = msgs.messages.filter(
+          (x) => x.content != undefined
+        ) as StoreMessage[];
+      })
+  );
+
+  await Promise.all(queries);
 
   return products;
 };
@@ -112,7 +128,7 @@ type CreateFunctionParams = {
   isPersistent: boolean;
   runtime: string;
   encoding: Encoding;
-  volumes: Array<MachineVolume | PersistentVolume>;
+  volumes: (MachineVolume | PersistentVolume)[];
   computeUnits: number;
   variables: Record<string, string>;
 };
@@ -135,7 +151,7 @@ export const createFunctionProgram = async ({
 
   try {
     const msg = await program.publish({
-      channel: "ALEPH-CLOUDSOLUTIONS",
+      channel: defaultVMChannel,
       account,
       isPersistent,
       file,
@@ -174,7 +190,13 @@ export const deleteVM = async (account: Account, message: ProgramMessage) => {
   }
 };
 
-// TODO: implement
+/**
+ * Creates an immutable volume using a store message
+ *
+ * @param account An aleph account object
+ * @param file A squashfs or ext4 volume file
+ * @returns The store message promise
+ */
 export const createVolume = async (
   account: Account,
   file: File
@@ -182,6 +204,38 @@ export const createVolume = async (
   return store.Publish({
     account,
     fileObject: file,
-    channel: "ALEPH-CLOUDSOLUTIONS",
+    channel: defaultVolumeChannel,
   });
 };
+
+/**
+ * Returns all the volumes for a given account
+ *
+ * @param account An aleph account object
+ */
+export const getVolumes = async (account: Account) => {
+  try {
+    const query = await any.GetMessages({
+      addresses: [account.address],
+      messageType: MessageType.store,
+      channels: [defaultVolumeChannel],
+    });
+
+    return query.messages;
+  } catch (error) {
+    throw E_.RequestFailed(error);
+  }
+};
+
+// export const getLinkedVolumes = (programs: ProgramMessage[], volumes: StoreMessage[]) => {
+//   return volumes.map((volume) => {
+//     const program = programs.find((program) => {
+//       program.content?.volumes.find(v => v?.hash === volume.item_hash)
+//     })
+
+//     return {
+//       ...volume,
+//       program: program?.metadata.name,
+//     }
+//   })
+// }
