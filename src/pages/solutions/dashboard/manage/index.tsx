@@ -119,7 +119,8 @@ export default function Home() {
 
           <TextGradient type="h6" color="main1">Linked storage</TextGradient>
           {
-            message.content?.volumes.map((volume, i) => (
+            // @fixme: remove any and fix type error
+            message.content?.volumes.map((volume: any, i) => (
               <div className="my-md" key={i}>
                 <TextGradient type="info">
                   {volume?.persistence === 'host' ? "Persistent " : "Immutable "} volume

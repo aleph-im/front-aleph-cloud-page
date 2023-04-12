@@ -17,11 +17,11 @@ export default function AutoBreadcrumb({ name }: AutoBreacrumbProps){
               if(index === ar.length - 1) {
                 if(name) return <span>{name}</span>
 
-                return <span>{capitalize(item)}</span>
+                return <span key={item}>{capitalize(item)}</span>
               }
               const href = String('../').repeat(ar.length - (index + 1)) + item
               return (
-                <Link href={href}>{capitalize(item)}</Link>
+                <Link key={item} href={href}>{capitalize(item)}</Link>
               )
             })
   }, [router.pathname, name])

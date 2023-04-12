@@ -49,7 +49,8 @@ export default function Home() {
               // @ts-ignore 
               selector: (row: ProgramMessage) => (
                 convertBitUnits(
-                  row.content?.volumes.reduce((ac, cv) => (ac += (cv?.size_mib || 0)), 0),
+                  // @fixme: remove any and fix type error
+                  row.content?.volumes.reduce((ac, cv: any) => (ac += (cv?.size_mib || 0)), 0),
                   {
                     from: 'mb',
                     to: 'gb',

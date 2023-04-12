@@ -67,7 +67,7 @@ export function useNewFunctionPage(): NewFunctionPage {
       return alert("Invalid code or file")
     }
 
-    let runtime = formState.customRuntimeHash
+    let runtime = formState.customRuntimeHash || ''
     if (formState.runtime !== 'custom') {
       runtime = runtimeRefs[formState.runtime]
     }
