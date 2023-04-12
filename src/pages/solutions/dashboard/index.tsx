@@ -1,4 +1,4 @@
-import { Col, Row, Table, Tabs, TextGradient } from '@aleph-front/aleph-core'
+import { Table, Tabs } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/ButtonLink'
 import CenteredSection from '@/components/CenteredSection'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
@@ -15,6 +15,9 @@ export default function DashboardHome() {
     const flattenedSizeData = useMemo(
       () => data.map(
         product => {
+          if(!product?.type)
+            return product
+          
           if (isVolume(product)) {
             return {
               ...product,
