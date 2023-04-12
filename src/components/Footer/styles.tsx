@@ -1,28 +1,23 @@
-import { Button, Icon } from '@aleph-front/aleph-core'
+import { addClasses, Button, Icon } from '@aleph-front/aleph-core'
 import styled, {
   css,
 } from 'styled-components'
 
-export const StyledFooter = styled.footer`
+export const StyledFooter = styled.footer.attrs(addClasses('py-xxl py-xxl-md'))`
   background-color: #00000033;
   box-sizing: border-box;
   width: 100%;
-  padding-top: 82px;
-  padding-bottom: 82px;
 `
 
-export const StyledLogoContainer = styled.div`
-  margin-bottom: 50px;
-`
+export const StyledLogoContainer = styled.div.attrs(addClasses('mb-xxl'))``
 
 export const StyledButton = styled(Button).attrs(props => {
   return {
-    ...props,
+    ...addClasses('mb-lg')(props),
     kind: 'neon',
     variant: 'tertiary',
     color: 'main0',
-    size: 'regular',
-    className: `${props.className || ''} mb-lg`
+    size: 'big',
   }
 })`
   display: block;
@@ -32,11 +27,10 @@ export const StyledButton = styled(Button).attrs(props => {
   }
 `
 
-export const StyledAnchor = styled.a.attrs(props => {
+export const StyledLink = styled.a.attrs(props => {
   return {
-    ...props,
+    ...addClasses('mb-lg tp-nav')(props),
     href: props.href || '#',
-    className: `${props.className || ''} mb-lg tp-nav`
   }
 })`
   ${({ theme }) => css`
@@ -53,11 +47,9 @@ export const StyledAnchor = styled.a.attrs(props => {
   `}
 `
 
-
 export const StyledIcon = styled(Icon).attrs(props => {
   return {
-    ...props,
+    ...addClasses('mr-xs')(props),
     size: 'lg',
-    className: `${props.className || ''} mr-xs`
   }
 })``

@@ -1,4 +1,4 @@
-import { Button, Navbar } from '@aleph-front/aleph-core'
+import { addClasses, Button, Navbar } from '@aleph-front/aleph-core'
 import styled from 'styled-components'
 
 export const StyledHeader = styled.header`
@@ -7,15 +7,15 @@ export const StyledHeader = styled.header`
   box-sizing: border-box;
   width: 100%;
   margin: 0;
-  background-color: #141327CC;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  /* background-color: #141327CC; */
 `
 
-export const StyledNavbar = styled(Navbar).attrs(props => {
-  return {
-    ...props,
-    className: `px-xs-xs px-sm-sm px-md-md px-lg-lg px-xl-xl px-xxl-xxl`
-  }
-})``
+export const StyledNavbar = styled(Navbar).attrs(addClasses('px-0'))`
+  position: relative;
+`
 
 export const StyledButton = styled(Button).attrs(props => {
   return {
@@ -25,7 +25,7 @@ export const StyledButton = styled(Button).attrs(props => {
     size: 'regular',
     variant: 'tertiary',
   }
-})`
+})<any>`
   display: block;
   
   &:last-child {

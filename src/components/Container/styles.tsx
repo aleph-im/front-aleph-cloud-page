@@ -1,17 +1,13 @@
+import { addClasses } from '@aleph-front/aleph-core'
 import styled, { css } from 'styled-components'
 
-export const StyledContainer = styled.div.attrs(props => {
-  return {
-    ...props,
-    className: `${props.className || ''} px-md-xs px-lg-lg px-xl-xl px-xxl-xxl`
-  }
-})`
+export const StyledContainer = styled.div.attrs(addClasses('px-lg px-xl3-md'))`
   ${({ theme }) => {
     return css`
       box-sizing: border-box;
       width: 100%;
       margin: 0 auto;
-      max-width: ${theme.breakpoint.xxl}rem;
+      max-width: ${theme.breakpoint.xxl + 12.5}rem;
     `
   }}
 `
