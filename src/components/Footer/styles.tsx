@@ -22,6 +22,8 @@ export const StyledButton = styled(Button).attrs(props => {
 })`
   display: block;
   
+  margin-bottom: 1.5rem;
+
   &:last-child {
     margin-bottom: 0;
   }
