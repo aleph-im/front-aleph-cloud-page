@@ -1,6 +1,7 @@
 import { createVolume } from "@/helpers/aleph"
 import { EnvironmentVariable } from "@/helpers/utils"
 import { Account } from "aleph-sdk-ts/dist/accounts/account"
+import { MachineVolume, PersistentVolume } from "aleph-sdk-ts/dist/messages/program/programModel"
 
 const samplePythonCode = `from fastapi import FastAPI
 

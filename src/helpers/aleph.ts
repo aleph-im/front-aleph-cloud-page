@@ -226,16 +226,3 @@ export const getVolumes = async (account: Account) => {
     throw E_.RequestFailed(error);
   }
 };
-
-// export const getLinkedVolumes = (programs: ProgramMessage[], volumes: StoreMessage[]) => {
-//   return volumes.map((volume) => {
-//     const program = programs.find((program) => {
-//       program.content?.volumes.find(v => v?.hash === volume.item_hash)
-//     })
-
-//     return {
-//       ...volume,
-//       program: program?.metadata.name,
-//     }
-//   })
-// }
