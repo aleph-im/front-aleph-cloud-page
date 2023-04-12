@@ -17,11 +17,14 @@ const Separator = styled.hr.attrs({ className: 'my-md' })`
   opacity: .25;
 `
 
-export default function Home() {
+export default function DashboardManage() {
   const router = useRouter()
   const { hash } = router.query
-  if (!hash || typeof hash !== 'string')
-    router.replace('../')
+
+  useEffect(() => {
+    if (!hash || typeof hash !== 'string')
+      router.replace('../')
+  }, [hash, router])
 
   const [message, setMessage] = useState<ProgramMessage | StoreMessage | undefined>(undefined)
 

@@ -4,10 +4,10 @@ import CenteredSection from '@/components/CenteredSection'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
 import { convertBitUnits, ellipseAddress, humanReadableSize, isVolume, unixToISODateString } from '@/helpers/utils'
 import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/message'
-import { useHomePage } from '@/hooks/pages/useHomePage'
+import { useHomePage } from '@/hooks/pages/useDashboardHomePage'
 import { useMemo } from 'react'
 
-export default function Home() {
+export default function DashboardHome() {
   const { products, functions, volumes } = useHomePage()
 
   // FIXME: Selector function signature

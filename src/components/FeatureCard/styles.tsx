@@ -1,20 +1,20 @@
-import { Card, getTypoCss } from '@aleph-front/aleph-core'
+import { Card, CardProps, getTypoCss } from '@aleph-front/aleph-core'
 import styled, { css } from 'styled-components'
 
-export const StyledCard = styled(Card).attrs(props => {
+export const StyledCard = styled(Card).attrs<{ disabled?: boolean }, CardProps>(props => {
   return {
     ...props,
     variant: "block",
     buttonColor: "main0",
     buttonVariant: "secondary",
     buttonHref: "#",
-    buttonOnClick: () => { },
+    buttonOnClick:( (e: MouseEvent) => { e.preventDefault(); return false; }) as any,
+    buttonDisabled: props.disabled
   }
 }) <{ disabled?: boolean }>`
   & header {
     position: relative;
-    display: inline-block;
-    clear: both;
+    display: table;
   }
 
   ${({ theme, disabled }) => disabled ? css`

@@ -10,7 +10,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
 
   return (
     isSSR ? (
-      <div>{children}</div>
+      <>{children}</>
     ) : (
       <Notification max={10} timeout={2000}>
         {children}

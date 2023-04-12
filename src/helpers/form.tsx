@@ -70,8 +70,9 @@ export const initialFormState: FormState = {
 /**
  * Convert a list of volume objects from the form to a list of volume objects for the Aleph API
  */
-export const displayVolumesToAlephVolumes = async (account: Account, volumes: Volume[]) => {
+export const displayVolumesToAlephVolumes = async (account: Account, volumes: Volume[]): Promise<(MachineVolume | PersistentVolume)[]> => {
   const ret = []
+
   for(const volume of volumes) {
     if(volume.type === 'new' && volume.src) {
       const createdVolume = await createVolume(account, volume.src);
@@ -92,12 +93,14 @@ export const displayVolumesToAlephVolumes = async (account: Account, volumes: Vo
         persistence: "host",
         mount: volume.mountpoint || "",
         size_mib: (volume.size || 2) * 1000,
-        name: volume.name || ""
+        name: volume.name || "",
+        is_read_only: () => false
       })
     }
   }
 
-  return ret
+  // @fixme: remove any and fix type error
+  return ret as any
 }
 
 export const nonEmptyString = (s: string) => s.trim().length > 0

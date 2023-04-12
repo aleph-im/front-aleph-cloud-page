@@ -13,7 +13,7 @@ import {
   runtimeRefs,
   Volume,
   VolumeTypes,
-} from "@/pages/solutions/dashboard/function/form";
+} from "@/helpers/form";
 import JSZip from "jszip";
 import { FormEvent, useMemo, useReducer } from "react";
 import useConnected from "../useConnected";
@@ -88,7 +88,7 @@ export function useNewFunctionPage(): NewFunctionPage {
       return alert("Invalid code or file");
     }
 
-    let runtime = formState.customRuntimeHash;
+    let runtime = formState.customRuntimeHash || "";
     if (formState.runtime !== "custom") {
       runtime = runtimeRefs[formState.runtime];
     }
