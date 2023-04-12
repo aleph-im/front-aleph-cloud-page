@@ -51,7 +51,9 @@ const StyledLink = styled(Button).attrs(props => {
 
 const StyledTagContainer = styled.div.attrs(addClasses('d-flex flex-wrap gap-y-sm gap-x-xs'))``
 
-const StyledTag = styled(Tag).attrs(addClasses('tp-body1 fs-lg m-0'))``
+const StyledTag = styled(Tag).attrs(addClasses('tp-body1 fs-lg m-0'))`
+  margin: 0;
+`
 
 export default function Home() {
   const [ref1, handleScroll1] = useScrollTo()
