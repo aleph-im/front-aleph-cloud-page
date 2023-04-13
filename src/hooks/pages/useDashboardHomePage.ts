@@ -1,30 +1,33 @@
-import { useAppState } from "@/contexts/appState"
-import { ProgramMessage } from "aleph-sdk-ts/dist/messages/message"
-import { useAccountProducts } from "../useAccountProducts"
-import useConnected from "../useConnected"
+import { useAppState } from "@/contexts/appState";
+import {
+  ProgramMessage,
+  StoreMessage,
+} from "aleph-sdk-ts/dist/messages/message";
+import { useAccountProducts } from "../useAccountProducts";
+import useConnected from "../useConnected";
 
-export type DashboardHomePage = {
-  products: ProgramMessage[]
-  functions: ProgramMessage[]
-  instances: ProgramMessage[]
-  databases: ProgramMessage[]
-}
+export type HomePage = {
+  products: (ProgramMessage | StoreMessage)[];
+  functions: ProgramMessage[];
+  instances: ProgramMessage[];
+  volumes: StoreMessage[];
+};
 
-export function useDashboardHomePage(): DashboardHomePage {
-  useConnected()
-  const [products] = useAccountProducts()
-  const [appState] = useAppState()
+export function useHomePage(): HomePage {
+  useConnected();
+  const [products] = useAccountProducts();
+  const [appState] = useAppState();
 
   const {
     functions = [],
+    volumes = [],
     instances = [],
-    databases = []
-  } = appState.products || {}
+  } = appState.products || {};
 
   return {
     products,
     functions,
+    volumes,
     instances,
-    databases
-  }
+  };
 }

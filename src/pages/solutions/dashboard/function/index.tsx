@@ -321,7 +321,7 @@ export default function NewFunction() {
                         <TextInput
                           label="Mount"
                           placeholder="/mount/opt"
-                          onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.checked)}
+                          onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
                           value={formState.volumes[iVolume].mountpoint}
                           name={`__config_volume_${iVolume}_mount`} />
                       </div>

@@ -1,6 +1,10 @@
 import { providers, Contract } from "ethers";
 import E_ from "./errors";
-import { ProgramMessage } from "aleph-sdk-ts/dist/messages/message";
+import {
+  MessageType,
+  ProgramMessage,
+  StoreMessage,
+} from "aleph-sdk-ts/dist/messages/message";
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -149,7 +153,11 @@ export const uniqId = () =>
 /**
  * Returns a link to the Aleph explorer for a given message
  */
-export const getExplorerURL = ({ item_hash, chain, sender }: ProgramMessage) =>
+export const getExplorerURL = ({
+  item_hash,
+  chain,
+  sender,
+}: ProgramMessage | StoreMessage) =>
   `https://explorer.aleph.im/address/${chain}/${sender}/message/PROGRAM/${item_hash}`;
 
 /**
@@ -217,9 +225,9 @@ export type FunctionPriceConfig = {
 };
 
 export type FunctionCost = {
-  compute: number
-  capabilities: number
-  storage: number
+  compute: number;
+  capabilities: number;
+  storage: number;
 };
 
 /**
@@ -252,3 +260,15 @@ export const getFunctionCost = ({
     storage: extraStorageCost,
   };
 };
+
+/**
+ * Returns true if the provided aleph message is a volume message
+ */
+export const isVolume = (msg: ProgramMessage | StoreMessage) =>
+  msg.type === MessageType.store;
+
+/**
+ * Returns true if the provided aleph message is a program message
+ */
+export const isProgram = (msg: ProgramMessage | StoreMessage) =>
+  msg.type === MessageType.program;

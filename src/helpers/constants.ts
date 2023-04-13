@@ -20,6 +20,10 @@ export const defaultFileExtension: Record<LanguageType, string> = {
   c: "c",
 }
 
+export const defaultVolumeChannel = "ALEPH-VOLUME";
+
+export const defaultVMChannel = "ALEPH-CLOUDSOLUTIONS";
+
 export const smallFooterPages = new Set([
   '/solutions/dashboard',
   '/solutions/dashboard/function',

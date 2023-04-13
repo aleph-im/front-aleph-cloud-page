@@ -1,5 +1,8 @@
 import { Account } from "aleph-sdk-ts/dist/accounts/account";
-import { ProgramMessage } from "aleph-sdk-ts/dist/messages/message";
+import {
+  ProgramMessage,
+  StoreMessage,
+} from "aleph-sdk-ts/dist/messages/message";
 
 export enum ActionTypes {
   connect,
@@ -12,9 +15,9 @@ export type State = {
   account?: Account;
   account_balance?: number;
   products: {
-    databases?: ProgramMessage[];
     instances?: ProgramMessage[];
     functions?: ProgramMessage[];
+    volumes?: StoreMessage[];
   };
 };
 
@@ -27,9 +30,9 @@ export const initialState: State = {
   account: undefined,
   account_balance: undefined,
   products: {
-    databases: undefined,
     instances: undefined,
     functions: undefined,
+    volumes: undefined,
   },
 };
 
