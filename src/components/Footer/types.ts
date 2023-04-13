@@ -1,3 +1,3 @@
 export type FooterProps = {
-  // todo
+  small?: boolean
 }

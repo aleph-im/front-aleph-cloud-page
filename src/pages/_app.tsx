@@ -14,8 +14,14 @@ import Header from '@/components/Header'
 
 import NotificationProvider from '@/components/NotificationProvider'
 import { AppStateProvider } from '@/contexts/appState'
+import { useMemo } from 'react'
+import { useRouter } from 'next/router'
+import { smallFooterPages } from '@/helpers/constants'
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter()
+  const small = useMemo(() => smallFooterPages.has(router.pathname), [router])
+
   return (
     <ThemeProvider theme={themes.dark}>
       <GlobalStyle />
@@ -24,7 +30,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <NotificationProvider>
           <Header />
           <Component {...pageProps} />
-          <Footer />
+          <Footer small={small} />
         </NotificationProvider>
       </AppStateProvider>
     </ThemeProvider>

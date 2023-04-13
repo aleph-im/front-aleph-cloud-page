@@ -1,8 +1,8 @@
-export const defaultVMURL = "https://aleph.sh/vm/";
+export const defaultVMURL = "https://aleph.sh/vm/"
 
-export const programStorageURL = "https://api2.aleph.im/api/v0/storage/raw/";
+export const programStorageURL = "https://api2.aleph.im/api/v0/storage/raw/"
 
-export type LanguageType = "python" | "javascript" | "rust" | "go" | "c";
+export type LanguageType = "python" | "javascript" | "rust" | "go" | "c"
 
 export const defaultMimetype: Record<LanguageType, string> = {
   python: "text/python",
@@ -10,7 +10,7 @@ export const defaultMimetype: Record<LanguageType, string> = {
   rust: "text/rust",
   go: "text/go",
   c: "text/plain",
-};
+}
 
 export const defaultFileExtension: Record<LanguageType, string> = {
   python: "py",
@@ -18,4 +18,10 @@ export const defaultFileExtension: Record<LanguageType, string> = {
   rust: "rs",
   go: "go",
   c: "c",
-};
+}
+
+export const smallFooterPages = new Set([
+  '/solutions/dashboard',
+  '/solutions/dashboard/function',
+  '/solutions/dashboard/manage'
+])

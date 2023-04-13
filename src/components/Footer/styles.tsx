@@ -9,8 +9,6 @@ export const StyledFooter = styled.footer.attrs(addClasses('py-xxl py-xxl-md'))`
   width: 100%;
 `
 
-export const StyledLogoContainer = styled.div.attrs(addClasses('mb-xxl'))``
-
 export const StyledButton = styled(Button).attrs(props => {
   return {
     ...addClasses('mb-lg')(props),
@@ -31,7 +29,7 @@ export const StyledButton = styled(Button).attrs(props => {
 
 export const StyledLink = styled.a.attrs(props => {
   return {
-    ...addClasses('mb-lg tp-nav')(props),
+    ...addClasses('tp-nav')(props),
     href: props.href || '#',
   }
 })`
@@ -39,6 +37,7 @@ export const StyledLink = styled.a.attrs(props => {
     display: block;
     cursor: pointer;
     font-weight: 700;
+    white-space: nowrap;
     
     color: ${theme.color.text};
     text-decoration: none;
@@ -52,6 +51,14 @@ export const StyledLink = styled.a.attrs(props => {
 export const StyledIcon = styled(Icon).attrs(props => {
   return {
     ...addClasses('mr-xs')(props),
+    size: 'lg',
+  }
+})``
+
+
+export const StyledIcon2 = styled(Icon).attrs(props => {
+  return {
+    ...addClasses('ml-xs')(props),
     size: 'lg',
   }
 })``
