@@ -133,7 +133,8 @@ export const convertBitUnits = (
  * Converts a number of bytes to a human readable size
  */
 export const humanReadableSize = (value?: number) => {
-  if (!value) return "n/a";
+  if (value === undefined) return "n/a";
+  if (value === 0) return "-";
 
   const units = ["b", "kb", "mb", "gb", "tb"];
   let i = 0;
@@ -141,7 +142,7 @@ export const humanReadableSize = (value?: number) => {
     i++;
   }
 
-  return (value / 1000 ** (i - 1)).toFixed(2) + units[i - 1];
+  return (value / 1000 ** (i - 1)).toFixed(2) + units[i];
 };
 
 /**
