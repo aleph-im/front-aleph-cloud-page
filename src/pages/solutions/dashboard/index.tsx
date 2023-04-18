@@ -1,4 +1,4 @@
-import { Table, Tabs } from '@aleph-front/aleph-core'
+import { Button, Table, Tabs } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/ButtonLink'
 import CenteredSection from '@/components/CenteredSection'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
@@ -114,13 +114,27 @@ export default function DashboardHome() {
             },
             {
               name: 'Functions',
-              component: <TabContent data={functions || []} />,
+              component: (
+                <>
+                  <TabContent data={functions || []} />
+                  <div className="my-xl text-center">
+                    <ButtonLink variant="primary" href="/solutions/dashboard/function">Create function</ButtonLink>
+                  </div>
+                </>
+              ),
               label: `(${functions?.length || 0})`,
               labelPosition: 'bottom'
             },
             {
               name: 'Volumes',
-              component: <TabContent data={volumes || []} />,
+              component: (
+                <>
+                  <TabContent data={volumes || []} />
+                  <div className="my-xl text-center">
+                    <ButtonLink variant="primary" href="/solutions/dashboard/volume">Create volume</ButtonLink>
+                  </div>
+                </>
+              ),
               label: `(${volumes?.length || 0})`,
               labelPosition: 'bottom'
             }
