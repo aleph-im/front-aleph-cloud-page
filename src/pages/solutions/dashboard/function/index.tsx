@@ -330,7 +330,7 @@ export default function NewFunction() {
                         <TextInput
                           label="Size"
                           disabled
-                          value={humanReadableSize(formState.volumes[iVolume]?.src?.size)}
+                          value={humanReadableSize((formState.volumes[iVolume]?.src?.size || 0) / 1000)}
                           name={`__config_volume_${iVolume}_size`} />
                       </div>
 
