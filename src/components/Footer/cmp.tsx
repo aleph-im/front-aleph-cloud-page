@@ -17,8 +17,8 @@ export const Footer = ({ small = false }: FooterProps) => {
             </Col>
             <Col>
               <ul className='d-flex items-center justify-center-lg'>
-                <li className='mr-lg'><StyledLink>Documentation<StyledIcon2 name='external-link-square-alt' /></StyledLink></li>
-                <li className='mr-0'><StyledLink>Telegram Developers<StyledIcon2 name='external-link-square-alt' /></StyledLink></li>
+                <li className='mr-lg'><StyledLink target="_blank" href="https://docs.aleph.im/">Documentation<StyledIcon2 name='external-link-square-alt' /></StyledLink></li>
+                <li className='mr-0'><StyledLink target="_blank" href="https://t.me/alephim">Telegram Developers<StyledIcon2 name='external-link-square-alt' /></StyledLink></li>
               </ul>
             </Col>
             <Col>
