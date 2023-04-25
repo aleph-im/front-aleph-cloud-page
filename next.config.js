@@ -44,6 +44,14 @@ const nextConfig = {
     //   pure?: boolean,
     // },
   },
+  async rewrites() {
+    return [
+      {
+        source: '/solutions',
+        destination: '/'
+      }
+    ]
+  }
 }
 
 module.exports = nextConfig
