@@ -6,6 +6,7 @@ import NoisyContainer from "@/components/NoisyContainer";
 import HiddenFileInput from "@/components/HiddenFileInput";
 import { convertBitUnits, getFunctionCost, getFunctionSpecsByComputeUnits, isValidItemHash, humanReadableSize } from "@/helpers/utils";
 import { useNewFunctionPage } from "@/hooks/pages/useNewFunctionPage";
+import NewVolume from "@/components/NewVolume/cmp";
 
 export default function NewFunction() {
   const {
@@ -295,149 +296,21 @@ export default function NewFunction() {
         <CenteredSection>
           <CompositeTitle number="9" title="Add volumes" type="h4" color="main1" />
           {formState.volumes.map((volume, iVolume) => (
-            <Tabs key={volume.refHash} align="left" tabs={[
-              {
-                name: 'New volume',
-                component: (
-                  <div className="my-lg">
-                    <p>Create and configure new volumes for your web3 function by either uploading a dependency file or a squashfs volume. Volumes play a crucial role in managing dependencies and providing a volume within your application.</p>
-
-                    <NoisyContainer>
-                      <div className="my-md d-flex flex-jc-sb">
-                        <HiddenFileInput value={formState.volumes[iVolume].src} onChange={(file) => setVolumeValue(iVolume, 'src', file)}>
-                          Upload squashfs volume <Icon name="arrow-up" className="ml-sm" />
-                        </HiddenFileInput>
-
-                        <strong>or</strong>
-
-                        <div className="unavailable-content">
-                          <HiddenFileInput onChange={(file) => setVolumeValue(iVolume, 'src', file)} accept=".tar.gz, .tgz, .tar, .zip">
-                            Upload dependency file <Icon name="arrow-up" className="ml-sm" />
-                          </HiddenFileInput>
-                        </div>
-                      </div>
-
-                      <div className="my-md">
-                        <TextInput
-                          label="Mount"
-                          placeholder="/mount/opt"
-                          onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
-                          value={formState.volumes[iVolume].mountpoint}
-                          name={`__config_volume_${iVolume}_mount`} />
-                      </div>
-
-                      <div className="my-md">
-                        <TextInput
-                          label="Size"
-                          disabled
-                          value={humanReadableSize((formState.volumes[iVolume]?.src?.size || 0) / 1000)}
-                          name={`__config_volume_${iVolume}_size`} />
-                      </div>
-
-                      <div className="my-md">
-                        <Checkbox
-                          label="Use latest version"
-                          onChange={e => setVolumeValue(iVolume, 'useLatest', e.target.checked)} />
-                      </div>
-
-                      <div className="my-md text-right">
-                        <Button type="button" onClick={() => removeVolume(iVolume)} color="main2" variant="secondary" kind="neon" size="regular">
-                          Remove
-                        </Button>
-                      </div>
-                    </NoisyContainer>
-                  </div>
-                )
-              },
-              {
-                name: 'Existing volume',
-                component: (
-                  <div className="my-lg">
-                    <p>Link existing volumes to your web3 function by pasting the reference hash associated with each volume. Volumes are an essential component for managing persistent data storage and dependencies within your application.</p>
-
-                    <NoisyContainer>
-                      <div className="my-md">
-                        <TextInput
-                          label="Mount"
-                          placeholder="/mount/opt"
-                          onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
-                          value={formState.volumes[iVolume].mountpoint}
-                          name={`__config_volume_${iVolume}_mount`} />
-                      </div>
-
-                      <div className="my-md">
-                        <TextInput
-                          label="Item hash"
-                          placeholder="3335ad270a571b..."
-                          onChange={e => setVolumeValue(iVolume, 'refHash', e.target.value)}
-                          value={formState.volumes[iVolume].refHash}
-                          error={
-                            (formState.volumes[iVolume].refHash && !isValidItemHash(formState.volumes[iVolume].refHash || '')) ? { message: "Invalid hash" } : undefined
-                          }
-                          name={`__config_volume_${iVolume}_name`} />
-                      </div>
-
-                      <div className="my-md">
-                        <Checkbox
-                          label="Use latest version"
-                          onChange={e => setVolumeValue(iVolume, 'useLatest', e.target.value)} />
-                      </div>
-
-                      <div className="my-md text-right">
-                        <Button type="button" onClick={() => removeVolume(iVolume)} color="main2" variant="secondary" kind="neon" size="regular">
-                          Remove
-                        </Button>
-                      </div>
-                    </NoisyContainer>
-                  </div>
-                )
-              },
-              {
-                name: 'Persistent storage',
-                component: (
-                  <div className="my-lg">
-                    <p>Create and configure persistent storage for your web3 functions, enabling your application to maintain data across multiple invocations or sessions. You can set up a customized storage solution tailored to your application&apos;s requirements.</p>
-
-                    <NoisyContainer>
-                      <div className="my-md">
-                        <TextInput
-                          label="Volume name"
-                          placeholder="Redis volume"
-                          onChange={e => setVolumeValue(iVolume, 'name', e.target.value)}
-                          value={formState.volumes[iVolume].name}
-                          name={`__config_volume_${iVolume}_name`}
-                          error={formState.volumes[iVolume].name === "" ? new Error('Please provide a name') : undefined} />
-                      </div>
-
-                      <div className="my-md">
-                        <TextInput
-                          label="Mount"
-                          placeholder="/mount/opt"
-                          onChange={e => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
-                          value={formState.volumes[iVolume].mountpoint}
-                          name={`__config_volume_${iVolume}_mount`} />
-                      </div>
-
-                      <div className="my-md">
-                        <TextInput
-                          label="Size (GB)"
-                          placeholder="2"
-                          onChange={e => setVolumeValue(iVolume, 'size', e.target.value)}
-                          value={formState.volumes[iVolume].size}
-                          name={`__config_volume_${iVolume}_size`} />
-                      </div>
-
-                      <div className="my-md text-right">
-                        <Button type="button" onClick={() => removeVolume(iVolume)} color="main2" variant="secondary" kind="neon" size="regular">
-                          Remove
-                        </Button>
-                      </div>
-                    </NoisyContainer>
-                  </div>
-                )
-              },
-            ]}
-              onTabChange={(_fromIndex, toIndex) => setVolumeType(iVolume, toIndex)} />
+            <NewVolume 
+              volumeMountpoint={volume.mountpoint}
+              volumeName={volume.name}
+              volumeSize={volume.size}
+              volumeSrc={volume.src}
+              volumeRefHash={volume.refHash}
+              handleMountpointChange={(e) => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
+              handleNameChange={(e) => setVolumeValue(iVolume, 'name', e.target.value)}
+              handleSizeChange={(e) => setVolumeValue(iVolume, 'size', e.target.value)}
+              handleSrcChange={(e) => setVolumeValue(iVolume, 'src', e)}
+              handleRefHashChange={(e) => setVolumeValue(iVolume, 'refHash', e.target.value)}
+              handleUseLatestChange={(e) => setVolumeValue(iVolume, 'useLatest', e.target.checked)}
+              removeCallback={() => removeVolume(iVolume)}
+              handleVolumeType={i => setVolumeType(iVolume, i)}
+             />
           ))}
 
           <Button type="button" onClick={addVolume} color="main0" variant="secondary" kind="neon" size="regular">

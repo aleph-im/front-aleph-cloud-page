@@ -18,7 +18,7 @@ const NewVolume = ({ volumeMountpoint, volumeRefHash, volumeName, volumeSize, vo
   
   return (
 <Tabs align="left"
-      onTabChange={handleVolumeType}
+      onTabChange={(_fi, ti) => handleVolumeType(ti)}
       tabs={[
       {
         name: 'New volume',
