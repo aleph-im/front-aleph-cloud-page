@@ -13,64 +13,69 @@ const RemoveVolume = ({ removeCallback }: RemoveVolumeProps) => (
   </div>
 )
 
-const NewVolume = ({ volumeMountpoint, volumeRefHash, volumeName, volumeSize, volumeSrc, volumeUseLatest, handleMountpointChange, handleNameChange, handleSizeChange, handleSrcChange, handleUseLatestChange, handleRefHashChange, handleVolumeType, removeCallback }: NewVolumeProps) => {
+export default function NewVolume({ volumeMountpoint, volumeRefHash, volumeName, volumeSize, volumeSrc, volumeUseLatest, handleMountpointChange, handleNameChange, handleSizeChange, handleSrcChange, handleUseLatestChange, handleRefHashChange, handleVolumeType, removeCallback, isStandAlone }: NewVolumeProps){
   const namePrefix = useMemo(() => crypto.randomUUID(), [])
+
+  const NewVolumeTabComponent = () => (
+    <div className="my-lg">
+      <p>Create and configure new volumes for your web3 function by either uploading a dependency file or a squashfs volume. Volumes play a crucial role in managing dependencies and providing a volume within your application.</p>
+
+      <NoisyContainer>
+        <div className="my-md d-flex flex-jc-sb">
+          <HiddenFileInput value={volumeSrc} onChange={handleSrcChange}>
+            Upload squashfs volume <Icon name="arrow-up" className="ml-sm" />
+          </HiddenFileInput>
+
+          <strong>or</strong>
+
+          <div className="unavailable-content">
+            <HiddenFileInput onChange={handleSrcChange}>
+              Upload dependency file <Icon name="arrow-up" className="ml-sm" />
+            </HiddenFileInput>
+          </div>
+        </div>
+
+        <div className="my-md">
+          <TextInput
+            label="Mount"
+            placeholder="/mount/opt"
+            onChange={handleMountpointChange}
+            value={volumeMountpoint}
+            name={namePrefix + '_mount'} />
+        </div>
+
+        <div className="my-md">
+          <TextInput
+            label="Size"
+            disabled
+            value={humanReadableSize((volumeSrc?.size || 0) / 1000)}
+            name={namePrefix + '_size'} />
+        </div>
+
+        <div className="my-md">
+          <Checkbox
+            label="Use latest version"
+            checked={volumeUseLatest}
+            onChange={handleUseLatestChange} />
+        </div>
+
+        {
+          removeCallback !== undefined && <RemoveVolume removeCallback={removeCallback} />
+        }
+      </NoisyContainer>
+    </div>
+  )
   
+  if(isStandAlone)
+    return <NewVolumeTabComponent />
+
   return (
 <Tabs align="left"
       onTabChange={(_fi, ti) => handleVolumeType(ti)}
       tabs={[
       {
         name: 'New volume',
-        component: (
-          <div className="my-lg">
-            <p>Create and configure new volumes for your web3 function by either uploading a dependency file or a squashfs volume. Volumes play a crucial role in managing dependencies and providing a volume within your application.</p>
-
-            <NoisyContainer>
-              <div className="my-md d-flex flex-jc-sb">
-                <HiddenFileInput value={volumeSrc} onChange={handleSrcChange}>
-                  Upload squashfs volume <Icon name="arrow-up" className="ml-sm" />
-                </HiddenFileInput>
-
-                <strong>or</strong>
-
-                <div className="unavailable-content">
-                  <HiddenFileInput onChange={handleSrcChange}>
-                    Upload dependency file <Icon name="arrow-up" className="ml-sm" />
-                  </HiddenFileInput>
-                </div>
-              </div>
-
-              <div className="my-md">
-                <TextInput
-                  label="Mount"
-                  placeholder="/mount/opt"
-                  onChange={handleMountpointChange}
-                  value={volumeMountpoint}
-                  name={namePrefix + '_mount'} />
-              </div>
-
-              <div className="my-md">
-                <TextInput
-                  label="Size"
-                  disabled
-                  value={humanReadableSize((volumeSrc?.size || 0) / 1000)}
-                  name={namePrefix + '_size'} />
-              </div>
-
-              <div className="my-md">
-                <Checkbox
-                  label="Use latest version"
-                  checked={volumeUseLatest}
-                  onChange={handleUseLatestChange} />
-              </div>
-
-              {
-                removeCallback !== undefined && <RemoveVolume removeCallback={removeCallback} />
-              }
-            </NoisyContainer>
-          </div>
-        )
+        component: <NewVolumeTabComponent />
       },
       {
         name: 'Existing volume',
@@ -157,5 +162,3 @@ const NewVolume = ({ volumeMountpoint, volumeRefHash, volumeName, volumeSize, vo
       },
     ]} />
 )}
-
-export default NewVolume

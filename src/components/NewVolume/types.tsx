@@ -17,4 +17,5 @@ export type NewVolumeProps = {
   handleRefHashChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   volumeType?: number
   handleVolumeType: (t: number) => void
+  isStandAlone?: boolean
 } & Partial<RemoveVolumeProps>

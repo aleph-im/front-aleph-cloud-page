@@ -1,14 +1,14 @@
-import { Button, Checkbox, ChipInput, CodeEditor, Icon, Radio, RadioGroup, Table, Tabs, TextGradient, TextInput } from "@aleph-front/aleph-core";
+import { Button, ChipInput, CodeEditor, Icon, Radio, RadioGroup, Table, Tabs, TextGradient, TextInput } from "@aleph-front/aleph-core";
 import AutoBreadcrumb from "@/components/AutoBreadcrumb";
 import CenteredSection from "@/components/CenteredSection";
 import CompositeTitle from "@/components/CompositeTitle";
 import NoisyContainer from "@/components/NoisyContainer";
 import HiddenFileInput from "@/components/HiddenFileInput";
-import { convertBitUnits, getFunctionCost, getFunctionSpecsByComputeUnits, isValidItemHash, humanReadableSize } from "@/helpers/utils";
+import { convertBitUnits, getFunctionCost, getFunctionSpecsByComputeUnits, isValidItemHash } from "@/helpers/utils";
 import { useNewFunctionPage } from "@/hooks/pages/useNewFunctionPage";
 import NewVolume from "@/components/NewVolume/cmp";
 
-export default function NewFunction() {
+export default function NewFunctionPage() {
   const {
     formState,
     functionCost,
