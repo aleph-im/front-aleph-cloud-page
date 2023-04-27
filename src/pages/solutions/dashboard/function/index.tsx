@@ -7,11 +7,11 @@ import HiddenFileInput from "@/components/HiddenFileInput";
 import { convertBitUnits, getFunctionCost, getFunctionSpecsByComputeUnits, isValidItemHash } from "@/helpers/utils";
 import { useNewFunctionPage } from "@/hooks/pages/useNewFunctionPage";
 import NewVolume from "@/components/NewVolume/cmp";
+import HoldingRequirements from "@/components/HoldingRequirements";
 
 export default function NewFunctionPage() {
   const {
     formState,
-    functionCost,
     handleSubmit,
     setFormValue,
     setEnvironmentVariable,
@@ -20,7 +20,9 @@ export default function NewFunctionPage() {
     setVolumeType,
     setVolumeValue,
     addVolume,
-    removeVolume
+    removeVolume,
+    address,
+    accountBalance
   } = useNewFunctionPage()
 
   return (
@@ -321,16 +323,28 @@ export default function NewFunctionPage() {
         <section className="fx-noise-light p-md">
           <CenteredSection>
             <TextGradient type="h4">Estimated holding requirements</TextGradient>
-
             <div className="my-md">
-              Compute: {functionCost.compute} Aleph
+              <TextGradient
+                color="main2"
+                type="body">
+                  This amount needs to be present in your wallet until the function is removed. Tokens won	&#39;t be locked nor consumed. The function will be garbage collected once funds are removed from the wallet. 
+              </TextGradient>
+              <a href="">Learn more about the benefits</a>
             </div>
 
-            <div className="my-md">
-              Storage: {functionCost.storage} Aleph
+            <div className="my-xl">
+              <HoldingRequirements 
+                address={address}
+                computeUnits={{
+                  type: 'function', 
+                  number: formState.computeUnits, 
+                  isPersistent: formState.isPersistent
+                }}
+                storage={formState.volumes}
+                unlockedAmount={accountBalance} />
             </div>
 
-            <div className="my-md text-center">
+            <div className="my-xl text-center">
               <Button type="submit" color="main0" kind="neon" size="big" variant="primary">Create function</Button>
             </div>
           </CenteredSection>

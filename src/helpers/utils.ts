@@ -146,10 +146,15 @@ export const humanReadableSize = (value?: number) => {
 };
 
 /**
- * Returns a short cryptographically secure hexadecimal random ID
+ * Transforms a number into a multiple of 1000 with a suffix, (ex: 625217 -> 625.2K)
  */
-export const uniqId = () =>
-  crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+export const humanReadableCurrency = (value?: number) => {
+  if (value === undefined) return "n/a";
+  if (value < 1_000) return String(value);
+  else if (value < 10 ** 6) return (value / 1_000).toFixed(1) + "K";
+  else if (value < 10 ** 9) return (value / 10 ** 6).toFixed(1) + "M";
+  else return (value / 10 ** 9).toFixed(1) + "B";
+};
 
 /**
  * Returns a link to the Aleph explorer for a given message
@@ -208,7 +213,7 @@ export const getFunctionSpecsByComputeUnits = (
   return {
     cpu: 1 * computeUnits,
     memory: 2 * computeUnits * 1000,
-    storage: 2 * 10 ** Number(isPersistent) * computeUnits * 1000 ** 3,
+    storage: 2 * 10 ** Number(isPersistent) * computeUnits,
   };
 };
 
@@ -228,7 +233,7 @@ export type FunctionPriceConfig = {
 export type FunctionCost = {
   compute: number;
   capabilities: number;
-  storage: number;
+  storageAllowance: number;
 };
 
 /**
@@ -245,11 +250,6 @@ export const getFunctionCost = ({
     computeUnits,
     isPersistent
   ).storage;
-
-  if (storage > storageAllowance) {
-    extraStorageCost = ((storage - storageAllowance) * 1000) / 3;
-  }
-
   const basePrice = isPersistent ? 2_000 : 200;
 
   return {
@@ -258,7 +258,7 @@ export const getFunctionCost = ({
       (ac, cv) => (ac += cv ? 1 : 0),
       1
     ),
-    storage: extraStorageCost,
+    storageAllowance,
   };
 };
 

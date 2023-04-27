@@ -43,6 +43,8 @@ export type NewFunctionPage = {
   ) => void;
   addVolume: () => void;
   removeVolume: (volumeIndex: number) => void;
+  address: string;
+  accountBalance: number;
 };
 
 export function useNewFunctionPage(): NewFunctionPage {
@@ -50,7 +52,7 @@ export function useNewFunctionPage(): NewFunctionPage {
 
   const router = useRouter();
   const [appState] = useAppState();
-  const { account } = appState;
+  const { account, accountBalance } = appState;
 
   const [formState, dispatchForm] = useReducer(
     (state: FormState, action: { type: string; payload: any }): FormState => {
@@ -208,7 +210,7 @@ export function useNewFunctionPage(): NewFunctionPage {
         isPersistent: formState.isPersistent,
         storage: formState.volumes.reduce((acc: number, volume: Volume) => {
           if (volume.type === "persistent") {
-            return acc + (volume.size || 0) * 1000 ** 3;
+            return acc + (volume.size || 0) * 10 ** 6;
           }
           if (volume.type === "new") {
             return acc + (volume?.src?.size || 0);
@@ -236,5 +238,7 @@ export function useNewFunctionPage(): NewFunctionPage {
     setVolumeValue,
     addVolume,
     removeVolume,
+    address: account?.address || "",
+    accountBalance: accountBalance || 0,
   };
 }

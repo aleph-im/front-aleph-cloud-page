@@ -13,7 +13,7 @@ export enum ActionTypes {
 
 export type State = {
   account?: Account;
-  account_balance?: number;
+  accountBalance?: number;
   products: {
     instances?: ProgramMessage[];
     functions?: ProgramMessage[];
@@ -28,7 +28,7 @@ export type Action = {
 
 export const initialState: State = {
   account: undefined,
-  account_balance: undefined,
+  accountBalance: undefined,
   products: {
     instances: undefined,
     functions: undefined,
@@ -56,7 +56,7 @@ export const reducer = (
     case ActionTypes.setAccountBalance:
       return {
         ...state,
-        account_balance: payload.balance,
+        accountBalance: payload.balance,
       };
 
     case ActionTypes.setProducts:
