@@ -14,7 +14,7 @@ const RemoveVolume = ({ removeCallback }: RemoveVolumeProps) => (
 )
 
 export default function NewVolume({ volumeMountpoint, volumeRefHash, volumeName, volumeSize, volumeSrc, volumeUseLatest, handleMountpointChange, handleNameChange, handleSizeChange, handleSrcChange, handleUseLatestChange, handleRefHashChange, handleVolumeType, removeCallback, isStandAlone }: NewVolumeProps){
-  const namePrefix = useMemo(() => crypto.randomUUID(), [])
+  const namePrefix = useMemo(() => (Math.random() * 10**8).toString(), [])
 
   const NewVolumeTabComponent = () => (
     <div className="my-lg">
