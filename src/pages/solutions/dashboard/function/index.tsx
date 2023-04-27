@@ -298,7 +298,8 @@ export default function NewFunctionPage() {
         <CenteredSection>
           <CompositeTitle number="9" title="Add volumes" type="h4" color="main1" />
           {formState.volumes.map((volume, iVolume) => (
-            <NewVolume 
+            <NewVolume
+              key={iVolume} // note: this key is meant to avoid a warning, and should work since the array is not reordered
               volumeMountpoint={volume.mountpoint}
               volumeName={volume.name}
               volumeSize={volume.size}

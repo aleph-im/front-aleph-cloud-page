@@ -77,9 +77,11 @@ export default function HoldingSummary({address, computeUnits, storage, unlocked
 
       {
         storage &&
-        displayedVolumes.map((volume) => {
+        displayedVolumes.map((volume, iVolume) => {
           return (
-            <StyledHoldingSummaryLine>
+            <StyledHoldingSummaryLine
+              key={iVolume}  // note: this key is meant to avoid a warning, and should work since the array is not reordered
+              >
               <div>STORAGE</div>
               <div>{volume.type === 'persistent' ? 'Persistent' : 'Immutable'} {getVolumeSize(volume)} GB</div>
               <div>{humanReadableCurrency(volume.price)} ALEPH</div>
