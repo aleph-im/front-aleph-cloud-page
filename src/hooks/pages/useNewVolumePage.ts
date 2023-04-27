@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import useConnected from "../useConnected";
 import {
   defaultVolume,
@@ -31,7 +31,8 @@ export function useNewVolumePage() {
     setVolumeProperty("type", volumeTypes[volumeType]);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
     if (!account) return;
 
     onLoad();
@@ -53,5 +54,7 @@ export function useNewVolumePage() {
     setVolumeType,
     handleSubmit,
     volumeState,
+    address: account?.address || "",
+    accountBalance: appState.accountBalance || 0,
   };
 }

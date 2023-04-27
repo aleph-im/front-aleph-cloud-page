@@ -150,7 +150,7 @@ export const humanReadableSize = (value?: number) => {
  */
 export const humanReadableCurrency = (value?: number) => {
   if (value === undefined) return "n/a";
-  if (value < 1_000) return String(value);
+  if (value < 1_000) return value.toFixed(1);
   else if (value < 10 ** 6) return (value / 1_000).toFixed(1) + "K";
   else if (value < 10 ** 9) return (value / 10 ** 6).toFixed(1) + "M";
   else return (value / 10 ** 9).toFixed(1) + "B";

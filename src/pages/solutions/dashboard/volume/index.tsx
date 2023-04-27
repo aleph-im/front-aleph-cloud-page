@@ -1,12 +1,15 @@
 import AutoBreadcrumb from "@/components/AutoBreadcrumb";
 import CenteredSection from "@/components/CenteredSection";
+import HoldingRequirements from "@/components/HoldingRequirements";
 import NewVolume from "@/components/NewVolume";
 import { useNewVolumePage } from "@/hooks/pages/useNewVolumePage";
+import { Button, TextGradient } from "@aleph-front/aleph-core";
 
 export default function NewVolumePage(){
-  const { volumeState, setVolumeProperty, setVolumeType } = useNewVolumePage()
+  const { volumeState, setVolumeProperty, setVolumeType, address, accountBalance, handleSubmit } = useNewVolumePage()
   return (
     <>
+    <form onSubmit={handleSubmit}>
       <section>
         <AutoBreadcrumb name="Setup new volume" />
       </section>
@@ -28,6 +31,30 @@ export default function NewVolumePage(){
           handleVolumeType={setVolumeType}
         />
       </CenteredSection>
+
+      <section className="fx-noise-light p-md">
+        <CenteredSection>
+          <TextGradient type="h4">Estimated holding requirements</TextGradient>
+          <div className="my-md">
+            <TextGradient
+              color="main2"
+              type="body">
+                This amount needs to be present in your wallet until the function is removed. Tokens won	&#39;t be locked nor consumed. The function will be garbage collected once funds are removed from the wallet. 
+            </TextGradient>
+            <a href="">Learn more about the benefits</a>
+          </div>
+
+          <HoldingRequirements 
+            address={address}
+            storage={[volumeState]}
+            unlockedAmount={accountBalance} />
+
+          <div className="my-xl text-center">
+            <Button type="submit" color="main0" kind="neon" size="big" variant="primary">Create function</Button>
+          </div>
+        </CenteredSection>
+      </section>
+    </form>
     </>
   )
 }
