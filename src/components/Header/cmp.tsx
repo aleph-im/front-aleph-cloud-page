@@ -1,6 +1,8 @@
 import { Button, Icon, Logo, NavbarLink, NavbarLinkList } from '@aleph-front/aleph-core'
 import { Chain } from 'aleph-sdk-ts/dist/messages/message'
+import { ETHAccount } from 'aleph-sdk-ts/dist/accounts/ethereum'
 import Link from 'next/link'
+import { ethers } from 'ethers'
 
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
 import { HeaderProps } from './types'
@@ -9,21 +11,42 @@ import { ActionTypes } from '@/helpers/store'
 import { ellipseAddress } from '@/helpers/utils'
 import { useAppState } from '@/contexts/appState'
 import { useTheme } from 'styled-components'
+import { useEffect } from 'react'
 
 export const Header = (props: HeaderProps) => {
   const [state, dispatch] = useAppState()
   const theme = useTheme()
 
+  useEffect(() => {
+      (async () => {
+          if(!state.account && (window?.ethereum as any).isConnected()) {
+              const accounts = await (window.ethereum as any).request({ method: 'eth_requestAccounts' })
+              const ethAccount = ethers.utils.getAddress(accounts[0])
+              const account = new ETHAccount((window?.ethereum as any), ethAccount)
+              dispatch({ type: ActionTypes.connect, payload: { account } })
+              await getBalance(account)
+              await getProducts(account)
+          }
+      })()
+  }, [state.account])
+
   const login = async () => {
     const account = await web3Connect(Chain.ETH, window?.ethereum)
     dispatch({ type: ActionTypes.connect, payload: { account } })
 
-    const balance = await getAccountBalance(account)
-    dispatch({ type: ActionTypes.setAccountBalance, payload: { balance } })
-
-    const products = await getAccountProducts(account)
-    dispatch({ type: ActionTypes.setProducts, payload: { products } })
+    await getBalance(account)
+    await getProducts(account)
   }
+
+    const getBalance = async (account: any) => {
+        const balance = await getAccountBalance(account)
+        dispatch({ type: ActionTypes.setAccountBalance, payload: { balance } })
+    }
+
+    const getProducts = async (account: any) => {
+        const products = await getAccountProducts(account)
+        dispatch({ type: ActionTypes.setProducts, payload: { products } })
+    }
 
   return (
     <StyledHeader>
