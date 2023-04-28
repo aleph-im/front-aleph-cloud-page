@@ -5,9 +5,7 @@ import {
   Col,
   Row,
   TextGradient,
-  Tag,
   Icon,
-  addClasses,
   useResponsiveMin,
 } from '@aleph-front/aleph-core'
 import Container from '@/components/Container'
@@ -45,14 +43,6 @@ const StyledLink = styled(Button).attrs((props) => {
     color: 'main0',
   }
 })``
-
-const StyledTagContainer = styled.div(() => [
-  tw`flex flex-wrap gap-y-4 gap-x-2.5`,
-])
-
-const StyledTag = styled(Tag).attrs(addClasses('tp-body1 fs-lg'))(() => [
-  tw`m-0`,
-])
 
 export default function Home() {
   const isDesktop = useResponsiveMin('md')
@@ -325,41 +315,6 @@ export default function Home() {
                   </StyledLink>
                 </StyledLinkItem>
               </ul>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-      <section className="fx-noise-light" tw="px-0 py-20">
-        <Container>
-          <h1 className="tp-h4" tw="mb-12 md:mb-6">
-            More resources
-          </h1>
-          <Row xs={1} md={6} xsGap="2.625rem" mdGap="1.5rem">
-            <Col xs={1} md={3}>
-              <h2 className="tp-h7" tw="mb-4">
-                Documentation
-              </h2>
-              <StyledTagContainer>
-                <StyledTag>VMs</StyledTag>
-                <StyledTag>Functions</StyledTag>
-                <StyledTag>Native storage</StyledTag>
-                <StyledTag>IPFS</StyledTag>
-                <StyledTag>Databases</StyledTag>
-                <StyledTag>Persistent VMs</StyledTag>
-                <StyledTag>Persistent storage</StyledTag>
-                <StyledTag>Use cases</StyledTag>
-              </StyledTagContainer>
-            </Col>
-            <Col xs={1} md={2} mdOffset={5}>
-              <h2 className="tp-h7" tw="mb-4">
-                Indexing Framework
-              </h2>
-              <StyledTagContainer>
-                <StyledTag>Ethereum</StyledTag>
-                <StyledTag>Solana</StyledTag>
-                <StyledTag>Tezos</StyledTag>
-                <StyledTag>Binance Smart Chain</StyledTag>
-              </StyledTagContainer>
             </Col>
           </Row>
         </Container>
