@@ -1,5 +1,6 @@
 import AutoBreadcrumb from "@/components/AutoBreadcrumb";
 import CenteredSection from "@/components/CenteredSection";
+import ExternalLink from "@/components/ExternalLink";
 import HoldingRequirements from "@/components/HoldingRequirements";
 import NewVolume from "@/components/NewVolume";
 import { useNewVolumePage } from "@/hooks/pages/useNewVolumePage";
@@ -20,6 +21,7 @@ export default function NewVolumePage(){
           volumeMountpoint={volumeState.mountpoint}
           volumeName={volumeState.name}
           volumeRefHash={volumeState.refHash}
+          volumeUseLatest={volumeState.useLatest}
           volumeSize={volumeState.size}
           volumeSrc={volumeState.src}
           handleMountpointChange={e => setVolumeProperty('mountpoint', e.target.value)}
@@ -41,7 +43,7 @@ export default function NewVolumePage(){
               type="body">
                 This amount needs to be present in your wallet until the function is removed. Tokens won	&#39;t be locked nor consumed. The function will be garbage collected once funds are removed from the wallet. 
             </TextGradient>
-            <a href="">Learn more about the benefits</a>
+            <ExternalLink href="https://aleph.im" text="Learn about the benefits" />
           </div>
 
           <HoldingRequirements 
@@ -50,7 +52,7 @@ export default function NewVolumePage(){
             unlockedAmount={accountBalance} />
 
           <div className="my-xl text-center">
-            <Button type="submit" color="main0" kind="neon" size="big" variant="primary">Create function</Button>
+            <Button type="submit" color="main0" kind="neon" size="big" variant="primary">Create volume</Button>
           </div>
         </CenteredSection>
       </section>

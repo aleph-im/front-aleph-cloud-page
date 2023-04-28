@@ -8,6 +8,7 @@ import { convertBitUnits, getFunctionCost, getFunctionSpecsByComputeUnits, isVal
 import { useNewFunctionPage } from "@/hooks/pages/useNewFunctionPage";
 import NewVolume from "@/components/NewVolume/cmp";
 import HoldingRequirements from "@/components/HoldingRequirements";
+import ExternalLink from "@/components/ExternalLink";
 
 export default function NewFunctionPage() {
   const {
@@ -304,6 +305,7 @@ export default function NewFunctionPage() {
               volumeName={volume.name}
               volumeSize={volume.size}
               volumeSrc={volume.src}
+              volumeUseLatest={volume.useLatest}
               volumeRefHash={volume.refHash}
               handleMountpointChange={(e) => setVolumeValue(iVolume, 'mountpoint', e.target.value)}
               handleNameChange={(e) => setVolumeValue(iVolume, 'name', e.target.value)}
@@ -330,7 +332,7 @@ export default function NewFunctionPage() {
                 type="body">
                   This amount needs to be present in your wallet until the function is removed. Tokens won	&#39;t be locked nor consumed. The function will be garbage collected once funds are removed from the wallet. 
               </TextGradient>
-              <a href="">Learn more about the benefits</a>
+              <ExternalLink href="https://aleph.im" text="Learn about the benefits" />
             </div>
 
             <div className="my-xl">

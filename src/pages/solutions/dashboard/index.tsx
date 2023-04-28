@@ -126,7 +126,7 @@ export default function DashboardHome() {
               labelPosition: 'bottom'
             },
             {
-              name: 'Volumes',
+              name: 'Immutable Volumes',
               component: (
                 <>
                   <TabContent data={volumes || []} />
