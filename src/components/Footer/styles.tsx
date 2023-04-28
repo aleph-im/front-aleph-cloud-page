@@ -17,15 +17,7 @@ export const StyledButton = styled(Button).attrs((props) => {
     color: 'main0',
     size: 'big',
   }
-})`
-  ${tw`mb-6`}
-  display: block;
-  margin-bottom: 1.5rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`
+})(() => [tw`!block !mb-6 last:!mb-0`])
 
 export const StyledLink = styled.a.attrs((props) => {
   return {

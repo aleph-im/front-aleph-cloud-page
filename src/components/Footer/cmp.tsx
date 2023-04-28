@@ -15,21 +15,21 @@ export const Footer = ({ small = false }: FooterProps) => {
     <StyledFooter>
       <Container>
         {small ? (
-          <Row xs={1} md={2} lg={3} gap="1.5rem">
+          <Row xs={1} md={2} lg={3} xsGap="3rem" lgGap="0">
             <Col xs={1} md={2} lg={1}>
               <div tw="flex items-center lg:justify-start">
                 <Logo size={28} />
               </div>
             </Col>
             <Col>
-              <ul tw="flex items-center lg:justify-center">
-                <li tw="mr-6">
-                  <StyledLink target="_blank" href="https://docs.aleph.im/">
+              <ul tw="flex flex-col gap-6 md:flex-row md:items-center lg:justify-center">
+                <li>
+                  <StyledLink target="_blank" href="https://docs.aleph.im">
                     Documentation
                     <StyledIcon2 name="external-link-square-alt" />
                   </StyledLink>
                 </li>
-                <li tw="mr-0">
+                <li>
                   <StyledLink target="_blank" href="https://t.me/alephim">
                     Telegram Developers
                     <StyledIcon2 name="external-link-square-alt" />
@@ -38,8 +38,8 @@ export const Footer = ({ small = false }: FooterProps) => {
               </ul>
             </Col>
             <Col>
-              <ul tw="flex items-center md:justify-end">
-                <li tw="mr-6">
+              <ul tw="flex items-center gap-6 md:justify-end">
+                <li>
                   <StyledLink
                     target="_blank"
                     href="https://twitter.com/aleph_im"
@@ -48,7 +48,7 @@ export const Footer = ({ small = false }: FooterProps) => {
                     Twitter
                   </StyledLink>
                 </li>
-                <li tw="mr-0">
+                <li>
                   <StyledLink
                     target="_blank"
                     href="https://medium.com/aleph-im"
