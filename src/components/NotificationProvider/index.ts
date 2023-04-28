@@ -1,1 +1,1 @@
-export { default  } from "./cmp";
+export { default } from './cmp'

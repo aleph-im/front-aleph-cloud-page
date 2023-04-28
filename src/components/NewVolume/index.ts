@@ -1,2 +1,2 @@
-export { default } from "./cmp";
-export type { NewVolumeProps } from "./types";
+export { default } from './cmp'
+export type { NewVolumeProps } from './types'

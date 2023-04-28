@@ -1,6 +1,6 @@
-import { ReactElement } from "react";
+import { ReactElement } from 'react'
 
 export type ButtonLinkProps = {
-  href: string;
-  children: ReactElement | string;
-};
+  href: string
+  children: ReactElement | string
+}

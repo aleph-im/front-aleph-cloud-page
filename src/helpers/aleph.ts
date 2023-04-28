@@ -3,23 +3,23 @@ import {
   MessageType,
   ProgramMessage,
   StoreMessage,
-} from "aleph-sdk-ts/dist/messages/message";
-import { Account } from "aleph-sdk-ts/dist/accounts/account";
-import { any, program, forget, store } from "aleph-sdk-ts/dist/messages";
-import { GetAccountFromProvider as getETHAccount } from "aleph-sdk-ts/dist/accounts/ethereum";
-import { GetAccountFromProvider as getSOLAccount } from "aleph-sdk-ts/dist/accounts/solana";
+} from 'aleph-sdk-ts/dist/messages/message'
+import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { any, program, forget, store } from 'aleph-sdk-ts/dist/messages'
+import { GetAccountFromProvider as getETHAccount } from 'aleph-sdk-ts/dist/accounts/ethereum'
+import { GetAccountFromProvider as getSOLAccount } from 'aleph-sdk-ts/dist/accounts/solana'
 import {
   getERC20Balance,
   getFunctionSpecsByComputeUnits,
   getSOLBalance,
-} from "./utils";
-import E_ from "./errors";
+} from './utils'
+import E_ from './errors'
 import {
   Encoding,
   MachineVolume,
   PersistentVolume,
-} from "aleph-sdk-ts/dist/messages/program/programModel";
-import { defaultVMChannel, defaultVolumeChannel } from "./constants";
+} from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { defaultVMChannel, defaultVolumeChannel } from './constants'
 
 /**
  * Connects to a web3 provider and returns an Aleph account object
@@ -30,15 +30,15 @@ import { defaultVMChannel, defaultVolumeChannel } from "./constants";
 export const web3Connect = (chain: Chain, provider: any): Promise<Account> => {
   switch (chain) {
     case Chain.ETH:
-      return getETHAccount(provider);
+      return getETHAccount(provider)
 
     case Chain.SOL:
-      return getSOLAccount(provider);
+      return getSOLAccount(provider)
 
     default:
-      throw E_.ChainNotYetSupported;
+      throw E_.ChainNotYetSupported
   }
-};
+}
 
 /**
  * Returns the Aleph token balance of an account using the default RPC method for the chain
@@ -49,15 +49,15 @@ export const web3Connect = (chain: Chain, provider: any): Promise<Account> => {
 export const getAccountBalance = async (account: Account): Promise<number> => {
   switch (account.GetChain()) {
     case Chain.ETH:
-      return getERC20Balance(account.address);
+      return getERC20Balance(account.address)
 
     case Chain.SOL:
-      return getSOLBalance(account.address);
+      return getSOLBalance(account.address)
 
     default:
-      throw E_.ChainNotYetSupported;
+      throw E_.ChainNotYetSupported
   }
-};
+}
 
 /**
  * Returns an aleph program message for a given hash
@@ -66,13 +66,13 @@ export const getMessage = async (hash: string) => {
   try {
     const msg = await any.GetMessage({
       hash: hash,
-    });
+    })
 
-    return msg;
+    return msg
   } catch (error) {
-    throw E_.RequestFailed(error);
+    throw E_.RequestFailed(error)
   }
-};
+}
 
 /**
  * Get all the products (databases, instances, functions, volumes) for a given account
@@ -84,8 +84,8 @@ export const getAccountProducts = async (account: Account) => {
   const products: Record<string, ProgramMessage[] | StoreMessage[]> = {
     functions: [],
     volumes: [],
-  };
-  const queries = [];
+  }
+  const queries = []
   queries.push(
     any
       .GetMessages({
@@ -95,10 +95,10 @@ export const getAccountProducts = async (account: Account) => {
       })
       .then((msgs) => {
         products.functions = msgs.messages.filter(
-          (x) => x.content != undefined
-        ) as ProgramMessage[];
-      })
-  );
+          (x) => x.content != undefined,
+        ) as ProgramMessage[]
+      }),
+  )
 
   queries.push(
     any
@@ -109,29 +109,29 @@ export const getAccountProducts = async (account: Account) => {
       })
       .then((msgs) => {
         products.volumes = msgs.messages.filter(
-          (x) => x.content != undefined
-        ) as StoreMessage[];
-      })
-  );
+          (x) => x.content != undefined,
+        ) as StoreMessage[]
+      }),
+  )
 
-  await Promise.all(queries);
+  await Promise.all(queries)
 
-  return products;
-};
+  return products
+}
 
 type CreateFunctionParams = {
-  account: Account;
-  file: File;
-  name: string;
-  tags: string[];
-  entrypoint: string;
-  isPersistent: boolean;
-  runtime: string;
-  encoding: Encoding;
-  volumes: (MachineVolume | PersistentVolume)[];
-  computeUnits: number;
-  variables: Record<string, string>;
-};
+  account: Account
+  file: File
+  name: string
+  tags: string[]
+  entrypoint: string
+  isPersistent: boolean
+  runtime: string
+  encoding?: Encoding
+  volumes: (MachineVolume | PersistentVolume)[]
+  computeUnits: number
+  variables: Record<string, string>
+}
 export const createFunctionProgram = async ({
   account,
   file,
@@ -146,8 +146,8 @@ export const createFunctionProgram = async ({
 }: CreateFunctionParams) => {
   const { memory, cpu } = getFunctionSpecsByComputeUnits(
     computeUnits,
-    isPersistent
-  );
+    isPersistent,
+  )
 
   try {
     const msg = await program.publish({
@@ -165,13 +165,13 @@ export const createFunctionProgram = async ({
       memory,
       vcpus: cpu,
       variables,
-    });
+    })
 
-    return msg;
+    return msg
   } catch (err) {
-    throw E_.RequestFailed(err);
+    throw E_.RequestFailed(err)
   }
-};
+}
 
 /**
  * Deletes a VM using a forget message
@@ -182,13 +182,13 @@ export const deleteVM = async (account: Account, message: ProgramMessage) => {
       account,
       hashes: [message.item_hash],
       channel: message.channel,
-    });
+    })
 
-    return msg;
+    return msg
   } catch (err) {
-    throw E_.RequestFailed(err);
+    throw E_.RequestFailed(err)
   }
-};
+}
 
 /**
  * Creates an immutable volume using a store message
@@ -199,14 +199,14 @@ export const deleteVM = async (account: Account, message: ProgramMessage) => {
  */
 export const createVolume = async (
   account: Account,
-  file: File
+  file: File,
 ): Promise<StoreMessage> => {
   return store.Publish({
     account,
     fileObject: file,
     channel: defaultVolumeChannel,
-  });
-};
+  })
+}
 
 /**
  * Returns all the volumes for a given account
@@ -219,10 +219,10 @@ export const getVolumes = async (account: Account) => {
       addresses: [account.address],
       messageType: MessageType.store,
       channels: [defaultVolumeChannel],
-    });
+    })
 
-    return query.messages;
+    return query.messages
   } catch (error) {
-    throw E_.RequestFailed(error);
+    throw E_.RequestFailed(error)
   }
-};
+}

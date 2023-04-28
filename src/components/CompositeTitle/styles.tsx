@@ -10,10 +10,10 @@ export const StyledCompositeTitleLabel = styled.span<StyledCompositeTitleLabelPr
   ${({ theme, type }) => css`
     align-self: center;
     transform: translate(5px, -${theme.typo[type].size / 2}rem);
-    color: #FFF;
+    color: #fff;
     font-size: ${theme.typo[type].size / 2}rem;
     font-weight: ${theme.typo[type].weight};
     font-family: ${theme.typo[type].family};
-    font-style: ${theme.typo[type].style};  
+    font-style: ${theme.typo[type].style};
   `}
 `

@@ -1,1 +1,1 @@
-export { default } from "./styles";
+export { default } from './styles'

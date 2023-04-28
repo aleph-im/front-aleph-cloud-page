@@ -1,5 +1,9 @@
 import { useEffect } from 'react'
-import { RequestState, useRequestState, UseRequestStateProps } from './useRequestState'
+import {
+  RequestState,
+  useRequestState,
+  UseRequestStateProps,
+} from './useRequestState'
 
 export type UseRequestProps<T> = UseRequestStateProps<T> & {
   doRequest: () => Promise<T>

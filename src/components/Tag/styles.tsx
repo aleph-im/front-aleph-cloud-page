@@ -1,7 +1,9 @@
 import { addClasses } from '@aleph-front/aleph-core'
 import styled, { css } from 'styled-components'
 
-export const StyledTag = styled.span.attrs(addClasses('fx-glass-base1 fx-glass-border-base0'))`
+export const StyledTag = styled.span.attrs(
+  addClasses('fx-glass-base1 fx-glass-border-base0'),
+)`
   ${({ theme }) => {
     return css`
       box-sizing: border-box;

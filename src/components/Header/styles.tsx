@@ -18,7 +18,7 @@ export const StyledNavbar = styled(Navbar)`
   position: relative;
 `
 
-export const StyledButton = styled(Button).attrs(props => {
+export const StyledButton = styled(Button).attrs((props) => {
   return {
     ...props,
     color: 'main0',
@@ -26,9 +26,9 @@ export const StyledButton = styled(Button).attrs(props => {
     size: 'regular',
     variant: 'tertiary',
   }
-}) <any>`
+})<any>`
   display: block;
-  
+
   &:last-child {
     margin-bottom: 0;
   }

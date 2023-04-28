@@ -1,3 +1,3 @@
 export type AutoBreacrumbProps = {
-  name?: string;
-};
+  name?: string
+}

@@ -1,39 +1,39 @@
-import { useAppState } from "@/contexts/appState";
-import { getAccountProducts } from "@/helpers/aleph";
-import { ActionTypes } from "@/helpers/store";
+import { useAppState } from '@/contexts/appState'
+import { getAccountProducts } from '@/helpers/aleph'
+import { ActionTypes } from '@/helpers/store'
 import {
   ProgramMessage,
   StoreMessage,
-} from "aleph-sdk-ts/dist/messages/message";
-import { useCallback, useMemo } from "react";
-import { useRequest } from "./useRequest";
-import { RequestState } from "./useRequestState";
+} from 'aleph-sdk-ts/dist/messages/message'
+import { useCallback, useMemo } from 'react'
+import { useRequest } from './useRequest'
+import { RequestState } from './useRequestState'
 
 export function useAccountProducts(): [
   (ProgramMessage | StoreMessage)[],
-  RequestState<unknown>
+  RequestState<unknown>,
 ] {
-  const [appState, dispatch] = useAppState();
+  const [appState, dispatch] = useAppState()
   const products = useMemo(
     () => Object.values(appState.products).flat(),
-    [appState]
-  );
+    [appState],
+  )
 
-  const { account } = appState;
+  const { account } = appState
 
   const doRequest = useCallback(() => {
-    if (!account) throw new Error("Not account");
-    return getAccountProducts(account);
-  }, [account]);
+    if (!account) throw new Error('Not account')
+    return getAccountProducts(account)
+  }, [account])
 
   const onSuccess = useCallback(
     (products: Record<string, (ProgramMessage | StoreMessage)[]>) => {
-      dispatch({ type: ActionTypes.setProducts, payload: { products } });
+      dispatch({ type: ActionTypes.setProducts, payload: { products } })
     },
-    [dispatch]
-  );
+    [dispatch],
+  )
 
-  const reqState = useRequest({ doRequest, onSuccess });
+  const reqState = useRequest({ doRequest, onSuccess })
 
-  return [products, reqState];
+  return [products, reqState]
 }

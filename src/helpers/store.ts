@@ -1,8 +1,8 @@
-import { Account } from "aleph-sdk-ts/dist/accounts/account";
+import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import {
   ProgramMessage,
   StoreMessage,
-} from "aleph-sdk-ts/dist/messages/message";
+} from 'aleph-sdk-ts/dist/messages/message'
 
 export enum ActionTypes {
   connect,
@@ -12,19 +12,19 @@ export enum ActionTypes {
 }
 
 export type State = {
-  account?: Account;
-  accountBalance?: number;
+  account?: Account
+  accountBalance?: number
   products: {
-    instances?: ProgramMessage[];
-    functions?: ProgramMessage[];
-    volumes?: StoreMessage[];
-  };
-};
+    instances?: ProgramMessage[]
+    functions?: ProgramMessage[]
+    volumes?: StoreMessage[]
+  }
+}
 
 export type Action = {
-  type: ActionTypes;
-  payload: any;
-};
+  type: ActionTypes
+  payload: any
+}
 
 export const initialState: State = {
   account: undefined,
@@ -34,38 +34,38 @@ export const initialState: State = {
     functions: undefined,
     volumes: undefined,
   },
-};
+}
 
 export const reducer = (
   state: State = initialState,
-  { type, payload }: Action
+  { type, payload }: Action,
 ) => {
   switch (type) {
     case ActionTypes.connect:
       return {
         ...state,
         account: payload.account,
-      };
+      }
 
     case ActionTypes.disconnect:
       return {
         ...state,
         account: undefined,
-      };
+      }
 
     case ActionTypes.setAccountBalance:
       return {
         ...state,
         accountBalance: payload.balance,
-      };
+      }
 
     case ActionTypes.setProducts:
       return {
         ...state,
         products: payload.products,
-      };
+      }
 
     default:
-      return state;
+      return state
   }
-};
+}

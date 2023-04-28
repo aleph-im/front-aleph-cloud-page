@@ -1,5 +1,4 @@
-
-import { RefObject, useCallback, useRef } from "react"
+import { RefObject, useCallback, useRef } from 'react'
 
 function getHandleScroll(ref: RefObject<HTMLElement>) {
   if (!ref.current) return
@@ -9,14 +8,9 @@ function getHandleScroll(ref: RefObject<HTMLElement>) {
   window.scrollTo({ behavior: 'smooth', top: window.scrollY + top - 100 })
 }
 
-export type UseScrollToReturn = [
-  RefObject<HTMLElement>,
-  () => void
-]
+export type UseScrollToReturn = [RefObject<HTMLElement>, () => void]
 
-export function useScrollTo(
-  _ref?: RefObject<HTMLElement>
-): UseScrollToReturn {
+export function useScrollTo(_ref?: RefObject<HTMLElement>): UseScrollToReturn {
   const innerRef = useRef(null)
   const ref = _ref || innerRef
 

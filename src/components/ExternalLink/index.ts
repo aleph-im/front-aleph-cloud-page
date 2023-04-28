@@ -1,2 +1,2 @@
-export { default } from "./cmp";
-export type { ExternalLinkProps } from "./types";
+export { default } from './cmp'
+export type { ExternalLinkProps } from './types'

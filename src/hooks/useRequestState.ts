@@ -15,12 +15,15 @@ export type RequestState<T> = {
 
 export type UseRequestStateProps<T> = RequestCallbacks<T>
 
-export type UseRequestStateReturn<T> = [RequestState<T>, Required<RequestCallbacks<T>>]
+export type UseRequestStateReturn<T> = [
+  RequestState<T>,
+  Required<RequestCallbacks<T>>,
+]
 
 export function useRequestState<T>({
   onSuccess: successProp,
   onError: errorProp,
-  onLoad: loadProp
+  onLoad: loadProp,
 }: UseRequestStateProps<T> = {}): UseRequestStateReturn<T> {
   const noti = useNotification()
 
@@ -30,40 +33,47 @@ export function useRequestState<T>({
     error: null,
   })
 
-  const onSuccess = useCallback((data: T) => {
-    setState({ data, loading: false, error: null })
+  const onSuccess = useCallback(
+    (data: T) => {
+      setState({ data, loading: false, error: null })
 
-    if (successProp) return successProp(data)
+      if (successProp) return successProp(data)
 
-    noti && noti.add({
-      variant: 'success',
-      title: 'Operation complete',
-    })
-  }, [successProp])
+      noti &&
+        noti.add({
+          variant: 'success',
+          title: 'Operation complete',
+        })
+    },
+    [successProp],
+  )
   // }, [noti, successProp]) @note: noti dep changes all the time
 
-  const onError = useCallback((error: Error) => {
-    setState({ data: null, loading: false, error })
+  const onError = useCallback(
+    (error: Error) => {
+      setState({ data: null, loading: false, error })
 
-    if (errorProp) return errorProp(error)
+      if (errorProp) return errorProp(error)
 
-    const text = error.message
-    const detail = (error?.cause as Error)?.message
+      const text = error.message
+      const detail = (error?.cause as Error)?.message
 
-    noti && noti.add({
-      variant: 'error',
-      title: 'Error',
-      text,
-      detail,
-    })
-  }, [errorProp])
+      noti &&
+        noti.add({
+          variant: 'error',
+          title: 'Error',
+          text,
+          detail,
+        })
+    },
+    [errorProp],
+  )
   // }, [noti, errorProp]) @note: noti dep changes all the time
 
   const onLoad = useCallback(() => {
     setState({ data: null, loading: true, error: null })
 
     loadProp && loadProp()
-
   }, [loadProp])
 
   return [state, { onSuccess, onError, onLoad }]

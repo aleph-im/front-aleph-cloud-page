@@ -1,7 +1,5 @@
 import { addClasses, Button, Icon } from '@aleph-front/aleph-core'
-import styled, {
-  css,
-} from 'styled-components'
+import styled, { css } from 'styled-components'
 import tw from 'twin.macro'
 
 export const StyledFooter = styled.footer`
@@ -11,7 +9,7 @@ export const StyledFooter = styled.footer`
   width: 100%;
 `
 
-export const StyledButton = styled(Button).attrs(props => {
+export const StyledButton = styled(Button).attrs((props) => {
   return {
     ...props,
     kind: 'neon',
@@ -29,7 +27,7 @@ export const StyledButton = styled(Button).attrs(props => {
   }
 `
 
-export const StyledLink = styled.a.attrs(props => {
+export const StyledLink = styled.a.attrs((props) => {
   return {
     ...addClasses('tp-nav')(props),
     href: props.href || '#',
@@ -40,7 +38,7 @@ export const StyledLink = styled.a.attrs(props => {
     cursor: pointer;
     font-weight: 700;
     white-space: nowrap;
-    
+
     color: ${theme.color.text};
     text-decoration: none;
 
@@ -50,14 +48,14 @@ export const StyledLink = styled.a.attrs(props => {
   `}
 `
 
-export const StyledIcon = styled(Icon).attrs(props => {
+export const StyledIcon = styled(Icon).attrs((props) => {
   return {
     ...props,
     size: 'lg',
   }
 })(() => [tw`mr-2.5`])
 
-export const StyledIcon2 = styled(Icon).attrs(props => {
+export const StyledIcon2 = styled(Icon).attrs((props) => {
   return {
     ...props,
     size: 'lg',

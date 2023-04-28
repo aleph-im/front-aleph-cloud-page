@@ -1,10 +1,10 @@
-import { providers, Contract } from "ethers";
-import E_ from "./errors";
+import { providers, Contract } from 'ethers'
+import E_ from './errors'
 import {
   MessageType,
   ProgramMessage,
   StoreMessage,
-} from "aleph-sdk-ts/dist/messages/message";
+} from 'aleph-sdk-ts/dist/messages/message'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -13,34 +13,34 @@ import {
  * @returns A shortened address
  */
 export const ellipseAddress = (address: string) => {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-};
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
 
 /**
  * Checks if a string is a valid Aleph message item hash
  */
 export const isValidItemHash = (hash: string) => {
-  const regex = /^[0-9a-f]{64}$/;
-  return regex.test(hash);
-};
+  const regex = /^[0-9a-f]{64}$/
+  return regex.test(hash)
+}
 
 export type EnvironmentVariable = {
-  name: string;
-  value: string;
-};
+  name: string
+  value: string
+}
 /**
  * Takes a collection of environment variables and returns an object with the name and value of each variable.
  */
 export const safeCollectionToObject = (collection: EnvironmentVariable[]) => {
-  const ret: Record<string, string> = {};
+  const ret: Record<string, string> = {}
   for (const { name, value } of collection) {
     if (name.trim().length > 0 && value.trim().length > 0) {
-      ret[name] = value;
+      ret[name] = value
     }
   }
 
-  return ret;
-};
+  return ret
+}
 
 /**
  * Get the Aleph balance for a given Ethereum address
@@ -51,40 +51,40 @@ export const safeCollectionToObject = (collection: EnvironmentVariable[]) => {
 export const getERC20Balance = async (address: string) => {
   // FIXME: This is a temporary solution, we should not rely on Infura
   const provider = new providers.InfuraProvider(
-    "homestead",
-    "4890a5bd89854916b128088119d76b50"
-  );
+    'homestead',
+    '4890a5bd89854916b128088119d76b50',
+  )
 
   const ERC20_ABI = [
     // Read-Only Functions
-    "function balanceOf(address owner) view returns (uint256)",
-    "function decimals() view returns (uint8)",
-    "function symbol() view returns (string)",
+    'function balanceOf(address owner) view returns (uint256)',
+    'function decimals() view returns (uint8)',
+    'function symbol() view returns (string)',
 
     // Authenticated Functions
-    "function transfer(address to, uint amount) returns (boolean)",
+    'function transfer(address to, uint amount) returns (boolean)',
 
     // Events
-    "event Transfer(address indexed from, address indexed to, uint amount)",
-  ];
+    'event Transfer(address indexed from, address indexed to, uint amount)',
+  ]
 
-  const ERC20_CONTRACT_ADDRESS = "0x27702a26126e0B3702af63Ee09aC4d1A084EF628";
+  const ERC20_CONTRACT_ADDRESS = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
 
   const ERC20Contract = new Contract(
     ERC20_CONTRACT_ADDRESS,
     ERC20_ABI,
-    provider
-  );
+    provider,
+  )
 
   try {
-    const rawBalance = await ERC20Contract.balanceOf(address);
-    const decimals = await ERC20Contract.decimals();
-    const balance = rawBalance / 10 ** decimals;
-    return balance;
+    const rawBalance = await ERC20Contract.balanceOf(address)
+    const decimals = await ERC20Contract.decimals()
+    const balance = rawBalance / 10 ** decimals
+    return balance
   } catch (error) {
-    throw E_.RequestFailed(error);
+    throw E_.RequestFailed(error)
   }
-};
+}
 
 /**
  * Gets the Aleph balance for a given Solana address
@@ -96,65 +96,69 @@ export const getSOLBalance = async (address: string) => {
   // FIXME: This is a temporary solution
   try {
     const query = await fetch(
-      `https://balance1.api.aleph.cloud/solana/${address}`
-    );
+      `https://balance1.api.aleph.cloud/solana/${address}`,
+    )
 
-    const { balance } = await query.json();
-    return balance;
+    const { balance } = await query.json()
+    return balance
   } catch (error) {
-    throw E_.RequestFailed(error);
+    throw E_.RequestFailed(error)
   }
-};
+}
 
-type BitUnit = "b" | "kb" | "mb" | "gb" | "tb";
+type BitUnit = 'b' | 'kb' | 'mb' | 'gb' | 'tb'
 type ConvertBitUnitOptions = {
-  from: BitUnit;
-  to: BitUnit;
-  displayUnit: boolean;
-};
+  from: BitUnit
+  to: BitUnit
+  displayUnit: boolean
+}
 export const convertBitUnits = (
   value: number,
-  { from = "mb", to = "gb", displayUnit = true }: Partial<ConvertBitUnitOptions>
+  {
+    from = 'mb',
+    to = 'gb',
+    displayUnit = true,
+  }: Partial<ConvertBitUnitOptions>,
 ) => {
-  const options: ConvertBitUnitOptions = { from, to, displayUnit };
+  const options: ConvertBitUnitOptions = { from, to, displayUnit }
   const units = {
     b: 1,
     kb: 1000,
     mb: 1000 ** 2,
     gb: 1000 ** 3,
     tb: 1000 ** 4,
-  };
+  }
 
-  const result = (value * units[options.from]) / units[options.to];
-  return options.displayUnit ? `${result} ${options.to.toUpperCase()}` : result;
-};
+  const result = (value * units[options.from]) / units[options.to]
+  return options.displayUnit ? `${result} ${options.to.toUpperCase()}` : result
+}
 
 /**
  * Converts a number of bytes to a human readable size
  */
 export const humanReadableSize = (value?: number) => {
-  if (value === undefined) return "n/a";
-  if (value === 0) return "-";
+  if (value === undefined) return 'n/a'
+  if (value === 0) return '-'
 
-  const units = ["b", "kb", "mb", "gb", "tb"];
-  let i = 0;
+  const units = ['b', 'kb', 'mb', 'gb', 'tb']
+  let i = 0
   while (value > 1000 ** i && i < units.length) {
-    i++;
+    i++
   }
 
-  return (value / 1000 ** (i - 1)).toFixed(2) + units[i];
-};
+  return (value / 1000 ** (i - 1)).toFixed(2) + units[i]
+}
 
 /**
  * Transforms a number into a multiple of 1000 with a suffix, (ex: 625217 -> 625.2K)
  */
 export const humanReadableCurrency = (value?: number) => {
-  if (value === undefined) return "n/a";
-  if (value < 1_000) return value.toFixed(1);
-  else if (value < 10 ** 6) return (value / 1_000).toFixed(1) + "K";
-  else if (value < 10 ** 9) return (value / 10 ** 6).toFixed(1) + "M";
-  else return (value / 10 ** 9).toFixed(1) + "B";
-};
+  if (value === undefined) return 'n/a'
+  if (value < 1_000) return value.toFixed(1)
+  else if (value < 10 ** 6) return (value / 1_000).toFixed(1) + 'K'
+  else if (value < 10 ** 9) return (value / 10 ** 6).toFixed(1) + 'M'
+  else return (value / 10 ** 9).toFixed(1) + 'B'
+}
 
 /**
  * Returns a link to the Aleph explorer for a given message
@@ -164,7 +168,7 @@ export const getExplorerURL = ({
   chain,
   sender,
 }: ProgramMessage | StoreMessage) =>
-  `https://explorer.aleph.im/address/${chain}/${sender}/message/PROGRAM/${item_hash}`;
+  `https://explorer.aleph.im/address/${chain}/${sender}/message/PROGRAM/${item_hash}`
 
 /**
  * Converts a UNIX timestamp to an ISO date, or returns a default value if the timestamp is invalid
@@ -172,14 +176,11 @@ export const getExplorerURL = ({
  * @param timeStamp A UNIX timestamp
  * @param noDate A default value to return if the timestamp is invalid
  */
-export const unixToISODateString = (
-  timeStamp?: number,
-  noDate: string = "n/a"
-) => {
-  if (!timeStamp) return noDate;
-  const date = new Date(timeStamp * 1000);
-  return date.toISOString().split("T")[0];
-};
+export const unixToISODateString = (timeStamp?: number, noDate = 'n/a') => {
+  if (!timeStamp) return noDate
+  const date = new Date(timeStamp * 1000)
+  return date.toISOString().split('T')[0]
+}
 
 /**
  * Converts a UNIX timestamp to an ISO date and time, or returns a default value if the timestamp is invalid
@@ -187,54 +188,51 @@ export const unixToISODateString = (
  * @param timeStamp A UNIX timestamp
  * @param noDate A default value to return if the timestamp is invalid
  */
-export const unixToISODateTimeString = (
-  timeStamp?: number,
-  noDate: string = "n/a"
-) => {
-  if (!timeStamp) return noDate;
-  const date = new Date(timeStamp * 1000);
-  return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeZoneName: "short",
-    timeStyle: "short",
-    timeZone: "UTC",
-  }).format(date);
-};
+export const unixToISODateTimeString = (timeStamp?: number, noDate = 'n/a') => {
+  if (!timeStamp) return noDate
+  const date = new Date(timeStamp * 1000)
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeZoneName: 'short',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+  }).format(date)
+}
 
 type MachineSpecs = {
-  cpu: number;
-  memory: number;
-  storage: number;
-};
+  cpu: number
+  memory: number
+  storage: number
+}
 export const getFunctionSpecsByComputeUnits = (
   computeUnits: number,
-  isPersistent: boolean
+  isPersistent: boolean,
 ): MachineSpecs => {
   return {
     cpu: 1 * computeUnits,
     memory: 2 * computeUnits * 1000,
     storage: 2 * 10 ** Number(isPersistent) * computeUnits,
-  };
-};
+  }
+}
 
 type CapabilitiesConfig = {
-  internetAccess?: boolean;
-  blockchainRPC?: boolean;
-  enableSnapshots?: boolean;
-};
+  internetAccess?: boolean
+  blockchainRPC?: boolean
+  enableSnapshots?: boolean
+}
 
 export type FunctionPriceConfig = {
-  computeUnits: number;
-  storage: number;
-  isPersistent: boolean;
-  capabilities: CapabilitiesConfig;
-};
+  computeUnits: number
+  storage: number
+  isPersistent: boolean
+  capabilities: CapabilitiesConfig
+}
 
 export type FunctionCost = {
-  compute: number;
-  capabilities: number;
-  storageAllowance: number;
-};
+  compute: number
+  capabilities: number
+  storageAllowance: number
+}
 
 /**
  * Calculates the amount of tokens required to deploy a function
@@ -245,31 +243,31 @@ export const getFunctionCost = ({
   isPersistent,
   capabilities,
 }: FunctionPriceConfig): FunctionCost => {
-  let extraStorageCost = 0;
+  const extraStorageCost = 0
   const storageAllowance = getFunctionSpecsByComputeUnits(
     computeUnits,
-    isPersistent
-  ).storage;
-  const basePrice = isPersistent ? 2_000 : 200;
+    isPersistent,
+  ).storage
+  const basePrice = isPersistent ? 2_000 : 200
 
   return {
     compute: basePrice * computeUnits,
     capabilities: Object.values(capabilities).reduce(
       (ac, cv) => (ac += cv ? 1 : 0),
-      1
+      1,
     ),
     storageAllowance,
-  };
-};
+  }
+}
 
 /**
  * Returns true if the provided aleph message is a volume message
  */
 export const isVolume = (msg: ProgramMessage | StoreMessage) =>
-  msg.type === MessageType.store;
+  msg.type === MessageType.store
 
 /**
  * Returns true if the provided aleph message is a program message
  */
 export const isProgram = (msg: ProgramMessage | StoreMessage) =>
-  msg.type === MessageType.program;
+  msg.type === MessageType.program
