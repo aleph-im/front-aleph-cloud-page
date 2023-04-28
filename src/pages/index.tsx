@@ -8,6 +8,7 @@ import {
   Tag,
   Icon,
   addClasses,
+  useResponsiveMin,
 } from '@aleph-front/aleph-core'
 import Container from '@/components/Container'
 import { IndexingImg } from '@/components/Imgs/IndexingImg'
@@ -42,12 +43,6 @@ const StyledLink = styled(Button).attrs((props) => {
     variant: 'text-only',
     size: 'regular',
     color: 'main0',
-    onClick: (e: MouseEvent) => {
-      if (!(e.currentTarget as HTMLAnchorElement).href) {
-        alert('href not implemented')
-        e.preventDefault()
-      }
-    },
   }
 })``
 
@@ -60,8 +55,12 @@ const StyledTag = styled(Tag).attrs(addClasses('tp-body1 fs-lg'))(() => [
 ])
 
 export default function Home() {
+  const isDesktop = useResponsiveMin('md')
+
   const [ref1, handleScroll1] = useScrollTo()
   const [ref2, handleScroll2] = useScrollTo()
+
+  const featureSectionBg = isDesktop ? '' : 'fx-glass-base0'
 
   return (
     <>
@@ -122,7 +121,7 @@ export default function Home() {
           </Row>
         </Container>
       </section>
-      <section tw="px-0 py-12 md:py-20">
+      <section className={featureSectionBg} tw="px-0 py-12 md:py-20">
         <Container>
           <Row xs={1} md={4} gap="1.5rem">
             <Col>
@@ -154,7 +153,7 @@ export default function Home() {
           </Row>
         </Container>
       </section>
-      <section className="fx-noise-light" tw="px-0 pt-20 pb-12 md:py-20">
+      <section className="fx-noise-light" tw="px-0 pt-20 pb-10 md:pb-20">
         <Container>
           <Row xs={1} md={2} gap="1.5rem">
             <Col>
@@ -164,24 +163,24 @@ export default function Home() {
               <span className="tp-info" tw="mb-0">
                 SOLANA - ETHEREUM - BINANCE SMART CHAIN
               </span>
-              <TextGradient type="h3" as="h2" color="main0">
-                Indexing framework
-              </TextGradient>
-              <p className="fs-md" tw="mb-12">
+              <H2 className="tp-h4 md:tp-h3">Indexing framework</H2>
+              <p className="fs-md" tw="mt-0 mb-16">
                 Consider using the Aleph Indexer Framework for indexing
-                blockchain data. It&apos;s open-source, multi-chain, and
-                provides an easy-to-use solution for building high-performance,
-                decentralized indexers on Aleph.im&apos;s infrastructure.
+                blockchain data. It&apos;s <strong>open-source</strong>,{' '}
+                <strong>multi-chain</strong>, and provides an easy-to-use
+                solution for building <strong>high-performance</strong>,{' '}
+                <strong>decentralized indexers</strong> on{' '}
+                <strong>Aleph.im&apos;s infrastructure</strong>.
               </p>
               <Button
                 forwardedAs="a"
-                href="https://forms.clickup.com/f/q8g62-81/GW7WSGW5BUC0P2HRBE"
+                href="https://bit.ly/3GAAjii"
                 target="_blank"
                 kind="neon"
                 variant="primary"
                 size="big"
                 color="main0"
-                tw="my-6"
+                tw="!my-0"
               >
                 Get in touch with us
               </Button>
@@ -204,7 +203,7 @@ export default function Home() {
           </Row>
         </Container>
       </section>
-      <section tw="px-0 py-12 md:py-20">
+      <section className={featureSectionBg} tw="px-0 py-12 md:py-20">
         <Container>
           <Row xs={1} md={4} gap="1.5rem">
             <Col>
@@ -242,40 +241,88 @@ export default function Home() {
           </h1>
           <Row xs={1} md={2} xsGap="2.625rem" mdGap="1.5rem">
             <Col>
-              <TextGradient as="h2" type="h7" color="main0" tw="mb-6">
+              <TextGradient forwardedAs="h2" type="h7" color="main0" tw="mb-6">
                 How-to’s
               </TextGradient>
               <ul>
                 <StyledLinkItem>
-                  <StyledLink>Host a website</StyledLink>
+                  <StyledLink
+                    href="https://docs.aleph.im/guides/update_a_program"
+                    target="_blank"
+                  >
+                    Update a program
+                  </StyledLink>
                 </StyledLinkItem>
                 <StyledLinkItem>
-                  <StyledLink>Store files now</StyledLink>
+                  <StyledLink
+                    href="https://docs.aleph.im/guides/python/dependency_volume"
+                    target="_blank"
+                  >
+                    Add dependencies to a program
+                  </StyledLink>
                 </StyledLinkItem>
                 <StyledLinkItem>
-                  <StyledLink>Pin a file</StyledLink>
-                </StyledLinkItem>
-                <StyledLinkItem>
-                  <StyledLink>Local VM&apos;s for testing</StyledLink>
+                  <StyledLink
+                    href="https://docs.aleph.im/guides/testing_microvms"
+                    target="_blank"
+                  >
+                    Local VM&apos;s for testing
+                  </StyledLink>
                 </StyledLinkItem>
                 <StyledLinkItem last>
-                  <StyledLink>Start indexing</StyledLink>
+                  <StyledLink
+                    href="https://github.com/aleph-im/aleph-indexer-library#aleph-indexer-library"
+                    target="_blank"
+                  >
+                    Start indexing
+                  </StyledLink>
                 </StyledLinkItem>
               </ul>
             </Col>
             <Col>
-              <TextGradient as="h2" type="h7" color="main0" tw="mb-6">
+              <TextGradient forwardedAs="h2" type="h7" color="main0" tw="mb-6">
                 Learn best practice
               </TextGradient>
               <ul>
                 <StyledLinkItem>
-                  <StyledLink>Trigger your VM</StyledLink>
+                  <StyledLink
+                    href="https://docs.aleph.im/guides/python/getting_started"
+                    target="_blank"
+                  >
+                    Build a Python VM
+                  </StyledLink>
                 </StyledLinkItem>
                 <StyledLinkItem>
-                  <StyledLink>Aggregates vs posts</StyledLink>
+                  <StyledLink
+                    href="https://aleph-im.gitbook.io/aleph-docs/virtual-machines-vm/help-articles/how-to-create-a-vm-with-nodejs-and-node_modules"
+                    target="_blank"
+                  >
+                    Build a NodeJS VM
+                  </StyledLink>
+                </StyledLinkItem>
+                <StyledLinkItem>
+                  <StyledLink
+                    href="https://docs.aleph.im/guides/rust/rust_microvm"
+                    target="_blank"
+                  >
+                    Build a Rust VM
+                  </StyledLink>
+                </StyledLinkItem>
+                <StyledLinkItem>
+                  <StyledLink
+                    href="https://docs.aleph.im/computing/runtimes/custom"
+                    target="_blank"
+                  >
+                    Build a custom runtime
+                  </StyledLink>
                 </StyledLinkItem>
                 <StyledLinkItem last>
-                  <StyledLink>Encrypt your data</StyledLink>
+                  <StyledLink
+                    href="https://docs.aleph.im/guides/python/advanced"
+                    target="_blank"
+                  >
+                    Advanced Python program features
+                  </StyledLink>
                 </StyledLinkItem>
               </ul>
             </Col>
