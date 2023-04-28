@@ -1,9 +1,9 @@
 import { addClasses, TextGradient } from '@aleph-front/aleph-core'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 
 export const StyledH2 = styled(TextGradient).attrs(props => {
   return {
-    ...addClasses('d-iblock')(props),
+    ...props,
     forwardedAs: 'h2',
     type: 'h5',
     color: props.color || 'main0'

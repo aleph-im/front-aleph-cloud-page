@@ -38,7 +38,7 @@ export default function DashboardHome() {
     )
 
     return (
-      <div className="py-md">
+      <div tw="py-5">
         <Table
           border="none"
           oddRowNoise
@@ -99,11 +99,11 @@ export default function DashboardHome() {
 
   return (
     <>
-      <section className="py-lg">
+      <section tw="py-6">
         <AutoBreadcrumb />
       </section>
 
-      <CenteredSection className="py-lg">
+      <CenteredSection tw="py-6">
         <Tabs tabs={
           [
             {
@@ -117,7 +117,7 @@ export default function DashboardHome() {
               component: (
                 <>
                   <TabContent data={functions || []} />
-                  <div className="my-xl text-center">
+                  <div tw="my-7 text-center">
                     <ButtonLink variant="primary" href="/solutions/dashboard/function">Create function</ButtonLink>
                   </div>
                 </>
@@ -130,7 +130,7 @@ export default function DashboardHome() {
               component: (
                 <>
                   <TabContent data={volumes || []} />
-                  <div className="my-xl text-center">
+                  <div tw="my-7 text-center">
                     <ButtonLink variant="primary" href="/solutions/dashboard/volume">Create volume</ButtonLink>
                   </div>
                 </>

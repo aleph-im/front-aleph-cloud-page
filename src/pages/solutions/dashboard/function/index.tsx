@@ -43,7 +43,7 @@ export default function NewFunctionPage() {
               name: 'Online editor',
               component: (
                 <>
-                  <div className="py-md">
+                  <div tw="py-5">
                     <NoisyContainer>
                       <RadioGroup direction="row">
                         <Radio
@@ -64,7 +64,7 @@ export default function NewFunctionPage() {
                       </RadioGroup>
                     </NoisyContainer>
                   </div>
-                  <div className="py-md">
+                  <div tw="py-5">
                     <CodeEditor onChange={value => setFormValue('functionCode', value)}
                       value={formState.functionCode}
                       language="python" />
@@ -74,11 +74,11 @@ export default function NewFunctionPage() {
             {
               name: 'Upload code',
               component: (
-                <div className="py-md text-center">
+                <div tw="py-5 text-center">
                   <p>Please select a zip archive</p>
 
                   <HiddenFileInput value={formState.functionFile} accept=".zip" onChange={(file) => setFormValue('functionFile', file)}>
-                    Upload zip archive <Icon name="arrow-up" className="ml-sm" />
+                    Upload zip archive <Icon name="arrow-up" tw="ml-4" />
                   </HiddenFileInput>
                 </div>
               )
@@ -117,7 +117,7 @@ export default function NewFunctionPage() {
                 value="custom" />
             </RadioGroup>
 
-            <div className={"my-md " + (formState.runtime !== 'custom' ? "unavailable-content" : "")}>
+            <div className={formState.runtime !== 'custom' ? "unavailable-content" : ""} tw="my-5">
               <TextInput
                 label="Runtime hash"
                 placeholder={"3335ad270a571b..."}
@@ -226,7 +226,7 @@ export default function NewFunctionPage() {
           <p>Organize and identify your functions more effectively by assigning a unique name, obtaining a hash reference, and defining multiple tags. This helps streamline your development process and makes it easier to manage your web3 functions.</p>
 
           <NoisyContainer>
-            <div className="my-md">
+            <div tw="my-5">
               <TextInput
                 label="Function name"
                 placeholder="Give it a name"
@@ -235,7 +235,7 @@ export default function NewFunctionPage() {
                 onChange={e => setFormValue('functionName', e.target.value)} />
             </div>
 
-            <div className="my-md">
+            <div tw="my-5">
               <ChipInput
                 label="Tags"
                 placeholder="Tags (press enter to add a new tag)"
@@ -256,7 +256,7 @@ export default function NewFunctionPage() {
               {
                 formState.environmentVariables.map((variable, index) => (
                   // eslint-disable-next-line react/jsx-key
-                  <div className="my-md d-flex flex-jc-sb">
+                  <div tw="flex justify-between my-5">
                     <TextInput
                       name={`__config_env_var_${index}_name`}
                       placeholder="Name"
@@ -274,7 +274,7 @@ export default function NewFunctionPage() {
             </NoisyContainer>
           }
 
-          <div className="my-md">
+          <div tw="my-5">
             <Button type="button" onClick={addEnvironmentVariable} color="main0" variant="secondary" kind="neon" size="regular">
               Add variable
             </Button>
@@ -315,7 +315,7 @@ export default function NewFunctionPage() {
               handleUseLatestChange={(e) => setVolumeValue(iVolume, 'useLatest', e.target.checked)}
               removeCallback={() => removeVolume(iVolume)}
               handleVolumeType={i => setVolumeType(iVolume, i)}
-             />
+            />
           ))}
 
           <Button type="button" onClick={addVolume} color="main0" variant="secondary" kind="neon" size="regular">
@@ -323,31 +323,31 @@ export default function NewFunctionPage() {
           </Button>
         </CenteredSection>
 
-        <section className="fx-noise-light p-md">
+        <section className="fx-noise-light" tw="p-5">
           <CenteredSection>
             <TextGradient type="h4">Estimated holding requirements</TextGradient>
-            <div className="my-md">
+            <div tw="my-5">
               <TextGradient
                 color="main2"
                 type="body">
-                  This amount needs to be present in your wallet until the function is removed. Tokens won	&#39;t be locked nor consumed. The function will be garbage collected once funds are removed from the wallet. 
+                This amount needs to be present in your wallet until the function is removed. Tokens won	&#39;t be locked nor consumed. The function will be garbage collected once funds are removed from the wallet.
               </TextGradient>
               <ExternalLink href="https://aleph.im" text="Learn about the benefits" />
             </div>
 
-            <div className="my-xl">
-              <HoldingRequirements 
+            <div tw="my-7">
+              <HoldingRequirements
                 address={address}
                 computeUnits={{
-                  type: 'function', 
-                  number: formState.computeUnits, 
+                  type: 'function',
+                  number: formState.computeUnits,
                   isPersistent: formState.isPersistent
                 }}
                 storage={formState.volumes}
                 unlockedAmount={accountBalance} />
             </div>
 
-            <div className="my-xl text-center">
+            <div tw="my-7 text-center">
               <Button type="submit" color="main0" kind="neon" size="big" variant="primary">Create function</Button>
             </div>
           </CenteredSection>

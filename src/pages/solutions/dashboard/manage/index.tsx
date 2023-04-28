@@ -10,8 +10,10 @@ import { ProgramMessage, StoreMessage } from "aleph-sdk-ts/dist/messages/message
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
+import tw from "twin.macro";
 
-const Separator = styled.hr.attrs({ className: 'my-md' })`
+const Separator = styled.hr`
+  ${tw`my-5`}
   border: 0;
   border-top: 1px solid #FFF;
   opacity: .25;
@@ -31,7 +33,7 @@ export default function DashboardManage() {
   useEffect(() => {
     const dispatchMsg = async () => {
       const msg = await getMessage(hash as string)
-      if(isVolume(msg as StoreMessage | ProgramMessage))
+      if (isVolume(msg as StoreMessage | ProgramMessage))
         setMessage(msg as StoreMessage)
       else
         setMessage(msg as ProgramMessage)
@@ -51,7 +53,6 @@ export default function DashboardManage() {
     </>
   )
 
-
   const handleDelete = async () => {
     // Account is instanciated in useConnected hook
     // @ts-ignore
@@ -70,7 +71,7 @@ export default function DashboardManage() {
     itemType: "",
     linkedVolumes: []
   }
-  if(isVolume(message)) {
+  if (isVolume(message)) {
     displayedInformation.name = ellipseAddress(message.item_hash)
     displayedInformation.downloadLink = programStorageURL + message.item_hash
     displayedInformation.itemType = "Volume"
@@ -84,11 +85,10 @@ export default function DashboardManage() {
   return (
     <>
       <AutoBreadcrumb name={displayedInformation.name} />
-
       <CenteredSection>
-        <div className="d-flex flex-jc-sb py-sm">
-          <div className="d-flex flex-ai-c">
-            <Icon name="alien-8bit" className="mr-sm" />
+        <div tw="flex justify-between py-4">
+          <div tw="flex items-center">
+            <Icon name="alien-8bit" tw="mr-4" />
             <div>{displayedInformation.name}</div>
           </div>
           <div>
@@ -97,8 +97,8 @@ export default function DashboardManage() {
               variant="tertiary"
               color="main0"
               kind="neon"
-              className="mr-sm"
-              as="a"
+              tw="!mr-4"
+              forwardedAs="a"
               href={displayedInformation.downloadLink}>
               Download
             </Button>
@@ -112,8 +112,8 @@ export default function DashboardManage() {
         </div>
 
         <NoisyContainer>
-          <div className="d-flex flex-ai-s">
-            <Tag className="tp-body2 fs-sm mr-sm">{displayedInformation.itemType}</Tag>
+          <div tw="flex items-start">
+            <Tag className="tp-body2 fs-sm" tw="mr-4">{displayedInformation.itemType}</Tag>
             <div>
               <TextGradient type="info">ITEM HASH</TextGradient>
               <div>{hash}</div>
@@ -122,48 +122,48 @@ export default function DashboardManage() {
 
           <Separator />
 
-          <div className="my-md">
+          <div tw="my-5">
             <TextGradient type="info">FUNCTION LINE</TextGradient>
             <div>
               <a className="tp-body1 fs-sm" href={defaultVMURL + hash} target="_blank" referrerPolicy="no-referrer">
                 {defaultVMURL + ellipseAddress(hash as string)}
 
-                <Icon name="arrow-up-right-from-square" className="ml-xs" />
+                <Icon name="arrow-up-right-from-square" tw="ml-2.5" />
               </a>
             </div>
           </div>
 
-          <div className="my-md">
+          <div tw="my-5">
             <TextGradient type="info">EXPLORER</TextGradient>
             <div>
               <a className="tp-body1 fs-sm" href={getExplorerURL(message)} target="_blank" referrerPolicy="no-referrer">
                 https://explorer.aleph.im/
 
-                <Icon name="arrow-up-right-from-square" className="ml-xs" />
+                <Icon name="arrow-up-right-from-square" tw="ml-2.5" />
               </a>
             </div>
           </div>
 
-          { displayedInformation.linkedVolumes.length > 0 &&
+          {displayedInformation.linkedVolumes.length > 0 &&
             <>
               <Separator />
 
               <TextGradient type="h6" color="main1">Linked storage</TextGradient>
-              { displayedInformation.linkedVolumes.map((volume, i) => (
-                  <div className="my-md" key={i}>
-                    <TextGradient type="info">
-                      {volume?.persistence === 'host' ? "Persistent " : "Immutable "} volume
-                    </TextGradient>
+              {displayedInformation.linkedVolumes.map((volume, i) => (
+                <div tw="my-5" key={i}>
+                  <TextGradient type="info">
+                    {volume?.persistence === 'host' ? "Persistent " : "Immutable "} volume
+                  </TextGradient>
 
-                    <pre>
-                      {JSON.stringify(volume, null, 2)}
-                    </pre>
-                  </div>
-                ))
+                  <pre>
+                    {JSON.stringify(volume, null, 2)}
+                  </pre>
+                </div>
+              ))
               }
-          </>
+            </>
           }
-          </NoisyContainer>
+        </NoisyContainer>
       </CenteredSection>
     </>
   )

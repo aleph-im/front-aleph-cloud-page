@@ -42,7 +42,7 @@ const HiddenFileInput = ({ onChange, accept, value, children }: HiddenFileInputP
       {
         inMemoryFile ?
         <Button onClick={() => handleChange(null)} type="button" color="main2" kind="neon" size="regular" variant="tertiary">
-          {ellipseAddress(inMemoryFile.name)} <Icon name="trash" className="ml-md" />
+          {ellipseAddress(inMemoryFile.name)} <Icon name="trash" tw="ml-5" />
         </Button>
         :
         <Button onClick={handleClick} type="button" color="main0" kind="neon" size="regular" variant="primary">

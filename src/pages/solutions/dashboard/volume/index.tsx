@@ -34,10 +34,10 @@ export default function NewVolumePage(){
         />
       </CenteredSection>
 
-      <section className="fx-noise-light p-md">
+      <section className="fx-noise-light" tw="p-5">
         <CenteredSection>
           <TextGradient type="h4">Estimated holding requirements</TextGradient>
-          <div className="my-md">
+          <div tw="my-5">
             <TextGradient
               color="main2"
               type="body">
@@ -51,7 +51,7 @@ export default function NewVolumePage(){
             storage={[volumeState]}
             unlockedAmount={accountBalance} />
 
-          <div className="my-xl text-center">
+          <div tw="my-7 text-center">
             <Button type="submit" color="main0" kind="neon" size="big" variant="primary">Create volume</Button>
           </div>
         </CenteredSection>

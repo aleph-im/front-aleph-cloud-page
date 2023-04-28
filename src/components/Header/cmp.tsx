@@ -45,7 +45,7 @@ export const Header = (props: HeaderProps) => {
             </NavbarLinkList>
             <NavbarLinkList onlyDesktop>
               <NavbarLink><StyledButton key="link" forwardedAs="button" disabled><Icon name="ethereum" /></StyledButton></NavbarLink>
-              <NavbarLink><Button as="button" variant="secondary" color="main1" kind="neon" size="regular">{ellipseAddress(state.account?.address)} <Icon name="meteor" size="lg" className="ml-xs" color={theme.color.main1}/></Button></NavbarLink>
+              <NavbarLink><Button as="button" variant="secondary" color="main1" kind="neon" size="regular">{ellipseAddress(state.account?.address)} <Icon name="meteor" size="lg" tw="ml-2.5" color={theme.color.main1}/></Button></NavbarLink>
             </NavbarLinkList>
           </>
         ) : (
@@ -56,13 +56,13 @@ export const Header = (props: HeaderProps) => {
             </NavbarLinkList>
             <NavbarLinkList onlyDesktop>
               <NavbarLink><StyledButton key="link" forwardedAs="button" disabled><Icon name="link-simple-slash" /></StyledButton></NavbarLink>
-              <NavbarLink><StyledButton onClick={login} forwardedAs="button">Connect <Icon name="meteor" size="lg" className="ml-xs" color={theme.color.main0}/></StyledButton></NavbarLink>
+              <NavbarLink><StyledButton onClick={login} forwardedAs="button">Connect <Icon name="meteor" size="lg" tw="ml-2.5" color={theme.color.main0}/></StyledButton></NavbarLink>
             </NavbarLinkList>
           </>
         )
         )}
       </StyledNavbar>
-    </StyledHeader >
+    </StyledHeader>
   )
 }
 

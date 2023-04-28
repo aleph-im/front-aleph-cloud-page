@@ -7,7 +7,7 @@ config.autoAddCss = false
 
 import type { AppProps } from 'next/app'
 import { ThemeProvider } from 'styled-components'
-import { themes, GlobalStyle } from '@aleph-front/aleph-core'
+import { themes, GlobalStyles } from '@aleph-front/aleph-core'
 import Footer from '@/components/Footer'
 import { GlobalStylesOverride } from '@/styles/global'
 import Header from '@/components/Header'
@@ -24,12 +24,14 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ThemeProvider theme={themes.dark}>
-      <GlobalStyle />
+      <GlobalStyles />
       <GlobalStylesOverride />
       <AppStateProvider>
         <NotificationProvider>
           <Header />
-          <Component {...pageProps} />
+          <main>
+            <Component {...pageProps} />
+          </main>
           <Footer small={small} />
         </NotificationProvider>
       </AppStateProvider>

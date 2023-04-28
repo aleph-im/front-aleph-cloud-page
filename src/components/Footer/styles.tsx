@@ -2,8 +2,10 @@ import { addClasses, Button, Icon } from '@aleph-front/aleph-core'
 import styled, {
   css,
 } from 'styled-components'
+import tw from 'twin.macro'
 
-export const StyledFooter = styled.footer.attrs(addClasses('py-xxl py-xxl-md'))`
+export const StyledFooter = styled.footer`
+  ${tw`py-12 md:py-12`}
   background-color: #00000033;
   box-sizing: border-box;
   width: 100%;
@@ -11,15 +13,15 @@ export const StyledFooter = styled.footer.attrs(addClasses('py-xxl py-xxl-md'))`
 
 export const StyledButton = styled(Button).attrs(props => {
   return {
-    ...addClasses('mb-lg')(props),
+    ...props,
     kind: 'neon',
     variant: 'tertiary',
     color: 'main0',
     size: 'big',
   }
 })`
+  ${tw`mb-6`}
   display: block;
-  
   margin-bottom: 1.5rem;
 
   &:last-child {
@@ -50,15 +52,14 @@ export const StyledLink = styled.a.attrs(props => {
 
 export const StyledIcon = styled(Icon).attrs(props => {
   return {
-    ...addClasses('mr-xs')(props),
+    ...props,
     size: 'lg',
   }
-})``
-
+})(() => [tw`mr-2.5`])
 
 export const StyledIcon2 = styled(Icon).attrs(props => {
   return {
-    ...addClasses('ml-xs')(props),
+    ...props,
     size: 'lg',
   }
-})``
+})(() => [tw`ml-2.5`])

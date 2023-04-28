@@ -1,5 +1,6 @@
-import { addClasses, Button, Navbar } from '@aleph-front/aleph-core'
+import { Button, Navbar } from '@aleph-front/aleph-core'
 import styled from 'styled-components'
+import tw from 'twin.macro'
 
 export const StyledHeader = styled.header`
   font-size: inherit;
@@ -13,7 +14,7 @@ export const StyledHeader = styled.header`
   /* background-color: #141327CC; */
 `
 
-export const StyledNavbar = styled(Navbar).attrs(addClasses('px-0'))`
+export const StyledNavbar = styled(Navbar)`
   position: relative;
 `
 
@@ -25,7 +26,7 @@ export const StyledButton = styled(Button).attrs(props => {
     size: 'regular',
     variant: 'tertiary',
   }
-})<any>`
+}) <any>`
   display: block;
   
   &:last-child {
