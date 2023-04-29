@@ -15,6 +15,7 @@ import {
 } from 'aleph-sdk-ts/dist/messages/message'
 import { useHomePage } from '@/hooks/pages/useDashboardHomePage'
 import { useMemo, useState } from 'react'
+import { ImmutableVolume, PersistentVolume } from 'aleph-sdk-ts/dist/messages/program/programModel'
 
 export default function DashboardHome() {
   const { products, functions, volumes } = useHomePage()
@@ -40,9 +41,18 @@ export default function DashboardHome() {
           return {
             ...product,
             size: (product as ProgramMessage).content?.volumes.reduce(
-              (ac, cv) =>
-                // FIXME: Volume is not properly defined in aleph-sdk-ts
-                (ac += cv?.size_mib || 0),
+              (ac, cv) => {
+                const immutableVolumeRef = volumes.find(v => (cv as ImmutableVolume)?.ref === v?.item_hash)
+                if(immutableVolumeRef){
+                  return ac + immutableVolumeRef?.size
+                }
+                const persistentVolume = (cv as PersistentVolume)?.size_mib
+
+                if(persistentVolume){
+                  return ac + persistentVolume * 10**3
+                }
+                return ac
+              },
               0,
             ),
           }
@@ -50,10 +60,12 @@ export default function DashboardHome() {
       [data],
     )
 
+    console.log(flattenedSizeData)
+
     return (
       <div tw="py-5">
         <Table
-          border="none"
+          borderType="none"
           oddRowNoise
           keySelector={(row: ProgramMessage) => row?.item_hash}
           data={flattenedSizeData}

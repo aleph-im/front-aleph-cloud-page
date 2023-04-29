@@ -27,20 +27,20 @@ export const Header = (props: HeaderProps) => {
   const [state, dispatch] = useAppState()
   const theme = useTheme()
 
-  useEffect(() => {
-    ;(async () => {
-      if (!state.account && (window?.ethereum as any).isConnected()) {
-        const accounts = await (window.ethereum as any).request({
-          method: 'eth_requestAccounts',
-        })
-        const ethAccount = ethers.utils.getAddress(accounts[0])
-        const account = new ETHAccount(window?.ethereum as any, ethAccount)
-        dispatch({ type: ActionTypes.connect, payload: { account } })
-        await getBalance(account)
-        await getProducts(account)
-      }
-    })()
-  }, [state.account])
+  // useEffect(() => {
+  //   ;(async () => {
+  //     if (!state.account && (window?.ethereum as any).isConnected()) {
+  //       const accounts = await (window.ethereum as any).request({
+  //         method: 'eth_requestAccounts',
+  //       })
+  //       const ethAccount = ethers.utils.getAddress(accounts[0])
+  //       const account = new ETHAccount(window?.ethereum as any, ethAccount)
+  //       dispatch({ type: ActionTypes.connect, payload: { account } })
+  //       await getBalance(account)
+  //       await getProducts(account)
+  //     }
+  //   })()
+  // }, [state.account])
 
   const login = async () => {
     const account = await web3Connect(Chain.ETH, window?.ethereum)
