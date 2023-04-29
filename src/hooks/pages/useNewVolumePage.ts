@@ -26,9 +26,8 @@ export function useNewVolumePage() {
     }))
   }
 
-  const setVolumeType = (volumeType: number) => {
-    const volumeTypes: VolumeTypes[] = ['new', 'existing', 'persistent']
-    setVolumeProperty('type', volumeTypes[volumeType])
+  const setVolumeType = (volumeType: VolumeTypes) => {
+    setVolumeProperty('type', volumeType)
   }
 
   const handleSubmit = async (e: FormEvent) => {

@@ -25,6 +25,7 @@ import { useNewFunctionPage } from '@/hooks/pages/useNewFunctionPage'
 import NewVolume from '@/components/NewVolume/cmp'
 import HoldingRequirements from '@/components/HoldingRequirements'
 import ExternalLink from '@/components/ExternalLink'
+import { useState } from 'react'
 
 export default function NewFunctionPage() {
   const {
@@ -41,6 +42,8 @@ export default function NewFunctionPage() {
     address,
     accountBalance,
   } = useNewFunctionPage()
+
+  const [tabId, setTabId] = useState('code')
 
   return (
     <>
@@ -63,67 +66,71 @@ export default function NewFunctionPage() {
           </p>
 
           <Tabs
+            selected={tabId}
             align="left"
             tabs={[
               {
+                id: 'code',
                 name: 'Online editor',
-                component: (
-                  <>
-                    <div tw="py-5">
-                      <NoisyContainer>
-                        <RadioGroup direction="row">
-                          <Radio
-                            checked={formState.codeLanguage === 'python'}
-                            label="Python 3.9"
-                            name="__config_code_language"
-                            onChange={() => setFormValue('codeLanguage', false)}
-                            value="on-demand"
-                          />
-                          <Radio
-                            checked={formState.codeLanguage === 'javascript'}
-                            label="Node.js"
-                            disabled
-                            name="__config_code_language"
-                            onChange={() => setFormValue('codeLanguage', true)}
-                            value="persistent"
-                          />
-                        </RadioGroup>
-                      </NoisyContainer>
-                    </div>
-                    <div tw="py-5">
-                      <CodeEditor
-                        onChange={(value) =>
-                          setFormValue('functionCode', value)
-                        }
-                        value={formState.functionCode}
-                        language="python"
-                      />
-                    </div>
-                  </>
-                ),
               },
               {
+                id: 'file',
                 name: 'Upload code',
-                component: (
-                  <div tw="py-5 text-center">
-                    <p>Please select a zip archive</p>
-
-                    <HiddenFileInput
-                      value={formState.functionFile}
-                      accept=".zip"
-                      onChange={(file) => setFormValue('functionFile', file)}
-                    >
-                      Upload zip archive <Icon name="arrow-up" tw="ml-4" />
-                    </HiddenFileInput>
-                  </div>
-                ),
               },
             ]}
-            onTabChange={(_from, to) => {
-              const codeOrFile = to === 0 ? 'code' : 'file'
-              setFormValue('codeOrFile', codeOrFile)
+            onTabChange={(id) => {
+              setTabId(id)
+              setFormValue('codeOrFile', id)
             }}
           />
+          <div role="tabpanel" tw="p-10">
+            {tabId === 'code' ? (
+              <>
+                <div tw="py-5">
+                  <NoisyContainer>
+                    <RadioGroup direction="row">
+                      <Radio
+                        checked={formState.codeLanguage === 'python'}
+                        label="Python 3.9"
+                        name="__config_code_language"
+                        onChange={() => setFormValue('codeLanguage', false)}
+                        value="on-demand"
+                      />
+                      <Radio
+                        checked={formState.codeLanguage === 'javascript'}
+                        label="Node.js"
+                        disabled
+                        name="__config_code_language"
+                        onChange={() => setFormValue('codeLanguage', true)}
+                        value="persistent"
+                      />
+                    </RadioGroup>
+                  </NoisyContainer>
+                </div>
+                <div tw="py-5">
+                  <CodeEditor
+                    onChange={(value) => setFormValue('functionCode', value)}
+                    value={formState.functionCode}
+                    language="python"
+                  />
+                </div>
+              </>
+            ) : tabId === 'file' ? (
+              <div tw="py-5 text-center">
+                <p>Please select a zip archive</p>
+
+                <HiddenFileInput
+                  value={formState.functionFile}
+                  accept=".zip"
+                  onChange={(file) => setFormValue('functionFile', file)}
+                >
+                  Upload zip archive <Icon name="arrow-up" tw="ml-4" />
+                </HiddenFileInput>
+              </div>
+            ) : (
+              <></>
+            )}
+          </div>
         </CenteredSection>
 
         <CenteredSection>

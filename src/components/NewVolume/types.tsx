@@ -1,3 +1,5 @@
+import { VolumeTypes } from '@/helpers/form'
+
 export type RemoveVolumeProps = {
   removeCallback: () => void
 }
@@ -16,6 +18,6 @@ export type NewVolumeProps = {
   volumeRefHash?: string
   handleRefHashChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   volumeType?: number
-  handleVolumeType: (t: number) => void
+  handleVolumeType: (t: VolumeTypes) => void
   isStandAlone?: boolean
 } & Partial<RemoveVolumeProps>

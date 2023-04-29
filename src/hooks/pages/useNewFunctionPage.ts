@@ -35,7 +35,7 @@ export type NewFunctionPage = {
   ) => void
   addEnvironmentVariable: () => void
   removeEnvironmentVariable: (variableIndex: number) => void
-  setVolumeType: (volumeIndex: number, volumeType: number) => void
+  setVolumeType: (volumeIndex: number, volumeType: VolumeTypes) => void
   setVolumeValue: (
     volumeIndex: number,
     volumekey: keyof Volume,
@@ -177,13 +177,12 @@ export function useNewFunctionPage(): NewFunctionPage {
     )
   }
 
-  const setVolumeType = (volumeIndex: number, volumeType: number) => {
-    const volumeTypes: VolumeTypes[] = ['new', 'existing', 'persistent']
+  const setVolumeType = (volumeIndex: number, volumeType: VolumeTypes) => {
     const volumes = [...formState.volumes]
 
     volumes[volumeIndex] = {
       ...volumes[volumeIndex],
-      type: volumeTypes[volumeType],
+      type: volumeType,
     }
     setFormValue('volumes', volumes)
   }

@@ -1,4 +1,4 @@
-import { Button, Table, Tabs } from '@aleph-front/aleph-core'
+import { Table, Tabs } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/ButtonLink'
 import CenteredSection from '@/components/CenteredSection'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
@@ -14,10 +14,11 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
 import { useHomePage } from '@/hooks/pages/useDashboardHomePage'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 export default function DashboardHome() {
   const { products, functions, volumes } = useHomePage()
+  const [tabId, setTabId] = useState('all')
 
   // FIXME: Selector function signature
   const TabContent = ({
@@ -25,7 +26,7 @@ export default function DashboardHome() {
   }: {
     data: (ProgramMessage | StoreMessage)[]
   }) => {
-    const flattenedSizeData = useMemo(
+    const flattenedSizeData: ProgramMessage[] = useMemo(
       () =>
         data.map((product) => {
           if (!product?.type) return product
@@ -45,7 +46,7 @@ export default function DashboardHome() {
               0,
             ),
           }
-        }),
+        }) as ProgramMessage[],
       [data],
     )
 
@@ -59,7 +60,8 @@ export default function DashboardHome() {
           columns={[
             {
               label: 'Type',
-              selector: (row) => (isVolume(row) ? 'Volume' : 'Function'),
+              selector: (row: ProgramMessage) =>
+                isVolume(row) ? 'Volume' : 'Function',
               sortable: true,
             },
             {
@@ -120,51 +122,60 @@ export default function DashboardHome() {
 
       <CenteredSection tw="py-6">
         <Tabs
+          selected={tabId}
           tabs={[
             {
+              id: 'all',
               name: 'All',
-              component: <TabContent data={products} />,
               label: `(${products.length || 0})`,
               labelPosition: 'bottom',
             },
             {
+              id: 'function',
               name: 'Functions',
-              component: (
-                <>
-                  <TabContent data={functions || []} />
-                  <div tw="my-7 text-center">
-                    <ButtonLink
-                      variant="primary"
-                      href="/solutions/dashboard/function"
-                    >
-                      Create function
-                    </ButtonLink>
-                  </div>
-                </>
-              ),
               label: `(${functions?.length || 0})`,
               labelPosition: 'bottom',
             },
             {
+              id: 'volume',
               name: 'Immutable Volumes',
-              component: (
-                <>
-                  <TabContent data={volumes || []} />
-                  <div tw="my-7 text-center">
-                    <ButtonLink
-                      variant="primary"
-                      href="/solutions/dashboard/volume"
-                    >
-                      Create volume
-                    </ButtonLink>
-                  </div>
-                </>
-              ),
               label: `(${volumes?.length || 0})`,
               labelPosition: 'bottom',
             },
           ]}
+          onTabChange={setTabId}
         />
+        <div role="tabpanel" tw="p-10">
+          {tabId === 'all' ? (
+            <TabContent data={products} />
+          ) : tabId === 'function' ? (
+            <>
+              <TabContent data={functions || []} />
+              <div tw="my-7 text-center">
+                <ButtonLink
+                  variant="primary"
+                  href="/solutions/dashboard/function"
+                >
+                  Create function
+                </ButtonLink>
+              </div>
+            </>
+          ) : tabId === 'volume' ? (
+            <>
+              <TabContent data={volumes || []} />
+              <div tw="my-7 text-center">
+                <ButtonLink
+                  variant="primary"
+                  href="/solutions/dashboard/volume"
+                >
+                  Create volume
+                </ButtonLink>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
 
         <p>
           Acquire aleph.im tokens for versatile access to resources within a
