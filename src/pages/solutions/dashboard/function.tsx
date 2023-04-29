@@ -244,7 +244,7 @@ export default function NewFunctionPage() {
           </p>
 
           <Table
-            border="none"
+            borderType="none"
             oddRowNoise
             keySelector={(row: any) => row.cpu}
             columns={[
