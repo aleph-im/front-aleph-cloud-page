@@ -7,7 +7,8 @@
     "build": "next build",
     "export": "next export",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
     "@aleph-front/aleph-core": "^1.2.3",

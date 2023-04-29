@@ -15,7 +15,10 @@ import {
 } from 'aleph-sdk-ts/dist/messages/message'
 import { useHomePage } from '@/hooks/pages/useDashboardHomePage'
 import { useMemo, useState } from 'react'
-import { ImmutableVolume, PersistentVolume } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import {
+  ImmutableVolume,
+  PersistentVolume,
+} from 'aleph-sdk-ts/dist/messages/program/programModel'
 
 export default function DashboardHome() {
   const { products, functions, volumes } = useHomePage()
@@ -42,14 +45,16 @@ export default function DashboardHome() {
             ...product,
             size: (product as ProgramMessage).content?.volumes.reduce(
               (ac, cv) => {
-                const immutableVolumeRef = volumes.find(v => (cv as ImmutableVolume)?.ref === v?.item_hash)
-                if(immutableVolumeRef){
+                const immutableVolumeRef = volumes.find(
+                  (v) => (cv as ImmutableVolume)?.ref === v?.item_hash,
+                )
+                if (immutableVolumeRef) {
                   return ac + immutableVolumeRef?.size
                 }
                 const persistentVolume = (cv as PersistentVolume)?.size_mib
 
-                if(persistentVolume){
-                  return ac + persistentVolume * 10**3
+                if (persistentVolume) {
+                  return ac + persistentVolume * 10 ** 3
                 }
                 return ac
               },
