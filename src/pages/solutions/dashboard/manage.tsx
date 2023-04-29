@@ -4,7 +4,7 @@ import NoisyContainer from '@/components/NoisyContainer'
 import { useAppState } from '@/contexts/appState'
 import { deleteVM, getMessage } from '@/helpers/aleph'
 import { defaultVMURL, programStorageURL } from '@/helpers/constants'
-import { ellipseAddress, getExplorerURL, isVolume } from '@/helpers/utils'
+import { ellipseAddress, getExplorerURL, humanReadableSize, isVolume } from '@/helpers/utils'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/aleph-core'
 import {
   MessageType,
@@ -73,12 +73,14 @@ export default function DashboardManage() {
     downloadLink: string
     itemType: string
     linkedVolumes: any[]
+    date: string[]
   }
   const displayedInformation: DisplayedInformation = {
     name: '',
     downloadLink: '',
     itemType: '',
     linkedVolumes: [],
+    date: new Date(message.time * 1000).toISOString().split('T'),
   }
   if (isVolume(message)) {
     displayedInformation.name = ellipseAddress(message.item_hash)
@@ -113,6 +115,7 @@ export default function DashboardManage() {
               tw="!mr-4"
               forwardedAs="a"
               href={displayedInformation.downloadLink}
+              target="_blank"
             >
               Download
             </Button>
@@ -140,7 +143,7 @@ export default function DashboardManage() {
           </div>
 
           <Separator />
-
+          { !isVolume(message) &&
           <div tw="my-5">
             <TextGradient type="info">FUNCTION LINE</TextGradient>
             <div>
@@ -156,6 +159,7 @@ export default function DashboardManage() {
               </a>
             </div>
           </div>
+          }
 
           <div tw="my-5">
             <TextGradient type="info">EXPLORER</TextGradient>
@@ -169,6 +173,22 @@ export default function DashboardManage() {
                 https://explorer.aleph.im/
                 <Icon name="arrow-up-right-from-square" tw="ml-2.5" />
               </a>
+            </div>
+          </div>
+
+          <div tw="my-5 flex">
+            <div>
+              <TextGradient type="info">SIZE</TextGradient>
+              <div>
+                {humanReadableSize(message.size)}
+              </div>
+            </div>
+
+            <div tw="ml-10">
+              <TextGradient type="info">CREATED ON</TextGradient>
+              <div>
+                {displayedInformation.date[0]} {displayedInformation.date[1].split('.')[0]}
+              </div>
             </div>
           </div>
 
