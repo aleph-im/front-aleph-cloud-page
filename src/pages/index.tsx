@@ -16,6 +16,7 @@ import H2 from '@/components/H2'
 import Strong from '@/components/Strong'
 import { useScrollTo } from '@/hooks/useScrollTo'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 
 const StyledH1Button = styled(Button).attrs((props) => {
   return {
@@ -45,11 +46,12 @@ const StyledLink = styled(Button).attrs((props) => {
 })``
 
 export default function Home() {
-  const isDesktop = useResponsiveMin('md')
-
   const [ref1, handleScroll1] = useScrollTo()
   const [ref2, handleScroll2] = useScrollTo()
 
+  const router = useRouter()
+
+  const isDesktop = useResponsiveMin('md')
   const featureSectionBg = isDesktop ? '' : 'fx-glass-base0'
 
   return (
@@ -120,6 +122,9 @@ export default function Home() {
                 text="An isolated environment  created for a  function to execute in response to an event and can run in two modes: on-demand or persistent."
                 buttonLabel="Create function"
                 headerImg="Object10"
+                buttonOnClick={() =>
+                  router.push('/solutions/dashboard/function')
+                }
               />
             </Col>
             <Col>
@@ -202,6 +207,7 @@ export default function Home() {
                 text="Immutable volumes store unchangeable data on IPFS, pinned to multiple nodes for reliable access and reproducible execution."
                 buttonLabel="Create volume"
                 headerImg="Object15"
+                buttonOnClick={() => router.push('/solutions/dashboard/volume')}
               />
             </Col>
             <Col>
@@ -210,6 +216,7 @@ export default function Home() {
                 text="Package your dependencies to an immutable volume upfront to reference it easily and speed up creation time of an instance or function."
                 buttonLabel="Create volume"
                 headerImg="Object13"
+                buttonOnClick={() => router.push('/solutions/dashboard/volume')}
               />
             </Col>
             <Col>

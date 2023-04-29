@@ -8,11 +8,6 @@ export const StyledCard = styled(Card).attrs<{ disabled?: boolean }, CardProps>(
       variant: 'block',
       buttonColor: 'main0',
       buttonVariant: 'secondary',
-      buttonHref: '#',
-      buttonOnClick: ((e: MouseEvent) => {
-        e.preventDefault()
-        return false
-      }) as any,
       buttonDisabled: props.disabled,
     }
   },
