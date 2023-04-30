@@ -47,11 +47,11 @@ export default function NewFunctionPage() {
 
   return (
     <>
+      <section tw="py-6">
+        <AutoBreadcrumb name="Setup new function" />
+      </section>
+      
       <form onSubmit={handleSubmit}>
-        <section>
-          <AutoBreadcrumb name="Setup new function" />
-        </section>
-
         <CenteredSection>
           <CompositeTitle
             number="1"
@@ -126,6 +126,8 @@ export default function NewFunctionPage() {
                 >
                   Upload zip archive <Icon name="arrow-up" tw="ml-4" />
                 </HiddenFileInput>
+
+                <p tw="my-5">Your zip archive should contain a <strong tw="font-bold">main</strong> file (ex: main.py) at its root that exposes an <strong tw="font-bold">app</strong> function. This will serve as an entrypoint to the program</p>
               </div>
             ) : (
               <></>

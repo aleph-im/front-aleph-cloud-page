@@ -17,11 +17,11 @@ export default function NewVolumePage() {
   } = useNewVolumePage()
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <section>
-          <AutoBreadcrumb name="Setup new volume" />
-        </section>
+      <section tw="py-6">
+        <AutoBreadcrumb name="Setup new volume" />
+      </section>
 
+      <form onSubmit={handleSubmit}>
         <CenteredSection>
           <NewVolume
             isStandAlone

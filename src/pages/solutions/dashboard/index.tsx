@@ -65,8 +65,6 @@ export default function DashboardHome() {
       [data],
     )
 
-    console.log(flattenedSizeData)
-
     return (
       <div tw="py-5">
         <Table
