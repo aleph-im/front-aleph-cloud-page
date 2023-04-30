@@ -14,6 +14,7 @@ import Header from '@/components/Header'
 
 import NotificationProvider from '@/components/NotificationProvider'
 import { AppStateProvider } from '@/contexts/appState'
+import AutoBreadcrumb from '@/components/AutoBreadcrumb/cmp'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -24,6 +25,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <NotificationProvider>
           <Header />
           <main>
+            <AutoBreadcrumb homeName="solutions" tw="py-5 px-6 md:px-16" />
             <Component {...pageProps} />
           </main>
           <Footer small={true} />

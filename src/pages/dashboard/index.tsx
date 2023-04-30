@@ -116,9 +116,7 @@ export default function DashboardHome() {
               label: '',
               selector: () => '',
               cell: (row: ProgramMessage) => (
-                <ButtonLink
-                  href={`/solutions/dashboard/manage?hash=${row?.item_hash}`}
-                >
+                <ButtonLink href={`/dashboard/manage?hash=${row?.item_hash}`}>
                   &gt;
                 </ButtonLink>
               ),
@@ -167,10 +165,7 @@ export default function DashboardHome() {
             <>
               <TabContent data={functions || []} />
               <div tw="my-7 text-center">
-                <ButtonLink
-                  variant="primary"
-                  href="/solutions/dashboard/function"
-                >
+                <ButtonLink variant="primary" href="/dashboard/function">
                   Create function
                 </ButtonLink>
               </div>
@@ -179,10 +174,7 @@ export default function DashboardHome() {
             <>
               <TabContent data={volumes || []} />
               <div tw="my-7 text-center">
-                <ButtonLink
-                  variant="primary"
-                  href="/solutions/dashboard/volume"
-                >
+                <ButtonLink variant="primary" href="/dashboard/volume">
                   Create volume
                 </ButtonLink>
               </div>

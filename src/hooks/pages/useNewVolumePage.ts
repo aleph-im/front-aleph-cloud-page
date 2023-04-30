@@ -42,7 +42,7 @@ export function useNewVolumePage() {
       ])
 
       onSuccess(true)
-      router.replace('/solutions/dashboard')
+      router.replace('/dashboard')
     } catch (err) {
       onError(err as Error)
     }

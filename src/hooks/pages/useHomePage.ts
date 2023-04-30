@@ -33,7 +33,7 @@ export function useHomePage(): HomePage {
       if (!acc) return
     }
 
-    router.push('/solutions/dashboard/function')
+    router.push('/dashboard/function')
   }, [connect, isConnected, router])
 
   // @note: wait till account is connected and redirect
@@ -43,7 +43,7 @@ export function useHomePage(): HomePage {
       if (!acc) return
     }
 
-    router.push('/solutions/dashboard/volume')
+    router.push('/dashboard/volume')
   }, [connect, isConnected, router])
 
   return {

@@ -20,7 +20,7 @@ export function useHeader(): Header {
     if (!isConnected) {
       const acc = await connect()
       if (!acc) return
-      router.push('/solutions/dashboard')
+      router.push('/dashboard')
     } else {
       await disconnect()
       router.push('/')

@@ -47,7 +47,7 @@ export const Header = () => {
                 </Link>
               </NavbarLink>
               <NavbarLink>
-                <Link key="dashboard" href="/solutions/dashboard">
+                <Link key="dashboard" href="/dashboard">
                   Dashboard
                 </Link>
               </NavbarLink>

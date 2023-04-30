@@ -122,7 +122,7 @@ export function useNewFunctionPage(): NewFunctionPage {
       })
 
       onSuccess(true)
-      router.replace('/solutions/dashboard')
+      router.replace('/dashboard')
     } catch (e) {
       onError(e as Error)
     }
