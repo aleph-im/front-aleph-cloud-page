@@ -27,5 +27,6 @@ export const defaultVMChannel = 'ALEPH-CLOUDSOLUTIONS'
 export const smallFooterPages = new Set([
   '/solutions/dashboard',
   '/solutions/dashboard/function',
+  '/solutions/dashboard/volume',
   '/solutions/dashboard/manage',
 ])
