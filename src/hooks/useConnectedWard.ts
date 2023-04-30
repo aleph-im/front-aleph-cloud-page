@@ -7,7 +7,7 @@ import { useAppState } from '@/contexts/appState'
  *
  * @param route The path to redirect to (defaults to "/")
  */
-export default function useConnected(route = '/') {
+export default function useConnectedWard(route = '/') {
   const [state] = useAppState()
   const router = useRouter()
 

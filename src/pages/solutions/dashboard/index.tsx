@@ -13,7 +13,7 @@ import {
   ProgramMessage,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
-import { useHomePage } from '@/hooks/pages/useDashboardHomePage'
+import { useDashboardHomePage } from '@/hooks/pages/useDashboardHomePage'
 import { useMemo, useState } from 'react'
 import {
   ImmutableVolume,
@@ -21,7 +21,7 @@ import {
 } from 'aleph-sdk-ts/dist/messages/program/programModel'
 
 export default function DashboardHome() {
-  const { products, functions, volumes } = useHomePage()
+  const { products, functions, volumes } = useDashboardHomePage()
   const [tabId, setTabId] = useState('all')
 
   // FIXME: Selector function signature

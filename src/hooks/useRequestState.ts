@@ -45,9 +45,8 @@ export function useRequestState<T>({
           title: 'Operation complete',
         })
     },
-    [successProp],
+    [noti, successProp],
   )
-  // }, [noti, successProp]) @note: noti dep changes all the time
 
   const onError = useCallback(
     (error: Error) => {
@@ -66,9 +65,8 @@ export function useRequestState<T>({
           detail,
         })
     },
-    [errorProp],
+    [errorProp, noti],
   )
-  // }, [noti, errorProp]) @note: noti dep changes all the time
 
   const onLoad = useCallback(() => {
     setState({ data: null, loading: true, error: null })

@@ -16,7 +16,7 @@ import {
 } from '@/helpers/form'
 import JSZip from 'jszip'
 import { FormEvent, useMemo, useReducer } from 'react'
-import useConnected from '../useConnected'
+import useConnectedWard from '../useConnectedWard'
 import { createFunctionProgram } from '../../helpers/aleph'
 import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
@@ -48,7 +48,7 @@ export type NewFunctionPage = {
 }
 
 export function useNewFunctionPage(): NewFunctionPage {
-  useConnected()
+  useConnectedWard()
 
   const router = useRouter()
   const [appState] = useAppState()

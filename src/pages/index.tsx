@@ -1,22 +1,14 @@
 import Head from 'next/head'
 import styled from 'styled-components'
-import {
-  Button,
-  Col,
-  Row,
-  TextGradient,
-  Icon,
-  useResponsiveMin,
-} from '@aleph-front/aleph-core'
+import tw from 'twin.macro'
+import { Button, Col, Row, TextGradient, Icon } from '@aleph-front/aleph-core'
 import Container from '@/components/Container'
 import { IndexingImg } from '@/components/Imgs/IndexingImg'
 import FeatureCard from '@/components/FeatureCard'
 import H1 from '@/components/H1'
 import H2 from '@/components/H2'
 import Strong from '@/components/Strong'
-import { useScrollTo } from '@/hooks/useScrollTo'
-import tw from 'twin.macro'
-import { useRouter } from 'next/router'
+import { useHomePage } from '@/hooks/pages/useHomePage'
 
 const StyledH1Button = styled(Button).attrs((props) => {
   return {
@@ -46,13 +38,7 @@ const StyledLink = styled(Button).attrs((props) => {
 })``
 
 export default function Home() {
-  const [ref1, handleScroll1] = useScrollTo()
-  const [ref2, handleScroll2] = useScrollTo()
-
-  const router = useRouter()
-
-  const isDesktop = useResponsiveMin('md')
-  const featureSectionBg = isDesktop ? '' : 'fx-glass-base0'
+  const { featureSectionBg, navigate, scroll } = useHomePage()
 
   return (
     <>
@@ -85,11 +71,11 @@ export default function Home() {
                   </p>
                 </div>
                 <div tw="flex flex-col md:flex-row gap-6 py-6 order-first items-start">
-                  <StyledH1Button onClick={handleScroll1}>
+                  <StyledH1Button onClick={scroll.volume.handle}>
                     Storage solutions
                     <Icon name="arrow-right-long" tw="ml-4" />
                   </StyledH1Button>
-                  <StyledH1Button onClick={handleScroll2}>
+                  <StyledH1Button onClick={scroll.function.handle}>
                     Computing solutions
                     <Icon name="arrow-right-long" tw="ml-4" />
                   </StyledH1Button>
@@ -99,7 +85,7 @@ export default function Home() {
           </Row>
         </Container>
       </section>
-      <section tw="px-0 py-6 md:pb-0 md:pt-20" ref={ref2}>
+      <section tw="px-0 py-6 md:pb-0 md:pt-20" ref={scroll.function.ref}>
         <Container>
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
@@ -122,9 +108,7 @@ export default function Home() {
                 text="An isolated environment  created for a  function to execute in response to an event and can run in two modes: on-demand or persistent."
                 buttonLabel="Create function"
                 headerImg="Object10"
-                buttonOnClick={() =>
-                  router.push('/solutions/dashboard/function')
-                }
+                buttonOnClick={navigate.function}
               />
             </Col>
             <Col>
@@ -183,7 +167,7 @@ export default function Home() {
           </Row>
         </Container>
       </section>
-      <section tw="px-0 pt-12 pb-6 md:pt-20 md:pb-0" ref={ref1}>
+      <section tw="px-0 pt-12 pb-6 md:pt-20 md:pb-0" ref={scroll.volume.ref}>
         <Container>
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
@@ -207,7 +191,7 @@ export default function Home() {
                 text="Immutable volumes store unchangeable data on IPFS, pinned to multiple nodes for reliable access and reproducible execution."
                 buttonLabel="Create volume"
                 headerImg="Object15"
-                buttonOnClick={() => router.push('/solutions/dashboard/volume')}
+                buttonOnClick={navigate.volume}
               />
             </Col>
             <Col>
@@ -216,7 +200,7 @@ export default function Home() {
                 text="Package your dependencies to an immutable volume upfront to reference it easily and speed up creation time of an instance or function."
                 buttonLabel="Create volume"
                 headerImg="Object13"
-                buttonOnClick={() => router.push('/solutions/dashboard/volume')}
+                buttonOnClick={navigate.volume}
               />
             </Col>
             <Col>

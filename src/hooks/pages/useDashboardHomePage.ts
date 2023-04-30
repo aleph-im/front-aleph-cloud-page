@@ -4,17 +4,17 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
 import { useAccountProducts } from '../useAccountProducts'
-import useConnected from '../useConnected'
+import useConnectedWard from '../useConnectedWard'
 
-export type HomePage = {
+export type DashboardHomePage = {
   products: (ProgramMessage | StoreMessage)[]
   functions: ProgramMessage[]
   instances: ProgramMessage[]
   volumes: StoreMessage[]
 }
 
-export function useHomePage(): HomePage {
-  useConnected()
+export function useDashboardHomePage(): DashboardHomePage {
+  useConnectedWard()
   const [products] = useAccountProducts()
   const [appState] = useAppState()
 

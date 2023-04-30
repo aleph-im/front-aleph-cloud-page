@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react'
-import useConnected from '../useConnected'
+import useConnectedWard from '../useConnectedWard'
 import {
   defaultVolume,
   displayVolumesToAlephVolumes,
@@ -11,7 +11,7 @@ import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
 
 export function useNewVolumePage() {
-  useConnected()
+  useConnectedWard()
 
   const [reqState, { onLoad, onSuccess, onError }] = useRequestState()
   const router = useRouter()

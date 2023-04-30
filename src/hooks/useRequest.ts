@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import {
   RequestState,
   useRequestState,
@@ -7,47 +7,37 @@ import {
 
 export type UseRequestProps<T> = UseRequestStateProps<T> & {
   doRequest: () => Promise<T>
+  triggerOnMount?: boolean
 }
 
-export type UseRequestReturn<T> = RequestState<T>
+export type UseRequestReturn<T> = RequestState<T> & {
+  request: () => Promise<void>
+}
 
-// @note: https://react.dev/learn/synchronizing-with-effects#how-to-handle-the-effect-firing-twice-in-development
 export function useRequest<T>({
   doRequest,
+  triggerOnMount,
   ...rest
 }: UseRequestProps<T>): UseRequestReturn<T> {
   const [reqState, { onLoad, onSuccess, onError }] = useRequestState(rest)
 
-  useEffect(() => {
-    let ignore = false
+  const request = useCallback(async () => {
+    onLoad()
 
-    async function handleRequest() {
-      onLoad()
-
-      try {
-        console.log('---> DO REQUEST')
-
-        const response = await doRequest()
-        if (ignore) return
-
-        console.log('---> SUCCESS')
-
-        onSuccess(response)
-      } catch (e) {
-        if (ignore) return
-
-        console.log('---> ERROR', e)
-
-        onError(e as Error)
-      }
-    }
-
-    handleRequest()
-
-    return () => {
-      ignore = true
+    try {
+      const response = await doRequest()
+      onSuccess(response)
+      return
+    } catch (e) {
+      onError(e as Error)
     }
   }, [doRequest, onLoad, onSuccess, onError])
 
-  return reqState
+  useEffect(() => {
+    console.log('triggerOnMount', triggerOnMount)
+    if (!triggerOnMount) return
+    request()
+  }, [request, triggerOnMount])
+
+  return { ...reqState, request }
 }

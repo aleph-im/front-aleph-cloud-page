@@ -33,7 +33,7 @@ export function useAccountProducts(): [
     [dispatch],
   )
 
-  const reqState = useRequest({ doRequest, onSuccess })
+  const reqState = useRequest({ doRequest, onSuccess, triggerOnMount: true })
 
   return [products, reqState]
 }
