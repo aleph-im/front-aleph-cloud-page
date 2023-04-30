@@ -55,7 +55,9 @@ export default function DashboardManage() {
   if (!message)
     return (
       <>
+      <section tw="py-6">
         <AutoBreadcrumb name="..." />
+      </section>
 
         <CenteredSection>
           <NoisyContainer>Loading...</NoisyContainer>
@@ -104,7 +106,10 @@ export default function DashboardManage() {
 
   return (
     <>
-      <AutoBreadcrumb name={displayedInformation.name} />
+      <section tw="py-6">
+        <AutoBreadcrumb name={displayedInformation.name} />
+      </section>
+
       <CenteredSection>
         <div tw="flex justify-between py-4">
           <div tw="flex items-center">
