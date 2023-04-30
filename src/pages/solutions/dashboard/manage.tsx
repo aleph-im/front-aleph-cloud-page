@@ -55,9 +55,9 @@ export default function DashboardManage() {
   if (!message)
     return (
       <>
-      <section tw="py-6">
-        <AutoBreadcrumb name="..." />
-      </section>
+        <section tw="py-6">
+          <AutoBreadcrumb name="..." />
+        </section>
 
         <CenteredSection>
           <NoisyContainer>Loading...</NoisyContainer>

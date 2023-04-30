@@ -50,7 +50,7 @@ export default function NewFunctionPage() {
       <section tw="py-6">
         <AutoBreadcrumb name="Setup new function" />
       </section>
-      
+
       <form onSubmit={handleSubmit}>
         <CenteredSection>
           <CompositeTitle
@@ -127,7 +127,12 @@ export default function NewFunctionPage() {
                   Upload zip archive <Icon name="arrow-up" tw="ml-4" />
                 </HiddenFileInput>
 
-                <p tw="my-5">Your zip archive should contain a <strong tw="font-bold">main</strong> file (ex: main.py) at its root that exposes an <strong tw="font-bold">app</strong> function. This will serve as an entrypoint to the program</p>
+                <p tw="my-5">
+                  Your zip archive should contain a{' '}
+                  <strong tw="font-bold">main</strong> file (ex: main.py) at its
+                  root that exposes an <strong tw="font-bold">app</strong>{' '}
+                  function. This will serve as an entrypoint to the program
+                </p>
               </div>
             ) : (
               <></>
@@ -308,7 +313,10 @@ export default function NewFunctionPage() {
                       size={'regular'}
                       forwardedAs={'button'}
                       type="button"
-                      onClick={(e) => {e.preventDefault(); setFormValue('computeUnits', row.cpu)}}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setFormValue('computeUnits', row.cpu)
+                      }}
                     >
                       &gt;
                     </Button>
