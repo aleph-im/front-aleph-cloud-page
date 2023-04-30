@@ -304,7 +304,9 @@ export default function NewFunctionPage() {
                       variant={'secondary'}
                       kind={'flat'}
                       size={'regular'}
-                      onClick={() => setFormValue('computeUnits', row.cpu)}
+                      forwardedAs={'button'}
+                      type="button"
+                      onClick={(e) => {e.preventDefault(); setFormValue('computeUnits', row.cpu)}}
                     >
                       &gt;
                     </Button>
