@@ -1,7 +1,6 @@
 import { Table, Tabs } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/ButtonLink'
 import CenteredSection from '@/components/CenteredSection'
-import AutoBreadcrumb from '@/components/AutoBreadcrumb'
 import {
   convertBitUnits,
   ellipseAddress,
@@ -129,10 +128,6 @@ export default function DashboardHome() {
 
   return (
     <>
-      <section tw="py-6">
-        <AutoBreadcrumb />
-      </section>
-
       <CenteredSection tw="py-6">
         <Tabs
           selected={tabId}

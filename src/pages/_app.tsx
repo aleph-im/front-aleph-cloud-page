@@ -15,8 +15,13 @@ import Header from '@/components/Header'
 import NotificationProvider from '@/components/NotificationProvider'
 import { AppStateProvider } from '@/contexts/appState'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb/cmp'
+import { breadcrumbNames } from '@/helpers/constants'
+import { useRouter } from 'next/router'
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter()
+  const hasBreadcrumb = router.pathname !== '/dashboard/manage'
+
   return (
     <ThemeProvider theme={themes.dark}>
       <GlobalStyles />
@@ -25,7 +30,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <NotificationProvider>
           <Header />
           <main>
-            <AutoBreadcrumb homeName="solutions" tw="py-5 px-6 md:px-16" />
+            {hasBreadcrumb && <AutoBreadcrumb names={breadcrumbNames} />}
             <Component {...pageProps} />
           </main>
           <Footer small={true} />

@@ -10,7 +10,6 @@ import {
   TextGradient,
   TextInput,
 } from '@aleph-front/aleph-core'
-import AutoBreadcrumb from '@/components/AutoBreadcrumb'
 import CenteredSection from '@/components/CenteredSection'
 import CompositeTitle from '@/components/CompositeTitle'
 import NoisyContainer from '@/components/NoisyContainer'
@@ -47,10 +46,6 @@ export default function NewFunctionPage() {
 
   return (
     <>
-      <section tw="py-6">
-        <AutoBreadcrumb name="Setup new function" />
-      </section>
-
       <form onSubmit={handleSubmit}>
         <CenteredSection>
           <CompositeTitle

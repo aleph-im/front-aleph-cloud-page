@@ -1,4 +1,3 @@
-import AutoBreadcrumb from '@/components/AutoBreadcrumb'
 import CenteredSection from '@/components/CenteredSection'
 import ExternalLink from '@/components/ExternalLink'
 import HoldingRequirements from '@/components/HoldingRequirements'
@@ -17,10 +16,6 @@ export default function NewVolumePage() {
   } = useNewVolumePage()
   return (
     <>
-      <section tw="py-6">
-        <AutoBreadcrumb name="Setup new volume" />
-      </section>
-
       <form onSubmit={handleSubmit}>
         <CenteredSection>
           <NewVolume

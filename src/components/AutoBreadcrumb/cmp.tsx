@@ -5,14 +5,15 @@ import Link from 'next/link'
 import { AutoBreacrumbProps } from './types'
 
 export default function AutoBreadcrumb({
-  names = { '/': 'Home' },
+  names,
+  name: nameProp,
   includeHome = true,
   ...rest
 }: AutoBreacrumbProps) {
   const router = useRouter()
   const isHome = router.pathname === '/'
 
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+  const uppercase = (s: string) => s.toUpperCase()
 
   const navLinks = useMemo(() => {
     if (isHome) return []
@@ -20,16 +21,30 @@ export default function AutoBreadcrumb({
     const links = router.pathname
       .split('/')
       .filter((item) => item !== '')
-      .map((item, index, ar) => {
-        if (index === ar.length - 1) {
-          if (name) return <span>{name}</span>
+      .map((item, index, arr) => {
+        const name = names?.[item]
 
-          return <span key={item}>{capitalize(item)}</span>
+        if (index === arr.length - 1) {
+          const [, hash] = router.asPath.split('#')
+
+          const itemName =
+            nameProp ||
+            (name
+              ? typeof name === 'object'
+                ? name[hash]
+                : name
+              : uppercase(item))
+
+          return <span key={item}>{itemName}</span>
         }
-        const href = String('../').repeat(ar.length - (index + 1)) + item
+
+        const itemName = name ? (name as string) : uppercase(item)
         return (
-          <Link key={item} href={href}>
-            {capitalize(item)}
+          <Link
+            key={item}
+            href={String('../').repeat(arr.length - (index + 1)) + item}
+          >
+            {itemName}
           </Link>
         )
       })
@@ -37,13 +52,15 @@ export default function AutoBreadcrumb({
     if (includeHome) {
       links.unshift(
         <Link key={'home'} href={'/'}>
-          {capitalize(homeName)}
+          {(names?.['/'] as string) || 'HOME'}
         </Link>,
       )
     }
 
     return links
-  }, [router.pathname, names, isHome, includeHome])
+  }, [router.pathname, router.asPath, nameProp, names, isHome, includeHome])
 
-  return isHome ? null : <Breadcrumb navLinks={navLinks} {...rest} />
+  return isHome ? null : (
+    <Breadcrumb navLinks={navLinks} {...rest} tw="py-5 px-6 md:px-16" />
+  )
 }

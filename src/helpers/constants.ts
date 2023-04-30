@@ -23,3 +23,9 @@ export const defaultFileExtension: Record<LanguageType, string> = {
 export const defaultVolumeChannel = 'ALEPH-VOLUME'
 
 export const defaultVMChannel = 'ALEPH-CLOUDSOLUTIONS'
+
+export const breadcrumbNames = {
+  '/': 'SOLUTIONS',
+  '/dashboard/function': 'SETUP NEW FUNCTION',
+  '/dashboard/volume': 'SETUP NEW VOLUME',
+}

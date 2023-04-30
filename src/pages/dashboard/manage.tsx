@@ -3,7 +3,11 @@ import CenteredSection from '@/components/CenteredSection'
 import NoisyContainer from '@/components/NoisyContainer'
 import { useAppState } from '@/contexts/appState'
 import { deleteVM, getMessage } from '@/helpers/aleph'
-import { defaultVMURL, programStorageURL } from '@/helpers/constants'
+import {
+  breadcrumbNames,
+  defaultVMURL,
+  programStorageURL,
+} from '@/helpers/constants'
 import {
   ellipseAddress,
   getExplorerURL,
@@ -17,7 +21,7 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import tw from 'twin.macro'
 
@@ -52,19 +56,6 @@ export default function DashboardManage() {
 
   const [globalState] = useAppState()
 
-  if (!message)
-    return (
-      <>
-        <section tw="py-6">
-          <AutoBreadcrumb name="..." />
-        </section>
-
-        <CenteredSection>
-          <NoisyContainer>Loading...</NoisyContainer>
-        </CenteredSection>
-      </>
-    )
-
   const handleDelete = async () => {
     const { account } = globalState
 
@@ -82,34 +73,49 @@ export default function DashboardManage() {
     linkedVolumes: any[]
     date: string[]
   }
-  const displayedInformation: DisplayedInformation = {
-    name: '',
-    downloadLink: '',
-    itemType: '',
-    linkedVolumes: [],
-    date: new Date(message.time * 1000).toISOString().split('T'),
-  }
-  if (isVolume(message)) {
-    displayedInformation.name = ellipseAddress(message.item_hash)
-    displayedInformation.downloadLink = programStorageURL + message.item_hash
-    displayedInformation.itemType = 'Volume'
-  } else {
-    displayedInformation.name =
-      (message as ProgramMessage).content?.metadata?.name || '<Unknown>'
-    displayedInformation.downloadLink =
-      programStorageURL + (message as ProgramMessage).content.code.ref
-    displayedInformation.itemType = 'Function'
-    displayedInformation.linkedVolumes = (
-      message as ProgramMessage
-    ).content.volumes
-  }
+
+  const displayedInformation: DisplayedInformation | undefined = useMemo(() => {
+    if (!message) return
+
+    const di: DisplayedInformation = {
+      name: '',
+      downloadLink: '',
+      itemType: '',
+      linkedVolumes: [],
+      date: new Date(message.time * 1000).toISOString().split('T'),
+    }
+
+    if (isVolume(message)) {
+      di.name = ellipseAddress(message.item_hash)
+      di.downloadLink = programStorageURL + message.item_hash
+      di.itemType = 'Volume'
+    } else {
+      di.name =
+        (message as ProgramMessage).content?.metadata?.name || '<Unknown>'
+      di.downloadLink =
+        programStorageURL + (message as ProgramMessage).content.code.ref
+      di.itemType = 'Function'
+      di.linkedVolumes = (message as ProgramMessage).content.volumes
+    }
+
+    return di
+  }, [message])
+
+  if (!message || !displayedInformation)
+    return (
+      <>
+        <CenteredSection>
+          <NoisyContainer>Loading...</NoisyContainer>
+        </CenteredSection>
+      </>
+    )
 
   return (
     <>
-      <section tw="py-6">
-        <AutoBreadcrumb name={displayedInformation.name} />
-      </section>
-
+      <AutoBreadcrumb
+        names={breadcrumbNames}
+        name={displayedInformation.name.toUpperCase()}
+      />
       <CenteredSection>
         <div tw="flex justify-between py-4">
           <div tw="flex items-center">
