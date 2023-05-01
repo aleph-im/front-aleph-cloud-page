@@ -7,9 +7,8 @@ export default function ExternalLink({ text, href }: ExternalLinkProps) {
     <>
       <StyledExternalLink href={href} target="_blank">
         {text ? text : href}
+        <Icon name="square-up-right" tw="ml-2.5" />
       </StyledExternalLink>
-      &nbsp;
-      <Icon name="square-up-right" />
     </>
   )
 }

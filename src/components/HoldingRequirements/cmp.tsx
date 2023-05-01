@@ -24,7 +24,7 @@ export default function HoldingSummary({
         capabilities: {},
       })
     }
-  }, [computeUnits, storage])
+  }, [computeUnits])
 
   const getVolumeSize = (volume: VolumeRequirements) => {
     if (volume.type === 'new')
@@ -65,7 +65,7 @@ export default function HoldingSummary({
           price: size * 1000 * 20,
         }
       })
-    }, [storage, computeUnits])
+    }, [storage, computeUnits, functionCost?.storageAllowance])
 
   const totalCost = useMemo(() => {
     const volumeCost = displayedVolumes.reduce(
@@ -76,16 +76,18 @@ export default function HoldingSummary({
   }, [displayedVolumes, functionCost])
 
   return (
-    <>
+    <div tw="max-w-full overflow-scroll">
       <StyledHoldingSummaryLine isHeader>
-        <div>BALANCE</div>
-        <div>current wallet {ellipseAddress(address)}</div>
+        <div tw="text-xs flex items-center">UNLOCKED</div>
+        <div className="tp-body1">current wallet {ellipseAddress(address)}</div>
         <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
       </StyledHoldingSummaryLine>
 
       {computeUnits && (
         <StyledHoldingSummaryLine>
-          <div>{computeUnits.type.toUpperCase()}</div>
+          <div tw="text-xs flex items-center">
+            {computeUnits.type.toUpperCase()}
+          </div>
           <div>
             {computeUnits.number} x86 64bit{' '}
             {computeUnits.isPersistent && '(persistent)'}
@@ -100,7 +102,7 @@ export default function HoldingSummary({
             <StyledHoldingSummaryLine
               key={iVolume} // note: this key is meant to avoid a warning, and should work since the array is not reordered
             >
-              <div>STORAGE</div>
+              <div tw="text-xs flex items-center">STORAGE</div>
               <div>
                 {volume.type === 'persistent' ? 'Persistent' : 'Immutable'}{' '}
                 {getVolumeSize(volume)} GB
@@ -112,15 +114,15 @@ export default function HoldingSummary({
 
       <StyledHoldingSummaryLine>
         <div></div>
-        <div>
+        <div tw="text-xs flex items-center justify-end">
           <strong>TOTAL</strong>
         </div>
         <div>
-          <TextGradient type="body2" color="main1">
+          <span className="text-main1">
             {humanReadableCurrency(totalCost)} ALEPH
-          </TextGradient>
+          </span>
         </div>
       </StyledHoldingSummaryLine>
-    </>
+    </div>
   )
 }

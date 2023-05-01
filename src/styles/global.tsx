@@ -1,13 +1,13 @@
 import { createGlobalStyle } from 'styled-components'
 
-export const GlobalStylesOverride = createGlobalStyle`
+export const GlobalStylesOverride = createGlobalStyle`  
   main {
     min-height: 800px;
   }
 
   /* FIXME: */
-  .unavailable-content *:not(.unavailable-label) {
-    opacity: 0.5;
+  .unavailable-content {
+    opacity: 0.3;
     filter: grayscale(1);
     pointer-events: none;
   }
@@ -21,4 +21,10 @@ export const GlobalStylesOverride = createGlobalStyle`
     border: 1px solid #FFFFFF33;
     color: inherit;
   }
+
+  /* FIXME: */
+  table: {
+    max-width: 100%;
+  }
+
 `

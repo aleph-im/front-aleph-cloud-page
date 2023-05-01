@@ -1,25 +1,36 @@
 import { TextGradient } from '@aleph-front/aleph-core'
-import { StyledCompositeTitle, StyledCompositeTitleLabel } from './styles'
-import { CompositeTitleProps, StyledCompositeTitleLabelProps } from './types'
+import { CompositeTitleProps } from './types'
+import { StyledLabel } from './styles'
 
 export default function CompositeTitle({
-  title,
+  children,
   number,
-  type,
-  color,
+  as: As = 'h1',
+  type = 'h5',
+  color = 'main1',
+  disabled = false,
   label,
-}: CompositeTitleProps & StyledCompositeTitleLabelProps) {
+  ...rest
+}: CompositeTitleProps) {
   return (
-    <StyledCompositeTitle>
-      <span className="fs-lg">{String(number).padStart(2, '0')}/&nbsp;</span>
-      <TextGradient type={type} color={color}>
-        {title}
-      </TextGradient>
-      {label && (
-        <StyledCompositeTitleLabel type={type} className="unavailable-label">
-          {label}
-        </StyledCompositeTitleLabel>
-      )}
-    </StyledCompositeTitle>
+    <As style={{ lineHeight: '1rem', margin: 0 }}>
+      <span className={disabled ? 'unavailable-content' : ''}>
+        <span className="tp-body1 fs-xl text-base0" tw="inline">
+          {String(number).padStart(2, '0')}/&nbsp;
+        </span>
+        <TextGradient
+          {...{
+            forwardedAs: 'span',
+            type,
+            color,
+            ...rest,
+          }}
+          tw="inline"
+        >
+          {children}
+        </TextGradient>
+      </span>
+      {label && <StyledLabel type={type}>{label}</StyledLabel>}
+    </As>
   )
 }

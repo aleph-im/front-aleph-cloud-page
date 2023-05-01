@@ -56,6 +56,8 @@ export function useNewFunctionPage(): NewFunctionPage {
 
   const [formState, dispatchForm] = useReducer(
     (state: FormState, action: { type: string; payload: any }): FormState => {
+      console.log('action', action)
+
       switch (action.type) {
         case 'SET_VALUE':
           return {

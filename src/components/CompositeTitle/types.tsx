@@ -1,10 +1,14 @@
-export type CompositeTitleProps = {
-  title: string
+import { TextGradientProps, TypoKind } from '@aleph-front/aleph-core'
+import { ElementType } from 'react'
+
+export type CompositeTitleProps = TextGradientProps & {
   number: number | string
-  color: string
+  color?: string
   label?: string
+  as?: ElementType
+  disabled?: boolean
 }
 
-export type StyledCompositeTitleLabelProps = {
-  type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+export type LabelProps = {
+  type: TypoKind
 }

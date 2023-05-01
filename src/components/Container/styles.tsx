@@ -10,3 +10,5 @@ export const StyledContainer = styled.div`
     max-width: ${theme.breakpoint.xxl + 12.5}rem;
   `}
 `
+
+export default StyledContainer

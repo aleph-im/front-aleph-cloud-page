@@ -27,6 +27,7 @@ declare global {
     interface IntrinsicAttributes<T> extends DOMAttributes<T> {
       as?: string | Element
       forwardedAs?: string | Element
+      css?: CSSProp
     }
   }
 }

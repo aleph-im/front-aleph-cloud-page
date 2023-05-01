@@ -1,4 +1,4 @@
-import CenteredSection from '@/components/CenteredSection'
+import CenteredSection from '@/components/CenteredContainer'
 import ExternalLink from '@/components/ExternalLink'
 import HoldingRequirements from '@/components/HoldingRequirements'
 import NewVolume from '@/components/NewVolume'

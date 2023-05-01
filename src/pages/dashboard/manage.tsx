@@ -1,5 +1,5 @@
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
-import CenteredSection from '@/components/CenteredSection'
+import CenteredSection from '@/components/CenteredContainer'
 import NoisyContainer from '@/components/NoisyContainer'
 import { useAppState } from '@/contexts/appState'
 import { deleteVM, getMessage } from '@/helpers/aleph'
@@ -52,7 +52,7 @@ export default function DashboardManage() {
       else setMessage(msg as ProgramMessage)
     }
     dispatchMsg()
-  }, [])
+  }, [hash])
 
   const [globalState] = useAppState()
 
@@ -93,7 +93,7 @@ export default function DashboardManage() {
       di.name =
         (message as ProgramMessage).content?.metadata?.name || '<Unknown>'
       di.downloadLink =
-        programStorageURL + (message as ProgramMessage).content.code.ref
+        programStorageURL + (message as ProgramMessage).content.code?.ref
       di.itemType = 'Function'
       di.linkedVolumes = (message as ProgramMessage).content.volumes
     }

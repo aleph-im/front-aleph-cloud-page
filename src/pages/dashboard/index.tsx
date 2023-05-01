@@ -1,6 +1,6 @@
 import { Table, Tabs } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/ButtonLink'
-import CenteredSection from '@/components/CenteredSection'
+import CenteredSection from '@/components/CenteredContainer'
 import {
   convertBitUnits,
   ellipseAddress,
