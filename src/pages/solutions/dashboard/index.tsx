@@ -83,17 +83,19 @@ export default function DashboardHome() {
             },
             {
               label: 'Cores',
-              selector: (row: ProgramMessage) => isVolume(row) ? '-' :
-                row?.content?.resources?.vcpus || 0,
+              selector: (row: ProgramMessage) =>
+                isVolume(row) ? '-' : row?.content?.resources?.vcpus || 0,
               sortable: true,
             },
             {
               label: 'Memory',
-              selector: (row: ProgramMessage) => isVolume(row) ? '-' :
-                convertBitUnits(row?.content?.resources?.memory || 0, {
-                  from: 'mb',
-                  to: 'gb',
-                }),
+              selector: (row: ProgramMessage) =>
+                isVolume(row)
+                  ? '-'
+                  : convertBitUnits(row?.content?.resources?.memory || 0, {
+                      from: 'mb',
+                      to: 'gb',
+                    }),
               sortable: true,
             },
             {

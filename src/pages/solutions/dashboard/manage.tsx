@@ -14,7 +14,13 @@ import {
   isVolumePersistent,
 } from '@/helpers/utils'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'
-import { Button, Icon, Tag, TextGradient, useNotification } from '@aleph-front/aleph-core'
+import {
+  Button,
+  Icon,
+  Tag,
+  TextGradient,
+  useNotification,
+} from '@aleph-front/aleph-core'
 import {
   ProgramMessage,
   StoreMessage,
@@ -35,17 +41,17 @@ const Separator = styled.hr`
 export default function DashboardManage() {
   const router = useRouter()
   const { hash } = router.query
-  
-  const [ _copiedValue , copyToClipboard ] = useCopyToClipboard()
+
+  const [_copiedValue, copyToClipboard] = useCopyToClipboard()
   const noti = useNotification()
 
   const copyAndNotify = (value: string) => {
     copyToClipboard(value)
-    if(noti){
+    if (noti) {
       noti.add({
-          variant: 'success',
-          title: 'Copied to clipboard',
-        })
+        variant: 'success',
+        title: 'Copied to clipboard',
+      })
     }
   }
 
@@ -86,8 +92,7 @@ export default function DashboardManage() {
     const { account } = globalState
 
     if (!account) throw new Error('Invalid account')
-    if (!message)
-      throw new Error('Invalid message')
+    if (!message) throw new Error('Invalid message')
 
     await deleteVM(account, message)
   }
@@ -242,15 +247,12 @@ export default function DashboardManage() {
               </TextGradient>
               {displayedInformation.linkedVolumes.map((volume, i) => (
                 <div tw="my-5" key={i}>
-                  {
-                    isVolumePersistent(volume) ?
+                  {isVolumePersistent(volume) ? (
                     <>
                       <TextGradient type="info">PERSISTENT VOLUME</TextGradient>
-                      <pre>
-                        {JSON.stringify(volume, null, 2)}
-                      </pre>
+                      <pre>{JSON.stringify(volume, null, 2)}</pre>
                     </>
-                    :
+                  ) : (
                     <>
                       <TextGradient type="info">IMMUTABLE VOLUME</TextGradient>
                       <div>
@@ -262,9 +264,13 @@ export default function DashboardManage() {
                           <Icon name="square-up-right" tw="ml-2.5" />
                         </Link>
                       </div>
-                      <IconText text={volume.ref} iconName="copy" callback={() => copyAndNotify(volume.ref)} />
+                      <IconText
+                        text={volume.ref}
+                        iconName="copy"
+                        callback={() => copyAndNotify(volume.ref)}
+                      />
                     </>
-                  }
+                  )}
                 </div>
               ))}
             </>
@@ -272,22 +278,15 @@ export default function DashboardManage() {
         </NoisyContainer>
 
         <div tw="my-7 text-center">
-        {
-          isVolume(message) ?
-          <ButtonLink
-          variant="primary"
-          href="/solutions/dashboard/volume"
-          >
-            Create volume
-          </ButtonLink>  
-          :
-          <ButtonLink
-          variant="primary"
-          href="/solutions/dashboard/function"
-          >
-            Create function
-          </ButtonLink>
-        }
+          {isVolume(message) ? (
+            <ButtonLink variant="primary" href="/solutions/dashboard/volume">
+              Create volume
+            </ButtonLink>
+          ) : (
+            <ButtonLink variant="primary" href="/solutions/dashboard/function">
+              Create function
+            </ButtonLink>
+          )}
         </div>
 
         <p>

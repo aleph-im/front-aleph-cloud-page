@@ -1,7 +1,7 @@
-import { Icon } from "@aleph-front/aleph-core"; 
-import { IconTextProps } from "./types";
+import { Icon } from '@aleph-front/aleph-core'
+import { IconTextProps } from './types'
 
-export default function IconText({ text, callback, iconName }: IconTextProps){
+export default function IconText({ text, callback, iconName }: IconTextProps) {
   return (
     <div tw="flex items-baseline">
       <span>{text}</span>
