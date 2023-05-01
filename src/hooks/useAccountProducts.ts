@@ -22,7 +22,7 @@ export function useAccountProducts(): [
   const { account } = appState
 
   const doRequest = useCallback(() => {
-    if (!account) throw new Error('Not account')
+    if (!account) throw new Error('You need to be logged in to see this page.')
     return getAccountProducts(account)
   }, [account])
 
