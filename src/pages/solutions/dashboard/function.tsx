@@ -41,6 +41,7 @@ export default function NewFunctionPage() {
     removeVolume,
     address,
     accountBalance,
+    isCreateButtonDisabled
   } = useNewFunctionPage()
 
   const [tabId, setTabId] = useState('code')
@@ -334,7 +335,6 @@ export default function NewFunctionPage() {
                   capabilities: {},
                   computeUnits,
                   isPersistent: formState.isPersistent,
-                  storage: 0,
                 })
 
                 return {
@@ -579,6 +579,7 @@ export default function NewFunctionPage() {
                 kind="neon"
                 size="big"
                 variant="primary"
+                disabled={isCreateButtonDisabled}
               >
                 Create function
               </Button>
