@@ -7,6 +7,7 @@ import {
   ellipseAddress,
   humanReadableSize,
   isVolume,
+  isVolumePersistent,
   unixToISODateString,
 } from '@/helpers/utils'
 import {
@@ -38,24 +39,18 @@ export default function DashboardHome() {
           if (isVolume(product)) {
             return {
               ...product,
-              size: (product as StoreMessage).size,
+              size: 0,
             }
           }
           return {
             ...product,
             size: (product as ProgramMessage).content?.volumes.reduce(
               (ac, cv) => {
-                const immutableVolumeRef = volumes.find(
-                  (v) => (cv as ImmutableVolume)?.ref === v?.item_hash,
-                )
-                if (immutableVolumeRef) {
-                  return ac + immutableVolumeRef?.size
-                }
-                const persistentVolume = (cv as PersistentVolume)?.size_mib
-
-                if (persistentVolume) {
+                if(isVolumePersistent(cv)){
+                  const persistentVolume = (cv as PersistentVolume)?.size_mib
                   return ac + persistentVolume * 10 ** 3
                 }
+
                 return ac
               },
               0,

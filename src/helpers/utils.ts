@@ -5,6 +5,11 @@ import {
   ProgramMessage,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
+import {
+  ImmutableVolume,
+  MachineVolume,
+  PersistentVolume,
+} from 'aleph-sdk-ts/dist/messages/program/programModel'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -167,8 +172,9 @@ export const getExplorerURL = ({
   item_hash,
   chain,
   sender,
+  type,
 }: ProgramMessage | StoreMessage) =>
-  `https://explorer.aleph.im/address/${chain}/${sender}/message/PROGRAM/${item_hash}`
+  `https://explorer.aleph.im/address/${chain}/${sender}/message/${type}/${item_hash}`
 
 /**
  * Converts a UNIX timestamp to an ISO date, or returns a default value if the timestamp is invalid
@@ -180,6 +186,32 @@ export const unixToISODateString = (timeStamp?: number, noDate = 'n/a') => {
   if (!timeStamp) return noDate
   const date = new Date(timeStamp * 1000)
   return date.toISOString().split('T')[0]
+}
+
+/**
+ * Dirty hack (using a hidden link) to download a blob
+ */
+export const downloadBlob = (blob: Blob, fileName: string) => {
+  const link = document.createElement('a')
+  link.href = window.URL.createObjectURL(blob)
+  link.download = fileName
+  link.click()
+}
+
+export const getStoreMessageSize = async (message: StoreMessage) => {
+  const headReq = await fetch(
+    'https://ipfs.io/ipfs/' + message.content.item_hash,
+    {
+      method: 'HEAD',
+    },
+  )
+
+  try {
+    const size = headReq.headers.get('content-length')
+    return Number(size)
+  } catch (err) {
+    return 0
+  }
 }
 
 /**
@@ -271,3 +303,7 @@ export const isVolume = (msg: ProgramMessage | StoreMessage) =>
  */
 export const isProgram = (msg: ProgramMessage | StoreMessage) =>
   msg.type === MessageType.program
+
+export const isVolumePersistent = (volume: MachineVolume) => {
+  return volume.hasOwnProperty('persistence')
+}
