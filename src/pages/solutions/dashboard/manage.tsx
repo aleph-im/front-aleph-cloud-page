@@ -5,8 +5,10 @@ import { useAppState } from '@/contexts/appState'
 import { deleteVM, getMessage } from '@/helpers/aleph'
 import { defaultVMURL, programStorageURL } from '@/helpers/constants'
 import {
+  downloadBlob,
   ellipseAddress,
   getExplorerURL,
+  getStoreMessageSize,
   humanReadableSize,
   isVolume,
 } from '@/helpers/utils'
@@ -75,6 +77,27 @@ export default function DashboardManage() {
     await deleteVM(account, message)
   }
 
+  const handleDownload = async () => {
+    if (!isVolume(message)) {
+      const ref = (message as ProgramMessage).content.code.ref
+      const storeMessageRef = await getMessage(ref)
+
+      const req = await fetch(
+        programStorageURL + (storeMessageRef as StoreMessage).content.item_hash,
+      )
+      const blob = await req.blob()
+
+      return downloadBlob(blob, `VM_${message.item_hash.slice(-12)}.zip`)
+    }
+
+    const req = await fetch(
+      programStorageURL + (message as StoreMessage).content.item_hash,
+    )
+    const blob = await req.blob()
+
+    return downloadBlob(blob, `Volume_${message.item_hash.slice(-12)}.sqsh`)
+  }
+
   type DisplayedInformation = {
     name: string
     downloadLink: string
@@ -124,8 +147,7 @@ export default function DashboardManage() {
               kind="neon"
               tw="!mr-4"
               forwardedAs="a"
-              href={displayedInformation.downloadLink}
-              target="_blank"
+              onClick={handleDownload}
             >
               Download
             </Button>
@@ -188,11 +210,6 @@ export default function DashboardManage() {
 
           <div tw="my-5 flex">
             <div>
-              <TextGradient type="info">SIZE</TextGradient>
-              <div>{humanReadableSize(message.size)}</div>
-            </div>
-
-            <div tw="ml-10">
               <TextGradient type="info">CREATED ON</TextGradient>
               <div>
                 {displayedInformation.date[0]}{' '}
