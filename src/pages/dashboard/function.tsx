@@ -414,7 +414,7 @@ export default function NewFunctionPage() {
                       computeUnits,
                       isPersistent: formState.isPersistent,
                       storage: 0,
-                    })
+                    } as any)
 
                     return {
                       cpu: specs.cpu,

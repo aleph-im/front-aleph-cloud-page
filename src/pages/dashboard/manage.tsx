@@ -89,6 +89,8 @@ export default function DashboardManage() {
   }
 
   const handleDownload = async () => {
+    if (!message) return
+
     if (!isVolume(message)) {
       const ref = (message as ProgramMessage).content.code.ref
       const storeMessageRef = await getMessage(ref)
