@@ -1,7 +1,6 @@
 import { useAppState } from '@/contexts/appState'
 import {
-  FunctionCost,
-  getFunctionCost,
+  getTotalProductCost,
   isValidItemHash,
   safeCollectionToObject,
 } from '@/helpers/utils'
@@ -25,7 +24,6 @@ import { useRouter } from 'next/router'
 
 export type NewFunctionPage = {
   formState: FormState
-  functionCost: FunctionCost
   handleSubmit: (e: FormEvent) => Promise<void>
   setFormValue: (name: keyof FormState, value: any) => void
   setEnvironmentVariable: (
@@ -45,6 +43,7 @@ export type NewFunctionPage = {
   removeVolume: (volumeIndex: number) => void
   address: string
   accountBalance: number
+  isCreateButtonDisabled: boolean
 }
 
 export function useNewFunctionPage(): NewFunctionPage {
@@ -203,32 +202,25 @@ export function useNewFunctionPage(): NewFunctionPage {
     setFormValue('volumes', volumes)
   }
 
-  const functionCost = useMemo(
+  const { totalCost } = useMemo(
     () =>
-      getFunctionCost({
+      getTotalProductCost({
+        volumes: formState.volumes,
         computeUnits: formState.computeUnits,
         isPersistent: formState.isPersistent,
-        storage: formState.volumes.reduce((acc: number, volume: Volume) => {
-          if (volume.type === 'persistent') {
-            return acc + (volume.size || 0) * 10 ** 6
-          }
-          if (volume.type === 'new') {
-            return acc + (volume?.src?.size || 0)
-          }
-          return acc
-        }, 0),
-        capabilities: {
-          internetAccess: true,
-          blockchainRPC: false,
-          enableSnapshots: false,
-        },
+        capabilities: {},
       }),
-    [formState.volumes, formState.computeUnits, formState.isPersistent],
+    [formState],
   )
+
+  const canAfford = (accountBalance || 0) > totalCost
+  let isCreateButtonDisabled = !canAfford
+  if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
+    isCreateButtonDisabled = false
+  }
 
   return {
     formState,
-    functionCost,
     handleSubmit,
     setFormValue,
     setEnvironmentVariable,
@@ -240,5 +232,6 @@ export function useNewFunctionPage(): NewFunctionPage {
     removeVolume,
     address: account?.address || '',
     accountBalance: accountBalance || 0,
+    isCreateButtonDisabled,
   }
 }

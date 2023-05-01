@@ -13,7 +13,9 @@ export default function NewVolumePage() {
     address,
     accountBalance,
     handleSubmit,
+    isCreateButtonDisabled,
   } = useNewVolumePage()
+
   return (
     <>
       <form onSubmit={handleSubmit}>
@@ -73,6 +75,7 @@ export default function NewVolumePage() {
                 kind="neon"
                 size="big"
                 variant="primary"
+                disabled={isCreateButtonDisabled}
               >
                 Create volume
               </Button>

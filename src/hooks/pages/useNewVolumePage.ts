@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useMemo, useState } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import {
   defaultVolume,
@@ -9,11 +9,12 @@ import {
 import { useAppState } from '@/contexts/appState'
 import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
+import { getTotalProductCost } from '@/helpers/utils'
 
 export function useNewVolumePage() {
   useConnectedWard()
 
-  const [reqState, { onLoad, onSuccess, onError }] = useRequestState()
+  const [, { onLoad, onSuccess, onError }] = useRequestState()
   const router = useRouter()
   const [appState] = useAppState()
   const { account } = appState
@@ -37,15 +38,31 @@ export function useNewVolumePage() {
     onLoad()
 
     try {
-      const alephVolumes = await displayVolumesToAlephVolumes(account, [
-        volumeState,
-      ])
+      await displayVolumesToAlephVolumes(account, [volumeState])
 
       onSuccess(true)
       router.replace('/dashboard')
     } catch (err) {
       onError(err as Error)
     }
+  }
+
+  const accountBalance = appState?.accountBalance || 0
+  const { totalCost } = useMemo(
+    () =>
+      getTotalProductCost({
+        volumes: [volumeState],
+        computeUnits: 0,
+        isPersistent: false,
+        capabilities: {},
+      }),
+    [volumeState],
+  )
+
+  const canAfford = accountBalance > totalCost
+  let isCreateButtonDisabled = !canAfford
+  if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
+    isCreateButtonDisabled = false
   }
 
   return {
@@ -55,5 +72,6 @@ export function useNewVolumePage() {
     volumeState,
     address: account?.address || '',
     accountBalance: appState.accountBalance || 0,
+    isCreateButtonDisabled,
   }
 }
