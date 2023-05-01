@@ -334,7 +334,6 @@ export default function NewFunctionPage() {
                   capabilities: {},
                   computeUnits,
                   isPersistent: formState.isPersistent,
-                  storage: 0,
                 })
 
                 return {

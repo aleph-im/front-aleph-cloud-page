@@ -1,7 +1,6 @@
 import { useAppState } from '@/contexts/appState'
 import {
   FunctionCost,
-  getFunctionCost,
   isValidItemHash,
   safeCollectionToObject,
 } from '@/helpers/utils'
@@ -25,7 +24,6 @@ import { useRouter } from 'next/router'
 
 export type NewFunctionPage = {
   formState: FormState
-  functionCost: FunctionCost
   handleSubmit: (e: FormEvent) => Promise<void>
   setFormValue: (name: keyof FormState, value: any) => void
   setEnvironmentVariable: (
@@ -201,32 +199,8 @@ export function useNewFunctionPage(): NewFunctionPage {
     setFormValue('volumes', volumes)
   }
 
-  const functionCost = useMemo(
-    () =>
-      getFunctionCost({
-        computeUnits: formState.computeUnits,
-        isPersistent: formState.isPersistent,
-        storage: formState.volumes.reduce((acc: number, volume: Volume) => {
-          if (volume.type === 'persistent') {
-            return acc + (volume.size || 0) * 10 ** 6
-          }
-          if (volume.type === 'new') {
-            return acc + (volume?.src?.size || 0)
-          }
-          return acc
-        }, 0),
-        capabilities: {
-          internetAccess: true,
-          blockchainRPC: false,
-          enableSnapshots: false,
-        },
-      }),
-    [formState.volumes, formState.computeUnits, formState.isPersistent],
-  )
-
   return {
     formState,
-    functionCost,
     handleSubmit,
     setFormValue,
     setEnvironmentVariable,

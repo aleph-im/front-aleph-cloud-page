@@ -10,6 +10,7 @@ import {
   MachineVolume,
   PersistentVolume,
 } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { VolumeRequirements } from '@/components/HoldingRequirements/types'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -255,7 +256,6 @@ type CapabilitiesConfig = {
 
 export type FunctionPriceConfig = {
   computeUnits: number
-  storage: number
   isPersistent: boolean
   capabilities: CapabilitiesConfig
 }
@@ -271,7 +271,6 @@ export type FunctionCost = {
  */
 export const getFunctionCost = ({
   computeUnits,
-  storage,
   isPersistent,
   capabilities,
 }: FunctionPriceConfig): FunctionCost => {
@@ -289,6 +288,84 @@ export const getFunctionCost = ({
       1,
     ),
     storageAllowance,
+  }
+}
+
+type getTotalProductCostConfig = FunctionPriceConfig & {
+  computeUnits?: number
+  isPersistent?: boolean
+  volumes?: VolumeRequirements[]
+}
+export const getTotalProductCost = ({
+  computeUnits,
+  isPersistent,
+  capabilities,
+  volumes,
+}: getTotalProductCostConfig) => {
+  const onlyNewVolumes =
+    volumes?.filter((volume) => volume.type !== 'existing') || []
+
+  // If no compute units are provided, we only calculate the cost of the volumes
+  // This will most likely be called from the create volume page
+  if (!computeUnits) {
+    const volumeCosts = onlyNewVolumes.map((volume) => ({
+      ...volume,
+      price: ((volume?.src?.size || 0) / 10 ** 6) * 20,
+    }))
+
+    return {
+      compute: 0,
+      volumeCosts,
+      totalCost: volumeCosts.reduce((ac, cv) => (ac += cv.price), 0),
+    }
+  }
+
+  // The algorithm for calculating the cost per volume is as follows:
+  // 1. Calculate the storage allowance for the function, the more compute units, the more storage allowance
+  // 2. For each volume, subtract the storage allowance from the volume size
+  // 3. If there is more storage than allowance left, the additional storage is charged at 20 tokens per mb
+  const { storageAllowance, compute } = getFunctionCost({
+    computeUnits,
+    isPersistent,
+    capabilities,
+  })
+
+  const getVolumeSize = (volume: VolumeRequirements) => {
+    if (volume.type === 'new')
+      return convertBitUnits(volume?.src?.size || 0, {
+        from: 'b',
+        to: 'gb',
+        displayUnit: false,
+      }) as number
+    return volume.size
+  }
+
+  let remainingAllowance = storageAllowance || 0
+  const volumeCosts = onlyNewVolumes.map((volume) => {
+    let size = getVolumeSize(volume) || 0
+    if (remainingAllowance > 0) {
+      if (size <= remainingAllowance) {
+        remainingAllowance -= size
+        size = 0
+      } else {
+        size -= remainingAllowance
+        remainingAllowance = 0
+      }
+    }
+
+    return {
+      ...volume,
+      price: size * 1000 * 20,
+    }
+  })
+
+  const totalCost =
+    volumeCosts.reduce((ac, cv) => (ac += cv.price), 0) + compute
+
+  return {
+    compute,
+    totalCost,
+    volumeCosts,
   }
 }
 

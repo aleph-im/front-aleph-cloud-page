@@ -1,8 +1,8 @@
 import {
   ellipseAddress,
   humanReadableCurrency,
-  getFunctionCost,
   convertBitUnits,
+  getTotalProductCost,
 } from '@/helpers/utils'
 import { StyledHoldingSummaryLine } from './styles'
 import { HoldingRequirementsProps, VolumeRequirements } from './types'
@@ -15,16 +15,13 @@ export default function HoldingSummary({
   storage,
   unlockedAmount,
 }: HoldingRequirementsProps) {
-  const functionCost = useMemo(() => {
-    if (computeUnits) {
-      return getFunctionCost({
-        computeUnits: computeUnits.number,
-        isPersistent: computeUnits?.isPersistent || false,
-        storage: 0,
-        capabilities: {},
-      })
-    }
-  }, [computeUnits, storage])
+
+  const totalProductCost = useMemo(() => getTotalProductCost({
+    computeUnits: computeUnits?.number || 0,
+    volumes: storage,
+    isPersistent: computeUnits?.isPersistent || false,
+    capabilities: {}
+  }), [computeUnits, storage])
 
   const getVolumeSize = (volume: VolumeRequirements) => {
     if (volume.type === 'new')
@@ -35,45 +32,6 @@ export default function HoldingSummary({
       }) as number
     return volume.size
   }
-
-  const displayedVolumes: (VolumeRequirements & { price: number })[] =
-    useMemo(() => {
-      const onlyNewVolumes =
-        storage?.filter((volume) => volume.type !== 'existing') || []
-      if (!computeUnits) {
-        return onlyNewVolumes.map((volume) => ({
-          ...volume,
-          price: (getVolumeSize(volume) || 0) * 1000 * 20,
-        }))
-      }
-
-      let remainingAllowance = functionCost?.storageAllowance || 0
-      return onlyNewVolumes.map((volume) => {
-        let size = getVolumeSize(volume) || 0
-        if (remainingAllowance > 0) {
-          if (size <= remainingAllowance) {
-            remainingAllowance -= size
-            size = 0
-          } else {
-            size -= remainingAllowance
-            remainingAllowance = 0
-          }
-        }
-
-        return {
-          ...volume,
-          price: size * 1000 * 20,
-        }
-      })
-    }, [storage, computeUnits])
-
-  const totalCost = useMemo(() => {
-    const volumeCost = displayedVolumes.reduce(
-      (acc, volume) => acc + volume.price,
-      0,
-    )
-    return (functionCost?.compute || 0) + volumeCost
-  }, [displayedVolumes, functionCost])
 
   return (
     <>
@@ -90,12 +48,12 @@ export default function HoldingSummary({
             {computeUnits.number} x86 64bit{' '}
             {computeUnits.isPersistent && '(persistent)'}
           </div>
-          <div>{humanReadableCurrency(functionCost?.compute)} ALEPH</div>
+          <div>{humanReadableCurrency(totalProductCost?.compute)} ALEPH</div>
         </StyledHoldingSummaryLine>
       )}
 
       {storage &&
-        displayedVolumes.map((volume, iVolume) => {
+        totalProductCost.volumeCosts.map((volume, iVolume) => {
           return (
             <StyledHoldingSummaryLine
               key={iVolume} // note: this key is meant to avoid a warning, and should work since the array is not reordered
@@ -117,7 +75,7 @@ export default function HoldingSummary({
         </div>
         <div>
           <TextGradient type="body2" color="main1">
-            {humanReadableCurrency(totalCost)} ALEPH
+            {humanReadableCurrency(totalProductCost.totalCost)} ALEPH
           </TextGradient>
         </div>
       </StyledHoldingSummaryLine>
