@@ -62,9 +62,9 @@ export function useNewVolumePage() {
   )
 
   const canAfford = accountBalance > totalCost
-  let createButtonDisabled = !canAfford
+  let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
-    createButtonDisabled = false
+    isCreateButtonDisabled = false
   }
 
   return {
@@ -74,6 +74,6 @@ export function useNewVolumePage() {
     volumeState,
     address: account?.address || '',
     accountBalance: appState.accountBalance || 0,
-    createButtonDisabled,
+    isCreateButtonDisabled,
   }
 }

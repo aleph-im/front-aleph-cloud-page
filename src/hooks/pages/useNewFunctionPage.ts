@@ -1,6 +1,6 @@
 import { useAppState } from '@/contexts/appState'
 import {
-  FunctionCost,
+  getTotalProductCost,
   isValidItemHash,
   safeCollectionToObject,
 } from '@/helpers/utils'
@@ -43,6 +43,7 @@ export type NewFunctionPage = {
   removeVolume: (volumeIndex: number) => void
   address: string
   accountBalance: number
+  isCreateButtonDisabled: boolean
 }
 
 export function useNewFunctionPage(): NewFunctionPage {
@@ -199,6 +200,23 @@ export function useNewFunctionPage(): NewFunctionPage {
     setFormValue('volumes', volumes)
   }
 
+  const { totalCost } = useMemo(
+    () =>
+      getTotalProductCost({
+        volumes: formState.volumes,
+        computeUnits: formState.computeUnits,
+        isPersistent: formState.isPersistent,
+        capabilities: {},
+      }),
+    [formState],
+  )
+
+  const canAfford = (accountBalance || 0) > totalCost
+  let isCreateButtonDisabled = !canAfford
+  if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
+    isCreateButtonDisabled = false
+  }
+
   return {
     formState,
     handleSubmit,
@@ -212,5 +230,6 @@ export function useNewFunctionPage(): NewFunctionPage {
     removeVolume,
     address: account?.address || '',
     accountBalance: accountBalance || 0,
+    isCreateButtonDisabled,
   }
 }

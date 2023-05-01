@@ -14,7 +14,7 @@ export default function NewVolumePage() {
     address,
     accountBalance,
     handleSubmit,
-    createButtonDisabled
+    isCreateButtonDisabled
   } = useNewVolumePage()
 
   return (
@@ -80,7 +80,7 @@ export default function NewVolumePage() {
                 kind="neon"
                 size="big"
                 variant="primary"
-                disabled={createButtonDisabled}
+                disabled={isCreateButtonDisabled}
               >
                 Create volume
               </Button>
