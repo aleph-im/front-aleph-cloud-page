@@ -37,4 +37,4 @@ jobs:
           pip install 'aioipfs>=0.6.2'
           python3 ./scripts/push_on_ipfs.py
           export IPFS_CID=$(python3 ./scripts/push_on_ipfs.py)
-          echo "$IPFS_CID"
+          echo $IPFS_CID
