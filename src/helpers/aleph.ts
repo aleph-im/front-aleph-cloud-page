@@ -176,7 +176,10 @@ export const createFunctionProgram = async ({
 /**
  * Deletes a VM using a forget message
  */
-export const deleteVM = async (account: Account, message: ProgramMessage) => {
+export const deleteVM = async (
+  account: Account,
+  message: ProgramMessage | StoreMessage,
+) => {
   try {
     const msg = await forget.Publish({
       account,

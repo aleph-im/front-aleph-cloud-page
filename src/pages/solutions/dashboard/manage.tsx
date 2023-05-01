@@ -1,5 +1,7 @@
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
+import ButtonLink from '@/components/ButtonLink'
 import CenteredSection from '@/components/CenteredSection'
+import IconText from '@/components/IconText'
 import NoisyContainer from '@/components/NoisyContainer'
 import { useAppState } from '@/contexts/appState'
 import { deleteVM, getMessage } from '@/helpers/aleph'
@@ -8,16 +10,16 @@ import {
   downloadBlob,
   ellipseAddress,
   getExplorerURL,
-  getStoreMessageSize,
-  humanReadableSize,
   isVolume,
+  isVolumePersistent,
 } from '@/helpers/utils'
-import { Button, Icon, Tag, TextGradient } from '@aleph-front/aleph-core'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
+import { Button, Icon, Tag, TextGradient, useNotification } from '@aleph-front/aleph-core'
 import {
-  MessageType,
   ProgramMessage,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -33,6 +35,19 @@ const Separator = styled.hr`
 export default function DashboardManage() {
   const router = useRouter()
   const { hash } = router.query
+  
+  const [ _copiedValue , copyToClipboard ] = useCopyToClipboard()
+  const noti = useNotification()
+
+  const copyAndNotify = (value: string) => {
+    copyToClipboard(value)
+    if(noti){
+      noti.add({
+          variant: 'success',
+          title: 'Copied to clipboard',
+        })
+    }
+  }
 
   useEffect(() => {
     if (!hash || typeof hash !== 'string') router.replace('../')
@@ -50,7 +65,7 @@ export default function DashboardManage() {
       else setMessage(msg as ProgramMessage)
     }
     dispatchMsg()
-  }, [])
+  }, [hash])
 
   const [globalState] = useAppState()
 
@@ -71,7 +86,7 @@ export default function DashboardManage() {
     const { account } = globalState
 
     if (!account) throw new Error('Invalid account')
-    if (!message || message.type !== MessageType.program)
+    if (!message)
       throw new Error('Invalid message')
 
     await deleteVM(account, message)
@@ -187,7 +202,7 @@ export default function DashboardManage() {
                 >
                   {defaultVMURL + ellipseAddress(hash as string)}
 
-                  <Icon name="arrow-up-right-from-square" tw="ml-2.5" />
+                  <Icon name="square-up-right" tw="ml-2.5" />
                 </a>
               </div>
             </div>
@@ -203,7 +218,7 @@ export default function DashboardManage() {
                 referrerPolicy="no-referrer"
               >
                 https://explorer.aleph.im/
-                <Icon name="arrow-up-right-from-square" tw="ml-2.5" />
+                <Icon name="square-up-right" tw="ml-2.5" />
               </a>
             </div>
           </div>
@@ -227,19 +242,63 @@ export default function DashboardManage() {
               </TextGradient>
               {displayedInformation.linkedVolumes.map((volume, i) => (
                 <div tw="my-5" key={i}>
-                  <TextGradient type="info">
-                    {volume?.persistence === 'host'
-                      ? 'Persistent '
-                      : 'Immutable '}{' '}
-                    volume
-                  </TextGradient>
-
-                  <pre>{JSON.stringify(volume, null, 2)}</pre>
+                  {
+                    isVolumePersistent(volume) ?
+                    <>
+                      <TextGradient type="info">PERSISTENT VOLUME</TextGradient>
+                      <pre>
+                        {JSON.stringify(volume, null, 2)}
+                      </pre>
+                    </>
+                    :
+                    <>
+                      <TextGradient type="info">IMMUTABLE VOLUME</TextGradient>
+                      <div>
+                        <Link
+                          className="tp-body1 fs-sm"
+                          href={`/solutions/dashboard/manage?hash=${volume.ref}`}
+                        >
+                          Volume details
+                          <Icon name="square-up-right" tw="ml-2.5" />
+                        </Link>
+                      </div>
+                      <IconText text={volume.ref} iconName="copy" callback={() => copyAndNotify(volume.ref)} />
+                    </>
+                  }
                 </div>
               ))}
             </>
           )}
         </NoisyContainer>
+
+        <div tw="my-7 text-center">
+        {
+          isVolume(message) ?
+          <ButtonLink
+          variant="primary"
+          href="/solutions/dashboard/volume"
+          >
+            Create volume
+          </ButtonLink>  
+          :
+          <ButtonLink
+          variant="primary"
+          href="/solutions/dashboard/function"
+          >
+            Create function
+          </ButtonLink>
+        }
+        </div>
+
+        <p>
+          Acquire aleph.im tokens for versatile access to resources within a
+          defined duration. These tokens remain in your wallet without being
+          locked or consumed, providing you with flexibility in utilizing
+          aleph.im&apos;s infrastructure. If you choose to remove the tokens
+          from your wallet, the allocated resources will be efficiently
+          reclaimed. Feel free to use or hold the tokens according to your
+          needs, even when not actively using Aleph.im&apos;s resources.
+        </p>
       </CenteredSection>
     </>
   )
