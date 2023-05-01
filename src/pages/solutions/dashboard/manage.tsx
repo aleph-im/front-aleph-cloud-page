@@ -78,17 +78,21 @@ export default function DashboardManage() {
   }
 
   const handleDownload = async () => {
-    if(!isVolume(message)){
+    if (!isVolume(message)) {
       const ref = (message as ProgramMessage).content.code.ref
       const storeMessageRef = await getMessage(ref)
 
-      const req = await fetch(programStorageURL + (storeMessageRef as StoreMessage).content.item_hash)
+      const req = await fetch(
+        programStorageURL + (storeMessageRef as StoreMessage).content.item_hash,
+      )
       const blob = await req.blob()
 
       return downloadBlob(blob, `VM_${message.item_hash.slice(-12)}.zip`)
     }
 
-    const req = await fetch(programStorageURL + (message as StoreMessage).content.item_hash)
+    const req = await fetch(
+      programStorageURL + (message as StoreMessage).content.item_hash,
+    )
     const blob = await req.blob()
 
     return downloadBlob(blob, `Volume_${message.item_hash.slice(-12)}.sqsh`)

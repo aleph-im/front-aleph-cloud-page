@@ -46,7 +46,7 @@ export default function DashboardHome() {
             ...product,
             size: (product as ProgramMessage).content?.volumes.reduce(
               (ac, cv) => {
-                if(isVolumePersistent(cv)){
+                if (isVolumePersistent(cv)) {
                   const persistentVolume = (cv as PersistentVolume)?.size_mib
                   return ac + persistentVolume * 10 ** 3
                 }
