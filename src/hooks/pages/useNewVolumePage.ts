@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useMemo, useState } from 'react'
 import useConnected from '../useConnected'
 import {
   defaultVolume,
@@ -9,6 +9,7 @@ import {
 import { useAppState } from '@/contexts/appState'
 import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
+import { getTotalProductCost } from '@/helpers/utils'
 
 export function useNewVolumePage() {
   useConnected()
@@ -48,6 +49,24 @@ export function useNewVolumePage() {
     }
   }
 
+  const accountBalance = appState?.accountBalance || 0
+  const { totalCost } = useMemo(
+    () =>
+      getTotalProductCost({
+        volumes: [volumeState],
+        computeUnits: 0,
+        isPersistent: false,
+        capabilities: {},
+      }),
+    [volumeState],
+  )
+
+  const canAfford = accountBalance > totalCost
+  let createButtonDisabled = !canAfford
+  if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
+    createButtonDisabled = false
+  }
+
   return {
     setVolumeProperty,
     setVolumeType,
@@ -55,5 +74,6 @@ export function useNewVolumePage() {
     volumeState,
     address: account?.address || '',
     accountBalance: appState.accountBalance || 0,
+    createButtonDisabled,
   }
 }

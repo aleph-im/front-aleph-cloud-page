@@ -14,7 +14,9 @@ export default function NewVolumePage() {
     address,
     accountBalance,
     handleSubmit,
+    createButtonDisabled
   } = useNewVolumePage()
+
   return (
     <>
       <section tw="py-6">
@@ -78,6 +80,7 @@ export default function NewVolumePage() {
                 kind="neon"
                 size="big"
                 variant="primary"
+                disabled={createButtonDisabled}
               >
                 Create volume
               </Button>
