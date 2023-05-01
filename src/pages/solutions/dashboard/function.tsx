@@ -41,7 +41,7 @@ export default function NewFunctionPage() {
     removeVolume,
     address,
     accountBalance,
-    isCreateButtonDisabled
+    isCreateButtonDisabled,
   } = useNewFunctionPage()
 
   const [tabId, setTabId] = useState('code')

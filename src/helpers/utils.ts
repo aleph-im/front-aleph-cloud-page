@@ -12,7 +12,6 @@ import {
 } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { VolumeRequirements } from '@/components/HoldingRequirements/types'
 
-
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
  *

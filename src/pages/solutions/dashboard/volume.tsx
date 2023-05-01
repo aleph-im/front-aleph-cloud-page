@@ -14,7 +14,7 @@ export default function NewVolumePage() {
     address,
     accountBalance,
     handleSubmit,
-    isCreateButtonDisabled
+    isCreateButtonDisabled,
   } = useNewVolumePage()
 
   return (

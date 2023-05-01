@@ -15,13 +15,16 @@ export default function HoldingSummary({
   storage,
   unlockedAmount,
 }: HoldingRequirementsProps) {
-
-  const totalProductCost = useMemo(() => getTotalProductCost({
-    computeUnits: computeUnits?.number || 0,
-    volumes: storage,
-    isPersistent: computeUnits?.isPersistent || false,
-    capabilities: {}
-  }), [computeUnits, storage])
+  const totalProductCost = useMemo(
+    () =>
+      getTotalProductCost({
+        computeUnits: computeUnits?.number || 0,
+        volumes: storage,
+        isPersistent: computeUnits?.isPersistent || false,
+        capabilities: {},
+      }),
+    [computeUnits, storage],
+  )
 
   const getVolumeSize = (volume: VolumeRequirements) => {
     if (volume.type === 'new')
