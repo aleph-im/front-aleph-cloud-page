@@ -11,6 +11,7 @@ import {
   programStorageURL,
 } from '@/helpers/constants'
 import {
+  convertBitUnits,
   downloadBlob,
   ellipseAddress,
   getExplorerURL,
@@ -258,7 +259,9 @@ export default function DashboardManage() {
                   {isVolumePersistent(volume) ? (
                     <>
                       <TextGradient type="info">PERSISTENT VOLUME</TextGradient>
-                      <pre>{JSON.stringify(volume, null, 2)}</pre>
+                      <div>
+                        {convertBitUnits(volume.size_mib, {from: 'mb', to: 'gb', displayUnit: true})}
+                      </div>
                     </>
                   ) : (
                     <>
