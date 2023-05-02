@@ -1,4 +1,4 @@
-import CenteredSection from '@/components/CenteredContainer'
+import Container from '@/components/CenteredContainer'
 import HoldingRequirements from '@/components/HoldingRequirements'
 import NewVolume from '@/components/NewVolume'
 import { useNewVolumePage } from '@/hooks/pages/useNewVolumePage'
@@ -18,33 +18,41 @@ export default function NewVolumePage() {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <CenteredSection>
-          <NewVolume
-            isStandAlone
-            volumeMountpoint={volumeState.mountpoint}
-            volumeName={volumeState.name}
-            volumeRefHash={volumeState.refHash}
-            volumeUseLatest={volumeState.useLatest}
-            volumeSize={volumeState.size}
-            volumeSrc={volumeState.src}
-            handleMountpointChange={(e) =>
-              setVolumeProperty('mountpoint', e.target.value)
-            }
-            handleNameChange={(e) => setVolumeProperty('name', e.target.value)}
-            handleRefHashChange={(e) =>
-              setVolumeProperty('refHash', e.target.value)
-            }
-            handleSizeChange={(e) => setVolumeProperty('size', e.target.value)}
-            handleSrcChange={(f) => setVolumeProperty('src', f)}
-            handleUseLatestChange={(e) =>
-              setVolumeProperty('useLatest', e.target.checked)
-            }
-            handleVolumeType={setVolumeType}
-          />
-        </CenteredSection>
-
-        <section className="fx-noise-light" tw="p-5">
-          <CenteredSection>
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <Container>
+            <NewVolume
+              isStandAlone
+              volumeMountpoint={volumeState.mountpoint}
+              volumeName={volumeState.name}
+              volumeRefHash={volumeState.refHash}
+              volumeUseLatest={volumeState.useLatest}
+              volumeSize={volumeState.size}
+              volumeSrc={volumeState.src}
+              handleMountpointChange={(e) =>
+                setVolumeProperty('mountpoint', e.target.value)
+              }
+              handleNameChange={(e) =>
+                setVolumeProperty('name', e.target.value)
+              }
+              handleRefHashChange={(e) =>
+                setVolumeProperty('refHash', e.target.value)
+              }
+              handleSizeChange={(e) =>
+                setVolumeProperty('size', e.target.value)
+              }
+              handleSrcChange={(f) => setVolumeProperty('src', f)}
+              handleUseLatestChange={(e) =>
+                setVolumeProperty('useLatest', e.target.checked)
+              }
+              handleVolumeType={setVolumeType}
+            />
+          </Container>
+        </section>
+        <section
+          className="fx-noise-light"
+          tw="px-0 pt-6 pb-24 md:pt-16 md:pb-32"
+        >
+          <Container>
             <TextGradient type="h4">
               Estimated holding requirements
             </TextGradient>
@@ -56,13 +64,11 @@ export default function NewVolumePage() {
                 from the wallet.
               </TextGradient>
             </div>
-
             <HoldingRequirements
               address={address}
               storage={[volumeState]}
               unlockedAmount={accountBalance}
             />
-
             <div tw="my-7 text-center">
               <Button
                 type="submit"
@@ -75,7 +81,7 @@ export default function NewVolumePage() {
                 Create volume
               </Button>
             </div>
-          </CenteredSection>
+          </Container>
         </section>
       </form>
     </>

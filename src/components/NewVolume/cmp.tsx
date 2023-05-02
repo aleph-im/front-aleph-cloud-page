@@ -60,16 +60,10 @@ export default function NewVolume({
         application.
       </p>
       <NoisyContainer>
-        <div tw="flex justify-between">
+        <div tw="pb-4">
           <HiddenFileInput value={volumeSrc} onChange={handleSrcChange}>
             Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
           </HiddenFileInput>
-          <strong>or</strong>
-          <div className="unavailable-content">
-            <HiddenFileInput onChange={handleSrcChange}>
-              Upload dependency file <Icon name="arrow-up" tw="ml-4" />
-            </HiddenFileInput>
-          </div>
         </div>
         <div tw="mt-4">
           <TextInput

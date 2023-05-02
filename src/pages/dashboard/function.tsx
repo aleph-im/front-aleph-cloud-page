@@ -733,7 +733,7 @@ export default function NewFunctionPage() {
                 This amount needs to be present in your wallet until the
                 function is removed. Tokens won’t be locked nor consumed. The
                 function will be garbage collected once funds are removed from
-                the wallet.&nbsp;
+                the wallet.
               </p>
             </div>
             <div tw="my-7">
