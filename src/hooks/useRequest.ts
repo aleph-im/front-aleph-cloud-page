@@ -34,7 +34,6 @@ export function useRequest<T>({
   }, [doRequest, onLoad, onSuccess, onError])
 
   useEffect(() => {
-    console.log('triggerOnMount', triggerOnMount)
     if (!triggerOnMount) return
     request()
   }, [request, triggerOnMount])
