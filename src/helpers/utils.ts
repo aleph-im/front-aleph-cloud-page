@@ -199,24 +199,6 @@ export const downloadBlob = (blob: Blob, fileName: string) => {
   link.click()
 }
 
-export const getStoreMessageSize = async (message: StoreMessage) => {}
-
-// export const getStoreMessageSize = async (message: StoreMessage) => {
-//   const headReq = await fetch(
-//     'https://ipfs.io/ipfs/' + message.content.item_hash,
-//     {
-//       method: 'HEAD',
-//     },
-//   )
-
-//   try {
-//     const size = headReq.headers.get('content-length')
-//     return Number(size)
-//   } catch (err) {
-//     return 0
-//   }
-// }
-
 /**
  * Converts a UNIX timestamp to an ISO date and time, or returns a default value if the timestamp is invalid
  *

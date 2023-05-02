@@ -15,7 +15,10 @@ import {
 } from 'aleph-sdk-ts/dist/messages/message'
 import { useDashboardHomePage } from '@/hooks/pages/useDashboardHomePage'
 import { useMemo, useState } from 'react'
-import { PersistentVolume } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import {
+  ImmutableVolume,
+  PersistentVolume,
+} from 'aleph-sdk-ts/dist/messages/program/programModel'
 
 export default function DashboardHome() {
   const { products, functions, volumes, fileStats } = useDashboardHomePage()
