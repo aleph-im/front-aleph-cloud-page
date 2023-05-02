@@ -123,10 +123,10 @@ export default function NewVolume({
               id: 'existing' as VolumeTypes,
               name: 'Existing volume',
             },
-            // {
-            //   id: 'persistent' as VolumeTypes,
-            //   name: 'Dependencies volume',
-            // },
+            {
+              id: 'persistent' as VolumeTypes,
+              name: 'Persistent Storage',
+            },
           ]}
         />
       </div>
@@ -139,8 +139,8 @@ export default function NewVolume({
             <p tw="mt-1 mb-6">
               Link existing volumes to your web3 function by pasting the
               reference hash associated with each volume. Volumes are an
-              essential component for managing persistent data storage and
-              dependencies within your application.
+              essential component for managing dependencies within your
+              application.
             </p>
 
             <NoisyContainer>
