@@ -3,12 +3,14 @@ import {
   ProgramMessage,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
+import { AccountFilesResponse } from './aleph'
 
 export enum ActionTypes {
   connect,
   disconnect,
   setAccountBalance,
   setProducts,
+  setAccountFiles,
 }
 
 export type State = {
@@ -19,6 +21,7 @@ export type State = {
     functions?: ProgramMessage[]
     volumes?: StoreMessage[]
   }
+  accountFiles?: AccountFilesResponse
 }
 
 export type Action = {
@@ -34,6 +37,7 @@ export const initialState: State = {
     functions: undefined,
     volumes: undefined,
   },
+  accountFiles: undefined,
 }
 
 export const reducer = (
@@ -63,6 +67,12 @@ export const reducer = (
       return {
         ...state,
         products: payload.products,
+      }
+
+    case ActionTypes.setAccountFiles:
+      return {
+        ...state,
+        accountFiles: payload.accountFiles,
       }
 
     default:

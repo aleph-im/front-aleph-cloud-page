@@ -1,6 +1,7 @@
 import { useAppState } from '@/contexts/appState'
 import {
   getAccountBalance,
+  getAccountFileStats,
   getAccountProducts,
   web3Connect,
 } from '@/helpers/aleph'
@@ -35,15 +36,26 @@ export function useConnect(): UseConnectReturn {
     [dispatch],
   )
 
+  const getFileStats = useCallback(
+    async (account: any) => {
+      const accountFiles = await getAccountFileStats(account)
+      dispatch({ type: ActionTypes.setAccountFiles, payload: { accountFiles } })
+    },
+    [dispatch],
+  )
+
   const connect = useCallback(async () => {
     const account = await web3Connect(Chain.ETH, window?.ethereum)
+
+    await Promise.all([
+      getBalance(account),
+      getProducts(account),
+      getFileStats(account),
+    ])
+
     dispatch({ type: ActionTypes.connect, payload: { account } })
-
-    await getBalance(account)
-    await getProducts(account)
-
     return account
-  }, [dispatch, getBalance, getProducts])
+  }, [dispatch, getBalance, getProducts, getFileStats])
 
   const disconnect = useCallback(async () => {
     dispatch({ type: ActionTypes.disconnect })
