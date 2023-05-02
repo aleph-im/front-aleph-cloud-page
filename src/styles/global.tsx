@@ -11,6 +11,10 @@ export const GlobalStylesOverride = createGlobalStyle`
     flex: 1 0 auto;
   }
 
+  html {
+    font-size: 16px;
+  }
+
   /* FIXME: */
   .unavailable-content {
     opacity: 0.3;
@@ -31,5 +35,6 @@ export const GlobalStylesOverride = createGlobalStyle`
   /* FIXME: */
   table {
     max-width: 100%;
+    overflow: auto;
   }
 `

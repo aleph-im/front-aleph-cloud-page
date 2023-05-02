@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import {
   Button,
   ChipInput,
   CodeEditor,
+  Col,
   Icon,
   Radio,
   RadioGroup,
+  Row,
   Table,
   Tabs,
   TextGradient,
@@ -23,7 +25,7 @@ import {
 import { useNewFunctionPage } from '@/hooks/pages/useNewFunctionPage'
 import NewVolume from '@/components/NewVolume/cmp'
 import HoldingRequirements from '@/components/HoldingRequirements'
-import Container from '@/components/CenteredContainer'
+import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
 import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
 import styled, { css } from 'styled-components'
@@ -40,6 +42,16 @@ const StyledTable = styled(Table<any>)`
     }
   `}
 `
+
+const Container = ({ children }: { children: ReactNode }) => (
+  <Row xs={1} lg={12} gap="0">
+    <Col xs={1} lg={10} lgOffset={2} xl={8} xlOffset={3} xxl={6} xxlOffset={4}>
+      <BaseContainer>
+        <div tw="max-w-[715px] mx-auto">{children}</div>
+      </BaseContainer>
+    </Col>
+  </Row>
+)
 
 export default function NewFunctionPage() {
   const {
@@ -64,30 +76,32 @@ export default function NewFunctionPage() {
     <>
       <form onSubmit={handleSubmit}>
         <section tw="px-0 py-0 md:py-8">
-          <Tabs
-            selected="function"
-            tabs={[
-              {
-                id: 'function',
-                name: 'Function',
-              },
-              {
-                id: 'instance',
-                name: 'Instance',
-                disabled: true,
-                label: 'SOON',
-                labelPosition: 'top',
-              },
-              {
-                id: 'confidential',
-                name: 'Confidential',
-                disabled: true,
-                label: 'SOON',
-                labelPosition: 'top',
-              },
-            ]}
-            tw="overflow-auto"
-          />
+          <Container>
+            <Tabs
+              selected="function"
+              tabs={[
+                {
+                  id: 'function',
+                  name: 'Function',
+                },
+                {
+                  id: 'instance',
+                  name: 'Instance',
+                  disabled: true,
+                  label: 'SOON',
+                  labelPosition: 'top',
+                },
+                {
+                  id: 'confidential',
+                  name: 'Confidential',
+                  disabled: true,
+                  label: 'SOON',
+                  labelPosition: 'top',
+                },
+              ]}
+              tw="overflow-auto"
+            />
+          </Container>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>
