@@ -43,10 +43,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Aleph.im Cloud Solutions</title>
+        <title>Aleph.im | Cloud Solutions</title>
         <meta name="description" content="Aleph.im Cloud Solution" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon-32x32.png" />
       </Head>
       <section tw="p-0">
         <Container>
