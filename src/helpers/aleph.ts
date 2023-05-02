@@ -229,3 +229,30 @@ export const getVolumes = async (account: Account) => {
     throw E_.RequestFailed(error)
   }
 }
+
+export type AccountFileObject = {
+  file_hash: string
+  size: number
+  type: 'file'
+  created: string
+  item_hash: string
+}
+export type AccountFilesResponse = {
+  address: string
+  total_size: number
+  files: AccountFileObject[]
+}
+
+/**
+ * Fetches all the files pinned by the user (fails silently)
+ *
+ * @param account An aleph account object
+ * @returns
+ */
+export const getAccountFileStats = async (account: Account) => {
+  const q = await fetch(
+    `https://api2.aleph.im/api/v0/addresses/${account.address}/files`,
+  )
+  const r: AccountFilesResponse = await q.json()
+  return r
+}

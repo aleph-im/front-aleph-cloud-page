@@ -519,7 +519,6 @@ export default function NewFunctionPage() {
                   name="__config_function_tags"
                   value={formState.metaTags}
                   onChange={(val) => {
-                    console.log('change', val)
                     setFormValue('metaTags', val)
                   }}
                 />

@@ -15,7 +15,10 @@ import {
 } from 'aleph-sdk-ts/dist/messages/message'
 import { useDashboardHomePage } from '@/hooks/pages/useDashboardHomePage'
 import { ReactNode, useMemo, useState } from 'react'
-import { PersistentVolume } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import {
+  ImmutableVolume,
+  PersistentVolume,
+} from 'aleph-sdk-ts/dist/messages/program/programModel'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -28,15 +31,19 @@ const Container = ({ children }: { children: ReactNode }) => (
 )
 
 export default function DashboardHome() {
-  const { products, functions, volumes } = useDashboardHomePage()
+  const { products, functions, volumes, fileStats } = useDashboardHomePage()
   const [tabId, setTabId] = useState('all')
 
-  // FIXME: Selector function signature
   const TabContent = ({
     data,
   }: {
     data: (ProgramMessage | StoreMessage)[]
   }) => {
+    const getVolumeSize = (hash: string) => {
+      const size = fileStats.find((s) => s.item_hash === hash)?.size || 0
+      return size / 1024
+    }
+
     const flattenedSizeData: ProgramMessage[] = useMemo(
       () =>
         data.map((product) => {
@@ -45,7 +52,7 @@ export default function DashboardHome() {
           if (isVolume(product)) {
             return {
               ...product,
-              size: 0,
+              size: getVolumeSize(product.item_hash),
             }
           }
           return {
@@ -56,8 +63,7 @@ export default function DashboardHome() {
                   const persistentVolume = (cv as PersistentVolume)?.size_mib
                   return ac + persistentVolume * 10 ** 3
                 }
-
-                return ac
+                return (ac += getVolumeSize((cv as ImmutableVolume).ref))
               },
               0,
             ),
