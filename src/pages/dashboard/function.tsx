@@ -28,7 +28,6 @@ import Container from '@/components/CenteredContainer'
 import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
 import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
 import styled, { css } from 'styled-components'
-import tw from 'twin.macro'
 
 const StyledTable = styled(Table<any>)`
   ${({ theme }) => css`
@@ -87,7 +86,7 @@ export default function NewFunctionPage() {
                 labelPosition: 'top',
               },
             ]}
-            tw="overflow-scroll"
+            tw="overflow-auto"
           />
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
@@ -331,7 +330,7 @@ export default function NewFunctionPage() {
               ensuring optimal performance and efficient resource usage tailored
               to your specific needs.
             </p>
-            <div tw="max-w-full overflow-y-hidden overflow-x-scroll">
+            <div tw="max-w-full overflow-y-hidden overflow-x-auto">
               <StyledTable
                 borderType="none"
                 oddRowNoise

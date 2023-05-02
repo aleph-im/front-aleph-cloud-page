@@ -36,7 +36,7 @@ export default function HoldingSummary({
   }
 
   return (
-    <div tw="max-w-full overflow-scroll">
+    <div tw="max-w-full overflow-auto">
       <StyledHoldingSummaryLine isHeader>
         <div tw="text-xs flex items-center">UNLOCKED</div>
         <div className="tp-body1">current wallet {ellipseAddress(address)}</div>
