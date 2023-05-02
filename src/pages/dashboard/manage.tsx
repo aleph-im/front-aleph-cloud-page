@@ -260,7 +260,11 @@ export default function DashboardManage() {
                     <>
                       <TextGradient type="info">PERSISTENT VOLUME</TextGradient>
                       <div>
-                        {convertBitUnits(volume.size_mib, {from: 'mb', to: 'gb', displayUnit: true})}
+                        {convertBitUnits(volume.size_mib, {
+                          from: 'mb',
+                          to: 'gb',
+                          displayUnit: true,
+                        })}
                       </div>
                     </>
                   ) : (
