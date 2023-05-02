@@ -266,7 +266,7 @@ export default function DashboardManage() {
                       <div>
                         <Link
                           className="tp-body1 fs-sm"
-                          href={`/solutions/dashboard/manage?hash=${volume.ref}`}
+                          href={`/dashboard/manage?hash=${volume.ref}`}
                         >
                           Volume details
                           <Icon name="square-up-right" tw="ml-2.5" />

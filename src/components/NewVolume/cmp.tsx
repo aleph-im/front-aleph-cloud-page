@@ -123,10 +123,10 @@ export default function NewVolume({
               id: 'existing' as VolumeTypes,
               name: 'Existing volume',
             },
-            // {
-            //   id: 'persistent' as VolumeTypes,
-            //   name: 'Dependencies volume',
-            // },
+            {
+              id: 'persistent' as VolumeTypes,
+              name: 'Persistent Storage',
+            },
           ]}
         />
       </div>

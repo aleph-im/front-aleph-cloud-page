@@ -23,12 +23,10 @@ import {
 import { useNewFunctionPage } from '@/hooks/pages/useNewFunctionPage'
 import NewVolume from '@/components/NewVolume/cmp'
 import HoldingRequirements from '@/components/HoldingRequirements'
-import ExternalLink from '@/components/ExternalLink'
 import Container from '@/components/CenteredContainer'
 import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
 import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
 import styled, { css } from 'styled-components'
-import tw from 'twin.macro'
 
 const StyledTable = styled(Table<any>)`
   ${({ theme }) => css`
@@ -57,6 +55,7 @@ export default function NewFunctionPage() {
     removeVolume,
     address,
     accountBalance,
+    isCreateButtonDisabled,
   } = useNewFunctionPage()
 
   const [tabId, setTabId] = useState('code')
@@ -737,10 +736,6 @@ export default function NewFunctionPage() {
                 function is removed. Tokens won’t be locked nor consumed. The
                 function will be garbage collected once funds are removed from
                 the wallet.&nbsp;
-                <ExternalLink
-                  href="https://aleph.im"
-                  text="Learn about the benefits"
-                />
               </p>
             </div>
             <div tw="my-7">
@@ -762,6 +757,7 @@ export default function NewFunctionPage() {
                 kind="neon"
                 size="big"
                 variant="primary"
+                disabled={isCreateButtonDisabled}
               >
                 Create function
               </Button>

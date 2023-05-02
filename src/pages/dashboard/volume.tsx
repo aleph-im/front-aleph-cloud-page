@@ -1,5 +1,4 @@
 import CenteredSection from '@/components/CenteredContainer'
-import ExternalLink from '@/components/ExternalLink'
 import HoldingRequirements from '@/components/HoldingRequirements'
 import NewVolume from '@/components/NewVolume'
 import { useNewVolumePage } from '@/hooks/pages/useNewVolumePage'
@@ -56,10 +55,6 @@ export default function NewVolumePage() {
                 The function will be garbage collected once funds are removed
                 from the wallet.
               </TextGradient>
-              <ExternalLink
-                href="https://aleph.im"
-                text="Learn about the benefits"
-              />
             </div>
 
             <HoldingRequirements
