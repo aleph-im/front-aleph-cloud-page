@@ -168,17 +168,16 @@ export default function NewFunctionPage() {
                           <div>
                             <div className="tp-body2 fs-md">Write code</div>
                             <div className="tp-body1 fs-md">
-                              You should specify that the uploaded zip bundle
-                              should contain an “app.py” file which is going to
-                              be executed as an entrypoint.
+                              Your code should have an app function that will
+                              serve as an entrypoint to the program.
                             </div>
                           </div>
                           <div tw="mt-6">
                             <div className="tp-body2 fs-md">Upload code</div>
                             <div className="tp-body1 fs-md">
-                              The code will be transformed into a zip archive of
-                              a single file named “app.py”. It is not necessary
-                              to mention it.
+                              Your zip file should contain a main file (ex:
+                              main.py) at its root that exposes an app function.
+                              This will serve as an entrypoint to the program.
                             </div>
                           </div>
                         </div>
@@ -569,34 +568,33 @@ export default function NewFunctionPage() {
                     <div>
                       <div className="tp-body2 fs-md">New volume</div>
                       <div className="tp-body1 fs-md">
-                        An immutable volume is a file containing a Squashfs
-                        filesystem that can be mounted read-only inside the
-                        virtual machine running programs in on-demand or
-                        persistent execution modes.
-                      </div>
-                      <div>
-                        <ExternalLinkButton
-                          href="https://docs.aleph.im/computing/volumes/immutable"
-                          size="regular"
-                        >
-                          Learn more
-                        </ExternalLinkButton>
+                        <p>
+                          Many Python programs require additional packages
+                          beyond those present on the system by default.
+                        </p>
+                        <p>
+                          An immutable volume is a file containing a Squashfs
+                          filesystem that can be mounted read-only inside the
+                          virtual machine running programs in on-demand or
+                          persistent execution modes.
+                        </p>
                       </div>
                     </div>
                     <div tw="mt-6">
-                      <div className="tp-body2 fs-md">Dependencies volume</div>
-                      <div className="tp-body1 fs-md">
-                        Many Python programs require additional packages beyond
-                        those present on the system by default.
-                      </div>
-                      <div>
-                        <ExternalLinkButton
-                          href="https://docs.aleph.im/guides/python/dependency_volume"
-                          size="regular"
-                        >
-                          Learn more
-                        </ExternalLinkButton>
-                      </div>
+                      <div className="tp-body2 fs-md">Existing volume</div>
+                      <p>
+                        If this function uses the same dependencies as another
+                        program, you can reference the volume hash to avoid data
+                        duplication at no additional cost.
+                      </p>
+                    </div>
+                    <div tw="mt-6">
+                      <div className="tp-body2 fs-md">Persistent storage</div>
+                      <p>
+                        By default function data are flushed on each run. A
+                        persistent storage will allow you to persist data on
+                        disk.
+                      </p>
                     </div>
                   </div>
                 }
