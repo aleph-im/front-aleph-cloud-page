@@ -73,69 +73,71 @@ export default function DashboardHome() {
     )
 
     return (
-      <Table
-        borderType="none"
-        oddRowNoise
-        keySelector={(row: ProgramMessage) => row?.item_hash}
-        data={flattenedSizeData}
-        columns={[
-          {
-            label: 'Type',
-            selector: (row: ProgramMessage) =>
-              isVolume(row) ? 'Volume' : 'Function',
-            sortable: true,
-          },
-          {
-            label: 'Name',
-            selector: (row: ProgramMessage) =>
-              row?.content?.metadata?.name ||
-              ellipseAddress(row?.item_hash || ''),
-            sortable: true,
-          },
-          {
-            label: 'Cores',
-            align: 'right',
-            selector: (row: ProgramMessage) =>
-              isVolume(row) ? '-' : row?.content?.resources?.vcpus || 0,
-            sortable: true,
-          },
-          {
-            label: 'Memory',
-            align: 'right',
-            selector: (row: ProgramMessage) =>
-              isVolume(row)
-                ? '-'
-                : convertBitUnits(row?.content?.resources?.memory || 0, {
-                    from: 'mb',
-                    to: 'gb',
-                  }),
-            sortable: true,
-          },
-          {
-            label: 'Size',
-            align: 'right',
-            selector: (row: ProgramMessage) => humanReadableSize(row.size),
-            sortable: true,
-          },
-          {
-            label: 'Date',
-            align: 'right',
-            selector: (row: ProgramMessage) =>
-              unixToISODateString(row?.content?.time),
-            sortable: true,
-          },
-          {
-            label: '',
-            align: 'right',
-            selector: () => '',
-            cell: (row: ProgramMessage) => (
-              <ButtonLink href={`/dashboard/manage?hash=${row?.item_hash}`}>
-                &gt;
-              </ButtonLink>
-            ),
-          },
-        ]}
-      />
+      <div tw="overflow-auto max-w-full">
+        <Table
+          borderType="none"
+          oddRowNoise
+          keySelector={(row: ProgramMessage) => row?.item_hash}
+          data={flattenedSizeData}
+          columns={[
+            {
+              label: 'Type',
+              selector: (row: ProgramMessage) =>
+                isVolume(row) ? 'Volume' : 'Function',
+              sortable: true,
+            },
+            {
+              label: 'Name',
+              selector: (row: ProgramMessage) =>
+                row?.content?.metadata?.name ||
+                ellipseAddress(row?.item_hash || ''),
+              sortable: true,
+            },
+            {
+              label: 'Cores',
+              align: 'right',
+              selector: (row: ProgramMessage) =>
+                isVolume(row) ? '-' : row?.content?.resources?.vcpus || 0,
+              sortable: true,
+            },
+            {
+              label: 'Memory',
+              align: 'right',
+              selector: (row: ProgramMessage) =>
+                isVolume(row)
+                  ? '-'
+                  : convertBitUnits(row?.content?.resources?.memory || 0, {
+                      from: 'mb',
+                      to: 'gb',
+                    }),
+              sortable: true,
+            },
+            {
+              label: 'Size',
+              align: 'right',
+              selector: (row: ProgramMessage) => humanReadableSize(row.size),
+              sortable: true,
+            },
+            {
+              label: 'Date',
+              align: 'right',
+              selector: (row: ProgramMessage) =>
+                unixToISODateString(row?.content?.time),
+              sortable: true,
+            },
+            {
+              label: '',
+              align: 'right',
+              selector: () => '',
+              cell: (row: ProgramMessage) => (
+                <ButtonLink href={`/dashboard/manage?hash=${row?.item_hash}`}>
+                  &gt;
+                </ButtonLink>
+              ),
+            },
+          ]}
+        />
+      </div>
     )
   }
 
@@ -168,7 +170,7 @@ export default function DashboardHome() {
             onTabChange={setTabId}
           />
         </div>
-        <div role="tabpanel" tw="overflow-auto max-w-full">
+        <div role="tabpanel">
           {tabId === 'all' ? (
             <>
               {products.length > 0 ? (
