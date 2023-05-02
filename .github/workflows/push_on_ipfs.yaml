@@ -33,7 +33,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: aleph-account
+          name: aleph-cloudsolutions
           path: out/
 
       - name: Push on IPFS
