@@ -8,11 +8,7 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { any, program, forget, store } from 'aleph-sdk-ts/dist/messages'
 import { GetAccountFromProvider as getETHAccount } from 'aleph-sdk-ts/dist/accounts/ethereum'
 import { GetAccountFromProvider as getSOLAccount } from 'aleph-sdk-ts/dist/accounts/solana'
-import {
-  getERC20Balance,
-  getFunctionSpecsByComputeUnits,
-  getSOLBalance,
-} from './utils'
+import { catchHttpErrors, getFunctionSpecsByComputeUnits } from './utils'
 import E_ from './errors'
 import {
   Encoding,
@@ -47,15 +43,17 @@ export const web3Connect = (chain: Chain, provider: any): Promise<Account> => {
  * @returns The Aleph balance of the account
  */
 export const getAccountBalance = async (account: Account): Promise<number> => {
-  switch (account.GetChain()) {
-    case Chain.ETH:
-      return getERC20Balance(account.address)
+  try {
+    const q = await fetch(
+      `https://api2.aleph.im/api/v0/addresses/${account.address}/balance`,
+    )
+    catchHttpErrors(q, [404])
 
-    case Chain.SOL:
-      return getSOLBalance(account.address)
-
-    default:
-      throw E_.ChainNotYetSupported
+    const res = await q.json()
+    return res.balance || 0
+  } catch (error) {
+    console.log('Could not retrieve account balance')
+    return 0
   }
 }
 
