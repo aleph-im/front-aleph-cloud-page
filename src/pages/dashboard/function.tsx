@@ -343,6 +343,10 @@ export default function NewFunctionPage() {
               ensuring optimal performance and efficient resource usage tailored
               to your specific needs.
             </p>
+
+            <p tw="mb-6">
+              You also get free volume storage with your instance. The free storage for on-demand VM is always equal to the amount of RAM, whilst the free storage for persistent VM is ten times (10x) the amount of RAM. 
+            </p>
             <div tw="max-w-full overflow-y-hidden overflow-x-auto">
               <StyledTable
                 borderType="none"
@@ -396,7 +400,6 @@ export default function NewFunctionPage() {
                     selector: () => '',
                     cell: (row) => {
                       const active = formState.computeUnits === row.cpu
-                      if (!active) return null
 
                       return (
                         <Button
@@ -406,6 +409,8 @@ export default function NewFunctionPage() {
                           size="regular"
                           forwardedAs="button"
                           type="button"
+                          // TODO: Fix this
+                          style={{ visibility: active ? 'visible' : 'hidden'}}
                           onClick={(e) => e.preventDefault()}
                         >
                           <Icon name="check" />
