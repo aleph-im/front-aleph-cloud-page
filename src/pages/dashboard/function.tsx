@@ -345,7 +345,10 @@ export default function NewFunctionPage() {
             </p>
 
             <p tw="mb-6">
-              You also get free volume storage with your instance. The free storage for on-demand VM is always equal to the amount of RAM, whilst the free storage for persistent VM is ten times (10x) the amount of RAM. 
+              You also get free volume storage with your instance. The free
+              storage for on-demand VM is always equal to the amount of RAM,
+              whilst the free storage for persistent VM is ten times (10x) the
+              amount of RAM.
             </p>
             <div tw="max-w-full overflow-y-hidden overflow-x-auto">
               <StyledTable
@@ -410,7 +413,7 @@ export default function NewFunctionPage() {
                           forwardedAs="button"
                           type="button"
                           // TODO: Fix this
-                          style={{ visibility: active ? 'visible' : 'hidden'}}
+                          style={{ visibility: active ? 'visible' : 'hidden' }}
                           onClick={(e) => e.preventDefault()}
                         >
                           <Icon name="check" />
