@@ -11,7 +11,7 @@ import { ellipseAddress } from '@/helpers/utils'
 import { useHeader } from '@/hooks/pages/useHeader'
 
 export const Header = () => {
-  const { theme, handleConnect, account } = useHeader()
+  const { theme, handleConnect, account, isOnPath } = useHeader()
 
   return (
     <StyledHeader>
@@ -41,12 +41,12 @@ export const Header = () => {
         {account ? (
           <>
             <NavbarLinkList withSlash>
-              <NavbarLink>
+              <NavbarLink isActive={isOnPath('/')}>
                 <Link key="solutions" href="/">
                   Solutions
                 </Link>
               </NavbarLink>
-              <NavbarLink>
+              <NavbarLink isActive={isOnPath('/dashboard')}>
                 <Link key="dashboard" href="/dashboard">
                   Dashboard
                 </Link>

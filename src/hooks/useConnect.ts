@@ -6,6 +6,7 @@ import {
   web3Connect,
 } from '@/helpers/aleph'
 import { ActionTypes } from '@/helpers/store'
+import { useNotification } from '@aleph-front/aleph-core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/message'
 import { useCallback } from 'react'
@@ -19,6 +20,19 @@ export type UseConnectReturn = {
 
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
+  const noti = useNotification()
+
+  const onError = useCallback(
+    (error: string) => {
+      noti &&
+        noti.add({
+          variant: 'error',
+          title: 'Error',
+          text: error,
+        })
+    },
+    [noti],
+  )
 
   const getBalance = useCallback(
     async (account: any) => {
@@ -45,13 +59,22 @@ export function useConnect(): UseConnectReturn {
   )
 
   const connect = useCallback(async () => {
-    const account = await web3Connect(Chain.ETH, window?.ethereum)
+    let account
+    try {
+      account = await web3Connect(Chain.ETH, window?.ethereum)
+    } catch (err) {
+      onError('You need an Ethereum wallet to use Aleph.im.')
+    }
+
+    if (!account) return
 
     await Promise.all([
       getBalance(account),
       getProducts(account),
       getFileStats(account),
-    ])
+    ]).catch((err) => {
+      onError(err.message)
+    })
 
     dispatch({ type: ActionTypes.connect, payload: { account } })
     return account
