@@ -8,12 +8,15 @@ export type Header = {
   theme: DefaultTheme
   handleConnect: () => void
   account: Account | undefined
+  isOnPath: (path: string) => boolean
 }
 
 export function useHeader(): Header {
   const { connect, disconnect, isConnected, account } = useConnect()
   const theme = useTheme()
   const router = useRouter()
+
+  const isOnPath = (path: string) => router.pathname === path
 
   // @note: wait till account is connected and redirect
   const handleConnect = useCallback(async () => {
@@ -31,5 +34,6 @@ export function useHeader(): Header {
     theme,
     handleConnect,
     account,
+    isOnPath,
   }
 }
