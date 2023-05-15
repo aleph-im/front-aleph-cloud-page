@@ -12,7 +12,7 @@ import { useHeader } from '@/hooks/pages/useHeader'
 import { useEffect } from 'react'
 
 export const Header = () => {
-  const { theme, handleConnect, enableConnection, account } = useHeader()
+  const { theme, handleConnect, enableConnection, account, isOnPath } = useHeader()
 
     useEffect(() => {
         (async () => {
@@ -50,12 +50,12 @@ export const Header = () => {
         {account ? (
           <>
             <NavbarLinkList withSlash>
-              <NavbarLink>
+              <NavbarLink isActive={isOnPath('/')}>
                 <Link key="solutions" href="/">
                   Solutions
                 </Link>
               </NavbarLink>
-              <NavbarLink>
+              <NavbarLink isActive={isOnPath('/dashboard')}>
                 <Link key="dashboard" href="/dashboard">
                   Dashboard
                 </Link>
