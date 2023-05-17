@@ -84,7 +84,7 @@ export default function Home() {
           </Row>
         </Container>
       </section>
-      <section tw="px-0 py-6 md:pb-0 md:pt-20" ref={scroll.function.ref}>
+      <section tw="px-0 py-6 md:pb-0 md:pt-20" ref={scroll.function.ref} id="compute">
         <Container>
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
@@ -166,7 +166,7 @@ export default function Home() {
           </Row>
         </Container>
       </section>
-      <section tw="px-0 pt-12 pb-6 md:pt-20 md:pb-0" ref={scroll.volume.ref}>
+      <section tw="px-0 pt-12 pb-6 md:pt-20 md:pb-0" ref={scroll.volume.ref} id="storage">
         <Container>
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
