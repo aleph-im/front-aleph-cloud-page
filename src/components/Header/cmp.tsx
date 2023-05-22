@@ -12,15 +12,16 @@ import { useHeader } from '@/hooks/pages/useHeader'
 import { useEffect } from 'react'
 
 export const Header = () => {
-  const { theme, handleConnect, enableConnection, account, isOnPath } = useHeader()
+  const { theme, handleConnect, enableConnection, account, isOnPath } =
+    useHeader()
 
-    useEffect(() => {
-        (async () => {
-            if (!account) {
-                enableConnection()
-            }
-        })()
-    }, [account])
+  useEffect(() => {
+    ;(async () => {
+      if (!account) {
+        enableConnection()
+      }
+    })()
+  }, [account])
 
   return (
     <StyledHeader>

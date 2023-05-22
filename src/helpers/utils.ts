@@ -55,7 +55,7 @@ export const safeCollectionToObject = (collection: EnvironmentVariable[]) => {
  * returns The Aleph balance of the address
  */
 export const getERC20Balance = async (address: string) => {
-  const ethereumProvider = new providers.Web3Provider(window?.ethereum);
+  const ethereumProvider = new providers.Web3Provider(window?.ethereum)
 
   const ERC20_ABI = [
     // Read-Only Functions

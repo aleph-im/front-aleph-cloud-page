@@ -108,7 +108,7 @@ export default function DashboardManage() {
       onSuccess(true)
       router.replace('/dashboard')
     } catch (e) {
-      onError((e as Error))
+      onError(e as Error)
     }
   }
 
