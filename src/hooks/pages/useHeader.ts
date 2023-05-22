@@ -7,6 +7,7 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 export type Header = {
   theme: DefaultTheme
   handleConnect: () => void
+  enableConnection: () => void
   account: Account | undefined
   isOnPath: (path: string) => boolean
 }
@@ -30,9 +31,19 @@ export function useHeader(): Header {
     }
   }, [connect, disconnect, isConnected, router])
 
+  const enableConnection = useCallback(async () => {
+    if (!isConnected) {
+      const acc = await connect()
+      if (!acc) return
+    } else {
+      await disconnect()
+    }
+  }, [connect, disconnect, isConnected, account])
+
   return {
     theme,
     handleConnect,
+    enableConnection,
     account,
     isOnPath,
   }

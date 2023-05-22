@@ -55,11 +55,7 @@ export const safeCollectionToObject = (collection: EnvironmentVariable[]) => {
  * returns The Aleph balance of the address
  */
 export const getERC20Balance = async (address: string) => {
-  // FIXME: This is a temporary solution, we should not rely on Infura
-  const provider = new providers.InfuraProvider(
-    'homestead',
-    '4890a5bd89854916b128088119d76b50',
-  )
+  const ethereumProvider = new providers.Web3Provider(window?.ethereum);
 
   const ERC20_ABI = [
     // Read-Only Functions
@@ -79,7 +75,7 @@ export const getERC20Balance = async (address: string) => {
   const ERC20Contract = new Contract(
     ERC20_CONTRACT_ADDRESS,
     ERC20_ABI,
-    provider,
+    ethereumProvider,
   )
 
   try {

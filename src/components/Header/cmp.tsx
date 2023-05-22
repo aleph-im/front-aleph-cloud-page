@@ -9,9 +9,18 @@ import Link from 'next/link'
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 import { useHeader } from '@/hooks/pages/useHeader'
+import { useEffect } from 'react'
 
 export const Header = () => {
-  const { theme, handleConnect, account, isOnPath } = useHeader()
+  const { theme, handleConnect, enableConnection, account, isOnPath } = useHeader()
+
+    useEffect(() => {
+        (async () => {
+            if (!account) {
+                enableConnection()
+            }
+        })()
+    }, [account])
 
   return (
     <StyledHeader>

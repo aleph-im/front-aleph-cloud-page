@@ -37,6 +37,7 @@ import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import tw from 'twin.macro'
+import { useRequestState } from '../../hooks/useRequestState'
 
 const Separator = styled.hr`
   ${tw`my-5`}
@@ -58,6 +59,8 @@ const Container = ({ children }: { children: ReactNode }) => (
 export default function DashboardManage() {
   const router = useRouter()
   const { hash } = router.query
+
+  const [reqState, { onLoad, onSuccess, onError }] = useRequestState()
 
   const [, copyToClipboard] = useCopyToClipboard()
   const noti = useNotification()
@@ -98,7 +101,15 @@ export default function DashboardManage() {
     if (!account) throw new Error('Invalid account')
     if (!message) throw new Error('Invalid message')
 
-    await deleteVM(account, message)
+    try {
+      onLoad()
+      await deleteVM(account, message)
+
+      onSuccess(true)
+      router.replace('/dashboard')
+    } catch (e) {
+      onError((e as Error))
+    }
   }
 
   const handleDownload = async () => {
