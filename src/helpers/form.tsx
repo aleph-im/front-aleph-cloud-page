@@ -96,7 +96,6 @@ export const displayVolumesToAlephVolumes = async (
         ref: volume.refHash || '',
         mount: volume.mountpoint || '',
         use_latest: volume.useLatest || false,
-        size_mib: (volume.size || 2) * 1000,
       })
     } else if (volume.type === 'persistent') {
       ret.push({
