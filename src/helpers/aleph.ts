@@ -250,13 +250,20 @@ export type AccountFilesResponse = {
  * @returns
  */
 export const getAccountFileStats = async (account: Account) => {
+  const emptyPayload = {
+    address: account.address,
+    total_size: 0,
+    files: [],
+  }
+
   try {
     const q = await fetch(
       `https://api2.aleph.im/api/v0/addresses/${account.address}/files`,
     )
     const r: AccountFilesResponse = await q.json()
-    return r
+    return r || emptyPayload
   } catch (e) {
     console.error(e)
+    return emptyPayload
   }
 }
