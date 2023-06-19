@@ -9,7 +9,7 @@ import {
 import HiddenFileInput from '../HiddenFileInput'
 import NoisyContainer from '../NoisyContainer'
 import { RemoveVolumeProps, NewVolumeProps } from './types'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { VolumeTypes } from '@/helpers/form'
 
 const RemoveVolume = ({ removeCallback }: RemoveVolumeProps) => (
@@ -49,6 +49,13 @@ export default function NewVolume({
     [],
   )
 
+  const mountPointRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (mountPointRef.current && volumeMountpoint) {
+      mountPointRef.current.focus()
+    }
+  }, [volumeMountpoint])
+
   const [tabId, setTabId] = useState('new')
 
   const NewVolumeTabComponent = () => (
@@ -72,6 +79,7 @@ export default function NewVolume({
             onChange={handleMountpointChange}
             value={volumeMountpoint}
             name={namePrefix + '_mount'}
+            ref={mountPointRef}
           />
         </div>
         <div tw="mt-4">
