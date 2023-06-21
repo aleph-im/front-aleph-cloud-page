@@ -2,15 +2,27 @@ import { providers, Contract } from 'ethers'
 import E_ from './errors'
 import {
   MessageType,
+  PostMessage,
   ProgramMessage,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
-import {
-  ImmutableVolume,
-  MachineVolume,
-  PersistentVolume,
-} from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { MachineVolume } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { VolumeRequirements } from '@/components/HoldingRequirements/types'
+import { EntityType } from './constants'
+
+/**
+ * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
+ *
+ * @param text A text to be shortened
+ * @param start Number of chars to print from the begining
+ * @param end Number of chars to print from the end
+ * @returns A shortened text
+ */
+export const ellipseText = (text: string, start = 10, end = 0) => {
+  if (text.length <= start) return text
+  if (text.length <= end) return text
+  return `${text.slice(0, start)}...${end > 0 ? text.slice(-end) : ''}`
+}
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -19,7 +31,7 @@ import { VolumeRequirements } from '@/components/HoldingRequirements/types'
  * @returns A shortened address
  */
 export const ellipseAddress = (address: string) => {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`
+  return ellipseText(address, 6, 4)
 }
 
 /**
@@ -172,6 +184,13 @@ export const getExplorerURL = ({
   type,
 }: ProgramMessage | StoreMessage) =>
   `https://explorer.aleph.im/address/${chain}/${sender}/message/${type}/${item_hash}`
+
+export const getDate = (time: number): string => {
+  const [date, hour] = new Date(time * 1000).toISOString().split('T')
+  const [hours] = hour.split('.')
+
+  return `${date} ${hours}`
+}
 
 /**
  * Converts a UNIX timestamp to an ISO date, or returns a default value if the timestamp is invalid
@@ -352,14 +371,28 @@ export const getTotalProductCost = ({
 /**
  * Returns true if the provided aleph message is a volume message
  */
-export const isVolume = (msg: ProgramMessage | StoreMessage) =>
-  msg.type === MessageType.store
+export const isVolume = (
+  msg: ProgramMessage | StoreMessage | PostMessage<any>,
+) => msg.type === MessageType.store
 
 /**
  * Returns true if the provided aleph message is a program message
  */
-export const isProgram = (msg: ProgramMessage | StoreMessage) =>
-  msg.type === MessageType.program
+export const isProgram = (
+  msg: ProgramMessage | StoreMessage | PostMessage<any>,
+) => msg.type === MessageType.program
+
+export const isSSHKey = (
+  msg: ProgramMessage | StoreMessage | PostMessage<any>,
+) => msg.type === MessageType.post
+
+export const getEntityTypeFromMessage = (
+  msg: ProgramMessage | StoreMessage | PostMessage<any>,
+) => {
+  if (isVolume(msg)) return EntityType.Volume
+  if (isProgram(msg)) return EntityType.Program
+  if (isSSHKey(msg)) return EntityType.SSHKey
+}
 
 export const isVolumePersistent = (volume: MachineVolume) => {
   return volume.hasOwnProperty('persistence')

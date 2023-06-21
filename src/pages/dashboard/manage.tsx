@@ -6,6 +6,7 @@ import NoisyContainer from '@/components/NoisyContainer'
 import { useAppState } from '@/contexts/appState'
 import { deleteVM, getMessage } from '@/helpers/aleph'
 import {
+  EntityType,
   breadcrumbNames,
   defaultVMURL,
   programStorageURL,
@@ -14,6 +15,7 @@ import {
   convertBitUnits,
   downloadBlob,
   ellipseAddress,
+  getEntityTypeFromMessage,
   getExplorerURL,
   isVolume,
   isVolumePersistent,
@@ -38,6 +40,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import tw from 'twin.macro'
 import { useRequestState } from '../../hooks/useRequestState'
+import ManageSSH from '@/components/ManageSSH/cmp'
 
 const Separator = styled.hr`
   ${tw`my-5`}
@@ -56,28 +59,9 @@ const Container = ({ children }: { children: ReactNode }) => (
   </Row>
 )
 
-export default function DashboardManage() {
+function LegacyDashboardManage() {
   const router = useRouter()
   const { hash } = router.query
-
-  const [reqState, { onLoad, onSuccess, onError }] = useRequestState()
-
-  const [, copyToClipboard] = useCopyToClipboard()
-  const noti = useNotification()
-
-  const copyAndNotify = (value: string) => {
-    copyToClipboard(value)
-    if (noti) {
-      noti.add({
-        variant: 'success',
-        title: 'Copied to clipboard',
-      })
-    }
-  }
-
-  useEffect(() => {
-    if (!hash || typeof hash !== 'string') router.replace('../')
-  }, [hash, router])
 
   const [message, setMessage] = useState<
     ProgramMessage | StoreMessage | undefined
@@ -92,6 +76,21 @@ export default function DashboardManage() {
     }
     dispatchMsg()
   }, [hash])
+
+  const [, { onLoad, onSuccess, onError }] = useRequestState()
+
+  const [, copyToClipboard] = useCopyToClipboard()
+  const noti = useNotification()
+
+  const copyAndNotify = (value: string) => {
+    copyToClipboard(value)
+    if (noti) {
+      noti.add({
+        variant: 'success',
+        title: 'Copied to clipboard',
+      })
+    }
+  }
 
   const [globalState] = useAppState()
 
@@ -319,10 +318,11 @@ export default function DashboardManage() {
                           </Link>
                         </div>
                         <IconText
-                          text={volume.ref}
                           iconName="copy"
-                          callback={() => copyAndNotify(volume.ref)}
-                        />
+                          onClick={() => copyAndNotify(volume.ref)}
+                        >
+                          {volume.ref}
+                        </IconText>
                       </>
                     )}
                   </div>
@@ -354,4 +354,52 @@ export default function DashboardManage() {
       </section>
     </>
   )
+}
+
+export default function DashboardManage(props: any) {
+  const router = useRouter()
+  const { hash } = router.query
+
+  useEffect(() => {
+    if (!hash || typeof hash !== 'string') router.replace('../')
+  }, [hash, router])
+
+  const type = useMessageToEntityType(hash as string)
+
+  if (!type) {
+    return (
+      <Container>
+        <NoisyContainer>Loading...</NoisyContainer>
+      </Container>
+    )
+  }
+
+  if (type === EntityType.SSHKey) {
+    return <ManageSSH {...props} />
+  } else {
+    return <LegacyDashboardManage {...props} />
+  }
+}
+
+export function useMessageToEntityType(
+  hash: string | undefined,
+): EntityType | undefined {
+  const [type, setType] = useState<EntityType | undefined>(undefined)
+
+  useEffect(() => {
+    if (!hash) {
+      setType(undefined)
+      return
+    }
+
+    async function fetchMessage(hash: string) {
+      const msg = (await getMessage(hash)) as StoreMessage | ProgramMessage
+      const type = getEntityTypeFromMessage(msg)
+      setType(type)
+    }
+
+    fetchMessage(hash)
+  }, [hash])
+
+  return type
 }

@@ -22,10 +22,19 @@ export const defaultFileExtension: Record<LanguageType, string> = {
 
 export const defaultVolumeChannel = 'ALEPH-VOLUME'
 
+export const defaultSSHPostType = 'ALEPH-SSH'
+export const defaultSSHChannel = 'ALEPH-SSH-TEST'
+
 export const defaultVMChannel = 'ALEPH-CLOUDSOLUTIONS'
 
 export const breadcrumbNames = {
   '/': 'SOLUTIONS',
   '/dashboard/function': 'SETUP NEW FUNCTION',
   '/dashboard/volume': 'SETUP NEW VOLUME',
+}
+
+export enum EntityType {
+  Volume = 'volume',
+  Program = 'program',
+  SSHKey = 'ssh',
 }

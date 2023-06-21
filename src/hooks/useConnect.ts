@@ -78,7 +78,7 @@ export function useConnect(): UseConnectReturn {
 
     dispatch({ type: ActionTypes.connect, payload: { account } })
     return account
-  }, [dispatch, getBalance, getProducts, getFileStats])
+  }, [getBalance, getProducts, getFileStats, dispatch, onError])
 
   const disconnect = useCallback(async () => {
     dispatch({ type: ActionTypes.disconnect })

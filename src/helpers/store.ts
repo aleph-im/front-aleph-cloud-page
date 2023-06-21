@@ -4,6 +4,7 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
 import { AccountFilesResponse } from './aleph'
+import { SSHKey } from './ssh'
 
 export enum ActionTypes {
   connect,
@@ -11,6 +12,8 @@ export enum ActionTypes {
   setAccountBalance,
   setProducts,
   setAccountFiles,
+  setAccountSSHKeys,
+  addAccountSSHKey,
 }
 
 export type State = {
@@ -22,6 +25,7 @@ export type State = {
     volumes?: StoreMessage[]
   }
   accountFiles?: AccountFilesResponse
+  accountSSHKeys?: any
 }
 
 export type Action = {
@@ -38,6 +42,7 @@ export const initialState: State = {
     volumes: undefined,
   },
   accountFiles: undefined,
+  accountSSHKeys: undefined,
 }
 
 export const reducer = (
@@ -73,6 +78,24 @@ export const reducer = (
       return {
         ...state,
         accountFiles: payload.accountFiles,
+      }
+
+    case ActionTypes.setAccountSSHKeys:
+      return {
+        ...state,
+        accountSSHKeys: payload.accountSSHKeys,
+      }
+
+    case ActionTypes.addAccountSSHKey:
+      const keys = (state.accountSSHKeys || []) as SSHKey[]
+
+      const map = new Map(keys.map((key) => [key.id, key]))
+      map.set(payload.accountSSHKey.id, payload.accountSSHKey)
+      const accountSSHKeys = Array.from(map.values())
+
+      return {
+        ...state,
+        accountSSHKeys,
       }
 
     default:

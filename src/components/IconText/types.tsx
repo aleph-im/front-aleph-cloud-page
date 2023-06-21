@@ -1,7 +1,8 @@
 import { IconName } from '@fortawesome/fontawesome-svg-core'
+import { ReactNode } from 'react'
 
 export type IconTextProps = {
-  text: string
-  callback: () => void
+  children: ReactNode
   iconName: IconName
+  onClick?: () => void
 }

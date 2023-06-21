@@ -1,11 +1,18 @@
 import {
+  AggregateMessage,
   Chain,
   MessageType,
   ProgramMessage,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { any, program, forget, store } from 'aleph-sdk-ts/dist/messages'
+import {
+  any,
+  program,
+  forget,
+  store,
+  aggregate,
+} from 'aleph-sdk-ts/dist/messages'
 import { GetAccountFromProvider as getETHAccount } from 'aleph-sdk-ts/dist/accounts/ethereum'
 import { GetAccountFromProvider as getSOLAccount } from 'aleph-sdk-ts/dist/accounts/solana'
 import {
@@ -19,7 +26,11 @@ import {
   MachineVolume,
   PersistentVolume,
 } from 'aleph-sdk-ts/dist/messages/program/programModel'
-import { defaultVMChannel, defaultVolumeChannel } from './constants'
+import {
+  defaultSSHChannel,
+  defaultVMChannel,
+  defaultVolumeChannel,
+} from './constants'
 
 /**
  * Connects to a web3 provider and returns an Aleph account object
