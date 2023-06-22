@@ -11,9 +11,10 @@ export const GlobalStylesOverride = createGlobalStyle`
     flex: 1 0 auto;
   }
 
-  html {
+  // @note: Use it only for development
+  /* html {
     font-size: 16px;
-  }
+  } */
 
   /* FIXME: */
   .unavailable-content {

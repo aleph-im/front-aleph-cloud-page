@@ -1,14 +1,15 @@
 import Head from 'next/head'
+import Image from 'next/image'
 import styled from 'styled-components'
 import tw from 'twin.macro'
 import { Button, Col, Row, TextGradient, Icon } from '@aleph-front/aleph-core'
 import Container from '@/components/Container'
-import { IndexingImg } from '@/components/Imgs/IndexingImg'
 import FeatureCard from '@/components/FeatureCard'
 import H1 from '@/components/H1'
 import H2 from '@/components/H2'
 import Strong from '@/components/Strong'
 import { useHomePage } from '@/hooks/pages/useHomePage'
+import { useBasePath } from '@/hooks/useBasePath'
 
 const StyledH1Button = styled(Button).attrs((props) => {
   return {
@@ -39,6 +40,9 @@ const StyledLink = styled(Button).attrs((props) => {
 
 export default function Home() {
   const { featureSectionBg, navigate, scroll } = useHomePage()
+
+  const basePath = useBasePath()
+  const imgPrefix = basePath?.charAt(0) === '/' ? basePath : ''
 
   return (
     <>
@@ -135,7 +139,12 @@ export default function Home() {
         <Container>
           <Row xs={1} md={2} gap="1.5rem">
             <Col>
-              <IndexingImg />
+              <Image
+                src={`${imgPrefix}/img/indexing.svg`}
+                alt="Indexing illustration"
+                fill={true}
+                tw="relative!"
+              />
             </Col>
             <Col>
               <span className="tp-info" tw="mb-0">

@@ -36,7 +36,8 @@ export function useRequest<T>({
   useEffect(() => {
     if (!triggerOnMount) return
     request()
-  }, [request, triggerOnMount])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return { ...reqState, request }
 }

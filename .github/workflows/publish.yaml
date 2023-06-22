@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  IS_GH_PAGES: gh-pages
+  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest

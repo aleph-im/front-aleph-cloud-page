@@ -1,11 +1,15 @@
 import { Icon } from '@aleph-front/aleph-core'
 import { IconTextProps } from './types'
 
-export default function IconText({ text, callback, iconName }: IconTextProps) {
+export default function IconText({
+  children,
+  onClick,
+  iconName,
+}: IconTextProps) {
   return (
-    <div tw="flex items-baseline">
-      <span>{text}</span>
-      <Icon name={iconName} onClick={callback} tw="cursor-pointer ml-2" />
+    <div tw="flex items-baseline cursor-pointer" onClick={onClick}>
+      <span tw="break-all">{children}</span>
+      <Icon name={iconName} tw="cursor-pointer ml-2" />
     </div>
   )
 }

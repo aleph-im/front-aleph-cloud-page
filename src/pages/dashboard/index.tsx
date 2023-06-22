@@ -4,6 +4,7 @@ import BaseContainer from '@/components/Container'
 import {
   convertBitUnits,
   ellipseAddress,
+  ellipseText,
   humanReadableSize,
   isVolume,
   isVolumePersistent,
@@ -19,6 +20,7 @@ import {
   ImmutableVolume,
   PersistentVolume,
 } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { SSHKey } from '@/helpers/ssh'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -30,116 +32,154 @@ const Container = ({ children }: { children: ReactNode }) => (
   </Row>
 )
 
-export default function DashboardHome() {
-  const { products, functions, volumes, fileStats } = useDashboardHomePage()
-  const [tabId, setTabId] = useState('all')
+const TabContent = ({
+  data,
+  fileStats,
+}: {
+  data: (ProgramMessage | StoreMessage)[]
+  fileStats: any
+}) => {
+  const getVolumeSize = (hash: string) => {
+    const size = fileStats.find((s: any) => s.item_hash === hash)?.size || 0
+    return size / 1024
+  }
 
-  const TabContent = ({
-    data,
-  }: {
-    data: (ProgramMessage | StoreMessage)[]
-  }) => {
-    const getVolumeSize = (hash: string) => {
-      const size = fileStats.find((s) => s.item_hash === hash)?.size || 0
-      return size / 1024
-    }
+  const flattenedSizeData: ProgramMessage[] = useMemo(
+    () =>
+      data.map((product) => {
+        if (!product?.type) return product
 
-    const flattenedSizeData: ProgramMessage[] = useMemo(
-      () =>
-        data.map((product) => {
-          if (!product?.type) return product
-
-          if (isVolume(product)) {
-            return {
-              ...product,
-              size: getVolumeSize(product.item_hash),
-            }
-          }
+        if (isVolume(product)) {
           return {
             ...product,
-            size: (product as ProgramMessage).content?.volumes.reduce(
-              (ac, cv) => {
-                if (isVolumePersistent(cv)) {
-                  const persistentVolume = (cv as PersistentVolume)?.size_mib
-                  return ac + persistentVolume * 10 ** 3
-                }
-                return (ac += getVolumeSize((cv as ImmutableVolume).ref))
-              },
-              0,
-            ),
+            size: getVolumeSize(product.item_hash),
           }
-        }) as ProgramMessage[],
-      [data],
-    )
+        }
+        return {
+          ...product,
+          size: (product as ProgramMessage).content?.volumes.reduce(
+            (ac, cv) => {
+              if (isVolumePersistent(cv)) {
+                const persistentVolume = (cv as PersistentVolume)?.size_mib
+                return ac + persistentVolume * 10 ** 3
+              }
+              return (ac += getVolumeSize((cv as ImmutableVolume).ref))
+            },
+            0,
+          ),
+        }
+      }) as ProgramMessage[],
+    [data],
+  )
 
-    return (
-      <div tw="overflow-auto max-w-full">
-        <Table
-          borderType="none"
-          oddRowNoise
-          keySelector={(row: ProgramMessage) => row?.item_hash}
-          data={flattenedSizeData}
-          columns={[
-            {
-              label: 'Type',
-              selector: (row: ProgramMessage) =>
-                isVolume(row) ? 'Volume' : 'Function',
-              sortable: true,
-            },
-            {
-              label: 'Name',
-              selector: (row: ProgramMessage) =>
-                row?.content?.metadata?.name ||
-                ellipseAddress(row?.item_hash || ''),
-              sortable: true,
-            },
-            {
-              label: 'Cores',
-              align: 'right',
-              selector: (row: ProgramMessage) =>
-                isVolume(row) ? '-' : row?.content?.resources?.vcpus || 0,
-              sortable: true,
-            },
-            {
-              label: 'Memory',
-              align: 'right',
-              selector: (row: ProgramMessage) =>
-                isVolume(row)
-                  ? '-'
-                  : convertBitUnits(row?.content?.resources?.memory || 0, {
-                      from: 'mb',
-                      to: 'gb',
-                    }),
-              sortable: true,
-            },
-            {
-              label: 'Size',
-              align: 'right',
-              selector: (row: ProgramMessage) => humanReadableSize(row.size),
-              sortable: true,
-            },
-            {
-              label: 'Date',
-              align: 'right',
-              selector: (row: ProgramMessage) =>
-                unixToISODateString(row?.content?.time),
-              sortable: true,
-            },
-            {
-              label: '',
-              align: 'right',
-              selector: () => '',
-              cell: (row: ProgramMessage) => (
-                <ButtonLink href={`/dashboard/manage?hash=${row?.item_hash}`}>
-                  &gt;
-                </ButtonLink>
-              ),
-            },
-          ]}
-        />
-      </div>
-    )
-  }
+  return (
+    <div tw="overflow-auto max-w-full">
+      <Table
+        borderType="none"
+        oddRowNoise
+        keySelector={(row: ProgramMessage) => row?.item_hash}
+        data={flattenedSizeData}
+        columns={[
+          {
+            label: 'Type',
+            selector: (row: ProgramMessage) =>
+              isVolume(row) ? 'Volume' : 'Function',
+            sortable: true,
+          },
+          {
+            label: 'Name',
+            selector: (row: ProgramMessage) =>
+              row?.content?.metadata?.name ||
+              ellipseAddress(row?.item_hash || ''),
+            sortable: true,
+          },
+          {
+            label: 'Cores',
+            align: 'right',
+            selector: (row: ProgramMessage) =>
+              isVolume(row) ? '-' : row?.content?.resources?.vcpus || 0,
+            sortable: true,
+          },
+          {
+            label: 'Memory',
+            align: 'right',
+            selector: (row: ProgramMessage) =>
+              isVolume(row)
+                ? '-'
+                : convertBitUnits(row?.content?.resources?.memory || 0, {
+                    from: 'mb',
+                    to: 'gb',
+                  }),
+            sortable: true,
+          },
+          {
+            label: 'Size',
+            align: 'right',
+            selector: (row: ProgramMessage) => humanReadableSize(row.size),
+            sortable: true,
+          },
+          {
+            label: 'Date',
+            align: 'right',
+            selector: (row: ProgramMessage) =>
+              unixToISODateString(row?.content?.time),
+            sortable: true,
+          },
+          {
+            label: '',
+            align: 'right',
+            selector: () => '',
+            cell: (row: ProgramMessage) => (
+              <ButtonLink href={`/dashboard/manage?hash=${row?.item_hash}`}>
+                &gt;
+              </ButtonLink>
+            ),
+          },
+        ]}
+      />
+    </div>
+  )
+}
+
+const SSHKeysTabContent = ({ data }: { data: SSHKey[] }) => {
+  return (
+    <div tw="overflow-auto max-w-full">
+      <Table
+        borderType="none"
+        oddRowNoise
+        keySelector={(row) => row.key}
+        data={data}
+        columns={[
+          {
+            label: 'SSH Key',
+            selector: (row) => ellipseText(row.key, 20, 0),
+            sortable: true,
+          },
+          {
+            label: 'Label',
+            selector: (row) => row.label || '',
+            sortable: true,
+          },
+          {
+            label: '',
+            align: 'right',
+            selector: () => '',
+            cell: (row: SSHKey) => (
+              <ButtonLink href={`/dashboard/manage?hash=${row.id}`}>
+                &gt;
+              </ButtonLink>
+            ),
+          },
+        ]}
+      />
+    </div>
+  )
+}
+
+export default function DashboardHome() {
+  const { products, functions, volumes, fileStats, sshKeys } =
+    useDashboardHomePage()
+  const [tabId, setTabId] = useState('all')
 
   return (
     <>
@@ -166,6 +206,12 @@ export default function DashboardHome() {
                 label: `(${volumes?.length || 0})`,
                 labelPosition: 'bottom',
               },
+              {
+                id: 'ssh',
+                name: 'SSH Keys',
+                label: `(${sshKeys?.length || 0})`,
+                labelPosition: 'bottom',
+              },
             ]}
             onTabChange={setTabId}
           />
@@ -174,7 +220,7 @@ export default function DashboardHome() {
           {tabId === 'all' ? (
             <>
               {products.length > 0 ? (
-                <TabContent data={products} />
+                <TabContent fileStats={fileStats} data={products} />
               ) : (
                 <div tw="mt-10 text-center">
                   <ButtonLink variant="primary" href="/dashboard/function">
@@ -187,7 +233,7 @@ export default function DashboardHome() {
             <>
               {functions.length > 0 ? (
                 <>
-                  <TabContent data={functions} />
+                  <TabContent fileStats={fileStats} data={functions} />
                   <div tw="mt-20 text-center">
                     <ButtonLink variant="primary" href="/dashboard/function">
                       Create function
@@ -206,7 +252,7 @@ export default function DashboardHome() {
             <>
               {volumes.length > 0 ? (
                 <>
-                  <TabContent data={volumes} />
+                  <TabContent fileStats={fileStats} data={volumes} />
                   <div tw="mt-20 text-center">
                     <ButtonLink variant="primary" href="/dashboard/volume">
                       Create volume
@@ -217,6 +263,25 @@ export default function DashboardHome() {
                 <div tw="mt-10 text-center">
                   <ButtonLink variant="primary" href="/dashboard/volume">
                     Create your first volume
+                  </ButtonLink>
+                </div>
+              )}
+            </>
+          ) : tabId === 'ssh' ? (
+            <>
+              {sshKeys.length > 0 ? (
+                <>
+                  <SSHKeysTabContent data={sshKeys} />
+                  <div tw="mt-20 text-center">
+                    <ButtonLink variant="primary" href="/dashboard/ssh">
+                      Create ssh key
+                    </ButtonLink>
+                  </div>
+                </>
+              ) : (
+                <div tw="mt-10 text-center">
+                  <ButtonLink variant="primary" href="/dashboard/ssh">
+                    Create your first ssh key
                   </ButtonLink>
                 </div>
               )}
