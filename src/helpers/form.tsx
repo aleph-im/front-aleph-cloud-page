@@ -1,20 +1,9 @@
 import { createVolume } from '@/helpers/aleph'
-import { EnvironmentVariable } from '@/helpers/utils'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import {
   MachineVolume,
   PersistentVolume,
 } from 'aleph-sdk-ts/dist/messages/program/programModel'
-
-const samplePythonCode = `from fastapi import FastAPI
-
-app = FastAPI()
-@app.get("/")
-async def root():
-  return {"message": "Hello World"}
-`
-
-type AvailableRuntimes = 'default_interpreted' | 'default_binary' | 'custom'
 
 export type VolumeTypes = 'new' | 'existing' | 'persistent'
 
@@ -32,46 +21,6 @@ export const defaultVolume: Volume = {
   type: 'new',
   size: 2,
   useLatest: true,
-}
-
-export const runtimeRefs: Record<
-  Exclude<AvailableRuntimes, 'custom'>,
-  string
-> = {
-  default_interpreted:
-    'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
-  default_binary:
-    'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
-}
-
-export type FormState = {
-  runtime: AvailableRuntimes
-  customRuntimeHash?: string
-  isPersistent: boolean
-  functionName: string
-  functionTags: string[]
-  volumes: Volume[]
-  codeOrFile: 'code' | 'file'
-  codeLanguage: string
-  functionCode?: string
-  functionFile?: File
-  computeUnits: number
-  environmentVariables: EnvironmentVariable[]
-  metaTags: string[]
-}
-
-export const initialFormState: FormState = {
-  runtime: 'default_interpreted',
-  isPersistent: false,
-  functionName: '',
-  functionTags: [],
-  volumes: [defaultVolume],
-  functionCode: samplePythonCode,
-  codeLanguage: 'python',
-  codeOrFile: 'code',
-  computeUnits: 1,
-  environmentVariables: [],
-  metaTags: [],
 }
 
 /**

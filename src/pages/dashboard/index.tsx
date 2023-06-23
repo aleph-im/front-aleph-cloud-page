@@ -189,7 +189,7 @@ const SSHKeysTabContent = ({ data }: { data: SSHKey[] }) => {
 }
 
 export default function DashboardHome() {
-  const { products, functions, volumes, fileStats, sshKeys } =
+  const { products, functions, instances, volumes, fileStats, sshKeys } =
     useDashboardHomePage()
   const [tabId, setTabId] = useState('all')
 
@@ -210,6 +210,12 @@ export default function DashboardHome() {
                 id: 'function',
                 name: 'Functions',
                 label: `(${functions?.length || 0})`,
+                labelPosition: 'bottom',
+              },
+              {
+                id: 'instance',
+                name: 'Instances',
+                label: `(${instances?.length || 0})`,
                 labelPosition: 'bottom',
               },
               {
@@ -256,6 +262,25 @@ export default function DashboardHome() {
                 <div tw="mt-10 text-center">
                   <ButtonLink variant="primary" href="/dashboard/function">
                     Create your first function
+                  </ButtonLink>
+                </div>
+              )}
+            </>
+          ) : tabId === 'instance' ? (
+            <>
+              {instances.length > 0 ? (
+                <>
+                  <TabContent fileStats={fileStats} data={instances} />
+                  <div tw="mt-20 text-center">
+                    <ButtonLink variant="primary" href="/dashboard/instance">
+                      Create instance
+                    </ButtonLink>
+                  </div>
+                </>
+              ) : (
+                <div tw="mt-10 text-center">
+                  <ButtonLink variant="primary" href="/dashboard/instance">
+                    Create your first instance
                   </ButtonLink>
                 </div>
               )}

@@ -29,6 +29,7 @@ import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
 import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
 import styled, { css } from 'styled-components'
+import { RuntimeId } from '@/hooks/useRuntimeSelector'
 
 const StyledTable = styled(Table<any>)`
   ${({ theme }) => css`
@@ -68,6 +69,7 @@ export default function NewFunctionPage() {
     address,
     accountBalance,
     isCreateButtonDisabled,
+    handleChangeEntityTab,
   } = useNewFunctionPage()
 
   const [tabId, setTabId] = useState('code')
@@ -79,6 +81,7 @@ export default function NewFunctionPage() {
           <Container>
             <Tabs
               selected="function"
+              onTabChange={handleChangeEntityTab}
               tabs={[
                 {
                   id: 'function',
@@ -87,9 +90,6 @@ export default function NewFunctionPage() {
                 {
                   id: 'instance',
                   name: 'Instance',
-                  disabled: true,
-                  label: 'SOON',
-                  labelPosition: 'top',
                 },
                 {
                   id: 'confidential',
@@ -102,6 +102,9 @@ export default function NewFunctionPage() {
               tw="overflow-auto"
             />
           </Container>
+        </section>
+        <section>
+          <pre>{JSON.stringify(formState, null, 2)}</pre>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>
@@ -244,33 +247,35 @@ export default function NewFunctionPage() {
             <NoisyContainer>
               <RadioGroup direction="column">
                 <Radio
-                  checked={formState.runtime === 'default_interpreted'}
+                  checked={formState.runtime === RuntimeId.Debian11}
                   label="Official runtime with Debian 11, Python 3.9 & Node.js 14"
                   name="__config_runtime"
+                  onChange={() => setFormValue('runtime', RuntimeId.Debian11)}
+                  value="default"
+                />
+                <Radio
+                  checked={formState.runtime === RuntimeId.Debian11Bin}
+                  label="Official min. runtime for binaries x86_64 (Rust, Go, ...) "
+                  name="__config_runtime"
                   onChange={() =>
-                    setFormValue('runtime', 'default_interpreted')
+                    setFormValue('runtime', RuntimeId.Debian11Bin)
                   }
                   value="default"
                 />
                 <Radio
-                  checked={formState.runtime === 'default_binary'}
-                  label="Official min. runtime for binaries x86_64 (Rust, Go, ...) "
-                  name="__config_runtime"
-                  onChange={() => setFormValue('runtime', 'default_binary')}
-                  value="default"
-                />
-                <Radio
-                  checked={formState.runtime === 'custom'}
+                  checked={formState.runtime === RuntimeId.Custom}
                   label="Custom runtime"
                   name="__config_runtime"
-                  onChange={() => setFormValue('runtime', 'custom')}
+                  onChange={() => setFormValue('runtime', RuntimeId.Custom)}
                   value="custom"
                 />
               </RadioGroup>
 
               <div
                 className={
-                  formState.runtime !== 'custom' ? 'unavailable-content' : ''
+                  formState.runtime !== RuntimeId.Custom
+                    ? 'unavailable-content'
+                    : ''
                 }
                 tw="mt-5"
               >
@@ -281,7 +286,7 @@ export default function NewFunctionPage() {
                   onChange={(e) =>
                     setFormValue('customRuntimeHash', e.target.value)
                   }
-                  disabled={formState.runtime !== 'custom'}
+                  disabled={formState.runtime !== RuntimeId.Custom}
                   error={
                     formState.customRuntimeHash &&
                     !isValidItemHash(formState.customRuntimeHash)

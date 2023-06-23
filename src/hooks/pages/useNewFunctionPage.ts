@@ -1,5 +1,6 @@
 import { useAppState } from '@/contexts/appState'
 import {
+  EnvironmentVariable,
   getTotalProductCost,
   isValidItemHash,
   safeCollectionToObject,
@@ -7,18 +8,54 @@ import {
 import {
   defaultVolume,
   displayVolumesToAlephVolumes,
-  FormState,
-  initialFormState,
-  runtimeRefs,
   Volume,
   VolumeTypes,
 } from '@/helpers/form'
 import JSZip from 'jszip'
-import { FormEvent, useMemo, useReducer } from 'react'
+import { FormEvent, useCallback, useMemo, useReducer } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import { createFunctionProgram } from '../../helpers/aleph'
 import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
+import { RuntimeId, Runtimes } from '../useRuntimeSelector'
+
+export type FormState = {
+  runtime: RuntimeId
+  customRuntimeHash?: string
+  isPersistent: boolean
+  functionName: string
+  functionTags: string[]
+  volumes: Volume[]
+  codeOrFile: 'code' | 'file'
+  codeLanguage: string
+  functionCode?: string
+  functionFile?: File
+  computeUnits: number
+  environmentVariables: EnvironmentVariable[]
+  metaTags: string[]
+}
+
+const samplePythonCode = `from fastapi import FastAPI
+
+app = FastAPI()
+@app.get("/")
+async def root():
+  return {"message": "Hello World"}
+`
+
+export const initialFormState: FormState = {
+  runtime: RuntimeId.Debian11,
+  isPersistent: false,
+  functionName: '',
+  functionTags: [],
+  volumes: [defaultVolume],
+  functionCode: samplePythonCode,
+  codeLanguage: 'python',
+  codeOrFile: 'code',
+  computeUnits: 1,
+  environmentVariables: [],
+  metaTags: [],
+}
 
 // @todo: Split this into reusable hooks by composition
 
@@ -44,6 +81,7 @@ export type NewFunctionPage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
+  handleChangeEntityTab: (tabId: string) => void
 }
 
 export function useNewFunctionPage(): NewFunctionPage {
@@ -69,7 +107,7 @@ export function useNewFunctionPage(): NewFunctionPage {
     initialFormState,
   )
 
-  const [reqState, { onLoad, onSuccess, onError }] = useRequestState()
+  const [, { onLoad, onSuccess, onError }] = useRequestState()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -89,10 +127,10 @@ export function useNewFunctionPage(): NewFunctionPage {
       return alert('Invalid code or file')
     }
 
-    let runtime = formState.customRuntimeHash || ''
-    if (formState.runtime !== 'custom') {
-      runtime = runtimeRefs[formState.runtime]
-    }
+    const runtime =
+      formState.runtime !== RuntimeId.Custom
+        ? Runtimes[formState.runtime].id
+        : formState.customRuntimeHash || ''
 
     if (!runtime || !isValidItemHash(runtime)) return alert('Invalid runtime')
 
@@ -217,6 +255,13 @@ export function useNewFunctionPage(): NewFunctionPage {
     isCreateButtonDisabled = false
   }
 
+  const handleChangeEntityTab = useCallback(
+    (id: string) => {
+      router.push(`/dashboard/${id}`)
+    },
+    [router],
+  )
+
   return {
     formState,
     handleSubmit,
@@ -231,5 +276,6 @@ export function useNewFunctionPage(): NewFunctionPage {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
+    handleChangeEntityTab,
   }
 }
