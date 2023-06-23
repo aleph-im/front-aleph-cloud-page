@@ -4,7 +4,6 @@ import BaseContainer from '@/components/Container'
 import {
   convertBitUnits,
   ellipseAddress,
-  ellipseText,
   humanReadableSize,
   isVolume,
   isVolumePersistent,
@@ -21,6 +20,7 @@ import {
   PersistentVolume,
 } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { SSHKey } from '@/helpers/ssh'
+import tw from 'twin.macro'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -154,22 +154,33 @@ const SSHKeysTabContent = ({ data }: { data: SSHKey[] }) => {
         columns={[
           {
             label: 'SSH Key',
-            render: (row) => ellipseText(row.key, 20, 0),
             sortable: true,
+            width: '75%',
+            render: (row) => row.key,
+            cellProps: () => ({
+              css: tw`max-w-0 whitespace-nowrap overflow-hidden text-ellipsis pr-3!`,
+            }),
           },
           {
             label: 'Label',
-            render: (row) => row.label || '',
             sortable: true,
+            render: (row) => row.label || '',
+            cellProps: () => ({
+              css: tw`max-w-0 whitespace-nowrap overflow-hidden text-ellipsis px-3!`,
+            }),
           },
           {
             label: '',
+            width: '0',
             align: 'right',
             render: (row: SSHKey) => (
               <ButtonLink href={`/dashboard/manage?hash=${row.id}`}>
                 &gt;
               </ButtonLink>
             ),
+            cellProps: () => ({
+              css: tw`pl-3!`,
+            }),
           },
         ]}
       />
