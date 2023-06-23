@@ -7,14 +7,7 @@ import ButtonLink from '@/components/ButtonLink'
 import IconText from '@/components/IconText'
 import NoisyContainer from '@/components/NoisyContainer'
 import { breadcrumbNames } from '@/helpers/constants'
-import {
-  Button,
-  Col,
-  Icon,
-  Row,
-  Tag,
-  addClasses,
-} from '@aleph-front/aleph-core'
+import { Button, Col, Row, Tag } from '@aleph-front/aleph-core'
 import { useDashboardManageSSHKeyPage } from '@/hooks/pages/useDashboardManageSSHKeyPage'
 import { ellipseText } from '@/helpers/utils'
 

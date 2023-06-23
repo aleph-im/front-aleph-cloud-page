@@ -15,7 +15,7 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
 import { useDashboardHomePage } from '@/hooks/pages/useDashboardHomePage'
-import { ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useMemo, useState } from 'react'
 import {
   ImmutableVolume,
   PersistentVolume,
@@ -39,10 +39,13 @@ const TabContent = ({
   data: (ProgramMessage | StoreMessage)[]
   fileStats: any
 }) => {
-  const getVolumeSize = (hash: string) => {
-    const size = fileStats.find((s: any) => s.item_hash === hash)?.size || 0
-    return size / 1024
-  }
+  const getVolumeSize = useCallback(
+    (hash: string) => {
+      const size = fileStats.find((s: any) => s.item_hash === hash)?.size || 0
+      return size / 1024
+    },
+    [fileStats],
+  )
 
   const flattenedSizeData: ProgramMessage[] = useMemo(
     () =>
@@ -69,7 +72,7 @@ const TabContent = ({
           ),
         }
       }) as ProgramMessage[],
-    [data],
+    [data, getVolumeSize],
   )
 
   return (
@@ -77,18 +80,18 @@ const TabContent = ({
       <Table
         borderType="none"
         oddRowNoise
-        keySelector={(row: ProgramMessage) => row?.item_hash}
+        rowKey={(row: ProgramMessage) => row?.item_hash}
         data={flattenedSizeData}
         columns={[
           {
             label: 'Type',
-            selector: (row: ProgramMessage) =>
+            render: (row: ProgramMessage) =>
               isVolume(row) ? 'Volume' : 'Function',
             sortable: true,
           },
           {
             label: 'Name',
-            selector: (row: ProgramMessage) =>
+            render: (row: ProgramMessage) =>
               row?.content?.metadata?.name ||
               ellipseAddress(row?.item_hash || ''),
             sortable: true,
@@ -96,14 +99,14 @@ const TabContent = ({
           {
             label: 'Cores',
             align: 'right',
-            selector: (row: ProgramMessage) =>
+            render: (row: ProgramMessage) =>
               isVolume(row) ? '-' : row?.content?.resources?.vcpus || 0,
             sortable: true,
           },
           {
             label: 'Memory',
             align: 'right',
-            selector: (row: ProgramMessage) =>
+            render: (row: ProgramMessage) =>
               isVolume(row)
                 ? '-'
                 : convertBitUnits(row?.content?.resources?.memory || 0, {
@@ -115,21 +118,20 @@ const TabContent = ({
           {
             label: 'Size',
             align: 'right',
-            selector: (row: ProgramMessage) => humanReadableSize(row.size),
+            render: (row: ProgramMessage) => humanReadableSize(row.size),
             sortable: true,
           },
           {
             label: 'Date',
             align: 'right',
-            selector: (row: ProgramMessage) =>
+            render: (row: ProgramMessage) =>
               unixToISODateString(row?.content?.time),
             sortable: true,
           },
           {
             label: '',
             align: 'right',
-            selector: () => '',
-            cell: (row: ProgramMessage) => (
+            render: (row: ProgramMessage) => (
               <ButtonLink href={`/dashboard/manage?hash=${row?.item_hash}`}>
                 &gt;
               </ButtonLink>
@@ -147,24 +149,23 @@ const SSHKeysTabContent = ({ data }: { data: SSHKey[] }) => {
       <Table
         borderType="none"
         oddRowNoise
-        keySelector={(row) => row.key}
+        rowKey={(row) => row.key}
         data={data}
         columns={[
           {
             label: 'SSH Key',
-            selector: (row) => ellipseText(row.key, 20, 0),
+            render: (row) => ellipseText(row.key, 20, 0),
             sortable: true,
           },
           {
             label: 'Label',
-            selector: (row) => row.label || '',
+            render: (row) => row.label || '',
             sortable: true,
           },
           {
             label: '',
             align: 'right',
-            selector: () => '',
-            cell: (row: SSHKey) => (
+            render: (row: SSHKey) => (
               <ButtonLink href={`/dashboard/manage?hash=${row.id}`}>
                 &gt;
               </ButtonLink>

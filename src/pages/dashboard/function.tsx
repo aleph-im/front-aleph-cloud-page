@@ -354,7 +354,7 @@ export default function NewFunctionPage() {
               <StyledTable
                 borderType="none"
                 oddRowNoise
-                keySelector={(row) => row.cpu}
+                rowKey={(row) => row.cpu}
                 rowProps={(row) => ({
                   onClick: () => {
                     setFormValue('computeUnits', row.cpu)
@@ -364,8 +364,8 @@ export default function NewFunctionPage() {
                   {
                     label: 'Cores',
                     sortable: true,
-                    selector: (row) => row.cpu,
-                    cell: (row) => {
+                    sortBy: (row) => row.cpu,
+                    render: (row) => {
                       const isActive = formState.computeUnits === row.cpu
                       const className = `${
                         isActive ? 'text-main0' : ''
@@ -379,8 +379,8 @@ export default function NewFunctionPage() {
                     label: 'Memory',
                     align: 'right',
                     sortable: true,
-                    selector: (row) => row.memory,
-                    cell: (row) => {
+                    sortBy: (row) => row.memory,
+                    render: (row) => {
                       const isActive = formState.computeUnits === row.cpu
                       const className = `${isActive ? 'text-main0' : ''}`
                       return <span className={className}>{row.memory}</span>
@@ -390,8 +390,8 @@ export default function NewFunctionPage() {
                     label: 'Hold',
                     align: 'right',
                     sortable: true,
-                    selector: (row) => row.price,
-                    cell: (row) => {
+                    sortBy: (row) => row.price,
+                    render: (row) => {
                       const isActive = formState.computeUnits === row.cpu
                       const className = `${isActive ? 'text-main0' : ''}`
                       return <span className={className}>{row.price}</span>
@@ -400,8 +400,7 @@ export default function NewFunctionPage() {
                   {
                     label: '',
                     align: 'right',
-                    selector: () => '',
-                    cell: (row) => {
+                    render: (row) => {
                       const active = formState.computeUnits === row.cpu
 
                       return (
