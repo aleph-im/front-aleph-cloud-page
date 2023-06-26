@@ -48,25 +48,24 @@ export const defaultRuntimeOptions = [
   Runtimes[RuntimeId.Ubuntu22],
 ]
 
-export type UseRuntimeSelectorProps = {
+export type UseSelectRuntimeProps = {
   runtime?: Runtime
   options?: Runtime[]
   onChange: (runtime: Runtime) => void
 }
 
-export type UseRuntimeSelectorReturn = {
+export type UseSelectRuntimeReturn = {
   runtime?: Runtime
   options: Runtime[]
   handleChange: (runtime: Runtime) => void
 }
 
-export function useRuntimeSelector({
+export function useSelectRuntime({
   runtime: runtimeProp,
   options: optionsProp,
   onChange,
-}: UseRuntimeSelectorProps): UseRuntimeSelectorReturn {
+}: UseSelectRuntimeProps): UseSelectRuntimeReturn {
   const [runtimeState, setRuntimeState] = useState<Runtime | undefined>()
-
   const runtime = runtimeProp || runtimeState
   const options = optionsProp || defaultRuntimeOptions
 

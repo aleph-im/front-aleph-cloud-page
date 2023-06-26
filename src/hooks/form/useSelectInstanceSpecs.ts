@@ -16,25 +16,24 @@ export const defaultSpecsOptions: InstanceSpecs[] = [1, 2, 4, 6, 8, 12].map(
   }),
 )
 
-export type UseInstanceSpecsSelectorProps = {
+export type UseSelectInstanceSpecsProps = {
   specs?: InstanceSpecs
   options?: InstanceSpecs[]
   onChange: (specs: InstanceSpecs) => void
 }
 
-export type UseInstanceSpecsSelectorReturn = {
+export type UseSelectInstanceSpecsReturn = {
   specs?: InstanceSpecs
   options: InstanceSpecs[]
   handleChange: (specs: InstanceSpecs) => void
 }
 
-export function useInstanceSpecsSelector({
+export function useSelectInstanceSpecs({
   specs: specsProp,
   options: optionsProp,
   onChange,
-}: UseInstanceSpecsSelectorProps): UseInstanceSpecsSelectorReturn {
+}: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
   const [specsState, setSpecsState] = useState<InstanceSpecs | undefined>()
-
   const specs = specsProp || specsState
   const options = optionsProp || defaultSpecsOptions
 

@@ -1,4 +1,4 @@
-import { humanReadableSize, isValidItemHash } from '@/helpers/utils'
+import { isValidItemHash } from '@/helpers/utils'
 import {
   Tabs,
   Icon,
@@ -11,18 +11,18 @@ import NoisyContainer from '../../NoisyContainer'
 import {
   RemoveVolumeProps,
   AddVolumeProps,
-  ExistingVolumeTabComponentProps,
-  NewVolumeTabComponentProps,
-  PersistentVolumeTabComponentProps,
+  AddExistingVolumeProps,
+  AddNewVolumeProps,
+  AddPersistentVolumeProps,
 } from './types'
-import React, { ChangeEvent, useCallback, useId, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import {
-  ExistingVolume,
-  NewVolume,
-  PersistentVolume,
   Volume,
   VolumeType,
   useAddVolume,
+  useAddExistingVolumeProps,
+  useAddNewVolumeProps,
+  useAddPersistentVolumeProps,
 } from '@/hooks/form/useAddVolume'
 
 const RemoveVolume = React.memo(({ volume, onRemove }: RemoveVolumeProps) => {
@@ -47,261 +47,189 @@ const RemoveVolume = React.memo(({ volume, onRemove }: RemoveVolumeProps) => {
 })
 RemoveVolume.displayName = 'RemoveVolume'
 
-// ----------
+const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
+  const {
+    id,
+    volume,
+    volumeSize,
+    handleFileSrcChange,
+    handleMountPathChange,
+    handleUseLatestChange,
+    handleRemove,
+  } = useAddNewVolumeProps(props)
 
-const NewVolumeTabComponent = React.memo(
-  ({ volume, onRemove, onChange }: NewVolumeTabComponentProps) => {
-    const id = useId()
+  return (
+    <>
+      <p tw="mt-1 mb-6">
+        Create and configure new volumes for your web3 function by either
+        uploading a dependency file or a squashfs volume. Volumes play a crucial
+        role in managing dependencies and providing a volume within your
+        application.
+      </p>
+      <NoisyContainer>
+        <div tw="pb-4">
+          <HiddenFileInput
+            value={volume.fileSrc}
+            onChange={handleFileSrcChange}
+          >
+            Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
+          </HiddenFileInput>
+        </div>
+        <div tw="mt-4">
+          <TextInput
+            label="Mount"
+            placeholder="/mount/opt"
+            value={volume.mountPath}
+            onChange={handleMountPathChange}
+            name={`${id}_mount`}
+          />
+        </div>
+        <div tw="mt-4">
+          <TextInput
+            label="Size"
+            value={volumeSize}
+            name={`${id}_size`}
+            disabled
+          />
+        </div>
+        <div tw="mt-4 py-4">
+          <Checkbox
+            label="Always update to the latest version"
+            checked={volume.useLatest}
+            onChange={handleUseLatestChange}
+          />
+        </div>
+        {handleRemove && (
+          <RemoveVolume volume={volume} onRemove={handleRemove} />
+        )}
+      </NoisyContainer>
+    </>
+  )
+})
+AddNewVolume.displayName = 'AddNewVolume'
 
-    const handleFileSrcChange = useCallback(
-      (fileSrc?: File) => {
-        if (!fileSrc) return //@todo: Handle error in UI
-        const newVolume: NewVolume = { ...volume, fileSrc }
-        onChange(newVolume)
-      },
-      [onChange, volume],
-    )
+const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
+  const {
+    id,
+    volume,
+    handleRefHashChange,
+    handleMountPathChange,
+    handleUseLatestChange,
+    handleRemove,
+  } = useAddExistingVolumeProps(props)
 
-    const handleMountPathChange = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => {
-        const mountPath = e.target.value
-        const newVolume: NewVolume = { ...volume, mountPath }
-        onChange(newVolume)
-      },
-      [onChange, volume],
-    )
+  return (
+    <>
+      <p tw="mt-1 mb-6">
+        Link existing volumes to your web3 function by pasting the reference
+        hash associated with each volume. Volumes are an essential component for
+        managing dependencies within your application.
+      </p>
 
-    const handleUseLatestChange = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => {
-        const useLatest = e.target.checked
-        const newVolume: NewVolume = { ...volume, useLatest }
-        onChange(newVolume)
-      },
-      [onChange, volume],
-    )
+      <NoisyContainer>
+        <div>
+          <TextInput
+            label="Mount"
+            placeholder="/mount/opt"
+            onChange={handleMountPathChange}
+            value={volume.mountPath}
+            name={`${id}_mount`}
+          />
+        </div>
+        <div tw="mt-4">
+          <TextInput
+            label="Item hash"
+            placeholder="3335ad270a571b..."
+            onChange={handleRefHashChange}
+            value={volume.refHash}
+            error={
+              volume.refHash && !isValidItemHash(volume.refHash || '')
+                ? { message: 'Invalid hash' }
+                : undefined
+            }
+            name={`${id}_refhash`}
+          />
+        </div>
+        <div tw="mt-4 py-4">
+          <Checkbox
+            label="Always update to the latest version"
+            checked={volume.useLatest}
+            onChange={handleUseLatestChange}
+          />
+        </div>
+        {handleRemove && (
+          <RemoveVolume volume={volume} onRemove={handleRemove} />
+        )}
+      </NoisyContainer>
+    </>
+  )
+})
+AddExistingVolume.displayName = 'AddExistingVolume'
 
-    const volumeSize = useMemo(
-      () => humanReadableSize((volume.fileSrc?.size || 0) / 1000),
-      [volume.fileSrc?.size],
-    )
+const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
+  const {
+    id,
+    volume,
+    handleNameChange,
+    handleMountPathChange,
+    handleSizeChange,
+    handleRemove,
+  } = useAddPersistentVolumeProps(props)
 
-    return (
-      <>
-        <p tw="mt-1 mb-6">
-          Create and configure new volumes for your web3 function by either
-          uploading a dependency file or a squashfs volume. Volumes play a
-          crucial role in managing dependencies and providing a volume within
-          your application.
-        </p>
-        <NoisyContainer>
-          <div tw="pb-4">
-            <HiddenFileInput
-              value={volume.fileSrc}
-              onChange={handleFileSrcChange}
-            >
-              Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
-            </HiddenFileInput>
-          </div>
-          <div tw="mt-4">
-            <TextInput
-              label="Mount"
-              placeholder="/mount/opt"
-              value={volume.mountPath}
-              onChange={handleMountPathChange}
-              name={id + '_mount'}
-            />
-          </div>
-          <div tw="mt-4">
-            <TextInput
-              label="Size"
-              value={volumeSize}
-              name={id + '_size'}
-              disabled
-            />
-          </div>
-          <div tw="mt-4 py-4">
-            <Checkbox
-              label="Always update to the latest version"
-              checked={volume.useLatest}
-              onChange={handleUseLatestChange}
-            />
-          </div>
-          {onRemove && <RemoveVolume volume={volume} onRemove={onRemove} />}
-        </NoisyContainer>
-      </>
-    )
-  },
-)
-NewVolumeTabComponent.displayName = 'NewVolumeTabComponent'
-
-// ----------
-
-const ExistingVolumeTabComponent = React.memo(
-  ({ volume, onChange, onRemove }: ExistingVolumeTabComponentProps) => {
-    const id = useId()
-
-    const handleRefHashChange = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => {
-        const refHash = e.target.value
-        const newVolume: ExistingVolume = { ...volume, refHash }
-        onChange(newVolume)
-      },
-      [onChange, volume],
-    )
-
-    const handleMountPathChange = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => {
-        const mountPath = e.target.value
-        const newVolume: ExistingVolume = { ...volume, mountPath }
-        onChange(newVolume)
-      },
-      [onChange, volume],
-    )
-
-    const handleUseLatestChange = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => {
-        const useLatest = e.target.checked
-        const newVolume: ExistingVolume = { ...volume, useLatest }
-        onChange(newVolume)
-      },
-      [onChange, volume],
-    )
-
-    return (
-      <>
-        <p tw="mt-1 mb-6">
-          Link existing volumes to your web3 function by pasting the reference
-          hash associated with each volume. Volumes are an essential component
-          for managing dependencies within your application.
-        </p>
-
-        <NoisyContainer>
-          <div>
-            <TextInput
-              label="Mount"
-              placeholder="/mount/opt"
-              onChange={handleMountPathChange}
-              value={volume.mountPath}
-              name={id + '_mount'}
-            />
-          </div>
-          <div tw="mt-4">
-            <TextInput
-              label="Item hash"
-              placeholder="3335ad270a571b..."
-              onChange={handleRefHashChange}
-              value={volume.refHash}
-              error={
-                volume.refHash && !isValidItemHash(volume.refHash || '')
-                  ? { message: 'Invalid hash' }
-                  : undefined
-              }
-              name={id + '_refhash'}
-            />
-          </div>
-          <div tw="mt-4 py-4">
-            <Checkbox
-              label="Always update to the latest version"
-              checked={volume.useLatest}
-              onChange={handleUseLatestChange}
-            />
-          </div>
-          {onRemove && <RemoveVolume volume={volume} onRemove={onRemove} />}
-        </NoisyContainer>
-      </>
-    )
-  },
-)
-ExistingVolumeTabComponent.displayName = 'ExistingVolumeTabComponent'
-
-// ----------
-
-const PersistentVolumeTabComponent = React.memo(
-  ({ volume, onChange, onRemove }: PersistentVolumeTabComponentProps) => {
-    const id = useId()
-
-    const handleNameChange = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => {
-        const name = e.target.value
-        const newVolume: PersistentVolume = { ...volume, name }
-        onChange(newVolume)
-      },
-      [onChange, volume],
-    )
-
-    const handleMountPathChange = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => {
-        const mountPath = e.target.value
-        const newVolume: PersistentVolume = { ...volume, mountPath }
-        onChange(newVolume)
-      },
-      [onChange, volume],
-    )
-
-    const handleSizeChange = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => {
-        const size = Number(e.target.value)
-        const newVolume: PersistentVolume = { ...volume, size }
-        onChange(newVolume)
-      },
-      [onChange, volume],
-    )
-
-    return (
-      <>
-        <p tw="mb-6">
-          Create and configure persistent storage for your web3 functions,
-          enabling your application to maintain data across multiple invocations
-          or sessions. You can set up a customized storage solution tailored to
-          your application&apos;s requirements.
-        </p>
-        <NoisyContainer>
-          <div>
-            <TextInput
-              label="Volume name"
-              placeholder="Redis volume"
-              onChange={handleNameChange}
-              value={volume.name}
-              name={id + '_name'}
-              error={
-                volume.name === ''
-                  ? new Error('Please provide a name')
-                  : undefined
-              }
-            />
-          </div>
-          <div tw="mt-4">
-            <TextInput
-              label="Mount"
-              placeholder="/mount/opt"
-              onChange={handleMountPathChange}
-              value={volume.mountPath}
-              name={id + '_mount'}
-            />
-          </div>
-          <div tw="mt-4">
-            <TextInput
-              label="Size (GB)"
-              placeholder="2"
-              onChange={handleSizeChange}
-              value={volume.size}
-              name={id + '_size'}
-            />
-          </div>
-          {onRemove && <RemoveVolume volume={volume} onRemove={onRemove} />}
-        </NoisyContainer>
-      </>
-    )
-  },
-)
-PersistentVolumeTabComponent.displayName = 'PersistentVolumeTabComponent'
-
-// ----------
+  return (
+    <>
+      <p tw="mb-6">
+        Create and configure persistent storage for your web3 functions,
+        enabling your application to maintain data across multiple invocations
+        or sessions. You can set up a customized storage solution tailored to
+        your application&apos;s requirements.
+      </p>
+      <NoisyContainer>
+        <div>
+          <TextInput
+            label="Volume name"
+            placeholder="Redis volume"
+            onChange={handleNameChange}
+            value={volume.name}
+            name={`${id}_name`}
+            error={
+              volume.name === ''
+                ? new Error('Please provide a name')
+                : undefined
+            }
+          />
+        </div>
+        <div tw="mt-4">
+          <TextInput
+            label="Mount"
+            placeholder="/mount/opt"
+            onChange={handleMountPathChange}
+            value={volume.mountPath}
+            name={`${id}_mount`}
+          />
+        </div>
+        <div tw="mt-4">
+          <TextInput
+            label="Size (GB)"
+            placeholder="2"
+            onChange={handleSizeChange}
+            value={volume.size}
+            name={`${id}_size`}
+          />
+        </div>
+        {handleRemove && (
+          <RemoveVolume volume={volume} onRemove={handleRemove} />
+        )}
+      </NoisyContainer>
+    </>
+  )
+})
+AddPersistentVolume.displayName = 'AddPersistentVolume'
 
 const CmpMap = {
-  [VolumeType.New]: NewVolumeTabComponent,
-  [VolumeType.Existing]: ExistingVolumeTabComponent,
-  [VolumeType.Persistent]: PersistentVolumeTabComponent,
+  [VolumeType.New]: AddNewVolume,
+  [VolumeType.Existing]: AddExistingVolume,
+  [VolumeType.Persistent]: AddPersistentVolume,
 }
 
 export default function AddVolume({
@@ -326,11 +254,7 @@ export default function AddVolume({
   const Cmp = useMemo(() => CmpMap[volume.type], [volume.type])
 
   if (isStandAlone)
-    return (
-      <NewVolumeTabComponent
-        {...{ volume: volume as NewVolume, onChange, ...rest }}
-      />
-    )
+    return <AddNewVolume {...{ volume: volume as never, onChange, ...rest }} />
 
   return (
     <>

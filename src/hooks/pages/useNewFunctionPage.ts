@@ -1,6 +1,5 @@
 import { useAppState } from '@/contexts/appState'
 import {
-  EnvironmentVariable,
   getTotalProductCost,
   isValidItemHash,
   safeCollectionToObject,
@@ -10,17 +9,18 @@ import { FormEvent, useCallback, useMemo } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import { createFunctionProgram } from '../../helpers/aleph'
 import { useRouter } from 'next/router'
-import { RuntimeId, Runtimes } from '../form/useRuntimeSelector'
+import { RuntimeId, Runtimes } from '../form/useSelectRuntime'
 import {
   InstanceSpecs,
   defaultSpecsOptions,
-} from '../form/useInstanceSpecsSelector'
+} from '../form/useSelectInstanceSpecs'
 import {
   Volume,
   defaultVolume,
   displayVolumesToAlephVolumes,
 } from '../form/useAddVolume'
 import { useForm } from '../useForm'
+import { EnvVar } from '../form/useAddEnvVars'
 
 export type NewFunctionFormState = {
   runtime: RuntimeId
@@ -34,7 +34,7 @@ export type NewFunctionFormState = {
   functionCode?: string
   functionFile?: File
   specs?: InstanceSpecs
-  environmentVariables: EnvironmentVariable[]
+  envVars: EnvVar[]
   metaTags: string[]
 }
 
@@ -56,7 +56,7 @@ const initialState: NewFunctionFormState = {
   functionCode: samplePythonCode,
   codeLanguage: 'python',
   codeOrFile: 'code',
-  environmentVariables: [],
+  envVars: [],
   metaTags: [],
 }
 
@@ -66,19 +66,13 @@ export type UseNewFunctionPage = {
   formState: NewFunctionFormState
   handleSubmit: (e: FormEvent) => Promise<void>
   setFormValue: (name: keyof NewFunctionFormState, value: any) => void
-  setEnvironmentVariable: (
-    variableIndex: number,
-    variableKey: 'name' | 'value',
-    variableValue: string,
-  ) => void
-  addEnvironmentVariable: () => void
-  removeEnvironmentVariable: (variableIndex: number) => void
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
   handleChangeEntityTab: (tabId: string) => void
   handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
   handleChangeVolumes: (volumes: Volume[]) => void
+  handleChangeEnvVars: (envVars: EnvVar[]) => void
 }
 
 export function useNewFunctionPage(): UseNewFunctionPage {
@@ -124,13 +118,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         formState.volumes,
       )
 
-      const {
-        functionName,
-        metaTags,
-        isPersistent,
-        specs,
-        environmentVariables,
-      } = formState
+      const { functionName, metaTags, isPersistent, specs, envVars } = formState
 
       if (!specs) throw new Error('Invalid instance specs')
 
@@ -145,7 +133,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         entrypoint: 'main:app', // TODO: Entrypoint
         memory: specs.ram,
         vcpus: specs.cpu,
-        variables: safeCollectionToObject(environmentVariables),
+        variables: safeCollectionToObject(envVars),
       })
 
       router.replace('/dashboard')
@@ -169,32 +157,10 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     [setFormValue],
   )
 
-  const addEnvironmentVariable = () => {
-    setFormValue('environmentVariables', [
-      ...formState.environmentVariables,
-      { name: '', value: '' },
-    ])
-  }
-
-  const setEnvironmentVariable = (
-    variableIndex: number,
-    variableKey: 'name' | 'value',
-    variableValue: string,
-  ) => {
-    const variables = [...formState.environmentVariables]
-    variables[variableIndex] = {
-      ...variables[variableIndex],
-      [variableKey]: variableValue,
-    }
-    setFormValue('environmentVariables', variables)
-  }
-
-  const removeEnvironmentVariable = (variableIndex: number) => {
-    setFormValue(
-      'environmentVariables',
-      formState.environmentVariables.filter((_, i) => i !== variableIndex),
-    )
-  }
+  const handleChangeEnvVars = useCallback(
+    (envVars: EnvVar[]) => setFormValue('envVars', envVars),
+    [setFormValue],
+  )
 
   const { totalCost } = useMemo(
     () =>
@@ -222,14 +188,12 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     formState,
     handleSubmit,
     setFormValue,
-    setEnvironmentVariable,
-    addEnvironmentVariable,
-    removeEnvironmentVariable,
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
     handleChangeEntityTab,
     handleChangeInstanceSpecs,
     handleChangeVolumes,
+    handleChangeEnvVars,
   }
 }

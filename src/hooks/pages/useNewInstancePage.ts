@@ -2,13 +2,14 @@ import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import { useRouter } from 'next/router'
-import { Runtime, defaultRuntimeOptions } from '../form/useRuntimeSelector'
+import { Runtime, defaultRuntimeOptions } from '../form/useSelectRuntime'
 import {
   InstanceSpecs,
   defaultSpecsOptions,
-} from '../form/useInstanceSpecsSelector'
+} from '../form/useSelectInstanceSpecs'
 import { useForm } from '../useForm'
 import { Volume, defaultVolume } from '../form/useAddVolume'
+import { EnvVar } from '../form/useAddEnvVars'
 
 // @todo: Split this into reusable hooks by composition
 
@@ -16,12 +17,14 @@ export type NewInstanceFormState = {
   runtime?: Runtime
   specs?: InstanceSpecs
   volumes?: Volume[]
+  envVars?: EnvVar[]
 }
 
 export const initialState: NewInstanceFormState = {
   runtime: defaultRuntimeOptions[0],
   specs: defaultSpecsOptions[0],
   volumes: [{ ...defaultVolume }],
+  envVars: [],
 }
 
 export type UseNewInstancePage = {
@@ -36,6 +39,7 @@ export type UseNewInstancePage = {
   handleChangeRuntime: (runtime: Runtime) => void
   handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
   handleChangeVolumes: (volumes: Volume[]) => void
+  handleChangeEnvVars: (envVars: EnvVar[]) => void
 }
 
 export function useNewInstancePage(): UseNewInstancePage {
@@ -71,6 +75,11 @@ export function useNewInstancePage(): UseNewInstancePage {
 
   const handleChangeVolumes = useCallback(
     (volumes: Volume[]) => setFormValue('volumes', volumes),
+    [setFormValue],
+  )
+
+  const handleChangeEnvVars = useCallback(
+    (envVars: EnvVar[]) => setFormValue('envVars', envVars),
     [setFormValue],
   )
 
@@ -111,5 +120,6 @@ export function useNewInstancePage(): UseNewInstancePage {
     handleChangeRuntime,
     handleChangeInstanceSpecs,
     handleChangeVolumes,
+    handleChangeEnvVars,
   }
 }

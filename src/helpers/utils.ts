@@ -9,6 +9,7 @@ import {
 import { MachineVolume } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { VolumeRequirements } from '@/components/HoldingRequirements/types'
 import { EntityType } from './constants'
+import { EnvVar } from '@/hooks/form/useAddEnvVars'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -42,14 +43,10 @@ export const isValidItemHash = (hash: string) => {
   return regex.test(hash)
 }
 
-export type EnvironmentVariable = {
-  name: string
-  value: string
-}
 /**
  * Takes a collection of environment variables and returns an object with the name and value of each variable.
  */
-export const safeCollectionToObject = (collection: EnvironmentVariable[]) => {
+export const safeCollectionToObject = (collection: EnvVar[]) => {
   const ret: Record<string, string> = {}
   for (const { name, value } of collection) {
     if (name.trim().length > 0 && value.trim().length > 0) {

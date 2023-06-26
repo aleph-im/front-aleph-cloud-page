@@ -3,15 +3,15 @@ import styled from 'styled-components'
 import tw from 'twin.macro'
 import { useBasePath } from '@/hooks/useBasePath'
 import { useCallback } from 'react'
-import { Runtime, useRuntimeSelector } from '@/hooks/form/useRuntimeSelector'
+import { Runtime, useSelectRuntime } from '@/hooks/form/useSelectRuntime'
 
-export type RuntimeItemProps = {
+export type SelectRuntimeItemProps = {
   runtime: Runtime
   selected: boolean
   onChange: (runtime: Runtime) => void
 }
 
-export type RuntimeSelectorProps = {
+export type SelectRuntimeProps = {
   runtime?: Runtime
   options?: Runtime[]
   onChange: (runtime: Runtime) => void
@@ -26,11 +26,11 @@ export const StyledFlatCard = styled.div<{ $selected: boolean }>`
   ${({ $selected }) => $selected && `border: 1px solid white`}
 `
 
-function RuntimeSelectorItem({
+function SelectRuntimeItem({
   runtime,
   selected,
   onChange,
-}: RuntimeItemProps) {
+}: SelectRuntimeItemProps) {
   const basePath = useBasePath()
   const imgPrefix = `${basePath}/img`
 
@@ -50,12 +50,12 @@ function RuntimeSelectorItem({
 }
 
 // Mocked runtimes
-export default function RuntimeSelector({
+export default function SelectRuntime({
   runtime: runtimeProp,
   options: optionsProp,
   onChange,
-}: RuntimeSelectorProps) {
-  const { runtime, options, handleChange } = useRuntimeSelector({
+}: SelectRuntimeProps) {
+  const { runtime, options, handleChange } = useSelectRuntime({
     runtime: runtimeProp,
     options: optionsProp,
     onChange,
@@ -65,7 +65,7 @@ export default function RuntimeSelector({
     <div tw="overflow-auto max-w-full">
       <div tw="flex items-center justify-start flex-nowrap gap-6">
         {options.map((option) => (
-          <RuntimeSelectorItem
+          <SelectRuntimeItem
             key={option.id + option.name}
             {...{
               option,

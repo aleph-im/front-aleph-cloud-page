@@ -10,19 +10,19 @@ export type RemoveVolumeProps = {
   onRemove: (volumeId: string) => void
 }
 
-export type NewVolumeTabComponentProps = {
+export type AddNewVolumeProps = {
   volume: NewVolume
   onChange: (volume: NewVolume) => void
   onRemove?: (volumeId: string) => void
 }
 
-export type ExistingVolumeTabComponentProps = {
+export type AddExistingVolumeProps = {
   volume: ExistingVolume
   onChange: (volume: ExistingVolume) => void
   onRemove?: (volumeId: string) => void
 }
 
-export type PersistentVolumeTabComponentProps = {
+export type AddPersistentVolumeProps = {
   volume: PersistentVolume
   onChange: (volume: PersistentVolume) => void
   onRemove?: (volumeId: string) => void

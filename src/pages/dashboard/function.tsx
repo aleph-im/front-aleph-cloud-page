@@ -21,9 +21,10 @@ import HoldingRequirements from '@/components/HoldingRequirements'
 import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
 import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
-import { RuntimeId } from '@/hooks/form/useRuntimeSelector'
-import InstanceSpecsSelector from '@/components/form/InstanceSpecsSelector'
+import { RuntimeId } from '@/hooks/form/useSelectRuntime'
+import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes/cmp'
+import AddEnvVars from '@/components/form/AddEnvVars'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -40,15 +41,13 @@ export default function NewFunctionPage() {
     formState,
     handleSubmit,
     setFormValue,
-    setEnvironmentVariable,
-    addEnvironmentVariable,
-    removeEnvironmentVariable,
     address,
     accountBalance,
     isCreateButtonDisabled,
     handleChangeEntityTab,
     handleChangeInstanceSpecs,
     handleChangeVolumes,
+    handleChangeEnvVars,
   } = useNewFunctionPage()
 
   const [tabId, setTabId] = useState('code')
@@ -333,7 +332,7 @@ export default function NewFunctionPage() {
               whilst the free storage for persistent VM is ten times (10x) the
               amount of RAM.
             </p>
-            <InstanceSpecsSelector
+            <SelectInstanceSpecs
               specs={formState.specs}
               onChange={handleChangeInstanceSpecs}
             />
@@ -488,71 +487,10 @@ export default function NewFunctionPage() {
               modify your application&apos;s behaviour without altering the
               source code.
             </p>
-            {formState.environmentVariables.length > 0 && (
-              <NoisyContainer>
-                <div tw="flex flex-col gap-x-6 gap-y-4">
-                  <p tw="-mb-2">Set</p>
-
-                  {formState.environmentVariables.map((variable, index) => (
-                    // eslint-disable-next-line react/jsx-key
-                    <div tw="flex flex-col md:flex-row gap-6">
-                      <div tw="flex-1">
-                        <TextInput
-                          name={`__config_env_var_${index}_name`}
-                          placeholder="Name"
-                          value={variable.name}
-                          onChange={(e) =>
-                            setEnvironmentVariable(
-                              index,
-                              'name',
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </div>
-                      <div tw="flex-1">
-                        <TextInput
-                          name={`__config_env_var_${index}_value`}
-                          placeholder="Value"
-                          value={variable.value}
-                          onChange={(e) =>
-                            setEnvironmentVariable(
-                              index,
-                              'value',
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </div>
-                      <div tw="min-w-max flex items-end">
-                        <Button
-                          color="main2"
-                          variant="secondary"
-                          kind="neon"
-                          size="regular"
-                          type="button"
-                          onClick={() => removeEnvironmentVariable(index)}
-                        >
-                          <Icon name="trash" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </NoisyContainer>
-            )}
-            <div tw="mt-6 mx-6">
-              <Button
-                type="button"
-                onClick={addEnvironmentVariable}
-                color="main0"
-                variant="secondary"
-                kind="neon"
-                size="regular"
-              >
-                Add variable
-              </Button>
-            </div>
+            <AddEnvVars
+              envVars={formState.envVars}
+              onChange={handleChangeEnvVars}
+            />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">

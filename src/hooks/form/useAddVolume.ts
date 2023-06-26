@@ -1,7 +1,8 @@
-import { useCallback, useState } from 'react'
+import { ChangeEvent, useCallback, useId, useMemo, useState } from 'react'
 import { createVolume } from '@/helpers/aleph'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { MachineVolume } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { humanReadableSize } from '@/helpers/utils'
 
 export enum VolumeType {
   New = 'new',
@@ -94,22 +95,211 @@ export const displayVolumesToAlephVolumes = async (
   return ret as any
 }
 
-export type UseVolumeSelectorProps = {
-  volume?: Volume
-  onChange: (volumes: Volume) => void
+export type UseAddNewVolumeProps = {
+  volume: NewVolume
+  onChange: (volume: NewVolume) => void
+  onRemove?: (volumeId: string) => void
 }
 
-export type UseVolumeSelectorReturn = {
+export type UseAddNewVolumeReturn = {
+  id: string
   volume: Volume
-  handleChange: (volumes: Volume) => void
+  volumeSize: string
+  handleFileSrcChange: (fileSrc?: File) => void
+  handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleUseLatestChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleRemove?: (volumeId: string) => void
+}
+
+export function useAddNewVolumeProps({
+  volume,
+  onChange,
+  onRemove: handleRemove,
+}: UseAddNewVolumeProps) {
+  const id = useId()
+
+  const handleFileSrcChange = useCallback(
+    (fileSrc?: File) => {
+      if (!fileSrc) return //@todo: Handle error in UI
+      const newVolume: NewVolume = { ...volume, fileSrc }
+      onChange(newVolume)
+    },
+    [onChange, volume],
+  )
+
+  const handleMountPathChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const mountPath = e.target.value
+      const newVolume: NewVolume = { ...volume, mountPath }
+      onChange(newVolume)
+    },
+    [onChange, volume],
+  )
+
+  const handleUseLatestChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const useLatest = e.target.checked
+      const newVolume: NewVolume = { ...volume, useLatest }
+      onChange(newVolume)
+    },
+    [onChange, volume],
+  )
+
+  const volumeSize = useMemo(
+    () => humanReadableSize((volume.fileSrc?.size || 0) / 1000),
+    [volume.fileSrc?.size],
+  )
+
+  return {
+    id,
+    volume,
+    volumeSize,
+    handleFileSrcChange,
+    handleMountPathChange,
+    handleUseLatestChange,
+    handleRemove,
+  }
+}
+
+// -------------
+
+export type UseAddExistingVolumeProps = {
+  volume: ExistingVolume
+  onChange: (volume: ExistingVolume) => void
+  onRemove?: (volumeId: string) => void
+}
+
+export type UseAddExistingVolumeReturn = {
+  id: string
+  volume: Volume
+  handleRefHashChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleUseLatestChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleRemove?: (volumeId: string) => void
+}
+
+export function useAddExistingVolumeProps({
+  volume,
+  onChange,
+  onRemove: handleRemove,
+}: UseAddExistingVolumeProps) {
+  const id = useId()
+
+  const handleRefHashChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const refHash = e.target.value
+      const newVolume: ExistingVolume = { ...volume, refHash }
+      onChange(newVolume)
+    },
+    [onChange, volume],
+  )
+
+  const handleMountPathChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const mountPath = e.target.value
+      const newVolume: ExistingVolume = { ...volume, mountPath }
+      onChange(newVolume)
+    },
+    [onChange, volume],
+  )
+
+  const handleUseLatestChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const useLatest = e.target.checked
+      const newVolume: ExistingVolume = { ...volume, useLatest }
+      onChange(newVolume)
+    },
+    [onChange, volume],
+  )
+
+  return {
+    id,
+    volume,
+    handleRefHashChange,
+    handleMountPathChange,
+    handleUseLatestChange,
+    handleRemove,
+  }
+}
+
+// -------------
+
+export type UseAddPersistentVolumeProps = {
+  volume: PersistentVolume
+  onChange: (volume: PersistentVolume) => void
+  onRemove?: (volumeId: string) => void
+}
+
+export type UseAddPersistentVolumeReturn = {
+  id: string
+  volume: Volume
+  handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleSizeChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleRemove?: (volumeId: string) => void
+}
+
+export function useAddPersistentVolumeProps({
+  volume,
+  onChange,
+  onRemove: handleRemove,
+}: UseAddPersistentVolumeProps) {
+  const id = useId()
+
+  const handleNameChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const name = e.target.value
+      const newVolume: PersistentVolume = { ...volume, name }
+      onChange(newVolume)
+    },
+    [onChange, volume],
+  )
+
+  const handleMountPathChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const mountPath = e.target.value
+      const newVolume: PersistentVolume = { ...volume, mountPath }
+      onChange(newVolume)
+    },
+    [onChange, volume],
+  )
+
+  const handleSizeChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const size = Number(e.target.value)
+      const newVolume: PersistentVolume = { ...volume, size }
+      onChange(newVolume)
+    },
+    [onChange, volume],
+  )
+
+  return {
+    id,
+    volume,
+    handleNameChange,
+    handleMountPathChange,
+    handleSizeChange,
+    handleRemove,
+  }
+}
+
+// -------------
+
+export type UseAddVolumeProps = {
+  volume?: Volume
+  onChange: (volume: Volume) => void
+}
+
+export type UseAddVolumeReturn = {
+  volume: Volume
+  handleChange: (volume: Volume) => void
 }
 
 export function useAddVolume({
   volume: volumeProp,
   onChange,
-}: UseVolumeSelectorProps): UseVolumeSelectorReturn {
+}: UseAddVolumeProps): UseAddVolumeReturn {
   const [volumeState, setVolumeState] = useState<Volume>({ ...defaultVolume })
-
   const volume = volumeProp || volumeState
 
   const handleChange = useCallback(
@@ -119,8 +309,6 @@ export function useAddVolume({
     },
     [onChange],
   )
-
-  // -------
 
   return {
     volume,

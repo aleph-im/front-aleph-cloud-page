@@ -2,13 +2,13 @@
 import styled, { css } from 'styled-components'
 import {
   InstanceSpecs,
-  useInstanceSpecsSelector,
-} from '@/hooks/form/useInstanceSpecsSelector'
+  useSelectInstanceSpecs,
+} from '@/hooks/form/useSelectInstanceSpecs'
 import { Button, Icon, Table, TableColumn } from '@aleph-front/aleph-core'
 import { useCallback, useMemo } from 'react'
 import { convertBitUnits, getFunctionCost } from '@/helpers/utils'
 
-export type InstanceSpecsSelectorProps = {
+export type SelectInstanceSpecsProps = {
   specs?: InstanceSpecs
   options?: InstanceSpecs[]
   isPersistentStorage?: boolean
@@ -35,13 +35,13 @@ const StyledTable = styled(Table<SpecsDetail>)`
 `
 
 // Mocked specs
-export default function InstanceSpecsSelector({
+export default function SelectInstanceSpecs({
   specs: specsProp,
   options: optionsProp,
   isPersistentStorage = false,
   onChange,
-}: InstanceSpecsSelectorProps) {
-  const { specs, options, handleChange } = useInstanceSpecsSelector({
+}: SelectInstanceSpecsProps) {
+  const { specs, options, handleChange } = useSelectInstanceSpecs({
     specs: specsProp,
     options: optionsProp,
     onChange,

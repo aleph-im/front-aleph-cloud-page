@@ -4,9 +4,10 @@ import CompositeTitle from '@/components/CompositeTitle'
 import { useNewInstancePage } from '@/hooks/pages/useNewInstancePage'
 import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton'
-import RuntimeSelector from '@/components/form/RuntimeSelector'
-import InstanceSpecsSelector from '@/components/form/InstanceSpecsSelector'
+import SelectRuntime from '@/components/form/SelectRuntime'
+import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes/cmp'
+import AddEnvVars from '@/components/form/AddEnvVars/cmp'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -26,6 +27,7 @@ export default function NewInstancePage() {
     handleChangeRuntime,
     handleChangeInstanceSpecs,
     handleChangeVolumes,
+    handleChangeEnvVars,
   } = useNewInstancePage()
 
   return (
@@ -70,7 +72,7 @@ export default function NewInstancePage() {
               be able to customize.
             </p>
             <div tw="px-0 mt-12 mb-6">
-              <RuntimeSelector
+              <SelectRuntime
                 runtime={formState.runtime}
                 onChange={handleChangeRuntime}
               />
@@ -92,7 +94,7 @@ export default function NewInstancePage() {
               your VM. You will be able to customize the volumes later.
             </p>
             <div tw="px-0 my-6">
-              <InstanceSpecsSelector
+              <SelectInstanceSpecs
                 specs={formState.specs}
                 onChange={handleChangeInstanceSpecs}
               />
@@ -108,6 +110,33 @@ export default function NewInstancePage() {
               <AddVolumes
                 volumes={formState.volumes}
                 onChange={handleChangeVolumes}
+              />
+            </div>
+          </Container>
+        </section>
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <Container>
+            <CompositeTitle as="h2" number="4">
+              Configure SSH Key
+            </CompositeTitle>
+            <p>
+              Access your cloud instances securely. Generate or and manage keys,
+              adding personal descriptions for easy future reference. Remember,
+              storing private keys safely is crucial for security. If you need
+              help, our support team is always ready to assist.
+            </p>
+            <div tw="px-0 my-6">TODO</div>
+          </Container>
+        </section>
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <Container>
+            <CompositeTitle as="h2" number="5">
+              Add environment variables
+            </CompositeTitle>
+            <div tw="px-0 my-6">
+              <AddEnvVars
+                envVars={formState.envVars}
+                onChange={handleChangeEnvVars}
               />
             </div>
           </Container>
