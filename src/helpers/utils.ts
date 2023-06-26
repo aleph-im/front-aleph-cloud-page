@@ -126,6 +126,13 @@ type ConvertBitUnitOptions = {
   to: BitUnit
   displayUnit: boolean
 }
+const units = {
+  b: 1,
+  kb: 1000,
+  mb: 1000 ** 2,
+  gb: 1000 ** 3,
+  tb: 1000 ** 4,
+}
 export const convertBitUnits = (
   value: number,
   {
@@ -134,17 +141,8 @@ export const convertBitUnits = (
     displayUnit = true,
   }: Partial<ConvertBitUnitOptions>,
 ) => {
-  const options: ConvertBitUnitOptions = { from, to, displayUnit }
-  const units = {
-    b: 1,
-    kb: 1000,
-    mb: 1000 ** 2,
-    gb: 1000 ** 3,
-    tb: 1000 ** 4,
-  }
-
-  const result = (value * units[options.from]) / units[options.to]
-  return options.displayUnit ? `${result} ${options.to.toUpperCase()}` : result
+  const result = (value * units[from]) / units[to]
+  return displayUnit ? `${result} ${to.toUpperCase()}` : result
 }
 
 /**
@@ -231,22 +229,6 @@ export const unixToISODateTimeString = (timeStamp?: number, noDate = 'n/a') => {
   }).format(date)
 }
 
-type MachineSpecs = {
-  cpu: number
-  memory: number
-  storage: number
-}
-export const getFunctionSpecsByComputeUnits = (
-  computeUnits: number,
-  isPersistent: boolean,
-): MachineSpecs => {
-  return {
-    cpu: 1 * computeUnits,
-    memory: 2 * computeUnits * 1000,
-    storage: 2 * 10 ** Number(isPersistent) * computeUnits,
-  }
-}
-
 type CapabilitiesConfig = {
   internetAccess?: boolean
   blockchainRPC?: boolean
@@ -254,9 +236,9 @@ type CapabilitiesConfig = {
 }
 
 export type FunctionPriceConfig = {
-  computeUnits: number
-  isPersistent: boolean
-  capabilities: CapabilitiesConfig
+  cpu: number
+  isPersistentStorage: boolean
+  capabilities?: CapabilitiesConfig
 }
 
 export type FunctionCost = {
@@ -269,19 +251,15 @@ export type FunctionCost = {
  * Calculates the amount of tokens required to deploy a function
  */
 export const getFunctionCost = ({
-  computeUnits,
-  isPersistent,
-  capabilities,
+  cpu,
+  isPersistentStorage,
+  capabilities = {},
 }: FunctionPriceConfig): FunctionCost => {
-  const extraStorageCost = 0
-  const storageAllowance = getFunctionSpecsByComputeUnits(
-    computeUnits,
-    isPersistent,
-  ).storage
-  const basePrice = isPersistent ? 2_000 : 200
+  const basePrice = isPersistentStorage ? 2_000 : 200
+  const storageAllowance = 2 * 10 ** Number(isPersistentStorage) * cpu
 
   return {
-    compute: basePrice * computeUnits,
+    compute: basePrice * cpu,
     capabilities: Object.values(capabilities).reduce(
       (ac, cv) => (ac += cv ? 1 : 0),
       1,
@@ -291,13 +269,13 @@ export const getFunctionCost = ({
 }
 
 type getTotalProductCostConfig = FunctionPriceConfig & {
-  computeUnits?: number
-  isPersistent?: boolean
+  cpu?: number
+  isPersistentStorage?: boolean
   volumes?: VolumeRequirements[]
 }
 export const getTotalProductCost = ({
-  computeUnits,
-  isPersistent,
+  cpu,
+  isPersistentStorage,
   capabilities,
   volumes,
 }: getTotalProductCostConfig) => {
@@ -306,7 +284,7 @@ export const getTotalProductCost = ({
 
   // If no compute units are provided, we only calculate the cost of the volumes
   // This will most likely be called from the create volume page
-  if (!computeUnits) {
+  if (!cpu) {
     const volumeCosts = onlyNewVolumes.map((volume) => ({
       ...volume,
       price: ((volume?.src?.size || 0) / 10 ** 6) * 20,
@@ -324,8 +302,8 @@ export const getTotalProductCost = ({
   // 2. For each volume, subtract the storage allowance from the volume size
   // 3. If there is more storage than allowance left, the additional storage is charged at 20 tokens per mb
   const { storageAllowance, compute } = getFunctionCost({
-    computeUnits,
-    isPersistent,
+    cpu,
+    isPersistentStorage,
     capabilities,
   })
 

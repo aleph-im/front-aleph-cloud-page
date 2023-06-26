@@ -44,7 +44,7 @@ export const Runtimes: Record<RuntimeId, Runtime> = {
 
 export type UseRuntimeSelectorProps = {
   images?: Runtime[]
-  onChange: (iamge: Runtime) => void
+  onChange: (image: Runtime) => void
 }
 
 export type UseRuntimeSelectorReturn = {

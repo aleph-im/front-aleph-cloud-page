@@ -1,11 +1,11 @@
-import { ReactNode, useCallback } from 'react'
+import { ReactNode } from 'react'
 import { Col, Row, Tabs } from '@aleph-front/aleph-core'
 import CompositeTitle from '@/components/CompositeTitle'
 import { useNewInstancePage } from '@/hooks/pages/useNewInstancePage'
 import BaseContainer from '@/components/Container'
-import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
-import RuntimeSelector from '@/components/RuntimeSelector/cmp'
-import { Runtime } from '@/hooks/useRuntimeSelector'
+import ExternalLinkButton from '@/components/ExternalLinkButton'
+import RuntimeSelector from '@/components/form/RuntimeSelector'
+import InstanceSpecsSelector from '@/components/form/InstanceSpecsSelector'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -18,15 +18,13 @@ const Container = ({ children }: { children: ReactNode }) => (
 )
 
 export default function NewInstancePage() {
-  const { formState, handleSubmit, setFormValue, handleChangeEntityTab } =
-    useNewInstancePage()
-
-  const handleChangeRuntime = useCallback(
-    (image: Runtime) => {
-      setFormValue('runtime', image.id)
-    },
-    [setFormValue],
-  )
+  const {
+    formState,
+    handleSubmit,
+    handleChangeEntityTab,
+    handleChangeRuntime,
+    handleChangeInstanceSpecs,
+  } = useNewInstancePage()
 
   return (
     <>
@@ -76,6 +74,20 @@ export default function NewInstancePage() {
               <ExternalLinkButton href="https://docs.aleph.im/computing/runtimes">
                 Learn more
               </ExternalLinkButton>
+            </div>
+          </Container>
+        </section>
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <Container>
+            <CompositeTitle as="h2" number="2">
+              Select an instance size
+            </CompositeTitle>
+            <p>
+              Please select one of the available instance size as a base for
+              your VM. You will be able to customize the volumes later.
+            </p>
+            <div tw="px-0 my-6">
+              <InstanceSpecsSelector onChange={handleChangeInstanceSpecs} />
             </div>
           </Container>
         </section>

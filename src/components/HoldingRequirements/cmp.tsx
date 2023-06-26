@@ -8,21 +8,21 @@ import { StyledHoldingSummaryLine } from './styles'
 import { HoldingRequirementsProps, VolumeRequirements } from './types'
 import { useMemo } from 'react'
 
-export default function HoldingSummary({
+export default function HoldingRequirements({
   address,
-  computeUnits,
+  reqs,
   storage,
   unlockedAmount,
 }: HoldingRequirementsProps) {
   const totalProductCost = useMemo(
     () =>
       getTotalProductCost({
-        computeUnits: computeUnits?.number || 0,
+        cpu: reqs?.number || 0,
         volumes: storage,
-        isPersistent: computeUnits?.isPersistent || false,
+        isPersistentStorage: reqs?.isPersistent || false,
         capabilities: {},
       }),
-    [computeUnits, storage],
+    [reqs, storage],
   )
 
   const getVolumeSize = (volume: VolumeRequirements) => {
@@ -43,14 +43,11 @@ export default function HoldingSummary({
         <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
       </StyledHoldingSummaryLine>
 
-      {computeUnits && (
+      {reqs && (
         <StyledHoldingSummaryLine>
-          <div tw="text-xs flex items-center">
-            {computeUnits.type.toUpperCase()}
-          </div>
+          <div tw="text-xs flex items-center">{reqs.type.toUpperCase()}</div>
           <div>
-            {computeUnits.number} x86 64bit{' '}
-            {computeUnits.isPersistent && '(persistent)'}
+            {reqs.number} x86 64bit {reqs.isPersistent && '(persistent)'}
           </div>
           <div>{humanReadableCurrency(totalProductCost?.compute)} ALEPH</div>
         </StyledHoldingSummaryLine>

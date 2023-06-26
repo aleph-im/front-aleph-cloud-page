@@ -3,12 +3,15 @@ import { FormEvent, useCallback, useReducer } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
-import { RuntimeId } from '@/helpers/constants'
+import { Runtime, RuntimeId } from '../form/useRuntimeSelector'
+import { InstanceSpecs } from '../form/useInstanceSpecsSelector'
 
 // @todo: Split this into reusable hooks by composition
 
 export type NewInstanceFormState = {
   runtime?: RuntimeId
+  cpu?: number
+  ram?: number
 }
 
 export const initialFormState = {
@@ -23,6 +26,9 @@ export type NewInstancePage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
+
+  handleChangeRuntime: (image: Runtime) => void
+  handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
 }
 
 export function useNewInstancePage(): NewInstancePage {
@@ -65,14 +71,32 @@ export function useNewInstancePage(): NewInstancePage {
     }
   }
 
-  const setFormValue = (name: keyof NewInstanceFormState, value: any) =>
-    dispatchForm({ type: 'SET_VALUE', payload: { name, value } })
+  const setFormValue = useCallback(
+    (name: keyof NewInstanceFormState, value: any) =>
+      dispatchForm({ type: 'SET_VALUE', payload: { name, value } }),
+    [],
+  )
+
+  const handleChangeRuntime = useCallback(
+    (image: Runtime) => {
+      setFormValue('runtime', image.id)
+    },
+    [setFormValue],
+  )
+
+  const handleChangeInstanceSpecs = useCallback(
+    (specs: InstanceSpecs) => {
+      setFormValue('cpu', specs.cpu)
+      setFormValue('ram', specs.ram)
+    },
+    [setFormValue],
+  )
 
   // const { totalCost } = useMemo(
   //   () =>
   //     getTotalProductCost({
   //       volumes: formState.volumes,
-  //       computeUnits: formState.computeUnits,
+  //       cpu: formState.cpu,
   //       isPersistent: formState.isPersistent,
   //       capabilities: {},
   //     }),
@@ -102,5 +126,7 @@ export function useNewInstancePage(): NewInstancePage {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
+    handleChangeRuntime,
+    handleChangeInstanceSpecs,
   }
 }

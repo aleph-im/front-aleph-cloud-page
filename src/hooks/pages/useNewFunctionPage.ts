@@ -17,7 +17,8 @@ import useConnectedWard from '../useConnectedWard'
 import { createFunctionProgram } from '../../helpers/aleph'
 import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
-import { RuntimeId, Runtimes } from '../useRuntimeSelector'
+import { RuntimeId, Runtimes } from '../form/useRuntimeSelector'
+import { InstanceSpecs } from '../form/useInstanceSpecsSelector'
 
 export type FormState = {
   runtime: RuntimeId
@@ -30,7 +31,8 @@ export type FormState = {
   codeLanguage: string
   functionCode?: string
   functionFile?: File
-  computeUnits: number
+  cpu: number
+  ram: number
   environmentVariables: EnvironmentVariable[]
   metaTags: string[]
 }
@@ -52,7 +54,8 @@ export const initialFormState: FormState = {
   functionCode: samplePythonCode,
   codeLanguage: 'python',
   codeOrFile: 'code',
-  computeUnits: 1,
+  cpu: 1,
+  ram: 2,
   environmentVariables: [],
   metaTags: [],
 }
@@ -82,6 +85,7 @@ export type NewFunctionPage = {
   accountBalance: number
   isCreateButtonDisabled: boolean
   handleChangeEntityTab: (tabId: string) => void
+  handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
 }
 
 export function useNewFunctionPage(): NewFunctionPage {
@@ -145,17 +149,27 @@ export function useNewFunctionPage(): NewFunctionPage {
 
       onLoad()
 
-      const msg = await createFunctionProgram({
+      const {
+        functionName,
+        metaTags,
+        isPersistent,
+        cpu,
+        ram,
+        environmentVariables,
+      } = formState
+
+      await createFunctionProgram({
         account,
-        name: formState.functionName.trim() || 'Untitled function',
-        tags: formState.metaTags,
-        isPersistent: formState.isPersistent,
+        name: functionName.trim() || 'Untitled function',
+        tags: metaTags,
+        isPersistent: isPersistent,
         file,
         runtime,
         volumes: alephVolumes, // TODO: Volumes
         entrypoint: 'main:app', // TODO: Entrypoint
-        computeUnits: formState.computeUnits,
-        variables: safeCollectionToObject(formState.environmentVariables),
+        memory: ram,
+        vcpus: cpu,
+        variables: safeCollectionToObject(environmentVariables),
       })
 
       onSuccess(true)
@@ -165,8 +179,19 @@ export function useNewFunctionPage(): NewFunctionPage {
     }
   }
 
-  const setFormValue = (name: keyof FormState, value: any) =>
-    dispatchForm({ type: 'SET_VALUE', payload: { name, value } })
+  const setFormValue = useCallback(
+    (name: keyof FormState, value: any) =>
+      dispatchForm({ type: 'SET_VALUE', payload: { name, value } }),
+    [],
+  )
+
+  const handleChangeInstanceSpecs = useCallback(
+    (specs: InstanceSpecs) => {
+      setFormValue('cpu', specs.cpu)
+      setFormValue('ram', specs.ram)
+    },
+    [setFormValue],
+  )
 
   const addEnvironmentVariable = () => {
     setFormValue('environmentVariables', [
@@ -242,8 +267,8 @@ export function useNewFunctionPage(): NewFunctionPage {
     () =>
       getTotalProductCost({
         volumes: formState.volumes,
-        computeUnits: formState.computeUnits,
-        isPersistent: formState.isPersistent,
+        cpu: formState.cpu,
+        isPersistentStorage: formState.isPersistent,
         capabilities: {},
       }),
     [formState],
@@ -277,5 +302,6 @@ export function useNewFunctionPage(): NewFunctionPage {
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
     handleChangeEntityTab,
+    handleChangeInstanceSpecs,
   }
 }

@@ -3,18 +3,17 @@ import styled from 'styled-components'
 import tw from 'twin.macro'
 import { useBasePath } from '@/hooks/useBasePath'
 import { useCallback } from 'react'
-import { Runtime } from '@/helpers/constants'
-import { useRuntimeSelector } from '@/hooks/useRuntimeSelector'
+import { Runtime, useRuntimeSelector } from '@/hooks/form/useRuntimeSelector'
 
 export type RuntimeItemProps = {
   image: Runtime
-  onChange: (iamge: Runtime) => void
+  onChange: (image: Runtime) => void
   selected: boolean
 }
 
 export type RuntimeSelectorProps = {
   images?: Runtime[]
-  onChange: (iamge: Runtime) => void
+  onChange: (image: Runtime) => void
 }
 
 export const StyledFlatCard = styled.div<{ $selected: boolean }>`

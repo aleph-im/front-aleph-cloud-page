@@ -1,36 +1,21 @@
 import {
-  AggregateMessage,
   Chain,
   MessageType,
   ProgramMessage,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/message'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import {
-  any,
-  program,
-  forget,
-  store,
-  aggregate,
-} from 'aleph-sdk-ts/dist/messages'
+import { any, program, forget, store } from 'aleph-sdk-ts/dist/messages'
 import { GetAccountFromProvider as getETHAccount } from 'aleph-sdk-ts/dist/accounts/ethereum'
 import { GetAccountFromProvider as getSOLAccount } from 'aleph-sdk-ts/dist/accounts/solana'
-import {
-  getERC20Balance,
-  getFunctionSpecsByComputeUnits,
-  getSOLBalance,
-} from './utils'
+import { getERC20Balance, getSOLBalance } from './utils'
 import E_ from './errors'
 import {
   Encoding,
   MachineVolume,
   PersistentVolume,
 } from 'aleph-sdk-ts/dist/messages/program/programModel'
-import {
-  defaultSSHChannel,
-  defaultVMChannel,
-  defaultVolumeChannel,
-} from './constants'
+import { defaultVMChannel, defaultVolumeChannel } from './constants'
 
 /**
  * Connects to a web3 provider and returns an Aleph account object
@@ -140,7 +125,8 @@ type CreateFunctionParams = {
   runtime: string
   encoding?: Encoding
   volumes: (MachineVolume | PersistentVolume)[]
-  computeUnits: number
+  memory: number
+  vcpus: number
   variables: Record<string, string>
 }
 export const createFunctionProgram = async ({
@@ -152,14 +138,10 @@ export const createFunctionProgram = async ({
   isPersistent,
   runtime,
   volumes,
-  computeUnits,
+  memory,
+  vcpus,
   variables,
 }: CreateFunctionParams) => {
-  const { memory, cpu } = getFunctionSpecsByComputeUnits(
-    computeUnits,
-    isPersistent,
-  )
-
   try {
     const msg = await program.publish({
       channel: defaultVMChannel,
@@ -174,7 +156,7 @@ export const createFunctionProgram = async ({
       runtime,
       entrypoint,
       memory,
-      vcpus: cpu,
+      vcpus,
       variables,
     })
 

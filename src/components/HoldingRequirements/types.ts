@@ -11,7 +11,7 @@ export type ComputeUnitsRequirements = {
 }
 
 export type HoldingRequirementsProps = {
-  computeUnits?: ComputeUnitsRequirements
+  reqs?: ComputeUnitsRequirements
   storage?: VolumeRequirements[]
   unlockedAmount: number
   address: string

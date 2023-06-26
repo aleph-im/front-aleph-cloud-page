@@ -52,8 +52,8 @@ export function useNewVolumePage() {
     () =>
       getTotalProductCost({
         volumes: [volumeState],
-        computeUnits: 0,
-        isPersistent: false,
+        cpu: 0,
+        isPersistentStorage: false,
         capabilities: {},
       }),
     [volumeState],

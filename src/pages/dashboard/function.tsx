@@ -8,7 +8,6 @@ import {
   Radio,
   RadioGroup,
   Row,
-  Table,
   Tabs,
   TextGradient,
   TextInput,
@@ -16,33 +15,15 @@ import {
 import CompositeTitle from '@/components/CompositeTitle'
 import NoisyContainer from '@/components/NoisyContainer'
 import HiddenFileInput from '@/components/HiddenFileInput'
-import {
-  convertBitUnits,
-  getFunctionCost,
-  getFunctionSpecsByComputeUnits,
-  isValidItemHash,
-} from '@/helpers/utils'
+import { isValidItemHash } from '@/helpers/utils'
 import { useNewFunctionPage } from '@/hooks/pages/useNewFunctionPage'
 import NewVolume from '@/components/NewVolume/cmp'
 import HoldingRequirements from '@/components/HoldingRequirements'
 import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
 import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
-import styled, { css } from 'styled-components'
-import { RuntimeId } from '@/hooks/useRuntimeSelector'
-
-const StyledTable = styled(Table<any>)`
-  ${({ theme }) => css`
-    tbody {
-      tr {
-        cursor: pointer;
-        &:hover {
-          color: ${theme.color.main0};
-        }
-      }
-    }
-  `}
-`
+import { RuntimeId } from '@/hooks/form/useRuntimeSelector'
+import InstanceSpecsSelector from '@/components/form/InstanceSpecsSelector'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -70,6 +51,7 @@ export default function NewFunctionPage() {
     accountBalance,
     isCreateButtonDisabled,
     handleChangeEntityTab,
+    handleChangeInstanceSpecs,
   } = useNewFunctionPage()
 
   const [tabId, setTabId] = useState('code')
@@ -77,6 +59,9 @@ export default function NewFunctionPage() {
   return (
     <>
       <form onSubmit={handleSubmit}>
+        <section>
+          <pre>{JSON.stringify(formState, null, 2)}</pre>
+        </section>
         <section tw="px-0 py-0 md:py-8">
           <Container>
             <Tabs
@@ -348,111 +333,13 @@ export default function NewFunctionPage() {
               ensuring optimal performance and efficient resource usage tailored
               to your specific needs.
             </p>
-
             <p tw="mb-6">
               You also get free volume storage with your instance. The free
               storage for on-demand VM is always equal to the amount of RAM,
               whilst the free storage for persistent VM is ten times (10x) the
               amount of RAM.
             </p>
-            <div tw="max-w-full overflow-y-hidden overflow-x-auto">
-              <StyledTable
-                borderType="none"
-                oddRowNoise
-                rowKey={(row) => row.cpu}
-                rowProps={(row) => ({
-                  onClick: () => {
-                    setFormValue('computeUnits', row.cpu)
-                  },
-                })}
-                columns={[
-                  {
-                    label: 'Cores',
-                    sortable: true,
-                    sortBy: (row) => row.cpu,
-                    render: (row) => {
-                      const isActive = formState.computeUnits === row.cpu
-                      const className = `${
-                        isActive ? 'text-main0' : ''
-                      } tp-body2`
-                      return (
-                        <span className={className}>{row.cpu} x86 64bit</span>
-                      )
-                    },
-                  },
-                  {
-                    label: 'Memory',
-                    align: 'right',
-                    sortable: true,
-                    sortBy: (row) => row.memory,
-                    render: (row) => {
-                      const isActive = formState.computeUnits === row.cpu
-                      const className = `${isActive ? 'text-main0' : ''}`
-                      return <span className={className}>{row.memory}</span>
-                    },
-                  },
-                  {
-                    label: 'Hold',
-                    align: 'right',
-                    sortable: true,
-                    sortBy: (row) => row.price,
-                    render: (row) => {
-                      const isActive = formState.computeUnits === row.cpu
-                      const className = `${isActive ? 'text-main0' : ''}`
-                      return <span className={className}>{row.price}</span>
-                    },
-                  },
-                  {
-                    label: '',
-                    align: 'right',
-                    render: (row) => {
-                      const active = formState.computeUnits === row.cpu
-
-                      return (
-                        <Button
-                          color="main0"
-                          variant="tertiary"
-                          kind="neon"
-                          size="regular"
-                          forwardedAs="button"
-                          type="button"
-                          // TODO: Fix this
-                          style={{ visibility: active ? 'visible' : 'hidden' }}
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <Icon name="check" />
-                        </Button>
-                      )
-                    },
-                  },
-                ]}
-                data={
-                  // TODO: Memoize this
-                  [1, 2, 4, 6, 8, 12].map((computeUnits) => {
-                    const specs = getFunctionSpecsByComputeUnits(
-                      computeUnits,
-                      formState.isPersistent,
-                    )
-                    const price = getFunctionCost({
-                      capabilities: {},
-                      computeUnits,
-                      isPersistent: formState.isPersistent,
-                      storage: 0,
-                    } as any)
-
-                    return {
-                      cpu: specs.cpu,
-                      memory: convertBitUnits(specs.memory, {
-                        from: 'mb',
-                        to: 'gb',
-                        displayUnit: true,
-                      }),
-                      price: price.compute + ' ALEPH',
-                    } as any
-                  })
-                }
-              />
-            </div>
+            <InstanceSpecsSelector onChange={handleChangeInstanceSpecs} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -764,9 +651,9 @@ export default function NewFunctionPage() {
             <div tw="my-7">
               <HoldingRequirements
                 address={address}
-                computeUnits={{
+                reqs={{
                   type: 'function',
-                  number: formState.computeUnits,
+                  number: formState.cpu,
                   isPersistent: formState.isPersistent,
                 }}
                 storage={formState.volumes}
