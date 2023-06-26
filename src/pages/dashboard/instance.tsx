@@ -6,6 +6,7 @@ import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton'
 import RuntimeSelector from '@/components/form/RuntimeSelector'
 import InstanceSpecsSelector from '@/components/form/InstanceSpecsSelector'
+import AddVolumes from '@/components/form/AddVolumes/cmp'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -24,11 +25,15 @@ export default function NewInstancePage() {
     handleChangeEntityTab,
     handleChangeRuntime,
     handleChangeInstanceSpecs,
+    handleChangeVolumes,
   } = useNewInstancePage()
 
   return (
     <>
       <form onSubmit={handleSubmit}>
+        <section>
+          <pre>{JSON.stringify(formState, null, 2)}</pre>
+        </section>
         <section tw="px-0 py-0 md:py-8">
           <Container>
             <Tabs
@@ -55,9 +60,6 @@ export default function NewInstancePage() {
             />
           </Container>
         </section>
-        <section>
-          <pre>{JSON.stringify(formState, null, 2)}</pre>
-        </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>
             <CompositeTitle as="h2" number="1">
@@ -68,7 +70,10 @@ export default function NewInstancePage() {
               be able to customize.
             </p>
             <div tw="px-0 mt-12 mb-6">
-              <RuntimeSelector onChange={handleChangeRuntime} />
+              <RuntimeSelector
+                runtime={formState.runtime}
+                onChange={handleChangeRuntime}
+              />
             </div>
             <div tw="mt-6 text-right">
               <ExternalLinkButton href="https://docs.aleph.im/computing/runtimes">
@@ -87,7 +92,23 @@ export default function NewInstancePage() {
               your VM. You will be able to customize the volumes later.
             </p>
             <div tw="px-0 my-6">
-              <InstanceSpecsSelector onChange={handleChangeInstanceSpecs} />
+              <InstanceSpecsSelector
+                specs={formState.specs}
+                onChange={handleChangeInstanceSpecs}
+              />
+            </div>
+          </Container>
+        </section>
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <Container>
+            <CompositeTitle as="h2" number="3">
+              Add volumes
+            </CompositeTitle>
+            <div tw="px-0 my-6">
+              <AddVolumes
+                volumes={formState.volumes}
+                onChange={handleChangeVolumes}
+              />
             </div>
           </Container>
         </section>

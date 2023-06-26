@@ -1,6 +1,6 @@
 import BaseContainer from '@/components/Container'
 import HoldingRequirements from '@/components/HoldingRequirements'
-import NewVolume from '@/components/NewVolume'
+import NewVolume from '@/components/form/AddVolume'
 import { useNewVolumePage } from '@/hooks/pages/useNewVolumePage'
 import { Button, Col, Row, TextGradient } from '@aleph-front/aleph-core'
 import { ReactNode } from 'react'
@@ -17,12 +17,11 @@ const Container = ({ children }: { children: ReactNode }) => (
 
 export default function NewVolumePage() {
   const {
-    volumeState,
-    setVolumeProperty,
-    setVolumeType,
+    formState,
+    handleSubmit,
+    handleChangeVolume,
     address,
     accountBalance,
-    handleSubmit,
     isCreateButtonDisabled,
   } = useNewVolumePage()
 
@@ -33,29 +32,8 @@ export default function NewVolumePage() {
           <Container>
             <NewVolume
               isStandAlone
-              volumeMountpoint={volumeState.mountpoint}
-              volumeName={volumeState.name}
-              volumeRefHash={volumeState.refHash}
-              volumeUseLatest={volumeState.useLatest}
-              volumeSize={volumeState.size}
-              volumeSrc={volumeState.src}
-              handleMountpointChange={(e) =>
-                setVolumeProperty('mountpoint', e.target.value)
-              }
-              handleNameChange={(e) =>
-                setVolumeProperty('name', e.target.value)
-              }
-              handleRefHashChange={(e) =>
-                setVolumeProperty('refHash', e.target.value)
-              }
-              handleSizeChange={(e) =>
-                setVolumeProperty('size', e.target.value)
-              }
-              handleSrcChange={(f) => setVolumeProperty('src', f)}
-              handleUseLatestChange={(e) =>
-                setVolumeProperty('useLatest', e.target.checked)
-              }
-              handleVolumeType={setVolumeType}
+              volume={formState.volume}
+              onChange={handleChangeVolume}
             />
           </Container>
         </section>
@@ -78,7 +56,7 @@ export default function NewVolumePage() {
             <div tw="my-7">
               <HoldingRequirements
                 address={address}
-                storage={[volumeState]}
+                storage={[formState.volume]}
                 unlockedAmount={accountBalance}
               />
             </div>

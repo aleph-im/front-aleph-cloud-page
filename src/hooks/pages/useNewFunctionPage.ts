@@ -5,22 +5,24 @@ import {
   isValidItemHash,
   safeCollectionToObject,
 } from '@/helpers/utils'
-import {
-  defaultVolume,
-  displayVolumesToAlephVolumes,
-  Volume,
-  VolumeTypes,
-} from '@/helpers/form'
 import JSZip from 'jszip'
-import { FormEvent, useCallback, useMemo, useReducer } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import { createFunctionProgram } from '../../helpers/aleph'
-import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
 import { RuntimeId, Runtimes } from '../form/useRuntimeSelector'
-import { InstanceSpecs } from '../form/useInstanceSpecsSelector'
+import {
+  InstanceSpecs,
+  defaultSpecsOptions,
+} from '../form/useInstanceSpecsSelector'
+import {
+  Volume,
+  defaultVolume,
+  displayVolumesToAlephVolumes,
+} from '../form/useAddVolume'
+import { useForm } from '../useForm'
 
-export type FormState = {
+export type NewFunctionFormState = {
   runtime: RuntimeId
   customRuntimeHash?: string
   isPersistent: boolean
@@ -31,8 +33,7 @@ export type FormState = {
   codeLanguage: string
   functionCode?: string
   functionFile?: File
-  cpu: number
-  ram: number
+  specs?: InstanceSpecs
   environmentVariables: EnvironmentVariable[]
   metaTags: string[]
 }
@@ -45,27 +46,26 @@ async def root():
   return {"message": "Hello World"}
 `
 
-export const initialFormState: FormState = {
+const initialState: NewFunctionFormState = {
   runtime: RuntimeId.Debian11,
   isPersistent: false,
   functionName: '',
   functionTags: [],
-  volumes: [defaultVolume],
+  specs: defaultSpecsOptions[0],
+  volumes: [{ ...defaultVolume }],
   functionCode: samplePythonCode,
   codeLanguage: 'python',
   codeOrFile: 'code',
-  cpu: 1,
-  ram: 2,
   environmentVariables: [],
   metaTags: [],
 }
 
 // @todo: Split this into reusable hooks by composition
 
-export type NewFunctionPage = {
-  formState: FormState
+export type UseNewFunctionPage = {
+  formState: NewFunctionFormState
   handleSubmit: (e: FormEvent) => Promise<void>
-  setFormValue: (name: keyof FormState, value: any) => void
+  setFormValue: (name: keyof NewFunctionFormState, value: any) => void
   setEnvironmentVariable: (
     variableIndex: number,
     variableKey: 'name' | 'value',
@@ -73,90 +73,66 @@ export type NewFunctionPage = {
   ) => void
   addEnvironmentVariable: () => void
   removeEnvironmentVariable: (variableIndex: number) => void
-  setVolumeType: (volumeIndex: number, volumeType: VolumeTypes) => void
-  setVolumeValue: (
-    volumeIndex: number,
-    volumekey: keyof Volume,
-    volumeValue: any,
-  ) => void
-  addVolume: () => void
-  removeVolume: (volumeIndex: number) => void
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
   handleChangeEntityTab: (tabId: string) => void
   handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
+  handleChangeVolumes: (volumes: Volume[]) => void
 }
 
-export function useNewFunctionPage(): NewFunctionPage {
+export function useNewFunctionPage(): UseNewFunctionPage {
   useConnectedWard()
 
   const router = useRouter()
   const [appState] = useAppState()
   const { account, accountBalance } = appState
 
-  const [formState, dispatchForm] = useReducer(
-    (state: FormState, action: { type: string; payload: any }): FormState => {
-      switch (action.type) {
-        case 'SET_VALUE':
-          return {
-            ...state,
-            [action.payload.name]: action.payload.value,
-          }
+  const onSubmit = useCallback(
+    async (formState: NewFunctionFormState) => {
+      let file
 
-        default:
-          return state
+      if (formState.codeOrFile === 'code') {
+        const jsZip = new JSZip()
+        jsZip.file('main.py', formState.functionCode || '')
+        const zip = await jsZip.generateAsync({ type: 'blob' })
+        file = new File([zip], 'main.py.zip', { type: 'application/zip' })
+      } else if (
+        formState.codeOrFile === 'file' &&
+        formState.functionFile !== undefined
+      ) {
+        file = formState.functionFile
+      } else {
+        throw new Error('Invalid code or file')
       }
-    },
-    initialFormState,
-  )
 
-  const [, { onLoad, onSuccess, onError }] = useRequestState()
+      const runtime =
+        formState.runtime !== RuntimeId.Custom
+          ? Runtimes[formState.runtime].id
+          : formState.customRuntimeHash || ''
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
+      if (!runtime || !isValidItemHash(runtime))
+        throw new Error('Invalid runtime')
 
-    let file
-    if (formState.codeOrFile === 'code') {
-      const jsZip = new JSZip()
-      jsZip.file('main.py', formState.functionCode || '')
-      const zip = await jsZip.generateAsync({ type: 'blob' })
-      file = new File([zip], 'main.py.zip', { type: 'application/zip' })
-    } else if (
-      formState.codeOrFile === 'file' &&
-      formState.functionFile !== undefined
-    ) {
-      file = formState.functionFile
-    } else {
-      return alert('Invalid code or file')
-    }
+      if (!isValidItemHash(runtime || ''))
+        throw new Error('Invalid runtime hash')
 
-    const runtime =
-      formState.runtime !== RuntimeId.Custom
-        ? Runtimes[formState.runtime].id
-        : formState.customRuntimeHash || ''
-
-    if (!runtime || !isValidItemHash(runtime)) return alert('Invalid runtime')
-
-    if (!isValidItemHash(runtime || '')) return alert('Invalid runtime hash')
-
-    try {
       if (!account) throw new Error('Account not found')
+
       const alephVolumes = await displayVolumesToAlephVolumes(
         account,
         formState.volumes,
       )
 
-      onLoad()
-
       const {
         functionName,
         metaTags,
         isPersistent,
-        cpu,
-        ram,
+        specs,
         environmentVariables,
       } = formState
+
+      if (!specs) throw new Error('Invalid instance specs')
 
       await createFunctionProgram({
         account,
@@ -167,39 +143,36 @@ export function useNewFunctionPage(): NewFunctionPage {
         runtime,
         volumes: alephVolumes, // TODO: Volumes
         entrypoint: 'main:app', // TODO: Entrypoint
-        memory: ram,
-        vcpus: cpu,
+        memory: specs.ram,
+        vcpus: specs.cpu,
         variables: safeCollectionToObject(environmentVariables),
       })
 
-      onSuccess(true)
       router.replace('/dashboard')
-    } catch (e) {
-      onError(e as Error)
-    }
-  }
-
-  const setFormValue = useCallback(
-    (name: keyof FormState, value: any) =>
-      dispatchForm({ type: 'SET_VALUE', payload: { name, value } }),
-    [],
+    },
+    [account, router],
   )
 
+  const {
+    state: formState,
+    setFormValue,
+    handleSubmit,
+  } = useForm({ initialState, onSubmit })
+
   const handleChangeInstanceSpecs = useCallback(
-    (specs: InstanceSpecs) => {
-      setFormValue('cpu', specs.cpu)
-      setFormValue('ram', specs.ram)
-    },
+    (specs: InstanceSpecs) => setFormValue('specs', specs),
+    [setFormValue],
+  )
+
+  const handleChangeVolumes = useCallback(
+    (volumes: Volume[]) => setFormValue('volumes', volumes),
     [setFormValue],
   )
 
   const addEnvironmentVariable = () => {
     setFormValue('environmentVariables', [
       ...formState.environmentVariables,
-      {
-        name: '',
-        value: '',
-      },
+      { name: '', value: '' },
     ])
   }
 
@@ -223,51 +196,11 @@ export function useNewFunctionPage(): NewFunctionPage {
     )
   }
 
-  const addVolume = () => {
-    setFormValue('volumes', [
-      ...formState.volumes,
-      {
-        ...defaultVolume,
-      },
-    ])
-  }
-
-  const removeVolume = (volumeIndex: number) => {
-    setFormValue(
-      'volumes',
-      formState.volumes.filter((_, i) => i !== volumeIndex),
-    )
-  }
-
-  const setVolumeType = (volumeIndex: number, volumeType: VolumeTypes) => {
-    const volumes = [...formState.volumes]
-
-    volumes[volumeIndex] = {
-      ...volumes[volumeIndex],
-      type: volumeType,
-    }
-    setFormValue('volumes', volumes)
-  }
-
-  const setVolumeValue = (
-    volumeIndex: number,
-    volumekey: keyof Volume,
-    volumeValue: any,
-  ) => {
-    const volumes = [...formState.volumes]
-    volumes[volumeIndex] = {
-      ...volumes[volumeIndex],
-      [volumekey]: volumeValue,
-    }
-
-    setFormValue('volumes', volumes)
-  }
-
   const { totalCost } = useMemo(
     () =>
       getTotalProductCost({
         volumes: formState.volumes,
-        cpu: formState.cpu,
+        cpu: formState.specs?.cpu || 0,
         isPersistentStorage: formState.isPersistent,
         capabilities: {},
       }),
@@ -281,9 +214,7 @@ export function useNewFunctionPage(): NewFunctionPage {
   }
 
   const handleChangeEntityTab = useCallback(
-    (id: string) => {
-      router.push(`/dashboard/${id}`)
-    },
+    (id: string) => router.push(`/dashboard/${id}`),
     [router],
   )
 
@@ -294,14 +225,11 @@ export function useNewFunctionPage(): NewFunctionPage {
     setEnvironmentVariable,
     addEnvironmentVariable,
     removeEnvironmentVariable,
-    setVolumeType,
-    setVolumeValue,
-    addVolume,
-    removeVolume,
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
     handleChangeEntityTab,
     handleChangeInstanceSpecs,
+    handleChangeVolumes,
   }
 }

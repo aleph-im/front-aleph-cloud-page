@@ -17,13 +17,13 @@ import NoisyContainer from '@/components/NoisyContainer'
 import HiddenFileInput from '@/components/HiddenFileInput'
 import { isValidItemHash } from '@/helpers/utils'
 import { useNewFunctionPage } from '@/hooks/pages/useNewFunctionPage'
-import NewVolume from '@/components/NewVolume/cmp'
 import HoldingRequirements from '@/components/HoldingRequirements'
 import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
 import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
 import { RuntimeId } from '@/hooks/form/useRuntimeSelector'
 import InstanceSpecsSelector from '@/components/form/InstanceSpecsSelector'
+import AddVolumes from '@/components/form/AddVolumes/cmp'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -43,15 +43,12 @@ export default function NewFunctionPage() {
     setEnvironmentVariable,
     addEnvironmentVariable,
     removeEnvironmentVariable,
-    setVolumeType,
-    setVolumeValue,
-    addVolume,
-    removeVolume,
     address,
     accountBalance,
     isCreateButtonDisabled,
     handleChangeEntityTab,
     handleChangeInstanceSpecs,
+    handleChangeVolumes,
   } = useNewFunctionPage()
 
   const [tabId, setTabId] = useState('code')
@@ -87,9 +84,6 @@ export default function NewFunctionPage() {
               tw="overflow-auto"
             />
           </Container>
-        </section>
-        <section>
-          <pre>{JSON.stringify(formState, null, 2)}</pre>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>
@@ -339,7 +333,10 @@ export default function NewFunctionPage() {
               whilst the free storage for persistent VM is ten times (10x) the
               amount of RAM.
             </p>
-            <InstanceSpecsSelector onChange={handleChangeInstanceSpecs} />
+            <InstanceSpecsSelector
+              specs={formState.specs}
+              onChange={handleChangeInstanceSpecs}
+            />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -430,47 +427,10 @@ export default function NewFunctionPage() {
             <CompositeTitle as="h2" number="6">
               Add volumes
             </CompositeTitle>
-            {formState.volumes.map((volume, iVolume) => (
-              <NewVolume
-                key={iVolume} // note: this key is meant to avoid a warning, and should work since the array is not reordered
-                volumeMountpoint={volume.mountpoint}
-                volumeName={volume.name}
-                volumeSize={volume.size}
-                volumeSrc={volume.src}
-                volumeUseLatest={volume.useLatest}
-                volumeRefHash={volume.refHash}
-                handleMountpointChange={(e) =>
-                  setVolumeValue(iVolume, 'mountpoint', e.target.value)
-                }
-                handleNameChange={(e) =>
-                  setVolumeValue(iVolume, 'name', e.target.value)
-                }
-                handleSizeChange={(e) =>
-                  setVolumeValue(iVolume, 'size', e.target.value)
-                }
-                handleSrcChange={(e) => setVolumeValue(iVolume, 'src', e)}
-                handleRefHashChange={(e) =>
-                  setVolumeValue(iVolume, 'refHash', e.target.value)
-                }
-                handleUseLatestChange={(e) =>
-                  setVolumeValue(iVolume, 'useLatest', e.target.checked)
-                }
-                removeCallback={() => removeVolume(iVolume)}
-                handleVolumeType={(i) => setVolumeType(iVolume, i)}
-              />
-            ))}
-            <div tw="mt-6 mx-6">
-              <Button
-                type="button"
-                onClick={addVolume}
-                color="main0"
-                variant="secondary"
-                kind="neon"
-                size="regular"
-              >
-                Add another volume
-              </Button>
-            </div>
+            <AddVolumes
+              volumes={formState.volumes}
+              onChange={handleChangeVolumes}
+            />
             <div tw="mt-6 text-right">
               <InfoTooltipButton
                 my="bottom-right"
@@ -653,7 +613,7 @@ export default function NewFunctionPage() {
                 address={address}
                 reqs={{
                   type: 'function',
-                  number: formState.cpu,
+                  number: formState.specs?.cpu || 0,
                   isPersistent: formState.isPersistent,
                 }}
                 storage={formState.volumes}

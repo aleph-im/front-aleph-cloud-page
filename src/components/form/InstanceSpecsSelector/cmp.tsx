@@ -9,7 +9,8 @@ import { useCallback, useMemo } from 'react'
 import { convertBitUnits, getFunctionCost } from '@/helpers/utils'
 
 export type InstanceSpecsSelectorProps = {
-  specs?: InstanceSpecs[]
+  specs?: InstanceSpecs
+  options?: InstanceSpecs[]
   isPersistentStorage?: boolean
   onChange: (specs: InstanceSpecs) => void
 }
@@ -36,11 +37,13 @@ const StyledTable = styled(Table<SpecsDetail>)`
 // Mocked specs
 export default function InstanceSpecsSelector({
   specs: specsProp,
+  options: optionsProp,
   isPersistentStorage = false,
   onChange,
 }: InstanceSpecsSelectorProps) {
-  const { specs, selected, handleChange } = useInstanceSpecsSelector({
+  const { specs, options, handleChange } = useInstanceSpecsSelector({
     specs: specsProp,
+    options: optionsProp,
     onChange,
   })
 
@@ -52,7 +55,7 @@ export default function InstanceSpecsSelector({
           sortable: true,
           sortBy: (row: SpecsDetail) => row.specs.cpu,
           render: (row: SpecsDetail) => {
-            const isActive = selected === row.specs.cpu
+            const isActive = specs?.id === row.specs.id
             const className = `${isActive ? 'text-main0' : ''} tp-body2`
             return <span className={className}>{row.specs.cpu} x86 64bit</span>
           },
@@ -63,7 +66,7 @@ export default function InstanceSpecsSelector({
           sortable: true,
           sortBy: (row: SpecsDetail) => row.ram,
           render: (row: SpecsDetail) => {
-            const isActive = selected === row.specs.cpu
+            const isActive = specs?.id === row.specs.id
             const className = `${isActive ? 'text-main0' : ''}`
             return <span className={className}>{row.ram}</span>
           },
@@ -74,7 +77,7 @@ export default function InstanceSpecsSelector({
           sortable: true,
           sortBy: (row: SpecsDetail) => row.price,
           render: (row: SpecsDetail) => {
-            const isActive = selected === row.specs.cpu
+            const isActive = specs?.id === row.specs.id
             const className = `${isActive ? 'text-main0' : ''}`
             return <span className={className}>{row.price}</span>
           },
@@ -83,7 +86,7 @@ export default function InstanceSpecsSelector({
           label: '',
           align: 'right',
           render: (row: SpecsDetail) => {
-            const active = selected === row.specs.cpu
+            const active = specs?.id === row.specs.id
 
             return (
               <Button
@@ -103,17 +106,16 @@ export default function InstanceSpecsSelector({
           },
         },
       ] as TableColumn<SpecsDetail>[],
-    [selected],
+    [specs],
   )
 
   const data: SpecsDetail[] = useMemo(() => {
-    return specs.map((specs) => {
+    return options.map((specs) => {
       const { cpu, ram } = specs
       const price = getFunctionCost({ cpu, isPersistentStorage })
 
       return {
         specs,
-        cpu: specs.cpu + '',
         ram: convertBitUnits(ram, {
           from: 'mb',
           to: 'gb',
@@ -122,9 +124,9 @@ export default function InstanceSpecsSelector({
         price: price.compute + ' ALEPH',
       }
     })
-  }, [isPersistentStorage, specs])
+  }, [isPersistentStorage, options])
 
-  const handleRowKey = useCallback((row: SpecsDetail) => row.specs.cpu + '', [])
+  const handleRowKey = useCallback((row: SpecsDetail) => row.specs.id, [])
 
   const handleRowProps = useCallback(
     (row: SpecsDetail) => ({ onClick: () => handleChange(row.specs) }),

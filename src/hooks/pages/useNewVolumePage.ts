@@ -1,62 +1,61 @@
-import { FormEvent, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import useConnectedWard from '../useConnectedWard'
-import {
-  defaultVolume,
-  displayVolumesToAlephVolumes,
-  Volume,
-  VolumeTypes,
-} from '@/helpers/form'
 import { useAppState } from '@/contexts/appState'
-import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
 import { getTotalProductCost } from '@/helpers/utils'
+import {
+  NewVolume,
+  Volume,
+  defaultVolume,
+  displayVolumesToAlephVolumes,
+} from '../form/useAddVolume'
+import { useForm } from '../useForm'
+
+export type NewVolumeFormState = {
+  volume: NewVolume
+}
+
+export const initialState: NewVolumeFormState = {
+  volume: { ...defaultVolume },
+}
 
 export function useNewVolumePage() {
   useConnectedWard()
 
-  const [, { onLoad, onSuccess, onError }] = useRequestState()
   const router = useRouter()
   const [appState] = useAppState()
   const { account } = appState
 
-  const [volumeState, setVolumeState] = useState(defaultVolume)
-  const setVolumeProperty = (key: keyof Volume, value: any) => {
-    setVolumeState((prev) => ({
-      ...prev,
-      [key]: value,
-    }))
-  }
-
-  const setVolumeType = (volumeType: VolumeTypes) => {
-    setVolumeProperty('type', volumeType)
-  }
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!account) return
-
-    onLoad()
-
-    try {
-      await displayVolumesToAlephVolumes(account, [volumeState])
-
-      onSuccess(true)
+  const onSubmit = useCallback(
+    async (state: NewVolumeFormState) => {
+      if (!account) throw new Error('Invalid account')
+      await displayVolumesToAlephVolumes(account, [state.volume])
       router.replace('/dashboard')
-    } catch (err) {
-      onError(err as Error)
-    }
-  }
+    },
+    [account, router],
+  )
+
+  const {
+    state: formState,
+    setFormValue,
+    handleSubmit,
+  } = useForm({ initialState, onSubmit })
+
+  const handleChangeVolume = useCallback(
+    (volume: Volume) => setFormValue('volume', volume),
+    [setFormValue],
+  )
 
   const accountBalance = appState?.accountBalance || 0
   const { totalCost } = useMemo(
     () =>
       getTotalProductCost({
-        volumes: [volumeState],
+        volumes: [formState.volume],
         cpu: 0,
         isPersistentStorage: false,
         capabilities: {},
       }),
-    [volumeState],
+    [formState],
   )
 
   const canAfford = accountBalance > totalCost
@@ -66,10 +65,9 @@ export function useNewVolumePage() {
   }
 
   return {
-    setVolumeProperty,
-    setVolumeType,
+    formState,
     handleSubmit,
-    volumeState,
+    handleChangeVolume,
     address: account?.address || '',
     accountBalance: appState.accountBalance || 0,
     isCreateButtonDisabled,

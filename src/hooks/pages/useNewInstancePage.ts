@@ -1,24 +1,30 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback, useReducer } from 'react'
+import { FormEvent, useCallback } from 'react'
 import useConnectedWard from '../useConnectedWard'
-import { useRequestState } from '../useRequestState'
 import { useRouter } from 'next/router'
-import { Runtime, RuntimeId } from '../form/useRuntimeSelector'
-import { InstanceSpecs } from '../form/useInstanceSpecsSelector'
+import { Runtime, defaultRuntimeOptions } from '../form/useRuntimeSelector'
+import {
+  InstanceSpecs,
+  defaultSpecsOptions,
+} from '../form/useInstanceSpecsSelector'
+import { useForm } from '../useForm'
+import { Volume, defaultVolume } from '../form/useAddVolume'
 
 // @todo: Split this into reusable hooks by composition
 
 export type NewInstanceFormState = {
-  runtime?: RuntimeId
-  cpu?: number
-  ram?: number
+  runtime?: Runtime
+  specs?: InstanceSpecs
+  volumes?: Volume[]
 }
 
-export const initialFormState = {
-  runtime: undefined,
+export const initialState: NewInstanceFormState = {
+  runtime: defaultRuntimeOptions[0],
+  specs: defaultSpecsOptions[0],
+  volumes: [{ ...defaultVolume }],
 }
 
-export type NewInstancePage = {
+export type UseNewInstancePage = {
   formState: NewInstanceFormState
   handleSubmit: (e: FormEvent) => Promise<void>
   handleChangeEntityTab: (tabId: string) => void
@@ -27,68 +33,44 @@ export type NewInstancePage = {
   accountBalance: number
   isCreateButtonDisabled: boolean
 
-  handleChangeRuntime: (image: Runtime) => void
+  handleChangeRuntime: (runtime: Runtime) => void
   handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
+  handleChangeVolumes: (volumes: Volume[]) => void
 }
 
-export function useNewInstancePage(): NewInstancePage {
+export function useNewInstancePage(): UseNewInstancePage {
   useConnectedWard()
 
   const router = useRouter()
   const [appState] = useAppState()
   const { account, accountBalance } = appState
 
-  const [formState, dispatchForm] = useReducer(
-    (
-      state: NewInstanceFormState,
-      action: { type: string; payload: any },
-    ): NewInstanceFormState => {
-      switch (action.type) {
-        case 'SET_VALUE':
-          return {
-            ...state,
-            [action.payload.name]: action.payload.value,
-          }
-
-        default:
-          return state
-      }
-    },
-    initialFormState,
-  )
-
-  const [, { onLoad, onSuccess, onError }] = useRequestState()
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    try {
-      onLoad()
-
-      onSuccess(true)
+  const onSubmit = useCallback(
+    async (state: NewInstanceFormState) => {
+      console.log(state)
       router.replace('/dashboard')
-    } catch (e) {
-      onError(e as Error)
-    }
-  }
-
-  const setFormValue = useCallback(
-    (name: keyof NewInstanceFormState, value: any) =>
-      dispatchForm({ type: 'SET_VALUE', payload: { name, value } }),
-    [],
+    },
+    [router],
   )
+
+  const {
+    state: formState,
+    setFormValue,
+    handleSubmit,
+  } = useForm({ initialState, onSubmit })
 
   const handleChangeRuntime = useCallback(
-    (image: Runtime) => {
-      setFormValue('runtime', image.id)
-    },
+    (runtime: Runtime) => setFormValue('runtime', runtime),
     [setFormValue],
   )
 
   const handleChangeInstanceSpecs = useCallback(
-    (specs: InstanceSpecs) => {
-      setFormValue('cpu', specs.cpu)
-      setFormValue('ram', specs.ram)
-    },
+    (specs: InstanceSpecs) => setFormValue('specs', specs),
+    [setFormValue],
+  )
+
+  const handleChangeVolumes = useCallback(
+    (volumes: Volume[]) => setFormValue('volumes', volumes),
     [setFormValue],
   )
 
@@ -128,5 +110,6 @@ export function useNewInstancePage(): NewInstancePage {
     isCreateButtonDisabled,
     handleChangeRuntime,
     handleChangeInstanceSpecs,
+    handleChangeVolumes,
   }
 }

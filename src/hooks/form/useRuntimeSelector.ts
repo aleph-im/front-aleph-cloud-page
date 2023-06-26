@@ -42,43 +42,48 @@ export const Runtimes: Record<RuntimeId, Runtime> = {
   },
 }
 
+export const defaultRuntimeOptions = [
+  Runtimes[RuntimeId.Debian11],
+  Runtimes[RuntimeId.Debian12],
+  Runtimes[RuntimeId.Ubuntu22],
+]
+
 export type UseRuntimeSelectorProps = {
-  images?: Runtime[]
-  onChange: (image: Runtime) => void
+  runtime?: Runtime
+  options?: Runtime[]
+  onChange: (runtime: Runtime) => void
 }
 
 export type UseRuntimeSelectorReturn = {
-  images: Runtime[]
-  selected?: string
-  handleChange: (image: Runtime) => void
+  runtime?: Runtime
+  options: Runtime[]
+  handleChange: (runtime: Runtime) => void
 }
 
 export function useRuntimeSelector({
-  images: imagesProp,
+  runtime: runtimeProp,
+  options: optionsProp,
   onChange,
 }: UseRuntimeSelectorProps): UseRuntimeSelectorReturn {
-  const [selected, setSelected] = useState<string | undefined>()
+  const [runtimeState, setRuntimeState] = useState<Runtime | undefined>()
 
-  const images = imagesProp || [
-    Runtimes[RuntimeId.Debian11],
-    Runtimes[RuntimeId.Debian12],
-    Runtimes[RuntimeId.Ubuntu22],
-  ]
+  const runtime = runtimeProp || runtimeState
+  const options = optionsProp || defaultRuntimeOptions
 
   // @note: Test overflowding items
-  // images = [...images, ...images, ...images, ...images]
+  // runtimes = [...runtimes, ...runtimes, ...runtimes, ...runtimes]
 
   const handleChange = useCallback(
-    (image: Runtime) => {
-      setSelected(image.id)
-      onChange(image)
+    (runtime: Runtime) => {
+      setRuntimeState(runtime)
+      onChange(runtime)
     },
     [onChange],
   )
 
   return {
-    images,
-    selected,
+    runtime,
+    options,
     handleChange,
   }
 }

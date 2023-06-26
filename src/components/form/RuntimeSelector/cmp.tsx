@@ -6,14 +6,15 @@ import { useCallback } from 'react'
 import { Runtime, useRuntimeSelector } from '@/hooks/form/useRuntimeSelector'
 
 export type RuntimeItemProps = {
-  image: Runtime
-  onChange: (image: Runtime) => void
+  runtime: Runtime
   selected: boolean
+  onChange: (runtime: Runtime) => void
 }
 
 export type RuntimeSelectorProps = {
-  images?: Runtime[]
-  onChange: (image: Runtime) => void
+  runtime?: Runtime
+  options?: Runtime[]
+  onChange: (runtime: Runtime) => void
 }
 
 export const StyledFlatCard = styled.div<{ $selected: boolean }>`
@@ -25,44 +26,51 @@ export const StyledFlatCard = styled.div<{ $selected: boolean }>`
   ${({ $selected }) => $selected && `border: 1px solid white`}
 `
 
-function RuntimeSelectorItem({ image, onChange, selected }: RuntimeItemProps) {
+function RuntimeSelectorItem({
+  runtime,
+  selected,
+  onChange,
+}: RuntimeItemProps) {
   const basePath = useBasePath()
   const imgPrefix = `${basePath}/img`
 
   const handleClick = useCallback(() => {
-    onChange(image)
-  }, [image, onChange])
+    onChange(runtime)
+  }, [runtime, onChange])
 
   return (
     <StyledFlatCard onClick={handleClick} $selected={selected}>
       <img
-        src={`${imgPrefix}/runtime/${image.dist}.svg`}
-        alt={`${image.name} runtime image logo`}
+        src={`${imgPrefix}/runtime/${runtime.dist}.svg`}
+        alt={`${runtime.name} runtime image logo`}
       />
-      {image.name}
+      {runtime.name}
     </StyledFlatCard>
   )
 }
 
 // Mocked runtimes
 export default function RuntimeSelector({
-  images: imagesProp,
+  runtime: runtimeProp,
+  options: optionsProp,
   onChange,
 }: RuntimeSelectorProps) {
-  const { images, selected, handleChange } = useRuntimeSelector({
-    images: imagesProp,
+  const { runtime, options, handleChange } = useRuntimeSelector({
+    runtime: runtimeProp,
+    options: optionsProp,
     onChange,
   })
 
   return (
     <div tw="overflow-auto max-w-full">
       <div tw="flex items-center justify-start flex-nowrap gap-6">
-        {images.map((image) => (
+        {options.map((option) => (
           <RuntimeSelectorItem
-            key={image.id + image.name}
+            key={option.id + option.name}
             {...{
-              image,
-              selected: image.id === selected,
+              option,
+              runtime: option,
+              selected: option.id === runtime?.id,
               onChange: handleChange,
             }}
           />
