@@ -24,7 +24,7 @@ export function useDashboardHomePage(): DashboardHomePage {
   const [products] = useAccountProducts()
   const [fileStatsWrapper] = useGetFileSize()
   const [appState] = useAppState()
-  const [sshKeys] = useAccountSSHKeys()
+  const [sshKeys = []] = useAccountSSHKeys()
 
   const {
     functions = [],

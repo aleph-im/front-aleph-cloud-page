@@ -16,48 +16,50 @@ const SSHKeyItem = React.memo(
     } = useSSHKeyItem(props)
 
     return (
-      <div tw="flex flex-col md:flex-row gap-6">
-        <div tw="flex items-end pb-2">
+      <div tw="flex gap-6">
+        <div tw="flex items-start pt-11">
           <Checkbox
             name={`${id}_selected`}
             checked={sshKey.isSelected}
             onChange={handleIsSelectedChange}
           />
         </div>
-        <div tw="flex-auto">
-          <TextInput
-            name={`${id}_key`}
-            label={`Key #${index + 1}`}
-            placeholder="AAAAB3NzaC1yc2EAAAAB ... B3NzaaC1=="
-            value={sshKey.key}
-            onChange={handleKeyChange}
-          />
-        </div>
-        <div tw="w-4/12">
-          <TextInput
-            name={`${id}_label`}
-            label={`Label`}
-            placeholder="cp@aleph.im"
-            value={sshKey.label}
-            onChange={handleLabelChange}
-          />
-        </div>
-        {allowRemove && (
-          <div tw="w-14 flex items-end justify-center pb-2">
-            {sshKey.isNew && (
-              <Button
-                color="main2"
-                variant="secondary"
-                kind="neon"
-                size="regular"
-                type="button"
-                onClick={handleRemove}
-              >
-                <Icon name="trash" />
-              </Button>
-            )}
+        <div tw="flex-auto flex flex-col md:flex-row gap-6">
+          <div tw="flex-auto">
+            <TextInput
+              name={`${id}_key`}
+              label={`Key #${index + 1}`}
+              placeholder="AAAAB3NzaC1yc2EAAAAB ... B3NzaaC1=="
+              value={sshKey.key}
+              onChange={handleKeyChange}
+            />
           </div>
-        )}
+          <div tw="md:w-4/12">
+            <TextInput
+              name={`${id}_label`}
+              label={`Label`}
+              placeholder="cp@aleph.im"
+              value={sshKey.label}
+              onChange={handleLabelChange}
+            />
+          </div>
+          {allowRemove && (
+            <div tw="w-14 flex items-end md:justify-center pb-2">
+              {sshKey.isNew && (
+                <Button
+                  color="main2"
+                  variant="secondary"
+                  kind="neon"
+                  size="regular"
+                  type="button"
+                  onClick={handleRemove}
+                >
+                  <Icon name="trash" />
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     )
   },
