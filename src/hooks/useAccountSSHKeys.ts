@@ -5,7 +5,10 @@ import { useCallback } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
 
-export function useAccountSSHKeys(): [SSHKey[], RequestState<unknown>] {
+export function useAccountSSHKeys(): [
+  SSHKey[] | undefined,
+  RequestState<unknown>,
+] {
   const [appState, dispatch] = useAppState()
 
   const { account } = appState

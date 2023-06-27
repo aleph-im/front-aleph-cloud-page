@@ -8,6 +8,7 @@ import SelectRuntime from '@/components/form/SelectRuntime'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes/cmp'
 import AddEnvVars from '@/components/form/AddEnvVars/cmp'
+import AddSSHKeys from '@/components/form/AddSSHKeys/cmp'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -28,6 +29,7 @@ export default function NewInstancePage() {
     handleChangeInstanceSpecs,
     handleChangeVolumes,
     handleChangeEnvVars,
+    handleChangeSSHKeys,
   } = useNewInstancePage()
 
   return (
@@ -120,12 +122,17 @@ export default function NewInstancePage() {
               Configure SSH Key
             </CompositeTitle>
             <p>
-              Access your cloud instances securely. Generate or and manage keys,
-              adding personal descriptions for easy future reference. Remember,
-              storing private keys safely is crucial for security. If you need
-              help, our support team is always ready to assist.
+              Access your cloud instances securely. Give existing key’s below
+              access to this instance or add new keys. Remember, storing private
+              keys safely is crucial for security. If you need help, our support
+              team is always ready to assist.
             </p>
-            <div tw="px-0 my-6">TODO</div>
+            <div tw="px-0 my-6">
+              <AddSSHKeys
+                sshKeys={formState.sshKeys}
+                onChange={handleChangeSSHKeys}
+              />
+            </div>
           </Container>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
@@ -133,6 +140,12 @@ export default function NewInstancePage() {
             <CompositeTitle as="h2" number="5">
               Add environment variables
             </CompositeTitle>
+            <p>
+              Organize and identify your functions more effectively by assigning
+              a unique name, obtaining a hash reference, and defining multiple
+              tags. This helps streamline your development process and makes it
+              easier to manage your web3 functions.
+            </p>
             <div tw="px-0 my-6">
               <AddEnvVars
                 envVars={formState.envVars}

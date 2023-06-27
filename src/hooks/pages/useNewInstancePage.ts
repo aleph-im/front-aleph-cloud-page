@@ -10,14 +10,14 @@ import {
 import { useForm } from '../useForm'
 import { Volume, defaultVolume } from '../form/useAddVolume'
 import { EnvVar } from '../form/useAddEnvVars'
-
-// @todo: Split this into reusable hooks by composition
+import { SSHKeyItem } from '../form/useAddSSHKeys'
 
 export type NewInstanceFormState = {
   runtime?: Runtime
   specs?: InstanceSpecs
   volumes?: Volume[]
   envVars?: EnvVar[]
+  sshKeys?: SSHKeyItem[]
 }
 
 export const initialState: NewInstanceFormState = {
@@ -25,6 +25,7 @@ export const initialState: NewInstanceFormState = {
   specs: defaultSpecsOptions[0],
   volumes: [{ ...defaultVolume }],
   envVars: [],
+  sshKeys: [],
 }
 
 export type UseNewInstancePage = {
@@ -40,6 +41,7 @@ export type UseNewInstancePage = {
   handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
   handleChangeVolumes: (volumes: Volume[]) => void
   handleChangeEnvVars: (envVars: EnvVar[]) => void
+  handleChangeSSHKeys: (sshKeys: SSHKeyItem[]) => void
 }
 
 export function useNewInstancePage(): UseNewInstancePage {
@@ -83,6 +85,11 @@ export function useNewInstancePage(): UseNewInstancePage {
     [setFormValue],
   )
 
+  const handleChangeSSHKeys = useCallback(
+    (sshKeys: SSHKeyItem[]) => setFormValue('sshKeys', sshKeys),
+    [setFormValue],
+  )
+
   // const { totalCost } = useMemo(
   //   () =>
   //     getTotalProductCost({
@@ -121,5 +128,6 @@ export function useNewInstancePage(): UseNewInstancePage {
     handleChangeInstanceSpecs,
     handleChangeVolumes,
     handleChangeEnvVars,
+    handleChangeSSHKeys,
   }
 }

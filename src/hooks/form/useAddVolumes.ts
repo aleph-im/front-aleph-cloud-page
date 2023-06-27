@@ -22,14 +22,17 @@ export function useAddVolumes({
 
   const handleChange = useCallback(
     (volume: Volume) => {
-      if (!volumes) return
+      const updatedVolumes = [...volumes]
+      const index = volumes.findIndex((vol) => vol.id === volume.id)
 
-      const newVolumes = [...volumes]
-      const i = volumes.findIndex((vol) => vol.id === volume.id)
-      newVolumes[i] = volume
+      if (index !== -1) {
+        updatedVolumes[index] = volume
+      } else {
+        updatedVolumes.push(volume)
+      }
 
-      setVolumesState(newVolumes)
-      onChange(newVolumes)
+      setVolumesState(updatedVolumes)
+      onChange(updatedVolumes)
     },
     [onChange, volumes],
   )
@@ -40,20 +43,18 @@ export function useAddVolumes({
       id: `volume-${Date.now()}`,
     }
 
-    const newVolumes = [...volumes, newVolume]
+    const updatedVolumes = [...volumes, newVolume]
 
-    setVolumesState(newVolumes)
-    onChange(newVolumes)
+    setVolumesState(updatedVolumes)
+    onChange(updatedVolumes)
   }, [onChange, volumes])
 
   const handleRemove = useCallback(
     (volumeId: string) => {
-      if (!volumes) return
+      const updatedVolumes = volumes.filter((vol) => vol.id !== volumeId)
 
-      const newVolumes = volumes.filter((vol) => vol.id !== volumeId)
-
-      setVolumesState(newVolumes)
-      onChange(newVolumes)
+      setVolumesState(updatedVolumes)
+      onChange(updatedVolumes)
     },
     [onChange, volumes],
   )

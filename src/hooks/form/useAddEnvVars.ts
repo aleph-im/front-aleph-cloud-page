@@ -87,14 +87,17 @@ export function useAddEnvVars({
 
   const handleChange = useCallback(
     (envVar: EnvVar) => {
-      if (!envVars) return
+      const updatedEnvVars = [...envVars]
+      const index = envVars.findIndex((envVar) => envVar.id === envVar.id)
 
-      const newEnvVars = [...envVars]
-      const i = envVars.findIndex((vol) => vol.id === envVar.id)
-      newEnvVars[i] = envVar
+      if (index !== -1) {
+        updatedEnvVars[index] = envVar
+      } else {
+        updatedEnvVars.push(envVar)
+      }
 
-      setEnvVarsState(newEnvVars)
-      onChange(newEnvVars)
+      setEnvVarsState(updatedEnvVars)
+      onChange(updatedEnvVars)
     },
     [onChange, envVars],
   )
@@ -105,20 +108,18 @@ export function useAddEnvVars({
       id: `envvar-${Date.now()}`,
     }
 
-    const newEnvVars = [...envVars, newEnvVar]
+    const updatedEnvVars = [...envVars, newEnvVar]
 
-    setEnvVarsState(newEnvVars)
-    onChange(newEnvVars)
+    setEnvVarsState(updatedEnvVars)
+    onChange(updatedEnvVars)
   }, [onChange, envVars])
 
   const handleRemove = useCallback(
     (envVarId: string) => {
-      if (!envVars) return
+      const updatedEnvVars = envVars.filter((envVar) => envVar.id !== envVarId)
 
-      const newEnvVars = envVars.filter((vol) => vol.id !== envVarId)
-
-      setEnvVarsState(newEnvVars)
-      onChange(newEnvVars)
+      setEnvVarsState(updatedEnvVars)
+      onChange(updatedEnvVars)
     },
     [onChange, envVars],
   )

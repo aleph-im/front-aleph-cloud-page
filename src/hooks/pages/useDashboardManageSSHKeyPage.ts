@@ -25,8 +25,6 @@ export function useDashboardManageSSHKeyPage(): DashboardManageSSHKeyPage {
   const [sshKey] = useAccountSSHKey(hash as string)
   const [, { onLoad, onSuccess, onError }] = useRequestState()
 
-  console.log('sshKey', sshKey)
-
   // Copy to clipboard
 
   const [, copyToClipboard] = useCopyToClipboard()

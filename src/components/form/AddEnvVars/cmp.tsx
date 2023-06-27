@@ -26,7 +26,7 @@ const EnvVarItem = React.memo((props: EnvVarItemProps) => {
           onChange={handleValueChange}
         />
       </div>
-      <div tw="min-w-max flex items-end">
+      <div tw="flex items-end justify-center pb-2">
         <Button
           color="main2"
           variant="secondary"
