@@ -6,7 +6,7 @@ export type EnvVarItemProps = {
   onRemove: (envVarId: string) => void
 }
 
-export type AddEnvVarProps = {
+export type AddEnvVarsProps = {
   envVars?: EnvVar[]
   onChange: (envVars: EnvVar[]) => void
 }

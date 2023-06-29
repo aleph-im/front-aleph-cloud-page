@@ -3,18 +3,21 @@ import styled from 'styled-components'
 import tw from 'twin.macro'
 import { useBasePath } from '@/hooks/useBasePath'
 import { useCallback } from 'react'
-import { Runtime, useSelectRuntime } from '@/hooks/form/useSelectRuntime'
+import {
+  InstanceImage,
+  useSelectInstanceImage,
+} from '@/hooks/form/useSelectInstanceImage'
 
-export type SelectRuntimeItemProps = {
-  runtime: Runtime
+export type SelectInstanceImageItemProps = {
+  image: InstanceImage
   selected: boolean
-  onChange: (runtime: Runtime) => void
+  onChange: (image: InstanceImage) => void
 }
 
-export type SelectRuntimeProps = {
-  runtime?: Runtime
-  options?: Runtime[]
-  onChange: (runtime: Runtime) => void
+export type SelectInstanceImageProps = {
+  image?: InstanceImage
+  options?: InstanceImage[]
+  onChange: (image: InstanceImage) => void
 }
 
 export const StyledFlatCard = styled.div<{ $selected: boolean }>`
@@ -26,37 +29,37 @@ export const StyledFlatCard = styled.div<{ $selected: boolean }>`
   ${({ $selected }) => $selected && `border: 1px solid white`}
 `
 
-function SelectRuntimeItem({
-  runtime,
+function SelectInstanceImageItem({
+  image,
   selected,
   onChange,
-}: SelectRuntimeItemProps) {
+}: SelectInstanceImageItemProps) {
   const basePath = useBasePath()
   const imgPrefix = `${basePath}/img`
 
   const handleClick = useCallback(() => {
-    onChange(runtime)
-  }, [runtime, onChange])
+    onChange(image)
+  }, [image, onChange])
 
   return (
     <StyledFlatCard onClick={handleClick} $selected={selected}>
       <img
-        src={`${imgPrefix}/runtime/${runtime.dist}.svg`}
-        alt={`${runtime.name} runtime image logo`}
+        src={`${imgPrefix}/image/${image.dist}.svg`}
+        alt={`${image.name} image image logo`}
       />
-      {runtime.name}
+      {image.name}
     </StyledFlatCard>
   )
 }
 
-// Mocked runtimes
-export default function SelectRuntime({
-  runtime: runtimeProp,
+// Mocked images
+export default function SelectInstanceImage({
+  image: imageProp,
   options: optionsProp,
   onChange,
-}: SelectRuntimeProps) {
-  const { runtime, options, handleChange } = useSelectRuntime({
-    runtime: runtimeProp,
+}: SelectInstanceImageProps) {
+  const { image, options, handleChange } = useSelectInstanceImage({
+    image: imageProp,
     options: optionsProp,
     onChange,
   })
@@ -65,12 +68,12 @@ export default function SelectRuntime({
     <div tw="overflow-auto max-w-full">
       <div tw="flex items-center justify-start flex-nowrap gap-6">
         {options.map((option) => (
-          <SelectRuntimeItem
+          <SelectInstanceImageItem
             key={option.id + option.name}
             {...{
               option,
-              runtime: option,
-              selected: option.id === runtime?.id,
+              image: option,
+              selected: option.id === image?.id,
               onChange: handleChange,
             }}
           />

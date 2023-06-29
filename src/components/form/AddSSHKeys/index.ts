@@ -1,2 +1,2 @@
 export { default } from './cmp'
-export type { AddSSHKeyProps as NewVolumeProps } from './types'
+export type { AddSSHKeysProps } from './types'

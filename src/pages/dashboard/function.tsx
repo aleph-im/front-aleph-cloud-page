@@ -21,10 +21,11 @@ import HoldingRequirements from '@/components/HoldingRequirements'
 import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
 import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
-import { RuntimeId } from '@/hooks/form/useSelectRuntime'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes/cmp'
 import AddEnvVars from '@/components/form/AddEnvVars'
+import AddDomains from '@/components/form/AddDomains/cmp'
+import { FunctionRuntimeId } from '@/hooks/form/useSelectFunctionRuntime'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -225,33 +226,37 @@ export default function NewFunctionPage() {
             <NoisyContainer>
               <RadioGroup direction="column">
                 <Radio
-                  checked={formState.runtime === RuntimeId.Debian11}
+                  checked={formState.runtime === FunctionRuntimeId.Debian11}
                   label="Official runtime with Debian 11, Python 3.9 & Node.js 14"
                   name="__config_runtime"
-                  onChange={() => setFormValue('runtime', RuntimeId.Debian11)}
-                  value="default"
-                />
-                <Radio
-                  checked={formState.runtime === RuntimeId.Debian11Bin}
-                  label="Official min. runtime for binaries x86_64 (Rust, Go, ...) "
-                  name="__config_runtime"
                   onChange={() =>
-                    setFormValue('runtime', RuntimeId.Debian11Bin)
+                    setFormValue('runtime', FunctionRuntimeId.Debian11)
                   }
                   value="default"
                 />
                 <Radio
-                  checked={formState.runtime === RuntimeId.Custom}
+                  checked={formState.runtime === FunctionRuntimeId.Debian11Bin}
+                  label="Official min. runtime for binaries x86_64 (Rust, Go, ...) "
+                  name="__config_runtime"
+                  onChange={() =>
+                    setFormValue('runtime', FunctionRuntimeId.Debian11Bin)
+                  }
+                  value="default"
+                />
+                <Radio
+                  checked={formState.runtime === FunctionRuntimeId.Custom}
                   label="Custom runtime"
                   name="__config_runtime"
-                  onChange={() => setFormValue('runtime', RuntimeId.Custom)}
+                  onChange={() =>
+                    setFormValue('runtime', FunctionRuntimeId.Custom)
+                  }
                   value="custom"
                 />
               </RadioGroup>
 
               <div
                 className={
-                  formState.runtime !== RuntimeId.Custom
+                  formState.runtime !== FunctionRuntimeId.Custom
                     ? 'unavailable-content'
                     : ''
                 }
@@ -264,7 +269,7 @@ export default function NewFunctionPage() {
                   onChange={(e) =>
                     setFormValue('customRuntimeHash', e.target.value)
                   }
-                  disabled={formState.runtime !== RuntimeId.Custom}
+                  disabled={formState.runtime !== FunctionRuntimeId.Custom}
                   error={
                     formState.customRuntimeHash &&
                     !isValidItemHash(formState.customRuntimeHash)
@@ -503,31 +508,7 @@ export default function NewFunctionPage() {
               providing a more accessible and professional way for users to
               interact with your application.
             </p>
-            <NoisyContainer>
-              <TextInput
-                button={
-                  <Button
-                    color="main0"
-                    kind="neon"
-                    size="regular"
-                    variant="secondary"
-                    disabled
-                  >
-                    Add
-                  </Button>
-                }
-                buttonStyle="wrapped"
-                color="white"
-                name="__config_add_domain"
-                placeholder="Enter custom domain"
-                disabled
-              />
-            </NoisyContainer>
-            <div tw="mt-6 text-right">
-              <ExternalLinkButton href="https://docs.aleph.im" disabled>
-                Learn more
-              </ExternalLinkButton>
-            </div>
+            <AddDomains />
           </Container>
         </section>
         <section

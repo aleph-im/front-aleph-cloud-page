@@ -4,11 +4,12 @@ import CompositeTitle from '@/components/CompositeTitle'
 import { useNewInstancePage } from '@/hooks/pages/useNewInstancePage'
 import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton'
-import SelectRuntime from '@/components/form/SelectRuntime'
+import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes/cmp'
 import AddEnvVars from '@/components/form/AddEnvVars/cmp'
 import AddSSHKeys from '@/components/form/AddSSHKeys/cmp'
+import AddDomains from '@/components/form/AddDomains'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -25,7 +26,7 @@ export default function NewInstancePage() {
     formState,
     handleSubmit,
     handleChangeEntityTab,
-    handleChangeRuntime,
+    handleChangeInstanceImage,
     handleChangeInstanceSpecs,
     handleChangeVolumes,
     handleChangeEnvVars,
@@ -74,9 +75,9 @@ export default function NewInstancePage() {
               be able to customize.
             </p>
             <div tw="px-0 mt-12 mb-6">
-              <SelectRuntime
-                runtime={formState.runtime}
-                onChange={handleChangeRuntime}
+              <SelectInstanceImage
+                image={formState.image}
+                onChange={handleChangeInstanceImage}
               />
             </div>
             <div tw="mt-6 text-right">
@@ -152,6 +153,21 @@ export default function NewInstancePage() {
                 onChange={handleChangeEnvVars}
               />
             </div>
+          </Container>
+        </section>
+        <section tw="px-0 py-6 md:py-10">
+          <Container>
+            <CompositeTitle as="h2" number="6" label="(SOON)" disabled>
+              Custom domain
+            </CompositeTitle>
+            <p tw="mb-6" className="unavailable-content">
+              You have the ability to configure a domain name to access your
+              cloud instances. By setting up a user-friendly custom domain,
+              accessing your instances becomes easier and more intuitive.
+              It&amp;s another way we&amp;re making web3 cloud management as
+              straightforward as possible.
+            </p>
+            <AddDomains />
           </Container>
         </section>
       </form>

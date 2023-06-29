@@ -9,7 +9,10 @@ import { FormEvent, useCallback, useMemo } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import { createFunctionProgram } from '../../helpers/aleph'
 import { useRouter } from 'next/router'
-import { RuntimeId, Runtimes } from '../form/useSelectRuntime'
+import {
+  FunctionRuntimeId,
+  FunctionRuntimes,
+} from '../form/useSelectFunctionRuntime'
 import {
   InstanceSpecs,
   defaultSpecsOptions,
@@ -23,7 +26,7 @@ import { useForm } from '../useForm'
 import { EnvVar } from '../form/useAddEnvVars'
 
 export type NewFunctionFormState = {
-  runtime: RuntimeId
+  runtime: FunctionRuntimeId
   customRuntimeHash?: string
   isPersistent: boolean
   functionName: string
@@ -47,7 +50,7 @@ async def root():
 `
 
 const initialState: NewFunctionFormState = {
-  runtime: RuntimeId.Debian11,
+  runtime: FunctionRuntimeId.Debian11,
   isPersistent: false,
   functionName: '',
   functionTags: [],
@@ -101,8 +104,8 @@ export function useNewFunctionPage(): UseNewFunctionPage {
       }
 
       const runtime =
-        formState.runtime !== RuntimeId.Custom
-          ? Runtimes[formState.runtime].id
+        formState.runtime !== FunctionRuntimeId.Custom
+          ? FunctionRuntimes[formState.runtime].id
           : formState.customRuntimeHash || ''
 
       if (!runtime || !isValidItemHash(runtime))

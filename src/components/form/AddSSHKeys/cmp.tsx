@@ -2,7 +2,7 @@ import React from 'react'
 import { Icon, TextInput, Button, Checkbox } from '@aleph-front/aleph-core'
 import { useAddSSHKeys, useSSHKeyItem } from '@/hooks/form/useAddSSHKeys'
 import NoisyContainer from '../../NoisyContainer'
-import { SSHKeyItemProps, AddSSHKeyProps } from './types'
+import { SSHKeyItemProps, AddSSHKeysProps } from './types'
 
 const SSHKeyItem = React.memo(
   ({ index, allowRemove, ...props }: SSHKeyItemProps) => {
@@ -69,7 +69,7 @@ SSHKeyItem.displayName = 'SSHKeyItem'
 export default function AddSSHKeys({
   sshKeys: sshKeysProp,
   onChange,
-}: AddSSHKeyProps) {
+}: AddSSHKeysProps) {
   const { sshKeys, handleChange, handleAdd, handleRemove, allowRemove } =
     useAddSSHKeys({
       sshKeys: sshKeysProp,

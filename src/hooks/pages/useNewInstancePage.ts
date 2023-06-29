@@ -2,7 +2,10 @@ import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import { useRouter } from 'next/router'
-import { Runtime, defaultRuntimeOptions } from '../form/useSelectRuntime'
+import {
+  InstanceImage,
+  defaultInstanceImageOptions,
+} from '../form/useSelectInstanceImage'
 import {
   InstanceSpecs,
   defaultSpecsOptions,
@@ -13,7 +16,7 @@ import { EnvVar } from '../form/useAddEnvVars'
 import { SSHKeyItem } from '../form/useAddSSHKeys'
 
 export type NewInstanceFormState = {
-  runtime?: Runtime
+  image?: InstanceImage
   specs?: InstanceSpecs
   volumes?: Volume[]
   envVars?: EnvVar[]
@@ -21,7 +24,7 @@ export type NewInstanceFormState = {
 }
 
 export const initialState: NewInstanceFormState = {
-  runtime: defaultRuntimeOptions[0],
+  image: defaultInstanceImageOptions[0],
   specs: defaultSpecsOptions[0],
   volumes: [{ ...defaultVolume }],
   envVars: [],
@@ -37,7 +40,7 @@ export type UseNewInstancePage = {
   accountBalance: number
   isCreateButtonDisabled: boolean
 
-  handleChangeRuntime: (runtime: Runtime) => void
+  handleChangeInstanceImage: (image: InstanceImage) => void
   handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
   handleChangeVolumes: (volumes: Volume[]) => void
   handleChangeEnvVars: (envVars: EnvVar[]) => void
@@ -65,8 +68,8 @@ export function useNewInstancePage(): UseNewInstancePage {
     handleSubmit,
   } = useForm({ initialState, onSubmit })
 
-  const handleChangeRuntime = useCallback(
-    (runtime: Runtime) => setFormValue('runtime', runtime),
+  const handleChangeInstanceImage = useCallback(
+    (image: InstanceImage) => setFormValue('image', image),
     [setFormValue],
   )
 
@@ -124,7 +127,7 @@ export function useNewInstancePage(): UseNewInstancePage {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
-    handleChangeRuntime,
+    handleChangeInstanceImage,
     handleChangeInstanceSpecs,
     handleChangeVolumes,
     handleChangeEnvVars,

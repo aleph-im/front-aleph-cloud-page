@@ -8,7 +8,7 @@ export type SSHKeyItemProps = {
   allowRemove: boolean
 }
 
-export type AddSSHKeyProps = {
+export type AddSSHKeysProps = {
   sshKeys?: SSHKeyItem[]
   onChange: (sshKeys: SSHKeyItem[]) => void
 }

@@ -2,7 +2,7 @@ import React from 'react'
 import { Icon, TextInput, Button } from '@aleph-front/aleph-core'
 import { useAddEnvVars, useEnvVarItem } from '@/hooks/form/useAddEnvVars'
 import NoisyContainer from '../../NoisyContainer'
-import { EnvVarItemProps, AddEnvVarProps } from './types'
+import { EnvVarItemProps, AddEnvVarsProps as AddEnvVarsProps } from './types'
 
 const EnvVarItem = React.memo((props: EnvVarItemProps) => {
   const { id, envVar, handleNameChange, handleValueChange, handleRemove } =
@@ -46,7 +46,7 @@ EnvVarItem.displayName = 'EnvVarItem'
 export default function AddEnvVars({
   envVars: envVarsProp,
   onChange,
-}: AddEnvVarProps) {
+}: AddEnvVarsProps) {
   const { envVars, handleChange, handleAdd, handleRemove } = useAddEnvVars({
     envVars: envVarsProp,
     onChange,
