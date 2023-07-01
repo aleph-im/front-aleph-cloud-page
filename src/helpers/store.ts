@@ -1,8 +1,5 @@
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import {
-  ProgramMessage,
-  StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/message'
+import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
 import { AccountFilesResponse } from './aleph'
 import { SSHKey } from './ssh'
 

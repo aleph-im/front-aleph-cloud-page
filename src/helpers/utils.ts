@@ -1,12 +1,12 @@
-import { providers, Contract } from 'ethers'
+import { BrowserProvider, Contract } from 'ethers'
 import E_ from './errors'
 import {
   MessageType,
   PostMessage,
   ProgramMessage,
   StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/message'
-import { MachineVolume } from 'aleph-sdk-ts/dist/messages/program/programModel'
+} from 'aleph-sdk-ts/dist/messages/types'
+import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
 import { VolumeRequirements } from '@/components/HoldingRequirements/types'
 import { EntityType } from './constants'
 import { EnvVar } from '@/hooks/form/useAddEnvVars'
@@ -64,7 +64,7 @@ export const safeCollectionToObject = (collection: EnvVar[]) => {
  * returns The Aleph balance of the address
  */
 export const getERC20Balance = async (address: string) => {
-  const ethereumProvider = new providers.Web3Provider(window?.ethereum)
+  const ethereumProvider = new BrowserProvider(window?.ethereum)
 
   const ERC20_ABI = [
     // Read-Only Functions

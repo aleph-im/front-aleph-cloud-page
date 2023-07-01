@@ -3,18 +3,16 @@ import {
   MessageType,
   ProgramMessage,
   StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/message'
+  MachineVolume,
+  PersistentVolume,
+} from 'aleph-sdk-ts/dist/messages/types'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { any, program, forget, store } from 'aleph-sdk-ts/dist/messages'
 import { GetAccountFromProvider as getETHAccount } from 'aleph-sdk-ts/dist/accounts/ethereum'
 import { GetAccountFromProvider as getSOLAccount } from 'aleph-sdk-ts/dist/accounts/solana'
 import { getERC20Balance, getSOLBalance } from './utils'
 import E_ from './errors'
-import {
-  Encoding,
-  MachineVolume,
-  PersistentVolume,
-} from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { defaultVMChannel, defaultVolumeChannel } from './constants'
 
 /**

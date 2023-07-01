@@ -1,8 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import {
-  ProgramMessage,
-  StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/message'
+import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
 import { useAccountProducts } from '../useAccountProducts'
 import useConnectedWard from '../useConnectedWard'
 import { AccountFileObject } from '@/helpers/aleph'

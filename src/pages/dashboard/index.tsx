@@ -9,16 +9,13 @@ import {
   isVolumePersistent,
   unixToISODateString,
 } from '@/helpers/utils'
-import {
-  ProgramMessage,
-  StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/message'
+import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
 import { useDashboardHomePage } from '@/hooks/pages/useDashboardHomePage'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import {
   ImmutableVolume,
   PersistentVolume,
-} from 'aleph-sdk-ts/dist/messages/program/programModel'
+} from 'aleph-sdk-ts/dist/messages/types'
 import { SSHKey } from '@/helpers/ssh'
 import tw from 'twin.macro'
 

@@ -8,7 +8,7 @@ import {
 import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/aleph-core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { Chain } from 'aleph-sdk-ts/dist/messages/message'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { useCallback } from 'react'
 
 export type UseConnectReturn = {

@@ -30,10 +30,7 @@ import {
   TextGradient,
   useNotification,
 } from '@aleph-front/aleph-core'
-import {
-  ProgramMessage,
-  StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/message'
+import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useMemo, useState } from 'react'

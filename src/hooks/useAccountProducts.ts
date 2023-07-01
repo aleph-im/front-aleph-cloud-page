@@ -1,10 +1,7 @@
 import { useAppState } from '@/contexts/appState'
 import { getAccountProducts } from '@/helpers/aleph'
 import { ActionTypes } from '@/helpers/store'
-import {
-  ProgramMessage,
-  StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/message'
+import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
 import { useCallback, useMemo } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
