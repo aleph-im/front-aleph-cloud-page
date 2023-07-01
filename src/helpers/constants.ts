@@ -25,6 +25,7 @@ export const defaultVolumeChannel = 'ALEPH-VOLUME'
 export const defaultSSHPostType = 'ALEPH-SSH'
 export const defaultSSHChannel = 'ALEPH-SSH-TEST'
 
+export const defaultInstanceChannel = 'ALEPH-CLOUDSOLUTIONS'
 export const defaultVMChannel = 'ALEPH-CLOUDSOLUTIONS'
 
 export const breadcrumbNames = {

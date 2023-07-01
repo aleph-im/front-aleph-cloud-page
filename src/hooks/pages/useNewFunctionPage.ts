@@ -2,7 +2,7 @@ import { useAppState } from '@/contexts/appState'
 import {
   getTotalProductCost,
   isValidItemHash,
-  safeCollectionToObject,
+  parseEnvVars,
 } from '@/helpers/utils'
 import JSZip from 'jszip'
 import { FormEvent, useCallback, useMemo } from 'react'
@@ -136,7 +136,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         entrypoint: 'main:app', // TODO: Entrypoint
         memory: specs.ram,
         vcpus: specs.cpu,
-        variables: safeCollectionToObject(envVars),
+        variables: parseEnvVars(envVars) || {},
       })
 
       router.replace('/dashboard')

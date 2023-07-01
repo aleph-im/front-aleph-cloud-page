@@ -1,7 +1,7 @@
 import { ChangeEvent, useCallback, useId, useMemo, useState } from 'react'
 import { createVolume } from '@/helpers/aleph'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { MachineVolume } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
 import { humanReadableSize } from '@/helpers/utils'
 
 export enum VolumeType {

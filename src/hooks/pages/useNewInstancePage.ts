@@ -14,8 +14,11 @@ import { useForm } from '../useForm'
 import { Volume, defaultVolume } from '../form/useAddVolume'
 import { EnvVar } from '../form/useAddEnvVars'
 import { SSHKeyItem } from '../form/useAddSSHKeys'
+import { InstanceManager } from '@/helpers/instance'
 
 export type NewInstanceFormState = {
+  name?: string
+  tags?: string[]
   image?: InstanceImage
   specs?: InstanceSpecs
   volumes?: Volume[]
@@ -27,8 +30,6 @@ export const initialState: NewInstanceFormState = {
   image: defaultInstanceImageOptions[0],
   specs: defaultSpecsOptions[0],
   volumes: [{ ...defaultVolume }],
-  envVars: [],
-  sshKeys: [],
 }
 
 export type UseNewInstancePage = {
@@ -56,7 +57,24 @@ export function useNewInstancePage(): UseNewInstancePage {
 
   const onSubmit = useCallback(
     async (state: NewInstanceFormState) => {
-      console.log(state)
+      console.log('state', state)
+
+      if (!account) throw new Error('Account not found')
+
+      const instanceManager = new InstanceManager(account)
+
+      const { image, name, tags, envVars, sshKeys, volumes, specs } = state
+
+      await instanceManager.add({
+        name,
+        tags,
+        envVars,
+        sshKeys,
+        volumes,
+        specs,
+        image,
+      })
+
       router.replace('/dashboard')
     },
     [router],

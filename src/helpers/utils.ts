@@ -1,6 +1,7 @@
 import { BrowserProvider, Contract } from 'ethers'
 import E_ from './errors'
 import {
+  MachineResources,
   MessageType,
   PostMessage,
   ProgramMessage,
@@ -10,6 +11,8 @@ import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
 import { VolumeRequirements } from '@/components/HoldingRequirements/types'
 import { EntityType } from './constants'
 import { EnvVar } from '@/hooks/form/useAddEnvVars'
+import { SSHKey } from './ssh'
+import { InstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -46,15 +49,22 @@ export const isValidItemHash = (hash: string) => {
 /**
  * Takes a collection of environment variables and returns an object with the name and value of each variable.
  */
-export const safeCollectionToObject = (collection: EnvVar[]) => {
-  const ret: Record<string, string> = {}
-  for (const { name, value } of collection) {
-    if (name.trim().length > 0 && value.trim().length > 0) {
-      ret[name] = value
-    }
-  }
+export const parseEnvVars = (
+  envVars?: EnvVar[],
+): Record<string, string> | undefined => {
+  if (!envVars) return
 
-  return ret
+  return envVars.reduce((acc, env) => {
+    const name = env.name.trim()
+    const value = env.value.trim()
+
+    if (name.length <= 0) throw new Error(`Invalid env var name "${name}"`)
+    if (value.length <= 0) throw new Error(`Invalid env var value "${value}"`)
+
+    acc[name] = value
+
+    return acc
+  }, {} as Record<string, string>)
 }
 
 /**

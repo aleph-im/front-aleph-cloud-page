@@ -24,22 +24,6 @@ export class SSHKeyStore {
     protected channel = defaultSSHChannel,
   ) {}
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // @todo: Type not exported from SDK...
-  protected parsePosts(posts: any[]): SSHKey[] {
-    return posts.map((post) => {
-      const { key, label } = post.content
-
-      return {
-        id: post.hash,
-        key,
-        label,
-        url: getExplorerURL(post),
-        date: getDate(post.time),
-      }
-    })
-  }
-
   async getAll(): Promise<SSHKey[]> {
     try {
       const response = await post.Get({
@@ -93,5 +77,21 @@ export class SSHKeyStore {
     } catch (err) {
       throw E_.RequestFailed(err)
     }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // @todo: Type not exported from SDK...
+  protected parsePosts(posts: any[]): SSHKey[] {
+    return posts.map((post) => {
+      const { key, label } = post.content
+
+      return {
+        id: post.hash,
+        key,
+        label,
+        url: getExplorerURL(post),
+        date: getDate(post.time),
+      }
+    })
   }
 }
