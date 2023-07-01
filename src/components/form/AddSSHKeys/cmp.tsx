@@ -22,6 +22,7 @@ const SSHKeyItem = React.memo(
             name={`${id}_selected`}
             checked={sshKey.isSelected}
             onChange={handleIsSelectedChange}
+            disabled={sshKey.isNew}
           />
         </div>
         <div tw="flex-auto flex flex-col md:flex-row gap-6">
@@ -32,6 +33,7 @@ const SSHKeyItem = React.memo(
               placeholder="AAAAB3NzaC1yc2EAAAAB ... B3NzaaC1=="
               value={sshKey.key}
               onChange={handleKeyChange}
+              disabled={!sshKey.isNew}
             />
           </div>
           <div tw="md:w-4/12">
@@ -41,6 +43,7 @@ const SSHKeyItem = React.memo(
               placeholder="cp@aleph.im"
               value={sshKey.label}
               onChange={handleLabelChange}
+              disabled={!sshKey.isNew}
             />
           </div>
           {allowRemove && (

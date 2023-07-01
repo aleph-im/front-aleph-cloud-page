@@ -127,10 +127,7 @@ export function useAddSSHKeys({
     ]
   }, [accountSSHKeyItems, newSSHKeys])
 
-  const allowRemove = useMemo(
-    () => !!sshKeys.find((key) => key.isNew),
-    [sshKeys],
-  )
+  const allowRemove = useMemo(() => sshKeys.some((key) => key.isNew), [sshKeys])
 
   const handleChange = useCallback(
     (sshKey: SSHKeyItem) => {
