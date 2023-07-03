@@ -9,8 +9,11 @@ import {
   isVolumePersistent,
   unixToISODateString,
 } from '@/helpers/utils'
-import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
-import { useDashboardHomePage } from '@/hooks/pages/useDashboardHomePage'
+import { ProgramMessage } from 'aleph-sdk-ts/dist/messages/types'
+import {
+  AnyProduct,
+  useDashboardHomePage,
+} from '@/hooks/pages/useDashboardHomePage'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import {
   ImmutableVolume,
@@ -33,7 +36,7 @@ const TabContent = ({
   data,
   fileStats,
 }: {
-  data: (ProgramMessage | StoreMessage)[]
+  data: AnyProduct[]
   fileStats: any
 }) => {
   const getVolumeSize = useCallback(
@@ -47,7 +50,7 @@ const TabContent = ({
   const flattenedSizeData: ProgramMessage[] = useMemo(
     () =>
       data.map((product) => {
-        if (!product?.type) return product
+        if (!('type' in product)) return product
 
         if (isVolume(product)) {
           return {
@@ -186,8 +189,9 @@ const SSHKeysTabContent = ({ data }: { data: SSHKey[] }) => {
 }
 
 export default function DashboardHome() {
-  const { products, functions, instances, volumes, fileStats, sshKeys } =
+  const { all, functions, instances, volumes, fileStats, sshKeys } =
     useDashboardHomePage()
+
   const [tabId, setTabId] = useState('all')
 
   return (
@@ -200,7 +204,7 @@ export default function DashboardHome() {
               {
                 id: 'all',
                 name: 'All',
-                label: `(${products.length || 0})`,
+                label: `(${all.length || 0})`,
                 labelPosition: 'bottom',
               },
               {
@@ -234,8 +238,8 @@ export default function DashboardHome() {
         <div role="tabpanel">
           {tabId === 'all' ? (
             <>
-              {products.length > 0 ? (
-                <TabContent fileStats={fileStats} data={products} />
+              {all.length > 0 ? (
+                <TabContent fileStats={fileStats} data={all} />
               ) : (
                 <div tw="mt-10 text-center">
                   <ButtonLink variant="primary" href="/dashboard/function">

@@ -1,30 +1,29 @@
 import { useAppState } from '@/contexts/appState'
-import { SSHKey, SSHKeyStore } from '@/helpers/ssh'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
+import { Instance, InstanceManager } from '@/helpers/instance'
 
-export function useAccountSSHKeys(): [
-  SSHKey[] | undefined,
+export function useAccountInstances(): [
+  Instance[] | undefined,
   RequestState<unknown>,
 ] {
   const [appState, dispatch] = useAppState()
-
   const { account } = appState
 
   const doRequest = useCallback(async () => {
     if (!account) throw new Error('Invalid account')
 
-    const sshKeyStore = new SSHKeyStore(account)
-    return await sshKeyStore.getAll()
+    const manager = new InstanceManager(account)
+    return await manager.getAll()
   }, [account])
 
   const onSuccess = useCallback(
-    (accountSSHKeys: SSHKey[]) => {
+    (accountInstances: Instance[]) => {
       dispatch({
-        type: ActionTypes.setAccountSSHKeys,
-        payload: { accountSSHKeys },
+        type: ActionTypes.setAccountInstances,
+        payload: { accountInstances },
       })
     },
     [dispatch],
@@ -45,5 +44,5 @@ export function useAccountSSHKeys(): [
     triggerOnMount: true,
   })
 
-  return [appState.accountSSHKeys, reqState]
+  return [appState.accountInstances, reqState]
 }

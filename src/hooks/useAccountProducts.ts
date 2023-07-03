@@ -1,36 +1,28 @@
-import { useAppState } from '@/contexts/appState'
-import { getAccountProducts } from '@/helpers/aleph'
-import { ActionTypes } from '@/helpers/store'
 import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
-import { useCallback, useMemo } from 'react'
-import { useRequest } from './useRequest'
-import { RequestState } from './useRequestState'
+import { Instance } from '@/helpers/instance'
+import { useAccountSSHKeys } from './useAccountSSHKeys'
+import { SSHKey } from '@/helpers/ssh'
+import { useAccountFunctions } from './useAccountFunctions'
+import { useAccountVolumes } from './useAccountVolumes'
+import { useAccountInstances } from './useAccountInstances'
 
-export function useAccountProducts(): [
-  (ProgramMessage | StoreMessage)[],
-  RequestState<unknown>,
-] {
-  const [appState, dispatch] = useAppState()
-  const products = useMemo(
-    () => Object.values(appState.products).flat(),
-    [appState],
-  )
+export type UseAccountProductsReturn = {
+  functions: ProgramMessage[]
+  instances: Instance[]
+  volumes: StoreMessage[]
+  sshKeys: SSHKey[]
+}
 
-  const { account } = appState
+export function useAccountProducts(): UseAccountProductsReturn {
+  const [functions = []] = useAccountFunctions()
+  const [volumes = []] = useAccountVolumes()
+  const [instances = []] = useAccountInstances()
+  const [sshKeys = []] = useAccountSSHKeys()
 
-  const doRequest = useCallback(() => {
-    if (!account) throw new Error('You need to be logged in to see this page.')
-    return getAccountProducts(account)
-  }, [account])
-
-  const onSuccess = useCallback(
-    (products: Record<string, (ProgramMessage | StoreMessage)[]>) => {
-      dispatch({ type: ActionTypes.setProducts, payload: { products } })
-    },
-    [dispatch],
-  )
-
-  const reqState = useRequest({ doRequest, onSuccess, triggerOnMount: true })
-
-  return [products, reqState]
+  return {
+    functions,
+    volumes,
+    instances,
+    sshKeys,
+  }
 }

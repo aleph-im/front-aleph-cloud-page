@@ -2,9 +2,15 @@ import { useCallback, useState } from 'react'
 import { useNotification } from '@aleph-front/aleph-core'
 
 export type RequestCallbacks<T> = {
-  onSuccess?: (data: T) => void
-  onError?: (error: Error) => void
+  onSuccess?: (data: T, defaultSuccessHandler: () => void) => void
+  onError?: (error: Error, defaultErrorHandler: (error: Error) => void) => void
   onLoad?: () => void
+}
+
+export type RequestCallbacksReturn<T> = {
+  onSuccess: (data: T) => void
+  onError: (error: Error) => void
+  onLoad: () => void
 }
 
 export type RequestState<T> = {
@@ -17,7 +23,7 @@ export type UseRequestStateProps<T> = RequestCallbacks<T>
 
 export type UseRequestStateReturn<T> = [
   RequestState<T>,
-  Required<RequestCallbacks<T>>,
+  RequestCallbacksReturn<T>,
 ]
 
 export function useRequestState<T>({
@@ -37,13 +43,17 @@ export function useRequestState<T>({
     (data: T) => {
       setState({ data, loading: false, error: null })
 
-      if (successProp) return successProp(data)
+      function defaultSuccessHandler() {
+        noti &&
+          noti.add({
+            variant: 'success',
+            title: 'Operation complete',
+          })
+      }
 
-      noti &&
-        noti.add({
-          variant: 'success',
-          title: 'Operation complete',
-        })
+      return successProp
+        ? successProp(data, defaultSuccessHandler)
+        : defaultSuccessHandler()
     },
     [noti, successProp],
   )
@@ -52,18 +62,22 @@ export function useRequestState<T>({
     (error: Error) => {
       setState({ data: null, loading: false, error })
 
-      if (errorProp) return errorProp(error)
+      function defaultErrorHandler(error: Error) {
+        const text = error.message
+        const detail = (error?.cause as Error)?.message
 
-      const text = error.message
-      const detail = (error?.cause as Error)?.message
+        noti &&
+          noti.add({
+            variant: 'error',
+            title: 'Error',
+            text,
+            detail,
+          })
+      }
 
-      noti &&
-        noti.add({
-          variant: 'error',
-          title: 'Error',
-          text,
-          detail,
-        })
+      return errorProp
+        ? errorProp(error, defaultErrorHandler)
+        : defaultErrorHandler(error)
     },
     [errorProp, noti],
   )

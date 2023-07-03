@@ -2,7 +2,6 @@ import { useAppState } from '@/contexts/appState'
 import {
   getAccountBalance,
   getAccountFileStats,
-  getAccountProducts,
   web3Connect,
 } from '@/helpers/aleph'
 import { ActionTypes } from '@/helpers/store'
@@ -42,14 +41,6 @@ export function useConnect(): UseConnectReturn {
     [dispatch],
   )
 
-  const getProducts = useCallback(
-    async (account: any) => {
-      const products = await getAccountProducts(account)
-      dispatch({ type: ActionTypes.setProducts, payload: { products } })
-    },
-    [dispatch],
-  )
-
   const getFileStats = useCallback(
     async (account: any) => {
       const accountFiles = await getAccountFileStats(account)
@@ -68,17 +59,18 @@ export function useConnect(): UseConnectReturn {
 
     if (!account) return
 
-    await Promise.all([
-      getBalance(account),
-      getProducts(account),
-      getFileStats(account),
-    ]).catch((err) => {
-      onError(err.message)
-    })
+    await Promise.all([getBalance(account), getFileStats(account)]).catch(
+      (err) => {
+        onError(err.message)
+      },
+    )
 
     dispatch({ type: ActionTypes.connect, payload: { account } })
     return account
-  }, [getBalance, getProducts, getFileStats, dispatch, onError])
+  }, [getBalance, getFileStats, dispatch, onError])
+
+  // @todo: Think if it is necessary preload all on connect
+  // useAccountProducts()
 
   const disconnect = useCallback(async () => {
     dispatch({ type: ActionTypes.disconnect })

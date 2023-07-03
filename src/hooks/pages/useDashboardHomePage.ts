@@ -1,40 +1,36 @@
-import { useAppState } from '@/contexts/appState'
 import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
-import { useAccountProducts } from '../useAccountProducts'
 import useConnectedWard from '../useConnectedWard'
 import { AccountFileObject } from '@/helpers/aleph'
 import { useGetFileSize } from '../useGetFileSize'
-import { useAccountSSHKeys } from '../useAccountSSHKeys'
 import { SSHKey } from '@/helpers/ssh'
+import { useAccountProducts } from '../useAccountProducts'
+import { Instance } from '@/helpers/instance'
+import { useMemo } from 'react'
+
+export type AnyProduct = ProgramMessage | Instance | StoreMessage | SSHKey
 
 export type DashboardHomePage = {
-  products: (ProgramMessage | StoreMessage)[]
   functions: ProgramMessage[]
-  instances: ProgramMessage[]
+  instances: Instance[]
   volumes: StoreMessage[]
   sshKeys: SSHKey[]
+  all: AnyProduct[]
   fileStats: AccountFileObject[]
 }
 
 export function useDashboardHomePage(): DashboardHomePage {
   useConnectedWard()
-  const [products] = useAccountProducts()
+  const products = useAccountProducts()
   const [fileStatsWrapper] = useGetFileSize()
-  const [appState] = useAppState()
-  const [sshKeys = []] = useAccountSSHKeys()
 
-  const {
-    functions = [],
-    volumes = [],
-    instances = [],
-  } = appState.products || {}
+  const all = useMemo(
+    () => Object.values(products).flatMap((product) => product as AnyProduct[]),
+    [products],
+  )
 
   return {
-    products,
-    functions,
-    volumes,
-    sshKeys,
-    instances,
+    ...products,
+    all,
     fileStats: fileStatsWrapper.files,
   }
 }

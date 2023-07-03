@@ -2,27 +2,28 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
 import { AccountFilesResponse } from './aleph'
 import { SSHKey } from './ssh'
+import { Instance } from './instance'
 
 export enum ActionTypes {
   connect,
   disconnect,
   setAccountBalance,
-  setProducts,
   setAccountFiles,
   setAccountSSHKeys,
   addAccountSSHKey,
+  setAccountFunctions,
+  setAccountVolumes,
+  setAccountInstances,
 }
 
 export type State = {
   account?: Account
   accountBalance?: number
-  products: {
-    instances?: ProgramMessage[]
-    functions?: ProgramMessage[]
-    volumes?: StoreMessage[]
-  }
+  accountInstances?: Instance[]
+  accountFunctions?: ProgramMessage[]
+  accountVolumes?: StoreMessage[]
   accountFiles?: AccountFilesResponse
-  accountSSHKeys?: any
+  accountSSHKeys?: SSHKey[]
 }
 
 export type Action = {
@@ -33,11 +34,9 @@ export type Action = {
 export const initialState: State = {
   account: undefined,
   accountBalance: undefined,
-  products: {
-    instances: undefined,
-    functions: undefined,
-    volumes: undefined,
-  },
+  accountInstances: undefined,
+  accountFunctions: undefined,
+  accountVolumes: undefined,
   accountFiles: undefined,
   accountSSHKeys: undefined,
 }
@@ -65,12 +64,6 @@ export const reducer = (
         accountBalance: payload.balance,
       }
 
-    case ActionTypes.setProducts:
-      return {
-        ...state,
-        products: payload.products,
-      }
-
     case ActionTypes.setAccountFiles:
       return {
         ...state,
@@ -93,6 +86,27 @@ export const reducer = (
       return {
         ...state,
         accountSSHKeys,
+      }
+
+    case ActionTypes.setAccountFunctions:
+      const { accountFunctions } = payload
+      return {
+        ...state,
+        accountFunctions,
+      }
+
+    case ActionTypes.setAccountVolumes:
+      const { accountVolumes } = payload
+      return {
+        ...state,
+        accountVolumes,
+      }
+
+    case ActionTypes.setAccountInstances:
+      const { accountInstances } = payload
+      return {
+        ...state,
+        accountInstances,
       }
 
     default:

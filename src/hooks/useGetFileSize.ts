@@ -1,35 +1,32 @@
 import { useAppState } from '@/contexts/appState'
-import {
-  AccountFileObject,
-  AccountFilesResponse,
-  getAccountFileStats,
-} from '@/helpers/aleph'
+import { AccountFilesResponse, getAccountFileStats } from '@/helpers/aleph'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
 
+// Silent fallback for faulty data
+const fallbackPayload: AccountFilesResponse = {
+  address: '',
+  files: [],
+  total_size: 0,
+}
+
 export function useGetFileSize(): [
   AccountFilesResponse,
   RequestState<unknown>,
 ] {
-  // Silent fallback for faulty data
-  const fallbackPayload: AccountFilesResponse = {
-    address: '',
-    files: [],
-    total_size: 0,
-  }
-
   const [appState, dispatch] = useAppState()
   const fileStats = useMemo(
     () => appState.accountFiles || fallbackPayload,
-    [appState],
+    [appState.accountFiles],
   )
 
   const { account } = appState
 
   const doRequest = useCallback(() => {
-    if (!account) throw new Error('You need to be logged in to see this page.')
+    if (!account) throw new Error('Invalid account')
+
     return getAccountFileStats(account)
   }, [account])
 
@@ -40,7 +37,20 @@ export function useGetFileSize(): [
     [dispatch],
   )
 
-  const reqState = useRequest({ doRequest, onSuccess, triggerOnMount: true })
+  const onError = useCallback(
+    (error: Error, defaultHandler: (error: Error) => void) => {
+      if (!account) return
+      defaultHandler(error)
+    },
+    [account],
+  )
+
+  const reqState = useRequest({
+    doRequest,
+    onSuccess,
+    onError,
+    triggerOnMount: true,
+  })
 
   return [fileStats, reqState]
 }

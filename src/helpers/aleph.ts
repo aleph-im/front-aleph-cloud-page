@@ -75,42 +75,45 @@ export const getMessage = async (hash: string) => {
  * @returns An object containing the products
  */
 export const getAccountProducts = async (account: Account) => {
-  const products: Record<string, ProgramMessage[] | StoreMessage[]> = {
-    functions: [],
-    volumes: [],
+  const [functions, volumes] = await Promise.all([
+    getAccountFunctions(account),
+    getAccountVolumes(account),
+  ])
+
+  return {
+    functions,
+    volumes,
   }
-  const queries = []
-  queries.push(
-    any
-      .GetMessages({
-        addresses: [account.address],
-        messageType: MessageType.program,
-        channels: [defaultVMChannel],
-      })
-      .then((msgs) => {
-        products.functions = msgs.messages.filter(
-          (x) => x.content != undefined,
-        ) as ProgramMessage[]
-      }),
-  )
+}
 
-  queries.push(
-    any
-      .GetMessages({
-        addresses: [account.address],
-        messageType: MessageType.store,
-        channels: [defaultVolumeChannel],
-      })
-      .then((msgs) => {
-        products.volumes = msgs.messages.filter(
-          (x) => x.content != undefined,
-        ) as StoreMessage[]
-      }),
-  )
+// @todo: Refactor
+export const getAccountFunctions = async (
+  account: Account,
+): Promise<ProgramMessage[]> => {
+  const response = await any.GetMessages({
+    addresses: [account.address],
+    messageType: MessageType.program,
+    channels: [defaultVMChannel],
+  })
 
-  await Promise.all(queries)
+  return response.messages.filter(
+    (x) => x.content != undefined,
+  ) as ProgramMessage[]
+}
 
-  return products
+// @todo: Refactor
+export const getAccountVolumes = async (
+  account: Account,
+): Promise<StoreMessage[]> => {
+  const response = await any.GetMessages({
+    addresses: [account.address],
+    messageType: MessageType.store,
+    channels: [defaultVolumeChannel],
+  })
+
+  return response.messages.filter(
+    (x) => x.content != undefined,
+  ) as StoreMessage[]
 }
 
 type CreateFunctionParams = {

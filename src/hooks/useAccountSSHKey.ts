@@ -12,15 +12,15 @@ export function useAccountSSHKey(
 
   const { account } = appState
 
-  const doRequest: any = useCallback(async () => {
-    if (!account) throw new Error('You need to be logged in to see this page.')
+  const doRequest = useCallback(async () => {
+    if (!account) throw new Error('Invalid account')
 
     const sshKeyStore = new SSHKeyStore(account)
     return await sshKeyStore.get(id)
   }, [account, id])
 
   const onSuccess = useCallback(
-    (accountSSHKey: SSHKey) => {
+    (accountSSHKey: SSHKey | undefined) => {
       dispatch({
         type: ActionTypes.addAccountSSHKey,
         payload: {
@@ -31,7 +31,20 @@ export function useAccountSSHKey(
     [dispatch],
   )
 
-  const reqState = useRequest({ doRequest, onSuccess, triggerOnMount: true })
+  const onError = useCallback(
+    (error: Error, defaultHandler: (error: Error) => void) => {
+      if (!account) return
+      defaultHandler(error)
+    },
+    [account],
+  )
+
+  const reqState = useRequest({
+    doRequest,
+    onSuccess,
+    onError,
+    triggerOnMount: true,
+  })
 
   const sshKey = (appState.accountSSHKeys || []).find(
     (key: SSHKey) => key.id === id,

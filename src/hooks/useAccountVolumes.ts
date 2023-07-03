@@ -1,30 +1,30 @@
 import { useAppState } from '@/contexts/appState'
-import { SSHKey, SSHKeyStore } from '@/helpers/ssh'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
+import { StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
+import { getAccountVolumes } from '@/helpers/aleph'
 
-export function useAccountSSHKeys(): [
-  SSHKey[] | undefined,
+export function useAccountVolumes(): [
+  StoreMessage[] | undefined,
   RequestState<unknown>,
 ] {
   const [appState, dispatch] = useAppState()
-
   const { account } = appState
 
   const doRequest = useCallback(async () => {
     if (!account) throw new Error('Invalid account')
 
-    const sshKeyStore = new SSHKeyStore(account)
-    return await sshKeyStore.getAll()
+    // @todo: Refactor
+    return await getAccountVolumes(account)
   }, [account])
 
   const onSuccess = useCallback(
-    (accountSSHKeys: SSHKey[]) => {
+    (accountVolumes: StoreMessage[]) => {
       dispatch({
-        type: ActionTypes.setAccountSSHKeys,
-        payload: { accountSSHKeys },
+        type: ActionTypes.setAccountVolumes,
+        payload: { accountVolumes },
       })
     },
     [dispatch],
@@ -45,5 +45,5 @@ export function useAccountSSHKeys(): [
     triggerOnMount: true,
   })
 
-  return [appState.accountSSHKeys, reqState]
+  return [appState.accountVolumes, reqState]
 }
