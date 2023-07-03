@@ -38,6 +38,8 @@ function SelectInstanceImageItem({
   const imgPrefix = `${basePath}/img`
 
   const handleClick = useCallback(() => {
+    if (image.disabled) return
+
     onChange(image)
   }, [image, onChange])
 
@@ -52,7 +54,6 @@ function SelectInstanceImageItem({
   )
 }
 
-// Mocked images
 export default function SelectInstanceImage({
   image: imageProp,
   options: optionsProp,
@@ -69,7 +70,7 @@ export default function SelectInstanceImage({
       <div tw="flex items-center justify-start flex-nowrap gap-6">
         {options.map((option) => (
           <SelectInstanceImageItem
-            key={option.id + option.name}
+            key={option.id}
             {...{
               option,
               image: option,

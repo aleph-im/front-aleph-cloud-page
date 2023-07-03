@@ -10,8 +10,9 @@ import useConnectedWard from '../useConnectedWard'
 import { createFunctionProgram } from '../../helpers/aleph'
 import { useRouter } from 'next/router'
 import {
+  FunctionRuntime,
   FunctionRuntimeId,
-  FunctionRuntimes,
+  defaultFunctionRuntimeOptions,
 } from '../form/useSelectFunctionRuntime'
 import {
   InstanceSpecs,
@@ -27,8 +28,7 @@ import { EnvVar } from '../form/useAddEnvVars'
 import { NameAndTags } from '../form/useAddNameAndTags'
 
 export type NewFunctionFormState = {
-  runtime: FunctionRuntimeId
-  customRuntimeHash?: string
+  runtime: FunctionRuntime
   isPersistent: boolean
   volumes: Volume[]
   codeOrFile: 'code' | 'file'
@@ -50,7 +50,7 @@ async def root():
 `
 
 const initialState: NewFunctionFormState = {
-  runtime: FunctionRuntimeId.Debian11,
+  runtime: defaultFunctionRuntimeOptions[0],
   isPersistent: false,
   name: '',
   specs: defaultSpecsOptions[0],
@@ -69,6 +69,7 @@ export type UseNewFunctionPage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
+  handleChangeFunctionRuntime: (runtime: FunctionRuntime) => void
   handleChangeEntityTab: (tabId: string) => void
   handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
   handleChangeVolumes: (volumes: Volume[]) => void
@@ -101,10 +102,11 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         throw new Error('Invalid code or file')
       }
 
-      const runtime =
-        formState.runtime !== FunctionRuntimeId.Custom
-          ? FunctionRuntimes[formState.runtime].id
-          : formState.customRuntimeHash || ''
+      const runtime = (
+        formState.runtime.id !== FunctionRuntimeId.Custom
+          ? formState.runtime.id
+          : formState.runtime.meta || ''
+      ).trim()
 
       if (!runtime || !isValidItemHash(runtime))
         throw new Error('Invalid runtime')
@@ -147,6 +149,11 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     setFormValue,
     handleSubmit,
   } = useForm({ initialState, onSubmit })
+
+  const handleChangeFunctionRuntime = useCallback(
+    (runtime: FunctionRuntime) => setFormValue('runtime', runtime),
+    [setFormValue],
+  )
 
   const handleChangeInstanceSpecs = useCallback(
     (specs: InstanceSpecs) => setFormValue('specs', specs),
@@ -201,6 +208,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
     handleChangeEntityTab,
+    handleChangeFunctionRuntime,
     handleChangeInstanceSpecs,
     handleChangeVolumes,
     handleChangeEnvVars,

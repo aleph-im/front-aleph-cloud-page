@@ -168,7 +168,10 @@ export class InstanceManager {
     return ref
   }
 
-  protected parseMetadata(name = 'Untitled instance', tags?: string[]): any {
+  protected parseMetadata(
+    name = 'Untitled instance',
+    tags?: string[],
+  ): Record<string, unknown> {
     const metadata: Record<string, unknown> = {}
 
     name = name.trim()

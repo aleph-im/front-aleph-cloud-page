@@ -1,10 +1,9 @@
-import { useCallback, useState } from 'react'
+import { ChangeEvent, useCallback, useState } from 'react'
 
 export enum FunctionRuntimeId {
-  Debian11 = 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
-  Debian11Bin = 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
-  Debian12 = 'TODO1',
-  Ubuntu22 = 'TODO2',
+  Runtime1 = 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
+  // @note: Added trailing blank spaces for generating different unique ids (it will be safely .trim() before sending the request) until the right hashes are provided
+  Runtime2 = 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4 ',
   Custom = 'custom',
 }
 
@@ -12,40 +11,31 @@ export type FunctionRuntime = {
   id: string
   name: string
   dist: string
+  meta?: string
 }
 
 export const FunctionRuntimes: Record<FunctionRuntimeId, FunctionRuntime> = {
-  [FunctionRuntimeId.Debian11]: {
-    id: FunctionRuntimeId.Debian11,
-    name: 'Debian 11 “Bullseye”',
+  [FunctionRuntimeId.Runtime1]: {
+    id: FunctionRuntimeId.Runtime1,
+    name: 'Official runtime with Debian 11, Python 3.9 & Node.js 14',
     dist: 'debian',
   },
-  [FunctionRuntimeId.Debian11Bin]: {
-    id: FunctionRuntimeId.Debian11Bin,
-    name: 'Debian 11 “Bullseye”',
+  [FunctionRuntimeId.Runtime2]: {
+    id: FunctionRuntimeId.Runtime2,
+    name: 'Official min. runtime for binaries x86_64 (Rust, Go, ...)',
     dist: 'debian',
-  },
-  [FunctionRuntimeId.Debian12]: {
-    id: FunctionRuntimeId.Debian12,
-    name: 'Debian 12 “Bookworm”',
-    dist: 'debian',
-  },
-  [FunctionRuntimeId.Ubuntu22]: {
-    id: FunctionRuntimeId.Ubuntu22,
-    name: 'Ubuntu 22.04.1 LTS',
-    dist: 'ubuntu',
   },
   [FunctionRuntimeId.Custom]: {
     id: FunctionRuntimeId.Custom,
-    name: 'Custom',
+    name: 'Custom runtime',
     dist: 'ubuntu',
   },
 }
 
 export const defaultFunctionRuntimeOptions = [
-  FunctionRuntimes[FunctionRuntimeId.Debian11],
-  FunctionRuntimes[FunctionRuntimeId.Debian12],
-  FunctionRuntimes[FunctionRuntimeId.Ubuntu22],
+  FunctionRuntimes[FunctionRuntimeId.Runtime1],
+  FunctionRuntimes[FunctionRuntimeId.Runtime2],
+  FunctionRuntimes[FunctionRuntimeId.Custom],
 ]
 
 export type UseSelectFunctionRuntimeProps = {
@@ -57,7 +47,8 @@ export type UseSelectFunctionRuntimeProps = {
 export type UseSelectFunctionRuntimeReturn = {
   runtime?: FunctionRuntime
   options: FunctionRuntime[]
-  handleChange: (runtime: FunctionRuntime) => void
+  handleRuntimeChange: (runtime: FunctionRuntime) => void
+  handleCustomRuntimeHashChange: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
 export function useSelectFunctionRuntime({
@@ -71,20 +62,38 @@ export function useSelectFunctionRuntime({
   const runtime = runtimeProp || runtimeState
   const options = optionsProp || defaultFunctionRuntimeOptions
 
-  // @note: Test overflowding items
-  // runtimes = [...runtimes, ...runtimes, ...runtimes, ...runtimes]
-
-  const handleChange = useCallback(
+  const handleRuntimeChange = useCallback(
     (runtime: FunctionRuntime) => {
+      const updatedRuntime: FunctionRuntime = { ...runtime }
+      updatedRuntime.meta =
+        runtime.id === FunctionRuntimeId.Custom
+          ? updatedRuntime.meta
+          : undefined
+
       setFunctionRuntimeState(runtime)
       onChange(runtime)
     },
     [onChange],
   )
 
+  const handleCustomRuntimeHashChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (!runtime) return
+
+      // @note: Custom hash string
+      const meta = e.target.value
+      const updatedRuntime: FunctionRuntime = { ...runtime, meta }
+
+      setFunctionRuntimeState(updatedRuntime)
+      onChange(updatedRuntime)
+    },
+    [onChange, runtime],
+  )
+
   return {
     runtime,
     options,
-    handleChange,
+    handleRuntimeChange,
+    handleCustomRuntimeHashChange,
   }
 }

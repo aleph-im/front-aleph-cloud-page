@@ -1,17 +1,18 @@
 import { useCallback, useState } from 'react'
 
 export enum InstanceImageId {
-  Debian11 = 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
-  Debian11Bin = 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
+  Debian11 = '5f31b0706f59404fad3d0bff97ef89ddf24da4761608ea0646329362c662ba51',
   Debian12 = 'TODO1',
   Ubuntu22 = 'TODO2',
-  Custom = 'custom',
 }
 
 export type InstanceImage = {
   id: string
   name: string
   dist: string
+
+  // @todo: Remove this once we have all premade images
+  disabled?: boolean
 }
 
 export const InstanceImages: Record<InstanceImageId, InstanceImage> = {
@@ -20,25 +21,17 @@ export const InstanceImages: Record<InstanceImageId, InstanceImage> = {
     name: 'Debian 11 “Bullseye”',
     dist: 'debian',
   },
-  [InstanceImageId.Debian11Bin]: {
-    id: InstanceImageId.Debian11Bin,
-    name: 'Debian 11 “Bullseye”',
-    dist: 'debian',
-  },
   [InstanceImageId.Debian12]: {
     id: InstanceImageId.Debian12,
     name: 'Debian 12 “Bookworm”',
     dist: 'debian',
+    disabled: true,
   },
   [InstanceImageId.Ubuntu22]: {
     id: InstanceImageId.Ubuntu22,
     name: 'Ubuntu 22.04.1 LTS',
     dist: 'ubuntu',
-  },
-  [InstanceImageId.Custom]: {
-    id: InstanceImageId.Custom,
-    name: 'Custom',
-    dist: 'ubuntu',
+    disabled: true,
   },
 }
 

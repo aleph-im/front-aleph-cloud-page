@@ -9,12 +9,10 @@ import {
   Row,
   Tabs,
   TextGradient,
-  TextInput,
 } from '@aleph-front/aleph-core'
 import CompositeTitle from '@/components/CompositeTitle'
 import NoisyContainer from '@/components/NoisyContainer'
 import HiddenFileInput from '@/components/HiddenFileInput'
-import { isValidItemHash } from '@/helpers/utils'
 import { useNewFunctionPage } from '@/hooks/pages/useNewFunctionPage'
 import HoldingRequirements from '@/components/HoldingRequirements'
 import BaseContainer from '@/components/Container'
@@ -24,8 +22,8 @@ import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes/cmp'
 import AddEnvVars from '@/components/form/AddEnvVars'
 import AddDomains from '@/components/form/AddDomains/cmp'
-import { FunctionRuntimeId } from '@/hooks/form/useSelectFunctionRuntime'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
+import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime/cmp'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -46,6 +44,7 @@ export default function NewFunctionPage() {
     accountBalance,
     isCreateButtonDisabled,
     handleChangeEntityTab,
+    handleChangeFunctionRuntime,
     handleChangeInstanceSpecs,
     handleChangeVolumes,
     handleChangeEnvVars,
@@ -224,67 +223,10 @@ export default function NewFunctionPage() {
               tailored to your specific requirements. Below are the available
               options
             </p>
-            <NoisyContainer>
-              <RadioGroup direction="column">
-                <Radio
-                  checked={formState.runtime === FunctionRuntimeId.Debian11}
-                  label="Official runtime with Debian 11, Python 3.9 & Node.js 14"
-                  name="__config_runtime"
-                  onChange={() =>
-                    setFormValue('runtime', FunctionRuntimeId.Debian11)
-                  }
-                  value="default"
-                />
-                <Radio
-                  checked={formState.runtime === FunctionRuntimeId.Debian11Bin}
-                  label="Official min. runtime for binaries x86_64 (Rust, Go, ...) "
-                  name="__config_runtime"
-                  onChange={() =>
-                    setFormValue('runtime', FunctionRuntimeId.Debian11Bin)
-                  }
-                  value="default"
-                />
-                <Radio
-                  checked={formState.runtime === FunctionRuntimeId.Custom}
-                  label="Custom runtime"
-                  name="__config_runtime"
-                  onChange={() =>
-                    setFormValue('runtime', FunctionRuntimeId.Custom)
-                  }
-                  value="custom"
-                />
-              </RadioGroup>
-
-              <div
-                className={
-                  formState.runtime !== FunctionRuntimeId.Custom
-                    ? 'unavailable-content'
-                    : ''
-                }
-                tw="mt-5"
-              >
-                <TextInput
-                  label="Runtime hash"
-                  placeholder={'3335ad270a571b...'}
-                  name="__config_runtime_hash"
-                  onChange={(e) =>
-                    setFormValue('customRuntimeHash', e.target.value)
-                  }
-                  disabled={formState.runtime !== FunctionRuntimeId.Custom}
-                  error={
-                    formState.customRuntimeHash &&
-                    !isValidItemHash(formState.customRuntimeHash)
-                      ? { message: 'Invalid hash' }
-                      : undefined
-                  }
-                />
-              </div>
-            </NoisyContainer>
-            <div tw="mt-6 text-right">
-              <ExternalLinkButton href="https://docs.aleph.im/computing/runtimes">
-                Learn more
-              </ExternalLinkButton>
-            </div>
+            <SelectFunctionRuntime
+              runtime={formState.runtime}
+              onChange={handleChangeFunctionRuntime}
+            />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
