@@ -1,7 +1,6 @@
 import { ReactNode, useState } from 'react'
 import {
   Button,
-  ChipInput,
   CodeEditor,
   Col,
   Icon,
@@ -26,6 +25,7 @@ import AddVolumes from '@/components/form/AddVolumes/cmp'
 import AddEnvVars from '@/components/form/AddEnvVars'
 import AddDomains from '@/components/form/AddDomains/cmp'
 import { FunctionRuntimeId } from '@/hooks/form/useSelectFunctionRuntime'
+import AddNameAndTags from '@/components/form/AddNameAndTags'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -49,6 +49,7 @@ export default function NewFunctionPage() {
     handleChangeInstanceSpecs,
     handleChangeVolumes,
     handleChangeEnvVars,
+    handleChangeNameAndTags,
   } = useNewFunctionPage()
 
   const [tabId, setTabId] = useState('code')
@@ -354,76 +355,11 @@ export default function NewFunctionPage() {
               tags. This helps streamline your development process and makes it
               easier to manage your web3 functions.
             </p>
-            <NoisyContainer>
-              <div>
-                <div tw="mb-3">
-                  <InfoTooltipButton
-                    plain
-                    my="bottom-left"
-                    at="bottom-right"
-                    tooltipContent={
-                      <div tw="text-left">
-                        <div>
-                          <div className="tp-body2 fs-md">Function name</div>
-                          <div className="tp-body1 fs-md">
-                            Assign a descriptive and unique name to your
-                            function, allowing you to quickly identify it among
-                            others in your application, understand the
-                            function&apos;s purpose and improve overall project
-                            organisation.
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  >
-                    Function name
-                  </InfoTooltipButton>
-                </div>
-                <TextInput
-                  placeholder="Give it a name"
-                  error={
-                    formState.functionName
-                      ? undefined
-                      : { message: 'This field is required' }
-                  }
-                  name="__config_function_name"
-                  onChange={(e) => setFormValue('functionName', e.target.value)}
-                />
-              </div>
-              <div tw="mt-4">
-                <div tw="mb-3">
-                  <InfoTooltipButton
-                    plain
-                    my="bottom-left"
-                    at="bottom-right"
-                    tooltipContent={
-                      <div tw="text-left">
-                        <div>
-                          <div className="tp-body2 fs-md">Tags</div>
-                          <div className="tp-body1 fs-md">
-                            Add relevant tags to categorize your functions based
-                            on their functionality, purpose, or any other
-                            criteria that provide personal context. Tags enable
-                            easy filtering and searching within your project,
-                            simplifying management and collaboration.
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  >
-                    Tags
-                  </InfoTooltipButton>
-                </div>
-                <ChipInput
-                  placeholder="Tags (press enter to add a new tag)"
-                  name="__config_function_tags"
-                  value={formState.metaTags}
-                  onChange={(val) => {
-                    setFormValue('metaTags', val)
-                  }}
-                />
-              </div>
-            </NoisyContainer>
+            <AddNameAndTags
+              name={formState.name}
+              tags={formState.tags}
+              onChange={handleChangeNameAndTags}
+            />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">

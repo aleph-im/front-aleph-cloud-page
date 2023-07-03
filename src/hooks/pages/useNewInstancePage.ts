@@ -15,6 +15,7 @@ import { Volume, defaultVolume } from '../form/useAddVolume'
 import { EnvVar } from '../form/useAddEnvVars'
 import { SSHKeyItem } from '../form/useAddSSHKeys'
 import { InstanceManager } from '@/helpers/instance'
+import { NameAndTags } from '../form/useAddNameAndTags'
 
 export type NewInstanceFormState = {
   name?: string
@@ -46,6 +47,7 @@ export type UseNewInstancePage = {
   handleChangeVolumes: (volumes: Volume[]) => void
   handleChangeEnvVars: (envVars: EnvVar[]) => void
   handleChangeSSHKeys: (sshKeys: SSHKeyItem[]) => void
+  handleChangeNameAndTags: (nameAndTags: NameAndTags) => void
 }
 
 export function useNewInstancePage(): UseNewInstancePage {
@@ -77,7 +79,7 @@ export function useNewInstancePage(): UseNewInstancePage {
 
       router.replace('/dashboard')
     },
-    [router],
+    [account, router],
   )
 
   const {
@@ -108,6 +110,14 @@ export function useNewInstancePage(): UseNewInstancePage {
 
   const handleChangeSSHKeys = useCallback(
     (sshKeys: SSHKeyItem[]) => setFormValue('sshKeys', sshKeys),
+    [setFormValue],
+  )
+
+  const handleChangeNameAndTags = useCallback(
+    ({ name, tags }: NameAndTags) => {
+      setFormValue('name', name)
+      setFormValue('tags', tags)
+    },
     [setFormValue],
   )
 
@@ -150,5 +160,6 @@ export function useNewInstancePage(): UseNewInstancePage {
     handleChangeVolumes,
     handleChangeEnvVars,
     handleChangeSSHKeys,
+    handleChangeNameAndTags,
   }
 }

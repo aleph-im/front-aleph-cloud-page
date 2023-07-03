@@ -10,6 +10,7 @@ import AddVolumes from '@/components/form/AddVolumes/cmp'
 import AddEnvVars from '@/components/form/AddEnvVars/cmp'
 import AddSSHKeys from '@/components/form/AddSSHKeys/cmp'
 import AddDomains from '@/components/form/AddDomains'
+import AddNameAndTags from '@/components/form/AddNameAndTags'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -31,6 +32,7 @@ export default function NewInstancePage() {
     handleChangeVolumes,
     handleChangeEnvVars,
     handleChangeSSHKeys,
+    handleChangeNameAndTags,
   } = useNewInstancePage()
 
   return (
@@ -168,6 +170,24 @@ export default function NewInstancePage() {
               straightforward as possible.
             </p>
             <AddDomains />
+          </Container>
+        </section>
+        <section tw="px-0 py-6 md:py-10">
+          <Container>
+            <CompositeTitle as="h2" number="7">
+              Name and tags
+            </CompositeTitle>
+            <p tw="mb-6">
+              Organize and identify your functions more effectively by assigning
+              a unique name, obtaining a hash reference, and defining multiple
+              tags. This helps streamline your development process and makes it
+              easier to manage your web3 functions.
+            </p>
+            <AddNameAndTags
+              name={formState.name}
+              tags={formState.tags}
+              onChange={handleChangeNameAndTags}
+            />
           </Container>
         </section>
       </form>

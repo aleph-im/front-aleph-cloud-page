@@ -24,21 +24,21 @@ import {
 } from '../form/useAddVolume'
 import { useForm } from '../useForm'
 import { EnvVar } from '../form/useAddEnvVars'
+import { NameAndTags } from '../form/useAddNameAndTags'
 
 export type NewFunctionFormState = {
   runtime: FunctionRuntimeId
   customRuntimeHash?: string
   isPersistent: boolean
-  functionName: string
-  functionTags: string[]
   volumes: Volume[]
   codeOrFile: 'code' | 'file'
   codeLanguage: string
   functionCode?: string
   functionFile?: File
   specs?: InstanceSpecs
-  envVars: EnvVar[]
-  metaTags: string[]
+  envVars?: EnvVar[]
+  tags?: string[]
+  name: string
 }
 
 const samplePythonCode = `from fastapi import FastAPI
@@ -52,15 +52,12 @@ async def root():
 const initialState: NewFunctionFormState = {
   runtime: FunctionRuntimeId.Debian11,
   isPersistent: false,
-  functionName: '',
-  functionTags: [],
+  name: '',
   specs: defaultSpecsOptions[0],
   volumes: [{ ...defaultVolume }],
   functionCode: samplePythonCode,
   codeLanguage: 'python',
   codeOrFile: 'code',
-  envVars: [],
-  metaTags: [],
 }
 
 // @todo: Split this into reusable hooks by composition
@@ -76,6 +73,7 @@ export type UseNewFunctionPage = {
   handleChangeInstanceSpecs: (specs: InstanceSpecs) => void
   handleChangeVolumes: (volumes: Volume[]) => void
   handleChangeEnvVars: (envVars: EnvVar[]) => void
+  handleChangeNameAndTags: (nameAndTags: NameAndTags) => void
 }
 
 export function useNewFunctionPage(): UseNewFunctionPage {
@@ -121,14 +119,14 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         formState.volumes,
       )
 
-      const { functionName, metaTags, isPersistent, specs, envVars } = formState
+      const { name, tags = [], isPersistent, specs, envVars } = formState
 
       if (!specs) throw new Error('Invalid instance specs')
 
       await createFunctionProgram({
         account,
-        name: functionName.trim() || 'Untitled function',
-        tags: metaTags,
+        name: name.trim() || 'Untitled function',
+        tags,
         isPersistent: isPersistent,
         file,
         runtime,
@@ -165,6 +163,14 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     [setFormValue],
   )
 
+  const handleChangeNameAndTags = useCallback(
+    ({ name, tags }: NameAndTags) => {
+      setFormValue('name', name)
+      setFormValue('tags', tags)
+    },
+    [setFormValue],
+  )
+
   const { totalCost } = useMemo(
     () =>
       getTotalProductCost({
@@ -198,5 +204,6 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     handleChangeInstanceSpecs,
     handleChangeVolumes,
     handleChangeEnvVars,
+    handleChangeNameAndTags,
   }
 }
