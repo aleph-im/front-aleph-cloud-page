@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import tw from 'twin.macro'
 import { useBasePath } from '@/hooks/useBasePath'
 import { useCallback } from 'react'
@@ -7,6 +7,7 @@ import {
   InstanceImage,
   useSelectInstanceImage,
 } from '@/hooks/form/useSelectInstanceImage'
+import { getGlowHoverEffectCss } from '@aleph-front/aleph-core'
 
 export type SelectInstanceImageItemProps = {
   image: InstanceImage
@@ -20,13 +21,27 @@ export type SelectInstanceImageProps = {
   onChange: (image: InstanceImage) => void
 }
 
-export const StyledFlatCard = styled.div<{ $selected: boolean }>`
-  ${tw`flex flex-col items-center justify-center shrink-0 cursor-pointer`}
-  width: 30%;
-  height: 10.125rem;
-  background-color: #ffffff1a;
-  border-radius: 1.5rem;
-  ${({ $selected }) => $selected && `border: 1px solid white`}
+export const StyledFlatCardContainer = styled.div`
+  ${tw`flex items-center justify-start md:flex-wrap gap-6`}
+`
+
+export const StyledFlatCard = styled.div<{
+  $selected: boolean
+  $disabled?: boolean
+}>`
+  ${({ $selected, $disabled }) => css`
+    ${tw`flex flex-col items-center justify-center shrink-0 cursor-pointer transition-all duration-300`}
+    width: 30%;
+    height: 10.125rem;
+    background-color: #ffffff1a;
+    border-radius: 1.5rem;
+    ${$selected && `border: 1px solid white;`}
+    ${$disabled && 'opacity: 0.3;'}
+
+    &:hover {
+      ${!$disabled && getGlowHoverEffectCss('main0')}
+    }
+  `}
 `
 
 function SelectInstanceImageItem({
@@ -44,7 +59,11 @@ function SelectInstanceImageItem({
   }, [image, onChange])
 
   return (
-    <StyledFlatCard onClick={handleClick} $selected={selected}>
+    <StyledFlatCard
+      onClick={handleClick}
+      $selected={selected}
+      $disabled={image.disabled}
+    >
       <img
         src={`${imgPrefix}/image/${image.dist}.svg`}
         alt={`${image.name} image image logo`}
@@ -66,8 +85,8 @@ export default function SelectInstanceImage({
   })
 
   return (
-    <div tw="overflow-auto max-w-full">
-      <div tw="flex items-center justify-start flex-nowrap gap-6">
+    <div tw="overflow-x-auto md:overflow-x-visible max-w-full">
+      <StyledFlatCardContainer>
         {options.map((option) => (
           <SelectInstanceImageItem
             key={option.id}
@@ -79,7 +98,7 @@ export default function SelectInstanceImage({
             }}
           />
         ))}
-      </div>
+      </StyledFlatCardContainer>
     </div>
   )
 }

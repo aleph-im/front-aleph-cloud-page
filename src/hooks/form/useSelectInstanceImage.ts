@@ -65,7 +65,7 @@ export function useSelectInstanceImage({
   const options = optionsProp || defaultInstanceImageOptions
 
   // @note: Test overflowding items
-  // images = [...images, ...images, ...images, ...images]
+  // options = [...options, ...options, ...options, ...options]
 
   const handleChange = useCallback(
     (image: InstanceImage) => {
