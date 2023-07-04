@@ -120,7 +120,7 @@ export default function Home() {
                 text="A virtual machine that runs on a Aleph.im's infrastructure and can be configured with CPUs, memory, storage, and networking."
                 buttonLabel="Create instance"
                 headerImg="Object11"
-                disabled
+                buttonOnClick={navigate.instance}
               />
             </Col>
             <Col>
@@ -209,6 +209,15 @@ export default function Home() {
                 buttonLabel="Create volume"
                 headerImg="Object13"
                 buttonOnClick={navigate.volume}
+              />
+            </Col>
+            <Col>
+              <FeatureCard
+                title="IPFS pinning"
+                text="Avoid data being removed or garbage collected using the decentralized pinning solution, and ensure your data stay persistent."
+                buttonLabel="Start IPFS pinning"
+                headerImg="Object8"
+                disabled
               />
             </Col>
             <Col>
