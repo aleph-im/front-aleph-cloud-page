@@ -43,44 +43,46 @@ const EnvVarItem = React.memo((props: EnvVarItemProps) => {
 })
 EnvVarItem.displayName = 'EnvVarItem'
 
-export default function AddEnvVars({
-  envVars: envVarsProp,
-  onChange,
-}: AddEnvVarsProps) {
-  const { envVars, handleChange, handleAdd, handleRemove } = useAddEnvVars({
-    envVars: envVarsProp,
-    onChange,
-  })
+export const AddEnvVars = React.memo(
+  ({ envVars: envVarsProp, onChange }: AddEnvVarsProps) => {
+    const { envVars, handleChange, handleAdd, handleRemove } = useAddEnvVars({
+      envVars: envVarsProp,
+      onChange,
+    })
 
-  return (
-    <>
-      {envVars.length > 0 && (
-        <NoisyContainer>
-          <div tw="flex flex-col gap-x-6 gap-y-4">
-            <p tw="-mb-2">Set</p>
-            {envVars.map((envVar) => (
-              <EnvVarItem
-                key={envVar.id}
-                envVar={envVar}
-                onChange={handleChange}
-                onRemove={handleRemove}
-              />
-            ))}
-          </div>
-        </NoisyContainer>
-      )}
-      <div tw="mt-6 mx-6">
-        <Button
-          type="button"
-          onClick={handleAdd}
-          color="main0"
-          variant="secondary"
-          kind="neon"
-          size="regular"
-        >
-          Add var
-        </Button>
-      </div>
-    </>
-  )
-}
+    return (
+      <>
+        {envVars.length > 0 && (
+          <NoisyContainer>
+            <div tw="flex flex-col gap-x-6 gap-y-4">
+              <p tw="-mb-2">Set</p>
+              {envVars.map((envVar) => (
+                <EnvVarItem
+                  key={envVar.id}
+                  envVar={envVar}
+                  onChange={handleChange}
+                  onRemove={handleRemove}
+                />
+              ))}
+            </div>
+          </NoisyContainer>
+        )}
+        <div tw="mt-6 mx-6">
+          <Button
+            type="button"
+            onClick={handleAdd}
+            color="main0"
+            variant="secondary"
+            kind="neon"
+            size="regular"
+          >
+            Add var
+          </Button>
+        </div>
+      </>
+    )
+  },
+)
+AddEnvVars.displayName = 'AddEnvVars'
+
+export default AddEnvVars

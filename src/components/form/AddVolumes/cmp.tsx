@@ -1,10 +1,11 @@
+import React from 'react'
 import { Button } from '@aleph-front/aleph-core'
 import { useAddVolumes } from '@/hooks/form/useAddVolumes'
 import { AddVolumesProps } from './types'
 import AddVolume from '../AddVolume'
 import InfoTooltipButton from '@/components/InfoTooltipButton'
 
-export default function AddVolumes(props: AddVolumesProps) {
+export const AddVolumes = React.memo((props: AddVolumesProps) => {
   const { volumes, handleAdd, handleRemove, handleChange } =
     useAddVolumes(props)
 
@@ -74,4 +75,7 @@ export default function AddVolumes(props: AddVolumesProps) {
       </div>
     </>
   )
-}
+})
+AddVolumes.displayName = 'AddVolumes'
+
+export default AddVolumes

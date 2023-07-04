@@ -3,7 +3,7 @@ import { TextInput, Button } from '@aleph-front/aleph-core'
 import NoisyContainer from '../../NoisyContainer'
 import ExternalLinkButton from '@/components/ExternalLinkButton'
 
-export default function AddDomains() {
+export const AddDomains = React.memo(() => {
   return (
     <>
       <NoisyContainer>
@@ -33,4 +33,7 @@ export default function AddDomains() {
       </div>
     </>
   )
-}
+})
+AddDomains.displayName = 'AddDomains'
+
+export default AddDomains

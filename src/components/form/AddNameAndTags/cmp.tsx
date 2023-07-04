@@ -5,7 +5,7 @@ import NoisyContainer from '../../NoisyContainer'
 import InfoTooltipButton from '@/components/InfoTooltipButton'
 import { AddNameAndTagsProps } from './types'
 
-export default function AddNameAndTags(props: AddNameAndTagsProps) {
+export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
   const { entityName, name, tags, handleNameChange, handleTagsChange } =
     useAddNameAndTags(props)
 
@@ -74,4 +74,7 @@ export default function AddNameAndTags(props: AddNameAndTagsProps) {
       </div>
     </NoisyContainer>
   )
-}
+})
+AddNameAndTags.displayName = 'AddNameAndTags'
+
+export default AddNameAndTags
