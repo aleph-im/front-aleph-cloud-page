@@ -1,15 +1,14 @@
-import { ReactNode } from 'react'
 import styled from 'styled-components'
 import tw from 'twin.macro'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
-import BaseContainer from '@/components/Container'
 import ButtonLink from '@/components/ButtonLink'
 import IconText from '@/components/IconText'
 import NoisyContainer from '@/components/NoisyContainer'
 import { breadcrumbNames } from '@/helpers/constants'
-import { Button, Col, Row, Tag } from '@aleph-front/aleph-core'
+import { Button, Tag } from '@aleph-front/aleph-core'
 import { useDashboardManageSSHKeyPage } from '@/hooks/pages/useDashboardManageSSHKeyPage'
 import { ellipseText } from '@/helpers/utils'
+import CenteredContainer from '@/components/CenteredContainer'
 
 const Separator = styled.hr`
   ${tw`my-5`}
@@ -23,15 +22,10 @@ const GrayText = styled.span`
   color: ${({ theme }) => theme.color.text}b3;
 `
 
-const Container = ({ children }: { children: ReactNode }) => (
-  <Row xs={1} lg={12} gap="0">
-    <Col xs={1} lg={12} xl={8} xlOffset={3}>
-      <BaseContainer>
-        <div tw="max-w-[961px] mx-auto">{children}</div>
-      </BaseContainer>
-    </Col>
-  </Row>
-)
+const Container = styled(CenteredContainer).attrs((props) => ({
+  ...props,
+  variant: 'dashboard',
+}))``
 
 export default function ManageSSH() {
   const { sshKey, handleCopyKey, handleCopyLabel, handleDelete } =

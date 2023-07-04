@@ -1,19 +1,8 @@
-import BaseContainer from '@/components/Container'
 import NoisyContainer from '@/components/NoisyContainer'
 import { useNewSSHKeyPage } from '@/hooks/pages/useNewSSHKeyPage'
-import { Button, Col, Row, TextArea, TextInput } from '@aleph-front/aleph-core'
+import { Button, TextArea, TextInput } from '@aleph-front/aleph-core'
 import { ChangeEvent, useCallback } from 'react'
-import { ReactNode } from 'react'
-
-const Container = ({ children }: { children: ReactNode }) => (
-  <Row xs={1} lg={12} gap="0">
-    <Col xs={1} lg={10} lgOffset={2} xl={8} xlOffset={3} xxl={6} xxlOffset={4}>
-      <BaseContainer>
-        <div tw="max-w-[715px] mx-auto">{children}</div>
-      </BaseContainer>
-    </Col>
-  </Row>
-)
+import { default as Container } from '@/components/CenteredContainer'
 
 export default function NewSSHKey() {
   const { key, label, setKey, setLabel, handleSubmit } = useNewSSHKeyPage()

@@ -1,5 +1,10 @@
+import { useEffect, useMemo, useState } from 'react'
+import styled from 'styled-components'
+import tw from 'twin.macro'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+
 import AutoBreadcrumb from '@/components/AutoBreadcrumb'
-import BaseContainer from '@/components/Container'
 import ButtonLink from '@/components/ButtonLink'
 import IconText from '@/components/IconText'
 import NoisyContainer from '@/components/NoisyContainer'
@@ -23,21 +28,15 @@ import {
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 import {
   Button,
-  Col,
   Icon,
-  Row,
   Tag,
   TextGradient,
   useNotification,
 } from '@aleph-front/aleph-core'
 import { ProgramMessage, StoreMessage } from 'aleph-sdk-ts/dist/messages/types'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
-import styled from 'styled-components'
-import tw from 'twin.macro'
 import { useRequestState } from '../../hooks/useRequestState'
 import ManageSSH from '@/components/ManageSSH/cmp'
+import CenteredContainer from '@/components/CenteredContainer'
 
 const Separator = styled.hr`
   ${tw`my-5`}
@@ -46,15 +45,10 @@ const Separator = styled.hr`
   opacity: 0.25;
 `
 
-const Container = ({ children }: { children: ReactNode }) => (
-  <Row xs={1} lg={12} gap="0">
-    <Col xs={1} lg={12} xl={8} xlOffset={3}>
-      <BaseContainer>
-        <div tw="max-w-[961px] mx-auto">{children}</div>
-      </BaseContainer>
-    </Col>
-  </Row>
-)
+const Container = styled(CenteredContainer).attrs((props) => ({
+  ...props,
+  variant: 'dashboard',
+}))``
 
 function LegacyDashboardManage() {
   const router = useRouter()

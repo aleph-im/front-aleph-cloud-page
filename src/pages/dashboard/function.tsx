@@ -1,12 +1,10 @@
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import {
   Button,
   CodeEditor,
-  Col,
   Icon,
   Radio,
   RadioGroup,
-  Row,
   Tabs,
   TextGradient,
 } from '@aleph-front/aleph-core'
@@ -15,7 +13,6 @@ import NoisyContainer from '@/components/NoisyContainer'
 import HiddenFileInput from '@/components/HiddenFileInput'
 import { useNewFunctionPage } from '@/hooks/pages/useNewFunctionPage'
 import HoldingRequirements from '@/components/HoldingRequirements'
-import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
 import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
@@ -25,16 +22,7 @@ import AddDomains from '@/components/form/AddDomains/cmp'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime/cmp'
 import { EntityType } from '@/helpers/constants'
-
-const Container = ({ children }: { children: ReactNode }) => (
-  <Row xs={1} lg={12} gap="0">
-    <Col xs={1} lg={10} lgOffset={2} xl={8} xlOffset={3} xxl={6} xxlOffset={4}>
-      <BaseContainer>
-        <div tw="max-w-[715px] mx-auto">{children}</div>
-      </BaseContainer>
-    </Col>
-  </Row>
-)
+import { default as Container } from '@/components/CenteredContainer'
 
 export default function NewFunctionPage() {
   const {
@@ -57,9 +45,6 @@ export default function NewFunctionPage() {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <section>
-          <pre>{JSON.stringify(formState, null, 2)}</pre>
-        </section>
         <section tw="px-0 py-0 md:py-8">
           <Container>
             <Tabs
@@ -315,49 +300,6 @@ export default function NewFunctionPage() {
               volumes={formState.volumes}
               onChange={handleChangeVolumes}
             />
-            <div tw="mt-6 text-right">
-              <InfoTooltipButton
-                my="bottom-right"
-                at="top-right"
-                tooltipContent={
-                  <div tw="text-left">
-                    <div>
-                      <div className="tp-body2 fs-md">New volume</div>
-                      <div className="tp-body1 fs-md">
-                        <p>
-                          Many Python programs require additional packages
-                          beyond those present on the system by default.
-                        </p>
-                        <p>
-                          An immutable volume is a file containing a Squashfs
-                          filesystem that can be mounted read-only inside the
-                          virtual machine running programs in on-demand or
-                          persistent execution modes.
-                        </p>
-                      </div>
-                    </div>
-                    <div tw="mt-6">
-                      <div className="tp-body2 fs-md">Existing volume</div>
-                      <p>
-                        If this function uses the same dependencies as another
-                        program, you can reference the volume hash to avoid data
-                        duplication at no additional cost.
-                      </p>
-                    </div>
-                    <div tw="mt-6">
-                      <div className="tp-body2 fs-md">Persistent storage</div>
-                      <p>
-                        By default function data are flushed on each run. A
-                        persistent storage will allow you to persist data on
-                        disk.
-                      </p>
-                    </div>
-                  </div>
-                }
-              >
-                Learn more
-              </InfoTooltipButton>
-            </div>
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">

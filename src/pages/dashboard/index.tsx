@@ -1,6 +1,8 @@
-import { Col, Row, Table, Tabs } from '@aleph-front/aleph-core'
+import { useCallback, useMemo, useState } from 'react'
+import styled from 'styled-components'
+import tw from 'twin.macro'
+import { Table, Tabs } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/ButtonLink'
-import BaseContainer from '@/components/Container'
 import {
   AnyProduct,
   convertBitUnits,
@@ -12,23 +14,17 @@ import {
 } from '@/helpers/utils'
 import { ProgramMessage } from 'aleph-sdk-ts/dist/messages/types'
 import { useDashboardHomePage } from '@/hooks/pages/useDashboardHomePage'
-import { ReactNode, useCallback, useMemo, useState } from 'react'
 import {
   ImmutableVolume,
   PersistentVolume,
 } from 'aleph-sdk-ts/dist/messages/types'
 import { SSHKey } from '@/helpers/ssh'
-import tw from 'twin.macro'
+import CenteredContainer from '@/components/CenteredContainer'
 
-const Container = ({ children }: { children: ReactNode }) => (
-  <Row xs={1} lg={12} gap="0">
-    <Col xs={1} lg={12} xl={8} xlOffset={3}>
-      <BaseContainer>
-        <div tw="max-w-[961px] mx-auto">{children}</div>
-      </BaseContainer>
-    </Col>
-  </Row>
-)
+const Container = styled(CenteredContainer).attrs((props) => ({
+  ...props,
+  variant: 'dashboard',
+}))``
 
 const TabContent = ({
   data,

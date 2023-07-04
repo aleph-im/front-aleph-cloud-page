@@ -1,8 +1,6 @@
-import { ReactNode } from 'react'
-import { Button, Col, Row, Tabs, TextGradient } from '@aleph-front/aleph-core'
+import { Button, Tabs, TextGradient } from '@aleph-front/aleph-core'
 import CompositeTitle from '@/components/CompositeTitle'
 import { useNewInstancePage } from '@/hooks/pages/useNewInstancePage'
-import BaseContainer from '@/components/Container'
 import ExternalLinkButton from '@/components/ExternalLinkButton'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
@@ -13,16 +11,7 @@ import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import HoldingRequirements from '@/components/HoldingRequirements'
 import { EntityType } from '@/helpers/constants'
-
-const Container = ({ children }: { children: ReactNode }) => (
-  <Row xs={1} lg={12} gap="0">
-    <Col xs={1} lg={10} lgOffset={2} xl={8} xlOffset={3} xxl={6} xxlOffset={4}>
-      <BaseContainer>
-        <div tw="max-w-[715px] mx-auto">{children}</div>
-      </BaseContainer>
-    </Col>
-  </Row>
-)
+import { default as Container } from '@/components/CenteredContainer'
 
 export default function NewInstancePage() {
   const {
@@ -43,9 +32,6 @@ export default function NewInstancePage() {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <section>
-          <pre>{JSON.stringify(formState, null, 2)}</pre>
-        </section>
         <section tw="px-0 py-0 md:py-8">
           <Container>
             <Tabs

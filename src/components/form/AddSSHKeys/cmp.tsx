@@ -106,7 +106,7 @@ export default function AddSSHKeys({
           kind="neon"
           size="regular"
         >
-          Add var
+          Add SSH key
         </Button>
       </div>
     </>
