@@ -11,7 +11,7 @@ import { convertBitUnits, getFunctionCost } from '@/helpers/utils'
 export type SelectInstanceSpecsProps = {
   specs?: InstanceSpecs
   options?: InstanceSpecs[]
-  isPersistentStorage?: boolean
+  isPersistentVM?: boolean
   onChange: (specs: InstanceSpecs) => void
 }
 
@@ -35,17 +35,9 @@ const StyledTable = styled(Table<SpecsDetail>)`
 `
 
 // Mocked specs
-export default function SelectInstanceSpecs({
-  specs: specsProp,
-  options: optionsProp,
-  isPersistentStorage = false,
-  onChange,
-}: SelectInstanceSpecsProps) {
-  const { specs, options, handleChange } = useSelectInstanceSpecs({
-    specs: specsProp,
-    options: optionsProp,
-    onChange,
-  })
+export default function SelectInstanceSpecs(props: SelectInstanceSpecsProps) {
+  const { specs, options, isPersistentVM, handleChange } =
+    useSelectInstanceSpecs(props)
 
   const columns = useMemo(
     () =>
@@ -112,7 +104,7 @@ export default function SelectInstanceSpecs({
   const data: SpecsDetail[] = useMemo(() => {
     return options.map((specs) => {
       const { cpu, ram } = specs
-      const price = getFunctionCost({ cpu, isPersistentStorage })
+      const price = getFunctionCost({ cpu, isPersistentVM })
 
       return {
         specs,
@@ -124,7 +116,7 @@ export default function SelectInstanceSpecs({
         price: price.compute + ' ALEPH',
       }
     })
-  }, [isPersistentStorage, options])
+  }, [isPersistentVM, options])
 
   const handleRowKey = useCallback((row: SpecsDetail) => row.specs.id, [])
 

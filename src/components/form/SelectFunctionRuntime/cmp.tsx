@@ -44,21 +44,15 @@ function SelectFunctionRuntimeItem({
   )
 }
 
-export default function SelectFunctionRuntime({
-  runtime: runtimeProp,
-  options: optionsProp,
-  onChange,
-}: SelectFunctionRuntimeProps) {
+export default function SelectFunctionRuntime(
+  props: SelectFunctionRuntimeProps,
+) {
   const {
     runtime,
     options,
     handleRuntimeChange,
     handleCustomRuntimeHashChange,
-  } = useSelectFunctionRuntime({
-    runtime: runtimeProp,
-    options: optionsProp,
-    onChange,
-  })
+  } = useSelectFunctionRuntime(props)
 
   return (
     <>

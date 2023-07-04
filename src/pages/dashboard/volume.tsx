@@ -1,6 +1,7 @@
 import BaseContainer from '@/components/Container'
 import HoldingRequirements from '@/components/HoldingRequirements'
 import NewVolume from '@/components/form/AddVolume'
+import { EntityType } from '@/helpers/constants'
 import { useNewVolumePage } from '@/hooks/pages/useNewVolumePage'
 import { Button, Col, Row, TextGradient } from '@aleph-front/aleph-core'
 import { ReactNode } from 'react'
@@ -56,7 +57,8 @@ export default function NewVolumePage() {
             <div tw="my-7">
               <HoldingRequirements
                 address={address}
-                storage={[formState.volume]}
+                type={EntityType.Volume}
+                volumes={[formState.volume]}
                 unlockedAmount={accountBalance}
               />
             </div>

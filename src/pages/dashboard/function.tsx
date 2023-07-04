@@ -24,6 +24,7 @@ import AddEnvVars from '@/components/form/AddEnvVars'
 import AddDomains from '@/components/form/AddDomains/cmp'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime/cmp'
+import { EntityType } from '@/helpers/constants'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -298,6 +299,7 @@ export default function NewFunctionPage() {
               easier to manage your web3 functions.
             </p>
             <AddNameAndTags
+              entityType={EntityType.Program}
               name={formState.name}
               tags={formState.tags}
               onChange={handleChangeNameAndTags}
@@ -408,12 +410,10 @@ export default function NewFunctionPage() {
             <div tw="my-7">
               <HoldingRequirements
                 address={address}
-                reqs={{
-                  type: 'function',
-                  number: formState.specs?.cpu || 0,
-                  isPersistent: formState.isPersistent,
-                }}
-                storage={formState.volumes}
+                type={EntityType.Program}
+                isPersistentVM={formState.isPersistent}
+                specs={formState.specs}
+                volumes={formState.volumes}
                 unlockedAmount={accountBalance}
               />
             </div>

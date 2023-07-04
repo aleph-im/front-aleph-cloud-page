@@ -2,6 +2,7 @@ import { Col, Row, Table, Tabs } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/ButtonLink'
 import BaseContainer from '@/components/Container'
 import {
+  AnyProduct,
   convertBitUnits,
   ellipseAddress,
   humanReadableSize,
@@ -10,10 +11,7 @@ import {
   unixToISODateString,
 } from '@/helpers/utils'
 import { ProgramMessage } from 'aleph-sdk-ts/dist/messages/types'
-import {
-  AnyProduct,
-  useDashboardHomePage,
-} from '@/hooks/pages/useDashboardHomePage'
+import { useDashboardHomePage } from '@/hooks/pages/useDashboardHomePage'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import {
   ImmutableVolume,

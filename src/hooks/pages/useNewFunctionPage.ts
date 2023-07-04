@@ -181,9 +181,9 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const { totalCost } = useMemo(
     () =>
       getTotalProductCost({
+        cpu: formState.specs?.cpu,
+        isPersistentVM: formState.isPersistent,
         volumes: formState.volumes,
-        cpu: formState.specs?.cpu || 0,
-        isPersistentStorage: formState.isPersistent,
         capabilities: {},
       }),
     [formState],

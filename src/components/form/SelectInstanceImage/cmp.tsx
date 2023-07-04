@@ -73,16 +73,8 @@ function SelectInstanceImageItem({
   )
 }
 
-export default function SelectInstanceImage({
-  image: imageProp,
-  options: optionsProp,
-  onChange,
-}: SelectInstanceImageProps) {
-  const { image, options, handleChange } = useSelectInstanceImage({
-    image: imageProp,
-    options: optionsProp,
-    onChange,
-  })
+export default function SelectInstanceImage(props: SelectInstanceImageProps) {
+  const { image, options, handleChange } = useSelectInstanceImage(props)
 
   return (
     <div tw="overflow-x-auto md:overflow-x-visible max-w-full">

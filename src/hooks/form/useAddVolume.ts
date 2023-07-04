@@ -2,7 +2,7 @@ import { ChangeEvent, useCallback, useId, useMemo, useState } from 'react'
 import { createVolume } from '@/helpers/aleph'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
-import { humanReadableSize } from '@/helpers/utils'
+import { convertBitUnits, getVolumeSize } from '@/helpers/utils'
 
 export enum VolumeType {
   New = 'new',
@@ -15,8 +15,8 @@ export type NewVolume = {
   type: VolumeType.New
   fileSrc?: File
   mountPath: string
-  size: number
   useLatest: boolean
+  size?: number
 }
 
 export type ExistingVolume = {
@@ -25,6 +25,7 @@ export type ExistingVolume = {
   mountPath: string
   refHash: string
   useLatest: boolean
+  size?: number
 }
 
 export type PersistentVolume = {
@@ -103,7 +104,7 @@ export type UseAddNewVolumeProps = {
 
 export type UseAddNewVolumeReturn = {
   id: string
-  volume: Volume
+  volume: NewVolume
   volumeSize: string
   handleFileSrcChange: (fileSrc?: File) => void
   handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
@@ -115,7 +116,7 @@ export function useAddNewVolumeProps({
   volume,
   onChange,
   onRemove: handleRemove,
-}: UseAddNewVolumeProps) {
+}: UseAddNewVolumeProps): UseAddNewVolumeReturn {
   const id = useId()
 
   const handleFileSrcChange = useCallback(
@@ -146,8 +147,13 @@ export function useAddNewVolumeProps({
   )
 
   const volumeSize = useMemo(
-    () => humanReadableSize((volume.fileSrc?.size || 0) / 1000),
-    [volume.fileSrc?.size],
+    () =>
+      convertBitUnits(getVolumeSize(volume), {
+        from: 'mb',
+        to: 'kb',
+        displayUnit: true,
+      }) as string,
+    [volume],
   )
 
   return {
@@ -171,7 +177,7 @@ export type UseAddExistingVolumeProps = {
 
 export type UseAddExistingVolumeReturn = {
   id: string
-  volume: Volume
+  volume: ExistingVolume
   handleRefHashChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleUseLatestChange: (e: ChangeEvent<HTMLInputElement>) => void
@@ -182,7 +188,7 @@ export function useAddExistingVolumeProps({
   volume,
   onChange,
   onRemove: handleRemove,
-}: UseAddExistingVolumeProps) {
+}: UseAddExistingVolumeProps): UseAddExistingVolumeReturn {
   const id = useId()
 
   const handleRefHashChange = useCallback(
@@ -232,7 +238,8 @@ export type UseAddPersistentVolumeProps = {
 
 export type UseAddPersistentVolumeReturn = {
   id: string
-  volume: Volume
+  volume: PersistentVolume
+  volumeSize: number
   handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleSizeChange: (e: ChangeEvent<HTMLInputElement>) => void
@@ -243,7 +250,7 @@ export function useAddPersistentVolumeProps({
   volume,
   onChange,
   onRemove: handleRemove,
-}: UseAddPersistentVolumeProps) {
+}: UseAddPersistentVolumeProps): UseAddPersistentVolumeReturn {
   const id = useId()
 
   const handleNameChange = useCallback(
@@ -266,16 +273,32 @@ export function useAddPersistentVolumeProps({
 
   const handleSizeChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      const size = Number(e.target.value)
+      const sizeGB = Number(e.target.value)
+      const size = convertBitUnits(sizeGB, {
+        from: 'gb',
+        to: 'mb',
+        displayUnit: false,
+      }) as number
       const newVolume: PersistentVolume = { ...volume, size }
       onChange(newVolume)
     },
     [onChange, volume],
   )
 
+  const volumeSize = useMemo(
+    () =>
+      convertBitUnits(getVolumeSize(volume), {
+        from: 'mb',
+        to: 'gb',
+        displayUnit: false,
+      }) as number,
+    [volume],
+  )
+
   return {
     id,
     volume,
+    volumeSize,
     handleNameChange,
     handleMountPathChange,
     handleSizeChange,

@@ -12,25 +12,27 @@ export const defaultSpecsOptions: InstanceSpecs[] = [1, 2, 4, 6, 8, 12].map(
     id: `specs-${cpu}`,
     cpu,
     ram: 2 * cpu * 1000,
-    // storage: 2 * 10 ** Number(isPersistent) * computeUnits,
   }),
 )
 
 export type UseSelectInstanceSpecsProps = {
   specs?: InstanceSpecs
   options?: InstanceSpecs[]
+  isPersistentVM?: boolean
   onChange: (specs: InstanceSpecs) => void
 }
 
 export type UseSelectInstanceSpecsReturn = {
   specs?: InstanceSpecs
   options: InstanceSpecs[]
+  isPersistentVM: boolean
   handleChange: (specs: InstanceSpecs) => void
 }
 
 export function useSelectInstanceSpecs({
   specs: specsProp,
   options: optionsProp,
+  isPersistentVM = false,
   onChange,
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
   const [specsState, setSpecsState] = useState<InstanceSpecs | undefined>()
@@ -48,6 +50,7 @@ export function useSelectInstanceSpecs({
   return {
     specs,
     options,
+    isPersistentVM,
     handleChange,
   }
 }

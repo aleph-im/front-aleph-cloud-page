@@ -1,18 +1,17 @@
-export type VolumeRequirements = {
-  size?: number
-  type: 'new' | 'persistent' | 'existing'
-  src?: File
-}
-
-export type ComputeUnitsRequirements = {
-  type: 'function' | 'instance'
-  number: number
-  isPersistent?: boolean
-}
+import { EntityType } from '@/helpers/constants'
+import { Volume } from '@/hooks/form/useAddVolume'
+import { InstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 
 export type HoldingRequirementsProps = {
-  reqs?: ComputeUnitsRequirements
-  storage?: VolumeRequirements[]
-  unlockedAmount: number
   address: string
+  unlockedAmount: number
+  type: EntityType
+  isPersistentVM?: boolean
+  specs?: InstanceSpecs
+  volumes?: Volume[]
+}
+
+export type HoldingRequirementsVolumeLineProps = {
+  volume: Volume
+  price: number
 }

@@ -170,6 +170,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
   const {
     id,
     volume,
+    volumeSize,
     handleNameChange,
     handleMountPathChange,
     handleSizeChange,
@@ -213,7 +214,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
             label="Size (GB)"
             placeholder="2"
             onChange={handleSizeChange}
-            value={volume.size}
+            value={volumeSize}
             name={`${id}_size`}
           />
         </div>

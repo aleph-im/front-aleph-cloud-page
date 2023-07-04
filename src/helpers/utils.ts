@@ -1,18 +1,18 @@
 import { BrowserProvider, Contract } from 'ethers'
 import E_ from './errors'
 import {
-  MachineResources,
+  InstanceMessage,
   MessageType,
   PostMessage,
   ProgramMessage,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/types'
 import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
-import { VolumeRequirements } from '@/components/HoldingRequirements/types'
 import { EntityType } from './constants'
 import { EnvVar } from '@/hooks/form/useAddEnvVars'
 import { SSHKey } from './ssh'
-import { InstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
+import { Instance } from './instance'
+import { Volume, VolumeType } from '@/hooks/form/useAddVolume'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -243,8 +243,8 @@ type CapabilitiesConfig = {
 }
 
 export type FunctionPriceConfig = {
-  cpu: number
-  isPersistentStorage: boolean
+  cpu?: number
+  isPersistentVM: boolean
   capabilities?: CapabilitiesConfig
 }
 
@@ -258,124 +258,142 @@ export type FunctionCost = {
  * Calculates the amount of tokens required to deploy a function
  */
 export const getFunctionCost = ({
-  cpu,
-  isPersistentStorage,
+  isPersistentVM,
+  cpu = 0,
   capabilities = {},
 }: FunctionPriceConfig): FunctionCost => {
-  const basePrice = isPersistentStorage ? 2_000 : 200
-  const storageAllowance = 2 * 10 ** Number(isPersistentStorage) * cpu
+  if (!cpu) {
+    return {
+      compute: 0,
+      capabilities: 0,
+      storageAllowance: 0,
+    }
+  }
+
+  const basePrice = isPersistentVM ? 2_000 : 200
+  const storageAllowance = 2 * 10 ** Number(isPersistentVM) * cpu
 
   return {
     compute: basePrice * cpu,
     capabilities: Object.values(capabilities).reduce(
-      (ac, cv) => (ac += cv ? 1 : 0),
+      (ac, cv) => ac + Number(cv),
       1,
     ),
     storageAllowance,
   }
 }
 
-type getTotalProductCostConfig = FunctionPriceConfig & {
-  cpu?: number
-  isPersistentStorage?: boolean
-  volumes?: VolumeRequirements[]
+/**
+ * Returns the size of a volume in mb
+ */
+export function getVolumeSize(volume: Volume): number {
+  if (volume.type === VolumeType.New) {
+    return volume.size || (volume?.fileSrc?.size || 0) / 10 ** 6
+  }
+
+  return volume.size || 0
 }
-export const getTotalProductCost = ({
-  cpu,
-  isPersistentStorage,
-  capabilities,
-  volumes,
-}: getTotalProductCostConfig) => {
-  const onlyNewVolumes =
-    volumes?.filter((volume) => volume.type !== 'existing') || []
 
-  // If no compute units are provided, we only calculate the cost of the volumes
-  // This will most likely be called from the create volume page
-  if (!cpu) {
-    const volumeCosts = onlyNewVolumes.map((volume) => ({
-      ...volume,
-      price: ((volume?.src?.size || 0) / 10 ** 6) * 20,
-    }))
+export function getVolumeCost(volume: Volume): number {
+  return getVolumeSize(volume) * 20
+}
 
-    return {
-      compute: 0,
-      volumeCosts,
-      totalCost: volumeCosts.reduce((ac, cv) => (ac += cv.price), 0),
-    }
-  }
-
-  // The algorithm for calculating the cost per volume is as follows:
-  // 1. Calculate the storage allowance for the function, the more compute units, the more storage allowance
-  // 2. For each volume, subtract the storage allowance from the volume size
-  // 3. If there is more storage than allowance left, the additional storage is charged at 20 tokens per mb
-  const { storageAllowance, compute } = getFunctionCost({
-    cpu,
-    isPersistentStorage,
-    capabilities,
-  })
-
-  const getVolumeSize = (volume: VolumeRequirements) => {
-    if (volume.type === 'new')
-      return convertBitUnits(volume?.src?.size || 0, {
-        from: 'b',
-        to: 'gb',
-        displayUnit: false,
-      }) as number
-    return volume.size
-  }
-
-  let remainingAllowance = storageAllowance || 0
-  const volumeCosts = onlyNewVolumes.map((volume) => {
+// @note: The algorithm for calculating the cost per volume is as follows:
+// 1. Calculate the storage allowance for the function, the more compute units, the more storage allowance
+// 2. For each volume, subtract the storage allowance from the volume size
+// 3. If there is more storage than allowance left, the additional storage is charged at 20 tokens per mb
+export function getPerVolumeCost(
+  volumes: Volume[],
+  storageAllowance = 0,
+): number[] {
+  return volumes.map((volume) => {
     let size = getVolumeSize(volume) || 0
-    if (remainingAllowance > 0) {
-      if (size <= remainingAllowance) {
-        remainingAllowance -= size
+
+    if (storageAllowance > 0) {
+      if (size <= storageAllowance) {
+        storageAllowance -= size
         size = 0
       } else {
-        size -= remainingAllowance
-        remainingAllowance = 0
+        size -= storageAllowance
+        storageAllowance = 0
       }
     }
 
-    return {
-      ...volume,
-      price: size * 1000 * 20,
-    }
+    return size * 20
+  })
+}
+
+export function getVolumeTotalCost(
+  volumes: Volume[],
+  storageAllowance = 0,
+): number {
+  return getPerVolumeCost(volumes, storageAllowance).reduce(
+    (ac, cv) => ac + cv,
+    0,
+  )
+}
+
+export type VolumesPriceConfig = {
+  volumes?: Volume[]
+}
+
+export type GetTotalProductCostConfig = FunctionPriceConfig & VolumesPriceConfig
+export type GetTotalProductReturn = {
+  computeTotalCost: number
+  perVolumeCost: number[]
+  volumeTotalCost: number
+  totalCost: number
+}
+
+export const getTotalProductCost = ({
+  cpu,
+  isPersistentVM,
+  volumes,
+  capabilities,
+}: GetTotalProductCostConfig): GetTotalProductReturn => {
+  const newVolumes =
+    volumes?.filter((volume) => volume.type !== VolumeType.Existing) || []
+
+  const { compute: computeTotalCost, storageAllowance } = getFunctionCost({
+    cpu,
+    isPersistentVM,
+    capabilities,
   })
 
-  const totalCost =
-    volumeCosts.reduce((ac, cv) => (ac += cv.price), 0) + compute
+  // @note: If no compute units are provided (compute = 0, storageAllowance= 0),
+  // we only calculate the cost of the volumes
+  // This will most likely be called from the create volume page
+  const perVolumeCost = getPerVolumeCost(newVolumes, storageAllowance)
+  const volumeTotalCost = perVolumeCost.reduce((ac, cv) => ac + cv, 0)
+  const totalCost = volumeTotalCost + computeTotalCost
 
   return {
-    compute,
+    computeTotalCost,
+    perVolumeCost,
+    volumeTotalCost,
     totalCost,
-    volumeCosts,
   }
 }
 
-/**
- * Returns true if the provided aleph message is a volume message
- */
-export const isVolume = (
-  msg: ProgramMessage | StoreMessage | PostMessage<any>,
-) => msg.type === MessageType.store
+export type AnyProduct = ProgramMessage | Instance | StoreMessage | SSHKey
 
-/**
- * Returns true if the provided aleph message is a program message
- */
-export const isProgram = (
-  msg: ProgramMessage | StoreMessage | PostMessage<any>,
-) => msg.type === MessageType.program
+export type AnyMessage =
+  | ProgramMessage
+  | InstanceMessage
+  | StoreMessage
+  | PostMessage<SSHKey>
 
-export const isSSHKey = (
-  msg: ProgramMessage | StoreMessage | PostMessage<any>,
-) => msg.type === MessageType.post
+export const isVolume = (msg: AnyMessage) => msg.type === MessageType.store
+export const isProgram = (msg: AnyMessage) => msg.type === MessageType.program
+export const isInstance = (msg: AnyMessage) => msg.type === MessageType.instance
+export const isSSHKey = (msg: AnyMessage) => msg.type === MessageType.post
 
 export const getEntityTypeFromMessage = (
-  msg: ProgramMessage | StoreMessage | PostMessage<any>,
+  msg: ProgramMessage | StoreMessage,
 ) => {
   if (isVolume(msg)) return EntityType.Volume
   if (isProgram(msg)) return EntityType.Program
+  if (isInstance(msg)) return EntityType.Instance
   if (isSSHKey(msg)) return EntityType.SSHKey
 }
 

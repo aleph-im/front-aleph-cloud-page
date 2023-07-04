@@ -37,5 +37,6 @@ export const breadcrumbNames = {
 export enum EntityType {
   Volume = 'volume',
   Program = 'program',
-  SSHKey = 'ssh',
+  Instance = 'instance',
+  SSHKey = 'sshKey',
 }

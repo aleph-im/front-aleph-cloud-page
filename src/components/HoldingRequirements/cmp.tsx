@@ -1,39 +1,62 @@
 import {
   ellipseAddress,
   humanReadableCurrency,
-  convertBitUnits,
   getTotalProductCost,
+  getVolumeSize,
+  convertBitUnits,
 } from '@/helpers/utils'
 import { StyledHoldingSummaryLine } from './styles'
-import { HoldingRequirementsProps, VolumeRequirements } from './types'
+import {
+  HoldingRequirementsProps,
+  HoldingRequirementsVolumeLineProps,
+} from './types'
 import { useMemo } from 'react'
+import React from 'react'
+import { EntityType } from '@/helpers/constants'
+
+const HoldingRequirementsVolumeLine = React.memo(
+  ({ volume, price }: HoldingRequirementsVolumeLineProps) => {
+    const size = useMemo(
+      () =>
+        convertBitUnits(getVolumeSize(volume), {
+          from: 'mb',
+          to: 'gb',
+          displayUnit: false,
+        }),
+      [volume],
+    )
+
+    return (
+      <StyledHoldingSummaryLine>
+        <div tw="text-xs flex items-center">STORAGE</div>
+        <div>
+          {volume.type === 'persistent' ? 'Persistent' : 'Immutable'} {size} GB
+        </div>
+        <div>{humanReadableCurrency(price)} ALEPH</div>
+      </StyledHoldingSummaryLine>
+    )
+  },
+)
+HoldingRequirementsVolumeLine.displayName = 'HoldingRequirementsVolumeLine'
 
 export default function HoldingRequirements({
   address,
-  reqs,
-  storage,
   unlockedAmount,
+  type,
+  specs,
+  volumes,
+  isPersistentVM = type === EntityType.Instance,
 }: HoldingRequirementsProps) {
-  const totalProductCost = useMemo(
+  const { computeTotalCost, perVolumeCost, totalCost } = useMemo(
     () =>
       getTotalProductCost({
-        cpu: reqs?.number || 0,
-        volumes: storage,
-        isPersistentStorage: reqs?.isPersistent || false,
+        cpu: specs?.cpu,
+        isPersistentVM,
+        volumes,
         capabilities: {},
       }),
-    [reqs, storage],
+    [isPersistentVM, specs, volumes],
   )
-
-  const getVolumeSize = (volume: VolumeRequirements) => {
-    if (volume.type === 'new')
-      return convertBitUnits(volume?.src?.size || 0, {
-        from: 'b',
-        to: 'gb',
-        displayUnit: false,
-      }) as number
-    return volume.size
-  }
 
   return (
     <div tw="max-w-full overflow-auto">
@@ -43,29 +66,24 @@ export default function HoldingRequirements({
         <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
       </StyledHoldingSummaryLine>
 
-      {reqs && (
+      {specs?.cpu && (
         <StyledHoldingSummaryLine>
-          <div tw="text-xs flex items-center">{reqs.type.toUpperCase()}</div>
+          <div tw="text-xs flex items-center">{type.toUpperCase()}</div>
           <div>
-            {reqs.number} x86 64bit {reqs.isPersistent && '(persistent)'}
+            {specs?.cpu} x86 64bit {isPersistentVM && '(persistent)'}
           </div>
-          <div>{humanReadableCurrency(totalProductCost?.compute)} ALEPH</div>
+          <div>{humanReadableCurrency(computeTotalCost)} ALEPH</div>
         </StyledHoldingSummaryLine>
       )}
 
-      {storage &&
-        totalProductCost.volumeCosts.map((volume, iVolume) => {
+      {volumes &&
+        volumes.map((volume, i) => {
           return (
-            <StyledHoldingSummaryLine
-              key={iVolume} // note: this key is meant to avoid a warning, and should work since the array is not reordered
-            >
-              <div tw="text-xs flex items-center">STORAGE</div>
-              <div>
-                {volume.type === 'persistent' ? 'Persistent' : 'Immutable'}{' '}
-                {getVolumeSize(volume)} GB
-              </div>
-              <div>{humanReadableCurrency(volume.price)} ALEPH</div>
-            </StyledHoldingSummaryLine>
+            <HoldingRequirementsVolumeLine
+              key={volume.id}
+              volume={volume}
+              price={perVolumeCost[i]}
+            />
           )
         })}
 
@@ -76,7 +94,7 @@ export default function HoldingRequirements({
         </div>
         <div>
           <span className="text-main1">
-            {humanReadableCurrency(totalProductCost.totalCost)} ALEPH
+            {humanReadableCurrency(totalCost)} ALEPH
           </span>
         </div>
       </StyledHoldingSummaryLine>

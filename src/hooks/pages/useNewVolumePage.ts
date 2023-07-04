@@ -2,7 +2,6 @@ import { useCallback, useMemo } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import { useAppState } from '@/contexts/appState'
 import { useRouter } from 'next/router'
-import { getTotalProductCost } from '@/helpers/utils'
 import {
   NewVolume,
   Volume,
@@ -10,6 +9,7 @@ import {
   displayVolumesToAlephVolumes,
 } from '../form/useAddVolume'
 import { useForm } from '../useForm'
+import { getVolumeTotalCost } from '@/helpers/utils'
 
 export type NewVolumeFormState = {
   volume: NewVolume
@@ -47,14 +47,8 @@ export function useNewVolumePage() {
   )
 
   const accountBalance = appState?.accountBalance || 0
-  const { totalCost } = useMemo(
-    () =>
-      getTotalProductCost({
-        volumes: [formState.volume],
-        cpu: 0,
-        isPersistentStorage: false,
-        capabilities: {},
-      }),
+  const totalCost = useMemo(
+    () => getVolumeTotalCost([formState.volume]),
     [formState],
   )
 

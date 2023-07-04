@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Col, Row, Tabs } from '@aleph-front/aleph-core'
+import { Button, Col, Row, Tabs, TextGradient } from '@aleph-front/aleph-core'
 import CompositeTitle from '@/components/CompositeTitle'
 import { useNewInstancePage } from '@/hooks/pages/useNewInstancePage'
 import BaseContainer from '@/components/Container'
@@ -11,6 +11,8 @@ import AddEnvVars from '@/components/form/AddEnvVars/cmp'
 import AddSSHKeys from '@/components/form/AddSSHKeys/cmp'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
+import HoldingRequirements from '@/components/HoldingRequirements'
+import { EntityType } from '@/helpers/constants'
 
 const Container = ({ children }: { children: ReactNode }) => (
   <Row xs={1} lg={12} gap="0">
@@ -25,6 +27,9 @@ const Container = ({ children }: { children: ReactNode }) => (
 export default function NewInstancePage() {
   const {
     formState,
+    address,
+    accountBalance,
+    isCreateButtonDisabled,
     handleSubmit,
     handleChangeEntityTab,
     handleChangeInstanceImage,
@@ -144,10 +149,11 @@ export default function NewInstancePage() {
               Add environment variables
             </CompositeTitle>
             <p>
-              Organize and identify your functions more effectively by assigning
-              a unique name, obtaining a hash reference, and defining multiple
-              tags. This helps streamline your development process and makes it
-              easier to manage your web3 functions.
+              Define key-value pairs that act as configuration settings for your
+              web3 instance. Environment variables offer a convenient and secure
+              way to store sensitive information, manage configurations, and
+              modify your application&amp;s behaviour without altering the
+              source code.
             </p>
             <div tw="px-0 my-6">
               <AddEnvVars
@@ -178,16 +184,57 @@ export default function NewInstancePage() {
               Name and tags
             </CompositeTitle>
             <p tw="mb-6">
-              Organize and identify your functions more effectively by assigning
+              Organize and identify your instances more effectively by assigning
               a unique name, obtaining a hash reference, and defining multiple
               tags. This helps streamline your development process and makes it
-              easier to manage your web3 functions.
+              easier to manage your web3 instances.
             </p>
             <AddNameAndTags
+              entityType={EntityType.Instance}
               name={formState.name}
               tags={formState.tags}
               onChange={handleChangeNameAndTags}
             />
+          </Container>
+        </section>
+        <section
+          className="fx-noise-light"
+          tw="px-0 pt-6 pb-24 md:pt-16 md:pb-32"
+        >
+          <Container>
+            <TextGradient forwardedAs="h2" type="h5" tw="mb-1">
+              Estimated holding requirements
+            </TextGradient>
+            <div tw="mt-1 mb-6">
+              <p className="text-main2">
+                This amount needs to be present in your wallet until the
+                instance is removed. Tokens won’t be locked nor consumed. The
+                instance will be garbage collected once funds are removed from
+                the wallet.
+              </p>
+            </div>
+            <div tw="my-7">
+              <HoldingRequirements
+                address={address}
+                type={EntityType.Instance}
+                isPersistentVM={true}
+                specs={formState.specs}
+                volumes={formState.volumes}
+                unlockedAmount={accountBalance}
+              />
+            </div>
+            <div tw="my-7 text-center">
+              <Button
+                type="submit"
+                color="main0"
+                kind="neon"
+                size="big"
+                variant="primary"
+                disabled={isCreateButtonDisabled}
+              >
+                Create instance
+              </Button>
+            </div>
           </Container>
         </section>
       </form>

@@ -1,4 +1,5 @@
-import { ChangeEvent, useCallback, useState } from 'react'
+import { EntityType } from '@/helpers/constants'
+import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 
 export type NameAndTags = {
   name?: string
@@ -8,16 +9,19 @@ export type NameAndTags = {
 export const defaultNameAndTags: NameAndTags = {}
 
 export type UseNameAndTagsProps = NameAndTags & {
+  entityType: EntityType.Instance | EntityType.Program
   onChange: (state: NameAndTags) => void
 }
 
 export type UseNameAndTagsReturn = NameAndTags & {
+  entityName: string
   handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleTagsChange: (tags: string[]) => void
 }
 
 export function useAddNameAndTags({
   onChange,
+  entityType,
   ...nameAndTagsProp
 }: UseNameAndTagsProps): UseNameAndTagsReturn {
   const [nameAndTagsState, setNameAndTagsState] = useState<NameAndTags>()
@@ -48,8 +52,14 @@ export function useAddNameAndTags({
     [onChange, nameAndTags],
   )
 
+  const entityName = useMemo(
+    () => (entityType === EntityType.Instance ? 'Instance' : 'Function'),
+    [entityType],
+  )
+
   return {
     ...nameAndTags,
+    entityName,
     handleNameChange,
     handleTagsChange,
   }

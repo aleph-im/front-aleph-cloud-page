@@ -5,14 +5,9 @@ import NoisyContainer from '../../NoisyContainer'
 import InfoTooltipButton from '@/components/InfoTooltipButton'
 import { AddNameAndTagsProps } from './types'
 
-export default function AddNameAndTags({
-  onChange,
-  ...stateProp
-}: AddNameAndTagsProps) {
-  const { name, tags, handleNameChange, handleTagsChange } = useAddNameAndTags({
-    ...stateProp,
-    onChange,
-  })
+export default function AddNameAndTags(props: AddNameAndTagsProps) {
+  const { entityName, name, tags, handleNameChange, handleTagsChange } =
+    useAddNameAndTags(props)
 
   return (
     <NoisyContainer>
@@ -25,7 +20,7 @@ export default function AddNameAndTags({
             tooltipContent={
               <div tw="text-left">
                 <div>
-                  <div className="tp-body2 fs-md">Function name</div>
+                  <div className="tp-body2 fs-md">{entityName} name</div>
                   <div className="tp-body1 fs-md">
                     Assign a descriptive and unique name to your function,
                     allowing you to quickly identify it among others in your
@@ -36,7 +31,7 @@ export default function AddNameAndTags({
               </div>
             }
           >
-            Function name
+            {entityName} name
           </InfoTooltipButton>
         </div>
         <TextInput

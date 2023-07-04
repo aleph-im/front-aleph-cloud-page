@@ -3,14 +3,9 @@ import { useAddVolumes } from '@/hooks/form/useAddVolumes'
 import { AddVolumesProps } from './types'
 import AddVolume from '../AddVolume'
 
-export default function AddVolumes({
-  volumes: volumesProp,
-  onChange,
-}: AddVolumesProps) {
-  const { volumes, handleAdd, handleRemove, handleChange } = useAddVolumes({
-    volumes: volumesProp,
-    onChange,
-  })
+export default function AddVolumes(props: AddVolumesProps) {
+  const { volumes, handleAdd, handleRemove, handleChange } =
+    useAddVolumes(props)
 
   return (
     <>

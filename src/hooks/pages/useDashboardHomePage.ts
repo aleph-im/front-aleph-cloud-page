@@ -6,8 +6,7 @@ import { SSHKey } from '@/helpers/ssh'
 import { useAccountProducts } from '../useAccountProducts'
 import { Instance } from '@/helpers/instance'
 import { useMemo } from 'react'
-
-export type AnyProduct = ProgramMessage | Instance | StoreMessage | SSHKey
+import { AnyProduct } from '@/helpers/utils'
 
 export type DashboardHomePage = {
   functions: ProgramMessage[]

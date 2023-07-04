@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import useConnectedWard from '../useConnectedWard'
 import { useRouter } from 'next/router'
 import {
@@ -16,6 +16,7 @@ import { EnvVar } from '../form/useAddEnvVars'
 import { SSHKeyItem } from '../form/useAddSSHKeys'
 import { InstanceManager } from '@/helpers/instance'
 import { NameAndTags } from '../form/useAddNameAndTags'
+import { getTotalProductCost } from '@/helpers/utils'
 
 export type NewInstanceFormState = {
   name?: string
@@ -121,18 +122,16 @@ export function useNewInstancePage(): UseNewInstancePage {
     [setFormValue],
   )
 
-  // const { totalCost } = useMemo(
-  //   () =>
-  //     getTotalProductCost({
-  //       volumes: formState.volumes,
-  //       cpu: formState.cpu,
-  //       isPersistent: formState.isPersistent,
-  //       capabilities: {},
-  //     }),
-  //   [formState],
-  // )
-
-  const totalCost = 0
+  const { totalCost } = useMemo(
+    () =>
+      getTotalProductCost({
+        cpu: formState.specs?.cpu,
+        isPersistentVM: true,
+        volumes: formState.volumes,
+        capabilities: {},
+      }),
+    [formState],
+  )
 
   const canAfford = (accountBalance || 0) > totalCost
   let isCreateButtonDisabled = !canAfford
