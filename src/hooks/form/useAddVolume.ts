@@ -85,7 +85,7 @@ export const displayVolumesToAlephVolumes = async (
       ret.push({
         persistence: 'host',
         mount: volume.mountPath || '',
-        size_mib: (volume.size || 2) * 1000,
+        size_mib: volume.size,
         name: volume.name || '',
         is_read_only: () => false,
       })
