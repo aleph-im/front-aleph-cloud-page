@@ -17,23 +17,11 @@ import { AppStateProvider } from '@/contexts/appState'
 import AutoBreadcrumb from '@/components/AutoBreadcrumb/cmp'
 import { breadcrumbNames } from '@/helpers/constants'
 import { useRouter } from 'next/router'
-import { useConnect } from '@/hooks/useConnect'
-import { useEffect } from 'react'
+import Main from '@/components/Main'
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter()
   const hasBreadcrumb = router.pathname !== '/dashboard/manage'
-
-  const { isConnected, connect } = useConnect()
-
-  useEffect(() => {
-    async function tryReconnect() {
-      if (isConnected) return
-      await connect()
-    }
-
-    tryReconnect()
-  }, [connect, isConnected])
 
   return (
     <ThemeProvider theme={themes.dark}>
@@ -42,10 +30,10 @@ export default function App({ Component, pageProps }: AppProps) {
       <AppStateProvider>
         <NotificationProvider>
           <Header />
-          <main>
+          <Main>
             {hasBreadcrumb && <AutoBreadcrumb names={breadcrumbNames} />}
             <Component {...pageProps} />
-          </main>
+          </Main>
           <Footer small={true} />
         </NotificationProvider>
       </AppStateProvider>
