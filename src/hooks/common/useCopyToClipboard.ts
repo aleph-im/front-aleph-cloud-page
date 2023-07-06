@@ -34,8 +34,8 @@ export function useCopyToClipboardAndNotify(): [CopiedValue, CopyAndNotifyFn] {
   const noti = useNotification()
 
   const copyAndNotify = useCallback(
-    (text: string) => {
-      const success = copyToClipboard(text)
+    async (text: string) => {
+      const success = await copyToClipboard(text)
 
       if (!success) return
       if (!noti) return

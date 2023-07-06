@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import {
-  convertBitUnits,
   humanReadableSize,
   isVolumeEphemeral,
   isVolumePersistent,
