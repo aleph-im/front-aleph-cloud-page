@@ -1,8 +1,9 @@
 import { useRouter } from 'next/router'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useConnect } from '../useConnect'
 import { DefaultTheme, useTheme } from 'styled-components'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { useAppState } from '@/contexts/appState'
 
 export type Header = {
   theme: DefaultTheme
@@ -10,12 +11,18 @@ export type Header = {
   enableConnection: () => void
   account: Account | undefined
   isOnPath: (path: string) => boolean
+  displayWalletPicker: boolean
+  setDisplayWalletPicker: (value: boolean) => void
+  accountBalance?: number
 }
 
 export function useHeader(): Header {
   const { connect, disconnect, isConnected, account } = useConnect()
+  const [appState] = useAppState()
   const theme = useTheme()
   const router = useRouter()
+
+  const { accountBalance } = appState
 
   const isOnPath = (path: string) => router.pathname === path
 
@@ -29,6 +36,8 @@ export function useHeader(): Header {
       await disconnect()
       router.push('/')
     }
+
+    setDisplayWalletPicker(false)
   }, [connect, disconnect, isConnected, router])
 
   const enableConnection = useCallback(async () => {
@@ -40,11 +49,16 @@ export function useHeader(): Header {
     }
   }, [connect, disconnect, isConnected, account])
 
+  const [displayWalletPicker, setDisplayWalletPicker] = useState(false)
+
   return {
     theme,
     handleConnect,
     enableConnection,
     account,
     isOnPath,
+    displayWalletPicker,
+    setDisplayWalletPicker,
+    accountBalance,
   }
 }

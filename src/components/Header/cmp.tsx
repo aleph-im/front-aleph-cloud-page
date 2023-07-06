@@ -4,6 +4,7 @@ import {
   Logo,
   NavbarLink,
   NavbarLinkList,
+  WalletPicker
 } from '@aleph-front/aleph-core'
 import Link from 'next/link'
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
@@ -12,16 +13,16 @@ import { useHeader } from '@/hooks/pages/useHeader'
 import { useEffect } from 'react'
 
 export const Header = () => {
-  const { theme, handleConnect, enableConnection, account, isOnPath } =
+  const { theme, handleConnect, enableConnection, account, isOnPath, displayWalletPicker, setDisplayWalletPicker, accountBalance } =
     useHeader()
 
-  useEffect(() => {
-    ;(async () => {
-      if (!account) {
-        enableConnection()
-      }
-    })()
-  }, [account])
+  // useEffect(() => {
+  //   ;(async () => {
+  //     if (!account) {
+  //       enableConnection()
+  //     }
+  //   })()
+  // }, [account])
 
   return (
     <StyledHeader>
@@ -68,24 +69,54 @@ export const Header = () => {
                   <Icon name="ethereum" />
                 </StyledButton>
               </NavbarLink>
-              <NavbarLink>
-                <Button
-                  as="button"
-                  variant="secondary"
-                  color="main1"
-                  kind="neon"
-                  size="regular"
-                  onClick={handleConnect}
-                >
-                  {ellipseAddress(account.address)}{' '}
-                  <Icon
-                    name="meteor"
-                    size="lg"
-                    tw="ml-2.5"
-                    color={theme.color.main1}
-                  />
-                </Button>
-              </NavbarLink>
+              <div tw="relative">
+                <NavbarLink>
+                  <Button
+                    as="button"
+                    variant="secondary"
+                    color="main1"
+                    kind="neon"
+                    size="regular"
+                    onClick={() => setDisplayWalletPicker(!displayWalletPicker)}
+                  >
+                    {ellipseAddress(account.address)}{' '}
+                    <Icon
+                      name="meteor"
+                      size="lg"
+                      tw="ml-2.5"
+                      color={theme.color.main1}
+                    />
+                  </Button>
+                </NavbarLink>
+
+                <div tw="absolute right-0 mt-10">
+                    {
+                      displayWalletPicker && 
+                        <WalletPicker
+                          networks={[
+                            {
+                              icon: 'ethereum',
+                              name: 'Ethereum',
+                              wallets: [
+                                {
+                                  color: 'orange',
+                                  icon: 'circle',
+                                  name: 'Metamask',
+                                  provider: () => window.ethereum
+                                }
+                              ]
+                            }
+                          ]}
+                          onConnect={handleConnect}
+                          onDisconnect={handleConnect}
+                          size="regular"
+                          address={account?.address}
+                          addressHref={`https://explorer.aleph.im/address/ETH/${account?.address}`}
+                          balance={accountBalance}
+                        />
+                    }
+                </div>
+              </div>
             </NavbarLinkList>
           </>
         ) : (
@@ -108,17 +139,44 @@ export const Header = () => {
                   <Icon name="link-simple-slash" />
                 </StyledButton>
               </NavbarLink>
-              <NavbarLink>
-                <StyledButton onClick={handleConnect} forwardedAs="button">
-                  Connect{' '}
-                  <Icon
-                    name="meteor"
-                    size="lg"
-                    tw="ml-2.5"
-                    color={theme.color.main0}
-                  />
-                </StyledButton>
-              </NavbarLink>
+
+              <div tw="relative">
+                <NavbarLink>
+                  <StyledButton onClick={() => setDisplayWalletPicker(!displayWalletPicker)} forwardedAs="button">
+                    Connect{' '}
+                    <Icon
+                      name="meteor"
+                      size="lg"
+                      tw="ml-2.5"
+                      color={theme.color.main0}
+                    />
+                  </StyledButton>
+                  <div tw="absolute right-0 mt-10">
+                  {
+                    displayWalletPicker && 
+                      <WalletPicker
+                        networks={[
+                          {
+                            icon: 'ethereum',
+                            name: 'Ethereum',
+                            wallets: [
+                              {
+                                color: 'orange',
+                                icon: 'circle',
+                                name: 'Metamask',
+                                provider: () => window.ethereum
+                              }
+                            ]
+                          }
+                        ]}
+                        onConnect={handleConnect}
+                        onDisconnect={handleConnect}
+                        size="regular"
+                      />
+                  }
+                  </div>
+                </NavbarLink>
+              </div>
             </NavbarLinkList>
           </>
         )}
