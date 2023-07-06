@@ -1,12 +1,12 @@
-import { EnvVar } from '@/hooks/form/useAddEnvVars'
+import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
 
 export type EnvVarItemProps = {
-  envVar: EnvVar
-  onChange: (envVar: EnvVar) => void
+  envVar: EnvVarProp
+  onChange: (envVar: EnvVarProp) => void
   onRemove: (envVarId: string) => void
 }
 
 export type AddEnvVarsProps = {
-  envVars?: EnvVar[]
-  onChange: (envVars: EnvVar[]) => void
+  envVars?: EnvVarProp[]
+  onChange: (envVars: EnvVarProp[]) => void
 }

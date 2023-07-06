@@ -1,13 +1,13 @@
-import { InstanceImage } from '@/hooks/form/useSelectInstanceImage'
+import { InstanceImageProp } from '@/hooks/form/useSelectInstanceImage'
 
 export type SelectInstanceImageItemProps = {
-  image: InstanceImage
+  image: InstanceImageProp
   selected: boolean
-  onChange: (image: InstanceImage) => void
+  onChange: (image: InstanceImageProp) => void
 }
 
 export type SelectInstanceImageProps = {
-  image?: InstanceImage
-  options?: InstanceImage[]
-  onChange: (image: InstanceImage) => void
+  image?: InstanceImageProp
+  options?: InstanceImageProp[]
+  onChange: (image: InstanceImageProp) => void
 }

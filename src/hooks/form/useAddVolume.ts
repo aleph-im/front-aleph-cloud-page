@@ -1,110 +1,55 @@
 import { ChangeEvent, useCallback, useId, useMemo, useState } from 'react'
-import { createVolume } from '@/helpers/aleph'
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
-import { convertBitUnits, getVolumeSize } from '@/helpers/utils'
+import { convertBitUnits } from '@/helpers/utils'
+import { VolumeManager, VolumeType } from '@/domain/volume'
 
-export enum VolumeType {
-  New = 'new',
-  Existing = 'existing',
-  Persistent = 'persistent',
-}
-
-export type NewVolume = {
+export type NewVolumeProp = {
   id: string
-  type: VolumeType.New
+  volumeType: VolumeType.New
   fileSrc?: File
-  mountPath: string
-  useLatest: boolean
+  mountPath?: string
+  useLatest?: boolean
   size?: number
 }
 
-export type ExistingVolume = {
+export type ExistingVolumeProp = {
   id: string
-  type: VolumeType.Existing
+  volumeType: VolumeType.Existing
   mountPath: string
   refHash: string
   useLatest: boolean
   size?: number
 }
 
-export type PersistentVolume = {
+export type PersistentVolumeProp = {
   id: string
-  type: VolumeType.Persistent
+  volumeType: VolumeType.Persistent
   name: string
   mountPath: string
   size: number
 }
 
-export type Volume = NewVolume | ExistingVolume | PersistentVolume
-
-// | MachineVolume
-// | {
-//     id: string
-//     type: VolumeType
-//     refHash?: string
-//     size?: number
-//     src?: File
-//     mountpoint?: string
-//     name?: string
-//     useLatest?: boolean
-//   }
-
-export const defaultVolume: NewVolume = {
+export const defaultVolume: NewVolumeProp = {
   id: `volume-0`,
-  type: VolumeType.New,
+  volumeType: VolumeType.New,
   mountPath: '',
   size: 0,
   useLatest: true,
 }
 
-/**
- * Convert a list of volume objects from the form to a list of volume objects for the Aleph API
- */
-export const displayVolumesToAlephVolumes = async (
-  account: Account,
-  volumes: Volume[],
-): Promise<MachineVolume[]> => {
-  const ret = []
-
-  for (const volume of volumes) {
-    if (volume.type === VolumeType.New && volume.fileSrc) {
-      const createdVolume = await createVolume(account, volume.fileSrc)
-      ret.push({
-        ref: createdVolume.item_hash,
-        mount: volume.mountPath || '',
-        use_latest: false,
-      })
-    } else if (volume.type === VolumeType.Existing) {
-      ret.push({
-        ref: volume.refHash || '',
-        mount: volume.mountPath || '',
-        use_latest: volume.useLatest || false,
-      })
-    } else if (volume.type === VolumeType.Persistent) {
-      ret.push({
-        persistence: 'host',
-        mount: volume.mountPath || '',
-        size_mib: volume.size,
-        name: volume.name || '',
-        is_read_only: () => false,
-      })
-    }
-  }
-
-  // @fixme: remove any and fix type error
-  return ret as any
-}
+export type VolumeProp =
+  | NewVolumeProp
+  | ExistingVolumeProp
+  | PersistentVolumeProp
 
 export type UseAddNewVolumeProps = {
-  volume: NewVolume
-  onChange: (volume: NewVolume) => void
+  volume: NewVolumeProp
+  onChange: (volume: NewVolumeProp) => void
   onRemove?: (volumeId: string) => void
 }
 
 export type UseAddNewVolumeReturn = {
   id: string
-  volume: NewVolume
+  volume: NewVolumeProp
   volumeSize: string
   handleFileSrcChange: (fileSrc?: File) => void
   handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
@@ -122,7 +67,12 @@ export function useAddNewVolumeProps({
   const handleFileSrcChange = useCallback(
     (fileSrc?: File) => {
       if (!fileSrc) return //@todo: Handle error in UI
-      const newVolume: NewVolume = { ...volume, fileSrc }
+
+      const newVolume: NewVolumeProp = { ...volume, fileSrc }
+
+      const size = VolumeManager.getVolumeSize(newVolume)
+      newVolume.size = size
+
       onChange(newVolume)
     },
     [onChange, volume],
@@ -131,7 +81,7 @@ export function useAddNewVolumeProps({
   const handleMountPathChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const mountPath = e.target.value
-      const newVolume: NewVolume = { ...volume, mountPath }
+      const newVolume: NewVolumeProp = { ...volume, mountPath }
       onChange(newVolume)
     },
     [onChange, volume],
@@ -140,7 +90,7 @@ export function useAddNewVolumeProps({
   const handleUseLatestChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const useLatest = e.target.checked
-      const newVolume: NewVolume = { ...volume, useLatest }
+      const newVolume: NewVolumeProp = { ...volume, useLatest }
       onChange(newVolume)
     },
     [onChange, volume],
@@ -148,7 +98,7 @@ export function useAddNewVolumeProps({
 
   const volumeSize = useMemo(
     () =>
-      convertBitUnits(getVolumeSize(volume), {
+      convertBitUnits(volume.size || 0, {
         from: 'mb',
         to: 'kb',
         displayUnit: true,
@@ -170,14 +120,14 @@ export function useAddNewVolumeProps({
 // -------------
 
 export type UseAddExistingVolumeProps = {
-  volume: ExistingVolume
-  onChange: (volume: ExistingVolume) => void
+  volume: ExistingVolumeProp
+  onChange: (volume: ExistingVolumeProp) => void
   onRemove?: (volumeId: string) => void
 }
 
 export type UseAddExistingVolumeReturn = {
   id: string
-  volume: ExistingVolume
+  volume: ExistingVolumeProp
   handleRefHashChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleUseLatestChange: (e: ChangeEvent<HTMLInputElement>) => void
@@ -194,7 +144,8 @@ export function useAddExistingVolumeProps({
   const handleRefHashChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const refHash = e.target.value
-      const newVolume: ExistingVolume = { ...volume, refHash }
+      // @todo: Get the file from ipfs, compute and update the size
+      const newVolume: ExistingVolumeProp = { ...volume, refHash }
       onChange(newVolume)
     },
     [onChange, volume],
@@ -203,7 +154,7 @@ export function useAddExistingVolumeProps({
   const handleMountPathChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const mountPath = e.target.value
-      const newVolume: ExistingVolume = { ...volume, mountPath }
+      const newVolume: ExistingVolumeProp = { ...volume, mountPath }
       onChange(newVolume)
     },
     [onChange, volume],
@@ -212,7 +163,7 @@ export function useAddExistingVolumeProps({
   const handleUseLatestChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const useLatest = e.target.checked
-      const newVolume: ExistingVolume = { ...volume, useLatest }
+      const newVolume: ExistingVolumeProp = { ...volume, useLatest }
       onChange(newVolume)
     },
     [onChange, volume],
@@ -231,14 +182,14 @@ export function useAddExistingVolumeProps({
 // -------------
 
 export type UseAddPersistentVolumeProps = {
-  volume: PersistentVolume
-  onChange: (volume: PersistentVolume) => void
+  volume: PersistentVolumeProp
+  onChange: (volume: PersistentVolumeProp) => void
   onRemove?: (volumeId: string) => void
 }
 
 export type UseAddPersistentVolumeReturn = {
   id: string
-  volume: PersistentVolume
+  volume: PersistentVolumeProp
   volumeSize: number
   handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
@@ -256,7 +207,7 @@ export function useAddPersistentVolumeProps({
   const handleNameChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const name = e.target.value
-      const newVolume: PersistentVolume = { ...volume, name }
+      const newVolume: PersistentVolumeProp = { ...volume, name }
       onChange(newVolume)
     },
     [onChange, volume],
@@ -265,7 +216,7 @@ export function useAddPersistentVolumeProps({
   const handleMountPathChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const mountPath = e.target.value
-      const newVolume: PersistentVolume = { ...volume, mountPath }
+      const newVolume: PersistentVolumeProp = { ...volume, mountPath }
       onChange(newVolume)
     },
     [onChange, volume],
@@ -279,7 +230,7 @@ export function useAddPersistentVolumeProps({
         to: 'mb',
         displayUnit: false,
       }) as number
-      const newVolume: PersistentVolume = { ...volume, size }
+      const newVolume: PersistentVolumeProp = { ...volume, size }
       onChange(newVolume)
     },
     [onChange, volume],
@@ -287,7 +238,7 @@ export function useAddPersistentVolumeProps({
 
   const volumeSize = useMemo(
     () =>
-      convertBitUnits(getVolumeSize(volume), {
+      convertBitUnits(volume.size, {
         from: 'mb',
         to: 'gb',
         displayUnit: false,
@@ -309,24 +260,26 @@ export function useAddPersistentVolumeProps({
 // -------------
 
 export type UseAddVolumeProps = {
-  volume?: Volume
-  onChange: (volume: Volume) => void
+  volume?: VolumeProp
+  onChange: (volume: VolumeProp) => void
 }
 
 export type UseAddVolumeReturn = {
-  volume: Volume
-  handleChange: (volume: Volume) => void
+  volume: VolumeProp
+  handleChange: (volume: VolumeProp) => void
 }
 
 export function useAddVolume({
   volume: volumeProp,
   onChange,
 }: UseAddVolumeProps): UseAddVolumeReturn {
-  const [volumeState, setVolumeState] = useState<Volume>({ ...defaultVolume })
+  const [volumeState, setVolumeState] = useState<VolumeProp>({
+    ...defaultVolume,
+  })
   const volume = volumeProp || volumeState
 
   const handleChange = useCallback(
-    (volume: Volume) => {
+    (volume: VolumeProp) => {
       setVolumeState(volume)
       onChange(volume)
     },

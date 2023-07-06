@@ -1,14 +1,14 @@
 import { useCallback, useState } from 'react'
-import { Volume, defaultVolume } from './useAddVolume'
+import { VolumeProp, defaultVolume } from './useAddVolume'
 
 export type UseAddVolumesProps = {
-  volumes?: Volume[]
-  onChange: (volumes: Volume[]) => void
+  volumes?: VolumeProp[]
+  onChange: (volumes: VolumeProp[]) => void
 }
 
 export type UseAddVolumesReturn = {
-  volumes: Volume[]
-  handleChange: (volumes: Volume) => void
+  volumes: VolumeProp[]
+  handleChange: (volumes: VolumeProp) => void
   handleAdd: () => void
   handleRemove: (volumeId: string) => void
 }
@@ -17,11 +17,11 @@ export function useAddVolumes({
   volumes: volumesProp,
   onChange,
 }: UseAddVolumesProps): UseAddVolumesReturn {
-  const [volumesState, setVolumesState] = useState<Volume[]>([])
+  const [volumesState, setVolumesState] = useState<VolumeProp[]>([])
   const volumes = volumesProp || volumesState
 
   const handleChange = useCallback(
-    (volume: Volume) => {
+    (volume: VolumeProp) => {
       const updatedVolumes = [...volumes]
       const index = volumes.findIndex((vol) => vol.id === volume.id)
 

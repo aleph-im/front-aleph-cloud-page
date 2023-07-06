@@ -5,9 +5,9 @@ import {
   ReactNode,
   useContext,
 } from 'react'
-import { initialState, reducer, State } from '@/helpers/store'
+import { Action, initialState, reducer, State } from '@/helpers/store'
 
-export type AppState = [state: State, dispatch: Dispatch<any>]
+export type AppState = [state: State, dispatch: Dispatch<Action>]
 
 export type AppStateProviderProps = {
   children: ReactNode

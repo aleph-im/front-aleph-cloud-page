@@ -1,14 +1,14 @@
-import { InstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
+import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 
 export type SelectInstanceSpecsProps = {
-  specs?: InstanceSpecs
-  options?: InstanceSpecs[]
+  specs?: InstanceSpecsProp
+  options?: InstanceSpecsProp[]
   isPersistentVM?: boolean
-  onChange: (specs: InstanceSpecs) => void
+  onChange: (specs: InstanceSpecsProp) => void
 }
 
 export type SpecsDetail = {
-  specs: InstanceSpecs
+  specs: InstanceSpecsProp
   ram: string // in GB
   price: string // in ALEPH
 }

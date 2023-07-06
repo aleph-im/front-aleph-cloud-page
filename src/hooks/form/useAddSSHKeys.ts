@@ -1,7 +1,7 @@
 import { ChangeEvent, useCallback, useId, useMemo, useState } from 'react'
-import { useAccountSSHKeys } from '../useAccountSSHKeys'
+import { useAccountSSHKeys } from '../common/useAccountSSHKeys'
 
-export type SSHKeyItem = {
+export type SSHKeyProp = {
   id: string
   key: string
   label: string
@@ -9,7 +9,7 @@ export type SSHKeyItem = {
   isNew?: boolean
 }
 
-export const defaultSSHKey: SSHKeyItem = {
+export const defaultSSHKey: SSHKeyProp = {
   id: `sshkey-0`,
   key: '',
   label: '',
@@ -18,14 +18,14 @@ export const defaultSSHKey: SSHKeyItem = {
 }
 
 export type UseSSHKeyItemProps = {
-  sshKey: SSHKeyItem
-  onChange: (sshKeys: SSHKeyItem) => void
+  sshKey: SSHKeyProp
+  onChange: (sshKeys: SSHKeyProp) => void
   onRemove: (sshKeyId: string) => void
 }
 
 export type UseSSHKeyItemReturn = {
   id: string
-  sshKey: SSHKeyItem
+  sshKey: SSHKeyProp
   handleIsSelectedChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleKeyChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleLabelChange: (e: ChangeEvent<HTMLInputElement>) => void
@@ -42,7 +42,7 @@ export function useSSHKeyItem({
   const handleIsSelectedChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const isSelected = e.target.checked
-      const newSSHKey: SSHKeyItem = { ...sshKey, isSelected }
+      const newSSHKey: SSHKeyProp = { ...sshKey, isSelected }
       onChange(newSSHKey)
     },
     [onChange, sshKey],
@@ -51,7 +51,7 @@ export function useSSHKeyItem({
   const handleKeyChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const key = e.target.value
-      const newSSHKey: SSHKeyItem = { ...sshKey, key }
+      const newSSHKey: SSHKeyProp = { ...sshKey, key }
       onChange(newSSHKey)
     },
     [onChange, sshKey],
@@ -60,7 +60,7 @@ export function useSSHKeyItem({
   const handleLabelChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const label = e.target.value
-      const newSSHKey: SSHKeyItem = { ...sshKey, label }
+      const newSSHKey: SSHKeyProp = { ...sshKey, label }
       onChange(newSSHKey)
     },
     [onChange, sshKey],
@@ -83,13 +83,13 @@ export function useSSHKeyItem({
 // --------------------
 
 export type UseSSHKeysProps = {
-  sshKeys?: SSHKeyItem[]
-  onChange: (sshKeys: SSHKeyItem[]) => void
+  sshKeys?: SSHKeyProp[]
+  onChange: (sshKeys: SSHKeyProp[]) => void
 }
 
 export type UseSSHKeysReturn = {
-  sshKeys: SSHKeyItem[]
-  handleChange: (sshKeys: SSHKeyItem) => void
+  sshKeys: SSHKeyProp[]
+  handleChange: (sshKeys: SSHKeyProp) => void
   handleAdd: () => void
   handleRemove: (sshKeyId: string) => void
   allowRemove: boolean
@@ -99,11 +99,11 @@ export function useAddSSHKeys({
   sshKeys: sshKeysProp,
   onChange,
 }: UseSSHKeysProps): UseSSHKeysReturn {
-  const [sshKeysState, setSSHKeysState] = useState<SSHKeyItem[]>([])
+  const [sshKeysState, setSSHKeysState] = useState<SSHKeyProp[]>([])
   const newSSHKeys = sshKeysProp || sshKeysState
 
   const [accountSSHKeys] = useAccountSSHKeys()
-  const accountSSHKeyItems: SSHKeyItem[] = useMemo(
+  const accountSSHKeyItems: SSHKeyProp[] = useMemo(
     () =>
       (accountSSHKeys || []).map(({ id, key, label = '' }) => ({
         id,
@@ -115,7 +115,7 @@ export function useAddSSHKeys({
     [accountSSHKeys],
   )
 
-  const sshKeys: SSHKeyItem[] = useMemo(() => {
+  const sshKeys: SSHKeyProp[] = useMemo(() => {
     const newKeysMap = new Map(newSSHKeys.map((key) => [key.id, key]))
     const accountKeysMap = new Map(
       accountSSHKeyItems.map((key) => [key.id, key]),
@@ -130,7 +130,7 @@ export function useAddSSHKeys({
   const allowRemove = useMemo(() => sshKeys.some((key) => key.isNew), [sshKeys])
 
   const handleChange = useCallback(
-    (sshKey: SSHKeyItem) => {
+    (sshKey: SSHKeyProp) => {
       let updatedSSHKeys = [...newSSHKeys]
       const index = updatedSSHKeys.findIndex((key) => key.id === sshKey.id)
 

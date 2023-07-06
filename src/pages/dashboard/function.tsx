@@ -8,21 +8,21 @@ import {
   Tabs,
   TextGradient,
 } from '@aleph-front/aleph-core'
-import CompositeTitle from '@/components/CompositeTitle'
-import NoisyContainer from '@/components/NoisyContainer'
-import HiddenFileInput from '@/components/HiddenFileInput'
-import { useNewFunctionPage } from '@/hooks/pages/useNewFunctionPage'
-import HoldingRequirements from '@/components/HoldingRequirements'
-import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
-import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
+import CompositeTitle from '@/components/common/CompositeTitle'
+import NoisyContainer from '@/components/common/NoisyContainer'
+import HiddenFileInput from '@/components/common/HiddenFileInput'
+import { useNewFunctionPage } from '@/hooks/pages/dashboard/useNewFunctionPage'
+import HoldingRequirements from '@/components/common/HoldingRequirements'
+import ExternalLinkButton from '@/components/common/ExternalLinkButton'
+import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
-import AddVolumes from '@/components/form/AddVolumes/cmp'
+import AddVolumes from '@/components/form/AddVolumes'
 import AddEnvVars from '@/components/form/AddEnvVars'
-import AddDomains from '@/components/form/AddDomains/cmp'
+import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
-import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime/cmp'
+import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime'
 import { EntityType } from '@/helpers/constants'
-import { default as Container } from '@/components/CenteredContainer'
+import { default as Container } from '@/components/common/CenteredContainer'
 
 export default function NewFunctionPage() {
   const {

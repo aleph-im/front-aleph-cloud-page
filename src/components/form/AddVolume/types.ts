@@ -1,36 +1,36 @@
 import {
-  ExistingVolume,
-  NewVolume,
-  PersistentVolume,
-  Volume,
+  ExistingVolumeProp,
+  NewVolumeProp,
+  PersistentVolumeProp,
+  VolumeProp,
 } from '@/hooks/form/useAddVolume'
 
 export type RemoveVolumeProps = {
-  volume: Volume
+  volume: VolumeProp
   onRemove: (volumeId: string) => void
 }
 
 export type AddNewVolumeProps = {
-  volume: NewVolume
-  onChange: (volume: NewVolume) => void
+  volume: NewVolumeProp
+  onChange: (volume: NewVolumeProp) => void
   onRemove?: (volumeId: string) => void
 }
 
 export type AddExistingVolumeProps = {
-  volume: ExistingVolume
-  onChange: (volume: ExistingVolume) => void
+  volume: ExistingVolumeProp
+  onChange: (volume: ExistingVolumeProp) => void
   onRemove?: (volumeId: string) => void
 }
 
 export type AddPersistentVolumeProps = {
-  volume: PersistentVolume
-  onChange: (volume: PersistentVolume) => void
+  volume: PersistentVolumeProp
+  onChange: (volume: PersistentVolumeProp) => void
   onRemove?: (volumeId: string) => void
 }
 
 export type AddVolumeProps = {
-  volume: Volume
+  volume: VolumeProp
   isStandAlone?: boolean
-  onChange: (volume: Volume) => void
+  onChange: (volume: VolumeProp) => void
   onRemove?: (volumeId: string) => void
 }

@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router'
-import { useScrollTo } from '../useScrollTo'
 import { useResponsiveMin } from '@aleph-front/aleph-core'
 import { RefObject, useCallback } from 'react'
-import { useConnect } from '../useConnect'
+import { useScrollTo } from '../common/useScrollTo'
+import { useConnect } from '../common/useConnect'
 
 export type HomePage = {
   featureSectionBg: string

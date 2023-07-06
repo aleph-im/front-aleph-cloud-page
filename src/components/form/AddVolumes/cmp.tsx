@@ -3,7 +3,7 @@ import { Button } from '@aleph-front/aleph-core'
 import { useAddVolumes } from '@/hooks/form/useAddVolumes'
 import { AddVolumesProps } from './types'
 import AddVolume from '../AddVolume'
-import InfoTooltipButton from '@/components/InfoTooltipButton'
+import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 
 export const AddVolumes = React.memo((props: AddVolumesProps) => {
   const { volumes, handleAdd, handleRemove, handleChange } =

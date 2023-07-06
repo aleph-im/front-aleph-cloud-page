@@ -1,9 +1,9 @@
-import HoldingRequirements from '@/components/HoldingRequirements'
 import NewVolume from '@/components/form/AddVolume'
 import { EntityType } from '@/helpers/constants'
-import { useNewVolumePage } from '@/hooks/pages/useNewVolumePage'
+import { useNewVolumePage } from '@/hooks/pages/dashboard/useNewVolumePage'
 import { Button, TextGradient } from '@aleph-front/aleph-core'
-import { default as Container } from '@/components/CenteredContainer'
+import HoldingRequirements from '@/components/common/HoldingRequirements'
+import { default as Container } from '@/components/common/CenteredContainer'
 
 export default function NewVolumePage() {
   const {

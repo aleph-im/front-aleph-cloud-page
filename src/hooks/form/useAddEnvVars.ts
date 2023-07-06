@@ -1,26 +1,26 @@
 import { ChangeEvent, useCallback, useId, useState } from 'react'
 
-export type EnvVar = {
+export type EnvVarProp = {
   id: string
   name: string
   value: string
 }
 
-export const defaultEnvVar: EnvVar = {
+export const defaultEnvVar: EnvVarProp = {
   id: `envvar-0`,
   name: '',
   value: '',
 }
 
 export type UseEnvVarItemProps = {
-  envVar: EnvVar
-  onChange: (envVars: EnvVar) => void
+  envVar: EnvVarProp
+  onChange: (envVars: EnvVarProp) => void
   onRemove: (envVarId: string) => void
 }
 
 export type UseEnvVarItemReturn = {
   id: string
-  envVar: EnvVar
+  envVar: EnvVarProp
   handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleValueChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleRemove: () => void
@@ -36,7 +36,7 @@ export function useEnvVarItem({
   const handleNameChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const name = e.target.value
-      const newEnvVar: EnvVar = { ...envVar, name }
+      const newEnvVar: EnvVarProp = { ...envVar, name }
       onChange(newEnvVar)
     },
     [onChange, envVar],
@@ -45,7 +45,7 @@ export function useEnvVarItem({
   const handleValueChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value
-      const newEnvVar: EnvVar = { ...envVar, value }
+      const newEnvVar: EnvVarProp = { ...envVar, value }
       onChange(newEnvVar)
     },
     [onChange, envVar],
@@ -67,13 +67,13 @@ export function useEnvVarItem({
 // --------------------
 
 export type UseEnvVarsProps = {
-  envVars?: EnvVar[]
-  onChange: (envVars: EnvVar[]) => void
+  envVars?: EnvVarProp[]
+  onChange: (envVars: EnvVarProp[]) => void
 }
 
 export type UseEnvVarsReturn = {
-  envVars: EnvVar[]
-  handleChange: (envVars: EnvVar) => void
+  envVars: EnvVarProp[]
+  handleChange: (envVars: EnvVarProp) => void
   handleAdd: () => void
   handleRemove: (envVarId: string) => void
 }
@@ -82,11 +82,11 @@ export function useAddEnvVars({
   envVars: envVarsProp,
   onChange,
 }: UseEnvVarsProps): UseEnvVarsReturn {
-  const [envVarsState, setEnvVarsState] = useState<EnvVar[]>([])
+  const [envVarsState, setEnvVarsState] = useState<EnvVarProp[]>([])
   const envVars = envVarsProp || envVarsState
 
   const handleChange = useCallback(
-    (envVar: EnvVar) => {
+    (envVar: EnvVarProp) => {
       const updatedEnvVars = [...envVars]
       const index = envVars.findIndex((envVar) => envVar.id === envVar.id)
 

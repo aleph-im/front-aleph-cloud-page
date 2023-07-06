@@ -1,7 +1,7 @@
 import React from 'react'
 import { TextInput, Button } from '@aleph-front/aleph-core'
-import NoisyContainer from '../../NoisyContainer'
-import ExternalLinkButton from '@/components/ExternalLinkButton'
+import ExternalLinkButton from '@/components/common/ExternalLinkButton'
+import NoisyContainer from '@/components/common/NoisyContainer'
 
 export const AddDomains = React.memo(() => {
   return (

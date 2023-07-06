@@ -1,14 +1,14 @@
-import { SSHKeyItem } from '@/hooks/form/useAddSSHKeys'
+import { SSHKeyProp } from '@/hooks/form/useAddSSHKeys'
 
 export type SSHKeyItemProps = {
-  sshKey: SSHKeyItem
-  onChange: (sshKey: SSHKeyItem) => void
+  sshKey: SSHKeyProp
+  onChange: (sshKey: SSHKeyProp) => void
   onRemove: (sshKeyId: string) => void
   index: number
   allowRemove: boolean
 }
 
 export type AddSSHKeysProps = {
-  sshKeys?: SSHKeyItem[]
-  onChange: (sshKeys: SSHKeyItem[]) => void
+  sshKeys?: SSHKeyProp[]
+  onChange: (sshKeys: SSHKeyProp[]) => void
 }

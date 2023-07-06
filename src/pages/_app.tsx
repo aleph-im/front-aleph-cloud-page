@@ -8,16 +8,16 @@ config.autoAddCss = false
 import type { AppProps } from 'next/app'
 import { ThemeProvider } from 'styled-components'
 import { themes, GlobalStyles } from '@aleph-front/aleph-core'
-import Footer from '@/components/Footer'
+import Footer from '@/components/common/Footer'
 import { GlobalStylesOverride } from '@/styles/global'
-import Header from '@/components/Header'
+import Header from '@/components/common/Header'
 
-import NotificationProvider from '@/components/NotificationProvider'
+import NotificationProvider from '@/components/common/NotificationProvider'
 import { AppStateProvider } from '@/contexts/appState'
-import AutoBreadcrumb from '@/components/AutoBreadcrumb/cmp'
+import AutoBreadcrumb from '@/components/common/AutoBreadcrumb/cmp'
 import { breadcrumbNames } from '@/helpers/constants'
 import { useRouter } from 'next/router'
-import Main from '@/components/Main'
+import Main from '@/components/common/Main'
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter()

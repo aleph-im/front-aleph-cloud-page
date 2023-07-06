@@ -1,19 +1,19 @@
 import { EntityType } from '@/helpers/constants'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 
-export type NameAndTags = {
+export type NameAndTagsProp = {
   name?: string
   tags?: string[]
 }
 
-export const defaultNameAndTags: NameAndTags = {}
+export const defaultNameAndTags: NameAndTagsProp = {}
 
-export type UseNameAndTagsProps = NameAndTags & {
+export type UseNameAndTagsProps = NameAndTagsProp & {
   entityType: EntityType.Instance | EntityType.Program
-  onChange: (state: NameAndTags) => void
+  onChange: (state: NameAndTagsProp) => void
 }
 
-export type UseNameAndTagsReturn = NameAndTags & {
+export type UseNameAndTagsReturn = NameAndTagsProp & {
   entityName: string
   handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleTagsChange: (tags: string[]) => void
@@ -24,13 +24,13 @@ export function useAddNameAndTags({
   entityType,
   ...nameAndTagsProp
 }: UseNameAndTagsProps): UseNameAndTagsReturn {
-  const [nameAndTagsState, setNameAndTagsState] = useState<NameAndTags>()
+  const [nameAndTagsState, setNameAndTagsState] = useState<NameAndTagsProp>()
   const nameAndTags = nameAndTagsProp || nameAndTagsState
 
   const handleNameChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const name = e.target.value
-      const updatedNameAndTags: NameAndTags = { ...nameAndTags, name }
+      const updatedNameAndTags: NameAndTagsProp = { ...nameAndTags, name }
 
       setNameAndTagsState(updatedNameAndTags)
       onChange(updatedNameAndTags)
@@ -40,7 +40,7 @@ export function useAddNameAndTags({
 
   const handleTagsChange = useCallback(
     (tags: string[]) => {
-      const updatedNameAndTags: NameAndTags = { ...nameAndTags }
+      const updatedNameAndTags: NameAndTagsProp = { ...nameAndTags }
 
       if (tags.length > 0) {
         updatedNameAndTags.tags = tags

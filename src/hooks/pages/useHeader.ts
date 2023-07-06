@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { useConnect } from '../useConnect'
 import { DefaultTheme, useTheme } from 'styled-components'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { useConnect } from '../common/useConnect'
 
 export type Header = {
   theme: DefaultTheme

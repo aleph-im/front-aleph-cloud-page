@@ -1,18 +1,20 @@
 import { BrowserProvider, Contract } from 'ethers'
 import E_ from './errors'
 import {
+  EphemeralVolume,
   InstanceMessage,
   MessageType,
+  PersistentVolume,
   PostMessage,
   ProgramMessage,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/types'
 import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
 import { EntityType } from './constants'
-import { EnvVar } from '@/hooks/form/useAddEnvVars'
-import { SSHKey } from './ssh'
-import { Instance } from './instance'
-import { Volume, VolumeType } from '@/hooks/form/useAddVolume'
+import { SSHKey } from '../domain/ssh'
+import { Instance } from '../domain/instance'
+import { AddVolume, Volume, VolumeManager, VolumeType } from '@/domain/volume'
+import { Program } from '@/domain/program'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -44,27 +46,6 @@ export const ellipseAddress = (address: string) => {
 export const isValidItemHash = (hash: string) => {
   const regex = /^[0-9a-f]{64}$/
   return regex.test(hash)
-}
-
-/**
- * Takes a collection of environment variables and returns an object with the name and value of each variable.
- */
-export const parseEnvVars = (
-  envVars?: EnvVar[],
-): Record<string, string> | undefined => {
-  if (!envVars) return
-
-  return envVars.reduce((acc, env) => {
-    const name = env.name.trim()
-    const value = env.value.trim()
-
-    if (name.length <= 0) throw new Error(`Invalid env var name "${name}"`)
-    if (value.length <= 0) throw new Error(`Invalid env var value "${value}"`)
-
-    acc[name] = value
-
-    return acc
-  }, {} as Record<string, string>)
 }
 
 /**
@@ -155,17 +136,23 @@ export const convertBitUnits = (
 /**
  * Converts a number of bytes to a human readable size
  */
-export const humanReadableSize = (value?: number) => {
+export const humanReadableSize = (
+  value?: number,
+  from: 'b' | 'kb' | 'mb' | 'gb' | 'tb' = 'b',
+): string => {
   if (value === undefined) return 'n/a'
   if (value === 0) return '-'
 
   const units = ['b', 'kb', 'mb', 'gb', 'tb']
-  let i = 0
-  while (value > 1000 ** i && i < units.length) {
+  const pow = units.indexOf(from)
+  value = value * 1000 ** pow
+
+  let i = -1
+  while (value >= 1000 ** (i + 1) && i < units.length) {
     i++
   }
 
-  return (value / 1000 ** (i - 1)).toFixed(2) + units[i]
+  return `${(value / 1000 ** i).toFixed(2)} ${units[i].toUpperCase()}`
 }
 
 /**
@@ -283,58 +270,8 @@ export const getFunctionCost = ({
   }
 }
 
-/**
- * Returns the size of a volume in mb
- */
-export function getVolumeSize(volume: Volume): number {
-  if (volume.type === VolumeType.New) {
-    return volume.size || (volume?.fileSrc?.size || 0) / 10 ** 6
-  }
-
-  return volume.size || 0
-}
-
-export function getVolumeCost(volume: Volume): number {
-  return getVolumeSize(volume) * 20
-}
-
-// @note: The algorithm for calculating the cost per volume is as follows:
-// 1. Calculate the storage allowance for the function, the more compute units, the more storage allowance
-// 2. For each volume, subtract the storage allowance from the volume size
-// 3. If there is more storage than allowance left, the additional storage is charged at 20 tokens per mb
-export function getPerVolumeCost(
-  volumes: Volume[],
-  storageAllowance = 0,
-): number[] {
-  return volumes.map((volume) => {
-    let size = getVolumeSize(volume) || 0
-
-    if (storageAllowance > 0) {
-      if (size <= storageAllowance) {
-        storageAllowance -= size
-        size = 0
-      } else {
-        size -= storageAllowance
-        storageAllowance = 0
-      }
-    }
-
-    return size * 20
-  })
-}
-
-export function getVolumeTotalCost(
-  volumes: Volume[],
-  storageAllowance = 0,
-): number {
-  return getPerVolumeCost(volumes, storageAllowance).reduce(
-    (ac, cv) => ac + cv,
-    0,
-  )
-}
-
 export type VolumesPriceConfig = {
-  volumes?: Volume[]
+  volumes?: (Volume | AddVolume)[]
 }
 
 export type GetTotalProductCostConfig = FunctionPriceConfig & VolumesPriceConfig
@@ -352,7 +289,7 @@ export const getTotalProductCost = ({
   capabilities,
 }: GetTotalProductCostConfig): GetTotalProductReturn => {
   const newVolumes =
-    volumes?.filter((volume) => volume.type !== VolumeType.Existing) || []
+    volumes?.filter((volume) => volume.volumeType !== VolumeType.Existing) || []
 
   const { compute: computeTotalCost, storageAllowance } = getFunctionCost({
     cpu,
@@ -363,7 +300,10 @@ export const getTotalProductCost = ({
   // @note: If no compute units are provided (compute = 0, storageAllowance= 0),
   // we only calculate the cost of the volumes
   // This will most likely be called from the create volume page
-  const perVolumeCost = getPerVolumeCost(newVolumes, storageAllowance)
+  const perVolumeCost = VolumeManager.getPerVolumeCost(
+    newVolumes,
+    storageAllowance,
+  )
   const volumeTotalCost = perVolumeCost.reduce((ac, cv) => ac + cv, 0)
   const totalCost = volumeTotalCost + computeTotalCost
 
@@ -375,7 +315,7 @@ export const getTotalProductCost = ({
   }
 }
 
-export type AnyProduct = ProgramMessage | Instance | StoreMessage | SSHKey
+export type AnyProduct = Program | Instance | Volume | SSHKey
 
 export type AnyMessage =
   | ProgramMessage
@@ -388,15 +328,22 @@ export const isProgram = (msg: AnyMessage) => msg.type === MessageType.program
 export const isInstance = (msg: AnyMessage) => msg.type === MessageType.instance
 export const isSSHKey = (msg: AnyMessage) => msg.type === MessageType.post
 
-export const getEntityTypeFromMessage = (
-  msg: ProgramMessage | StoreMessage,
-) => {
+export function getEntityTypeFromMessage(msg: AnyMessage): EntityType {
   if (isVolume(msg)) return EntityType.Volume
   if (isProgram(msg)) return EntityType.Program
   if (isInstance(msg)) return EntityType.Instance
   if (isSSHKey(msg)) return EntityType.SSHKey
+  throw new Error('Unknown type')
 }
 
-export const isVolumePersistent = (volume: MachineVolume) => {
+export function isVolumePersistent(
+  volume: MachineVolume,
+): volume is PersistentVolume {
   return volume.hasOwnProperty('persistence')
+}
+
+export function isVolumeEphemeral(
+  volume: MachineVolume,
+): volume is EphemeralVolume {
+  return volume.hasOwnProperty('ephemeral')
 }

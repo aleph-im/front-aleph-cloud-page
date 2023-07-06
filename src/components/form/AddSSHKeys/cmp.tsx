@@ -1,8 +1,8 @@
 import React from 'react'
 import { Icon, TextInput, Button, Checkbox } from '@aleph-front/aleph-core'
 import { useAddSSHKeys, useSSHKeyItem } from '@/hooks/form/useAddSSHKeys'
-import NoisyContainer from '../../NoisyContainer'
 import { SSHKeyItemProps, AddSSHKeysProps } from './types'
+import NoisyContainer from '@/components/common/NoisyContainer'
 
 const SSHKeyItem = React.memo(
   ({ index, allowRemove, ...props }: SSHKeyItemProps) => {

@@ -1,8 +1,8 @@
 import React from 'react'
 import { Icon, TextInput, Button } from '@aleph-front/aleph-core'
 import { useAddEnvVars, useEnvVarItem } from '@/hooks/form/useAddEnvVars'
-import NoisyContainer from '../../NoisyContainer'
 import { EnvVarItemProps, AddEnvVarsProps as AddEnvVarsProps } from './types'
+import NoisyContainer from '@/components/common/NoisyContainer'
 
 const EnvVarItem = React.memo((props: EnvVarItemProps) => {
   const { id, envVar, handleNameChange, handleValueChange, handleRemove } =

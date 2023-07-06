@@ -6,8 +6,6 @@ import {
   Checkbox,
   Button,
 } from '@aleph-front/aleph-core'
-import HiddenFileInput from '../../HiddenFileInput'
-import NoisyContainer from '../../NoisyContainer'
 import {
   RemoveVolumeProps,
   AddVolumeProps,
@@ -17,13 +15,14 @@ import {
 } from './types'
 import React, { useCallback, useMemo } from 'react'
 import {
-  Volume,
-  VolumeType,
   useAddVolume,
   useAddExistingVolumeProps,
   useAddNewVolumeProps,
   useAddPersistentVolumeProps,
 } from '@/hooks/form/useAddVolume'
+import { VolumeType, Volume } from '@/domain/volume'
+import NoisyContainer from '@/components/common/NoisyContainer'
+import HiddenFileInput from '@/components/common/HiddenFileInput'
 
 const RemoveVolume = React.memo(({ volume, onRemove }: RemoveVolumeProps) => {
   const handleRemove = useCallback(() => {
@@ -242,13 +241,13 @@ export const AddVolume = React.memo(
 
     const handleVolumeTypeChange = useCallback(
       (type: string | VolumeType) => {
-        const newVolume = { ...volume, type } as Volume
+        const newVolume = { ...volume, volumeType: type } as Volume
         handleChange(newVolume)
       },
       [handleChange, volume],
     )
 
-    const Cmp = useMemo(() => CmpMap[volume.type], [volume.type])
+    const Cmp = useMemo(() => CmpMap[volume.volumeType], [volume.volumeType])
 
     if (isStandAlone)
       return (
@@ -259,7 +258,7 @@ export const AddVolume = React.memo(
       <>
         <div tw="px-0 pt-6 pb-3">
           <Tabs
-            selected={volume.type}
+            selected={volume.volumeType}
             align="left"
             onTabChange={handleVolumeTypeChange}
             tabs={[

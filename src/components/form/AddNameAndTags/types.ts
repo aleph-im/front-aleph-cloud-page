@@ -1,7 +1,7 @@
 import { EntityType } from '@/helpers/constants'
-import { NameAndTags } from '@/hooks/form/useAddNameAndTags'
+import { NameAndTagsProp } from '@/hooks/form/useAddNameAndTags'
 
-export type AddNameAndTagsProps = NameAndTags & {
+export type AddNameAndTagsProps = NameAndTagsProp & {
   entityType: EntityType.Instance | EntityType.Program
-  onChange: (state: NameAndTags) => void
+  onChange: (state: NameAndTagsProp) => void
 }

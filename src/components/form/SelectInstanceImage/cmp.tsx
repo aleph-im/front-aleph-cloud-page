@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { useBasePath } from '@/hooks/useBasePath'
+import { useBasePath } from '@/hooks/common/useBasePath'
 import { useCallback } from 'react'
 import { useSelectInstanceImage } from '@/hooks/form/useSelectInstanceImage'
 import { SelectInstanceImageItemProps, SelectInstanceImageProps } from './types'

@@ -1,21 +1,11 @@
-import NoisyContainer from '@/components/NoisyContainer'
-import { useNewSSHKeyPage } from '@/hooks/pages/useNewSSHKeyPage'
+import Container from '@/components/common/Container'
+import NoisyContainer from '@/components/common/NoisyContainer'
+import { useNewSSHKeyPage } from '@/hooks/pages/dashboard/useNewSSHKeyPage'
 import { Button, TextArea, TextInput } from '@aleph-front/aleph-core'
-import { ChangeEvent, useCallback } from 'react'
-import { default as Container } from '@/components/CenteredContainer'
 
 export default function NewSSHKey() {
-  const { key, label, setKey, setLabel, handleSubmit } = useNewSSHKeyPage()
-
-  const handleKeyChange = useCallback(
-    (e: ChangeEvent<HTMLTextAreaElement>) => setKey(e.target.value),
-    [setKey],
-  )
-
-  const handleLabelChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => setLabel(e.target.value),
-    [setLabel],
-  )
+  const { key, label, handleChangeKey, handleChangeLabel, handleSubmit } =
+    useNewSSHKeyPage()
 
   return (
     <>
@@ -27,7 +17,7 @@ export default function NewSSHKey() {
                 <TextArea
                   label="SSH Public Key"
                   value={key}
-                  onChange={handleKeyChange}
+                  onChange={handleChangeKey}
                   name="ssh_key"
                   placeholder="SSH Key"
                   tw="h-40 break-all"
@@ -37,7 +27,7 @@ export default function NewSSHKey() {
                 <TextInput
                   label="Label"
                   value={label}
-                  onChange={handleLabelChange}
+                  onChange={handleChangeLabel}
                   name="ssh_label"
                   placeholder="Label"
                 />

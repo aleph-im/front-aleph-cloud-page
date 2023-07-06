@@ -1,18 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
+import React from 'react'
 import { useCallback, useId } from 'react'
-import {
-  FunctionRuntimeId,
-  useSelectFunctionRuntime,
-} from '@/hooks/form/useSelectFunctionRuntime'
+import { useSelectFunctionRuntime } from '@/hooks/form/useSelectFunctionRuntime'
 import { Radio, RadioGroup, TextInput } from '@aleph-front/aleph-core'
-import NoisyContainer from '@/components/NoisyContainer'
-import ExternalLinkButton from '@/components/ExternalLinkButton'
+import NoisyContainer from '@/components/common/NoisyContainer'
+import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { isValidItemHash } from '@/helpers/utils'
 import {
   SelectFunctionRuntimeItemProps,
   SelectFunctionRuntimeProps,
 } from './types'
-import React from 'react'
+import { FunctionRuntimeId } from '@/domain/runtime'
 
 const SelectFunctionRuntimeItem = React.memo(
   ({ runtime, selected, onChange }: SelectFunctionRuntimeItemProps) => {
