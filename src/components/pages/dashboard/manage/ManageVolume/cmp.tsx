@@ -5,7 +5,7 @@ import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
 import { Button, Icon, Tag } from '@aleph-front/aleph-core'
 import { useManageVolume } from '@/hooks/pages/dashboard/useManageVolume'
-import { ellipseAddress, ellipseText } from '@/helpers/utils'
+import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 
 export default function ManageVolume() {
@@ -94,7 +94,9 @@ export default function ManageVolume() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
-                  <GrayText className="fs-xs tp-body1">{volume.size}</GrayText>
+                  <GrayText className="fs-xs tp-body1">
+                    {humanReadableSize(volume.size, 'mb')}
+                  </GrayText>
                 </div>
               </div>
 

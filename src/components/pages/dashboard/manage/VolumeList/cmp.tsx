@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import {
   convertBitUnits,
+  humanReadableSize,
   isVolumeEphemeral,
   isVolumePersistent,
 } from '@/helpers/utils'
@@ -25,11 +26,7 @@ export const VolumeList = React.memo(
                 <div className="tp-info text-main0">PERSISTENT VOLUME</div>
                 <div>
                   <GrayText className="fs-xs tp-body1">
-                    {convertBitUnits(volume.size_mib, {
-                      from: 'mb',
-                      to: 'gb',
-                      displayUnit: true,
-                    })}
+                    {humanReadableSize(volume.size_mib, 'mb')}
                   </GrayText>
                 </div>
               </div>
@@ -38,11 +35,7 @@ export const VolumeList = React.memo(
                 <div className="tp-info text-main0">EPHEMERAL VOLUME</div>
                 <div>
                   <GrayText className="fs-xs tp-body1">
-                    {convertBitUnits(volume.size_mib, {
-                      from: 'mb',
-                      to: 'gb',
-                      displayUnit: true,
-                    })}
+                    {humanReadableSize(volume.size_mib, 'mb')}
                   </GrayText>
                 </div>
               </div>

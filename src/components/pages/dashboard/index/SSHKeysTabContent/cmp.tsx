@@ -6,7 +6,6 @@ import ButtonLink from '@/components/common/ButtonLink'
 
 export const SSHKeysTabContent = React.memo(
   ({ data }: SSHKeysTabContentProps) => {
-    console.log(data)
     return (
       <>
         {data.length > 0 ? (

@@ -1,8 +1,9 @@
 import { useNotification } from '@aleph-front/aleph-core'
 import { useCallback, useState } from 'react'
 
-type CopiedValue = string | null
-type CopyFn = (text: string) => Promise<boolean> // Return success
+export type CopiedValue = string | null
+export type CopyFn = (text: string) => Promise<boolean> // Return success
+export type CopyAndNotifyFn = (text: string) => Promise<void>
 
 export function useCopyToClipboard(): [CopiedValue, CopyFn] {
   const [copiedText, setCopiedText] = useState<CopiedValue>(null)
@@ -28,14 +29,15 @@ export function useCopyToClipboard(): [CopiedValue, CopyFn] {
   return [copiedText, copy]
 }
 
-export function useCopyToClipboardAndNotify(): [CopiedValue, CopyFn] {
+export function useCopyToClipboardAndNotify(): [CopiedValue, CopyAndNotifyFn] {
   const [copiedText, copyToClipboard] = useCopyToClipboard()
   const noti = useNotification()
 
-  useCallback(
+  const copyAndNotify = useCallback(
     (text: string) => {
-      copyToClipboard(text)
+      const success = copyToClipboard(text)
 
+      if (!success) return
       if (!noti) return
 
       noti.add({
@@ -46,7 +48,7 @@ export function useCopyToClipboardAndNotify(): [CopiedValue, CopyFn] {
     [copyToClipboard, noti],
   )
 
-  return [copiedText, copyToClipboard]
+  return [copiedText, copyAndNotify]
 }
 
 export default useCopyToClipboard

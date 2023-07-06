@@ -5,7 +5,7 @@ import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/aleph-core'
 import { useManageInstance } from '@/hooks/pages/dashboard/useManageInstance'
-import { ellipseAddress, ellipseText } from '@/helpers/utils'
+import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import VolumeList from '../VolumeList'
 
@@ -33,7 +33,7 @@ export default function ManageInstance() {
       <AutoBreadcrumb names={breadcrumbNames} name={name.toUpperCase()} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <div tw="flex justify-end pb-5">
+          <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
@@ -87,7 +87,7 @@ export default function ManageInstance() {
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
                   <GrayText className="fs-xs tp-body1">
-                    {instance.size}
+                    {humanReadableSize(instance.size, 'mb')}
                   </GrayText>
                 </div>
               </div>
