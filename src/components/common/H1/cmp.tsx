@@ -1,0 +1,10 @@
+import React from 'react'
+import { StyledH1 } from './styles'
+import { H1Props } from './types'
+
+export const H1 = React.memo(({ children, ...rest }: H1Props) => {
+  return <StyledH1 {...rest}>{children}</StyledH1>
+})
+H1.displayName = 'H1'
+
+export default H1

@@ -1,13 +1,14 @@
 import { useRouter } from 'next/router'
-import { useScrollTo } from '../useScrollTo'
 import { useResponsiveMin } from '@aleph-front/aleph-core'
 import { RefObject, useCallback } from 'react'
-import { useConnect } from '../useConnect'
+import { useScrollTo } from '../common/useScrollTo'
+import { useConnect } from '../common/useConnect'
 
 export type HomePage = {
   featureSectionBg: string
   navigate: {
     function: () => void
+    instance: () => void
     volume: () => void
   }
   scroll: {
@@ -37,6 +38,16 @@ export function useHomePage(): HomePage {
   }, [connect, isConnected, router])
 
   // @note: wait till account is connected and redirect
+  const navigateInstance = useCallback(async () => {
+    if (!isConnected) {
+      const acc = await connect()
+      if (!acc) return
+    }
+
+    router.push('/dashboard/instance')
+  }, [connect, isConnected, router])
+
+  // @note: wait till account is connected and redirect
   const navigateVolume = useCallback(async () => {
     if (!isConnected) {
       const acc = await connect()
@@ -50,6 +61,7 @@ export function useHomePage(): HomePage {
     featureSectionBg,
     navigate: {
       function: navigateFunction,
+      instance: navigateInstance,
       volume: navigateVolume,
     },
     scroll: {

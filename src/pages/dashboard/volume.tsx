@@ -1,28 +1,17 @@
-import BaseContainer from '@/components/Container'
-import HoldingRequirements from '@/components/HoldingRequirements'
-import NewVolume from '@/components/NewVolume'
-import { useNewVolumePage } from '@/hooks/pages/useNewVolumePage'
-import { Button, Col, Row, TextGradient } from '@aleph-front/aleph-core'
-import { ReactNode } from 'react'
-
-const Container = ({ children }: { children: ReactNode }) => (
-  <Row xs={1} lg={12} gap="0">
-    <Col xs={1} lg={10} lgOffset={2} xl={8} xlOffset={3} xxl={6} xxlOffset={4}>
-      <BaseContainer>
-        <div tw="max-w-[715px] mx-auto">{children}</div>
-      </BaseContainer>
-    </Col>
-  </Row>
-)
+import NewVolume from '@/components/form/AddVolume'
+import { EntityType } from '@/helpers/constants'
+import { useNewVolumePage } from '@/hooks/pages/dashboard/useNewVolumePage'
+import { Button, TextGradient } from '@aleph-front/aleph-core'
+import HoldingRequirements from '@/components/common/HoldingRequirements'
+import { default as Container } from '@/components/common/CenteredContainer'
 
 export default function NewVolumePage() {
   const {
-    volumeState,
-    setVolumeProperty,
-    setVolumeType,
+    formState,
+    handleSubmit,
+    handleChangeVolume,
     address,
     accountBalance,
-    handleSubmit,
     isCreateButtonDisabled,
   } = useNewVolumePage()
 
@@ -33,29 +22,8 @@ export default function NewVolumePage() {
           <Container>
             <NewVolume
               isStandAlone
-              volumeMountpoint={volumeState.mountpoint}
-              volumeName={volumeState.name}
-              volumeRefHash={volumeState.refHash}
-              volumeUseLatest={volumeState.useLatest}
-              volumeSize={volumeState.size}
-              volumeSrc={volumeState.src}
-              handleMountpointChange={(e) =>
-                setVolumeProperty('mountpoint', e.target.value)
-              }
-              handleNameChange={(e) =>
-                setVolumeProperty('name', e.target.value)
-              }
-              handleRefHashChange={(e) =>
-                setVolumeProperty('refHash', e.target.value)
-              }
-              handleSizeChange={(e) =>
-                setVolumeProperty('size', e.target.value)
-              }
-              handleSrcChange={(f) => setVolumeProperty('src', f)}
-              handleUseLatestChange={(e) =>
-                setVolumeProperty('useLatest', e.target.checked)
-              }
-              handleVolumeType={setVolumeType}
+              volume={formState.volume}
+              onChange={handleChangeVolume}
             />
           </Container>
         </section>
@@ -78,7 +46,8 @@ export default function NewVolumePage() {
             <div tw="my-7">
               <HoldingRequirements
                 address={address}
-                storage={[volumeState]}
+                type={EntityType.Volume}
+                volumes={[formState.volume]}
                 unlockedAmount={accountBalance}
               />
             </div>

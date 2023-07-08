@@ -1,73 +1,43 @@
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import {
   Button,
-  ChipInput,
   CodeEditor,
-  Col,
   Icon,
   Radio,
   RadioGroup,
-  Row,
-  Table,
   Tabs,
   TextGradient,
-  TextInput,
 } from '@aleph-front/aleph-core'
-import CompositeTitle from '@/components/CompositeTitle'
-import NoisyContainer from '@/components/NoisyContainer'
-import HiddenFileInput from '@/components/HiddenFileInput'
-import {
-  convertBitUnits,
-  getFunctionCost,
-  getFunctionSpecsByComputeUnits,
-  isValidItemHash,
-} from '@/helpers/utils'
-import { useNewFunctionPage } from '@/hooks/pages/useNewFunctionPage'
-import NewVolume from '@/components/NewVolume/cmp'
-import HoldingRequirements from '@/components/HoldingRequirements'
-import BaseContainer from '@/components/Container'
-import ExternalLinkButton from '@/components/ExternalLinkButton/cmp'
-import InfoTooltipButton from '@/components/InfoTooltipButton/cmp'
-import styled, { css } from 'styled-components'
-
-const StyledTable = styled(Table<any>)`
-  ${({ theme }) => css`
-    tbody {
-      tr {
-        cursor: pointer;
-        &:hover {
-          color: ${theme.color.main0};
-        }
-      }
-    }
-  `}
-`
-
-const Container = ({ children }: { children: ReactNode }) => (
-  <Row xs={1} lg={12} gap="0">
-    <Col xs={1} lg={10} lgOffset={2} xl={8} xlOffset={3} xxl={6} xxlOffset={4}>
-      <BaseContainer>
-        <div tw="max-w-[715px] mx-auto">{children}</div>
-      </BaseContainer>
-    </Col>
-  </Row>
-)
+import CompositeTitle from '@/components/common/CompositeTitle'
+import NoisyContainer from '@/components/common/NoisyContainer'
+import HiddenFileInput from '@/components/common/HiddenFileInput'
+import { useNewFunctionPage } from '@/hooks/pages/dashboard/useNewFunctionPage'
+import HoldingRequirements from '@/components/common/HoldingRequirements'
+import ExternalLinkButton from '@/components/common/ExternalLinkButton'
+import InfoTooltipButton from '@/components/common/InfoTooltipButton'
+import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
+import AddVolumes from '@/components/form/AddVolumes'
+import AddEnvVars from '@/components/form/AddEnvVars'
+import AddDomains from '@/components/form/AddDomains'
+import AddNameAndTags from '@/components/form/AddNameAndTags'
+import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime'
+import { EntityType } from '@/helpers/constants'
+import { default as Container } from '@/components/common/CenteredContainer'
 
 export default function NewFunctionPage() {
   const {
     formState,
     handleSubmit,
     setFormValue,
-    setEnvironmentVariable,
-    addEnvironmentVariable,
-    removeEnvironmentVariable,
-    setVolumeType,
-    setVolumeValue,
-    addVolume,
-    removeVolume,
     address,
     accountBalance,
     isCreateButtonDisabled,
+    handleChangeEntityTab,
+    handleChangeFunctionRuntime,
+    handleChangeInstanceSpecs,
+    handleChangeVolumes,
+    handleChangeEnvVars,
+    handleChangeNameAndTags,
   } = useNewFunctionPage()
 
   const [tabId, setTabId] = useState('code')
@@ -79,6 +49,7 @@ export default function NewFunctionPage() {
           <Container>
             <Tabs
               selected="function"
+              onTabChange={handleChangeEntityTab}
               tabs={[
                 {
                   id: 'function',
@@ -87,9 +58,6 @@ export default function NewFunctionPage() {
                 {
                   id: 'instance',
                   name: 'Instance',
-                  disabled: true,
-                  label: 'SOON',
-                  labelPosition: 'top',
                 },
                 {
                   id: 'confidential',
@@ -241,61 +209,10 @@ export default function NewFunctionPage() {
               tailored to your specific requirements. Below are the available
               options
             </p>
-            <NoisyContainer>
-              <RadioGroup direction="column">
-                <Radio
-                  checked={formState.runtime === 'default_interpreted'}
-                  label="Official runtime with Debian 11, Python 3.9 & Node.js 14"
-                  name="__config_runtime"
-                  onChange={() =>
-                    setFormValue('runtime', 'default_interpreted')
-                  }
-                  value="default"
-                />
-                <Radio
-                  checked={formState.runtime === 'default_binary'}
-                  label="Official min. runtime for binaries x86_64 (Rust, Go, ...) "
-                  name="__config_runtime"
-                  onChange={() => setFormValue('runtime', 'default_binary')}
-                  value="default"
-                />
-                <Radio
-                  checked={formState.runtime === 'custom'}
-                  label="Custom runtime"
-                  name="__config_runtime"
-                  onChange={() => setFormValue('runtime', 'custom')}
-                  value="custom"
-                />
-              </RadioGroup>
-
-              <div
-                className={
-                  formState.runtime !== 'custom' ? 'unavailable-content' : ''
-                }
-                tw="mt-5"
-              >
-                <TextInput
-                  label="Runtime hash"
-                  placeholder={'3335ad270a571b...'}
-                  name="__config_runtime_hash"
-                  onChange={(e) =>
-                    setFormValue('customRuntimeHash', e.target.value)
-                  }
-                  disabled={formState.runtime !== 'custom'}
-                  error={
-                    formState.customRuntimeHash &&
-                    !isValidItemHash(formState.customRuntimeHash)
-                      ? { message: 'Invalid hash' }
-                      : undefined
-                  }
-                />
-              </div>
-            </NoisyContainer>
-            <div tw="mt-6 text-right">
-              <ExternalLinkButton href="https://docs.aleph.im/computing/runtimes">
-                Learn more
-              </ExternalLinkButton>
-            </div>
+            <SelectFunctionRuntime
+              runtime={formState.runtime}
+              onChange={handleChangeFunctionRuntime}
+            />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -343,111 +260,16 @@ export default function NewFunctionPage() {
               ensuring optimal performance and efficient resource usage tailored
               to your specific needs.
             </p>
-
             <p tw="mb-6">
               You also get free volume storage with your instance. The free
               storage for on-demand VM is always equal to the amount of RAM,
               whilst the free storage for persistent VM is ten times (10x) the
               amount of RAM.
             </p>
-            <div tw="max-w-full overflow-y-hidden overflow-x-auto">
-              <StyledTable
-                borderType="none"
-                oddRowNoise
-                rowKey={(row) => row.cpu}
-                rowProps={(row) => ({
-                  onClick: () => {
-                    setFormValue('computeUnits', row.cpu)
-                  },
-                })}
-                columns={[
-                  {
-                    label: 'Cores',
-                    sortable: true,
-                    sortBy: (row) => row.cpu,
-                    render: (row) => {
-                      const isActive = formState.computeUnits === row.cpu
-                      const className = `${
-                        isActive ? 'text-main0' : ''
-                      } tp-body2`
-                      return (
-                        <span className={className}>{row.cpu} x86 64bit</span>
-                      )
-                    },
-                  },
-                  {
-                    label: 'Memory',
-                    align: 'right',
-                    sortable: true,
-                    sortBy: (row) => row.memory,
-                    render: (row) => {
-                      const isActive = formState.computeUnits === row.cpu
-                      const className = `${isActive ? 'text-main0' : ''}`
-                      return <span className={className}>{row.memory}</span>
-                    },
-                  },
-                  {
-                    label: 'Hold',
-                    align: 'right',
-                    sortable: true,
-                    sortBy: (row) => row.price,
-                    render: (row) => {
-                      const isActive = formState.computeUnits === row.cpu
-                      const className = `${isActive ? 'text-main0' : ''}`
-                      return <span className={className}>{row.price}</span>
-                    },
-                  },
-                  {
-                    label: '',
-                    align: 'right',
-                    render: (row) => {
-                      const active = formState.computeUnits === row.cpu
-
-                      return (
-                        <Button
-                          color="main0"
-                          variant="tertiary"
-                          kind="neon"
-                          size="regular"
-                          forwardedAs="button"
-                          type="button"
-                          // TODO: Fix this
-                          style={{ visibility: active ? 'visible' : 'hidden' }}
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <Icon name="check" />
-                        </Button>
-                      )
-                    },
-                  },
-                ]}
-                data={
-                  // TODO: Memoize this
-                  [1, 2, 4, 6, 8, 12].map((computeUnits) => {
-                    const specs = getFunctionSpecsByComputeUnits(
-                      computeUnits,
-                      formState.isPersistent,
-                    )
-                    const price = getFunctionCost({
-                      capabilities: {},
-                      computeUnits,
-                      isPersistent: formState.isPersistent,
-                      storage: 0,
-                    } as any)
-
-                    return {
-                      cpu: specs.cpu,
-                      memory: convertBitUnits(specs.memory, {
-                        from: 'mb',
-                        to: 'gb',
-                        displayUnit: true,
-                      }),
-                      price: price.compute + ' ALEPH',
-                    } as any
-                  })
-                }
-              />
-            </div>
+            <SelectInstanceSpecs
+              specs={formState.specs}
+              onChange={handleChangeInstanceSpecs}
+            />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -461,76 +283,12 @@ export default function NewFunctionPage() {
               tags. This helps streamline your development process and makes it
               easier to manage your web3 functions.
             </p>
-            <NoisyContainer>
-              <div>
-                <div tw="mb-3">
-                  <InfoTooltipButton
-                    plain
-                    my="bottom-left"
-                    at="bottom-right"
-                    tooltipContent={
-                      <div tw="text-left">
-                        <div>
-                          <div className="tp-body2 fs-md">Function name</div>
-                          <div className="tp-body1 fs-md">
-                            Assign a descriptive and unique name to your
-                            function, allowing you to quickly identify it among
-                            others in your application, understand the
-                            function&apos;s purpose and improve overall project
-                            organisation.
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  >
-                    Function name
-                  </InfoTooltipButton>
-                </div>
-                <TextInput
-                  placeholder="Give it a name"
-                  error={
-                    formState.functionName
-                      ? undefined
-                      : { message: 'This field is required' }
-                  }
-                  name="__config_function_name"
-                  onChange={(e) => setFormValue('functionName', e.target.value)}
-                />
-              </div>
-              <div tw="mt-4">
-                <div tw="mb-3">
-                  <InfoTooltipButton
-                    plain
-                    my="bottom-left"
-                    at="bottom-right"
-                    tooltipContent={
-                      <div tw="text-left">
-                        <div>
-                          <div className="tp-body2 fs-md">Tags</div>
-                          <div className="tp-body1 fs-md">
-                            Add relevant tags to categorize your functions based
-                            on their functionality, purpose, or any other
-                            criteria that provide personal context. Tags enable
-                            easy filtering and searching within your project,
-                            simplifying management and collaboration.
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  >
-                    Tags
-                  </InfoTooltipButton>
-                </div>
-                <ChipInput
-                  placeholder="Tags (press enter to add a new tag)"
-                  name="__config_function_tags"
-                  value={formState.metaTags}
-                  onChange={(val) => {
-                    setFormValue('metaTags', val)
-                  }}
-                />
-              </div>
-            </NoisyContainer>
+            <AddNameAndTags
+              entityType={EntityType.Program}
+              name={formState.name}
+              tags={formState.tags}
+              onChange={handleChangeNameAndTags}
+            />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -538,90 +296,10 @@ export default function NewFunctionPage() {
             <CompositeTitle as="h2" number="6">
               Add volumes
             </CompositeTitle>
-            {formState.volumes.map((volume, iVolume) => (
-              <NewVolume
-                key={iVolume} // note: this key is meant to avoid a warning, and should work since the array is not reordered
-                volumeMountpoint={volume.mountpoint}
-                volumeName={volume.name}
-                volumeSize={volume.size}
-                volumeSrc={volume.src}
-                volumeUseLatest={volume.useLatest}
-                volumeRefHash={volume.refHash}
-                handleMountpointChange={(e) =>
-                  setVolumeValue(iVolume, 'mountpoint', e.target.value)
-                }
-                handleNameChange={(e) =>
-                  setVolumeValue(iVolume, 'name', e.target.value)
-                }
-                handleSizeChange={(e) =>
-                  setVolumeValue(iVolume, 'size', e.target.value)
-                }
-                handleSrcChange={(e) => setVolumeValue(iVolume, 'src', e)}
-                handleRefHashChange={(e) =>
-                  setVolumeValue(iVolume, 'refHash', e.target.value)
-                }
-                handleUseLatestChange={(e) =>
-                  setVolumeValue(iVolume, 'useLatest', e.target.checked)
-                }
-                removeCallback={() => removeVolume(iVolume)}
-                handleVolumeType={(i) => setVolumeType(iVolume, i)}
-              />
-            ))}
-            <div tw="mt-6 mx-6">
-              <Button
-                type="button"
-                onClick={addVolume}
-                color="main0"
-                variant="secondary"
-                kind="neon"
-                size="regular"
-              >
-                Add another volume
-              </Button>
-            </div>
-            <div tw="mt-6 text-right">
-              <InfoTooltipButton
-                my="bottom-right"
-                at="top-right"
-                tooltipContent={
-                  <div tw="text-left">
-                    <div>
-                      <div className="tp-body2 fs-md">New volume</div>
-                      <div className="tp-body1 fs-md">
-                        <p>
-                          Many Python programs require additional packages
-                          beyond those present on the system by default.
-                        </p>
-                        <p>
-                          An immutable volume is a file containing a Squashfs
-                          filesystem that can be mounted read-only inside the
-                          virtual machine running programs in on-demand or
-                          persistent execution modes.
-                        </p>
-                      </div>
-                    </div>
-                    <div tw="mt-6">
-                      <div className="tp-body2 fs-md">Existing volume</div>
-                      <p>
-                        If this function uses the same dependencies as another
-                        program, you can reference the volume hash to avoid data
-                        duplication at no additional cost.
-                      </p>
-                    </div>
-                    <div tw="mt-6">
-                      <div className="tp-body2 fs-md">Persistent storage</div>
-                      <p>
-                        By default function data are flushed on each run. A
-                        persistent storage will allow you to persist data on
-                        disk.
-                      </p>
-                    </div>
-                  </div>
-                }
-              >
-                Learn more
-              </InfoTooltipButton>
-            </div>
+            <AddVolumes
+              volumes={formState.volumes}
+              onChange={handleChangeVolumes}
+            />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -636,71 +314,10 @@ export default function NewFunctionPage() {
               modify your application&apos;s behaviour without altering the
               source code.
             </p>
-            {formState.environmentVariables.length > 0 && (
-              <NoisyContainer>
-                <div tw="flex flex-col gap-x-6 gap-y-4">
-                  <p tw="-mb-2">Set</p>
-
-                  {formState.environmentVariables.map((variable, index) => (
-                    // eslint-disable-next-line react/jsx-key
-                    <div tw="flex flex-col md:flex-row gap-6">
-                      <div tw="flex-1">
-                        <TextInput
-                          name={`__config_env_var_${index}_name`}
-                          placeholder="Name"
-                          value={variable.name}
-                          onChange={(e) =>
-                            setEnvironmentVariable(
-                              index,
-                              'name',
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </div>
-                      <div tw="flex-1">
-                        <TextInput
-                          name={`__config_env_var_${index}_value`}
-                          placeholder="Value"
-                          value={variable.value}
-                          onChange={(e) =>
-                            setEnvironmentVariable(
-                              index,
-                              'value',
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </div>
-                      <div tw="min-w-max flex items-end">
-                        <Button
-                          color="main2"
-                          variant="secondary"
-                          kind="neon"
-                          size="regular"
-                          type="button"
-                          onClick={() => removeEnvironmentVariable(index)}
-                        >
-                          <Icon name="trash" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </NoisyContainer>
-            )}
-            <div tw="mt-6 mx-6">
-              <Button
-                type="button"
-                onClick={addEnvironmentVariable}
-                color="main0"
-                variant="secondary"
-                kind="neon"
-                size="regular"
-              >
-                Add variable
-              </Button>
-            </div>
+            <AddEnvVars
+              envVars={formState.envVars}
+              onChange={handleChangeEnvVars}
+            />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -713,31 +330,7 @@ export default function NewFunctionPage() {
               providing a more accessible and professional way for users to
               interact with your application.
             </p>
-            <NoisyContainer>
-              <TextInput
-                button={
-                  <Button
-                    color="main0"
-                    kind="neon"
-                    size="regular"
-                    variant="secondary"
-                    disabled
-                  >
-                    Add
-                  </Button>
-                }
-                buttonStyle="wrapped"
-                color="white"
-                name="__config_add_domain"
-                placeholder="Enter custom domain"
-                disabled
-              />
-            </NoisyContainer>
-            <div tw="mt-6 text-right">
-              <ExternalLinkButton href="https://docs.aleph.im" disabled>
-                Learn more
-              </ExternalLinkButton>
-            </div>
+            <AddDomains />
           </Container>
         </section>
         <section
@@ -759,12 +352,10 @@ export default function NewFunctionPage() {
             <div tw="my-7">
               <HoldingRequirements
                 address={address}
-                computeUnits={{
-                  type: 'function',
-                  number: formState.computeUnits,
-                  isPersistent: formState.isPersistent,
-                }}
-                storage={formState.volumes}
+                type={EntityType.Program}
+                isPersistentVM={formState.isPersistent}
+                specs={formState.specs}
+                volumes={formState.volumes}
                 unlockedAmount={accountBalance}
               />
             </div>

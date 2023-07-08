@@ -20,12 +20,14 @@ export const defaultFileExtension: Record<LanguageType, string> = {
   c: 'c',
 }
 
-export const defaultVolumeChannel = 'ALEPH-VOLUME'
-
 export const defaultSSHPostType = 'ALEPH-SSH'
-export const defaultSSHChannel = 'ALEPH-SSH-TEST'
 
-export const defaultVMChannel = 'ALEPH-CLOUDSOLUTIONS'
+export const defaultConsoleChannel = 'ALEPH-CLOUDSOLUTIONS'
+
+export const defaultVolumeChannel = defaultConsoleChannel
+export const defaultSSHChannel = defaultConsoleChannel
+export const defaultInstanceChannel = defaultConsoleChannel
+export const defaultProgramChannel = defaultConsoleChannel
 
 export const breadcrumbNames = {
   '/': 'SOLUTIONS',
@@ -36,5 +38,13 @@ export const breadcrumbNames = {
 export enum EntityType {
   Volume = 'volume',
   Program = 'program',
-  SSHKey = 'ssh',
+  Instance = 'instance',
+  SSHKey = 'sshKey',
+}
+
+export const EntityTypeName: Record<EntityType, string> = {
+  [EntityType.Volume]: 'Volume',
+  [EntityType.Program]: 'Function',
+  [EntityType.Instance]: 'Instance',
+  [EntityType.SSHKey]: 'SSH Key',
 }
