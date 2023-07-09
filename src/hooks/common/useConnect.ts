@@ -5,6 +5,7 @@ import { useNotification } from '@aleph-front/aleph-core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { useCallback } from 'react'
+import { useSessionStorage } from 'usehooks-ts'
 
 export type UseConnectReturn = {
   connect: () => Promise<Account | undefined>
@@ -16,6 +17,10 @@ export type UseConnectReturn = {
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
   const noti = useNotification()
+  const [_keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
+    'keepAccountAlive',
+    false,
+  )
 
   const onError = useCallback(
     (error: string) => {
@@ -46,6 +51,7 @@ export function useConnect(): UseConnectReturn {
     }
 
     if (!account) return
+    setKeepAccountAlive(true)
 
     await Promise.all([getBalance(account)]).catch((err) => {
       onError(err.message)
@@ -59,6 +65,7 @@ export function useConnect(): UseConnectReturn {
   // useAccountProducts()
 
   const disconnect = useCallback(async () => {
+    setKeepAccountAlive(false)
     dispatch({ type: ActionTypes.disconnect, payload: null })
   }, [dispatch])
 
