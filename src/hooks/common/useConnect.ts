@@ -60,7 +60,7 @@ export function useConnect(): UseConnectReturn {
 
     dispatch({ type: ActionTypes.connect, payload: { account } })
     return account
-  }, [getBalance, dispatch, onError])
+  }, [getBalance, dispatch, onError, keepAccountAlive])
 
   // @todo: Think if it is necessary preload all on connect
   // useAccountProducts()
@@ -73,10 +73,10 @@ export function useConnect(): UseConnectReturn {
   const { account } = state
   const isConnected = !!account?.address
 
-  const tryReconnect = async () => {
+  const tryReconnect = useCallback(async () => {
     if (isConnected || !keepAccountAlive) return
     await connect()
-  }
+  }, [keepAccountAlive, isConnected])
 
   return {
     connect,
