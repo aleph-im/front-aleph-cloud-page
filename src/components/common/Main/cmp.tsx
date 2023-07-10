@@ -3,16 +3,11 @@ import { MainProps } from './types'
 import { useConnect } from '@/hooks/common/useConnect'
 
 export const Main = ({ children }: MainProps) => {
-  const { isConnected, connect } = useConnect()
+  const { tryReconnect } = useConnect()
 
   useEffect(() => {
-    async function tryReconnect() {
-      if (isConnected) return
-      await connect()
-    }
-
     tryReconnect()
-  }, [connect, isConnected])
+  }, [tryReconnect])
 
   return <main>{children}</main>
 }
