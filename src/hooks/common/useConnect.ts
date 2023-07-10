@@ -12,12 +12,13 @@ export type UseConnectReturn = {
   disconnect: () => Promise<void>
   isConnected: boolean
   account: Account | undefined
+  tryReconnect: () => Promise<void>
 }
 
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
   const noti = useNotification()
-  const [_keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
+  const [keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
     'keepAccountAlive',
     false,
   )
@@ -72,10 +73,16 @@ export function useConnect(): UseConnectReturn {
   const { account } = state
   const isConnected = !!account?.address
 
+  const tryReconnect = async () => {
+    if (isConnected || !keepAccountAlive) return
+    await connect()
+  }
+
   return {
     connect,
     disconnect,
     isConnected,
     account,
+    tryReconnect,
   }
 }

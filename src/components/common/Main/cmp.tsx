@@ -1,23 +1,12 @@
 import { useEffect } from 'react'
 import { MainProps } from './types'
 import { useConnect } from '@/hooks/common/useConnect'
-import { useSessionStorage } from 'usehooks-ts'
 
 export const Main = ({ children }: MainProps) => {
-  const { isConnected, connect } = useConnect()
-  const [keepAccountAlive] = useSessionStorage(
-    'keepAccountAlive',
-    false,
-  )
+  const { isConnected, connect, tryReconnect } = useConnect()
 
   useEffect(() => {
-    async function tryReconnect() {
-      if (isConnected) return
-      await connect()
-    }
-
-    if(keepAccountAlive)
-      tryReconnect()
+    tryReconnect()
   }, [connect, isConnected])
 
   return <main>{children}</main>
