@@ -1,22 +1,22 @@
 import { useAppState } from '@/contexts/appState'
-import { Volume, VolumeManager } from '@/domain/volume'
+import { Volume } from '@/domain/volume'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
+import { useVolumeManager } from './useVolumeManager'
 
 export function useAccountVolume(
   id: string,
 ): [Volume | undefined, RequestState<unknown>] {
   const [appState, dispatch] = useAppState()
-  const { account } = appState
+  const manager = useVolumeManager()
 
   const doRequest = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
 
-    const volumeStore = new VolumeManager(account)
-    return await volumeStore.get(id)
-  }, [account, id])
+    return await manager.get(id)
+  }, [manager, id])
 
   const onSuccess = useCallback(
     (accountVolume: Volume | undefined) => {
@@ -30,10 +30,10 @@ export function useAccountVolume(
 
   const onError = useCallback(
     (error: Error, defaultHandler: (error: Error) => void) => {
-      if (!account) return
+      if (!manager) return
       defaultHandler(error)
     },
-    [account],
+    [manager],
   )
 
   const volume = useMemo(

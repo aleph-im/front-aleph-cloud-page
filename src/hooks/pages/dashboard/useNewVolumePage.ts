@@ -9,6 +9,7 @@ import {
   defaultVolume,
   VolumeProp,
 } from '@/hooks/form/useAddVolume'
+import { useVolumeManager } from '@/hooks/common/useVolumeManager'
 
 export type NewVolumeFormState = {
   volume: NewVolumeProp
@@ -25,16 +26,17 @@ export function useNewVolumePage() {
   const [appState] = useAppState()
   const { account } = appState
 
+  const manager = useVolumeManager()
+
   const onSubmit = useCallback(
     async (state: NewVolumeFormState) => {
-      if (!account) throw new Error('Invalid account')
+      if (!manager) throw new Error('Manager not ready')
 
-      const volumeManager = new VolumeManager(account)
-      await volumeManager.add(state.volume)
+      await manager.add(state.volume)
 
       router.replace('/dashboard')
     },
-    [account, router],
+    [manager, router],
   )
 
   const {

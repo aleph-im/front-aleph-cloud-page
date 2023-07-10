@@ -1,22 +1,22 @@
 import { useAppState } from '@/contexts/appState'
-import { Instance, InstanceManager } from '@/domain/instance'
+import { Instance } from '@/domain/instance'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
+import { useInstanceManager } from './useInstanceManager'
 
 export function useAccountInstance(
   id: string,
 ): [Instance | undefined, RequestState<unknown>] {
   const [appState, dispatch] = useAppState()
-  const { account } = appState
+  const manager = useInstanceManager()
 
   const doRequest = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
 
-    const instanceStore = new InstanceManager(account)
-    return await instanceStore.get(id)
-  }, [account, id])
+    return await manager.get(id)
+  }, [id, manager])
 
   const onSuccess = useCallback(
     (accountInstance: Instance | undefined) => {
@@ -30,10 +30,10 @@ export function useAccountInstance(
 
   const onError = useCallback(
     (error: Error, defaultHandler: (error: Error) => void) => {
-      if (!account) return
+      if (!manager) return
       defaultHandler(error)
     },
-    [account],
+    [manager],
   )
 
   const instance = useMemo(

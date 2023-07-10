@@ -138,8 +138,8 @@ export class VolumeManager {
 
   constructor(
     protected account: Account,
+    protected fileManager: FileManager,
     protected channel = defaultVolumeChannel,
-    protected fileManager = new FileManager(account),
   ) {}
 
   async getAll(): Promise<Volume[]> {

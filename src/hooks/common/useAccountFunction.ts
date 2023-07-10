@@ -1,22 +1,22 @@
 import { useAppState } from '@/contexts/appState'
-import { Program, ProgramManager } from '@/domain/program'
+import { Program } from '@/domain/program'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
+import { useProgramManager } from './useProgramManager'
 
 export function useAccountFunction(
   id: string,
 ): [Program | undefined, RequestState<unknown>] {
   const [appState, dispatch] = useAppState()
-  const { account } = appState
+  const manager = useProgramManager()
 
   const doRequest = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
 
-    const functionStore = new ProgramManager(account)
-    return await functionStore.get(id)
-  }, [account, id])
+    return await manager.get(id)
+  }, [manager, id])
 
   const onSuccess = useCallback(
     (accountFunction: Program | undefined) => {
@@ -30,10 +30,10 @@ export function useAccountFunction(
 
   const onError = useCallback(
     (error: Error, defaultHandler: (error: Error) => void) => {
-      if (!account) return
+      if (!manager) return
       defaultHandler(error)
     },
-    [account],
+    [manager],
   )
 
   const fn = useMemo(

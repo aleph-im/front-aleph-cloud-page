@@ -1,4 +1,5 @@
 import { defaultConsoleChannel } from '@/helpers/constants'
+import { Mutex } from '@/helpers/utils'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 
 export type AccountFileObject = {
@@ -17,6 +18,7 @@ export type AccountFilesResponse = {
 export class FileManager {
   protected sizesMapCache: Record<string, number> = {}
   protected lastFetch = 0
+  protected mutex = new Mutex()
 
   constructor(
     protected account: Account,
@@ -49,8 +51,14 @@ export class FileManager {
   }
 
   async getSizesMap(): Promise<Record<string, number>> {
-    if (this.lastFetch + 1000 * 60 < Date.now()) {
-      await this.getAll()
+    const release = await this.mutex.acquire()
+
+    try {
+      if (this.lastFetch + 1000 * 60 < Date.now()) {
+        await this.getAll()
+      }
+    } finally {
+      release()
     }
 
     return this.sizesMapCache

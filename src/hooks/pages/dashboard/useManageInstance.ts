@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { useAppState } from '@/contexts/appState'
-import { Instance, InstanceManager } from '@/domain/instance'
+import { Instance } from '@/domain/instance'
 import { useAccountInstance } from '@/hooks/common/useAccountInstance'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
+import { useInstanceManager } from '@/hooks/common/useInstanceManager'
 
 export type ManageInstance = {
   instance?: Instance
@@ -17,34 +17,31 @@ export function useManageInstance(): ManageInstance {
   const router = useRouter()
   const { hash } = router.query
 
-  const [globalState] = useAppState()
   const [instance] = useAccountInstance(hash as string)
   const [, { onLoad, onSuccess, onError }] = useRequestState()
-
-  const { account } = globalState
-
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
+
+  const manager = useInstanceManager()
 
   const handleCopyHash = useCallback(() => {
     copyAndNotify(instance?.id || '')
   }, [copyAndNotify, instance])
 
   const handleDelete = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
     if (!instance) throw new Error('Invalid function')
+    if (!manager) throw new Error('Manager not ready')
 
     try {
       onLoad()
 
-      const functionStore = new InstanceManager(account)
-      await functionStore.del(instance)
+      await manager.del(instance)
 
       onSuccess(true)
       router.replace('/dashboard')
     } catch (e) {
       onError(e as Error)
     }
-  }, [account, instance, router, onError, onLoad, onSuccess])
+  }, [instance, manager, onLoad, onSuccess, router, onError])
 
   return {
     instance,

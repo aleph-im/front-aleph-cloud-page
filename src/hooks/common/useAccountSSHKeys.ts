@@ -1,24 +1,23 @@
 import { useAppState } from '@/contexts/appState'
-import { SSHKey, SSHKeyManager } from '@/domain/ssh'
+import { SSHKey } from '@/domain/ssh'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
+import { useSSHKeyManager } from './useSSHKeyManager'
 
 export function useAccountSSHKeys(): [
   SSHKey[] | undefined,
   RequestState<unknown>,
 ] {
   const [appState, dispatch] = useAppState()
-
-  const { account } = appState
+  const manager = useSSHKeyManager()
 
   const doRequest = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
 
-    const sshKeyStore = new SSHKeyManager(account)
-    return await sshKeyStore.getAll()
-  }, [account])
+    return await manager.getAll()
+  }, [manager])
 
   const onSuccess = useCallback(
     (accountSSHKeys: SSHKey[]) => {
@@ -32,10 +31,10 @@ export function useAccountSSHKeys(): [
 
   const onError = useCallback(
     (error: Error, defaultHandler: (error: Error) => void) => {
-      if (!account) return
+      if (!manager) return
       defaultHandler(error)
     },
-    [account],
+    [manager],
   )
 
   const reqState = useRequest({

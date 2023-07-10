@@ -3,21 +3,21 @@ import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
-import { Program, ProgramManager } from '@/domain/program'
+import { Program } from '@/domain/program'
+import { useProgramManager } from './useProgramManager'
 
 export function useAccountFunctions(): [
   Program[] | undefined,
   RequestState<unknown>,
 ] {
   const [appState, dispatch] = useAppState()
-  const { account } = appState
+  const manager = useProgramManager()
 
   const doRequest = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
 
-    const manager = new ProgramManager(account)
     return await manager.getAll()
-  }, [account])
+  }, [manager])
 
   const onSuccess = useCallback(
     (accountFunctions: Program[]) => {
@@ -31,10 +31,10 @@ export function useAccountFunctions(): [
 
   const onError = useCallback(
     (error: Error, defaultHandler: (error: Error) => void) => {
-      if (!account) return
+      if (!manager) return
       defaultHandler(error)
     },
-    [account],
+    [manager],
   )
 
   const reqState = useRequest({

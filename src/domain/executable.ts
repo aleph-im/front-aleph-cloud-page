@@ -14,7 +14,10 @@ import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
 
 export abstract class Executable {
-  constructor(protected account: Account) {}
+  constructor(
+    protected account: Account,
+    protected volumeManager: VolumeManager,
+  ) {}
 
   protected parseEnvVars(
     envVars?: EnvVarProp[],
@@ -42,8 +45,8 @@ export abstract class Executable {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
     // @note: Create new volumes before and cast them to ExistingVolume type
-    const volumeManager = new VolumeManager(this.account)
-    const messages = await volumeManager.add(volumes)
+
+    const messages = await this.volumeManager.add(volumes)
     const parsedVolumes: (AddExistingVolume | AddPersistentVolume)[] =
       volumes.map((volume, i) => {
         if (volume.volumeType === VolumeType.New) {

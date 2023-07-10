@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { useAppState } from '@/contexts/appState'
-import { Program, ProgramManager } from '@/domain/program'
+import { Program } from '@/domain/program'
 import { useAccountFunction } from '@/hooks/common/useAccountFunction'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
+import { useProgramManager } from '@/hooks/common/useProgramManager'
 
 export type ManageFunction = {
   func?: Program
@@ -18,42 +18,38 @@ export function useManageFunction(): ManageFunction {
   const router = useRouter()
   const { hash } = router.query
 
-  const [globalState] = useAppState()
   const [func] = useAccountFunction(hash as string)
   const [, { onLoad, onSuccess, onError }] = useRequestState()
-
-  const { account } = globalState
-
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
+
+  const manager = useProgramManager()
 
   const handleCopyHash = useCallback(() => {
     copyAndNotify(func?.id || '')
   }, [copyAndNotify, func])
 
   const handleDelete = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
     if (!func) throw new Error('Invalid function')
 
     try {
       onLoad()
 
-      const functionStore = new ProgramManager(account)
-      await functionStore.del(func)
+      await manager.del(func)
 
       onSuccess(true)
       router.replace('/dashboard')
     } catch (e) {
       onError(e as Error)
     }
-  }, [account, func, router, onError, onLoad, onSuccess])
+  }, [manager, func, router, onError, onLoad, onSuccess])
 
   const handleDownload = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
     if (!func) throw new Error('Invalid function')
 
-    const functionStore = new ProgramManager(account)
-    await functionStore.download(func)
-  }, [account, func])
+    await manager.download(func)
+  }, [manager, func])
 
   return {
     func,

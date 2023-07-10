@@ -3,21 +3,21 @@ import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
-import { Instance, InstanceManager } from '@/domain/instance'
+import { Instance } from '@/domain/instance'
+import { useInstanceManager } from './useInstanceManager'
 
 export function useAccountInstances(): [
   Instance[] | undefined,
   RequestState<unknown>,
 ] {
   const [appState, dispatch] = useAppState()
-  const { account } = appState
+  const manager = useInstanceManager()
 
   const doRequest = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
 
-    const manager = new InstanceManager(account)
     return await manager.getAll()
-  }, [account])
+  }, [manager])
 
   const onSuccess = useCallback(
     (accountInstances: Instance[]) => {
@@ -31,10 +31,10 @@ export function useAccountInstances(): [
 
   const onError = useCallback(
     (error: Error, defaultHandler: (error: Error) => void) => {
-      if (!account) return
+      if (!manager) return
       defaultHandler(error)
     },
-    [account],
+    [manager],
   )
 
   const reqState = useRequest({

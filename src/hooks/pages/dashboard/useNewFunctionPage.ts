@@ -13,9 +13,9 @@ import {
 import { VolumeProp, defaultVolume } from '../../form/useAddVolume'
 import { EnvVarProp } from '../../form/useAddEnvVars'
 import { NameAndTagsProp } from '../../form/useAddNameAndTags'
-import { ProgramManager } from '@/domain/program'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
+import { useProgramManager } from '@/hooks/common/useProgramManager'
 
 export type NewFunctionFormState = {
   runtime: FunctionRuntimeProp
@@ -74,13 +74,13 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const [appState] = useAppState()
   const { account, accountBalance } = appState
 
+  const manager = useProgramManager()
+
   const onSubmit = useCallback(
     async (state: NewFunctionFormState) => {
       console.log('state', state)
 
-      if (!account) throw new Error('Account not found')
-
-      const programManager = new ProgramManager(account)
+      if (!manager) throw new Error('Manager not ready')
 
       const {
         runtime,
@@ -97,7 +97,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
       const file = codeOrFile === 'code' ? functionCode : functionFile
 
-      await programManager.add({
+      await manager.add({
         runtime,
         name,
         tags,
@@ -112,7 +112,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
       router.replace('/dashboard')
     },
-    [account, router],
+    [manager, router],
   )
 
   const {

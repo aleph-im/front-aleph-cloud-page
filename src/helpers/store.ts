@@ -1,9 +1,10 @@
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { SSHKey } from '../domain/ssh'
-import { Volume } from '@/domain/volume'
-import { Instance } from '@/domain/instance'
-import { Program } from '@/domain/program'
-import { AccountFilesResponse } from '@/domain/file'
+import { SSHKey, SSHKeyManager } from '../domain/ssh'
+import { Volume, VolumeManager } from '@/domain/volume'
+import { Instance, InstanceManager } from '@/domain/instance'
+import { Program, ProgramManager } from '@/domain/program'
+import { AccountFilesResponse, FileManager } from '@/domain/file'
+import { MessageManager } from '@/domain/message'
 
 export enum ActionTypes {
   connect,
@@ -28,6 +29,13 @@ export type State = {
   accountVolumes?: Volume[]
   accountFiles?: AccountFilesResponse
   accountSSHKeys?: SSHKey[]
+
+  fileManager?: FileManager
+  messageManager?: MessageManager
+  sshKeyManager?: SSHKeyManager
+  volumeManager?: VolumeManager
+  programManager?: ProgramManager
+  instanceManager?: InstanceManager
 }
 
 export type Action = {
@@ -44,6 +52,13 @@ export const initialState: State = {
   accountVolumes: undefined,
   accountFiles: undefined,
   accountSSHKeys: undefined,
+
+  fileManager: undefined,
+  messageManager: undefined,
+  sshKeyManager: undefined,
+  volumeManager: undefined,
+  programManager: undefined,
+  instanceManager: undefined,
 }
 
 function addEntityToCollection<E extends { id: string }>(
@@ -64,9 +79,35 @@ export const reducer = (
 ) => {
   switch (type) {
     case ActionTypes.connect: {
+      const { account } = payload
+
+      const fileManager = new FileManager(account)
+      const messageManager = new MessageManager(account)
+      const sshKeyManager = new SSHKeyManager(account)
+      const volumeManager = new VolumeManager(account, fileManager)
+      const programManager = new ProgramManager(
+        account,
+        volumeManager,
+        messageManager,
+        fileManager,
+      )
+      const instanceManager = new InstanceManager(
+        account,
+        volumeManager,
+        sshKeyManager,
+        fileManager,
+      )
+
       return {
         ...state,
-        account: payload.account,
+        account,
+
+        fileManager,
+        messageManager,
+        sshKeyManager,
+        volumeManager,
+        programManager,
+        instanceManager,
       }
     }
 
@@ -74,6 +115,13 @@ export const reducer = (
       return {
         ...state,
         account: undefined,
+
+        fileManager: undefined,
+        messageManager: undefined,
+        sshKeyManager: undefined,
+        volumeManager: undefined,
+        programManager: undefined,
+        instanceManager: undefined,
       }
     }
 

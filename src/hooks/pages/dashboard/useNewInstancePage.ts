@@ -1,7 +1,6 @@
 import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { InstanceManager } from '@/domain/instance'
 import { getTotalProductCost } from '@/helpers/utils'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
@@ -17,6 +16,7 @@ import {
   InstanceSpecsProp,
   defaultSpecsOptions,
 } from '@/hooks/form/useSelectInstanceSpecs'
+import { useInstanceManager } from '@/hooks/common/useInstanceManager'
 
 export type NewInstanceFormState = {
   name?: string
@@ -56,17 +56,17 @@ export function useNewInstancePage(): UseNewInstancePage {
   const [appState] = useAppState()
   const { account, accountBalance } = appState
 
+  const manager = useInstanceManager()
+
   const onSubmit = useCallback(
     async (state: NewInstanceFormState) => {
       console.log('state', state)
 
-      if (!account) throw new Error('Account not found')
-
-      const instanceManager = new InstanceManager(account)
+      if (!manager) throw new Error('Manager not ready')
 
       const { image, name, tags, envVars, sshKeys, volumes, specs } = state
 
-      await instanceManager.add({
+      await manager.add({
         name,
         tags,
         envVars,
@@ -78,7 +78,7 @@ export function useNewInstancePage(): UseNewInstancePage {
 
       router.replace('/dashboard')
     },
-    [account, router],
+    [manager, router],
   )
 
   const {

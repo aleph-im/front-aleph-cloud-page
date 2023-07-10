@@ -347,3 +347,71 @@ export function isVolumeEphemeral(
 ): volume is EphemeralVolume {
   return volume.hasOwnProperty('ephemeral')
 }
+
+/**
+ * An util to create promises and control their lifecycle from other scope.
+ * In other frameworks they usually call it "Deferred" too.
+ *
+ * Example:
+ * ```ts
+ * function sleep(ms) {
+ *   const future = new Future()
+ *   setTimeout(() => future.resolve(), ms)
+ *   return future.promise
+ * }
+ *
+ * async function main() {
+ *   await sleep(1000)
+ * }
+ * ```
+ */
+export class Future<T> {
+  public resolve!: (value: T | PromiseLike<T>) => void
+  public reject!: (reason?: any) => void
+  public promise!: Promise<T>
+
+  constructor() {
+    this.promise = new Promise<T>((_res, _rej) => {
+      this.resolve = _res
+      this.reject = _rej
+    })
+  }
+}
+
+/**
+ * An util for controlling concurrency (lock / unlock) forcing sequential access
+ * to some region of the code
+ *
+ * Example:
+ * ```ts
+ * // Waits for the lock to be free and returns the releaser function
+ * const release = await mutex.acquire()
+ *
+ * try {
+ *   // Execute the concurrent safe code here
+ * } finally {
+ *   // Release the lock.
+ *   // Ensures that the lock is always released, even if there are errors
+ *   release()
+ * }
+ * ```
+ */
+export class Mutex {
+  protected queue = Promise.resolve()
+  public count = 0
+
+  async acquire(): Promise<() => void> {
+    const release = new Future<void>()
+
+    const currentQueue = this.queue
+    this.queue = this.queue.then(() => release.promise)
+    this.count++
+
+    await currentQueue
+
+    return () => {
+      this.count--
+      release.resolve()
+    }
+  }
+}

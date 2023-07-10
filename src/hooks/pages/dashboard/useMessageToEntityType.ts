@@ -1,21 +1,13 @@
-import { useMemo, useState, useEffect } from 'react'
-import { useAppState } from '@/contexts/appState'
-import { MessageManager } from '@/domain/message'
+import { useState, useEffect } from 'react'
 import { EntityType } from '@/helpers/constants'
 import { AnyMessage, getEntityTypeFromMessage } from '@/helpers/utils'
+import { useMessageManager } from '@/hooks/common/useMessageManager'
 
 export function useMessageToEntityType(
   hash: string | undefined,
 ): EntityType | undefined {
-  const [globalState] = useAppState()
-  const { account } = globalState
-
-  const messageManager = useMemo(
-    () => (account ? new MessageManager(account) : undefined),
-    [account],
-  )
-
   const [type, setType] = useState<EntityType | undefined>(undefined)
+  const manager = useMessageManager()
 
   useEffect(() => {
     if (!hash) {
@@ -24,15 +16,15 @@ export function useMessageToEntityType(
     }
 
     async function fetchMessage(hash: string) {
-      if (!messageManager) return
+      if (!manager) return
 
-      const msg = (await messageManager.get(hash)) as AnyMessage
+      const msg = (await manager.get(hash)) as AnyMessage
       const type = getEntityTypeFromMessage(msg)
       setType(type)
     }
 
     fetchMessage(hash)
-  }, [hash, messageManager])
+  }, [hash, manager])
 
   return type
 }

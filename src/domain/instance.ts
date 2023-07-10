@@ -13,12 +13,13 @@ import {
 import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyProp } from '@/hooks/form/useAddSSHKeys'
-import { SSHKeyManager } from './ssh'
 import { InstanceContent } from 'aleph-sdk-ts/dist/messages/instance/types'
 import { Executable } from './executable'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
 import { InstanceImageProp } from '@/hooks/form/useSelectInstanceImage'
 import { FileManager } from './file'
+import { SSHKeyManager } from './ssh'
+import { VolumeManager } from './volume'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -45,10 +46,12 @@ export type Instance = InstanceContent & {
 export class InstanceManager extends Executable {
   constructor(
     protected account: Account,
+    protected volumeManager: VolumeManager,
+    protected sshKeyManager: SSHKeyManager,
+    protected fileManager: FileManager,
     protected channel = defaultInstanceChannel,
-    protected fileManager = new FileManager(account),
   ) {
-    super(account)
+    super(account, volumeManager)
   }
 
   async getAll(): Promise<Instance[]> {
@@ -125,9 +128,8 @@ export class InstanceManager extends Executable {
 
     // @note: Create new keys before instance
     const newKeys = sshKeys.filter((key) => key.isNew && key.isSelected)
-    const sshKeyStore = new SSHKeyManager(this.account)
     await Promise.all(
-      newKeys.map(({ key, label }) => sshKeyStore.add({ key, label })),
+      newKeys.map(({ key, label }) => this.sshKeyManager.add({ key, label })),
     )
 
     return sshKeys

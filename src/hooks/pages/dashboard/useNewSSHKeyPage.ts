@@ -1,9 +1,8 @@
 import { ChangeEvent, FormEvent, useCallback } from 'react'
-import { useAppState } from '@/contexts/appState'
 import { useRouter } from 'next/router'
-import { SSHKeyManager } from '@/domain/ssh'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
+import { useSSHKeyManager } from '@/hooks/common/useSSHKeyManager'
 
 export type NewSSHKeyFormState = {
   key: string
@@ -25,21 +24,19 @@ export function useNewSSHKeyPage() {
   useConnectedWard()
 
   const router = useRouter()
-  const [appState] = useAppState()
-  const { account } = appState
+  const manager = useSSHKeyManager()
 
   const onSubmit = useCallback(
     async (state: NewSSHKeyFormState) => {
       console.log('state', state)
 
-      if (!account) throw new Error('Account not found')
+      if (!manager) throw new Error('Manager not ready')
 
-      const sshKeyStore = new SSHKeyManager(account)
-      await sshKeyStore.add(state)
+      await manager.add(state)
 
       router.replace('/dashboard')
     },
-    [account, router],
+    [manager, router],
   )
 
   const {

@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { useAppState } from '@/contexts/appState'
-import { SSHKey, SSHKeyManager } from '@/domain/ssh'
+import { SSHKey } from '@/domain/ssh'
 import { useAccountSSHKey } from '@/hooks/common/useAccountSSHKey'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
+import { useSSHKeyManager } from '@/hooks/common/useSSHKeyManager'
 
 export type ManageSSHKey = {
   sshKey?: SSHKey
@@ -17,13 +17,11 @@ export function useManageSSHKey(): ManageSSHKey {
   const router = useRouter()
   const { hash } = router.query
 
-  const [globalState] = useAppState()
   const [sshKey] = useAccountSSHKey(hash as string)
   const [, { onLoad, onSuccess, onError }] = useRequestState()
-
-  const { account } = globalState
-
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
+
+  const manager = useSSHKeyManager()
 
   const handleCopyLabel = useCallback(() => {
     copyAndNotify(sshKey?.label || '')
@@ -34,21 +32,20 @@ export function useManageSSHKey(): ManageSSHKey {
   }, [copyAndNotify, sshKey])
 
   const handleDelete = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
     if (!sshKey) throw new Error('Invalid key')
+    if (!manager) throw new Error('Manager not ready')
 
     try {
       onLoad()
 
-      const sshKeyStore = new SSHKeyManager(account)
-      await sshKeyStore.del(sshKey)
+      await manager.del(sshKey)
 
       onSuccess(true)
       router.replace('/dashboard')
     } catch (e) {
       onError(e as Error)
     }
-  }, [account, sshKey, router, onError, onLoad, onSuccess])
+  }, [sshKey, onLoad, manager, onSuccess, router, onError])
 
   return {
     sshKey,

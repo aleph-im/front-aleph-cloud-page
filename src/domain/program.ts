@@ -31,6 +31,7 @@ import { VolumeProp } from '@/hooks/form/useAddVolume'
 import { FunctionRuntime, FunctionRuntimeId } from './runtime'
 import { FileManager } from './file'
 import { MessageManager } from './message'
+import { VolumeManager } from './volume'
 
 // @todo: Export this type from sdk and remove here
 declare type ProgramPublishConfiguration = {
@@ -88,11 +89,12 @@ export type Program = Omit<ProgramContent, 'type'> & {
 export class ProgramManager extends Executable {
   constructor(
     protected account: Account,
+    protected volumeManager: VolumeManager,
+    protected messageManager: MessageManager,
+    protected fileManager: FileManager,
     protected channel = defaultProgramChannel,
-    protected fileManager = new FileManager(account),
-    protected messageManager = new MessageManager(account),
   ) {
-    super(account)
+    super(account, volumeManager)
   }
 
   async getAll(): Promise<Program[]> {

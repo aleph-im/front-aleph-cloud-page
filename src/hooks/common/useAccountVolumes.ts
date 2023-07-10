@@ -3,21 +3,21 @@ import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
-import { Volume, VolumeManager } from '@/domain/volume'
+import { Volume } from '@/domain/volume'
+import { useVolumeManager } from './useVolumeManager'
 
 export function useAccountVolumes(): [
   Volume[] | undefined,
   RequestState<unknown>,
 ] {
   const [appState, dispatch] = useAppState()
-  const { account } = appState
+  const manager = useVolumeManager()
 
   const doRequest = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
 
-    const volumeManager = new VolumeManager(account)
-    return await volumeManager.getAll()
-  }, [account])
+    return await manager.getAll()
+  }, [manager])
 
   const onSuccess = useCallback(
     (accountVolumes: Volume[]) => {
@@ -31,10 +31,10 @@ export function useAccountVolumes(): [
 
   const onError = useCallback(
     (error: Error, defaultHandler: (error: Error) => void) => {
-      if (!account) return
+      if (!manager) return
       defaultHandler(error)
     },
-    [account],
+    [manager],
   )
 
   const reqState = useRequest({

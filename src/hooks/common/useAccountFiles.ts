@@ -3,21 +3,21 @@ import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { useRequest } from './useRequest'
 import { RequestState } from './useRequestState'
-import { AccountFilesResponse, FileManager } from '@/domain/file'
+import { AccountFilesResponse } from '@/domain/file'
+import { useFileManager } from './useFileManager'
 
 export function useAccountFiles(): [
   AccountFilesResponse | undefined,
   RequestState<unknown>,
 ] {
   const [appState, dispatch] = useAppState()
-  const { account } = appState
+  const manager = useFileManager()
 
   const doRequest = useCallback(async () => {
-    if (!account) throw new Error('Invalid account')
+    if (!manager) throw new Error('Manager not ready')
 
-    const manager = new FileManager(account)
     return await manager.getAll()
-  }, [account])
+  }, [manager])
 
   const onSuccess = useCallback(
     (accountFiles: AccountFilesResponse) => {
@@ -28,10 +28,10 @@ export function useAccountFiles(): [
 
   const onError = useCallback(
     (error: Error, defaultHandler: (error: Error) => void) => {
-      if (!account) return
+      if (!manager) return
       defaultHandler(error)
     },
-    [account],
+    [manager],
   )
 
   const reqState = useRequest({
