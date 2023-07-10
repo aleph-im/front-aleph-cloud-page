@@ -1,4 +1,4 @@
-import NewVolume from '@/components/form/AddVolume'
+import { AddNewVolume } from '@/components/form/AddVolume'
 import { EntityType } from '@/helpers/constants'
 import { useNewVolumePage } from '@/hooks/pages/dashboard/useNewVolumePage'
 import { Button, TextGradient } from '@aleph-front/aleph-core'
@@ -20,7 +20,7 @@ export default function NewVolumePage() {
       <form onSubmit={handleSubmit}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>
-            <NewVolume
+            <AddNewVolume
               isStandAlone
               volume={formState.volume}
               onChange={handleChangeVolume}

@@ -46,11 +46,12 @@ const RemoveVolume = React.memo(({ volume, onRemove }: RemoveVolumeProps) => {
 })
 RemoveVolume.displayName = 'RemoveVolume'
 
-const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
+export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
   const {
     id,
     volume,
     volumeSize,
+    isStandAlone,
     handleFileSrcChange,
     handleMountPathChange,
     handleUseLatestChange,
@@ -74,15 +75,17 @@ const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
             Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
           </HiddenFileInput>
         </div>
-        <div tw="mt-4">
-          <TextInput
-            label="Mount"
-            placeholder="/mount/opt"
-            value={volume.mountPath}
-            onChange={handleMountPathChange}
-            name={`${id}_mount`}
-          />
-        </div>
+        {!isStandAlone && (
+          <div tw="mt-4">
+            <TextInput
+              label="Mount"
+              placeholder="/mount/opt"
+              value={volume.mountPath}
+              onChange={handleMountPathChange}
+              name={`${id}_mount`}
+            />
+          </div>
+        )}
         <div tw="mt-4">
           <TextInput
             label="Size"
@@ -91,15 +94,19 @@ const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
             disabled
           />
         </div>
-        <div tw="mt-4 py-4">
-          <Checkbox
-            label="Always update to the latest version"
-            checked={volume.useLatest}
-            onChange={handleUseLatestChange}
-          />
-        </div>
-        {handleRemove && (
-          <RemoveVolume volume={volume} onRemove={handleRemove} />
+        {!isStandAlone && (
+          <>
+            <div tw="mt-4 py-4">
+              <Checkbox
+                label="Always update to the latest version"
+                checked={volume.useLatest}
+                onChange={handleUseLatestChange}
+              />
+            </div>
+            {handleRemove && (
+              <RemoveVolume volume={volume} onRemove={handleRemove} />
+            )}
+          </>
         )}
       </NoisyContainer>
     </>

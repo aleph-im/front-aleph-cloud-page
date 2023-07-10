@@ -12,6 +12,7 @@ export type RemoveVolumeProps = {
 
 export type AddNewVolumeProps = {
   volume: NewVolumeProp
+  isStandAlone?: boolean
   onChange: (volume: NewVolumeProp) => void
   onRemove?: (volumeId: string) => void
 }
@@ -30,7 +31,6 @@ export type AddPersistentVolumeProps = {
 
 export type AddVolumeProps = {
   volume: VolumeProp
-  isStandAlone?: boolean
   onChange: (volume: VolumeProp) => void
   onRemove?: (volumeId: string) => void
 }

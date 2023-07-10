@@ -43,6 +43,7 @@ export type VolumeProp =
 
 export type UseAddNewVolumeProps = {
   volume: NewVolumeProp
+  isStandAlone?: boolean
   onChange: (volume: NewVolumeProp) => void
   onRemove?: (volumeId: string) => void
 }
@@ -51,6 +52,7 @@ export type UseAddNewVolumeReturn = {
   id: string
   volume: NewVolumeProp
   volumeSize: string
+  isStandAlone?: boolean
   handleFileSrcChange: (fileSrc?: File) => void
   handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleUseLatestChange: (e: ChangeEvent<HTMLInputElement>) => void
@@ -61,6 +63,7 @@ export function useAddNewVolumeProps({
   volume,
   onChange,
   onRemove: handleRemove,
+  isStandAlone,
 }: UseAddNewVolumeProps): UseAddNewVolumeReturn {
   const id = useId()
 
@@ -110,6 +113,7 @@ export function useAddNewVolumeProps({
     id,
     volume,
     volumeSize,
+    isStandAlone,
     handleFileSrcChange,
     handleMountPathChange,
     handleUseLatestChange,
