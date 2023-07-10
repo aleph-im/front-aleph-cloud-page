@@ -58,8 +58,10 @@ export class FileManager {
 
   protected parseSizesMap(files: AccountFileObject[]): void {
     this.lastFetch = Date.now()
+    console.log(files)
     this.sizesMapCache = files.reduce((ac, cv) => {
-      ac[cv.item_hash] = cv.size
+      // @note: Cast from bytes to MBs
+      ac[cv.item_hash] = cv.size / 10 ** 6
       return ac
     }, {} as Record<string, number>)
   }
