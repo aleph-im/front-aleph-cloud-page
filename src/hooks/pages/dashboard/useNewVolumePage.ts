@@ -10,6 +10,7 @@ import {
   VolumeProp,
 } from '@/hooks/form/useAddVolume'
 import { useVolumeManager } from '@/hooks/common/useVolumeManager'
+import { ActionTypes } from '@/helpers/store'
 
 export type NewVolumeFormState = {
   volume: NewVolumeProp
@@ -23,7 +24,7 @@ export function useNewVolumePage() {
   useConnectedWard()
 
   const router = useRouter()
-  const [appState] = useAppState()
+  const [appState, dispatch] = useAppState()
   const { account } = appState
 
   const manager = useVolumeManager()
@@ -32,11 +33,16 @@ export function useNewVolumePage() {
     async (state: NewVolumeFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      await manager.add(state.volume)
+      const [accountVolume] = await manager.add(state.volume)
+
+      dispatch({
+        type: ActionTypes.addAccountVolume,
+        payload: { accountVolume },
+      })
 
       router.replace('/dashboard')
     },
-    [manager, router],
+    [dispatch, manager, router],
   )
 
   const {

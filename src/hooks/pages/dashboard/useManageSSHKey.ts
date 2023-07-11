@@ -5,6 +5,8 @@ import { useAccountSSHKey } from '@/hooks/common/useAccountSSHKey'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
 import { useSSHKeyManager } from '@/hooks/common/useSSHKeyManager'
+import { useAppState } from '@/contexts/appState'
+import { ActionTypes } from '@/helpers/store'
 
 export type ManageSSHKey = {
   sshKey?: SSHKey
@@ -17,9 +19,10 @@ export function useManageSSHKey(): ManageSSHKey {
   const router = useRouter()
   const { hash } = router.query
 
-  const [sshKey] = useAccountSSHKey(hash as string)
+  const [sshKey] = useAccountSSHKey({ id: hash as string })
   const [, { onLoad, onSuccess, onError }] = useRequestState()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
+  const [, dispatch] = useAppState()
 
   const manager = useSSHKeyManager()
 
@@ -40,12 +43,18 @@ export function useManageSSHKey(): ManageSSHKey {
 
       await manager.del(sshKey)
 
+      dispatch({
+        type: ActionTypes.delAccountSSHKey,
+        payload: { id: sshKey.id },
+      })
+
       onSuccess(true)
+
       router.replace('/dashboard')
     } catch (e) {
       onError(e as Error)
     }
-  }, [sshKey, onLoad, manager, onSuccess, router, onError])
+  }, [sshKey, manager, onLoad, dispatch, onSuccess, router, onError])
 
   return {
     sshKey,

@@ -16,7 +16,6 @@ import {
   isValidItemHash,
 } from '../helpers/utils'
 import {
-  ProgramMessage,
   ItemType,
   MachineVolume,
   MessageType,
@@ -84,6 +83,7 @@ export type Program = Omit<ProgramContent, 'type'> & {
   urlVM: string
   date: string
   size?: number
+  confirmed?: boolean
 }
 
 export class ProgramManager extends Executable {
@@ -118,11 +118,11 @@ export class ProgramManager extends Executable {
       channel: this.channel,
     })
 
-    const [data] = await this.parseMessages([message])
-    return data
+    const [entity] = await this.parseMessages([message])
+    return entity
   }
 
-  async add(newProgram: NewProgram): Promise<ProgramMessage> {
+  async add(newProgram: NewProgram): Promise<Program> {
     try {
       const { account, channel } = this
       const {
@@ -141,7 +141,7 @@ export class ProgramManager extends Executable {
       const volumes = await this.parseVolumes(newProgram.volumes)
       const file = await this.parseCode(newProgram.file)
 
-      return await program.publish({
+      const response = await program.publish({
         account,
         channel,
         runtime,
@@ -154,6 +154,9 @@ export class ProgramManager extends Executable {
         volumes,
         metadata,
       })
+
+      const [entity] = await this.parseMessages([response])
+      return entity
     } catch (err) {
       throw E_.RequestFailed(err)
     }
@@ -233,6 +236,7 @@ export class ProgramManager extends Executable {
           urlVM: `${defaultVMURL}${message.item_hash}`,
           date: getDate(message.time),
           size,
+          confirmed: !!message.confirmed,
         }
       })
   }

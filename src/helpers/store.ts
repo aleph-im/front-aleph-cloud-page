@@ -13,12 +13,16 @@ export enum ActionTypes {
   setAccountFiles,
   setAccountSSHKeys,
   addAccountSSHKey,
+  delAccountSSHKey,
   setAccountFunctions,
   addAccountFunction,
+  delAccountFunction,
   setAccountVolumes,
   addAccountVolume,
+  delAccountVolume,
   setAccountInstances,
   addAccountInstance,
+  delAccountInstance,
 }
 
 export type State = {
@@ -61,16 +65,40 @@ export const initialState: State = {
   instanceManager: undefined,
 }
 
+function addEntitiesToCollection<E extends { id: string }>(
+  entities: E[],
+  collection: E[] = [],
+): E[] {
+  const map = new Map(collection.map((entity) => [entity.id, entity]))
+
+  for (const entity of entities) {
+    map.set(entity.id, entity)
+  }
+
+  return Array.from(map.values())
+}
+
 function addEntityToCollection<E extends { id: string }>(
   entity: E,
   collection?: E[],
 ): E[] {
-  const entities = (collection || []) as E[]
+  return addEntitiesToCollection([entity], collection)
+}
 
-  const map = new Map(entities.map((entity) => [entity.id, entity]))
-  map.set(entity.id, entity)
+function delEntityFromCollection<E extends { id: string }>(
+  id: string,
+  collection: E[] = [],
+): E[] {
+  return collection.filter((e) => e.id !== id)
+}
 
-  return Array.from(map.values())
+function replaceCollection<E extends { id: string; confirmed?: boolean }>(
+  entities: E[],
+  collection: E[] = [],
+): E[] {
+  const notConfirmedCollection = collection.filter((e) => !e.confirmed)
+
+  return addEntitiesToCollection(entities, notConfirmedCollection)
 }
 
 export const reducer = (
@@ -139,10 +167,17 @@ export const reducer = (
       }
     }
 
+    // ------ SSH Keys --------
+
     case ActionTypes.setAccountSSHKeys: {
+      const accountSSHKeys = replaceCollection(
+        payload.accountSSHKeys,
+        state.accountSSHKeys,
+      )
+
       return {
         ...state,
-        accountSSHKeys: payload.accountSSHKeys,
+        accountSSHKeys,
       }
     }
 
@@ -158,8 +193,26 @@ export const reducer = (
       }
     }
 
+    case ActionTypes.delAccountSSHKey: {
+      const accountSSHKeys = delEntityFromCollection(
+        payload.id,
+        state.accountSSHKeys,
+      )
+
+      return {
+        ...state,
+        accountSSHKeys,
+      }
+    }
+
+    // ------ Functions --------
+
     case ActionTypes.setAccountFunctions: {
-      const { accountFunctions } = payload
+      const accountFunctions = replaceCollection(
+        payload.accountFunctions,
+        state.accountFunctions,
+      )
+
       return {
         ...state,
         accountFunctions,
@@ -178,8 +231,26 @@ export const reducer = (
       }
     }
 
+    case ActionTypes.delAccountFunction: {
+      const accountFunctions = delEntityFromCollection(
+        payload.id,
+        state.accountFunctions,
+      )
+
+      return {
+        ...state,
+        accountFunctions,
+      }
+    }
+
+    // ------ Volumes --------
+
     case ActionTypes.setAccountVolumes: {
-      const { accountVolumes } = payload
+      const accountVolumes = replaceCollection(
+        payload.accountVolumes,
+        state.accountVolumes,
+      )
+
       return {
         ...state,
         accountVolumes,
@@ -198,8 +269,26 @@ export const reducer = (
       }
     }
 
+    case ActionTypes.delAccountVolume: {
+      const accountVolumes = delEntityFromCollection(
+        payload.id,
+        state.accountVolumes,
+      )
+
+      return {
+        ...state,
+        accountVolumes,
+      }
+    }
+
+    // ------ Volumes --------
+
     case ActionTypes.setAccountInstances: {
-      const { accountInstances } = payload
+      const accountInstances = replaceCollection(
+        payload.accountInstances,
+        state.accountInstances,
+      )
+
       return {
         ...state,
         accountInstances,
@@ -209,6 +298,18 @@ export const reducer = (
     case ActionTypes.addAccountInstance: {
       const accountInstances = addEntityToCollection(
         payload.accountInstance,
+        state.accountInstances,
+      )
+
+      return {
+        ...state,
+        accountInstances,
+      }
+    }
+
+    case ActionTypes.delAccountInstance: {
+      const accountInstances = delEntityFromCollection(
+        payload.id,
         state.accountInstances,
       )
 

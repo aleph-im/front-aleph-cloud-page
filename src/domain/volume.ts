@@ -7,11 +7,7 @@ import {
   programStorageURL,
 } from '../helpers/constants'
 import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
-import {
-  MessageType,
-  StoreContent,
-  StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/types'
+import { MessageType, StoreContent } from 'aleph-sdk-ts/dist/messages/types'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
 
@@ -52,6 +48,7 @@ export type BaseVolume = StoreContent & {
   url: string
   date: string
   size?: number
+  confirmed?: boolean
 }
 
 export type NewVolume = BaseVolume & {
@@ -150,7 +147,7 @@ export class VolumeManager {
         channels: [this.channel],
       })
 
-      return this.parseMessages(response.messages)
+      return await this.parseMessages(response.messages)
     } catch (err) {
       return []
     }
@@ -163,11 +160,11 @@ export class VolumeManager {
       channel: this.channel,
     })
 
-    const [data] = await this.parseMessages([message])
-    return data
+    const [entity] = await this.parseMessages([message])
+    return entity
   }
 
-  async add(volumes: AddVolume | AddVolume[]): Promise<StoreMessage[]> {
+  async add(volumes: AddVolume | AddVolume[]): Promise<Volume[]> {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
     const newVolumes = this.parseNewVolumes(volumes)
@@ -175,7 +172,7 @@ export class VolumeManager {
     try {
       const { account, channel } = this
 
-      return await Promise.all(
+      const response = await Promise.all(
         newVolumes.map(async ({ fileSrc: fileObject }) =>
           store.Publish({
             account,
@@ -184,6 +181,8 @@ export class VolumeManager {
           }),
         ),
       )
+
+      return await this.parseMessages(response)
     } catch (err) {
       throw E_.RequestFailed(err)
     }
@@ -230,16 +229,23 @@ export class VolumeManager {
 
     return messages
       .filter(({ content }) => content !== undefined)
-      .map((message) => {
-        return {
-          id: message.item_hash,
-          ...message.content,
-          type: EntityType.Volume,
-          volumeType: VolumeType.Existing,
-          url: getExplorerURL(message),
-          date: getDate(message.time),
-          size: sizesMap[message.item_hash],
-        }
-      })
+      .map((message) => this.parseMessage(message, message.content, sizesMap))
+  }
+
+  protected parseMessage(
+    message: any,
+    content: any,
+    sizesMap: Record<string, number>,
+  ): Volume {
+    return {
+      id: message.item_hash,
+      ...content,
+      type: EntityType.Volume,
+      volumeType: VolumeType.Existing,
+      url: getExplorerURL(message),
+      date: getDate(message.time),
+      size: sizesMap[message.item_hash],
+      confirmed: !!message.confirmed,
+    }
   }
 }

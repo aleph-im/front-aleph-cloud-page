@@ -5,6 +5,8 @@ import { useAccountVolume } from '@/hooks/common/useAccountVolume'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
 import { useVolumeManager } from '@/hooks/common/useVolumeManager'
+import { ActionTypes } from '@/helpers/store'
+import { useAppState } from '@/contexts/appState'
 
 export type ManageVolume = {
   volume?: Volume
@@ -17,9 +19,10 @@ export function useManageVolume(): ManageVolume {
   const router = useRouter()
   const { hash } = router.query
 
-  const [volume] = useAccountVolume(hash as string)
+  const [volume] = useAccountVolume({ id: hash as string })
   const [, { onLoad, onSuccess, onError }] = useRequestState()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
+  const [, dispatch] = useAppState()
 
   const manager = useVolumeManager()
 
@@ -36,12 +39,18 @@ export function useManageVolume(): ManageVolume {
 
       await manager.del(volume)
 
+      dispatch({
+        type: ActionTypes.delAccountVolume,
+        payload: { id: volume.id },
+      })
+
       onSuccess(true)
+
       router.replace('/dashboard')
     } catch (e) {
       onError(e as Error)
     }
-  }, [manager, volume, router, onError, onLoad, onSuccess])
+  }, [manager, volume, onLoad, dispatch, onSuccess, router, onError])
 
   const handleDownload = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')

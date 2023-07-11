@@ -3,9 +3,13 @@ import tw from 'twin.macro'
 import { SSHKeysTabContentProps } from './types'
 import { Table } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/common/ButtonLink'
+import { useTheme } from 'styled-components'
+import { RotatingLines } from 'react-loader-spinner'
 
 export const SSHKeysTabContent = React.memo(
   ({ data }: SSHKeysTabContentProps) => {
+    const theme = useTheme()
+
     return (
       <>
         {data.length > 0 ? (
@@ -16,6 +20,9 @@ export const SSHKeysTabContent = React.memo(
                 oddRowNoise
                 rowKey={(row) => row.key}
                 data={data}
+                rowProps={(row) => ({
+                  css: row.confirmed ? '' : tw`opacity-60`,
+                })}
                 columns={[
                   {
                     label: 'SSH Key',
@@ -39,8 +46,21 @@ export const SSHKeysTabContent = React.memo(
                     width: '0',
                     align: 'right',
                     render: (row) => (
-                      <ButtonLink href={`/dashboard/manage?hash=${row.id}`}>
-                        &gt;
+                      <ButtonLink
+                        color={row.confirmed ? 'main0' : 'main2'}
+                        href={`/dashboard/manage?hash=${row.id}`}
+                      >
+                        {row.confirmed ? (
+                          <>&gt;</>
+                        ) : (
+                          <>
+                            <RotatingLines
+                              strokeColor={theme.color.main2}
+                              animationDuration="1"
+                              width="1em"
+                            />
+                          </>
+                        )}
                       </ButtonLink>
                     ),
                     cellProps: () => ({

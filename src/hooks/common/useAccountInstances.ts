@@ -1,15 +1,23 @@
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { useRequest } from './useRequest'
-import { RequestState } from './useRequestState'
+import { UseRequestReturn, useRequest } from './useRequest'
 import { Instance } from '@/domain/instance'
 import { useInstanceManager } from './useInstanceManager'
+import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
 
-export function useAccountInstances(): [
+export type UseAccountInstancesProps = {
+  triggerOnMount?: boolean
+}
+
+export type UseAccountInstancesReturn = [
   Instance[] | undefined,
-  RequestState<unknown>,
-] {
+  UseRequestReturn<Instance[]>,
+]
+
+export function useAccountInstances({
+  triggerOnMount = true,
+}: UseAccountInstancesProps = {}): UseAccountInstancesReturn {
   const [appState, dispatch] = useAppState()
   const manager = useInstanceManager()
 
@@ -44,5 +52,13 @@ export function useAccountInstances(): [
     triggerOnMount: true,
   })
 
-  return [appState.accountInstances, reqState]
+  const entities = appState.accountInstances
+
+  useRetryNotConfirmedEntities({
+    entities,
+    request: reqState.request,
+    triggerOnMount,
+  })
+
+  return [entities, reqState]
 }

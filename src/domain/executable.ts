@@ -53,7 +53,7 @@ export abstract class Executable {
           return {
             ...volume,
             volumeType: VolumeType.Existing,
-            refHash: messages[i].item_hash,
+            refHash: messages[i].id,
           } as AddExistingVolume
         }
 

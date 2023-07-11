@@ -16,6 +16,7 @@ import { NameAndTagsProp } from '../../form/useAddNameAndTags'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
 import { useProgramManager } from '@/hooks/common/useProgramManager'
+import { ActionTypes } from '@/helpers/store'
 
 export type NewFunctionFormState = {
   runtime: FunctionRuntimeProp
@@ -71,7 +72,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   useConnectedWard()
 
   const router = useRouter()
-  const [appState] = useAppState()
+  const [appState, dispatch] = useAppState()
   const { account, accountBalance } = appState
 
   const manager = useProgramManager()
@@ -97,7 +98,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
       const file = codeOrFile === 'code' ? functionCode : functionFile
 
-      await manager.add({
+      const accountFunction = await manager.add({
         runtime,
         name,
         tags,
@@ -110,9 +111,14 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         file,
       })
 
+      dispatch({
+        type: ActionTypes.addAccountFunction,
+        payload: { accountFunction },
+      })
+
       router.replace('/dashboard')
     },
-    [manager, router],
+    [dispatch, manager, router],
   )
 
   const {

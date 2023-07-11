@@ -8,9 +8,13 @@ import {
   ellipseAddress,
   humanReadableSize,
 } from '@/helpers/utils'
+import { useTheme } from 'styled-components'
+import { RotatingLines } from 'react-loader-spinner'
 
 export const InstancesTabContent = React.memo(
   ({ data }: InstancesTabContentProps) => {
+    const theme = useTheme()
+
     return (
       <>
         {data.length > 0 ? (
@@ -21,6 +25,9 @@ export const InstancesTabContent = React.memo(
                 oddRowNoise
                 rowKey={(row) => row.id}
                 data={data}
+                rowProps={(row) => ({
+                  css: row.confirmed ? '' : tw`opacity-60`,
+                })}
                 columns={[
                   {
                     label: 'Name',
@@ -62,8 +69,21 @@ export const InstancesTabContent = React.memo(
                     width: '0',
                     align: 'right',
                     render: (row) => (
-                      <ButtonLink href={`/dashboard/manage?hash=${row.id}`}>
-                        &gt;
+                      <ButtonLink
+                        color={row.confirmed ? 'main0' : 'main2'}
+                        href={`/dashboard/manage?hash=${row.id}`}
+                      >
+                        {row.confirmed ? (
+                          <>&gt;</>
+                        ) : (
+                          <>
+                            <RotatingLines
+                              strokeColor={theme.color.main2}
+                              animationDuration="1"
+                              width="1em"
+                            />
+                          </>
+                        )}
                       </ButtonLink>
                     ),
                     cellProps: () => ({

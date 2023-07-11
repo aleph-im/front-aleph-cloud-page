@@ -5,6 +5,8 @@ import { useAccountFunction } from '@/hooks/common/useAccountFunction'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
 import { useProgramManager } from '@/hooks/common/useProgramManager'
+import { useAppState } from '@/contexts/appState'
+import { ActionTypes } from '@/helpers/store'
 
 export type ManageFunction = {
   func?: Program
@@ -18,9 +20,10 @@ export function useManageFunction(): ManageFunction {
   const router = useRouter()
   const { hash } = router.query
 
-  const [func] = useAccountFunction(hash as string)
+  const [func] = useAccountFunction({ id: hash as string })
   const [, { onLoad, onSuccess, onError }] = useRequestState()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
+  const [, dispatch] = useAppState()
 
   const manager = useProgramManager()
 
@@ -37,12 +40,18 @@ export function useManageFunction(): ManageFunction {
 
       await manager.del(func)
 
+      dispatch({
+        type: ActionTypes.delAccountFunction,
+        payload: { id: func.id },
+      })
+
       onSuccess(true)
+
       router.replace('/dashboard')
     } catch (e) {
       onError(e as Error)
     }
-  }, [manager, func, router, onError, onLoad, onSuccess])
+  }, [manager, func, onLoad, dispatch, onSuccess, router, onError])
 
   const handleDownload = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')

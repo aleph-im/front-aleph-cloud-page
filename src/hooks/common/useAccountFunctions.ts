@@ -1,15 +1,23 @@
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { useRequest } from './useRequest'
-import { RequestState } from './useRequestState'
+import { UseRequestReturn, useRequest } from './useRequest'
 import { Program } from '@/domain/program'
 import { useProgramManager } from './useProgramManager'
+import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
 
-export function useAccountFunctions(): [
+export type UseAccountFunctionsProps = {
+  triggerOnMount?: boolean
+}
+
+export type UseAccountFunctionsReturn = [
   Program[] | undefined,
-  RequestState<unknown>,
-] {
+  UseRequestReturn<Program[]>,
+]
+
+export function useAccountFunctions({
+  triggerOnMount = true,
+}: UseAccountFunctionsProps = {}): UseAccountFunctionsReturn {
   const [appState, dispatch] = useAppState()
   const manager = useProgramManager()
 
@@ -41,8 +49,16 @@ export function useAccountFunctions(): [
     doRequest,
     onSuccess,
     onError,
-    triggerOnMount: true,
+    triggerOnMount,
   })
 
-  return [appState.accountFunctions, reqState]
+  const entities = appState.accountFunctions
+
+  useRetryNotConfirmedEntities({
+    entities,
+    request: reqState.request,
+    triggerOnMount,
+  })
+
+  return [entities, reqState]
 }

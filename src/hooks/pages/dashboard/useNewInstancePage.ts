@@ -17,6 +17,7 @@ import {
   defaultSpecsOptions,
 } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useInstanceManager'
+import { ActionTypes } from '@/helpers/store'
 
 export type NewInstanceFormState = {
   name?: string
@@ -53,7 +54,7 @@ export function useNewInstancePage(): UseNewInstancePage {
   useConnectedWard()
 
   const router = useRouter()
-  const [appState] = useAppState()
+  const [appState, dispatch] = useAppState()
   const { account, accountBalance } = appState
 
   const manager = useInstanceManager()
@@ -66,7 +67,7 @@ export function useNewInstancePage(): UseNewInstancePage {
 
       const { image, name, tags, envVars, sshKeys, volumes, specs } = state
 
-      await manager.add({
+      const accountInstance = await manager.add({
         name,
         tags,
         envVars,
@@ -76,9 +77,14 @@ export function useNewInstancePage(): UseNewInstancePage {
         image,
       })
 
+      dispatch({
+        type: ActionTypes.addAccountInstance,
+        payload: { accountInstance },
+      })
+
       router.replace('/dashboard')
     },
-    [manager, router],
+    [dispatch, manager, router],
   )
 
   const {

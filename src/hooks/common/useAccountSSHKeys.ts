@@ -2,14 +2,22 @@ import { useAppState } from '@/contexts/appState'
 import { SSHKey } from '@/domain/ssh'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { useRequest } from './useRequest'
-import { RequestState } from './useRequestState'
+import { UseRequestReturn, useRequest } from './useRequest'
 import { useSSHKeyManager } from './useSSHKeyManager'
+import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
 
-export function useAccountSSHKeys(): [
+export type UseAccountSSHKeysProps = {
+  triggerOnMount?: boolean
+}
+
+export type UseAccountSSHKeysReturn = [
   SSHKey[] | undefined,
-  RequestState<unknown>,
-] {
+  UseRequestReturn<SSHKey[]>,
+]
+
+export function useAccountSSHKeys({
+  triggerOnMount = true,
+}: UseAccountSSHKeysProps = {}): UseAccountSSHKeysReturn {
   const [appState, dispatch] = useAppState()
   const manager = useSSHKeyManager()
 
@@ -41,8 +49,16 @@ export function useAccountSSHKeys(): [
     doRequest,
     onSuccess,
     onError,
-    triggerOnMount: true,
+    triggerOnMount,
   })
 
-  return [appState.accountSSHKeys, reqState]
+  const entities = appState.accountSSHKeys
+
+  useRetryNotConfirmedEntities({
+    entities,
+    request: reqState.request,
+    triggerOnMount,
+  })
+
+  return [entities, reqState]
 }

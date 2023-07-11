@@ -14,6 +14,7 @@ export type AnyProductRow = {
   size: number
   date: string
   url: string
+  confirmed?: boolean
 }
 
 export type DashboardHomePage = UseAccountProductsReturn & {
@@ -28,7 +29,7 @@ export function useDashboardHomePage(): DashboardHomePage {
     return Object.values(products)
       .flatMap((product) => product as AnyProduct[])
       .map((product) => {
-        const { id, type, date, url } = product
+        const { id, type, date, url, confirmed } = product
 
         const name =
           (type === EntityType.SSHKey
@@ -49,6 +50,7 @@ export function useDashboardHomePage(): DashboardHomePage {
           size,
           date,
           url,
+          confirmed,
         }
       })
   }, [products])

@@ -4,9 +4,13 @@ import { VolumesTabContentProps } from './types'
 import { Table } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
+import { RotatingLines } from 'react-loader-spinner'
+import { useTheme } from 'styled-components'
 
 export const VolumesTabContent = React.memo(
   ({ data }: VolumesTabContentProps) => {
+    const theme = useTheme()
+
     return (
       <>
         {data.length > 0 ? (
@@ -17,6 +21,9 @@ export const VolumesTabContent = React.memo(
                 oddRowNoise
                 rowKey={(row) => row.id}
                 data={data}
+                rowProps={(row) => ({
+                  css: row.confirmed ? '' : tw`opacity-60`,
+                })}
                 columns={[
                   {
                     label: 'Name',
@@ -41,8 +48,21 @@ export const VolumesTabContent = React.memo(
                     width: '0',
                     align: 'right',
                     render: (row) => (
-                      <ButtonLink href={`/dashboard/manage?hash=${row.id}`}>
-                        &gt;
+                      <ButtonLink
+                        color={row.confirmed ? 'main0' : 'main2'}
+                        href={`/dashboard/manage?hash=${row.id}`}
+                      >
+                        {row.confirmed ? (
+                          <>&gt;</>
+                        ) : (
+                          <>
+                            <RotatingLines
+                              strokeColor={theme.color.main2}
+                              animationDuration="1"
+                              width="1em"
+                            />
+                          </>
+                        )}
                       </ButtonLink>
                     ),
                     cellProps: () => ({

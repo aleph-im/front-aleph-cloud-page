@@ -1,15 +1,23 @@
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { useRequest } from './useRequest'
-import { RequestState } from './useRequestState'
+import { UseRequestReturn, useRequest } from './useRequest'
 import { Volume } from '@/domain/volume'
 import { useVolumeManager } from './useVolumeManager'
+import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
 
-export function useAccountVolumes(): [
+export type UseAccountVolumesProps = {
+  triggerOnMount?: boolean
+}
+
+export type UseAccountVolumesReturn = [
   Volume[] | undefined,
-  RequestState<unknown>,
-] {
+  UseRequestReturn<Volume[]>,
+]
+
+export function useAccountVolumes({
+  triggerOnMount = true,
+}: UseAccountVolumesProps = {}): UseAccountVolumesReturn {
   const [appState, dispatch] = useAppState()
   const manager = useVolumeManager()
 
@@ -41,8 +49,16 @@ export function useAccountVolumes(): [
     doRequest,
     onSuccess,
     onError,
-    triggerOnMount: true,
+    triggerOnMount,
   })
 
-  return [appState.accountVolumes, reqState]
+  const entities = appState.accountVolumes
+
+  useRetryNotConfirmedEntities({
+    entities,
+    request: reqState.request,
+    triggerOnMount,
+  })
+
+  return [entities, reqState]
 }

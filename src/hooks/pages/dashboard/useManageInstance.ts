@@ -5,6 +5,8 @@ import { useAccountInstance } from '@/hooks/common/useAccountInstance'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
 import { useInstanceManager } from '@/hooks/common/useInstanceManager'
+import { useAppState } from '@/contexts/appState'
+import { ActionTypes } from '@/helpers/store'
 
 export type ManageInstance = {
   instance?: Instance
@@ -17,9 +19,10 @@ export function useManageInstance(): ManageInstance {
   const router = useRouter()
   const { hash } = router.query
 
-  const [instance] = useAccountInstance(hash as string)
+  const [instance] = useAccountInstance({ id: hash as string })
   const [, { onLoad, onSuccess, onError }] = useRequestState()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
+  const [, dispatch] = useAppState()
 
   const manager = useInstanceManager()
 
@@ -36,12 +39,18 @@ export function useManageInstance(): ManageInstance {
 
       await manager.del(instance)
 
+      dispatch({
+        type: ActionTypes.delAccountInstance,
+        payload: { id: instance.id },
+      })
+
       onSuccess(true)
+
       router.replace('/dashboard')
     } catch (e) {
       onError(e as Error)
     }
-  }, [instance, manager, onLoad, onSuccess, router, onError])
+  }, [instance, manager, onLoad, dispatch, onSuccess, router, onError])
 
   return {
     instance,

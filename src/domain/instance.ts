@@ -5,11 +5,7 @@ import { InstancePublishConfiguration } from 'aleph-sdk-ts/dist/messages/instanc
 import E_ from '../helpers/errors'
 import { EntityType, defaultInstanceChannel } from '../helpers/constants'
 import { getDate, getExplorerURL, isValidItemHash } from '../helpers/utils'
-import {
-  InstanceMessage,
-  MachineVolume,
-  MessageType,
-} from 'aleph-sdk-ts/dist/messages/types'
+import { MachineVolume, MessageType } from 'aleph-sdk-ts/dist/messages/types'
 import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyProp } from '@/hooks/form/useAddSSHKeys'
@@ -41,6 +37,7 @@ export type Instance = InstanceContent & {
   url: string
   date: string
   size?: number
+  confirmed?: boolean
 }
 
 export class InstanceManager extends Executable {
@@ -75,11 +72,11 @@ export class InstanceManager extends Executable {
       channel: this.channel,
     })
 
-    const [data] = await this.parseMessages([message])
-    return data
+    const [entity] = await this.parseMessages([message])
+    return entity
   }
 
-  async add(newInstance: AddInstance): Promise<InstanceMessage> {
+  async add(newInstance: AddInstance): Promise<Instance> {
     try {
       const { account, channel } = this
       const { envVars, sshKeys, specs, name, tags } = newInstance
@@ -91,7 +88,7 @@ export class InstanceManager extends Executable {
       const authorized_keys = await this.parseSSHKeys(sshKeys)
       const volumes = await this.parseVolumes(newInstance.volumes)
 
-      return await instance.publish({
+      const response = await instance.publish({
         account,
         channel,
         variables,
@@ -101,6 +98,9 @@ export class InstanceManager extends Executable {
         volumes,
         metadata,
       })
+
+      const [entity] = await this.parseMessages([response])
+      return entity
     } catch (err) {
       throw E_.RequestFailed(err)
     }
@@ -170,6 +170,7 @@ export class InstanceManager extends Executable {
           url: getExplorerURL(message),
           date: getDate(message.time),
           size,
+          confirmed: !!message.confirmed,
         }
       })
   }

@@ -3,6 +3,8 @@ import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
 import { useSSHKeyManager } from '@/hooks/common/useSSHKeyManager'
+import { useAppState } from '@/contexts/appState'
+import { ActionTypes } from '@/helpers/store'
 
 export type NewSSHKeyFormState = {
   key: string
@@ -11,6 +13,7 @@ export type NewSSHKeyFormState = {
 
 export const initialState: NewSSHKeyFormState = {
   key: '',
+  label: '',
 }
 
 export type UseNewSSHKeyPage = {
@@ -25,18 +28,22 @@ export function useNewSSHKeyPage() {
 
   const router = useRouter()
   const manager = useSSHKeyManager()
+  const [, dispatch] = useAppState()
 
   const onSubmit = useCallback(
     async (state: NewSSHKeyFormState) => {
-      console.log('state', state)
-
       if (!manager) throw new Error('Manager not ready')
 
-      await manager.add(state)
+      const accountSSHKey = await manager.add(state)
+
+      dispatch({
+        type: ActionTypes.addAccountSSHKey,
+        payload: { accountSSHKey },
+      })
 
       router.replace('/dashboard')
     },
-    [manager, router],
+    [dispatch, manager, router],
   )
 
   const {

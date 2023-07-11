@@ -18,6 +18,7 @@ export type SSHKey = AddSSHKey & {
   id: string // hash
   url: string
   date: string
+  confirmed?: boolean
 }
 
 export class SSHKeyManager {
@@ -49,20 +50,22 @@ export class SSHKeyManager {
       hashes: [id],
     })
 
-    const [data] = this.parsePosts(response.posts)
-    return data
+    const [entity] = this.parsePosts(response.posts)
+    return entity
   }
 
-  async add(sshKey: AddSSHKey) {
+  async add(sshKey: AddSSHKey): Promise<SSHKey> {
     try {
       const { key, label } = sshKey
 
-      return await post.Publish({
+      const response = await post.Publish({
         account: this.account,
         postType: this.type,
         channel: this.channel,
         content: { key, label },
       })
+
+      return this.parseNewPost(response)
     } catch (err) {
       throw E_.RequestFailed(err)
     }
@@ -85,14 +88,24 @@ export class SSHKeyManager {
   // @todo: Type not exported from SDK...
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parsePosts(posts: any[]): SSHKey[] {
-    return posts.map((post) => {
-      return {
-        type: EntityType.SSHKey,
-        id: post.item_hash,
-        ...post.content,
-        url: getExplorerURL(post),
-        date: getDate(post.time),
-      }
-    })
+    return posts.map((post) => this.parsePost(post, post.content))
+  }
+
+  // @todo: Type not exported from SDK...
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected parseNewPost(post: any): SSHKey {
+    return this.parsePost(post, post.content.content)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected parsePost(post: any, content: any): SSHKey {
+    return {
+      type: EntityType.SSHKey,
+      id: post.item_hash,
+      ...content,
+      url: getExplorerURL(post),
+      date: getDate(post.time),
+      confirmed: !!post.confirmed,
+    }
   }
 }
