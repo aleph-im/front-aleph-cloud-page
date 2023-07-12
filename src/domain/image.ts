@@ -1,7 +1,7 @@
 export enum InstanceImageId {
-  Debian11 = '5f31b0706f59404fad3d0bff97ef89ddf24da4761608ea0646329362c662ba51',
-  Debian12 = 'TODO1',
-  Ubuntu22 = 'TODO2',
+  Debian11 = '5fbe9f437454601d27ef60d2fabb3fde302d4a7777a7035195658b4a6a34ac0a',
+  Debian12 = '3b42891b0c40a1e6ed931f49b34baef18135d8addaaf0c9a66656d630957aa6b',
+  Ubuntu22 = '77fef271aa6ff9825efa3186ca2e715d19e7108279b817201c69c34cedc74c27',
 }
 
 export type InstanceImage = {
@@ -23,12 +23,10 @@ export const InstanceImages: Record<InstanceImageId, InstanceImage> = {
     id: InstanceImageId.Debian12,
     name: 'Debian 12 “Bookworm”',
     dist: 'debian',
-    disabled: true,
   },
   [InstanceImageId.Ubuntu22]: {
     id: InstanceImageId.Ubuntu22,
-    name: 'Ubuntu 22.04.1 LTS',
+    name: 'Ubuntu 22.04 LTS',
     dist: 'ubuntu',
-    disabled: true,
   },
 }
