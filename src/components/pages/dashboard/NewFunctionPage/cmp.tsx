@@ -269,6 +269,7 @@ export default function NewFunctionPage() {
             </p>
             <SelectInstanceSpecs
               specs={formState.specs}
+              isPersistentVM={formState.isPersistent}
               onChange={handleChangeInstanceSpecs}
             />
           </Container>

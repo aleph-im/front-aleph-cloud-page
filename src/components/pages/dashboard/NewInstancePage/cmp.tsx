@@ -92,6 +92,7 @@ export default function NewInstancePage() {
             <div tw="px-0 my-6">
               <SelectInstanceSpecs
                 specs={formState.specs}
+                isPersistentVM={true}
                 onChange={handleChangeInstanceSpecs}
               />
             </div>
