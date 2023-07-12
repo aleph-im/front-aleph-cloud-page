@@ -5,6 +5,7 @@ import { Instance, InstanceManager } from '@/domain/instance'
 import { Program, ProgramManager } from '@/domain/program'
 import { AccountFilesResponse, FileManager } from '@/domain/file'
 import { MessageManager } from '@/domain/message'
+import { Domain, DomainManager } from '@/domain/domain'
 
 export enum ActionTypes {
   connect,
@@ -23,6 +24,9 @@ export enum ActionTypes {
   setAccountInstances,
   addAccountInstance,
   delAccountInstance,
+  setAccountDomains,
+  addAccountDomain,
+  delAccountDomain,
 }
 
 export type State = {
@@ -33,10 +37,12 @@ export type State = {
   accountVolumes?: Volume[]
   accountFiles?: AccountFilesResponse
   accountSSHKeys?: SSHKey[]
+  accountDomains?: Domain[]
 
   fileManager?: FileManager
   messageManager?: MessageManager
   sshKeyManager?: SSHKeyManager
+  domainManager?: DomainManager
   volumeManager?: VolumeManager
   programManager?: ProgramManager
   instanceManager?: InstanceManager
@@ -56,10 +62,12 @@ export const initialState: State = {
   accountVolumes: undefined,
   accountFiles: undefined,
   accountSSHKeys: undefined,
+  accountDomains: undefined,
 
   fileManager: undefined,
   messageManager: undefined,
   sshKeyManager: undefined,
+  domainManager: undefined,
   volumeManager: undefined,
   programManager: undefined,
   instanceManager: undefined,
@@ -112,16 +120,19 @@ export const reducer = (
       const fileManager = new FileManager(account)
       const messageManager = new MessageManager(account)
       const sshKeyManager = new SSHKeyManager(account)
+      const domainManager = new DomainManager(account)
       const volumeManager = new VolumeManager(account, fileManager)
       const programManager = new ProgramManager(
         account,
         volumeManager,
+        domainManager,
         messageManager,
         fileManager,
       )
       const instanceManager = new InstanceManager(
         account,
         volumeManager,
+        domainManager,
         sshKeyManager,
         fileManager,
       )
@@ -133,6 +144,7 @@ export const reducer = (
         fileManager,
         messageManager,
         sshKeyManager,
+        domainManager,
         volumeManager,
         programManager,
         instanceManager,
@@ -147,6 +159,7 @@ export const reducer = (
         fileManager: undefined,
         messageManager: undefined,
         sshKeyManager: undefined,
+        domainManager: undefined,
         volumeManager: undefined,
         programManager: undefined,
         instanceManager: undefined,
@@ -281,7 +294,7 @@ export const reducer = (
       }
     }
 
-    // ------ Volumes --------
+    // ------ Instances --------
 
     case ActionTypes.setAccountInstances: {
       const accountInstances = replaceCollection(
@@ -316,6 +329,44 @@ export const reducer = (
       return {
         ...state,
         accountInstances,
+      }
+    }
+
+    // ------ Domains --------
+
+    case ActionTypes.setAccountDomains: {
+      const accountDomains = replaceCollection(
+        payload.accountDomains,
+        state.accountDomains,
+      )
+
+      return {
+        ...state,
+        accountDomains,
+      }
+    }
+
+    case ActionTypes.addAccountDomain: {
+      const accountDomains = addEntityToCollection(
+        payload.accountDomain,
+        state.accountDomains,
+      )
+
+      return {
+        ...state,
+        accountDomains,
+      }
+    }
+
+    case ActionTypes.delAccountDomain: {
+      const accountDomains = delEntityFromCollection(
+        payload.id,
+        state.accountDomains,
+      )
+
+      return {
+        ...state,
+        accountDomains,
       }
     }
 

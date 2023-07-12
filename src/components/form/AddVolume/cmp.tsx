@@ -86,14 +86,16 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
             />
           </div>
         )}
-        <div tw="mt-4">
-          <TextInput
-            label="Size"
-            value={volumeSize}
-            name={`${id}_size`}
-            disabled
-          />
-        </div>
+        {volume.fileSrc && (
+          <div tw="mt-4">
+            <TextInput
+              label="Size"
+              value={volumeSize}
+              name={`${id}_size`}
+              disabled
+            />
+          </div>
+        )}
         {!isStandAlone && (
           <>
             <div tw="mt-4 py-4">

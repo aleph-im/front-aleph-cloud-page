@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { SSHKey } from '@/domain/ssh'
-import { useAccountSSHKey } from '@/hooks/common/useAccountSSHKey'
+import { useAccountSSHKey } from '@/hooks/common/useAccountEntity/useAccountSSHKey'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
-import { useSSHKeyManager } from '@/hooks/common/useSSHKeyManager'
+import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 

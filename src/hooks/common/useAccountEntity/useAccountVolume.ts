@@ -2,9 +2,9 @@ import { useAppState } from '@/contexts/appState'
 import { Volume } from '@/domain/volume'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
-import { UseRequestReturn, useRequest } from './useRequest'
-import { useVolumeManager } from './useVolumeManager'
-import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
+import { UseRequestReturn, useRequest } from '../useRequest'
+import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
+import { useVolumeManager } from '../useManager/useVolumeManager'
 
 export type UseAccountVolumeProps = {
   id: string

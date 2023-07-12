@@ -15,8 +15,9 @@ import { EnvVarProp } from '../../form/useAddEnvVars'
 import { NameAndTagsProp } from '../../form/useAddNameAndTags'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
-import { useProgramManager } from '@/hooks/common/useProgramManager'
+import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { ActionTypes } from '@/helpers/store'
+import { DomainProp } from '@/hooks/form/useAddDomains'
 
 export type NewFunctionFormState = {
   runtime: FunctionRuntimeProp
@@ -28,6 +29,7 @@ export type NewFunctionFormState = {
   functionFile?: File
   specs?: InstanceSpecsProp
   envVars?: EnvVarProp[]
+  domains?: DomainProp[]
   tags?: string[]
   name: string
 }
@@ -65,6 +67,7 @@ export type UseNewFunctionPage = {
   handleChangeInstanceSpecs: (specs: InstanceSpecsProp) => void
   handleChangeVolumes: (volumes: VolumeProp[]) => void
   handleChangeEnvVars: (envVars: EnvVarProp[]) => void
+  handleChangeDomains: (domains: DomainProp[]) => void
   handleChangeNameAndTags: (nameAndTags: NameAndTagsProp) => void
 }
 
@@ -89,6 +92,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         tags,
         isPersistent,
         envVars,
+        domains,
         volumes,
         specs,
         codeOrFile,
@@ -103,6 +107,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         name,
         tags,
         envVars,
+        domains,
         specs,
         volumes,
         isPersistent,
@@ -115,6 +120,8 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         type: ActionTypes.addAccountFunction,
         payload: { accountFunction },
       })
+
+      // @todo: Check new volumes and domains being created to add them to the store
 
       router.replace('/dashboard')
     },
@@ -144,6 +151,11 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
   const handleChangeEnvVars = useCallback(
     (envVars: EnvVarProp[]) => setFormValue('envVars', envVars),
+    [setFormValue],
+  )
+
+  const handleChangeDomains = useCallback(
+    (domains: DomainProp[]) => setFormValue('domains', domains),
     [setFormValue],
   )
 
@@ -189,6 +201,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     handleChangeInstanceSpecs,
     handleChangeVolumes,
     handleChangeEnvVars,
+    handleChangeDomains,
     handleChangeNameAndTags,
   }
 }

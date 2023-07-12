@@ -16,6 +16,9 @@ import { InstanceImageProp } from '@/hooks/form/useSelectInstanceImage'
 import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
 import { VolumeManager } from './volume'
+import { DomainProp } from '@/hooks/form/useAddDomains'
+import { DomainManager } from './domain'
+import { EntityManager } from './types'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -28,6 +31,7 @@ export type AddInstance = Omit<
   envVars?: EnvVarProp[]
   specs?: InstanceSpecsProp
   volumes?: VolumeProp[]
+  domains?: DomainProp[]
 }
 
 // @todo: Refactor
@@ -40,15 +44,19 @@ export type Instance = InstanceContent & {
   confirmed?: boolean
 }
 
-export class InstanceManager extends Executable {
+export class InstanceManager
+  extends Executable
+  implements EntityManager<Instance, AddInstance>
+{
   constructor(
     protected account: Account,
     protected volumeManager: VolumeManager,
+    protected domainManager: DomainManager,
     protected sshKeyManager: SSHKeyManager,
     protected fileManager: FileManager,
     protected channel = defaultInstanceChannel,
   ) {
-    super(account, volumeManager)
+    super(account, volumeManager, domainManager)
   }
 
   async getAll(): Promise<Instance[]> {
@@ -100,18 +108,22 @@ export class InstanceManager extends Executable {
       })
 
       const [entity] = await this.parseMessages([response])
+
+      // @note: Add the domain link
+      await this.parseDomains(entity.id, newInstance.domains)
+
       return entity
     } catch (err) {
       throw E_.RequestFailed(err)
     }
   }
 
-  async del(instanceOrId: string | Instance) {
+  async del(instanceOrId: string | Instance): Promise<void> {
     instanceOrId =
       typeof instanceOrId === 'string' ? instanceOrId : instanceOrId.id
 
     try {
-      return await forget.Publish({
+      await forget.Publish({
         account: this.account,
         channel: this.channel,
         hashes: [instanceOrId],

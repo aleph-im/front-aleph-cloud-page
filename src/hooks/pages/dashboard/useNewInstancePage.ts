@@ -16,8 +16,9 @@ import {
   InstanceSpecsProp,
   defaultSpecsOptions,
 } from '@/hooks/form/useSelectInstanceSpecs'
-import { useInstanceManager } from '@/hooks/common/useInstanceManager'
+import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { ActionTypes } from '@/helpers/store'
+import { DomainProp } from '@/hooks/form/useAddDomains'
 
 export type NewInstanceFormState = {
   name?: string
@@ -27,6 +28,7 @@ export type NewInstanceFormState = {
   volumes?: VolumeProp[]
   envVars?: EnvVarProp[]
   sshKeys?: SSHKeyProp[]
+  domains?: DomainProp[]
 }
 
 export const initialState: NewInstanceFormState = {
@@ -47,6 +49,7 @@ export type UseNewInstancePage = {
   handleChangeVolumes: (volumes: VolumeProp[]) => void
   handleChangeEnvVars: (envVars: EnvVarProp[]) => void
   handleChangeSSHKeys: (sshKeys: SSHKeyProp[]) => void
+  handleChangeDomains: (domains: DomainProp[]) => void
   handleChangeNameAndTags: (nameAndTags: NameAndTagsProp) => void
 }
 
@@ -65,13 +68,15 @@ export function useNewInstancePage(): UseNewInstancePage {
 
       if (!manager) throw new Error('Manager not ready')
 
-      const { image, name, tags, envVars, sshKeys, volumes, specs } = state
+      const { image, name, tags, envVars, domains, sshKeys, volumes, specs } =
+        state
 
       const accountInstance = await manager.add({
         name,
         tags,
         envVars,
         sshKeys,
+        domains,
         volumes,
         specs,
         image,
@@ -81,6 +86,8 @@ export function useNewInstancePage(): UseNewInstancePage {
         type: ActionTypes.addAccountInstance,
         payload: { accountInstance },
       })
+
+      // @todo: Check new volumes and domains being created to add them to the store
 
       router.replace('/dashboard')
     },
@@ -115,6 +122,11 @@ export function useNewInstancePage(): UseNewInstancePage {
 
   const handleChangeSSHKeys = useCallback(
     (sshKeys: SSHKeyProp[]) => setFormValue('sshKeys', sshKeys),
+    [setFormValue],
+  )
+
+  const handleChangeDomains = useCallback(
+    (domains: DomainProp[]) => setFormValue('domains', domains),
     [setFormValue],
   )
 
@@ -162,6 +174,7 @@ export function useNewInstancePage(): UseNewInstancePage {
     handleChangeVolumes,
     handleChangeEnvVars,
     handleChangeSSHKeys,
+    handleChangeDomains,
     handleChangeNameAndTags,
   }
 }

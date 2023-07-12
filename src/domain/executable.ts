@@ -12,11 +12,15 @@ import {
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
+import { DomainProp } from '@/hooks/form/useAddDomains'
+import { AddDomainTarget, Domain, DomainManager } from './domain'
+import { EntityType } from '@/helpers/constants'
 
 export abstract class Executable {
   constructor(
     protected account: Account,
     protected volumeManager: VolumeManager,
+    protected domainManager: DomainManager,
   ) {}
 
   protected parseEnvVars(
@@ -37,6 +41,29 @@ export abstract class Executable {
     }, {} as Record<string, string>)
   }
 
+  protected async parseDomains(
+    ref: string,
+    domains?: DomainProp[],
+  ): Promise<void> {
+    if (!domains) return
+
+    const parsedDomains = domains.map((domain) => {
+      const name = domain.name.trim()
+
+      if (name.length <= 0) throw new Error(`Invalid domain name "${name}"`)
+
+      return {
+        id: name,
+        name,
+        ref,
+        target: AddDomainTarget.Program,
+        type: EntityType.Domain,
+      } as Domain
+    })
+
+    await this.domainManager.add(parsedDomains)
+  }
+
   protected async parseVolumes(
     volumes?: VolumeProp | VolumeProp[],
   ): Promise<MachineVolume[] | undefined> {
@@ -47,6 +74,7 @@ export abstract class Executable {
     // @note: Create new volumes before and cast them to ExistingVolume type
 
     const messages = await this.volumeManager.add(volumes)
+
     const parsedVolumes: (AddExistingVolume | AddPersistentVolume)[] =
       volumes.map((volume, i) => {
         if (volume.volumeType === VolumeType.New) {

@@ -1,47 +1,48 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { Volume } from '@/domain/volume'
-import { useAccountVolume } from '@/hooks/common/useAccountVolume'
+import { Program } from '@/domain/program'
+import { useAccountFunction } from '@/hooks/common/useAccountEntity/useAccountFunction'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
-import { useVolumeManager } from '@/hooks/common/useVolumeManager'
-import { ActionTypes } from '@/helpers/store'
+import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { useAppState } from '@/contexts/appState'
+import { ActionTypes } from '@/helpers/store'
 
-export type ManageVolume = {
-  volume?: Volume
+export type ManageFunction = {
+  func?: Program
   handleCopyHash: () => void
   handleDelete: () => void
   handleDownload: () => void
+  copyAndNotify: (text: string) => void
 }
 
-export function useManageVolume(): ManageVolume {
+export function useManageFunction(): ManageFunction {
   const router = useRouter()
   const { hash } = router.query
 
-  const [volume] = useAccountVolume({ id: hash as string })
+  const [func] = useAccountFunction({ id: hash as string })
   const [, { onLoad, onSuccess, onError }] = useRequestState()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [, dispatch] = useAppState()
 
-  const manager = useVolumeManager()
+  const manager = useProgramManager()
 
   const handleCopyHash = useCallback(() => {
-    copyAndNotify(volume?.id || '')
-  }, [copyAndNotify, volume])
+    copyAndNotify(func?.id || '')
+  }, [copyAndNotify, func])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')
-    if (!volume) throw new Error('Invalid volume')
+    if (!func) throw new Error('Invalid function')
 
     try {
       onLoad()
 
-      await manager.del(volume)
+      await manager.del(func)
 
       dispatch({
-        type: ActionTypes.delAccountVolume,
-        payload: { id: volume.id },
+        type: ActionTypes.delAccountFunction,
+        payload: { id: func.id },
       })
 
       onSuccess(true)
@@ -50,19 +51,20 @@ export function useManageVolume(): ManageVolume {
     } catch (e) {
       onError(e as Error)
     }
-  }, [manager, volume, onLoad, dispatch, onSuccess, router, onError])
+  }, [manager, func, onLoad, dispatch, onSuccess, router, onError])
 
   const handleDownload = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')
-    if (!volume) throw new Error('Invalid volume')
+    if (!func) throw new Error('Invalid function')
 
-    await manager.download(volume)
-  }, [manager, volume])
+    await manager.download(func)
+  }, [manager, func])
 
   return {
-    volume,
+    func,
     handleCopyHash,
     handleDelete,
     handleDownload,
+    copyAndNotify,
   }
 }

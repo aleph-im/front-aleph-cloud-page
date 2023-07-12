@@ -2,9 +2,9 @@ import { useAppState } from '@/contexts/appState'
 import { Program } from '@/domain/program'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
-import { UseRequestReturn, useRequest } from './useRequest'
-import { useProgramManager } from './useProgramManager'
-import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
+import { UseRequestReturn, useRequest } from '../useRequest'
+import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
+import { useProgramManager } from '../useManager/useProgramManager'
 
 export type UseAccountFunctionProps = {
   id: string

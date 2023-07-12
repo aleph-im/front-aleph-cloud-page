@@ -1,10 +1,10 @@
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { useRequest } from './useRequest'
-import { RequestState } from './useRequestState'
 import { AccountFilesResponse } from '@/domain/file'
-import { useFileManager } from './useFileManager'
+import { useFileManager } from '../useManager/useFileManager'
+import { RequestState } from '../useRequestState'
+import { useRequest } from '../useRequest'
 
 export function useAccountFiles(): [
   AccountFilesResponse | undefined,

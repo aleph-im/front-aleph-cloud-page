@@ -4,7 +4,7 @@ import IconText from '@/components/common/IconText'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
 import { Button, Icon, Tag } from '@aleph-front/aleph-core'
-import { useManageVolume } from '@/hooks/pages/dashboard/useManageVolume'
+import { useManageVolume } from '@/hooks/pages/dashboard/manage/useManageVolume'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 

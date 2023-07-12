@@ -1,14 +1,14 @@
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-import { useMessageToEntityType } from './useMessageToEntityType'
+import { useHashToEntityType } from './useHashToEntityType'
 import { EntityType } from '@/helpers/constants'
 
 export type UseDashboardManagePageReturn = {
-  type: EntityType
+  type: EntityType | undefined
 }
 
-export function useDashboardManagePage() {
+export function useDashboardManagePage(): UseDashboardManagePageReturn {
   useConnectedWard()
 
   const router = useRouter()
@@ -18,7 +18,6 @@ export function useDashboardManagePage() {
     if (!hash || typeof hash !== 'string') router.replace('../')
   }, [hash, router])
 
-  const type = useMessageToEntityType(hash as string)
-
+  const type = useHashToEntityType(hash as string)
   return { type }
 }

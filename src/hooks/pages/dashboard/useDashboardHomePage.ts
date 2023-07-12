@@ -1,47 +1,52 @@
 import { useMemo } from 'react'
-import { AnyProduct, ellipseAddress } from '@/helpers/utils'
+import { AnyEntity, ellipseAddress } from '@/helpers/utils'
 import { EntityType } from '@/helpers/constants'
 import {
-  UseAccountProductsReturn,
-  useAccountProducts,
-} from '@/hooks/common/useAccountProducts'
+  UseAccountEntitiesReturn,
+  useAccountEntities,
+} from '@/hooks/common/useAccountEntity/useAccountEntities'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 
-export type AnyProductRow = {
+export type AnyEntityRow = {
   id: string
   type: EntityType
   name: string
   size: number
-  date: string
-  url: string
+  date?: string
+  url?: string
   confirmed?: boolean
 }
 
-export type DashboardHomePage = UseAccountProductsReturn & {
-  all: AnyProductRow[]
+export type DashboardHomePage = UseAccountEntitiesReturn & {
+  all: AnyEntityRow[]
 }
 
 export function useDashboardHomePage(): DashboardHomePage {
   useConnectedWard()
-  const products = useAccountProducts()
+  const entities = useAccountEntities()
 
-  const all: AnyProductRow[] = useMemo(() => {
-    return Object.values(products)
-      .flatMap((product) => product as AnyProduct[])
-      .map((product) => {
-        const { id, type, date, url, confirmed } = product
+  const all: AnyEntityRow[] = useMemo(() => {
+    return Object.values(entities)
+      .flatMap((entity) => entity as AnyEntity[])
+      .map((entity) => {
+        const { id, type, confirmed } = entity
 
         const name =
           (type === EntityType.SSHKey
-            ? product.label
+            ? entity.label
             : type === EntityType.Instance || type === EntityType.Program
-            ? product.metadata?.name
-            : ellipseAddress(product.id || '')) || `Unknown ${type}`
+            ? entity.metadata?.name
+            : ellipseAddress(entity.id || '')) || `Unknown ${type}`
 
         const size =
           (type === EntityType.SSHKey
-            ? new Blob([product.key]).size
-            : product.size) || 0
+            ? new Blob([entity.key]).size
+            : type === EntityType.Domain
+            ? 0
+            : entity.size) || 0
+
+        const date = entity.type === EntityType.Domain ? '' : entity.date
+        const url = entity.type === EntityType.Domain ? '' : entity.url
 
         return {
           id,
@@ -53,10 +58,10 @@ export function useDashboardHomePage(): DashboardHomePage {
           confirmed,
         }
       })
-  }, [products])
+  }, [entities])
 
   return {
-    ...products,
+    ...entities,
     all,
   }
 }

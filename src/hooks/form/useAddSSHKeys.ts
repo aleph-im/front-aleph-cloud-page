@@ -1,5 +1,5 @@
 import { ChangeEvent, useCallback, useId, useMemo, useState } from 'react'
-import { useAccountSSHKeys } from '../common/useAccountSSHKeys'
+import { useAccountSSHKeys } from '../common/useAccountEntity/useAccountSSHKeys'
 
 export type SSHKeyProp = {
   id: string

@@ -1,25 +1,25 @@
 import { useAppState } from '@/contexts/appState'
-import { SSHKey } from '@/domain/ssh'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { UseRequestReturn, useRequest } from './useRequest'
-import { useSSHKeyManager } from './useSSHKeyManager'
-import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
+import { UseRequestReturn, useRequest } from '../useRequest'
+import { Instance } from '@/domain/instance'
+import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
+import { useInstanceManager } from '../useManager/useInstanceManager'
 
-export type UseAccountSSHKeysProps = {
+export type UseAccountInstancesProps = {
   triggerOnMount?: boolean
 }
 
-export type UseAccountSSHKeysReturn = [
-  SSHKey[] | undefined,
-  UseRequestReturn<SSHKey[]>,
+export type UseAccountInstancesReturn = [
+  Instance[] | undefined,
+  UseRequestReturn<Instance[]>,
 ]
 
-export function useAccountSSHKeys({
+export function useAccountInstances({
   triggerOnMount = true,
-}: UseAccountSSHKeysProps = {}): UseAccountSSHKeysReturn {
+}: UseAccountInstancesProps = {}): UseAccountInstancesReturn {
   const [appState, dispatch] = useAppState()
-  const manager = useSSHKeyManager()
+  const manager = useInstanceManager()
 
   const doRequest = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')
@@ -28,10 +28,10 @@ export function useAccountSSHKeys({
   }, [manager])
 
   const onSuccess = useCallback(
-    (accountSSHKeys: SSHKey[]) => {
+    (accountInstances: Instance[]) => {
       dispatch({
-        type: ActionTypes.setAccountSSHKeys,
-        payload: { accountSSHKeys },
+        type: ActionTypes.setAccountInstances,
+        payload: { accountInstances },
       })
     },
     [dispatch],
@@ -49,10 +49,10 @@ export function useAccountSSHKeys({
     doRequest,
     onSuccess,
     onError,
-    triggerOnMount,
+    triggerOnMount: true,
   })
 
-  const entities = appState.accountSSHKeys
+  const entities = appState.accountInstances
 
   useRetryNotConfirmedEntities({
     entities,

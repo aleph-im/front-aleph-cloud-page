@@ -1,10 +1,10 @@
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { UseRequestReturn, useRequest } from './useRequest'
+import { UseRequestReturn, useRequest } from '../useRequest'
 import { Program } from '@/domain/program'
-import { useProgramManager } from './useProgramManager'
-import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
+import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
+import { useProgramManager } from '../useManager/useProgramManager'
 
 export type UseAccountFunctionsProps = {
   triggerOnMount?: boolean
