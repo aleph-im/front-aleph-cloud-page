@@ -68,9 +68,7 @@ export function useAddNewVolumeProps({
   const id = useId()
 
   const handleFileSrcChange = useCallback(
-    (fileSrc?: File) => {
-      if (!fileSrc) return //@todo: Handle error in UI
-
+    (fileSrc: File | undefined) => {
       const newVolume: NewVolumeProp = { ...volume, fileSrc }
 
       const size = VolumeManager.getVolumeSize(newVolume)

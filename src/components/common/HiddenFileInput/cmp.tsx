@@ -1,77 +1,77 @@
-import React, { useEffect } from 'react'
+import React, { ChangeEvent, memo, useCallback, useRef, useState } from 'react'
 import { Button, Icon } from '@aleph-front/aleph-core'
 import { HiddenFileInputProps } from './types'
 import { StyledHiddenFileInput } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 
-const HiddenFileInput = ({
-  onChange,
-  accept,
-  value,
-  children,
-}: HiddenFileInputProps) => {
-  const inputRef = React.useRef<HTMLInputElement>(null)
-  const [inMemoryFile, setInMemoryFile] = React.useState<File | null>(null)
+export const HiddenFileInput = memo(
+  ({ onChange, accept, value, children }: HiddenFileInputProps) => {
+    const inputRef = useRef<HTMLInputElement>(null)
+    const [state, setState] = useState<File | undefined>(undefined)
 
-  const handleClick = () => {
-    if (inputRef.current !== null) inputRef.current.click()
-  }
+    const file = value || state
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | null) => {
-    if (e === null) {
-      setInMemoryFile(null)
-      return onChange(undefined)
-    }
+    const handleClick = useCallback(() => {
+      if (!inputRef.current) return
+      inputRef.current.click()
+    }, [])
 
-    // This is verbose to avoid a type error on e.target.files[0] being undefined
-    const target = e.target as HTMLInputElement
-    const { files } = target
+    const handleRemoveFile = useCallback(() => {
+      setState(undefined)
+      onChange(undefined)
+    }, [onChange])
 
-    if (files) {
-      const fileUploaded = files[0]
-      setInMemoryFile(fileUploaded)
-      onChange(fileUploaded)
-    }
-  }
+    const handleChange = useCallback(
+      (e: ChangeEvent<HTMLInputElement>) => {
+        // This is verbose to avoid a type error on e.target.files[0] being undefined
+        const target = e.target as HTMLInputElement
+        const { files } = target
 
-  useEffect(() => {
-    if (value) setInMemoryFile(value)
-  }, [value])
+        if (files) {
+          const fileUploaded = files[0]
+          setState(fileUploaded)
+          onChange(fileUploaded)
+        }
+      },
+      [onChange],
+    )
 
-  return (
-    <>
-      {inMemoryFile ? (
-        <Button
-          onClick={() => handleChange(null)}
-          type="button"
-          color="main2"
-          kind="neon"
-          size="regular"
-          variant="tertiary"
-        >
-          {ellipseAddress(inMemoryFile.name)} <Icon name="trash" tw="ml-5" />
-        </Button>
-      ) : (
-        <Button
-          onClick={handleClick}
-          type="button"
-          color="main0"
-          kind="neon"
-          size="regular"
-          variant="primary"
-        >
-          {children}
-        </Button>
-      )}
+    return (
+      <>
+        {file ? (
+          <Button
+            onClick={handleRemoveFile}
+            type="button"
+            color="main2"
+            kind="neon"
+            size="regular"
+            variant="tertiary"
+          >
+            {ellipseAddress(file.name)} <Icon name="trash" tw="ml-5" />
+          </Button>
+        ) : (
+          <Button
+            onClick={handleClick}
+            type="button"
+            color="main0"
+            kind="neon"
+            size="regular"
+            variant="primary"
+          >
+            {children}
+          </Button>
+        )}
 
-      <StyledHiddenFileInput
-        type="file"
-        ref={inputRef}
-        onChange={handleChange}
-        accept={accept}
-      />
-    </>
-  )
-}
+        <StyledHiddenFileInput
+          type="file"
+          ref={inputRef}
+          onChange={handleChange}
+          accept={accept}
+        />
+      </>
+    )
+  },
+)
+HiddenFileInput.displayName = 'HiddenFileInput'
 
 export default HiddenFileInput
