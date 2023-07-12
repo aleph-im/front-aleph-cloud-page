@@ -199,7 +199,7 @@ export default function ManageDomain() {
                   <div>
                     <a
                       className="tp-body1 fs-sm"
-                      href={domain.ref}
+                      href={refEntity.url}
                       target="_blank"
                       referrerPolicy="no-referrer"
                     >
