@@ -6,6 +6,7 @@ import {
 } from '@/helpers/utils'
 import { StyledHoldingSummaryLine } from './styles'
 import {
+  HoldingRequirementsDomainLineProps,
   HoldingRequirementsProps,
   HoldingRequirementsVolumeLineProps,
 } from './types'
@@ -39,12 +40,26 @@ const HoldingRequirementsVolumeLine = React.memo(
 )
 HoldingRequirementsVolumeLine.displayName = 'HoldingRequirementsVolumeLine'
 
+const HoldingRequirementsDomainLine = React.memo(
+  ({ domain }: HoldingRequirementsDomainLineProps) => {
+    return (
+      <StyledHoldingSummaryLine>
+        <div tw="text-xs flex items-center">CUSTOM DOMAIN</div>
+        <div>{domain.name}</div>
+        <div>0 ALEPH</div>
+      </StyledHoldingSummaryLine>
+    )
+  },
+)
+HoldingRequirementsDomainLine.displayName = 'HoldingRequirementsDomainLine'
+
 export default function HoldingRequirements({
   address,
   unlockedAmount,
   type,
   specs,
   volumes,
+  domains,
   isPersistentVM = type === EntityType.Instance,
 }: HoldingRequirementsProps) {
   const { computeTotalCost, perVolumeCost, totalCost } = useMemo(
@@ -84,6 +99,13 @@ export default function HoldingRequirements({
               volume={volume}
               price={perVolumeCost[i]}
             />
+          )
+        })}
+
+      {domains &&
+        domains.map((domain) => {
+          return (
+            <HoldingRequirementsDomainLine key={domain.id} domain={domain} />
           )
         })}
 

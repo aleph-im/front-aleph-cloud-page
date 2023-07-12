@@ -361,6 +361,7 @@ export default function NewFunctionPage() {
                 isPersistentVM={formState.isPersistent}
                 specs={formState.specs}
                 volumes={formState.volumes}
+                domains={formState.domains}
                 unlockedAmount={accountBalance}
               />
             </div>

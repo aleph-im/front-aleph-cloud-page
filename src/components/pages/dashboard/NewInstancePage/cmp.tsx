@@ -210,6 +210,7 @@ export default function NewInstancePage() {
                 isPersistentVM={true}
                 specs={formState.specs}
                 volumes={formState.volumes}
+                domains={formState.domains}
                 unlockedAmount={accountBalance}
               />
             </div>
