@@ -1,27 +1,27 @@
 import { useAppState } from '@/contexts/appState'
-import { Instance } from '@/domain/instance'
+import { Domain } from '@/domain/domain'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
-import { UseRequestReturn, useRequest } from './useRequest'
-import { useInstanceManager } from './useInstanceManager'
-import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
+import { UseRequestReturn, useRequest } from '../useRequest'
+import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
+import { useDomainManager } from '../useManager/useDomainManager'
 
-export type UseAccountInstanceProps = {
+export type UseAccountDomainProps = {
   id: string
   triggerOnMount?: boolean
 }
 
-export type UseAccountInstanceReturn = [
-  Instance | undefined,
-  UseRequestReturn<Instance | undefined>,
+export type UseAccountDomainReturn = [
+  Domain | undefined,
+  UseRequestReturn<Domain | undefined>,
 ]
 
-export function useAccountInstance({
+export function useAccountDomain({
   id,
   triggerOnMount = true,
-}: UseAccountInstanceProps): UseAccountInstanceReturn {
+}: UseAccountDomainProps): UseAccountDomainReturn {
   const [appState, dispatch] = useAppState()
-  const manager = useInstanceManager()
+  const manager = useDomainManager()
 
   const doRequest = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')
@@ -30,10 +30,10 @@ export function useAccountInstance({
   }, [id, manager])
 
   const onSuccess = useCallback(
-    (accountInstance: Instance | undefined) => {
+    (accountDomain: Domain | undefined) => {
       dispatch({
-        type: ActionTypes.addAccountInstance,
-        payload: { accountInstance },
+        type: ActionTypes.addAccountDomain,
+        payload: { accountDomain },
       })
     },
     [dispatch],
@@ -47,10 +47,9 @@ export function useAccountInstance({
     [manager],
   )
 
-  const instance = useMemo(
-    () =>
-      (appState.accountInstances || []).find((key: Instance) => key.id === id),
-    [appState.accountInstances, id],
+  const domainKey = useMemo(
+    () => (appState.accountDomains || []).find((key: Domain) => key.id === id),
+    [appState.accountDomains, id],
   )
 
   const reqState = useRequest({
@@ -61,10 +60,10 @@ export function useAccountInstance({
   })
 
   useRetryNotConfirmedEntities({
-    entities: instance,
+    entities: domainKey,
     request: reqState.request,
     triggerOnMount,
   })
 
-  return [instance, reqState]
+  return [domainKey, reqState]
 }

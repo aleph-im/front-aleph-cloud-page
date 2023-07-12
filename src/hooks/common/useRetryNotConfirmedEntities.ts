@@ -16,15 +16,13 @@ export function useRetryNotConfirmedEntities<E extends ConfirmableEntity>({
   useEffect(() => {
     if (!triggerOnMount) return
 
-    const id = setTimeout(async () => {
-      const notConfirmed = (
-        Array.isArray(entities) ? entities : [entities]
-      ).filter((entity) => !entity.confirmed)
+    const notConfirmed = (
+      Array.isArray(entities) ? entities : [entities]
+    ).filter((entity) => !entity.confirmed)
 
-      if (!notConfirmed.length) return
+    if (!notConfirmed.length) return
 
-      await request()
-    }, 10 * 1000)
+    const id = setTimeout(request, 10 * 1000)
 
     return () => clearTimeout(id)
   }, [entities, request, triggerOnMount])

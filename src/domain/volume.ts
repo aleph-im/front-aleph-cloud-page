@@ -10,6 +10,7 @@ import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
 import { MessageType, StoreContent } from 'aleph-sdk-ts/dist/messages/types'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
+import { EntityManager } from './types'
 
 export enum VolumeType {
   New = 'new',
@@ -82,7 +83,7 @@ export type PersistentVolume = BaseVolume & {
 
 export type Volume = NewVolume | ExistingVolume | PersistentVolume
 
-export class VolumeManager {
+export class VolumeManager implements EntityManager<Volume, AddVolume> {
   /**
    * Returns the size of a volume in mb
    */
@@ -188,11 +189,11 @@ export class VolumeManager {
     }
   }
 
-  async del(volumeOrId: string | Volume) {
+  async del(volumeOrId: string | Volume): Promise<void> {
     volumeOrId = typeof volumeOrId === 'string' ? volumeOrId : volumeOrId.id
 
     try {
-      return await forget.Publish({
+      await forget.Publish({
         account: this.account,
         channel: this.channel,
         hashes: [volumeOrId],

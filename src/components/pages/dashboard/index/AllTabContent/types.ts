@@ -1,5 +1,5 @@
-import { AnyProductRow } from '@/hooks/pages/dashboard/useDashboardHomePage'
+import { AnyEntityRow } from '@/hooks/pages/dashboard/useDashboardHomePage'
 
 export type AllTabContentProps = {
-  data: AnyProductRow[]
+  data: AnyEntityRow[]
 }

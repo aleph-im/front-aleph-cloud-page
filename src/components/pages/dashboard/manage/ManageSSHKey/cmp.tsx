@@ -4,7 +4,7 @@ import IconText from '@/components/common/IconText'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
 import { Button, Tag } from '@aleph-front/aleph-core'
-import { useManageSSHKey } from '@/hooks/pages/dashboard/useManageSSHKey'
+import { useManageSSHKey } from '@/hooks/pages/dashboard/manage/useManageSSHKey'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 

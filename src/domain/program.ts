@@ -31,6 +31,9 @@ import { FunctionRuntime, FunctionRuntimeId } from './runtime'
 import { FileManager } from './file'
 import { MessageManager } from './message'
 import { VolumeManager } from './volume'
+import { DomainProp } from '@/hooks/form/useAddDomains'
+import { DomainManager } from './domain'
+import { EntityManager } from './types'
 
 // @todo: Export this type from sdk and remove here
 declare type ProgramPublishConfiguration = {
@@ -53,7 +56,7 @@ declare type ProgramPublishConfiguration = {
   variables?: Record<string, string>
 }
 
-export type NewProgram = Omit<
+export type AddProgram = Omit<
   ProgramPublishConfiguration,
   | 'account'
   | 'channel'
@@ -73,6 +76,7 @@ export type NewProgram = Omit<
   envVars?: EnvVarProp[]
   specs?: InstanceSpecsProp
   volumes?: VolumeProp[]
+  domains?: DomainProp[]
 }
 
 // @todo: Refactor
@@ -86,15 +90,19 @@ export type Program = Omit<ProgramContent, 'type'> & {
   confirmed?: boolean
 }
 
-export class ProgramManager extends Executable {
+export class ProgramManager
+  extends Executable
+  implements EntityManager<Program, AddProgram>
+{
   constructor(
     protected account: Account,
     protected volumeManager: VolumeManager,
+    protected domainManager: DomainManager,
     protected messageManager: MessageManager,
     protected fileManager: FileManager,
     protected channel = defaultProgramChannel,
   ) {
-    super(account, volumeManager)
+    super(account, volumeManager, domainManager)
   }
 
   async getAll(): Promise<Program[]> {
@@ -122,7 +130,7 @@ export class ProgramManager extends Executable {
     return entity
   }
 
-  async add(newProgram: NewProgram): Promise<Program> {
+  async add(newProgram: AddProgram): Promise<Program> {
     try {
       const { account, channel } = this
       const {
@@ -156,17 +164,21 @@ export class ProgramManager extends Executable {
       })
 
       const [entity] = await this.parseMessages([response])
+
+      // @note: Add the domain link
+      await this.parseDomains(entity.id, newProgram.domains)
+
       return entity
     } catch (err) {
       throw E_.RequestFailed(err)
     }
   }
 
-  async del(programOrId: string | Program) {
+  async del(programOrId: string | Program): Promise<void> {
     programOrId = typeof programOrId === 'string' ? programOrId : programOrId.id
 
     try {
-      return await forget.Publish({
+      await forget.Publish({
         account: this.account,
         channel: this.channel,
         hashes: [programOrId],

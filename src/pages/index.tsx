@@ -1,3 +1,3 @@
-import HomePage from '@/components/pages/HomePage/cmp'
+import HomePage from '@/components/pages/HomePage'
 
 export default HomePage

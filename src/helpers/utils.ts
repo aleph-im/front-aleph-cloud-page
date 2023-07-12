@@ -15,6 +15,7 @@ import { SSHKey } from '../domain/ssh'
 import { Instance } from '../domain/instance'
 import { AddVolume, Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Program } from '@/domain/program'
+import { Domain } from '@/domain/domain'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -315,7 +316,7 @@ export const getTotalProductCost = ({
   }
 }
 
-export type AnyProduct = Program | Instance | Volume | SSHKey
+export type AnyEntity = Program | Instance | Volume | SSHKey | Domain
 
 export type AnyMessage =
   | ProgramMessage

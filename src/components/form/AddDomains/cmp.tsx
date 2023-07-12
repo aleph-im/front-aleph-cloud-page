@@ -1,39 +1,80 @@
 import React from 'react'
-import { TextInput, Button } from '@aleph-front/aleph-core'
-import ExternalLinkButton from '@/components/common/ExternalLinkButton'
+import { Icon, TextInput, Button } from '@aleph-front/aleph-core'
+import { useAddDomains, useDomainItem } from '@/hooks/form/useAddDomains'
+import { DomainItemProps, AddDomainsProps as AddDomainsProps } from './types'
 import NoisyContainer from '@/components/common/NoisyContainer'
 
-export const AddDomains = React.memo(() => {
+const DomainItem = React.memo((props: DomainItemProps) => {
+  const { id, domain, handleNameChange, handleRemove } = useDomainItem(props)
+
   return (
-    <>
-      <NoisyContainer>
+    <div tw="flex flex-col md:flex-row gap-6">
+      <div tw="flex-1">
         <TextInput
-          button={
-            <Button
-              color="main0"
-              kind="neon"
-              size="regular"
-              variant="secondary"
-              disabled
-            >
-              Add
-            </Button>
-          }
-          buttonStyle="wrapped"
-          color="white"
-          name="__config_add_domain"
-          placeholder="Enter custom domain"
-          disabled
+          name={`${id}_name`}
+          placeholder="Name"
+          value={domain.name}
+          onChange={handleNameChange}
         />
-      </NoisyContainer>
-      <div tw="mt-6 text-right">
-        <ExternalLinkButton href="https://docs.aleph.im" disabled>
-          Learn more
-        </ExternalLinkButton>
       </div>
-    </>
+      <div tw="flex items-end md:justify-center pb-2">
+        <Button
+          color="main2"
+          variant="secondary"
+          kind="neon"
+          size="regular"
+          type="button"
+          onClick={handleRemove}
+        >
+          <Icon name="trash" />
+        </Button>
+      </div>
+    </div>
   )
 })
+DomainItem.displayName = 'DomainItem'
+
+export const AddDomains = React.memo(
+  ({ domains: domainsProp, onChange }: AddDomainsProps) => {
+    const { domains, handleChange, handleAdd, handleRemove } = useAddDomains({
+      domains: domainsProp,
+      onChange,
+    })
+
+    return (
+      <>
+        {domains.length > 0 && (
+          <NoisyContainer>
+            <div tw="flex flex-col gap-x-6 gap-y-4">
+              {domains.map((domain) => (
+                <DomainItem
+                  key={domain.id}
+                  domain={domain}
+                  onChange={handleChange}
+                  onRemove={handleRemove}
+                />
+              ))}
+            </div>
+          </NoisyContainer>
+        )}
+        {domains.length < 1 && (
+          <div tw="mt-6 mx-6">
+            <Button
+              type="button"
+              onClick={handleAdd}
+              color="main0"
+              variant="secondary"
+              kind="neon"
+              size="regular"
+            >
+              Add domain
+            </Button>
+          </div>
+        )}
+      </>
+    )
+  },
+)
 AddDomains.displayName = 'AddDomains'
 
 export default AddDomains

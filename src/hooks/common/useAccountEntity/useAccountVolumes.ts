@@ -1,10 +1,10 @@
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { UseRequestReturn, useRequest } from './useRequest'
+import { UseRequestReturn, useRequest } from '../useRequest'
 import { Volume } from '@/domain/volume'
-import { useVolumeManager } from './useVolumeManager'
-import { useRetryNotConfirmedEntities } from './useRetryNotConfirmedEntities'
+import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
+import { useVolumeManager } from '../useManager/useVolumeManager'
 
 export type UseAccountVolumesProps = {
   triggerOnMount?: boolean

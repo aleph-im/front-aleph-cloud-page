@@ -9,7 +9,7 @@ import {
   defaultVolume,
   VolumeProp,
 } from '@/hooks/form/useAddVolume'
-import { useVolumeManager } from '@/hooks/common/useVolumeManager'
+import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { ActionTypes } from '@/helpers/store'
 
 export type NewVolumeFormState = {

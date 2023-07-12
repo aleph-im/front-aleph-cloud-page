@@ -2,7 +2,7 @@ import { ChangeEvent, FormEvent, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
-import { useSSHKeyManager } from '@/hooks/common/useSSHKeyManager'
+import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 

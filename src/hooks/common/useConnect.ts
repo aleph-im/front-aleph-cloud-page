@@ -63,9 +63,6 @@ export function useConnect(): UseConnectReturn {
     return account
   }, [setKeepAccountAlive, getBalance, dispatch, onError])
 
-  // @todo: Think if it is necessary preload all on connect
-  // useAccountProducts()
-
   const disconnect = useCallback(async () => {
     setKeepAccountAlive(false)
     dispatch({ type: ActionTypes.disconnect, payload: null })

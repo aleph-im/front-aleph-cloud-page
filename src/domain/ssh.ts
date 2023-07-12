@@ -7,6 +7,7 @@ import {
   defaultSSHPostType,
 } from '../helpers/constants'
 import { getDate, getExplorerURL } from '../helpers/utils'
+import { EntityManager } from './types'
 
 export type AddSSHKey = {
   key: string
@@ -21,7 +22,7 @@ export type SSHKey = AddSSHKey & {
   confirmed?: boolean
 }
 
-export class SSHKeyManager {
+export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
   constructor(
     protected account: Account,
     protected type = defaultSSHPostType,
@@ -71,11 +72,11 @@ export class SSHKeyManager {
     }
   }
 
-  async del(sshKeyOrId: string | SSHKey) {
+  async del(sshKeyOrId: string | SSHKey): Promise<void> {
     sshKeyOrId = typeof sshKeyOrId === 'string' ? sshKeyOrId : sshKeyOrId.id
 
     try {
-      return await forget.Publish({
+      await forget.Publish({
         account: this.account,
         channel: this.channel,
         hashes: [sshKeyOrId],

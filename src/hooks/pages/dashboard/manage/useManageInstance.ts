@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { Instance } from '@/domain/instance'
-import { useAccountInstance } from '@/hooks/common/useAccountInstance'
+import { useAccountInstance } from '@/hooks/common/useAccountEntity/useAccountInstance'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
-import { useInstanceManager } from '@/hooks/common/useInstanceManager'
+import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 

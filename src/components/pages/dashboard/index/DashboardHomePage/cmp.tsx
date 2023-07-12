@@ -9,6 +9,7 @@ import InstancesTabContent from '../InstancesTabContent'
 import VolumesTabContent from '../VolumesTabContent/cmp'
 import AllTabContent from '../AllTabContent'
 import { useDashboardHomePage } from '@/hooks/pages/dashboard/useDashboardHomePage'
+import DomainsTabContent from '../DomainsTabContent/cmp'
 
 const Container = styled(CenteredContainer).attrs((props) => ({
   ...props,
@@ -16,7 +17,8 @@ const Container = styled(CenteredContainer).attrs((props) => ({
 }))``
 
 export default function DashboardHomePage() {
-  const { all, functions, instances, volumes, sshKeys } = useDashboardHomePage()
+  const { all, functions, instances, volumes, sshKeys, domains } =
+    useDashboardHomePage()
 
   const [tabId, setTabId] = useState('all')
 
@@ -57,6 +59,12 @@ export default function DashboardHomePage() {
                 label: `(${sshKeys.length})`,
                 labelPosition: 'bottom',
               },
+              {
+                id: 'domain',
+                name: 'Domains',
+                label: `(${domains.length})`,
+                labelPosition: 'bottom',
+              },
             ]}
             onTabChange={setTabId}
           />
@@ -72,6 +80,8 @@ export default function DashboardHomePage() {
             <VolumesTabContent data={volumes} />
           ) : tabId === 'ssh' ? (
             <SSHKeysTabContent data={sshKeys} />
+          ) : tabId === 'domain' ? (
+            <DomainsTabContent data={domains} />
           ) : (
             <></>
           )}
