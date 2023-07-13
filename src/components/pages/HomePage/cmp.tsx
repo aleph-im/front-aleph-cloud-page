@@ -93,6 +93,7 @@ export default function HomePage() {
                 buttonLabel="Create instance"
                 headerImg="Object11"
                 buttonOnClick={navigate.instance}
+                disabled
               />
             </Col>
             <Col>
