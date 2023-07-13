@@ -310,14 +310,13 @@ export default function NewFunctionPage() {
         <section tw="px-0 py-6 md:py-10">
           <Container>
             <CompositeTitle as="h2" number="7">
-              Define environment variables
+              Add environment variables
             </CompositeTitle>
             <p tw="mb-6">
               Define key-value pairs that act as configuration settings for your
-              web3 function. Environment variables offer a convenient and secure
-              way to store sensitive information, manage configurations, and
-              modify your application&apos;s behaviour without altering the
-              source code.
+              web3 function. Environment variables offer a convenient way to
+              store information, manage configurations, and modify your
+              application&apos;s behaviour without altering the source code.
             </p>
             <AddEnvVars
               envVars={formState.envVars}

@@ -137,10 +137,9 @@ export default function NewInstancePage() {
             </CompositeTitle>
             <p>
               Define key-value pairs that act as configuration settings for your
-              web3 instance. Environment variables offer a convenient and secure
-              way to store sensitive information, manage configurations, and
-              modify your application&amp;s behaviour without altering the
-              source code.
+              web3 instance. Environment variables offer a convenient way to
+              store information, manage configurations, and modify your
+              application&apos;s behaviour without altering the source code.
             </p>
             <div tw="px-0 my-6">
               <AddEnvVars
