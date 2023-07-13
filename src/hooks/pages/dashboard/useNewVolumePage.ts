@@ -57,8 +57,8 @@ export function useNewVolumePage() {
   )
 
   const accountBalance = appState?.accountBalance || 0
-  const totalCost = useMemo(
-    () => VolumeManager.getVolumeTotalCost([formState.volume]),
+  const { totalCost } = useMemo(
+    () => VolumeManager.getCost({ volumes: [formState.volume] }),
     [formState],
   )
 

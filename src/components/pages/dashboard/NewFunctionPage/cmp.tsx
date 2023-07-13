@@ -272,7 +272,7 @@ export default function NewFunctionPage() {
             </p>
             <SelectInstanceSpecs
               specs={formState.specs}
-              isPersistentVM={formState.isPersistent}
+              isPersistent={formState.isPersistent}
               onChange={handleChangeInstanceSpecs}
             />
           </Container>
@@ -362,7 +362,7 @@ export default function NewFunctionPage() {
               <HoldingRequirements
                 address={address}
                 type={EntityType.Program}
-                isPersistentVM={formState.isPersistent}
+                isPersistent={formState.isPersistent}
                 specs={formState.specs}
                 volumes={formState.volumes}
                 domains={formState.domains}

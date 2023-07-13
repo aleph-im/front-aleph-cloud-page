@@ -6,8 +6,8 @@ import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 export type HoldingRequirementsProps = {
   address: string
   unlockedAmount: number
-  type: EntityType
-  isPersistentVM?: boolean
+  type: EntityType.Program | EntityType.Instance | EntityType.Volume
+  isPersistent?: boolean
   specs?: InstanceSpecsProp
   volumes?: VolumeProp[]
   domains?: DomainProp[]

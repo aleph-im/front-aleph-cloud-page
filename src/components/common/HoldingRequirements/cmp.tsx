@@ -1,7 +1,6 @@
 import {
   ellipseAddress,
   humanReadableCurrency,
-  getTotalProductCost,
   convertBitUnits,
 } from '@/helpers/utils'
 import { StyledHoldingSummaryLine } from './styles'
@@ -13,6 +12,9 @@ import {
 import { useMemo } from 'react'
 import React from 'react'
 import { EntityType } from '@/helpers/constants'
+import { InstanceManager } from '@/domain/instance'
+import { ProgramManager } from '@/domain/program'
+import { VolumeManager } from '@/domain/volume'
 
 const HoldingRequirementsVolumeLine = React.memo(
   ({ volume, price }: HoldingRequirementsVolumeLineProps) => {
@@ -60,18 +62,30 @@ export default function HoldingRequirements({
   specs,
   volumes,
   domains,
-  isPersistentVM = type === EntityType.Instance,
+  isPersistent = type === EntityType.Instance,
 }: HoldingRequirementsProps) {
-  const { computeTotalCost, perVolumeCost, totalCost } = useMemo(
-    () =>
-      getTotalProductCost({
-        cpu: specs?.cpu,
-        isPersistentVM,
-        volumes,
-        capabilities: {},
-      }),
-    [isPersistentVM, specs, volumes],
-  )
+  const { computeTotalCost, perVolumeCost, totalCost } = useMemo(() => {
+    switch (type) {
+      case EntityType.Program:
+        return ProgramManager.getCost({
+          specs,
+          volumes,
+          isPersistent,
+        })
+      case EntityType.Instance:
+        return InstanceManager.getCost({
+          specs,
+          volumes,
+        })
+      case EntityType.Volume:
+        return {
+          ...VolumeManager.getCost({
+            volumes,
+          }),
+          computeTotalCost: 0,
+        }
+    }
+  }, [isPersistent, specs, type, volumes])
 
   return (
     <div tw="max-w-full overflow-auto">
@@ -81,23 +95,23 @@ export default function HoldingRequirements({
         <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
       </StyledHoldingSummaryLine>
 
-      {specs?.cpu && (
+      {specs && (
         <StyledHoldingSummaryLine>
           <div tw="text-xs flex items-center">{type.toUpperCase()}</div>
           <div>
-            {specs?.cpu} x86 64bit {isPersistentVM && '(persistent)'}
+            {specs.cpu} x86 64bit {isPersistent && '(persistent)'}
           </div>
           <div>{humanReadableCurrency(computeTotalCost)} ALEPH</div>
         </StyledHoldingSummaryLine>
       )}
 
       {volumes &&
-        volumes.map((volume, i) => {
+        volumes.map((volume) => {
           return (
             <HoldingRequirementsVolumeLine
               key={volume.id}
               volume={volume}
-              price={perVolumeCost[i]}
+              price={perVolumeCost[volume.id]?.cost || 0}
             />
           )
         })}

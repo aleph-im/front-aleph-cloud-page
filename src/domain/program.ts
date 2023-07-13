@@ -25,7 +25,7 @@ import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
 import { ProgramContent } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import JSZip from 'jszip'
 import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
-import { Executable } from './executable'
+import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
 import { FunctionRuntime, FunctionRuntimeId } from './runtime'
 import { FileManager } from './file'
@@ -90,10 +90,23 @@ export type Program = Omit<ProgramContent, 'type'> & {
   confirmed?: boolean
 }
 
+export type ProgramCostProps = Omit<ExecutableCostProps, 'type'> & {
+  isPersistent: boolean
+}
+
+export type ProgramCost = ExecutableCost
+
 export class ProgramManager
   extends Executable
   implements EntityManager<Program, AddProgram>
 {
+  /**
+   * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
+   */
+  static getCost = (props: ProgramCostProps): ProgramCost => {
+    return Executable.getExecutableCost(props)
+  }
+
   constructor(
     protected account: Account,
     protected volumeManager: VolumeManager,

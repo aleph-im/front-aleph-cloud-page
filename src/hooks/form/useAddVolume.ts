@@ -101,7 +101,7 @@ export function useAddNewVolumeProps({
     () =>
       convertBitUnits(volume.size || 0, {
         from: 'mb',
-        to: 'kb',
+        to: 'mb',
         displayUnit: true,
       }) as string,
     [volume],

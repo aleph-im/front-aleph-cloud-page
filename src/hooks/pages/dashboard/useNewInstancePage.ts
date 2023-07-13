@@ -1,7 +1,6 @@
 import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { getTotalProductCost } from '@/helpers/utils'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
@@ -14,11 +13,12 @@ import {
 } from '@/hooks/form/useSelectInstanceImage'
 import {
   InstanceSpecsProp,
-  defaultSpecsOptions,
+  getDefaultSpecsOptions,
 } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { ActionTypes } from '@/helpers/store'
 import { DomainProp } from '@/hooks/form/useAddDomains'
+import { InstanceManager } from '@/domain/instance'
 
 export type NewInstanceFormState = {
   name?: string
@@ -33,7 +33,7 @@ export type NewInstanceFormState = {
 
 export const initialState: NewInstanceFormState = {
   image: defaultInstanceImageOptions[0],
-  specs: defaultSpecsOptions[0],
+  specs: getDefaultSpecsOptions(true)[0],
   volumes: [{ ...defaultVolume }],
 }
 
@@ -64,8 +64,6 @@ export function useNewInstancePage(): UseNewInstancePage {
 
   const onSubmit = useCallback(
     async (state: NewInstanceFormState) => {
-      console.log('state', state)
-
       if (!manager) throw new Error('Manager not ready')
 
       const { image, name, tags, envVars, domains, sshKeys, volumes, specs } =
@@ -140,9 +138,8 @@ export function useNewInstancePage(): UseNewInstancePage {
 
   const { totalCost } = useMemo(
     () =>
-      getTotalProductCost({
-        cpu: formState.specs?.cpu,
-        isPersistentVM: true,
+      InstanceManager.getCost({
+        specs: formState.specs,
         volumes: formState.volumes,
         capabilities: {},
       }),

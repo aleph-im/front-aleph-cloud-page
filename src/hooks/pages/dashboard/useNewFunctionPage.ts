@@ -1,5 +1,4 @@
 import { useAppState } from '@/contexts/appState'
-import { getTotalProductCost } from '@/helpers/utils'
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import {
@@ -8,7 +7,7 @@ import {
 } from '../../form/useSelectFunctionRuntime'
 import {
   InstanceSpecsProp,
-  defaultSpecsOptions,
+  getDefaultSpecsOptions,
 } from '../../form/useSelectInstanceSpecs'
 import { VolumeProp, defaultVolume } from '../../form/useAddVolume'
 import { EnvVarProp } from '../../form/useAddEnvVars'
@@ -18,6 +17,7 @@ import { useForm } from '@/hooks/common/useForm'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { ActionTypes } from '@/helpers/store'
 import { DomainProp } from '@/hooks/form/useAddDomains'
+import { ProgramManager } from '@/domain/program'
 
 export type NewFunctionFormState = {
   runtime: FunctionRuntimeProp
@@ -31,7 +31,7 @@ export type NewFunctionFormState = {
   envVars?: EnvVarProp[]
   domains?: DomainProp[]
   tags?: string[]
-  name: string
+  name?: string
 }
 
 const samplePythonCode = `from fastapi import FastAPI
@@ -44,10 +44,9 @@ async def root():
 
 const initialState: NewFunctionFormState = {
   runtime: defaultFunctionRuntimeOptions[0],
-  isPersistent: false,
-  name: '',
-  specs: defaultSpecsOptions[0],
+  specs: getDefaultSpecsOptions(false)[0],
   volumes: [{ ...defaultVolume }],
+  isPersistent: false,
   functionCode: samplePythonCode,
   codeLanguage: 'python',
   codeOrFile: 'code',
@@ -82,8 +81,6 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
   const onSubmit = useCallback(
     async (state: NewFunctionFormState) => {
-      console.log('state', state)
-
       if (!manager) throw new Error('Manager not ready')
 
       const {
@@ -169,9 +166,9 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
   const { totalCost } = useMemo(
     () =>
-      getTotalProductCost({
-        cpu: formState.specs?.cpu,
-        isPersistentVM: formState.isPersistent,
+      ProgramManager.getCost({
+        specs: formState.specs,
+        isPersistent: formState.isPersistent,
         volumes: formState.volumes,
         capabilities: {},
       }),

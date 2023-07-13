@@ -1,43 +1,51 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 export type InstanceSpecsProp = {
   id: string
   cpu: number
   ram: number
-  storage?: number
+  storage: number
 }
 
-export const defaultSpecsOptions: InstanceSpecsProp[] = [1, 2, 4, 6, 8, 12].map(
-  (cpu) => ({
+// @note: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
+export function getDefaultSpecsOptions(
+  isPersistent: boolean,
+): InstanceSpecsProp[] {
+  return [1, 2, 4, 6, 8, 12].map((cpu) => ({
     id: `specs-${cpu}`,
     cpu,
-    ram: 2 * cpu * 1000,
-  }),
-)
+    ram: cpu * 2 * 10 ** 3, // MB
+    storage: cpu * 2 * (isPersistent ? 10 : 1) * 10 ** 3, // MB
+  }))
+}
 
 export type UseSelectInstanceSpecsProps = {
   specs?: InstanceSpecsProp
   options?: InstanceSpecsProp[]
-  isPersistentVM?: boolean
+  isPersistent?: boolean
   onChange: (specs: InstanceSpecsProp) => void
 }
 
 export type UseSelectInstanceSpecsReturn = {
   specs?: InstanceSpecsProp
   options: InstanceSpecsProp[]
-  isPersistentVM: boolean
+  isPersistent: boolean
   handleChange: (specs: InstanceSpecsProp) => void
 }
 
 export function useSelectInstanceSpecs({
   specs: specsProp,
   options: optionsProp,
-  isPersistentVM = false,
+  isPersistent = true,
   onChange,
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
   const [specsState, setSpecsState] = useState<InstanceSpecsProp | undefined>()
   const specs = specsProp || specsState
-  const options = optionsProp || defaultSpecsOptions
+
+  const options = useMemo(
+    () => optionsProp || getDefaultSpecsOptions(isPersistent),
+    [optionsProp, isPersistent],
+  )
 
   const handleChange = useCallback(
     (specs: InstanceSpecsProp) => {
@@ -50,7 +58,7 @@ export function useSelectInstanceSpecs({
   return {
     specs,
     options,
-    isPersistentVM,
+    isPersistent,
     handleChange,
   }
 }

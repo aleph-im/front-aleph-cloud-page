@@ -10,7 +10,7 @@ import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyProp } from '@/hooks/form/useAddSSHKeys'
 import { InstanceContent } from 'aleph-sdk-ts/dist/messages/instance/types'
-import { Executable } from './executable'
+import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
 import { InstanceImageProp } from '@/hooks/form/useSelectInstanceImage'
 import { FileManager } from './file'
@@ -44,10 +44,24 @@ export type Instance = InstanceContent & {
   confirmed?: boolean
 }
 
+export type InstanceCostProps = Omit<ExecutableCostProps, 'type'>
+
+export type InstanceCost = ExecutableCost
+
 export class InstanceManager
   extends Executable
   implements EntityManager<Instance, AddInstance>
 {
+  /**
+   * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
+   */
+  static getCost = (props: InstanceCostProps): InstanceCost => {
+    return Executable.getExecutableCost({
+      ...props,
+      isPersistent: true,
+    })
+  }
+
   constructor(
     protected account: Account,
     protected volumeManager: VolumeManager,

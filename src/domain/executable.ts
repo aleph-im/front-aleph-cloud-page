@@ -8,6 +8,8 @@ import {
   VolumeType,
   AddExistingVolume,
   AddPersistentVolume,
+  VolumeCost,
+  VolumeCostProps,
 } from './volume'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
@@ -16,7 +18,70 @@ import { DomainProp } from '@/hooks/form/useAddDomains'
 import { AddDomainTarget, Domain, DomainManager } from './domain'
 import { EntityType } from '@/helpers/constants'
 
+type ExecutableCapabilitiesProps = {
+  internetAccess?: boolean
+  blockchainRPC?: boolean
+  enableSnapshots?: boolean
+}
+
+export type ExecutableCostProps = VolumeCostProps & {
+  isPersistent?: boolean
+  specs?: InstanceSpecsProp
+  capabilities?: ExecutableCapabilitiesProps
+}
+
+export type ExecutableCost = Omit<VolumeCost, 'totalCost'> & {
+  computeTotalCost: number
+  volumeTotalCost: number
+  totalCost: number
+}
+
 export abstract class Executable {
+  /**
+   * Calculates the amount of tokens required to deploy a function
+   * https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
+   */
+  static getExecutableCost = ({
+    isPersistent,
+    specs,
+    capabilities = {},
+    volumes = [],
+  }: ExecutableCostProps): ExecutableCost => {
+    if (!specs)
+      return {
+        computeTotalCost: 0,
+        volumeTotalCost: 0,
+        perVolumeCost: {},
+        totalCost: 0,
+      }
+
+    const basePrice = isPersistent ? 2_000 : 200
+
+    const capabilitiesCost = Object.values(capabilities).reduce(
+      (ac, cv) => ac + Number(cv),
+      1, // @note: baseAlephAPI always included,
+    )
+
+    const computeTotalCost = basePrice * specs.cpu * capabilitiesCost
+
+    const newVolumes = volumes.filter(
+      (volume) => volume.volumeType !== VolumeType.Existing,
+    )
+
+    const { perVolumeCost, totalCost: volumeTotalCost } = VolumeManager.getCost(
+      { volumes: newVolumes, sizeDiscount: specs.storage },
+    )
+
+    const totalCost = volumeTotalCost + computeTotalCost
+
+    return {
+      computeTotalCost,
+      perVolumeCost,
+      volumeTotalCost,
+      totalCost,
+    }
+  }
+
   constructor(
     protected account: Account,
     protected volumeManager: VolumeManager,

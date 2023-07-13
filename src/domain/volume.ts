@@ -83,6 +83,23 @@ export type PersistentVolume = BaseVolume & {
 
 export type Volume = NewVolume | ExistingVolume | PersistentVolume
 
+export type VolumeCostProps = {
+  volumes?: (Volume | AddVolume)[]
+  sizeDiscount?: number
+}
+
+export type PerVolumeCostItem = {
+  size: number
+  cost: number
+}
+
+export type PerVolumeCost = Record<string, PerVolumeCostItem>
+
+export type VolumeCost = {
+  perVolumeCost: PerVolumeCost
+  totalCost: number
+}
+
 export class VolumeManager implements EntityManager<Volume, AddVolume> {
   /**
    * Returns the size of a volume in mb
@@ -95,43 +112,51 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return volume.size || 0
   }
 
-  static getVolumeCost(volume: Volume): number {
-    return this.getVolumeSize(volume) * 20
-  }
-
   // @note: The algorithm for calculating the cost per volume is as follows:
   // 1. Calculate the storage allowance for the function, the more compute units, the more storage allowance
   // 2. For each volume, subtract the storage allowance from the volume size
   // 3. If there is more storage than allowance left, the additional storage is charged at 20 tokens per mb
-  static getPerVolumeCost(
-    volumes: (Volume | AddVolume)[],
-    storageAllowance = 0,
-  ): number[] {
-    return volumes.map((volume) => {
-      let size = this.getVolumeSize(volume) || 0
+  static getPerVolumeCost({
+    volumes = [],
+    sizeDiscount = 0,
+  }: VolumeCostProps): PerVolumeCost {
+    return volumes.reduce((acc, volume) => {
+      const size = this.getVolumeSize(volume) || 0
+      let newSize = size
 
-      if (storageAllowance > 0) {
-        if (size <= storageAllowance) {
-          storageAllowance -= size
-          size = 0
+      if (sizeDiscount > 0) {
+        if (newSize <= sizeDiscount) {
+          sizeDiscount -= newSize
+          newSize = 0
         } else {
-          size -= storageAllowance
-          storageAllowance = 0
+          newSize -= sizeDiscount
+          sizeDiscount = 0
         }
       }
 
-      return size * 20
-    })
+      const cost = newSize * 20
+
+      acc[volume.id] = {
+        size,
+        cost,
+      }
+
+      return acc
+    }, {} as PerVolumeCost)
   }
 
-  static getVolumeTotalCost(
-    volumes: (Volume | AddVolume)[],
-    storageAllowance = 0,
-  ): number {
-    return this.getPerVolumeCost(volumes, storageAllowance).reduce(
-      (ac, cv) => ac + cv,
+  static getCost(props: VolumeCostProps): VolumeCost {
+    const perVolumeCost = this.getPerVolumeCost(props)
+
+    const totalCost = Object.values(perVolumeCost).reduce(
+      (ac, cv) => ac + cv.cost,
       0,
     )
+
+    return {
+      perVolumeCost,
+      totalCost,
+    }
   }
 
   constructor(

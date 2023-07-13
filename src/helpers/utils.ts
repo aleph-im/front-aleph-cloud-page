@@ -13,7 +13,7 @@ import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
 import { EntityType } from './constants'
 import { SSHKey } from '../domain/ssh'
 import { Instance } from '../domain/instance'
-import { AddVolume, Volume, VolumeManager, VolumeType } from '@/domain/volume'
+import { Volume } from '@/domain/volume'
 import { Program } from '@/domain/program'
 import { Domain } from '@/domain/domain'
 
@@ -222,98 +222,6 @@ export const unixToISODateTimeString = (timeStamp?: number, noDate = 'n/a') => {
     timeStyle: 'short',
     timeZone: 'UTC',
   }).format(date)
-}
-
-type CapabilitiesConfig = {
-  internetAccess?: boolean
-  blockchainRPC?: boolean
-  enableSnapshots?: boolean
-}
-
-export type FunctionPriceConfig = {
-  cpu?: number
-  isPersistentVM: boolean
-  capabilities?: CapabilitiesConfig
-}
-
-export type FunctionCost = {
-  compute: number
-  capabilities: number
-  storageAllowance: number
-}
-
-/**
- * Calculates the amount of tokens required to deploy a function
- */
-export const getFunctionCost = ({
-  isPersistentVM,
-  cpu = 0,
-  capabilities = {},
-}: FunctionPriceConfig): FunctionCost => {
-  if (!cpu) {
-    return {
-      compute: 0,
-      capabilities: 0,
-      storageAllowance: 0,
-    }
-  }
-
-  const basePrice = isPersistentVM ? 2_000 : 200
-  const storageAllowance = 2 * 10 ** Number(isPersistentVM) * cpu
-
-  return {
-    compute: basePrice * cpu,
-    capabilities: Object.values(capabilities).reduce(
-      (ac, cv) => ac + Number(cv),
-      1,
-    ),
-    storageAllowance,
-  }
-}
-
-export type VolumesPriceConfig = {
-  volumes?: (Volume | AddVolume)[]
-}
-
-export type GetTotalProductCostConfig = FunctionPriceConfig & VolumesPriceConfig
-export type GetTotalProductReturn = {
-  computeTotalCost: number
-  perVolumeCost: number[]
-  volumeTotalCost: number
-  totalCost: number
-}
-
-export const getTotalProductCost = ({
-  cpu,
-  isPersistentVM,
-  volumes,
-  capabilities,
-}: GetTotalProductCostConfig): GetTotalProductReturn => {
-  const newVolumes =
-    volumes?.filter((volume) => volume.volumeType !== VolumeType.Existing) || []
-
-  const { compute: computeTotalCost, storageAllowance } = getFunctionCost({
-    cpu,
-    isPersistentVM,
-    capabilities,
-  })
-
-  // @note: If no compute units are provided (compute = 0, storageAllowance= 0),
-  // we only calculate the cost of the volumes
-  // This will most likely be called from the create volume page
-  const perVolumeCost = VolumeManager.getPerVolumeCost(
-    newVolumes,
-    storageAllowance,
-  )
-  const volumeTotalCost = perVolumeCost.reduce((ac, cv) => ac + cv, 0)
-  const totalCost = volumeTotalCost + computeTotalCost
-
-  return {
-    computeTotalCost,
-    perVolumeCost,
-    volumeTotalCost,
-    totalCost,
-  }
 }
 
 export type AnyEntity = Program | Instance | Volume | SSHKey | Domain

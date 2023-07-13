@@ -3,13 +3,14 @@ import React from 'react'
 import { useSelectInstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 import { Button, Icon, TableColumn } from '@aleph-front/aleph-core'
 import { useCallback, useMemo } from 'react'
-import { convertBitUnits, getFunctionCost } from '@/helpers/utils'
+import { convertBitUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
 import { StyledTable } from './styles'
+import { Executable } from '@/domain/executable'
 
 export const SelectInstanceSpecs = React.memo(
   (props: SelectInstanceSpecsProps) => {
-    const { specs, options, isPersistentVM, handleChange } =
+    const { specs, options, isPersistent, handleChange } =
       useSelectInstanceSpecs(props)
 
     const columns = useMemo(
@@ -78,8 +79,8 @@ export const SelectInstanceSpecs = React.memo(
 
     const data: SpecsDetail[] = useMemo(() => {
       return options.map((specs) => {
-        const { cpu, ram } = specs
-        const price = getFunctionCost({ cpu, isPersistentVM })
+        const { ram } = specs
+        const price = Executable.getExecutableCost({ isPersistent, specs })
 
         return {
           specs,
@@ -88,10 +89,10 @@ export const SelectInstanceSpecs = React.memo(
             to: 'gb',
             displayUnit: true,
           }) as string,
-          price: price.compute + ' ALEPH',
+          price: price.computeTotalCost + ' ALEPH',
         }
       })
-    }, [isPersistentVM, options])
+    }, [isPersistent, options])
 
     const handleRowKey = useCallback((row: SpecsDetail) => row.specs.id, [])
 

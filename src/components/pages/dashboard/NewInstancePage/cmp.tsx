@@ -92,7 +92,7 @@ export default function NewInstancePage() {
             <div tw="px-0 my-6">
               <SelectInstanceSpecs
                 specs={formState.specs}
-                isPersistentVM={true}
+                isPersistent={true}
                 onChange={handleChangeInstanceSpecs}
               />
             </div>
@@ -206,7 +206,7 @@ export default function NewInstancePage() {
               <HoldingRequirements
                 address={address}
                 type={EntityType.Instance}
-                isPersistentVM={true}
+                isPersistent={true}
                 specs={formState.specs}
                 volumes={formState.volumes}
                 domains={formState.domains}
