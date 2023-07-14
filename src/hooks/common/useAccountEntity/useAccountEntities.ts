@@ -27,9 +27,6 @@ export function useAccountEntities(): UseAccountEntitiesReturn {
   return {
     functions,
     volumes,
-    // instances,
-    // sshKeys,
-    // domains,
     instances: [],
     sshKeys: [],
     domains: [],
