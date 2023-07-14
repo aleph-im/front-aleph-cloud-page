@@ -4,7 +4,7 @@ import { AllTabContentProps } from './types'
 import { Table } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/common/ButtonLink'
 import { humanReadableSize } from '@/helpers/utils'
-import { EntityTypeName } from '@/helpers/constants'
+import { EntityType, EntityTypeName } from '@/helpers/constants'
 
 export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
   return (
@@ -52,7 +52,11 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                     <ButtonLink
                       color={row.confirmed ? 'main0' : 'main2'}
                       variant="tertiary"
-                      href={`/dashboard/manage?hash=${row.id}`}
+                      href={
+                        row.type === EntityType.Domain
+                          ? `/dashboard/manage?hash=aggregate/${EntityType.Domain}/${row.id}`
+                          : `/dashboard/manage?hash=${row.id}`
+                      }
                     >
                       &gt;
                     </ButtonLink>
