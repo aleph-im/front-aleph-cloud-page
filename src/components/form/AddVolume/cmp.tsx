@@ -67,7 +67,7 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
         application.
       </p>
       <NoisyContainer>
-        <div tw="pb-4">
+        <div tw="py-4">
           <HiddenFileInput
             value={volume.fileSrc}
             onChange={handleFileSrcChange}
