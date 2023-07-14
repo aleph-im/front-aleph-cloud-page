@@ -22,7 +22,6 @@ const SSHKeyItem = React.memo(
             name={`${id}_selected`}
             checked={sshKey.isSelected}
             onChange={handleIsSelectedChange}
-            disabled={sshKey.isNew}
           />
         </div>
         <div tw="flex-auto flex flex-col md:flex-row gap-6">
