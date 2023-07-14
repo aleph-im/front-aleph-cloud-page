@@ -8,6 +8,7 @@ import { useManageFunction } from '@/hooks/pages/dashboard/manage/useManageFunct
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import VolumeList from '../VolumeList/cmp'
+import StatusLabel from '@/components/common/StatusLabel/cmp'
 
 export default function ManageFunction() {
   const { func, handleCopyHash, handleDelete, handleDownload, copyAndNotify } =
@@ -36,6 +37,10 @@ export default function ManageFunction() {
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
+              <StatusLabel
+                variant={func.confirmed ? 'running' : 'confirming'}
+                tw="ml-4"
+              />
             </div>
             <div>
               <Button

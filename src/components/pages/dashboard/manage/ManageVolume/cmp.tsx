@@ -7,6 +7,7 @@ import { Button, Icon, Tag } from '@aleph-front/aleph-core'
 import { useManageVolume } from '@/hooks/pages/dashboard/manage/useManageVolume'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
+import StatusLabel from '@/components/common/StatusLabel'
 
 export default function ManageVolume() {
   const { volume, handleCopyHash, handleDelete, handleDownload } =
@@ -32,8 +33,12 @@ export default function ManageVolume() {
         <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
-              <Icon name="spider-web" tw="mr-4" className="text-main1" />
+              <Icon name="floppy-disk" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
+              <StatusLabel
+                variant={volume.confirmed ? 'ready' : 'confirming'}
+                tw="ml-4"
+              />
             </div>
             <div>
               <Button

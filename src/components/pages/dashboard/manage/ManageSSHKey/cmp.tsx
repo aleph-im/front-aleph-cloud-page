@@ -3,10 +3,11 @@ import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
-import { Button, Tag } from '@aleph-front/aleph-core'
+import { Button, Icon, Tag } from '@aleph-front/aleph-core'
 import { useManageSSHKey } from '@/hooks/pages/dashboard/manage/useManageSSHKey'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
+import StatusLabel from '@/components/common/StatusLabel'
 
 export default function ManageSSHKey() {
   const { sshKey, handleCopyKey, handleCopyLabel, handleDelete } =
@@ -30,7 +31,15 @@ export default function ManageSSHKey() {
       <AutoBreadcrumb names={breadcrumbNames} name={name.toUpperCase()} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <div tw="flex justify-end pb-5">
+          <div tw="flex justify-between pb-5">
+            <div tw="flex items-center">
+              <Icon name="key" tw="mr-4" className="text-main1" />
+              <div className="tp-body2">{name}</div>
+              <StatusLabel
+                variant={sshKey.confirmed ? 'ready' : 'confirming'}
+                tw="ml-4"
+              />
+            </div>
             <div>
               <Button
                 size="regular"

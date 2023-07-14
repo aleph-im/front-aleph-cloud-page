@@ -1,17 +1,29 @@
 import { addClasses } from '@aleph-front/aleph-core'
 import styled, { css } from 'styled-components'
+import { LabelVariant } from './types'
 
-export const StyledLabel = styled.span.attrs(
-  addClasses('fx-glass-base1 fx-glass-border-base0'),
-)`
+export type StyledLabelProps = {
+  $variant?: LabelVariant
+}
+
+export const StyledLabel = styled.span.attrs<StyledLabelProps>((props) => {
+  const { $variant } = props
+
+  const cls =
+    $variant === 'success'
+      ? 'gr-main1'
+      : $variant === 'error'
+      ? 'gr-extra1'
+      : 'gr-main2'
+
+  return addClasses(`tp-info ${cls}`)(props)
+})<StyledLabelProps>`
   ${({ theme }) => {
     return css`
-      box-sizing: border-box;
-      display: inline-block;
-      padding: 0.5rem 1.125rem;
-      color: ${theme.color.text};
-      margin: 0 auto;
-      border-radius: 0.5rem;
+      padding: 0.25rem 0.94rem;
+      color: ${theme.color.base2};
+      border-radius: 0.375rem;
+      line-height: normal !important;
     `
   }}
 `

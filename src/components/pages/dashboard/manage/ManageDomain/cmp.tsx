@@ -2,10 +2,11 @@ import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import IconText from '@/components/common/IconText'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
-import { BulletItem, Tag, TextGradient } from '@aleph-front/aleph-core'
+import { BulletItem, Icon, Tag, TextGradient } from '@aleph-front/aleph-core'
 import { useManageDomain } from '@/hooks/pages/dashboard/manage/useManageDomain'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
+import StatusLabel from '@/components/common/StatusLabel'
 
 export default function ManageDomain() {
   const { domain, status, refEntity, account, handleCopyRef } =
@@ -29,10 +30,17 @@ export default function ManageDomain() {
       <AutoBreadcrumb names={breadcrumbNames} name={name.toUpperCase()} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          {/*
-          todo: Include it after allowing standalone domain creation form
-          <div tw="flex justify-end pb-5">
-            <div>
+          <div tw="flex justify-between pb-5">
+            <div tw="flex items-center">
+              <Icon name="input-text" tw="mr-4" className="text-main1" />
+              <div className="tp-body2">{name}</div>
+              <StatusLabel
+                variant={domain.confirmed ? 'ready' : 'confirming'}
+                tw="ml-4"
+              />
+            </div>
+            {/* <div>
+              @todo: Include it after allowing standalone domain creation form
               <Button
                 size="regular"
                 variant="tertiary"
@@ -42,8 +50,8 @@ export default function ManageDomain() {
               >
                 Delete
               </Button>
-            </div>
-          </div> */}
+            </div> */}
+          </div>
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
@@ -123,14 +131,16 @@ export default function ManageDomain() {
                             }
                             title={''}
                           />
-                          Create a CNAME record
-                          <span className="text-main0" tw="mx-2">
-                            {domain.name}
-                          </span>
-                          with value
-                          <span className="text-main0" tw="mx-2">
-                            program.public.aleph.sh.
-                          </span>
+                          <div>
+                            Create a CNAME record
+                            <span className="text-main0" tw="mx-2">
+                              {domain.name}
+                            </span>
+                            with value
+                            <span className="text-main0" tw="mx-2">
+                              program.public.aleph.sh.
+                            </span>
+                          </div>
                         </div>
                       </GrayText>
                       <GrayText>
@@ -143,14 +153,16 @@ export default function ManageDomain() {
                             }
                             title={''}
                           />
-                          Create a TXT owner proof record
-                          <span className="text-main0" tw="mx-2">
-                            _control.{domain.name}
-                          </span>
-                          with value
-                          <span className="text-main0" tw="mx-2">
-                            {account?.address}
-                          </span>
+                          <div>
+                            Create a TXT owner proof record
+                            <span className="text-main0" tw="mx-2">
+                              _control.{domain.name}
+                            </span>
+                            with value
+                            <span className="text-main0" tw="mx-2">
+                              {account?.address}
+                            </span>
+                          </div>
                         </div>
                       </GrayText>
                     </div>
