@@ -56,33 +56,11 @@ export const isValidItemHash = (hash: string) => {
  * returns The Aleph balance of the address
  */
 export const getERC20Balance = async (address: string) => {
-  const ethereumProvider = new BrowserProvider(window?.ethereum)
-
-  const ERC20_ABI = [
-    // Read-Only Functions
-    'function balanceOf(address owner) view returns (uint256)',
-    'function decimals() view returns (uint8)',
-    'function symbol() view returns (string)',
-
-    // Authenticated Functions
-    'function transfer(address to, uint amount) returns (boolean)',
-
-    // Events
-    'event Transfer(address indexed from, address indexed to, uint amount)',
-  ]
-
-  const ERC20_CONTRACT_ADDRESS = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
-
-  const ERC20Contract = new Contract(
-    ERC20_CONTRACT_ADDRESS,
-    ERC20_ABI,
-    ethereumProvider,
-  )
-
   try {
-    const rawBalance = await ERC20Contract.balanceOf(address)
-    const decimals = await ERC20Contract.decimals()
-    const balance = rawBalance / 10 ** decimals
+    const query = await fetch(
+      `https://api2.aleph.im/api/v0/addresses/${address}/balance`,
+    )
+    const { balance } = await query.json()
     return balance
   } catch (error) {
     throw E_.RequestFailed(error)
