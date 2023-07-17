@@ -59,9 +59,6 @@ export default function NewFunctionPage() {
                 {
                   id: 'instance',
                   name: 'Instance',
-                  disabled: true,
-                  label: 'SOON',
-                  labelPosition: 'top',
                 },
                 {
                   id: 'confidential',
@@ -326,20 +323,18 @@ export default function NewFunctionPage() {
         </section>
         <section tw="px-0 py-6 md:py-10">
           <Container>
-            <div className="unavailable-content">
-              <CompositeTitle as="h2" number="8" label="(SOON)">
-                Custom domain
-              </CompositeTitle>
-              <p tw="mb-6">
-                Configure a user-friendly domain name for your web3 function,
-                providing a more accessible and professional way for users to
-                interact with your application.
-              </p>
-              <AddDomains
-                domains={formState.domains}
-                onChange={handleChangeDomains}
-              />
-            </div>
+            <CompositeTitle as="h2" number="8">
+              Custom domain
+            </CompositeTitle>
+            <p tw="mb-6">
+              Configure a user-friendly domain name for your web3 function,
+              providing a more accessible and professional way for users to
+              interact with your application.
+            </p>
+            <AddDomains
+              domains={formState.domains}
+              onChange={handleChangeDomains}
+            />
           </Container>
         </section>
         <section

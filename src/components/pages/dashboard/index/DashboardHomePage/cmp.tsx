@@ -41,30 +41,30 @@ export default function DashboardHomePage() {
                 label: `(${functions.length})`,
                 labelPosition: 'bottom',
               },
-              // {
-              //   id: 'instance',
-              //   name: 'Instances',
-              //   label: `(${instances.length})`,
-              //   labelPosition: 'bottom',
-              // },
+              {
+                id: 'instance',
+                name: 'Instances',
+                label: `(${instances.length})`,
+                labelPosition: 'bottom',
+              },
               {
                 id: 'volume',
                 name: 'Immutable Volumes',
                 label: `(${volumes.length})`,
                 labelPosition: 'bottom',
               },
-              // {
-              //   id: 'ssh',
-              //   name: 'SSH Keys',
-              //   label: `(${sshKeys.length})`,
-              //   labelPosition: 'bottom',
-              // },
-              // {
-              //   id: 'domain',
-              //   name: 'Domains',
-              //   label: `(${domains.length})`,
-              //   labelPosition: 'bottom',
-              // },
+              {
+                id: 'ssh',
+                name: 'SSH Keys',
+                label: `(${sshKeys.length})`,
+                labelPosition: 'bottom',
+              },
+              {
+                id: 'domain',
+                name: 'Domains',
+                label: `(${domains.length})`,
+                labelPosition: 'bottom',
+              },
             ]}
             onTabChange={setTabId}
           />
