@@ -16,6 +16,12 @@ const Container = styled(CenteredContainer).attrs((props) => ({
   variant: 'dashboard',
 }))``
 
+function getLabel(entities: unknown[], beta = false): string {
+  const n = entities.length > 0 ? `(${entities.length})` : ''
+  const b = beta ? 'BETA ' : ''
+  return `${b}${n}`
+}
+
 export default function DashboardHomePage() {
   const { all, functions, instances, volumes, sshKeys, domains } =
     useDashboardHomePage()
@@ -32,38 +38,38 @@ export default function DashboardHomePage() {
               {
                 id: 'all',
                 name: 'All',
-                label: `(${all.length})`,
+                label: getLabel(all),
                 labelPosition: 'bottom',
               },
               {
                 id: 'function',
                 name: 'Functions',
-                label: `(${functions.length})`,
+                label: getLabel(functions),
                 labelPosition: 'bottom',
               },
               {
                 id: 'instance',
                 name: 'Instances',
-                label: `(${instances.length})`,
-                labelPosition: 'bottom',
+                label: getLabel(instances, true),
+                labelPosition: 'top',
               },
               {
                 id: 'volume',
                 name: 'Immutable Volumes',
-                label: `(${volumes.length})`,
+                label: getLabel(volumes),
                 labelPosition: 'bottom',
               },
               {
                 id: 'ssh',
                 name: 'SSH Keys',
-                label: `(${sshKeys.length})`,
-                labelPosition: 'bottom',
+                label: getLabel(sshKeys, true),
+                labelPosition: 'top',
               },
               {
                 id: 'domain',
                 name: 'Domains',
-                label: `(${domains.length})`,
-                labelPosition: 'bottom',
+                label: getLabel(domains, true),
+                labelPosition: 'top',
               },
             ]}
             onTabChange={setTabId}

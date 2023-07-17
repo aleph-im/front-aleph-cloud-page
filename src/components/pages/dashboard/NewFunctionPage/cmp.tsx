@@ -59,6 +59,8 @@ export default function NewFunctionPage() {
                 {
                   id: 'instance',
                   name: 'Instance',
+                  label: 'BETA',
+                  labelPosition: 'top',
                 },
                 {
                   id: 'confidential',

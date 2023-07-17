@@ -45,6 +45,8 @@ export default function NewInstancePage() {
                 {
                   id: 'instance',
                   name: 'Instance',
+                  label: 'BETA',
+                  labelPosition: 'top',
                 },
                 {
                   id: 'confidential',

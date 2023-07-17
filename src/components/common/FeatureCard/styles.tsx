@@ -1,7 +1,12 @@
 import { Card, CardProps, getTypoCss } from '@aleph-front/aleph-core'
 import styled, { css } from 'styled-components'
 
-export const StyledCard = styled(Card).attrs<{ disabled?: boolean }, CardProps>(
+export type StyledCardProps = {
+  disabled?: boolean
+  beta?: boolean
+}
+
+export const StyledCard = styled(Card).attrs<StyledCardProps, CardProps>(
   (props) => {
     return {
       ...props,
@@ -11,13 +16,13 @@ export const StyledCard = styled(Card).attrs<{ disabled?: boolean }, CardProps>(
       buttonDisabled: props.disabled,
     }
   },
-)<{ disabled?: boolean }>`
+)<StyledCardProps>`
   & header {
     position: relative;
     display: table;
   }
 
-  ${({ theme, disabled }) =>
+  ${({ theme, disabled, beta }) =>
     disabled
       ? css`
           & > :nth-child(odd),
@@ -41,6 +46,18 @@ export const StyledCard = styled(Card).attrs<{ disabled?: boolean }, CardProps>(
             margin-left: 0.40625rem;
             ${getTypoCss('info')}
             color: ${theme.color.text}
+          }
+        `
+      : beta
+      ? css`
+          & header:after {
+            position: absolute;
+            content: '(BETA)';
+            left: 100%;
+            top: -0.5em;
+            margin-left: 0.40625rem;
+            ${getTypoCss('info')}
+            color: ${theme.color.main0}
           }
         `
       : ''}
