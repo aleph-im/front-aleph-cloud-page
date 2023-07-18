@@ -28,8 +28,8 @@ export function useDomainStatus(
 
     if (!status) request()
 
-    const id = setTimeout(request, 10 * 1000)
-    return () => clearTimeout(id)
+    const id = setInterval(request, 10 * 1000)
+    return () => clearInterval(id)
   }, [status, domain, manager])
 
   return status

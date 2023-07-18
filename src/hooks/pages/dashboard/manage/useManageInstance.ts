@@ -1,16 +1,19 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { Instance } from '@/domain/instance'
+import { Instance, InstanceStatus } from '@/domain/instance'
 import { useAccountInstance } from '@/hooks/common/useAccountEntity/useAccountInstance'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
+import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
 
 export type ManageInstance = {
   instance?: Instance
+  status?: InstanceStatus
   handleCopyHash: () => void
+  handleCopyConnect: () => void
   handleDelete: () => void
   copyAndNotify: (text: string) => void
 }
@@ -24,11 +27,17 @@ export function useManageInstance(): ManageInstance {
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [, dispatch] = useAppState()
 
+  const status = useInstanceStatus(instance)
+
   const manager = useInstanceManager()
 
   const handleCopyHash = useCallback(() => {
     copyAndNotify(instance?.id || '')
   }, [copyAndNotify, instance])
+
+  const handleCopyConnect = useCallback(() => {
+    copyAndNotify(`ssh root@${status?.vm_ipv6}`)
+  }, [copyAndNotify, status])
 
   const handleDelete = useCallback(async () => {
     if (!instance) throw new Error('Invalid function')
@@ -54,7 +63,9 @@ export function useManageInstance(): ManageInstance {
 
   return {
     instance,
+    status,
     handleCopyHash,
+    handleCopyConnect,
     handleDelete,
     copyAndNotify,
   }

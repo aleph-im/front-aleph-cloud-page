@@ -20,6 +20,7 @@ export const StyledLabel = styled.span.attrs<StyledLabelProps>((props) => {
 })<StyledLabelProps>`
   ${({ theme }) => {
     return css`
+      display: inline-flex;
       padding: 0.25rem 0.94rem;
       color: ${theme.color.base2};
       border-radius: 0.375rem;

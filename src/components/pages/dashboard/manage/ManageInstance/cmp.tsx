@@ -5,14 +5,29 @@ import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/aleph-core'
 import { useManageInstance } from '@/hooks/pages/dashboard/manage/useManageInstance'
-import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
+import {
+  convertBitUnits,
+  ellipseAddress,
+  ellipseText,
+  humanReadableSize,
+} from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import StatusLabel from '@/components/common/StatusLabel'
+import { ThreeDots } from 'react-loader-spinner'
+import { useTheme } from 'styled-components'
 
 export default function ManageInstance() {
-  const { instance, handleCopyHash, handleDelete, copyAndNotify } =
-    useManageInstance()
+  const {
+    instance,
+    status,
+    handleCopyHash,
+    handleCopyConnect,
+    handleDelete,
+    copyAndNotify,
+  } = useManageInstance()
+
+  const theme = useTheme()
 
   if (!instance) {
     return (
@@ -39,7 +54,11 @@ export default function ManageInstance() {
               <Icon name="alien-8bit" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
               <StatusLabel
-                variant={instance.confirmed ? 'running' : 'confirming'}
+                variant={
+                  instance.confirmed && status?.vm_ipv6
+                    ? 'running'
+                    : 'confirming'
+                }
                 tw="ml-4"
               />
             </div>
@@ -66,6 +85,61 @@ export default function ManageInstance() {
                 <IconText iconName="copy" onClick={handleCopyHash}>
                   {instance.id}
                 </IconText>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div tw="flex my-5">
+              <div tw="mr-5">
+                <div className="tp-info text-main0">CORES</div>
+                <div>
+                  <GrayText>{instance.resources.vcpus} x86 64bit</GrayText>
+                </div>
+              </div>
+
+              <div tw="mr-5">
+                <div className="tp-info text-main0">RAM</div>
+                <div>
+                  <GrayText>
+                    {convertBitUnits(instance.resources.memory, {
+                      from: 'mb',
+                      to: 'gb',
+                      displayUnit: true,
+                    })}
+                  </GrayText>
+                </div>
+              </div>
+
+              {status && (
+                <div tw="mr-5">
+                  <div className="tp-info text-main0">IPV6</div>
+                  <div>
+                    <GrayText>{status.vm_ipv6}</GrayText>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div tw="mr-5">
+              <div className="tp-info text-main0">SSH COMMAND</div>
+              <div>
+                {status ? (
+                  <IconText iconName="copy" onClick={handleCopyConnect}>
+                    <GrayText>&gt;_ ssh root@{status.vm_ipv6}</GrayText>
+                  </IconText>
+                ) : (
+                  <div tw="flex items-end">
+                    <GrayText tw="mr-1" className="text-main2">
+                      Allocating
+                    </GrayText>
+                    <ThreeDots
+                      width=".8rem"
+                      height="1rem"
+                      color={theme.color.main2}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -106,6 +180,39 @@ export default function ManageInstance() {
                 </div>
               </div>
             </div>
+
+            {status?.node && (
+              <>
+                <Separator />
+
+                <TextGradient type="h6" color="main1">
+                  Current CRN
+                </TextGradient>
+
+                <div tw="my-5">
+                  <div className="tp-info text-main0">NAME</div>
+                  <div>
+                    <GrayText>{status.node.node_id}</GrayText>
+                  </div>
+                </div>
+
+                <div tw="my-5">
+                  <div className="tp-info text-main0">URL</div>
+                  <div>
+                    <a
+                      className="tp-body1 fs-sm"
+                      href={status.node.url}
+                      target="_blank"
+                      referrerPolicy="no-referrer"
+                    >
+                      <IconText iconName="square-up-right">
+                        <GrayText>{ellipseText(status.node.url, 80)}</GrayText>
+                      </IconText>
+                    </a>
+                  </div>
+                </div>
+              </>
+            )}
 
             {volumes.length > 0 && (
               <>

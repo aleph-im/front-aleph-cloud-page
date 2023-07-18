@@ -48,6 +48,24 @@ export type InstanceCostProps = Omit<ExecutableCostProps, 'type'>
 
 export type InstanceCost = ExecutableCost
 
+export type InstanceNode = {
+  node_id: string
+  url: string
+  ipv6: string
+  supports_ipv6: boolean
+}
+
+export type InstanceStatus = {
+  vm_hash: string
+  vm_type: EntityType.Instance | EntityType.Program
+  vm_ipv6: string
+  period: {
+    start_timestamp: string
+    duration_seconds: number
+  }
+  node: InstanceNode
+}
+
 export class InstanceManager
   extends Executable
   implements EntityManager<Instance, AddInstance>
@@ -145,6 +163,17 @@ export class InstanceManager
     } catch (err) {
       throw E_.RequestFailed(err)
     }
+  }
+
+  async checkStatus(instance: Instance): Promise<InstanceStatus | undefined> {
+    const query = await fetch(
+      `https://scheduler.api.aleph.sh/api/v0/allocation/${instance.id}`,
+    )
+
+    if (query.status === 404) return
+
+    const response = await query.json()
+    return response
   }
 
   protected async parseSSHKeys(

@@ -22,8 +22,7 @@ export function useRetryNotConfirmedEntities<E extends ConfirmableEntity>({
 
     if (!notConfirmed.length) return
 
-    const id = setTimeout(request, 10 * 1000)
-
-    return () => clearTimeout(id)
+    const id = setInterval(request, 10 * 1000)
+    return () => clearInterval(id)
   }, [entities, request, triggerOnMount])
 }
