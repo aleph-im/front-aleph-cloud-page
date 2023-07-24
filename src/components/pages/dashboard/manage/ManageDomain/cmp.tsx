@@ -2,21 +2,28 @@ import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import IconText from '@/components/common/IconText'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
-import { BulletItem, Icon, Tag, TextGradient } from '@aleph-front/aleph-core'
+import {
+  BulletItem,
+  Button,
+  Icon,
+  Tag,
+  TextGradient,
+} from '@aleph-front/aleph-core'
 import { useManageDomain } from '@/hooks/pages/dashboard/manage/useManageDomain'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import StatusLabel from '@/components/common/StatusLabel'
+import ButtonLink from '@/components/common/ButtonLink'
 
 export default function ManageDomain() {
-  const { domain, status, refEntity, account, handleCopyRef } =
+  const { domain, status, refEntity, account, handleDelete, handleCopyRef } =
     useManageDomain()
 
   if (!domain) {
     return (
       <>
         <Container>
-          <NoisyContainer>Loading...</NoisyContainer>
+          <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
     )
@@ -39,8 +46,7 @@ export default function ManageDomain() {
                 tw="ml-4"
               />
             </div>
-            {/* <div>
-              @todo: Include it after allowing standalone domain creation form
+            <div>
               <Button
                 size="regular"
                 variant="tertiary"
@@ -50,7 +56,7 @@ export default function ManageDomain() {
               >
                 Delete
               </Button>
-            </div> */}
+            </div>
           </div>
 
           <NoisyContainer>
@@ -224,6 +230,12 @@ export default function ManageDomain() {
               </>
             )}
           </NoisyContainer>
+
+          <div tw="mt-20 text-center">
+            <ButtonLink variant="primary" href="/dashboard/domain">
+              Add new domain
+            </ButtonLink>
+          </div>
 
           <p tw="my-24 text-center">
             Acquire aleph.im tokens for versatile access to resources within a

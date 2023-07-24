@@ -33,7 +33,7 @@ export default function ManageInstance() {
     return (
       <>
         <Container>
-          <NoisyContainer>Loading...</NoisyContainer>
+          <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
     )

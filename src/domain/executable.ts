@@ -15,7 +15,7 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
 import { DomainProp } from '@/hooks/form/useAddDomains'
-import { AddDomainTarget, Domain, DomainManager } from './domain'
+import { AddDomain, AddDomainTarget, Domain, DomainManager } from './domain'
 import { EntityType } from '@/helpers/constants'
 
 type ExecutableCapabilitiesProps = {
@@ -112,18 +112,12 @@ export abstract class Executable {
   ): Promise<void> {
     if (!domains) return
 
-    const parsedDomains = domains.map((domain) => {
-      const name = domain.name.trim()
-
-      if (name.length <= 0) throw new Error(`Invalid domain name "${name}"`)
-
+    const parsedDomains: AddDomain[] = domains.map(({ name }) => {
       return {
-        id: name,
         name,
         ref,
         target: AddDomainTarget.Program,
-        type: EntityType.Domain,
-      } as Domain
+      }
     })
 
     await this.domainManager.add(parsedDomains)

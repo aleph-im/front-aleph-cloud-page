@@ -13,7 +13,7 @@ export default function NewSSHKey() {
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>
             <NoisyContainer>
-              <div tw="mt-4">
+              <div>
                 <TextArea
                   label="SSH Public Key"
                   value={key}

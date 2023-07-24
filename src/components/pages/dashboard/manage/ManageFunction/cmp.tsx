@@ -18,7 +18,7 @@ export default function ManageFunction() {
     return (
       <>
         <Container>
-          <NoisyContainer>Loading...</NoisyContainer>
+          <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
     )

@@ -7,6 +7,7 @@ import {
   defaultDomainChannel,
 } from '../helpers/constants'
 import { EntityManager } from './types'
+import { isValidItemHash } from '@/helpers/utils'
 
 export type DomainAggregateItem = {
   type: AddDomainTarget
@@ -71,6 +72,8 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   async add(domains: AddDomain | AddDomain[]): Promise<Domain[]> {
     domains = Array.isArray(domains) ? domains : [domains]
 
+    domains = await this.parseDomains(domains)
+
     try {
       const content: DomainAggregate = domains.reduce((ac, cv) => {
         const { name, ref, target } = cv
@@ -129,6 +132,25 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     })
     const response = await query.json()
     return response
+  }
+
+  protected async parseDomains(domains: AddDomain[]): Promise<AddDomain[]> {
+    const currentDomains = await this.getAll()
+    const currentDomainSet = new Set<string>(currentDomains.map((d) => d.name))
+
+    return domains.map((domain: AddDomain) => {
+      const ref = domain.ref.trim()
+      const name = domain.name.trim()
+
+      if (!ref || !isValidItemHash(ref)) throw new Error('Invalid domain ref')
+
+      if (!name) throw new Error('Invalid domain name')
+
+      if (currentDomainSet.has(name))
+        throw new Error('Domain name already used by another resource')
+
+      return { ...domain, ref, name }
+    })
   }
 
   // @todo: Type not exported from SDK...

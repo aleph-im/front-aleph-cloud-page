@@ -60,16 +60,16 @@ export const DomainsTabContent = React.memo(
                 ]}
               />
             </div>
-            {/* <div tw="mt-20 text-center">
+            <div tw="mt-20 text-center">
               <ButtonLink variant="primary" href="/dashboard/domain">
                 Create domain
               </ButtonLink>
-            </div> */}
+            </div>
           </>
         ) : (
           <div tw="mt-10 text-center">
-            <ButtonLink variant="primary" href="/dashboard/instance">
-              Create your first instance and link a domain to it
+            <ButtonLink variant="primary" href="/dashboard/domain">
+              Create your first domain
             </ButtonLink>
           </div>
         )}
