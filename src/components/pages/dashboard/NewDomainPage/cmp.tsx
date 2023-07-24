@@ -47,7 +47,7 @@ export default function NewDomain() {
               </>
             ) : (
               <>
-                <NoisyContainer>
+                <NoisyContainer tw="z-10!">
                   <div>
                     <TextInput
                       label="Domain name"
