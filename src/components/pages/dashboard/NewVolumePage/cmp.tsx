@@ -7,12 +7,11 @@ import Container from '@/components/common/CenteredContainer'
 
 export default function NewVolumePage() {
   const {
-    formState,
-    handleSubmit,
-    handleChangeVolume,
     address,
     accountBalance,
     isCreateButtonDisabled,
+    volumeCtrl,
+    handleSubmit,
   } = useNewVolumePage()
 
   return (
@@ -20,11 +19,7 @@ export default function NewVolumePage() {
       <form onSubmit={handleSubmit}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>
-            <AddNewVolume
-              isStandAlone
-              volume={formState.volume}
-              onChange={handleChangeVolume}
-            />
+            <AddNewVolume {...volumeCtrl.field} isStandAlone />
           </Container>
         </section>
         <section
@@ -47,7 +42,7 @@ export default function NewVolumePage() {
               <HoldingRequirements
                 address={address}
                 type={EntityType.Volume}
-                volumes={[formState.volume]}
+                volumes={[volumeCtrl.field.value]}
                 unlockedAmount={accountBalance}
               />
             </div>

@@ -10,7 +10,7 @@ export const defaultInstanceImageOptions = [
 ]
 
 export type UseSelectInstanceImageProps = {
-  image?: InstanceImageProp
+  value?: InstanceImageProp
   options?: InstanceImageProp[]
   onChange: (image: InstanceImageProp) => void
 }
@@ -22,7 +22,7 @@ export type UseSelectInstanceImageReturn = {
 }
 
 export function useSelectInstanceImage({
-  image: imageProp,
+  value: imageProp,
   options: optionsProp,
   onChange,
 }: UseSelectInstanceImageProps): UseSelectInstanceImageReturn {

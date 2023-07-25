@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
@@ -7,12 +7,11 @@ import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { AddDomain, AddDomainTarget } from '@/domain/domain'
 import { EntityType } from '@/helpers/constants'
+import { UseControllerReturn, useController } from 'react-hook-form'
 
 export type NewDomainFormState = AddDomain
 
-export const initialState: NewDomainFormState = {
-  name: '',
-  ref: '',
+export const defaultValues: Partial<NewDomainFormState> = {
   target: AddDomainTarget.Program,
 }
 
@@ -22,30 +21,23 @@ export type DomainRefOptions = {
   type: EntityType
 }
 
-export type UseNewDomainPage = {
-  formState: NewDomainFormState
-  entityType: EntityType.Instance | EntityType.Program
+export type UseNewDomainPageReturn = {
   entities: DomainRefOptions[]
   hasInstances: boolean
   hasFunctions: boolean
   hasEntities: boolean
+  nameCtrl: UseControllerReturn<NewDomainFormState, 'name'>
+  programTypeCtrl: UseControllerReturn<NewDomainFormState, 'programType'>
+  refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
   handleSubmit: (e: FormEvent) => Promise<void>
-  handleChangeName: (e: ChangeEvent<HTMLTextAreaElement>) => void
-  handleChangeEntityType: (
-    _: ChangeEvent<HTMLInputElement>,
-    type: string,
-  ) => void
-  handleChangeRef: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
-export function useNewDomainPage() {
+export function useNewDomainPage(): UseNewDomainPageReturn {
   useConnectedWard()
 
   const router = useRouter()
   const manager = useDomainManager()
   const [{ accountInstances, accountFunctions }, dispatch] = useAppState()
-
-  const [entityType, setEntityType] = useState<EntityType>()
 
   const onSubmit = useCallback(
     async (state: NewDomainFormState) => {
@@ -63,21 +55,35 @@ export function useNewDomainPage() {
     [dispatch, manager, router],
   )
 
-  const {
-    state: formState,
-    setFormValue,
-    handleSubmit,
-  } = useForm({ initialState, onSubmit })
+  const { control, handleSubmit, setValue } = useForm({
+    defaultValues,
+    onSubmit,
+  })
 
-  const handleChangeName = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => setFormValue('name', e.target.value),
-    [setFormValue],
-  )
+  const nameCtrl = useController({
+    control,
+    name: 'name',
+    rules: { required: true },
+  })
 
-  const handleChangeRef = useCallback(
-    (ref: string | string[]) => setFormValue('ref', ref as string),
-    [setFormValue],
-  )
+  const programTypeCtrl = useController({
+    control,
+    name: 'programType',
+    rules: {
+      required: true,
+      onChange() {
+        setValue('ref', '')
+      },
+    },
+  })
+
+  const refCtrl = useController({
+    control,
+    name: 'ref',
+    rules: { required: true },
+  })
+
+  const entityType = programTypeCtrl.field.value
 
   const entities = useMemo(() => {
     const entities = !entityType
@@ -95,14 +101,6 @@ export function useNewDomainPage() {
     })
   }, [entityType, accountInstances, accountFunctions])
 
-  const handleChangeEntityType = useCallback(
-    (_: ChangeEvent<HTMLInputElement>, type: unknown) => {
-      setEntityType(type as EntityType)
-      handleChangeRef('')
-    },
-    [handleChangeRef],
-  )
-
   const hasInstances = useMemo(
     () => !!accountInstances?.length,
     [accountInstances],
@@ -119,15 +117,13 @@ export function useNewDomainPage() {
   )
 
   return {
-    ...formState,
-    entityType,
     entities,
     hasInstances,
     hasFunctions,
     hasEntities,
-    handleChangeName,
-    handleChangeEntityType,
-    handleChangeRef,
+    nameCtrl,
+    programTypeCtrl,
+    refCtrl,
     handleSubmit,
   }
 }

@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import { VolumeProp, defaultVolume } from './useAddVolume'
 
 export type UseAddVolumesProps = {
-  volumes?: VolumeProp[]
+  value?: VolumeProp[]
   onChange: (volumes: VolumeProp[]) => void
 }
 
@@ -14,7 +14,7 @@ export type UseAddVolumesReturn = {
 }
 
 export function useAddVolumes({
-  volumes: volumesProp,
+  value: volumesProp,
   onChange,
 }: UseAddVolumesProps): UseAddVolumesReturn {
   const [volumesState, setVolumesState] = useState<VolumeProp[]>([])

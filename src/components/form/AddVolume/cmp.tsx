@@ -20,7 +20,7 @@ import {
   useAddNewVolumeProps,
   useAddPersistentVolumeProps,
 } from '@/hooks/form/useAddVolume'
-import { VolumeType, Volume } from '@/domain/volume'
+import { VolumeType } from '@/domain/volume'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import HiddenFileInput from '@/components/common/HiddenFileInput'
 
@@ -241,59 +241,53 @@ const CmpMap = {
   [VolumeType.Persistent]: AddPersistentVolume,
 }
 
-export const AddVolume = React.memo(
-  ({ isStandAlone, volume: volumeProp, onChange, ...rest }: AddVolumeProps) => {
-    const { volume, handleChange } = useAddVolume({
-      volume: volumeProp,
-      onChange,
-    })
+export const AddVolume = React.memo((props: AddVolumeProps) => {
+  const {
+    volume,
+    isStandAlone,
+    handleChange,
+    handleVolumeTypeChange,
+    handleRemove,
+  } = useAddVolume(props)
 
-    const handleVolumeTypeChange = useCallback(
-      (type: string | VolumeType) => {
-        const newVolume = { ...volume, volumeType: type } as Volume
-        handleChange(newVolume)
-      },
-      [handleChange, volume],
-    )
+  const Cmp = useMemo(() => CmpMap[volume.volumeType], [volume.volumeType])
 
-    const Cmp = useMemo(() => CmpMap[volume.volumeType], [volume.volumeType])
+  const subProps = {
+    volume: volume as never,
+    onChange: handleChange,
+    onRemove: handleRemove,
+  }
 
-    if (isStandAlone)
-      return (
-        <AddNewVolume {...{ volume: volume as never, onChange, ...rest }} />
-      )
+  if (isStandAlone) return <AddNewVolume {...subProps} />
 
-    return (
-      <>
-        <div tw="px-0 pt-6 pb-3">
-          <Tabs
-            selected={volume.volumeType}
-            align="left"
-            onTabChange={handleVolumeTypeChange}
-            tabs={[
-              {
-                id: VolumeType.New,
-                name: 'New volume',
-              },
-              {
-                id: VolumeType.Existing,
-                name: 'Existing volume',
-              },
-              {
-                id: VolumeType.Persistent,
-                name: 'Persistent Storage',
-              },
-            ]}
-          />
-        </div>
+  return (
+    <>
+      <div tw="px-0 pt-6 pb-3">
+        <Tabs
+          selected={volume.volumeType}
+          align="left"
+          onTabChange={handleVolumeTypeChange}
+          tabs={[
+            {
+              id: VolumeType.New,
+              name: 'New volume',
+            },
+            {
+              id: VolumeType.Existing,
+              name: 'Existing volume',
+            },
+            {
+              id: VolumeType.Persistent,
+              name: 'Persistent Storage',
+            },
+          ]}
+        />
+      </div>
 
-        <div role="tabpanel">
-          {<Cmp {...{ volume: volume as never, onChange, ...rest }} />}
-        </div>
-      </>
-    )
-  },
-)
+      <div role="tabpanel">{<Cmp {...subProps} />}</div>
+    </>
+  )
+})
 AddVolume.displayName = 'AddVolume'
 
 export default AddVolume

@@ -6,7 +6,7 @@ import { useForm } from '@/hooks/common/useForm'
 import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
 import { NameAndTagsProp } from '@/hooks/form/useAddNameAndTags'
 import { SSHKeyProp } from '@/hooks/form/useAddSSHKeys'
-import { VolumeProp, defaultVolume } from '@/hooks/form/useAddVolume'
+import { VolumeProp } from '@/hooks/form/useAddVolume'
 import {
   InstanceImageProp,
   defaultInstanceImageOptions,
@@ -19,10 +19,10 @@ import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager
 import { ActionTypes } from '@/helpers/store'
 import { DomainProp } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
+import { UseControllerReturn, useController } from 'react-hook-form'
 
 export type NewInstanceFormState = {
-  name?: string
-  tags?: string[]
+  nameAndTags?: NameAndTagsProp
   image?: InstanceImageProp
   specs?: InstanceSpecsProp
   volumes?: VolumeProp[]
@@ -31,26 +31,26 @@ export type NewInstanceFormState = {
   domains?: DomainProp[]
 }
 
-export const initialState: NewInstanceFormState = {
+export const defaultValues: Partial<NewInstanceFormState> = {
   image: defaultInstanceImageOptions[0],
   specs: getDefaultSpecsOptions(true)[0],
-  volumes: [{ ...defaultVolume }],
+  // volumes: [{ ...defaultVolume }],
 }
 
 export type UseNewInstancePage = {
-  formState: NewInstanceFormState
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
+  imageCtrl: UseControllerReturn<NewInstanceFormState, 'image'>
+  specsCtrl: UseControllerReturn<NewInstanceFormState, 'specs'>
+  volumesCtrl: UseControllerReturn<NewInstanceFormState, 'volumes'>
+  envVarsCtrl: UseControllerReturn<NewInstanceFormState, 'envVars'>
+  sshKeysCtrl: UseControllerReturn<NewInstanceFormState, 'sshKeys'>
+  domainsCtrl: UseControllerReturn<NewInstanceFormState, 'domains'>
+  nameAndTagsCtrl: UseControllerReturn<NewInstanceFormState, 'nameAndTags'>
   handleSubmit: (e: FormEvent) => Promise<void>
   handleChangeEntityTab: (tabId: string) => void
-  handleChangeInstanceImage: (image: InstanceImageProp) => void
-  handleChangeInstanceSpecs: (specs: InstanceSpecsProp) => void
-  handleChangeVolumes: (volumes: VolumeProp[]) => void
-  handleChangeEnvVars: (envVars: EnvVarProp[]) => void
-  handleChangeSSHKeys: (sshKeys: SSHKeyProp[]) => void
-  handleChangeDomains: (domains: DomainProp[]) => void
-  handleChangeNameAndTags: (nameAndTags: NameAndTagsProp) => void
+  values: any
 }
 
 export function useNewInstancePage(): UseNewInstancePage {
@@ -66,12 +66,11 @@ export function useNewInstancePage(): UseNewInstancePage {
     async (state: NewInstanceFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const { image, name, tags, envVars, domains, sshKeys, volumes, specs } =
+      const { image, nameAndTags, envVars, domains, sshKeys, volumes, specs } =
         state
 
       const accountInstance = await manager.add({
-        name,
-        tags,
+        ...nameAndTags,
         envVars,
         sshKeys,
         domains,
@@ -92,58 +91,59 @@ export function useNewInstancePage(): UseNewInstancePage {
     [dispatch, manager, router],
   )
 
-  const {
-    state: formState,
-    setFormValue,
-    handleSubmit,
-  } = useForm({ initialState, onSubmit })
+  const { watch, control, handleSubmit } = useForm({ defaultValues, onSubmit })
+  const values = watch()
 
-  const handleChangeInstanceImage = useCallback(
-    (image: InstanceImageProp) => setFormValue('image', image),
-    [setFormValue],
-  )
+  const imageCtrl = useController({
+    control,
+    name: 'image',
+    rules: { required: true },
+  })
 
-  const handleChangeInstanceSpecs = useCallback(
-    (specs: InstanceSpecsProp) => setFormValue('specs', specs),
-    [setFormValue],
-  )
+  const specsCtrl = useController({
+    control,
+    name: 'specs',
+    rules: { required: true },
+  })
 
-  const handleChangeVolumes = useCallback(
-    (volumes: VolumeProp[]) => setFormValue('volumes', volumes),
-    [setFormValue],
-  )
+  const volumesCtrl = useController({
+    control,
+    name: 'volumes',
+    rules: { required: false },
+  })
 
-  const handleChangeEnvVars = useCallback(
-    (envVars: EnvVarProp[]) => setFormValue('envVars', envVars),
-    [setFormValue],
-  )
+  const envVarsCtrl = useController({
+    control,
+    name: 'envVars',
+    rules: { required: false },
+  })
 
-  const handleChangeSSHKeys = useCallback(
-    (sshKeys: SSHKeyProp[]) => setFormValue('sshKeys', sshKeys),
-    [setFormValue],
-  )
+  const sshKeysCtrl = useController({
+    control,
+    name: 'sshKeys',
+    rules: { required: false },
+  })
 
-  const handleChangeDomains = useCallback(
-    (domains: DomainProp[]) => setFormValue('domains', domains),
-    [setFormValue],
-  )
+  const domainsCtrl = useController({
+    control,
+    name: 'domains',
+    rules: { required: false },
+  })
 
-  const handleChangeNameAndTags = useCallback(
-    ({ name, tags }: NameAndTagsProp) => {
-      setFormValue('name', name)
-      setFormValue('tags', tags)
-    },
-    [setFormValue],
-  )
+  const nameAndTagsCtrl = useController({
+    control,
+    name: 'nameAndTags',
+    rules: { required: true },
+  })
 
   const { totalCost } = useMemo(
     () =>
       InstanceManager.getCost({
-        specs: formState.specs,
-        volumes: formState.volumes,
+        specs: specsCtrl.field.value,
+        volumes: volumesCtrl.field.value,
         capabilities: {},
       }),
-    [formState],
+    [specsCtrl.field.value, volumesCtrl.field.value],
   )
 
   const canAfford = (accountBalance || 0) > totalCost
@@ -160,18 +160,18 @@ export function useNewInstancePage(): UseNewInstancePage {
   )
 
   return {
-    formState,
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
+    imageCtrl,
+    specsCtrl,
+    volumesCtrl,
+    envVarsCtrl,
+    sshKeysCtrl,
+    domainsCtrl,
+    nameAndTagsCtrl,
     handleSubmit,
     handleChangeEntityTab,
-    handleChangeInstanceImage,
-    handleChangeInstanceSpecs,
-    handleChangeVolumes,
-    handleChangeEnvVars,
-    handleChangeSSHKeys,
-    handleChangeDomains,
-    handleChangeNameAndTags,
+    values,
   }
 }

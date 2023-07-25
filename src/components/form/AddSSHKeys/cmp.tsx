@@ -68,48 +68,43 @@ const SSHKeyItem = React.memo(
 )
 SSHKeyItem.displayName = 'SSHKeyItem'
 
-export const AddSSHKeys = React.memo(
-  ({ sshKeys: sshKeysProp, onChange }: AddSSHKeysProps) => {
-    const { sshKeys, handleChange, handleAdd, handleRemove, allowRemove } =
-      useAddSSHKeys({
-        sshKeys: sshKeysProp,
-        onChange,
-      })
+export const AddSSHKeys = React.memo((props: AddSSHKeysProps) => {
+  const { sshKeys, handleChange, handleAdd, handleRemove, allowRemove } =
+    useAddSSHKeys(props)
 
-    return (
-      <>
-        {sshKeys.length > 0 && (
-          <NoisyContainer>
-            <div tw="flex flex-col gap-x-6 gap-y-4">
-              {sshKeys.map((sshKey, index) => (
-                <SSHKeyItem
-                  key={sshKey.id}
-                  sshKey={sshKey}
-                  index={index}
-                  onChange={handleChange}
-                  onRemove={handleRemove}
-                  allowRemove={allowRemove}
-                />
-              ))}
-            </div>
-          </NoisyContainer>
-        )}
-        <div tw="mt-6 mx-6">
-          <Button
-            type="button"
-            onClick={handleAdd}
-            color="main0"
-            variant="secondary"
-            kind="neon"
-            size="regular"
-          >
-            Add SSH key
-          </Button>
-        </div>
-      </>
-    )
-  },
-)
+  return (
+    <>
+      {sshKeys.length > 0 && (
+        <NoisyContainer>
+          <div tw="flex flex-col gap-x-6 gap-y-4">
+            {sshKeys.map((sshKey, index) => (
+              <SSHKeyItem
+                key={sshKey.id}
+                sshKey={sshKey}
+                index={index}
+                onChange={handleChange}
+                onRemove={handleRemove}
+                allowRemove={allowRemove}
+              />
+            ))}
+          </div>
+        </NoisyContainer>
+      )}
+      <div tw="mt-6 mx-6">
+        <Button
+          type="button"
+          onClick={handleAdd}
+          color="main0"
+          variant="secondary"
+          kind="neon"
+          size="regular"
+        >
+          Add SSH key
+        </Button>
+      </div>
+    </>
+  )
+})
 AddSSHKeys.displayName = 'AddSSHKeys'
 
 export default AddSSHKeys

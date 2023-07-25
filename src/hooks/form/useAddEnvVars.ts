@@ -67,7 +67,7 @@ export function useEnvVarItem({
 // --------------------
 
 export type UseEnvVarsProps = {
-  envVars?: EnvVarProp[]
+  value?: EnvVarProp[]
   onChange: (envVars: EnvVarProp[]) => void
 }
 
@@ -79,7 +79,7 @@ export type UseEnvVarsReturn = {
 }
 
 export function useAddEnvVars({
-  envVars: envVarsProp,
+  value: envVarsProp,
   onChange,
 }: UseEnvVarsProps): UseEnvVarsReturn {
   const [envVarsState, setEnvVarsState] = useState<EnvVarProp[]>([])

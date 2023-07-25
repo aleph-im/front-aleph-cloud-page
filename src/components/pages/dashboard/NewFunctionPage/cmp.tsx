@@ -1,51 +1,42 @@
-import { useState } from 'react'
-import {
-  Button,
-  CodeEditor,
-  Icon,
-  Radio,
-  RadioGroup,
-  Tabs,
-  TextGradient,
-} from '@aleph-front/aleph-core'
+import { Button, Tabs, TextGradient } from '@aleph-front/aleph-core'
+import { EntityType } from '@/helpers/constants'
 import CompositeTitle from '@/components/common/CompositeTitle'
-import NoisyContainer from '@/components/common/NoisyContainer'
-import HiddenFileInput from '@/components/common/HiddenFileInput'
 import { useNewFunctionPage } from '@/hooks/pages/dashboard/useNewFunctionPage'
 import HoldingRequirements from '@/components/common/HoldingRequirements'
-import ExternalLinkButton from '@/components/common/ExternalLinkButton'
-import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
 import AddEnvVars from '@/components/form/AddEnvVars'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime'
-import { EntityType } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
+import AddFunctionCode from '@/components/form/AddFunctionCode'
+import SelectFunctionPersistence from '@/components/form/SelectFunctionPersistence'
 
 export default function NewFunctionPage() {
   const {
-    formState,
-    handleSubmit,
-    setFormValue,
     address,
     accountBalance,
     isCreateButtonDisabled,
+    functionCodeCtrl,
+    runtimeCtrl,
+    specsCtrl,
+    volumesCtrl,
+    envVarsCtrl,
+    domainsCtrl,
+    nameAndTagsCtrl,
+    isPersistentCtrl,
+    handleSubmit,
     handleChangeEntityTab,
-    handleChangeFunctionRuntime,
-    handleChangeInstanceSpecs,
-    handleChangeVolumes,
-    handleChangeEnvVars,
-    handleChangeDomains,
-    handleChangeNameAndTags,
+    values,
   } = useNewFunctionPage()
-
-  const [tabId, setTabId] = useState('code')
 
   return (
     <>
       <form onSubmit={handleSubmit}>
+        <section>
+          <pre>{JSON.stringify(values, null, 2)}</pre>
+        </section>
         <section tw="px-0 py-0 md:py-8">
           <Container>
             <Tabs
@@ -83,123 +74,7 @@ export default function NewFunctionPage() {
               If your code has any dependencies, you can upload them separately
               in the volume section below to ensure a faster creation.
             </p>
-            <div tw="px-0 pt-6 pb-3">
-              <Tabs
-                selected={tabId}
-                align="left"
-                tabs={[
-                  {
-                    id: 'code',
-                    name: 'Write code',
-                  },
-                  {
-                    id: 'file',
-                    name: 'Upload code',
-                  },
-                ]}
-                onTabChange={(id) => {
-                  setTabId(id)
-                  setFormValue('codeOrFile', id)
-                }}
-              />
-            </div>
-            <div role="tabpanel">
-              {tabId === 'code' ? (
-                <>
-                  <p tw="mb-6">
-                    To get started you can start adding your code in the window
-                    below.
-                  </p>
-                  <div tw="mb-6">
-                    <NoisyContainer>
-                      <RadioGroup direction="row">
-                        <Radio
-                          checked={formState.codeLanguage === 'python'}
-                          label="Python 3.9"
-                          name="__config_code_language"
-                          onChange={() =>
-                            setFormValue('codeLanguage', 'python')
-                          }
-                          value="on-demand"
-                        />
-                        <Radio
-                          checked={formState.codeLanguage === 'javascript'}
-                          label="Node.js"
-                          disabled
-                          name="__config_code_language"
-                          onChange={() =>
-                            setFormValue('codeLanguage', 'javascript')
-                          }
-                          value="persistent"
-                        />
-                      </RadioGroup>
-                    </NoisyContainer>
-                  </div>
-                  <div>
-                    <CodeEditor
-                      tw="p-5 rounded-3xl min-h-[415px]"
-                      onChange={(value) => setFormValue('functionCode', value)}
-                      value={formState.functionCode}
-                      defaultLanguage={formState.codeLanguage}
-                      language={formState.codeLanguage}
-                    />
-                  </div>
-                  <div tw="mt-6 text-right">
-                    <InfoTooltipButton
-                      my="bottom-right"
-                      at="top-right"
-                      tooltipContent={
-                        <div tw="text-left">
-                          <div>
-                            <div className="tp-body2 fs-md">Write code</div>
-                            <div className="tp-body1 fs-md">
-                              Your code should have an app function that will
-                              serve as an entrypoint to the program.
-                            </div>
-                          </div>
-                          <div tw="mt-6">
-                            <div className="tp-body2 fs-md">Upload code</div>
-                            <div className="tp-body1 fs-md">
-                              Your zip file should contain a main file (ex:
-                              main.py) at its root that exposes an app function.
-                              This will serve as an entrypoint to the program.
-                            </div>
-                          </div>
-                        </div>
-                      }
-                    >
-                      Learn more
-                    </InfoTooltipButton>
-                  </div>
-                </>
-              ) : tabId === 'file' ? (
-                <>
-                  <p tw="mb-2">
-                    To get started, compress your code into a zip file and
-                    upload it here.
-                  </p>
-                  <p tw="mb-6">
-                    Your zip archive should contain a{' '}
-                    <strong tw="font-bold">main</strong> file (ex: main.py) at
-                    its root that exposes an <strong tw="font-bold">app</strong>{' '}
-                    function. This will serve as an entrypoint to the program
-                  </p>
-                  <NoisyContainer>
-                    <div tw="py-5 text-center">
-                      <HiddenFileInput
-                        value={formState.functionFile}
-                        accept=".zip"
-                        onChange={(file) => setFormValue('functionFile', file)}
-                      >
-                        Upload code <Icon name="arrow-up" tw="ml-4" />
-                      </HiddenFileInput>
-                    </div>
-                  </NoisyContainer>
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
+            <AddFunctionCode {...functionCodeCtrl.field} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -212,10 +87,7 @@ export default function NewFunctionPage() {
               tailored to your specific requirements. Below are the available
               options
             </p>
-            <SelectFunctionRuntime
-              runtime={formState.runtime}
-              onChange={handleChangeFunctionRuntime}
-            />
+            <SelectFunctionRuntime {...runtimeCtrl.field} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -228,29 +100,7 @@ export default function NewFunctionPage() {
               persistent, or only on-demand in response to a user request or an
               event.
             </p>
-            <NoisyContainer>
-              <RadioGroup direction="row">
-                <Radio
-                  checked={formState.isPersistent}
-                  label="Persistent"
-                  name="__config_runtime_scheduling"
-                  onChange={() => setFormValue('isPersistent', true)}
-                  value="persistent"
-                />
-                <Radio
-                  checked={!formState.isPersistent}
-                  label="On-demand"
-                  name="__config_runtime_scheduling"
-                  onChange={() => setFormValue('isPersistent', false)}
-                  value="on-demand"
-                />
-              </RadioGroup>
-            </NoisyContainer>
-            <div tw="mt-6 text-right">
-              <ExternalLinkButton href="https://docs.aleph.im/computing/persistent">
-                Learn more
-              </ExternalLinkButton>
-            </div>
+            <SelectFunctionPersistence {...isPersistentCtrl.field} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -270,9 +120,8 @@ export default function NewFunctionPage() {
               amount of RAM.
             </p>
             <SelectInstanceSpecs
-              specs={formState.specs}
-              isPersistent={formState.isPersistent}
-              onChange={handleChangeInstanceSpecs}
+              {...specsCtrl.field}
+              isPersistent={isPersistentCtrl.field.value}
             />
           </Container>
         </section>
@@ -288,10 +137,8 @@ export default function NewFunctionPage() {
               easier to manage your web3 functions.
             </p>
             <AddNameAndTags
+              {...nameAndTagsCtrl.field}
               entityType={EntityType.Program}
-              name={formState.name}
-              tags={formState.tags}
-              onChange={handleChangeNameAndTags}
             />
           </Container>
         </section>
@@ -300,10 +147,7 @@ export default function NewFunctionPage() {
             <CompositeTitle as="h2" number="6">
               Add volumes
             </CompositeTitle>
-            <AddVolumes
-              volumes={formState.volumes}
-              onChange={handleChangeVolumes}
-            />
+            <AddVolumes {...volumesCtrl.field} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -317,10 +161,7 @@ export default function NewFunctionPage() {
               store information, manage configurations, and modify your
               application&apos;s behaviour without altering the source code.
             </p>
-            <AddEnvVars
-              envVars={formState.envVars}
-              onChange={handleChangeEnvVars}
-            />
+            <AddEnvVars {...envVarsCtrl.field} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -333,10 +174,7 @@ export default function NewFunctionPage() {
               providing a more accessible and professional way for users to
               interact with your application.
             </p>
-            <AddDomains
-              domains={formState.domains}
-              onChange={handleChangeDomains}
-            />
+            <AddDomains {...domainsCtrl.field} />
           </Container>
         </section>
         <section
@@ -359,10 +197,10 @@ export default function NewFunctionPage() {
               <HoldingRequirements
                 address={address}
                 type={EntityType.Program}
-                isPersistent={formState.isPersistent}
-                specs={formState.specs}
-                volumes={formState.volumes}
-                domains={formState.domains}
+                isPersistent={isPersistentCtrl.field.value}
+                specs={specsCtrl.field.value}
+                volumes={volumesCtrl.field.value}
+                domains={domainsCtrl.field.value}
                 unlockedAmount={accountBalance}
               />
             </div>

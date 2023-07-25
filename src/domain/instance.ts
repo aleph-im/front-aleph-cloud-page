@@ -142,7 +142,11 @@ export class InstanceManager
       const [entity] = await this.parseMessages([response])
 
       // @note: Add the domain link
-      await this.parseDomains(entity.id, newInstance.domains)
+      await this.parseDomains(
+        EntityType.Instance,
+        entity.id,
+        newInstance.domains,
+      )
 
       return entity
     } catch (err) {
@@ -183,9 +187,7 @@ export class InstanceManager
 
     // @note: Create new keys before instance
     const newKeys = sshKeys.filter((key) => key.isNew && key.isSelected)
-    await Promise.all(
-      newKeys.map(({ key, label }) => this.sshKeyManager.add({ key, label })),
-    )
+    await this.sshKeyManager.add(newKeys, false)
 
     return sshKeys
       .filter((key) => key.isSelected)

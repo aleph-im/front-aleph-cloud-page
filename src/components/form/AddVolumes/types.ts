@@ -5,6 +5,6 @@ export type RemoveVolumeProps = {
 }
 
 export type AddVolumesProps = {
-  volumes?: VolumeProp[]
+  value?: VolumeProp[]
   onChange: (volumes: VolumeProp[]) => void
 } & Partial<RemoveVolumeProps>

@@ -8,7 +8,8 @@ export type NameAndTagsProp = {
 
 export const defaultNameAndTags: NameAndTagsProp = {}
 
-export type UseNameAndTagsProps = NameAndTagsProp & {
+export type UseNameAndTagsProps = {
+  value?: NameAndTagsProp
   entityType: EntityType.Instance | EntityType.Program
   onChange: (state: NameAndTagsProp) => void
 }
@@ -20,9 +21,9 @@ export type UseNameAndTagsReturn = NameAndTagsProp & {
 }
 
 export function useAddNameAndTags({
+  value: nameAndTagsProp,
   onChange,
   entityType,
-  ...nameAndTagsProp
 }: UseNameAndTagsProps): UseNameAndTagsReturn {
   const [nameAndTagsState, setNameAndTagsState] = useState<NameAndTagsProp>()
   const nameAndTags = nameAndTagsProp || nameAndTagsState

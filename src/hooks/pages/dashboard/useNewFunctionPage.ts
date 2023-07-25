@@ -9,7 +9,7 @@ import {
   InstanceSpecsProp,
   getDefaultSpecsOptions,
 } from '../../form/useSelectInstanceSpecs'
-import { VolumeProp, defaultVolume } from '../../form/useAddVolume'
+import { VolumeProp } from '../../form/useAddVolume'
 import { EnvVarProp } from '../../form/useAddEnvVars'
 import { NameAndTagsProp } from '../../form/useAddNameAndTags'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
@@ -18,56 +18,45 @@ import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { ActionTypes } from '@/helpers/store'
 import { DomainProp } from '@/hooks/form/useAddDomains'
 import { ProgramManager } from '@/domain/program'
+import { UseControllerReturn, useController } from 'react-hook-form'
+import { FunctionCodeProp, defaultCode } from '@/hooks/form/useAddFunctionCode'
 
 export type NewFunctionFormState = {
+  code?: FunctionCodeProp
+  nameAndTags?: NameAndTagsProp
   runtime: FunctionRuntimeProp
   isPersistent: boolean
-  volumes: VolumeProp[]
-  codeOrFile: 'code' | 'file'
-  codeLanguage: string
-  functionCode?: string
-  functionFile?: File
+  volumes?: VolumeProp[]
   specs?: InstanceSpecsProp
   envVars?: EnvVarProp[]
   domains?: DomainProp[]
-  tags?: string[]
-  name?: string
 }
 
-const samplePythonCode = `from fastapi import FastAPI
-
-app = FastAPI()
-@app.get("/")
-async def root():
-  return {"message": "Hello World"}
-`
-
-const initialState: NewFunctionFormState = {
+const defaultValues: Partial<NewFunctionFormState> = {
+  code: { ...defaultCode },
   runtime: defaultFunctionRuntimeOptions[0],
   specs: getDefaultSpecsOptions(false)[0],
-  volumes: [{ ...defaultVolume }],
   isPersistent: false,
-  functionCode: samplePythonCode,
-  codeLanguage: 'python',
-  codeOrFile: 'code',
+  // volumes: [{ ...defaultVolume }],
 }
 
 // @todo: Split this into reusable hooks by composition
 
 export type UseNewFunctionPage = {
-  formState: NewFunctionFormState
-  handleSubmit: (e: FormEvent) => Promise<void>
-  setFormValue: (name: keyof NewFunctionFormState, value: unknown) => void
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
-  handleChangeFunctionRuntime: (runtime: FunctionRuntimeProp) => void
+  functionCodeCtrl: UseControllerReturn<NewFunctionFormState, 'code'>
+  runtimeCtrl: UseControllerReturn<NewFunctionFormState, 'runtime'>
+  specsCtrl: UseControllerReturn<NewFunctionFormState, 'specs'>
+  volumesCtrl: UseControllerReturn<NewFunctionFormState, 'volumes'>
+  envVarsCtrl: UseControllerReturn<NewFunctionFormState, 'envVars'>
+  domainsCtrl: UseControllerReturn<NewFunctionFormState, 'domains'>
+  nameAndTagsCtrl: UseControllerReturn<NewFunctionFormState, 'nameAndTags'>
+  isPersistentCtrl: UseControllerReturn<NewFunctionFormState, 'isPersistent'>
+  handleSubmit: (e: FormEvent) => Promise<void>
   handleChangeEntityTab: (tabId: string) => void
-  handleChangeInstanceSpecs: (specs: InstanceSpecsProp) => void
-  handleChangeVolumes: (volumes: VolumeProp[]) => void
-  handleChangeEnvVars: (envVars: EnvVarProp[]) => void
-  handleChangeDomains: (domains: DomainProp[]) => void
-  handleChangeNameAndTags: (nameAndTags: NameAndTagsProp) => void
+  values: any
 }
 
 export function useNewFunctionPage(): UseNewFunctionPage {
@@ -85,24 +74,18 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
       const {
         runtime,
-        name,
-        tags,
+        nameAndTags,
         isPersistent,
         envVars,
         domains,
         volumes,
         specs,
-        codeOrFile,
-        functionCode,
-        functionFile,
+        code: { code } = {},
       } = state
 
-      const file = codeOrFile === 'code' ? functionCode : functionFile
-
       const accountFunction = await manager.add({
+        ...nameAndTags,
         runtime,
-        name,
-        tags,
         envVars,
         domains,
         specs,
@@ -110,7 +93,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         isPersistent,
         // @todo: Move this to a new FunctionCode component that will always return
         // a file and an entrypoint depending on the selected language and code
-        file,
+        file: code,
       })
 
       dispatch({
@@ -125,54 +108,75 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     [dispatch, manager, router],
   )
 
-  const {
-    state: formState,
-    setFormValue,
-    handleSubmit,
-  } = useForm({ initialState, onSubmit })
+  const { watch, control, handleSubmit } = useForm({ defaultValues, onSubmit })
 
-  const handleChangeFunctionRuntime = useCallback(
-    (runtime: FunctionRuntimeProp) => setFormValue('runtime', runtime),
-    [setFormValue],
-  )
+  const values = watch()
 
-  const handleChangeInstanceSpecs = useCallback(
-    (specs: InstanceSpecsProp) => setFormValue('specs', specs),
-    [setFormValue],
-  )
+  const functionCodeCtrl = useController({
+    control,
+    name: 'code',
+    rules: { required: true },
+  })
 
-  const handleChangeVolumes = useCallback(
-    (volumes: VolumeProp[]) => setFormValue('volumes', volumes),
-    [setFormValue],
-  )
+  const runtimeCtrl = useController({
+    control,
+    name: 'runtime',
+    rules: { required: true },
+  })
 
-  const handleChangeEnvVars = useCallback(
-    (envVars: EnvVarProp[]) => setFormValue('envVars', envVars),
-    [setFormValue],
-  )
+  const specsCtrl = useController({
+    control,
+    name: 'specs',
+    rules: { required: true },
+  })
 
-  const handleChangeDomains = useCallback(
-    (domains: DomainProp[]) => setFormValue('domains', domains),
-    [setFormValue],
-  )
+  const volumesCtrl = useController({
+    control,
+    name: 'volumes',
+    rules: { required: false },
+  })
 
-  const handleChangeNameAndTags = useCallback(
-    ({ name, tags }: NameAndTagsProp) => {
-      setFormValue('name', name)
-      setFormValue('tags', tags)
+  const envVarsCtrl = useController({
+    control,
+    name: 'envVars',
+    rules: { required: false },
+  })
+
+  const domainsCtrl = useController({
+    control,
+    name: 'domains',
+    rules: { required: false },
+  })
+
+  const nameAndTagsCtrl = useController({
+    control,
+    name: 'nameAndTags',
+    rules: { required: true },
+  })
+
+  const isPersistentCtrl = useController({
+    control,
+    name: 'isPersistent',
+    rules: {
+      validate: {
+        required: (value) => typeof value === 'boolean',
+      },
     },
-    [setFormValue],
-  )
+  })
 
   const { totalCost } = useMemo(
     () =>
       ProgramManager.getCost({
-        specs: formState.specs,
-        isPersistent: formState.isPersistent,
-        volumes: formState.volumes,
+        specs: specsCtrl.field.value,
+        isPersistent: isPersistentCtrl.field.value,
+        volumes: volumesCtrl.field.value,
         capabilities: {},
       }),
-    [formState],
+    [
+      isPersistentCtrl.field.value,
+      specsCtrl.field.value,
+      volumesCtrl.field.value,
+    ],
   )
 
   const canAfford = (accountBalance || 0) > totalCost
@@ -187,18 +191,19 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   )
 
   return {
-    formState,
-    handleSubmit,
-    setFormValue,
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
+    functionCodeCtrl,
+    runtimeCtrl,
+    specsCtrl,
+    volumesCtrl,
+    envVarsCtrl,
+    domainsCtrl,
+    nameAndTagsCtrl,
+    isPersistentCtrl,
+    handleSubmit,
     handleChangeEntityTab,
-    handleChangeFunctionRuntime,
-    handleChangeInstanceSpecs,
-    handleChangeVolumes,
-    handleChangeEnvVars,
-    handleChangeDomains,
-    handleChangeNameAndTags,
+    values,
   }
 }

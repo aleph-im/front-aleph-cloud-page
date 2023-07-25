@@ -15,16 +15,13 @@ import {
 
 export default function NewDomain() {
   const {
-    name,
-    ref,
-    entityType,
     entities,
     hasEntities,
     hasFunctions,
     hasInstances,
-    handleChangeName,
-    handleChangeEntityType,
-    handleChangeRef,
+    nameCtrl,
+    programTypeCtrl,
+    refCtrl,
     handleSubmit,
   } = useNewDomainPage()
 
@@ -50,19 +47,18 @@ export default function NewDomain() {
                 <NoisyContainer tw="z-10!">
                   <div>
                     <TextInput
+                      {...nameCtrl.field}
+                      {...nameCtrl.fieldState}
                       label="Domain name"
-                      value={name}
-                      onChange={handleChangeName}
-                      name="domain_name"
                       placeholder="Name"
                     />
                   </div>
                   <div tw="mt-8">
                     <RadioGroup
+                      {...programTypeCtrl.field}
+                      {...programTypeCtrl.fieldState}
                       direction="row"
                       label="Resource type"
-                      value={entityType}
-                      onChange={handleChangeEntityType}
                     >
                       <Radio
                         label="Function"
@@ -79,14 +75,15 @@ export default function NewDomain() {
                   {entities.length > 0 && (
                     <div tw="mt-8">
                       <Dropdown
+                        {...refCtrl.field}
+                        {...refCtrl.fieldState}
                         label={
-                          entityType
-                            ? `${EntityTypeName[entityType]} ref`
+                          programTypeCtrl.field.value
+                            ? `${
+                                EntityTypeName[programTypeCtrl.field.value]
+                              } ref`
                             : 'Resource ref'
                         }
-                        value={ref}
-                        onChange={handleChangeRef}
-                        name="domain_ref"
                       >
                         {entities.map(({ label, value }) => (
                           <DropdownOption key={value} value={value}>

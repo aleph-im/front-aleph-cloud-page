@@ -34,47 +34,43 @@ const DomainItem = React.memo((props: DomainItemProps) => {
 })
 DomainItem.displayName = 'DomainItem'
 
-export const AddDomains = React.memo(
-  ({ domains: domainsProp, onChange }: AddDomainsProps) => {
-    const { domains, handleChange, handleAdd, handleRemove } = useAddDomains({
-      domains: domainsProp,
-      onChange,
-    })
+export const AddDomains = React.memo((props: AddDomainsProps) => {
+  const { domains, handleChange, handleAdd, handleRemove } =
+    useAddDomains(props)
 
-    return (
-      <>
-        {domains.length > 0 && (
-          <NoisyContainer>
-            <div tw="flex flex-col gap-x-6 gap-y-4">
-              {domains.map((domain) => (
-                <DomainItem
-                  key={domain.id}
-                  domain={domain}
-                  onChange={handleChange}
-                  onRemove={handleRemove}
-                />
-              ))}
-            </div>
-          </NoisyContainer>
-        )}
-        {domains.length < 1 && (
-          <div tw="mt-6 mx-6">
-            <Button
-              type="button"
-              onClick={handleAdd}
-              color="main0"
-              variant="secondary"
-              kind="neon"
-              size="regular"
-            >
-              Add domain
-            </Button>
+  return (
+    <>
+      {domains.length > 0 && (
+        <NoisyContainer>
+          <div tw="flex flex-col gap-x-6 gap-y-4">
+            {domains.map((domain) => (
+              <DomainItem
+                key={domain.id}
+                domain={domain}
+                onChange={handleChange}
+                onRemove={handleRemove}
+              />
+            ))}
           </div>
-        )}
-      </>
-    )
-  },
-)
+        </NoisyContainer>
+      )}
+      {domains.length < 1 && (
+        <div tw="mt-6 mx-6">
+          <Button
+            type="button"
+            onClick={handleAdd}
+            color="main0"
+            variant="secondary"
+            kind="neon"
+            size="regular"
+          >
+            Add domain
+          </Button>
+        </div>
+      )}
+    </>
+  )
+})
 AddDomains.displayName = 'AddDomains'
 
 export default AddDomains

@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React from 'react'
-import { useCallback, useId } from 'react'
+import { useId } from 'react'
 import { useSelectFunctionRuntime } from '@/hooks/form/useSelectFunctionRuntime'
 import { Radio, RadioGroup, TextInput } from '@aleph-front/aleph-core'
 import NoisyContainer from '@/components/common/NoisyContainer'
@@ -13,21 +13,10 @@ import {
 import { FunctionRuntimeId } from '@/domain/runtime'
 
 const SelectFunctionRuntimeItem = React.memo(
-  ({ runtime, selected, onChange }: SelectFunctionRuntimeItemProps) => {
+  ({ runtime }: SelectFunctionRuntimeItemProps) => {
     const id = useId()
 
-    const handleChange = useCallback(() => {
-      onChange(runtime)
-    }, [runtime, onChange])
-
-    return (
-      <Radio
-        label={runtime.name}
-        name={id}
-        checked={selected}
-        onChange={handleChange}
-      />
-    )
+    return <Radio label={runtime.name} name={id} value={runtime.id} />
   },
 )
 SelectFunctionRuntimeItem.displayName = 'SelectFunctionRuntimeItem'
@@ -44,15 +33,17 @@ export const SelectFunctionRuntime = React.memo(
     return (
       <>
         <NoisyContainer>
-          <RadioGroup direction="column">
+          <RadioGroup
+            value={runtime?.id}
+            onChange={handleRuntimeChange}
+            direction="column"
+          >
             {options.map((option) => (
               <SelectFunctionRuntimeItem
                 key={option.id}
                 {...{
                   option,
                   runtime: option,
-                  selected: option.id === runtime?.id,
-                  onChange: handleRuntimeChange,
                 }}
               />
             ))}

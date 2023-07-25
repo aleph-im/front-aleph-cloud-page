@@ -1,7 +1,7 @@
 import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 
 export type SelectInstanceSpecsProps = {
-  specs?: InstanceSpecsProp
+  value?: InstanceSpecsProp
   options?: InstanceSpecsProp[]
   isPersistent?: boolean
   onChange: (specs: InstanceSpecsProp) => void

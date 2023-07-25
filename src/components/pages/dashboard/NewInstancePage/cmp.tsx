@@ -14,24 +14,27 @@ import { useNewInstancePage } from '@/hooks/pages/dashboard/useNewInstancePage'
 
 export default function NewInstancePage() {
   const {
-    formState,
     address,
     accountBalance,
     isCreateButtonDisabled,
+    imageCtrl,
+    specsCtrl,
+    volumesCtrl,
+    envVarsCtrl,
+    sshKeysCtrl,
+    domainsCtrl,
+    nameAndTagsCtrl,
     handleSubmit,
     handleChangeEntityTab,
-    handleChangeInstanceImage,
-    handleChangeInstanceSpecs,
-    handleChangeVolumes,
-    handleChangeEnvVars,
-    handleChangeSSHKeys,
-    handleChangeDomains,
-    handleChangeNameAndTags,
+    values,
   } = useNewInstancePage()
 
   return (
     <>
       <form onSubmit={handleSubmit}>
+        <section>
+          <pre>{JSON.stringify(values, null, 2)}</pre>
+        </section>
         <section tw="px-0 py-0 md:py-8">
           <Container>
             <Tabs
@@ -70,16 +73,8 @@ export default function NewInstancePage() {
               be able to customize.
             </p>
             <div tw="px-0 mt-12 mb-6">
-              <SelectInstanceImage
-                image={formState.image}
-                onChange={handleChangeInstanceImage}
-              />
+              <SelectInstanceImage {...imageCtrl.field} />
             </div>
-            {/* <div tw="mt-6 text-right">
-              <ExternalLinkButton href="https://docs.aleph.im/computing/runtimes">
-                Learn more
-              </ExternalLinkButton>
-            </div> */}
           </Container>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
@@ -92,11 +87,7 @@ export default function NewInstancePage() {
               your VM. You will be able to customize the volumes later.
             </p>
             <div tw="px-0 my-6">
-              <SelectInstanceSpecs
-                specs={formState.specs}
-                isPersistent={true}
-                onChange={handleChangeInstanceSpecs}
-              />
+              <SelectInstanceSpecs {...specsCtrl.field} isPersistent />
             </div>
           </Container>
         </section>
@@ -106,10 +97,7 @@ export default function NewInstancePage() {
               Add volumes
             </CompositeTitle>
             <div tw="px-0 my-6">
-              <AddVolumes
-                volumes={formState.volumes}
-                onChange={handleChangeVolumes}
-              />
+              <AddVolumes {...volumesCtrl.field} />
             </div>
           </Container>
         </section>
@@ -125,10 +113,7 @@ export default function NewInstancePage() {
               team is always ready to assist.
             </p>
             <div tw="px-0 my-6">
-              <AddSSHKeys
-                sshKeys={formState.sshKeys}
-                onChange={handleChangeSSHKeys}
-              />
+              <AddSSHKeys {...sshKeysCtrl.field} />
             </div>
           </Container>
         </section>
@@ -144,10 +129,7 @@ export default function NewInstancePage() {
               application&apos;s behaviour without altering the source code.
             </p>
             <div tw="px-0 my-6">
-              <AddEnvVars
-                envVars={formState.envVars}
-                onChange={handleChangeEnvVars}
-              />
+              <AddEnvVars {...envVarsCtrl.field} />
             </div>
           </Container>
         </section>
@@ -163,10 +145,7 @@ export default function NewInstancePage() {
               It&amp;s another way we&amp;re making web3 cloud management as
               straightforward as possible.
             </p>
-            <AddDomains
-              domains={formState.domains}
-              onChange={handleChangeDomains}
-            />
+            <AddDomains {...domainsCtrl.field} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -181,10 +160,8 @@ export default function NewInstancePage() {
               easier to manage your web3 instances.
             </p>
             <AddNameAndTags
+              {...nameAndTagsCtrl.field}
               entityType={EntityType.Instance}
-              name={formState.name}
-              tags={formState.tags}
-              onChange={handleChangeNameAndTags}
             />
           </Container>
         </section>
@@ -209,9 +186,9 @@ export default function NewInstancePage() {
                 address={address}
                 type={EntityType.Instance}
                 isPersistent={true}
-                specs={formState.specs}
-                volumes={formState.volumes}
-                domains={formState.domains}
+                specs={specsCtrl.field.value}
+                volumes={volumesCtrl.field.value}
+                domains={domainsCtrl.field.value}
                 unlockedAmount={accountBalance}
               />
             </div>

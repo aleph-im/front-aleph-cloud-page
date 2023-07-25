@@ -194,6 +194,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
     const newVolumes = this.parseNewVolumes(volumes)
+    if (newVolumes.length === 0) return []
 
     try {
       const { account, channel } = this
@@ -242,10 +243,12 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   ): Required<AddNewVolume>[] {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
-    return volumes.filter(
+    const newVolumes = volumes.filter(
       (volume: VolumeProp): volume is Required<AddNewVolume> =>
         volume.volumeType === VolumeType.New && !!volume.fileSrc,
     )
+
+    return newVolumes
   }
 
   // @todo: Type not exported from SDK...

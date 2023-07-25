@@ -83,7 +83,7 @@ export function useSSHKeyItem({
 // --------------------
 
 export type UseSSHKeysProps = {
-  sshKeys?: SSHKeyProp[]
+  value?: SSHKeyProp[]
   onChange: (sshKeys: SSHKeyProp[]) => void
 }
 
@@ -96,7 +96,7 @@ export type UseSSHKeysReturn = {
 }
 
 export function useAddSSHKeys({
-  sshKeys: sshKeysProp,
+  value: sshKeysProp,
   onChange,
 }: UseSSHKeysProps): UseSSHKeysReturn {
   const [sshKeysState, setSSHKeysState] = useState<SSHKeyProp[]>([])

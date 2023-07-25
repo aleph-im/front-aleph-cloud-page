@@ -54,7 +54,7 @@ export function useDomainItem({
 // --------------------
 
 export type UseDomainsProps = {
-  domains?: DomainProp[]
+  value?: DomainProp[]
   onChange: (domains: DomainProp[]) => void
 }
 
@@ -66,7 +66,7 @@ export type UseDomainsReturn = {
 }
 
 export function useAddDomains({
-  domains: domainsProp,
+  value: domainsProp,
   onChange,
 }: UseDomainsProps): UseDomainsReturn {
   const [domainsState, setDomainsState] = useState<DomainProp[]>([])

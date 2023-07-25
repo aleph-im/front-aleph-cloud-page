@@ -7,6 +7,6 @@ export type EnvVarItemProps = {
 }
 
 export type AddEnvVarsProps = {
-  envVars?: EnvVarProp[]
+  value?: EnvVarProp[]
   onChange: (envVars: EnvVarProp[]) => void
 }

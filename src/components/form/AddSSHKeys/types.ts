@@ -9,6 +9,6 @@ export type SSHKeyItemProps = {
 }
 
 export type AddSSHKeysProps = {
-  sshKeys?: SSHKeyProp[]
+  value?: SSHKeyProp[]
   onChange: (sshKeys: SSHKeyProp[]) => void
 }

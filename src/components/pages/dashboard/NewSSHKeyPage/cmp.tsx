@@ -4,8 +4,7 @@ import { useNewSSHKeyPage } from '@/hooks/pages/dashboard/useNewSSHKeyPage'
 import { Button, TextArea, TextInput } from '@aleph-front/aleph-core'
 
 export default function NewSSHKey() {
-  const { key, label, handleChangeKey, handleChangeLabel, handleSubmit } =
-    useNewSSHKeyPage()
+  const { keyCtrl, labelCtrl, handleSubmit } = useNewSSHKeyPage()
 
   return (
     <>
@@ -15,20 +14,18 @@ export default function NewSSHKey() {
             <NoisyContainer>
               <div>
                 <TextArea
+                  {...keyCtrl.field}
+                  {...keyCtrl.fieldState}
                   label="SSH Public Key"
-                  value={key}
-                  onChange={handleChangeKey}
-                  name="ssh_key"
                   placeholder="SSH Key"
                   tw="h-40 break-all"
                 />
               </div>
               <div tw="mt-4">
                 <TextInput
+                  {...labelCtrl.field}
+                  {...labelCtrl.fieldState}
                   label="Label"
-                  value={label}
-                  onChange={handleChangeLabel}
-                  name="ssh_label"
                   placeholder="Label"
                 />
               </div>

@@ -7,7 +7,7 @@ export type SelectInstanceImageItemProps = {
 }
 
 export type SelectInstanceImageProps = {
-  image?: InstanceImageProp
+  value?: InstanceImageProp
   options?: InstanceImageProp[]
   onChange: (image: InstanceImageProp) => void
 }

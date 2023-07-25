@@ -179,7 +179,7 @@ export class ProgramManager
       const [entity] = await this.parseMessages([response])
 
       // @note: Add the domain link
-      await this.parseDomains(entity.id, newProgram.domains)
+      await this.parseDomains(EntityType.Program, entity.id, newProgram.domains)
 
       return entity
     } catch (err) {

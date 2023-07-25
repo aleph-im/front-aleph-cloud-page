@@ -20,7 +20,7 @@ export function getDefaultSpecsOptions(
 }
 
 export type UseSelectInstanceSpecsProps = {
-  specs?: InstanceSpecsProp
+  value?: InstanceSpecsProp
   options?: InstanceSpecsProp[]
   isPersistent?: boolean
   onChange: (specs: InstanceSpecsProp) => void
@@ -34,9 +34,9 @@ export type UseSelectInstanceSpecsReturn = {
 }
 
 export function useSelectInstanceSpecs({
-  specs: specsProp,
+  value: specsProp,
   options: optionsProp,
-  isPersistent = true,
+  isPersistent = false,
   onChange,
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
   const [specsState, setSpecsState] = useState<InstanceSpecsProp | undefined>()

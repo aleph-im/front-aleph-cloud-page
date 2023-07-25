@@ -1,29 +1,26 @@
-import { ChangeEvent, FormEvent, useCallback } from 'react'
+import { FormEvent, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
+import { UseControllerReturn, useController } from 'react-hook-form'
 
 export type NewSSHKeyFormState = {
   key: string
   label?: string
 }
 
-export const initialState: NewSSHKeyFormState = {
-  key: '',
-  label: '',
-}
+export const defaultValues: Partial<NewSSHKeyFormState> = {}
 
-export type UseNewSSHKeyPage = {
-  formState: NewSSHKeyFormState
+export type UseNewSSHKeyPageReturn = {
+  keyCtrl: UseControllerReturn<NewSSHKeyFormState, 'key'>
+  labelCtrl: UseControllerReturn<NewSSHKeyFormState, 'label'>
   handleSubmit: (e: FormEvent) => Promise<void>
-  handleChangeKey: (e: ChangeEvent<HTMLTextAreaElement>) => void
-  handleChangeLabel: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
-export function useNewSSHKeyPage() {
+export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
   useConnectedWard()
 
   const router = useRouter()
@@ -34,7 +31,7 @@ export function useNewSSHKeyPage() {
     async (state: NewSSHKeyFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const accountSSHKey = await manager.add(state)
+      const [accountSSHKey] = await manager.add(state)
 
       dispatch({
         type: ActionTypes.addAccountSSHKey,
@@ -46,27 +43,26 @@ export function useNewSSHKeyPage() {
     [dispatch, manager, router],
   )
 
-  const {
-    state: formState,
-    setFormValue,
-    handleSubmit,
-  } = useForm({ initialState, onSubmit })
+  const { control, handleSubmit } = useForm({
+    defaultValues,
+    onSubmit,
+  })
 
-  const handleChangeKey = useCallback(
-    (e: ChangeEvent<HTMLTextAreaElement>) =>
-      setFormValue('key', e.target.value),
-    [setFormValue],
-  )
+  const keyCtrl = useController({
+    control,
+    name: 'key',
+    rules: { required: true },
+  })
 
-  const handleChangeLabel = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => setFormValue('label', e.target.value),
-    [setFormValue],
-  )
+  const labelCtrl = useController({
+    control,
+    name: 'label',
+    rules: { required: true },
+  })
 
   return {
-    ...formState,
-    handleChangeKey,
-    handleChangeLabel,
+    keyCtrl,
+    labelCtrl,
     handleSubmit,
   }
 }

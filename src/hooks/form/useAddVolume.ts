@@ -1,6 +1,6 @@
 import { ChangeEvent, useCallback, useId, useMemo, useState } from 'react'
 import { convertBitUnits } from '@/helpers/utils'
-import { VolumeManager, VolumeType } from '@/domain/volume'
+import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 
 export type NewVolumeProp = {
   id: string
@@ -262,18 +262,25 @@ export function useAddPersistentVolumeProps({
 // -------------
 
 export type UseAddVolumeProps = {
-  volume?: VolumeProp
+  value?: VolumeProp
+  isStandAlone?: boolean
   onChange: (volume: VolumeProp) => void
+  onRemove?: (volumeId: string) => void
 }
 
 export type UseAddVolumeReturn = {
   volume: VolumeProp
+  isStandAlone: boolean
   handleChange: (volume: VolumeProp) => void
+  handleVolumeTypeChange: (type: string | VolumeType) => void
+  handleRemove?: (volumeId: string) => void
 }
 
 export function useAddVolume({
-  volume: volumeProp,
+  value: volumeProp,
+  isStandAlone = false,
   onChange,
+  onRemove: handleRemove,
 }: UseAddVolumeProps): UseAddVolumeReturn {
   const [volumeState, setVolumeState] = useState<VolumeProp>({
     ...defaultVolume,
@@ -288,8 +295,19 @@ export function useAddVolume({
     [onChange],
   )
 
+  const handleVolumeTypeChange = useCallback(
+    (type: string | VolumeType) => {
+      const newVolume = { ...volume, volumeType: type } as Volume
+      handleChange(newVolume)
+    },
+    [handleChange, volume],
+  )
+
   return {
     volume,
+    isStandAlone,
     handleChange,
+    handleVolumeTypeChange,
+    handleRemove,
   }
 }

@@ -14,7 +14,7 @@ export const defaultFunctionRuntimeOptions = [
 ]
 
 export type UseSelectFunctionRuntimeProps = {
-  runtime?: FunctionRuntimeProp
+  value?: FunctionRuntimeProp
   options?: FunctionRuntimeProp[]
   onChange: (runtime: FunctionRuntimeProp) => void
 }
@@ -22,12 +22,15 @@ export type UseSelectFunctionRuntimeProps = {
 export type UseSelectFunctionRuntimeReturn = {
   runtime?: FunctionRuntimeProp
   options: FunctionRuntimeProp[]
-  handleRuntimeChange: (runtime: FunctionRuntimeProp) => void
+  handleRuntimeChange: (
+    _: ChangeEvent<HTMLInputElement>,
+    runtime?: unknown,
+  ) => void
   handleCustomRuntimeHashChange: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
 export function useSelectFunctionRuntime({
-  runtime: runtimeProp,
+  value: runtimeProp,
   options: optionsProp,
   onChange,
 }: UseSelectFunctionRuntimeProps): UseSelectFunctionRuntimeReturn {
@@ -38,7 +41,10 @@ export function useSelectFunctionRuntime({
   const options = optionsProp || defaultFunctionRuntimeOptions
 
   const handleRuntimeChange = useCallback(
-    (runtime: FunctionRuntimeProp) => {
+    (_: ChangeEvent<HTMLInputElement>, runtimeId?: unknown) => {
+      const runtime = options.find((opt) => opt.id === runtimeId)
+      if (!runtime) return
+
       const updatedRuntime: FunctionRuntimeProp = { ...runtime }
       updatedRuntime.meta =
         runtime.id === FunctionRuntimeId.Custom

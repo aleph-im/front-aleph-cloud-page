@@ -15,7 +15,7 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
 import { DomainProp } from '@/hooks/form/useAddDomains'
-import { AddDomain, AddDomainTarget, Domain, DomainManager } from './domain'
+import { AddDomain, AddDomainTarget, DomainManager } from './domain'
 import { EntityType } from '@/helpers/constants'
 
 type ExecutableCapabilitiesProps = {
@@ -107,6 +107,7 @@ export abstract class Executable {
   }
 
   protected async parseDomains(
+    programType: EntityType.Program | EntityType.Instance,
     ref: string,
     domains?: DomainProp[],
   ): Promise<void> {
@@ -116,11 +117,12 @@ export abstract class Executable {
       return {
         name,
         ref,
+        programType,
         target: AddDomainTarget.Program,
       }
     })
 
-    await this.domainManager.add(parsedDomains)
+    await this.domainManager.add(parsedDomains, false)
   }
 
   protected async parseVolumes(
