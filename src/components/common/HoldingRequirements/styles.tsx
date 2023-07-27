@@ -12,16 +12,21 @@ export const StyledHoldingSummaryLine = styled.div<StyledHoldingSummaryLineProps
     grid-auto-rows: max-content;
     opacity: ${isHeader ? 0.5 : 1};
     margin-bottom: ${isHeader ? '1.5rem' : '0'};
-    justify-self: start;
+    align-items: stretch;
 
     & > * {
       ${tw`px-4 py-3`}
       width: 100%;
       border-bottom: 1px solid #666;
 
-      &:not(:first-child) {
-        text-align: right;
+      &:first-child {
+        ${tw`flex flex-col items-start justify-center text-xs `}
       }
+
+      &:not(:first-child) {
+        ${tw`flex flex-col items-end justify-center`}
+      }
+
       &:last-child {
         border-bottom-style: dashed;
       }

@@ -91,6 +91,7 @@ export type VolumeCostProps = {
 export type PerVolumeCostItem = {
   size: number
   cost: number
+  discount: number
 }
 
 export type PerVolumeCost = Record<string, PerVolumeCostItem>
@@ -138,10 +139,12 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       // @note: medium article =>  https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
       // @note: code is law => https://github.com/aleph-im/aleph-vm-scheduler/blob/master/scheduler/balance.py#L82
       // const cost = newSize * 20
+      const discount = size - newSize
       const cost = newSize * (1 / 3)
 
       acc[volume.id] = {
         size,
+        discount,
         cost,
       }
 
@@ -153,12 +156,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     const perVolumeCost = this.getPerVolumeCost(props)
 
     const totalCost = Math.ceil(
-      Object
-        .values(perVolumeCost)
-        .reduce(
-          (ac, cv) => ac + cv.cost,
-          0,
-        )
+      Object.values(perVolumeCost).reduce((ac, cv) => ac + cv.cost, 0),
     )
 
     return {
@@ -171,7 +169,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     protected account: Account,
     protected fileManager: FileManager,
     protected channel = defaultVolumeChannel,
-  ) { }
+  ) {}
 
   async getAll(): Promise<Volume[]> {
     try {
