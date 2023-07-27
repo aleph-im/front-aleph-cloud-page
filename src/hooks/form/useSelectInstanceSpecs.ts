@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
+import { EntityType } from '@/helpers/constants'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export type InstanceSpecsProp = {
   id: string
@@ -19,7 +20,18 @@ export function getDefaultSpecsOptions(
   }))
 }
 
+export function updateSpecsStorage(
+  specs: InstanceSpecsProp,
+  isPersistent: boolean,
+): InstanceSpecsProp {
+  return {
+    ...specs,
+    storage: specs.cpu * 2 * (isPersistent ? 10 : 1) * 10 ** 3, // MB
+  }
+}
+
 export type UseSelectInstanceSpecsProps = {
+  type: EntityType.Instance | EntityType.Program
   specs?: InstanceSpecsProp
   options?: InstanceSpecsProp[]
   isPersistent?: boolean
@@ -27,6 +39,7 @@ export type UseSelectInstanceSpecsProps = {
 }
 
 export type UseSelectInstanceSpecsReturn = {
+  type: EntityType.Instance | EntityType.Program
   specs?: InstanceSpecsProp
   options: InstanceSpecsProp[]
   isPersistent: boolean
@@ -34,6 +47,7 @@ export type UseSelectInstanceSpecsReturn = {
 }
 
 export function useSelectInstanceSpecs({
+  type,
   specs: specsProp,
   options: optionsProp,
   isPersistent = true,
@@ -55,7 +69,17 @@ export function useSelectInstanceSpecs({
     [onChange],
   )
 
+  useEffect(() => {
+    if (!specs) return
+
+    const updatedSpecs = updateSpecsStorage(specs, isPersistent)
+    if (updatedSpecs.storage === specs.storage) return
+
+    handleChange(updatedSpecs)
+  }, [specs, isPersistent, handleChange])
+
   return {
+    type,
     specs,
     options,
     isPersistent,

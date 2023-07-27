@@ -14,28 +14,44 @@ import React from 'react'
 import { EntityType } from '@/helpers/constants'
 import { InstanceManager } from '@/domain/instance'
 import { ProgramManager } from '@/domain/program'
-import { VolumeManager } from '@/domain/volume'
+import { VolumeManager, VolumeType } from '@/domain/volume'
 
 const HoldingRequirementsVolumeLine = React.memo(
-  ({ volume, price }: HoldingRequirementsVolumeLineProps) => {
-    const size = useMemo(
-      () =>
-        convertBitUnits(volume.size || 0, {
-          from: 'mb',
-          to: 'gb',
-          displayUnit: false,
-        }),
-      [volume],
-    )
+  ({ volume, cost }: HoldingRequirementsVolumeLineProps) => {
+    if (!cost) return <></>
 
     return (
       <StyledHoldingSummaryLine>
-        <div tw="text-xs flex items-center">STORAGE</div>
+        <div>STORAGE</div>
         <div>
-          {volume.volumeType === 'persistent' ? 'Persistent' : 'Immutable'}{' '}
-          {size} GB
+          <div>
+            {convertBitUnits(volume.size || 0, {
+              from: 'mb',
+              to: 'gb',
+              displayUnit: true,
+            })}
+            <span className="tp-info text-main0" tw="ml-2">
+              {volume.volumeType === VolumeType.Persistent
+                ? 'PERSISTENT'
+                : 'IMMUTABLE'}
+            </span>
+          </div>
+          {cost.discount > 0 && (
+            <>
+              <div>
+                {convertBitUnits(cost.discount || 0, {
+                  from: 'mb',
+                  to: 'gb',
+                  displayUnit: true,
+                })}
+                <span className="tp-info text-main1" tw="ml-2">
+                  FREE
+                </span>
+              </div>
+            </>
+          )}
         </div>
-        <div>{humanReadableCurrency(price)} ALEPH</div>
+        <div>{humanReadableCurrency(cost.cost)} ALEPH</div>
       </StyledHoldingSummaryLine>
     )
   },
@@ -46,7 +62,7 @@ const HoldingRequirementsDomainLine = React.memo(
   ({ domain }: HoldingRequirementsDomainLineProps) => {
     return (
       <StyledHoldingSummaryLine>
-        <div tw="text-xs flex items-center">CUSTOM DOMAIN</div>
+        <div>CUSTOM DOMAIN</div>
         <div>{domain.name}</div>
         <div>0 ALEPH</div>
       </StyledHoldingSummaryLine>
@@ -90,19 +106,49 @@ export default function HoldingRequirements({
   return (
     <div tw="max-w-full overflow-auto">
       <StyledHoldingSummaryLine isHeader>
-        <div tw="text-xs flex items-center">UNLOCKED</div>
+        <div>UNLOCKED</div>
         <div className="tp-body1">current wallet {ellipseAddress(address)}</div>
         <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
       </StyledHoldingSummaryLine>
 
       {specs && (
-        <StyledHoldingSummaryLine>
-          <div tw="text-xs flex items-center">{type.toUpperCase()}</div>
-          <div>
-            {specs.cpu} x86 64bit {isPersistent && '(persistent)'}
-          </div>
-          <div>{humanReadableCurrency(computeTotalCost)} ALEPH</div>
-        </StyledHoldingSummaryLine>
+        <>
+          <StyledHoldingSummaryLine>
+            <div>{type.toUpperCase()}</div>
+            <div>
+              <div>
+                {specs.cpu} x86 64bit
+                {type === EntityType.Program && isPersistent && '(persistent)'}
+                <span className="tp-info text-main0" tw="ml-2">
+                  CORES
+                </span>
+              </div>
+              <div>
+                {convertBitUnits(specs.ram, {
+                  from: 'mb',
+                  to: 'gb',
+                  displayUnit: true,
+                })}
+                <span className="tp-info text-main0" tw="ml-2">
+                  RAM
+                </span>
+              </div>
+              {type === EntityType.Instance && (
+                <div>
+                  {convertBitUnits(specs.storage, {
+                    from: 'mb',
+                    to: 'gb',
+                    displayUnit: true,
+                  })}
+                  <span className="tp-info text-main0" tw="ml-2">
+                    STORAGE
+                  </span>
+                </div>
+              )}
+            </div>
+            <div>{humanReadableCurrency(computeTotalCost)} ALEPH</div>
+          </StyledHoldingSummaryLine>
+        </>
       )}
 
       {volumes &&
@@ -111,7 +157,7 @@ export default function HoldingRequirements({
             <HoldingRequirementsVolumeLine
               key={volume.id}
               volume={volume}
-              price={perVolumeCost[volume.id]?.cost || 0}
+              cost={perVolumeCost[volume.id]}
             />
           )
         })}

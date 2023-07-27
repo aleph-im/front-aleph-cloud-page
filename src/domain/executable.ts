@@ -25,6 +25,7 @@ type ExecutableCapabilitiesProps = {
 }
 
 export type ExecutableCostProps = VolumeCostProps & {
+  type: EntityType.Instance | EntityType.Program
   isPersistent?: boolean
   specs?: InstanceSpecsProp
   capabilities?: ExecutableCapabilitiesProps
@@ -42,6 +43,7 @@ export abstract class Executable {
    * https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
    */
   static getExecutableCost = ({
+    type,
     isPersistent,
     specs,
     capabilities = {},
@@ -55,6 +57,7 @@ export abstract class Executable {
         totalCost: 0,
       }
 
+    isPersistent = type === EntityType.Instance ? true : isPersistent
     const basePrice = isPersistent ? 2_000 : 200
 
     const capabilitiesCost = Object.values(capabilities).reduce(
@@ -68,8 +71,10 @@ export abstract class Executable {
       (volume) => volume.volumeType !== VolumeType.Existing,
     )
 
+    const sizeDiscount = type === EntityType.Instance ? 0 : specs.storage
+
     const { perVolumeCost, totalCost: volumeTotalCost } = VolumeManager.getCost(
-      { volumes: newVolumes, sizeDiscount: specs.storage },
+      { volumes: newVolumes, sizeDiscount },
     )
 
     const totalCost = volumeTotalCost + computeTotalCost
@@ -86,7 +91,7 @@ export abstract class Executable {
     protected account: Account,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
-  ) {}
+  ) { }
 
   protected parseEnvVars(
     envVars?: EnvVarProp[],

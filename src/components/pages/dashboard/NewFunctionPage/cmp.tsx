@@ -270,6 +270,7 @@ export default function NewFunctionPage() {
               amount of RAM.
             </p>
             <SelectInstanceSpecs
+              type={EntityType.Program}
               specs={formState.specs}
               isPersistent={formState.isPersistent}
               onChange={handleChangeInstanceSpecs}

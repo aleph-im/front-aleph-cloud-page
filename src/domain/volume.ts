@@ -91,6 +91,7 @@ export type VolumeCostProps = {
 export type PerVolumeCostItem = {
   size: number
   cost: number
+  discount: number
 }
 
 export type PerVolumeCost = Record<string, PerVolumeCostItem>
@@ -115,7 +116,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   // @note: The algorithm for calculating the cost per volume is as follows:
   // 1. Calculate the storage allowance for the function, the more compute units, the more storage allowance
   // 2. For each volume, subtract the storage allowance from the volume size
-  // 3. If there is more storage than allowance left, the additional storage is charged at 20 tokens per mb
+  // 3. If there is more storage than allowance left, the additional storage is charged at ~20~ 1/3 tokens per mb
   static getPerVolumeCost({
     volumes = [],
     sizeDiscount = 0,
@@ -134,10 +135,16 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
         }
       }
 
-      const cost = newSize * 20
+      // @todo: Check extra price calculation (on the medium article it is 20ALEPH per 1MB / scheduler code checks 1/3ALEPH per 1MB)
+      // @note: medium article =>  https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
+      // @note: code is law => https://github.com/aleph-im/aleph-vm-scheduler/blob/master/scheduler/balance.py#L82
+      // const cost = newSize * 20
+      const discount = size - newSize
+      const cost = newSize * (1 / 3)
 
       acc[volume.id] = {
         size,
+        discount,
         cost,
       }
 
@@ -148,9 +155,8 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   static getCost(props: VolumeCostProps): VolumeCost {
     const perVolumeCost = this.getPerVolumeCost(props)
 
-    const totalCost = Object.values(perVolumeCost).reduce(
-      (ac, cv) => ac + cv.cost,
-      0,
+    const totalCost = Math.ceil(
+      Object.values(perVolumeCost).reduce((ac, cv) => ac + cv.cost, 0),
     )
 
     return {

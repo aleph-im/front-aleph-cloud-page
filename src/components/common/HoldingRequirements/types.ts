@@ -1,3 +1,4 @@
+import { PerVolumeCostItem } from '@/domain/volume'
 import { EntityType } from '@/helpers/constants'
 import { DomainProp } from '@/hooks/form/useAddDomains'
 import { VolumeProp } from '@/hooks/form/useAddVolume'
@@ -15,7 +16,7 @@ export type HoldingRequirementsProps = {
 
 export type HoldingRequirementsVolumeLineProps = {
   volume: VolumeProp
-  price: number
+  cost?: PerVolumeCostItem
 }
 
 export type HoldingRequirementsDomainLineProps = {
