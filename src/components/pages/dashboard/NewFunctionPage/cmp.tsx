@@ -121,6 +121,7 @@ export default function NewFunctionPage() {
             </p>
             <SelectInstanceSpecs
               {...specsCtrl.field}
+              type={EntityType.Program}
               isPersistent={isPersistentCtrl.field.value}
             />
           </Container>

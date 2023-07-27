@@ -87,7 +87,11 @@ export default function NewInstancePage() {
               your VM. You will be able to customize the volumes later.
             </p>
             <div tw="px-0 my-6">
-              <SelectInstanceSpecs {...specsCtrl.field} isPersistent />
+              <SelectInstanceSpecs
+                {...specsCtrl.field}
+                type={EntityType.Instance}
+                isPersistent
+              />
             </div>
           </Container>
         </section>
