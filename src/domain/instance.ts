@@ -76,7 +76,7 @@ export class InstanceManager
   static getCost = (props: InstanceCostProps): InstanceCost => {
     return Executable.getExecutableCost({
       ...props,
-      isPersistent: true,
+      type: EntityType.Instance
     })
   }
 
