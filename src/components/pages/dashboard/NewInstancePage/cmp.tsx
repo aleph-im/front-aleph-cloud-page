@@ -93,6 +93,7 @@ export default function NewInstancePage() {
             </p>
             <div tw="px-0 my-6">
               <SelectInstanceSpecs
+                type={EntityType.Instance}
                 specs={formState.specs}
                 isPersistent={true}
                 onChange={handleChangeInstanceSpecs}

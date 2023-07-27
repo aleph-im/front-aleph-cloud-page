@@ -1,3 +1,4 @@
+import { EntityType } from '@/helpers/constants'
 import { useCallback, useMemo, useState } from 'react'
 
 export type InstanceSpecsProp = {
@@ -20,6 +21,7 @@ export function getDefaultSpecsOptions(
 }
 
 export type UseSelectInstanceSpecsProps = {
+  type: EntityType.Instance | EntityType.Program
   specs?: InstanceSpecsProp
   options?: InstanceSpecsProp[]
   isPersistent?: boolean
@@ -27,6 +29,7 @@ export type UseSelectInstanceSpecsProps = {
 }
 
 export type UseSelectInstanceSpecsReturn = {
+  type: EntityType.Instance | EntityType.Program
   specs?: InstanceSpecsProp
   options: InstanceSpecsProp[]
   isPersistent: boolean
@@ -34,6 +37,7 @@ export type UseSelectInstanceSpecsReturn = {
 }
 
 export function useSelectInstanceSpecs({
+  type,
   specs: specsProp,
   options: optionsProp,
   isPersistent = true,
@@ -56,6 +60,7 @@ export function useSelectInstanceSpecs({
   )
 
   return {
+    type,
     specs,
     options,
     isPersistent,
