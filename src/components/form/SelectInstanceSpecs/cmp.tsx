@@ -93,7 +93,11 @@ export const SelectInstanceSpecs = React.memo(
     const data: SpecsDetail[] = useMemo(() => {
       return options.map((specs) => {
         const { ram, storage } = specs
-        const price = Executable.getExecutableCost({ isPersistent, specs })
+        const price = Executable.getExecutableCost({
+          type,
+          specs,
+          isPersistent,
+        })
 
         return {
           specs,
@@ -110,7 +114,7 @@ export const SelectInstanceSpecs = React.memo(
           price: price.computeTotalCost + ' ALEPH',
         }
       })
-    }, [isPersistent, options])
+    }, [type, isPersistent, options])
 
     const handleRowKey = useCallback((row: SpecsDetail) => row.specs.id, [])
 
