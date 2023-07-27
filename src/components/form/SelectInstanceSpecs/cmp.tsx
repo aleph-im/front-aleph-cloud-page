@@ -84,7 +84,7 @@ export const SelectInstanceSpecs = React.memo(
             const className = `${isActive ? 'text-main0' : ''}`
             return <span className={className}>{row.storage}</span>
           },
-        },)
+        })
       }
 
       return cols

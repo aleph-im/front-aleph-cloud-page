@@ -106,7 +106,7 @@ export class ProgramManager
   static getCost = (props: ProgramCostProps): ProgramCost => {
     return Executable.getExecutableCost({
       ...props,
-      type: EntityType.Program
+      type: EntityType.Program,
     })
   }
 

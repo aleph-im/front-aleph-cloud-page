@@ -91,7 +91,7 @@ export abstract class Executable {
     protected account: Account,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
-  ) { }
+  ) {}
 
   protected parseEnvVars(
     envVars?: EnvVarProp[],
