@@ -5,9 +5,7 @@ import { useConnect } from '@/hooks/common/useConnect'
 export const Main = ({ children }: MainProps) => {
   const { tryReconnect } = useConnect()
 
-  useEffect(() => {
-    tryReconnect()
-  }, [tryReconnect])
+  
 
   return <main>{children}</main>
 }
