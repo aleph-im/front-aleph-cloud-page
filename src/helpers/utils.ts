@@ -60,6 +60,10 @@ export const getERC20Balance = async (address: string) => {
     const query = await fetch(
       `https://api2.aleph.im/api/v0/addresses/${address}/balance`,
     )
+
+    // @note: 404 means the balance is 0, don't throw error in that case
+    if (query.status === 404) return 0
+
     const { balance } = await query.json()
     return balance
   } catch (error) {
@@ -139,6 +143,7 @@ export const humanReadableSize = (
  */
 export const humanReadableCurrency = (value?: number) => {
   if (value === undefined) return 'n/a'
+  if (value === 0) return value
   if (value < 1_000) return value.toFixed(1)
   else if (value < 10 ** 6) return (value / 1_000).toFixed(1) + 'K'
   else if (value < 10 ** 9) return (value / 10 ** 6).toFixed(1) + 'M'

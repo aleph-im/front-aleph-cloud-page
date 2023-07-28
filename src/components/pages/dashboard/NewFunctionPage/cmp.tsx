@@ -12,6 +12,8 @@ import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime'
 import Container from '@/components/common/CenteredContainer'
 import AddFunctionCode from '@/components/form/AddFunctionCode'
 import SelectFunctionPersistence from '@/components/form/SelectFunctionPersistence'
+import BorderBox from '@/components/common/BorderBox'
+import { convertBitUnits } from '@/helpers/utils'
 
 export default function NewFunctionPage() {
   const {
@@ -113,12 +115,6 @@ export default function NewFunctionPage() {
               ensuring optimal performance and efficient resource usage tailored
               to your specific needs.
             </p>
-            <p tw="mb-6">
-              You also get free volume storage with your instance. The free
-              storage for on-demand VM is always equal to the amount of RAM,
-              whilst the free storage for persistent VM is ten times (10x) the
-              amount of RAM.
-            </p>
             <SelectInstanceSpecs
               {...specsCtrl.field}
               type={EntityType.Program}
@@ -148,6 +144,21 @@ export default function NewFunctionPage() {
             <CompositeTitle as="h2" number="6">
               Add volumes
             </CompositeTitle>
+            {specsCtrl.field.value && (
+              <BorderBox $color="main2" tw="mt-4" className="tp-body1">
+                Good news! Your selected package already includes{' '}
+                <span className="text-main0">
+                  {convertBitUnits(specsCtrl.field.value.specs.storage, {
+                    from: 'mb',
+                    to: 'gb',
+                    displayUnit: true,
+                  })}
+                </span>{' '}
+                of storage at no additional cost. This has been factored into
+                your configuration to maximize efficiency and value. Feel free
+                to adjust as necessary.
+              </BorderBox>
+            )}
             <AddVolumes {...volumesCtrl.field} />
           </Container>
         </section>

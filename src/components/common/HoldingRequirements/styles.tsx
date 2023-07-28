@@ -1,3 +1,4 @@
+import { addClasses } from '@aleph-front/aleph-core'
 import styled, { css } from 'styled-components'
 import tw from 'twin.macro'
 
@@ -33,3 +34,9 @@ export const StyledHoldingSummaryLine = styled.div<StyledHoldingSummaryLineProps
     }
   `}
 `
+
+export const GreyLabel = styled.span.attrs(addClasses('tp-info'))`
+  color: rgba(255, 255, 255, 0.3);
+`
+
+export const BlueLabel = styled.span.attrs(addClasses('tp-info text-main0'))``

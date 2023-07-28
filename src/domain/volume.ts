@@ -90,8 +90,9 @@ export type VolumeCostProps = {
 
 export type PerVolumeCostItem = {
   size: number
-  cost: number
+  price: number
   discount: number
+  cost: number
 }
 
 export type PerVolumeCost = Record<string, PerVolumeCostItem>
@@ -139,11 +140,13 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       // @note: medium article =>  https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
       // @note: code is law => https://github.com/aleph-im/aleph-vm-scheduler/blob/master/scheduler/balance.py#L82
       // const cost = newSize * 20
-      const discount = size - newSize
+      const discount = 1 - newSize / size
+      const price = size * (1 / 3)
       const cost = newSize * (1 / 3)
 
       acc[volume.id] = {
         size,
+        price,
         discount,
         cost,
       }

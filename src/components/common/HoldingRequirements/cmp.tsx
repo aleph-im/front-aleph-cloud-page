@@ -3,26 +3,91 @@ import {
   humanReadableCurrency,
   convertBitUnits,
 } from '@/helpers/utils'
-import { StyledHoldingSummaryLine } from './styles'
+import { GreyLabel, StyledHoldingSummaryLine } from './styles'
 import {
   HoldingRequirementsDomainLineProps,
   HoldingRequirementsProps,
+  HoldingRequirementsSpecsLineProps,
   HoldingRequirementsVolumeLineProps,
 } from './types'
 import { useMemo } from 'react'
 import React from 'react'
-import { EntityType } from '@/helpers/constants'
+import { EntityType, EntityTypeName } from '@/helpers/constants'
 import { InstanceManager } from '@/domain/instance'
 import { ProgramManager } from '@/domain/program'
 import { VolumeManager, VolumeType } from '@/domain/volume'
+import InfoTooltipButton from '../InfoTooltipButton'
 
-const HoldingRequirementsVolumeLine = React.memo(
-  ({ volume, cost }: HoldingRequirementsVolumeLineProps) => {
-    if (!cost) return <></>
+const HoldingRequirementsSpecsLine = React.memo(
+  ({ type, specs, cost }: HoldingRequirementsSpecsLineProps) => {
+    const { cpu, ram, storage } = specs
+
+    const cpuStr = useMemo(() => `${cpu}x86-64bit`, [cpu])
+
+    const ramStr = useMemo(
+      () =>
+        `${convertBitUnits(ram, {
+          from: 'mb',
+          to: 'gb',
+          displayUnit: false,
+        })}GB-RAM`,
+      [ram],
+    )
+
+    const storageStr = useMemo(
+      () =>
+        `${convertBitUnits(storage, {
+          from: 'mb',
+          to: 'gb',
+          displayUnit: false,
+        })}GB-HDD`,
+      [storage],
+    )
+
+    const specsStr = useMemo(
+      () =>
+        `${cpuStr}.${ramStr}${
+          type === EntityType.Instance ? `.${storageStr}` : ''
+        }`,
+      [cpuStr, ramStr, storageStr, type],
+    )
 
     return (
       <StyledHoldingSummaryLine>
-        <div>STORAGE</div>
+        <div>
+          <div>{EntityTypeName[type].toUpperCase()}</div>
+        </div>
+        <div>
+          <div>{specsStr}</div>
+        </div>
+        <div>
+          <div>{humanReadableCurrency(cost)} ALEPH</div>
+        </div>
+      </StyledHoldingSummaryLine>
+    )
+  },
+)
+HoldingRequirementsSpecsLine.displayName = 'HoldingRequirementsSpecsLine'
+
+const HoldingRequirementsVolumeLine = React.memo(
+  ({ volume, cost, specs }: HoldingRequirementsVolumeLineProps) => {
+    if (!cost) return <></>
+
+    const hasDiscount = !!cost.discount
+    const fullDiscount = !cost.cost
+
+    return (
+      <StyledHoldingSummaryLine>
+        <div>
+          <div>
+            STORAGE
+            <GreyLabel tw="ml-2">
+              {volume.volumeType === VolumeType.Persistent
+                ? 'PERSISTENT'
+                : 'VOLUME'}
+            </GreyLabel>
+          </div>
+        </div>
         <div>
           <div>
             {convertBitUnits(volume.size || 0, {
@@ -30,28 +95,62 @@ const HoldingRequirementsVolumeLine = React.memo(
               to: 'gb',
               displayUnit: true,
             })}
-            <span className="tp-info text-main0" tw="ml-2">
-              {volume.volumeType === VolumeType.Persistent
-                ? 'PERSISTENT'
-                : 'IMMUTABLE'}
-            </span>
           </div>
-          {cost.discount > 0 && (
-            <>
-              <div>
-                {convertBitUnits(cost.discount || 0, {
-                  from: 'mb',
-                  to: 'gb',
-                  displayUnit: true,
-                })}
-                <span className="tp-info text-main1" tw="ml-2">
-                  FREE
-                </span>
-              </div>
-            </>
-          )}
         </div>
-        <div>{humanReadableCurrency(cost.cost)} ALEPH</div>
+        <div>
+          <div>
+            {hasDiscount ? (
+              <InfoTooltipButton
+                plain
+                align="left"
+                my="bottom-left"
+                at="bottom-right"
+                tooltipContent={
+                  <div tw="text-left">
+                    <div className="tp-body1 fs-md">
+                      {fullDiscount ? (
+                        <>
+                          The cost displayed for the added storage is{' '}
+                          <span className="text-main0">
+                            {humanReadableCurrency(cost.cost)} ALEPH
+                          </span>{' '}
+                          as this resource is already included in your selected
+                          package at no additional charge.
+                        </>
+                      ) : (
+                        <>
+                          Good news! The displayed price is lower than usual due
+                          to a discount of{' '}
+                          <span className="text-main0">
+                            {humanReadableCurrency(cost.price - cost.cost)}{' '}
+                            ALEPH
+                          </span>
+                          {specs && (
+                            <>
+                              {` for `}
+                              <span className="text-main0">
+                                {convertBitUnits(specs.storage, {
+                                  from: 'mb',
+                                  to: 'gb',
+                                  displayUnit: true,
+                                })}
+                              </span>{' '}
+                              included in your package.
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                }
+              >
+                {humanReadableCurrency(cost.cost)} ALEPH
+              </InfoTooltipButton>
+            ) : (
+              <>{humanReadableCurrency(cost.cost)} ALEPH</>
+            )}
+          </div>
+        </div>
       </StyledHoldingSummaryLine>
     )
   },
@@ -64,7 +163,7 @@ const HoldingRequirementsDomainLine = React.memo(
       <StyledHoldingSummaryLine>
         <div>CUSTOM DOMAIN</div>
         <div>{domain.name}</div>
-        <div>0 ALEPH</div>
+        <div>-</div>
       </StyledHoldingSummaryLine>
     )
   },
@@ -112,43 +211,15 @@ export default function HoldingRequirements({
       </StyledHoldingSummaryLine>
 
       {specs && (
-        <>
-          <StyledHoldingSummaryLine>
-            <div>{type.toUpperCase()}</div>
-            <div>
-              <div>
-                {specs.cpu} x86 64bit
-                {type === EntityType.Program && isPersistent && '(persistent)'}
-                <span className="tp-info text-main0" tw="ml-2">
-                  CORES
-                </span>
-              </div>
-              <div>
-                {convertBitUnits(specs.ram, {
-                  from: 'mb',
-                  to: 'gb',
-                  displayUnit: true,
-                })}
-                <span className="tp-info text-main0" tw="ml-2">
-                  RAM
-                </span>
-              </div>
-              {type === EntityType.Instance && (
-                <div>
-                  {convertBitUnits(specs.storage, {
-                    from: 'mb',
-                    to: 'gb',
-                    displayUnit: true,
-                  })}
-                  <span className="tp-info text-main0" tw="ml-2">
-                    STORAGE
-                  </span>
-                </div>
-              )}
-            </div>
-            <div>{humanReadableCurrency(computeTotalCost)} ALEPH</div>
-          </StyledHoldingSummaryLine>
-        </>
+        <HoldingRequirementsSpecsLine
+          {...{
+            type,
+            specs,
+            isPersistent,
+            perVolumeCost,
+            cost: computeTotalCost,
+          }}
+        />
       )}
 
       {volumes &&
@@ -156,11 +227,22 @@ export default function HoldingRequirements({
           return (
             <HoldingRequirementsVolumeLine
               key={volume.id}
-              volume={volume}
-              cost={perVolumeCost[volume.id]}
+              {...{
+                volume,
+                specs,
+                cost: perVolumeCost[volume.id],
+              }}
             />
           )
         })}
+
+      {type === EntityType.Program && (
+        <StyledHoldingSummaryLine>
+          <div>TYPE</div>
+          <div>{isPersistent ? 'persistent' : 'on-demand'}</div>
+          <div>-</div>
+        </StyledHoldingSummaryLine>
+      )}
 
       {domains &&
         domains.map((domain) => {
@@ -171,9 +253,7 @@ export default function HoldingRequirements({
 
       <StyledHoldingSummaryLine>
         <div></div>
-        <div tw="text-xs flex items-center justify-end">
-          <strong>TOTAL</strong>
-        </div>
+        <div className="tp-body2">Total</div>
         <div>
           <span className="text-main1">
             {humanReadableCurrency(totalCost)} ALEPH

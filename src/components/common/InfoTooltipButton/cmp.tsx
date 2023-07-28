@@ -8,6 +8,7 @@ export default function InfoTooltipButton({
   children,
   tooltipContent,
   plain,
+  align = 'right',
   ...rest
 }: InfoTooltipButtonProps) {
   // @note: https://reactjs.org/link/uselayouteffect-ssr
@@ -25,17 +26,21 @@ export default function InfoTooltipButton({
     ? tw`!fixed !left-0 !top-0 !transform-none m-6 !z-20 !w-[calc(100% - 3rem)] !h-[calc(100% - 3rem)] !max-w-full`
     : tw``
 
+  const iconElm = (
+    <Icon name="info-circle" css={align === 'left' ? tw`-order-1` : ''} />
+  )
+
   return (
     <>
       {plain ? (
-        <span ref={targetRef} tw="cursor-help">
+        <span ref={targetRef} tw="cursor-help flex items-center gap-2.5">
           {children}
-          <Icon name="info-circle" tw="ml-2.5" />
+          {iconElm}
         </span>
       ) : (
-        <StyledInfoTooltipButton ref={targetRef}>
+        <StyledInfoTooltipButton ref={targetRef} tw="flex items-center gap-2.5">
           {children}
-          <Icon name="info-circle" tw="ml-2.5" />
+          {iconElm}
         </StyledInfoTooltipButton>
       )}
       {renderTooltip && (
