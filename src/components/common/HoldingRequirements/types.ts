@@ -14,8 +14,15 @@ export type HoldingRequirementsProps = {
   domains?: DomainProp[]
 }
 
+export type HoldingRequirementsSpecsLineProps = {
+  type: EntityType.Program | EntityType.Instance | EntityType.Volume
+  specs: InstanceSpecsProp
+  cost: number
+}
+
 export type HoldingRequirementsVolumeLineProps = {
   volume: VolumeProp
+  specs?: InstanceSpecsProp
   cost?: PerVolumeCostItem
 }
 

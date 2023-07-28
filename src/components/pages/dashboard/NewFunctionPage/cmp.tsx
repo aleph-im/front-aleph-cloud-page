@@ -23,6 +23,8 @@ import AddNameAndTags from '@/components/form/AddNameAndTags'
 import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime'
 import { EntityType } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
+import BorderBox from '@/components/common/BorderBox'
+import { convertBitUnits } from '@/helpers/utils'
 
 export default function NewFunctionPage() {
   const {
@@ -263,12 +265,6 @@ export default function NewFunctionPage() {
               ensuring optimal performance and efficient resource usage tailored
               to your specific needs.
             </p>
-            <p tw="mb-6">
-              You also get free volume storage with your instance. The free
-              storage for on-demand VM is always equal to the amount of RAM,
-              whilst the free storage for persistent VM is ten times (10x) the
-              amount of RAM.
-            </p>
             <SelectInstanceSpecs
               type={EntityType.Program}
               specs={formState.specs}
@@ -301,6 +297,21 @@ export default function NewFunctionPage() {
             <CompositeTitle as="h2" number="6">
               Add volumes
             </CompositeTitle>
+            {formState.specs && (
+              <BorderBox $color="main2" tw="mt-4" className="tp-body1">
+                Good news! Your selected package already includes{' '}
+                <span className="text-main0">
+                  {convertBitUnits(formState.specs.storage, {
+                    from: 'mb',
+                    to: 'gb',
+                    displayUnit: true,
+                  })}
+                </span>{' '}
+                of storage at no additional cost. This has been factored into
+                your configuration to maximize efficiency and value. Feel free
+                to adjust as necessary.
+              </BorderBox>
+            )}
             <AddVolumes
               volumes={formState.volumes}
               onChange={handleChangeVolumes}
