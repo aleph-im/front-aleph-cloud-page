@@ -12,8 +12,9 @@ export type Header = {
   account: Account | undefined
   isOnPath: (path: string) => boolean
   displayWalletPicker: boolean
-  setDisplayWalletPicker: (value: boolean) => void,
+  setDisplayWalletPicker: (value: boolean) => void
   accountBalance?: number
+  ethereumClient?: any
 }
 
 export function useHeader(): Header {
@@ -65,6 +66,7 @@ export function useHeader(): Header {
   }, [connect, disconnect, isConnected, account])
 
   const [displayWalletPicker, setDisplayWalletPicker] = useState(false)
+
 
   return {
     theme,
