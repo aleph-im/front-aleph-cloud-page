@@ -20,25 +20,15 @@ export default function NewFunctionPage() {
     address,
     accountBalance,
     isCreateButtonDisabled,
-    functionCodeCtrl,
-    runtimeCtrl,
-    specsCtrl,
-    volumesCtrl,
-    envVarsCtrl,
-    domainsCtrl,
-    nameAndTagsCtrl,
-    isPersistentCtrl,
     handleSubmit,
     handleChangeEntityTab,
     values,
+    control,
   } = useNewFunctionPage()
 
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <section>
-          <pre>{JSON.stringify(values, null, 2)}</pre>
-        </section>
         <section tw="px-0 py-0 md:py-8">
           <Container>
             <Tabs
@@ -76,7 +66,7 @@ export default function NewFunctionPage() {
               If your code has any dependencies, you can upload them separately
               in the volume section below to ensure a faster creation.
             </p>
-            <AddFunctionCode {...functionCodeCtrl.field} />
+            <AddFunctionCode name="caca" control={control} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -89,7 +79,7 @@ export default function NewFunctionPage() {
               tailored to your specific requirements. Below are the available
               options
             </p>
-            <SelectFunctionRuntime {...runtimeCtrl.field} />
+            <SelectFunctionRuntime name="runtime" control={control} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -102,7 +92,7 @@ export default function NewFunctionPage() {
               persistent, or only on-demand in response to a user request or an
               event.
             </p>
-            <SelectFunctionPersistence {...isPersistentCtrl.field} />
+            <SelectFunctionPersistence name="isPersistent" control={control} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -116,9 +106,10 @@ export default function NewFunctionPage() {
               to your specific needs.
             </p>
             <SelectInstanceSpecs
-              {...specsCtrl.field}
+              name="specs"
+              control={control}
               type={EntityType.Program}
-              isPersistent={isPersistentCtrl.field.value}
+              isPersistent={values.isPersistent}
             />
           </Container>
         </section>
@@ -133,10 +124,7 @@ export default function NewFunctionPage() {
               tags. This helps streamline your development process and makes it
               easier to manage your web3 functions.
             </p>
-            <AddNameAndTags
-              {...nameAndTagsCtrl.field}
-              entityType={EntityType.Program}
-            />
+            <AddNameAndTags control={control} entityType={EntityType.Program} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -144,11 +132,11 @@ export default function NewFunctionPage() {
             <CompositeTitle as="h2" number="6">
               Add volumes
             </CompositeTitle>
-            {specsCtrl.field.value && (
+            {values.specs && (
               <BorderBox $color="main2" tw="mt-4" className="tp-body1">
                 Good news! Your selected package already includes{' '}
                 <span className="text-main0">
-                  {convertBitUnits(specsCtrl.field.value.specs.storage, {
+                  {convertBitUnits(values.specs.storage, {
                     from: 'mb',
                     to: 'gb',
                     displayUnit: true,
@@ -159,7 +147,7 @@ export default function NewFunctionPage() {
                 to adjust as necessary.
               </BorderBox>
             )}
-            <AddVolumes {...volumesCtrl.field} />
+            <AddVolumes name="volumes" control={control} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -173,7 +161,7 @@ export default function NewFunctionPage() {
               store information, manage configurations, and modify your
               application&apos;s behaviour without altering the source code.
             </p>
-            <AddEnvVars {...envVarsCtrl.field} />
+            <AddEnvVars name="envVars" control={control} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -186,7 +174,7 @@ export default function NewFunctionPage() {
               providing a more accessible and professional way for users to
               interact with your application.
             </p>
-            <AddDomains {...domainsCtrl.field} />
+            <AddDomains name="domains" control={control} />
           </Container>
         </section>
         <section
@@ -209,10 +197,10 @@ export default function NewFunctionPage() {
               <HoldingRequirements
                 address={address}
                 type={EntityType.Program}
-                isPersistent={isPersistentCtrl.field.value}
-                specs={specsCtrl.field.value}
-                volumes={volumesCtrl.field.value}
-                domains={domainsCtrl.field.value}
+                isPersistent={values.isPersistent}
+                specs={values.specs}
+                volumes={values.volumes}
+                domains={values.domains}
                 unlockedAmount={accountBalance}
               />
             </div>

@@ -81,6 +81,8 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     domains = await this.parseDomains(domains, throwOnCollision)
 
     try {
+      if (!domains.length) return []
+
       const content: DomainAggregate = domains.reduce((ac, cv) => {
         const { name, ref, target, programType } = cv
 

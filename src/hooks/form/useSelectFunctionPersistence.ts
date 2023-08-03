@@ -1,42 +1,52 @@
-import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import { formValidationRules } from '@/helpers/errors'
+import { ChangeEvent, useCallback, useMemo } from 'react'
+import { Control, UseControllerReturn, useController } from 'react-hook-form'
+
+export type FunctionPersistenceField = boolean
 
 export type UseSelectFunctionPersistenceProps = {
-  value?: boolean
-  onChange: (isPersistent: boolean) => void
+  name?: string
+  control: Control
+  defaultValue?: FunctionPersistenceField
 }
 
 export type UseSelectFunctionPersistenceReturn = {
-  isPersistent?: boolean
-  value?: string
-  handleChange: (_: ChangeEvent<HTMLInputElement>, value?: unknown) => void
+  isPersistentCtrl: UseControllerReturn<any, any>
+  isPersistentValue: string
+  isPersistentHandleChange: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
 export function useSelectFunctionPersistence({
-  value: isPersistentProp,
-  onChange,
+  name = 'isPersistent',
+  control,
+  defaultValue,
 }: UseSelectFunctionPersistenceProps): UseSelectFunctionPersistenceReturn {
-  const [isPersistentState, setFunctionPersistenceState] = useState<
-    boolean | undefined
-  >()
-  const isPersistent = isPersistentProp || isPersistentState
+  const { requiredBoolean } = formValidationRules
 
-  const handleChange = useCallback(
-    (_: ChangeEvent<HTMLInputElement>, value?: unknown) => {
-      const isPersistent = value === 'true'
-      setFunctionPersistenceState(isPersistent)
-      onChange(isPersistent)
+  const isPersistentCtrl = useController({
+    control,
+    name,
+    defaultValue,
+    rules: {
+      validate: { requiredBoolean },
     },
-    [onChange],
-  )
+  })
 
-  const value = useMemo(
-    () => (isPersistent ? isPersistent + '' : undefined),
-    [isPersistent],
+  const isPersistentHandleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const val = e.target.value === 'true'
+      isPersistentCtrl.field.onChange(val)
+    },
+    [isPersistentCtrl.field],
+  )
+  const isPersistentValue = useMemo(
+    () => isPersistentCtrl.field.value + '',
+    [isPersistentCtrl.field],
   )
 
   return {
-    value,
-    isPersistent,
-    handleChange,
+    isPersistentCtrl,
+    isPersistentValue,
+    isPersistentHandleChange,
   }
 }

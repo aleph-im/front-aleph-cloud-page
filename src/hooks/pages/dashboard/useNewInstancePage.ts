@@ -3,54 +3,53 @@ import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
-import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
-import { NameAndTagsProp } from '@/hooks/form/useAddNameAndTags'
-import { SSHKeyProp } from '@/hooks/form/useAddSSHKeys'
-import { VolumeProp } from '@/hooks/form/useAddVolume'
+import { EnvVarField } from '@/hooks/form/useAddEnvVars'
+import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
+import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
+import { VolumeField } from '@/hooks/form/useAddVolume'
 import {
-  InstanceImageProp,
-  defaultInstanceImageOptions,
+  InstanceImageField,
+  defaultInstanceImage,
 } from '@/hooks/form/useSelectInstanceImage'
 import {
-  InstanceSpecsProp,
+  InstanceSpecsField,
   getDefaultSpecsOptions,
 } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { ActionTypes } from '@/helpers/store'
-import { DomainProp } from '@/hooks/form/useAddDomains'
+import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
-import { UseControllerReturn, useController } from 'react-hook-form'
+import {
+  Control,
+  UseControllerReturn,
+  useController,
+  useWatch,
+} from 'react-hook-form'
 
 export type NewInstanceFormState = {
-  nameAndTags?: NameAndTagsProp
-  image?: InstanceImageProp
-  specs?: InstanceSpecsProp
-  volumes?: VolumeProp[]
-  envVars?: EnvVarProp[]
-  sshKeys?: SSHKeyProp[]
-  domains?: DomainProp[]
+  nameAndTags?: NameAndTagsField
+  image?: InstanceImageField
+  specs?: InstanceSpecsField
+  volumes?: VolumeField[]
+  envVars?: EnvVarField[]
+  sshKeys?: SSHKeyField[]
+  domains?: DomainField[]
 }
 
 export const defaultValues: Partial<NewInstanceFormState> = {
-  image: defaultInstanceImageOptions[0],
+  image: defaultInstanceImage,
   specs: getDefaultSpecsOptions(true)[0],
-  // volumes: [{ ...defaultVolume }],
 }
 
 export type UseNewInstancePage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
-  imageCtrl: UseControllerReturn<NewInstanceFormState, 'image'>
-  specsCtrl: UseControllerReturn<NewInstanceFormState, 'specs'>
   volumesCtrl: UseControllerReturn<NewInstanceFormState, 'volumes'>
-  envVarsCtrl: UseControllerReturn<NewInstanceFormState, 'envVars'>
-  sshKeysCtrl: UseControllerReturn<NewInstanceFormState, 'sshKeys'>
-  domainsCtrl: UseControllerReturn<NewInstanceFormState, 'domains'>
-  nameAndTagsCtrl: UseControllerReturn<NewInstanceFormState, 'nameAndTags'>
   handleSubmit: (e: FormEvent) => Promise<void>
   handleChangeEntityTab: (tabId: string) => void
   values: any
+  control: Control<any>
 }
 
 export function useNewInstancePage(): UseNewInstancePage {
@@ -91,59 +90,23 @@ export function useNewInstancePage(): UseNewInstancePage {
     [dispatch, manager, router],
   )
 
-  const { watch, control, handleSubmit } = useForm({ defaultValues, onSubmit })
-  const values = watch()
-
-  const imageCtrl = useController({
-    control,
-    name: 'image',
-    rules: { required: true },
-  })
-
-  const specsCtrl = useController({
-    control,
-    name: 'specs',
-    rules: { required: true },
-  })
+  const { control, handleSubmit } = useForm({ defaultValues, onSubmit })
+  const values = useWatch({ control }) as NewInstanceFormState
 
   const volumesCtrl = useController({
     control,
     name: 'volumes',
-    rules: { required: false },
-  })
-
-  const envVarsCtrl = useController({
-    control,
-    name: 'envVars',
-    rules: { required: false },
-  })
-
-  const sshKeysCtrl = useController({
-    control,
-    name: 'sshKeys',
-    rules: { required: false },
-  })
-
-  const domainsCtrl = useController({
-    control,
-    name: 'domains',
-    rules: { required: false },
-  })
-
-  const nameAndTagsCtrl = useController({
-    control,
-    name: 'nameAndTags',
-    rules: { required: true },
+    rules: {},
   })
 
   const { totalCost } = useMemo(
     () =>
       InstanceManager.getCost({
-        specs: specsCtrl.field.value,
+        specs: values.specs,
         volumes: volumesCtrl.field.value,
         capabilities: {},
       }),
-    [specsCtrl.field.value, volumesCtrl.field.value],
+    [values.specs, volumesCtrl.field.value],
   )
 
   const canAfford = (accountBalance || 0) > totalCost
@@ -163,15 +126,10 @@ export function useNewInstancePage(): UseNewInstancePage {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
-    imageCtrl,
-    specsCtrl,
     volumesCtrl,
-    envVarsCtrl,
-    sshKeysCtrl,
-    domainsCtrl,
-    nameAndTagsCtrl,
     handleSubmit,
     handleChangeEntityTab,
     values,
+    control,
   }
 }

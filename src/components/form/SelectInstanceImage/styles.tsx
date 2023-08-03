@@ -3,7 +3,7 @@ import tw from 'twin.macro'
 import { getResponsiveCss } from '@aleph-front/aleph-core'
 
 export const StyledFlatCardContainer = styled.div`
-  ${tw`flex items-center justify-start md:justify-center flex-nowrap md:flex-wrap gap-6`}
+  ${tw`flex items-center justify-start md:justify-evenly flex-nowrap md:flex-wrap gap-6`}
 `
 
 export const StyledFlatCard = styled.div<{

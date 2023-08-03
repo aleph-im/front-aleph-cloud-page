@@ -17,24 +17,15 @@ export default function NewInstancePage() {
     address,
     accountBalance,
     isCreateButtonDisabled,
-    imageCtrl,
-    specsCtrl,
-    volumesCtrl,
-    envVarsCtrl,
-    sshKeysCtrl,
-    domainsCtrl,
-    nameAndTagsCtrl,
     handleSubmit,
     handleChangeEntityTab,
     values,
+    control,
   } = useNewInstancePage()
 
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <section>
-          <pre>{JSON.stringify(values, null, 2)}</pre>
-        </section>
         <section tw="px-0 py-0 md:py-8">
           <Container>
             <Tabs
@@ -73,7 +64,7 @@ export default function NewInstancePage() {
               be able to customize.
             </p>
             <div tw="px-0 mt-12 mb-6">
-              <SelectInstanceImage {...imageCtrl.field} />
+              <SelectInstanceImage name="image" control={control} />
             </div>
           </Container>
         </section>
@@ -88,7 +79,8 @@ export default function NewInstancePage() {
             </p>
             <div tw="px-0 my-6">
               <SelectInstanceSpecs
-                {...specsCtrl.field}
+                name="specs"
+                control={control}
                 type={EntityType.Instance}
                 isPersistent
               />
@@ -101,7 +93,7 @@ export default function NewInstancePage() {
               Add volumes
             </CompositeTitle>
             <div tw="px-0 my-6">
-              <AddVolumes {...volumesCtrl.field} />
+              <AddVolumes name="volumes" control={control} />
             </div>
           </Container>
         </section>
@@ -117,7 +109,7 @@ export default function NewInstancePage() {
               team is always ready to assist.
             </p>
             <div tw="px-0 my-6">
-              <AddSSHKeys {...sshKeysCtrl.field} />
+              <AddSSHKeys name="sshKeys" control={control} />
             </div>
           </Container>
         </section>
@@ -133,7 +125,7 @@ export default function NewInstancePage() {
               application&apos;s behaviour without altering the source code.
             </p>
             <div tw="px-0 my-6">
-              <AddEnvVars {...envVarsCtrl.field} />
+              <AddEnvVars name="envVars" control={control} />
             </div>
           </Container>
         </section>
@@ -149,7 +141,7 @@ export default function NewInstancePage() {
               It&amp;s another way we&amp;re making web3 cloud management as
               straightforward as possible.
             </p>
-            <AddDomains {...domainsCtrl.field} />
+            <AddDomains name="domains" control={control} />
           </Container>
         </section>
         <section tw="px-0 py-6 md:py-10">
@@ -164,7 +156,7 @@ export default function NewInstancePage() {
               easier to manage your web3 instances.
             </p>
             <AddNameAndTags
-              {...nameAndTagsCtrl.field}
+              control={control}
               entityType={EntityType.Instance}
             />
           </Container>
@@ -190,9 +182,9 @@ export default function NewInstancePage() {
                 address={address}
                 type={EntityType.Instance}
                 isPersistent={true}
-                specs={specsCtrl.field.value}
-                volumes={volumesCtrl.field.value}
-                domains={domainsCtrl.field.value}
+                specs={values.specs}
+                volumes={values.volumes}
+                domains={values.domains}
                 unlockedAmount={accountBalance}
               />
             </div>

@@ -48,15 +48,33 @@ export function useForm<FormState extends Record<string, any>, Response>({
 
   const handleValidationError = useCallback(
     async (errors: FieldErrors<FormState>) => {
-      const [firstError] = Object.values(errors)
-
-      const error = new Error(
-        errors.root?.message ||
-          (firstError?.message as string) ||
-          'Validation error',
-      )
-
       console.log(errors)
+
+      let error: Error | undefined
+
+      if (!error && errors.root) {
+        error = new Error(errors.root?.message)
+      }
+
+      if (!error) {
+        const [firstError] = Object.entries(errors)
+
+        if (firstError) {
+          const [field, opts] = firstError
+
+          const description = opts?.message
+            ? `: ${opts.message}`
+            : opts?.type
+            ? `: "${opts?.type}" validation not satisfied`
+            : ''
+
+          error = new Error(`Error on field "${field}"${description}`)
+        }
+      }
+
+      if (!error) {
+        error = new Error('Validation error')
+      }
 
       onError(error)
     },

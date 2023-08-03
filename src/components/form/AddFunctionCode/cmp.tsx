@@ -1,4 +1,4 @@
-import React, { useId } from 'react'
+import React from 'react'
 import { AddFunctionCodeProps } from './types'
 import HiddenFileInput from '@/components/common/HiddenFileInput'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
@@ -13,27 +13,17 @@ import NoisyContainer from '@/components/common/NoisyContainer'
 import { useAddFunctionCode } from '@/hooks/form/useAddFunctionCode'
 
 export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
-  const {
-    tab,
-    code,
-    codeFile,
-    codeString,
-    handleTabChange,
-    handleCodeFileChange,
-    handleCodeStringChange,
-    handleCodeLanguageChange,
-  } = useAddFunctionCode(props)
-  const id = useId()
+  const { langCtrl, typeCtrl, textCtrl, fileCtrl } = useAddFunctionCode(props)
 
   return (
     <>
       <div tw="px-0 pt-6 pb-3">
         <Tabs
-          selected={tab}
+          selected={typeCtrl.field.value}
           align="left"
           tabs={[
             {
-              id: 'string',
+              id: 'text',
               name: 'Write code',
             },
             {
@@ -41,11 +31,11 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
               name: 'Upload code',
             },
           ]}
-          onTabChange={handleTabChange}
+          onTabChange={typeCtrl.field.onChange}
         />
       </div>
       <div role="tabpanel">
-        {tab === 'string' ? (
+        {typeCtrl.field.value === 'text' ? (
           <>
             <p tw="mb-6">
               To get started you can start adding your code in the window below.
@@ -53,27 +43,22 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
             <div tw="mb-6">
               <NoisyContainer>
                 <RadioGroup
-                  value={code.lang}
-                  onChange={handleCodeLanguageChange}
+                  {...langCtrl.field}
+                  {...langCtrl.fieldState}
                   direction="row"
                 >
-                  <Radio label="Python 3.9" value="python" name={id} />
-                  <Radio
-                    label="Node.js"
-                    value="javascript"
-                    name={id}
-                    disabled
-                  />
+                  <Radio label="Python 3.9" value="python" />
+                  <Radio label="Node.js" value="javascript" disabled />
                 </RadioGroup>
               </NoisyContainer>
             </div>
             <div>
               <CodeEditor
+                {...textCtrl.field}
+                {...textCtrl.fieldState}
+                defaultLanguage={langCtrl.field.value}
+                language={langCtrl.field.value}
                 tw="p-5 rounded-3xl min-h-[415px]"
-                value={codeString}
-                onChange={handleCodeStringChange}
-                defaultLanguage={code.lang}
-                language={code.lang}
               />
             </div>
             <div tw="mt-6 text-right">
@@ -104,7 +89,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
               </InfoTooltipButton>
             </div>
           </>
-        ) : tab === 'file' ? (
+        ) : (
           <>
             <p tw="mb-2">
               To get started, compress your code into a zip file and upload it
@@ -119,17 +104,15 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
             <NoisyContainer>
               <div tw="py-5 text-center">
                 <HiddenFileInput
+                  {...fileCtrl.field}
+                  {...fileCtrl.fieldState}
                   accept=".zip"
-                  value={codeFile}
-                  onChange={handleCodeFileChange}
                 >
                   Upload code <Icon name="arrow-up" tw="ml-4" />
                 </HiddenFileInput>
               </div>
             </NoisyContainer>
           </>
-        ) : (
-          <></>
         )}
       </div>
     </>

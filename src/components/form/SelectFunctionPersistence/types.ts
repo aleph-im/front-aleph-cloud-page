@@ -1,4 +1,6 @@
+import { Control } from 'react-hook-form'
+
 export type SelectFunctionPersistenceProps = {
-  value?: boolean
-  onChange: (isPersistent: boolean) => void
+  name?: string
+  control: Control
 }

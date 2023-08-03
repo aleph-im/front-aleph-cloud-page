@@ -1,3 +1,4 @@
+import JSZip from 'jszip'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, program, any } from 'aleph-sdk-ts/dist/messages'
 // import { ProgramPublishConfiguration } from 'aleph-sdk-ts/dist/messages/program/publish'
@@ -21,19 +22,20 @@ import {
   MessageType,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/types'
-import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
+import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { ProgramContent } from 'aleph-sdk-ts/dist/messages/program/programModel'
-import JSZip from 'jszip'
-import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
-import { VolumeProp } from '@/hooks/form/useAddVolume'
-import { FunctionRuntime, FunctionRuntimeId } from './runtime'
+import { VolumeField } from '@/hooks/form/useAddVolume'
+import { FunctionRuntimeId } from './runtime'
 import { FileManager } from './file'
 import { MessageManager } from './message'
 import { VolumeManager } from './volume'
-import { DomainProp } from '@/hooks/form/useAddDomains'
+import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
+import { FunctionRuntimeField } from '@/hooks/form/useSelectFunctionRuntime'
+import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
+import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 
 // @todo: Export this type from sdk and remove here
 declare type ProgramPublishConfiguration = {
@@ -67,16 +69,16 @@ export type AddProgram = Omit<
   | 'volumes'
   | 'entrypoint'
 > & {
-  file?: string | File
+  code?: FunctionCodeField
   entrypoint?: string
   isPersistent: boolean
-  runtime?: FunctionRuntime
+  runtime?: FunctionRuntimeField
   name?: string
   tags?: string[]
-  envVars?: EnvVarProp[]
-  specs?: InstanceSpecsProp
-  volumes?: VolumeProp[]
-  domains?: DomainProp[]
+  envVars?: EnvVarField[]
+  specs?: InstanceSpecsField
+  volumes?: VolumeField[]
+  domains?: DomainField[]
 }
 
 // @todo: Refactor
@@ -163,7 +165,7 @@ export class ProgramManager
       const metadata = this.parseMetadata(name, tags)
       const runtime = this.parseRuntime(newProgram.runtime)
       const volumes = await this.parseVolumes(newProgram.volumes)
-      const file = await this.parseCode(newProgram.file)
+      const file = await this.parseCode(newProgram.code)
 
       const response = await program.publish({
         account,
@@ -215,26 +217,32 @@ export class ProgramManager
     return downloadBlob(blob, `VM_${program.id.slice(-12)}.zip`)
   }
 
-  protected async parseCode(codeOrFile?: string | File): Promise<File> {
-    if (typeof codeOrFile === 'string') {
+  protected async parseCode(code?: FunctionCodeField): Promise<File> {
+    if (!code) throw new Error('Invalid function code')
+
+    if (code.type === 'text') {
+      if (!code.text) throw new Error('Invalid function code text')
+
       const jsZip = new JSZip()
-      jsZip.file('main.py', codeOrFile || '')
+      jsZip.file('main.py', code.text)
       const zip = await jsZip.generateAsync({ type: 'blob' })
       return new File([zip], 'main.py.zip', { type: 'application/zip' })
     }
 
-    if (codeOrFile instanceof File) {
-      return codeOrFile
+    if (code.type === 'file') {
+      if (!code.file) throw new Error('Invalid function code file')
+
+      return code.file
     }
 
-    throw new Error('Invalid code or file')
+    throw new Error('Invalid function code type')
   }
 
-  protected parseRuntime(runtime?: FunctionRuntime): string {
+  protected parseRuntime(runtime?: FunctionRuntimeField): string {
     const ref = (
       runtime?.id !== FunctionRuntimeId.Custom
         ? runtime?.id || ''
-        : runtime.meta || ''
+        : runtime.custom || ''
     ).trim()
 
     if (!ref || !isValidItemHash(ref)) throw new Error('Invalid runtime ref')

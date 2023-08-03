@@ -1,8 +1,8 @@
 import { EntityType } from '@/helpers/constants'
-import { NameAndTagsProp } from '@/hooks/form/useAddNameAndTags'
+import { Control } from 'react-hook-form'
 
 export type AddNameAndTagsProps = {
-  value?: NameAndTagsProp
   entityType: EntityType.Instance | EntityType.Program
-  onChange: (state: NameAndTagsProp) => void
+  name?: string
+  control: Control
 }

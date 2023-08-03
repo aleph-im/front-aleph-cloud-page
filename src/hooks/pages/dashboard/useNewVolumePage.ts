@@ -1,28 +1,29 @@
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { VolumeManager } from '@/domain/volume'
+import { VolumeManager, VolumeType } from '@/domain/volume'
 import { useAppState } from '@/contexts/appState'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
-import { NewVolumeProp, defaultVolume } from '@/hooks/form/useAddVolume'
+import { NewVolumeStandaloneField } from '@/hooks/form/useAddVolume'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { ActionTypes } from '@/helpers/store'
-import { UseControllerReturn, useController } from 'react-hook-form'
+import { Control } from 'react-hook-form'
 
 export type NewVolumeFormState = {
-  volume: NewVolumeProp
+  volume: NewVolumeStandaloneField
 }
 
 export const defaultValues: Partial<NewVolumeFormState> = {
-  volume: { ...defaultVolume },
+  volume: { volumeType: VolumeType.New },
 }
 
 export type UseNewVolumePageReturn = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
-  volumeCtrl: UseControllerReturn<NewVolumeFormState, 'volume'>
   handleSubmit: (e: FormEvent) => Promise<void>
+  values: any
+  control: Control<any>
 }
 
 export function useNewVolumePage(): UseNewVolumePageReturn {
@@ -50,18 +51,13 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     [dispatch, manager, router],
   )
 
-  const { control, handleSubmit } = useForm({ defaultValues, onSubmit })
-
-  const volumeCtrl = useController({
-    control,
-    name: 'volume',
-    rules: { required: true },
-  })
+  const { watch, control, handleSubmit } = useForm({ defaultValues, onSubmit })
+  const values = watch()
 
   const accountBalance = appState?.accountBalance || 0
   const { totalCost } = useMemo(
-    () => VolumeManager.getCost({ volumes: [volumeCtrl.field.value] }),
-    [volumeCtrl.field.value],
+    () => VolumeManager.getCost({ volumes: [values.volume] }),
+    [values.volume],
   )
 
   const canAfford = accountBalance > totalCost
@@ -74,7 +70,8 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     address: account?.address || '',
     accountBalance: appState.accountBalance || 0,
     isCreateButtonDisabled,
-    volumeCtrl,
     handleSubmit,
+    values,
+    control,
   }
 }

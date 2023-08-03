@@ -1,52 +1,56 @@
-import { ChangeEvent, useCallback, useId, useState } from 'react'
+import { formValidationRules } from '@/helpers/errors'
+import { useCallback } from 'react'
+import {
+  Control,
+  FieldArrayWithId,
+  UseControllerReturn,
+  useController,
+  useFieldArray,
+} from 'react-hook-form'
 
-export type DomainProp = {
-  id: string
+export type DomainField = {
   name: string
 }
 
-export const defaultDomain: DomainProp = {
-  id: `domain-0`,
+export const defaultValues: DomainField = {
   name: '',
 }
 
 export type UseDomainItemProps = {
-  domain: DomainProp
-  onChange: (domains: DomainProp) => void
-  onRemove: (domainId: string) => void
+  name?: string
+  index: number
+  control: Control
+  defaultValue?: DomainField
+  onRemove: (index?: number) => void
 }
 
 export type UseDomainItemReturn = {
-  id: string
-  domain: DomainProp
-  handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
+  nameCtrl: UseControllerReturn<any, any>
   handleRemove: () => void
 }
 
 export function useDomainItem({
-  domain,
-  onChange,
+  name = 'domains',
+  index,
+  control,
+  defaultValue,
   onRemove,
 }: UseDomainItemProps): UseDomainItemReturn {
-  const id = useId()
+  const { required } = formValidationRules
 
-  const handleNameChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const name = e.target.value
-      const newDomain: DomainProp = { ...domain, name }
-      onChange(newDomain)
-    },
-    [onChange, domain],
-  )
+  const nameCtrl = useController({
+    control,
+    name: `${name}.${index}.name`,
+    defaultValue: defaultValue?.name,
+    rules: { required },
+  })
 
   const handleRemove = useCallback(() => {
-    onRemove(domain.id)
-  }, [domain.id, onRemove])
+    onRemove(index)
+  }, [index, onRemove])
 
   return {
-    id,
-    domain,
-    handleNameChange,
+    nameCtrl,
     handleRemove,
   }
 }
@@ -54,66 +58,37 @@ export function useDomainItem({
 // --------------------
 
 export type UseDomainsProps = {
-  value?: DomainProp[]
-  onChange: (domains: DomainProp[]) => void
+  name?: string
+  control: Control
 }
 
 export type UseDomainsReturn = {
-  domains: DomainProp[]
-  handleChange: (domains: DomainProp) => void
+  name: string
+  control: Control
+  fields: FieldArrayWithId[]
   handleAdd: () => void
-  handleRemove: (domainId: string) => void
+  handleRemove: (index?: number) => void
 }
 
 export function useAddDomains({
-  value: domainsProp,
-  onChange,
+  name = 'domains',
+  control,
 }: UseDomainsProps): UseDomainsReturn {
-  const [domainsState, setDomainsState] = useState<DomainProp[]>([])
-  const domains = domainsProp || domainsState
+  const domainsCtrl = useFieldArray({
+    control,
+    name,
+  })
 
-  const handleChange = useCallback(
-    (domain: DomainProp) => {
-      const updatedDomains = [...domains]
-      const index = domains.findIndex((domain) => domain.id === domain.id)
-
-      if (index !== -1) {
-        updatedDomains[index] = domain
-      } else {
-        updatedDomains.push(domain)
-      }
-
-      setDomainsState(updatedDomains)
-      onChange(updatedDomains)
-    },
-    [onChange, domains],
-  )
+  const { fields, remove: handleRemove, append } = domainsCtrl
 
   const handleAdd = useCallback(() => {
-    const newDomain = {
-      ...defaultDomain,
-      id: `domain-${Date.now()}`,
-    }
-
-    const updatedDomains = [...domains, newDomain]
-
-    setDomainsState(updatedDomains)
-    onChange(updatedDomains)
-  }, [onChange, domains])
-
-  const handleRemove = useCallback(
-    (domainId: string) => {
-      const updatedDomains = domains.filter((domain) => domain.id !== domainId)
-
-      setDomainsState(updatedDomains)
-      onChange(updatedDomains)
-    },
-    [onChange, domains],
-  )
+    append({ ...defaultValues })
+  }, [append])
 
   return {
-    domains,
-    handleChange,
+    name,
+    control,
+    fields,
     handleAdd,
     handleRemove,
   }

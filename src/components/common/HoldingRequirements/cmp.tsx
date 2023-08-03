@@ -71,6 +71,7 @@ HoldingRequirementsSpecsLine.displayName = 'HoldingRequirementsSpecsLine'
 
 const HoldingRequirementsVolumeLine = React.memo(
   ({ volume, cost, specs }: HoldingRequirementsVolumeLineProps) => {
+    const size = VolumeManager.getVolumeSize(volume)
     if (!cost) return <></>
 
     const hasDiscount = !!cost.discount
@@ -90,7 +91,7 @@ const HoldingRequirementsVolumeLine = React.memo(
         </div>
         <div>
           <div>
-            {convertBitUnits(volume.size || 0, {
+            {convertBitUnits(size, {
               from: 'mb',
               to: 'gb',
               displayUnit: true,
@@ -223,14 +224,14 @@ export default function HoldingRequirements({
       )}
 
       {volumes &&
-        volumes.map((volume) => {
+        volumes.map((volume, index) => {
           return (
             <HoldingRequirementsVolumeLine
-              key={volume.id}
+              key={volume.volumeType + index}
               {...{
                 volume,
                 specs,
-                cost: perVolumeCost[volume.id],
+                cost: perVolumeCost[index],
               }}
             />
           )
@@ -247,7 +248,7 @@ export default function HoldingRequirements({
       {domains &&
         domains.map((domain) => {
           return (
-            <HoldingRequirementsDomainLine key={domain.id} domain={domain} />
+            <HoldingRequirementsDomainLine key={domain.name} domain={domain} />
           )
         })}
 

@@ -1,37 +1,43 @@
 import {
-  ExistingVolumeProp,
-  NewVolumeProp,
-  PersistentVolumeProp,
-  VolumeProp,
+  ExistingVolumeField,
+  NewVolumeField,
+  PersistentVolumeField,
+  VolumeField,
 } from '@/hooks/form/useAddVolume'
+import { Control } from 'react-hook-form'
+
+export type AddVolumeCommonProps = {
+  name: string
+  index?: number
+  control: Control
+  onRemove?: (index?: number) => void
+}
+
+export type AddNewVolumeStandaloneProps = Omit<
+  AddVolumeCommonProps,
+  'onRemove' | 'index'
+> & {
+  defaultValue?: NewVolumeField
+}
+
+export type AddNewVolumeProps = AddVolumeCommonProps & {
+  defaultValue?: NewVolumeField
+}
+
+export type AddExistingVolumeProps = AddVolumeCommonProps & {
+  defaultValue?: ExistingVolumeField
+}
+
+export type AddPersistentVolumeProps = AddVolumeCommonProps & {
+  defaultValue?: PersistentVolumeField
+}
+
+// ---------
 
 export type RemoveVolumeProps = {
-  volume: VolumeProp
-  onRemove: (volumeId: string) => void
+  onRemove: () => void
 }
 
-export type AddNewVolumeProps = {
-  volume: NewVolumeProp
-  isStandAlone?: boolean
-  onChange: (volume: NewVolumeProp) => void
-  onRemove?: (volumeId: string) => void
-}
-
-export type AddExistingVolumeProps = {
-  volume: ExistingVolumeProp
-  onChange: (volume: ExistingVolumeProp) => void
-  onRemove?: (volumeId: string) => void
-}
-
-export type AddPersistentVolumeProps = {
-  volume: PersistentVolumeProp
-  onChange: (volume: PersistentVolumeProp) => void
-  onRemove?: (volumeId: string) => void
-}
-
-export type AddVolumeProps = {
-  volume: VolumeProp
-  isStandAlone?: boolean
-  onChange: (volume: VolumeProp) => void
-  onRemove?: (volumeId: string) => void
+export type AddVolumeProps = AddVolumeCommonProps & {
+  defaultValue?: VolumeField
 }

@@ -1,16 +1,17 @@
-import { AddNewVolume } from '@/components/form/AddVolume'
 import { EntityType } from '@/helpers/constants'
 import { useNewVolumePage } from '@/hooks/pages/dashboard/useNewVolumePage'
 import { Button, TextGradient } from '@aleph-front/aleph-core'
 import HoldingRequirements from '@/components/common/HoldingRequirements'
 import Container from '@/components/common/CenteredContainer'
+import { AddNewVolume } from '@/components/form/AddVolume/cmp'
 
 export default function NewVolumePage() {
   const {
+    control,
+    values,
     address,
     accountBalance,
     isCreateButtonDisabled,
-    volumeCtrl,
     handleSubmit,
   } = useNewVolumePage()
 
@@ -19,7 +20,7 @@ export default function NewVolumePage() {
       <form onSubmit={handleSubmit}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>
-            <AddNewVolume {...volumeCtrl.field} isStandAlone />
+            <AddNewVolume name="volume" control={control} />
           </Container>
         </section>
         <section
@@ -42,7 +43,7 @@ export default function NewVolumePage() {
               <HoldingRequirements
                 address={address}
                 type={EntityType.Volume}
-                volumes={[volumeCtrl.field.value]}
+                volumes={[values.volume]}
                 unlockedAmount={accountBalance}
               />
             </div>

@@ -2,42 +2,41 @@ import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import {
-  FunctionRuntimeProp,
-  defaultFunctionRuntimeOptions,
+  FunctionRuntimeField,
+  defaultFunctionRuntime,
 } from '../../form/useSelectFunctionRuntime'
 import {
-  InstanceSpecsProp,
+  InstanceSpecsField,
   getDefaultSpecsOptions,
 } from '../../form/useSelectInstanceSpecs'
-import { VolumeProp } from '../../form/useAddVolume'
-import { EnvVarProp } from '../../form/useAddEnvVars'
-import { NameAndTagsProp } from '../../form/useAddNameAndTags'
+import { VolumeField } from '../../form/useAddVolume'
+import { EnvVarField } from '../../form/useAddEnvVars'
+import { NameAndTagsField } from '../../form/useAddNameAndTags'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { ActionTypes } from '@/helpers/store'
-import { DomainProp } from '@/hooks/form/useAddDomains'
+import { DomainField } from '@/hooks/form/useAddDomains'
 import { ProgramManager } from '@/domain/program'
-import { UseControllerReturn, useController } from 'react-hook-form'
-import { FunctionCodeProp, defaultCode } from '@/hooks/form/useAddFunctionCode'
+import { Control, useWatch } from 'react-hook-form'
+import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
 
 export type NewFunctionFormState = {
-  code?: FunctionCodeProp
-  nameAndTags?: NameAndTagsProp
-  runtime: FunctionRuntimeProp
+  code?: FunctionCodeField
+  nameAndTags?: NameAndTagsField
+  runtime: FunctionRuntimeField
   isPersistent: boolean
-  volumes?: VolumeProp[]
-  specs?: InstanceSpecsProp
-  envVars?: EnvVarProp[]
-  domains?: DomainProp[]
+  volumes?: VolumeField[]
+  specs?: InstanceSpecsField
+  envVars?: EnvVarField[]
+  domains?: DomainField[]
 }
 
 const defaultValues: Partial<NewFunctionFormState> = {
   code: { ...defaultCode },
-  runtime: defaultFunctionRuntimeOptions[0],
+  runtime: defaultFunctionRuntime,
   specs: getDefaultSpecsOptions(false)[0],
   isPersistent: false,
-  // volumes: [{ ...defaultVolume }],
 }
 
 // @todo: Split this into reusable hooks by composition
@@ -46,17 +45,10 @@ export type UseNewFunctionPage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
-  functionCodeCtrl: UseControllerReturn<NewFunctionFormState, 'code'>
-  runtimeCtrl: UseControllerReturn<NewFunctionFormState, 'runtime'>
-  specsCtrl: UseControllerReturn<NewFunctionFormState, 'specs'>
-  volumesCtrl: UseControllerReturn<NewFunctionFormState, 'volumes'>
-  envVarsCtrl: UseControllerReturn<NewFunctionFormState, 'envVars'>
-  domainsCtrl: UseControllerReturn<NewFunctionFormState, 'domains'>
-  nameAndTagsCtrl: UseControllerReturn<NewFunctionFormState, 'nameAndTags'>
-  isPersistentCtrl: UseControllerReturn<NewFunctionFormState, 'isPersistent'>
   handleSubmit: (e: FormEvent) => Promise<void>
   handleChangeEntityTab: (tabId: string) => void
   values: any
+  control: Control<any>
 }
 
 export function useNewFunctionPage(): UseNewFunctionPage {
@@ -80,7 +72,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         domains,
         volumes,
         specs,
-        code: { code } = {},
+        code,
       } = state
 
       const accountFunction = await manager.add({
@@ -91,9 +83,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         specs,
         volumes,
         isPersistent,
-        // @todo: Move this to a new FunctionCode component that will always return
-        // a file and an entrypoint depending on the selected language and code
-        file: code,
+        code,
       })
 
       dispatch({
@@ -108,75 +98,19 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     [dispatch, manager, router],
   )
 
-  const { watch, control, handleSubmit } = useForm({ defaultValues, onSubmit })
-
-  const values = watch()
-
-  const functionCodeCtrl = useController({
-    control,
-    name: 'code',
-    rules: { required: true },
-  })
-
-  const runtimeCtrl = useController({
-    control,
-    name: 'runtime',
-    rules: { required: true },
-  })
-
-  const specsCtrl = useController({
-    control,
-    name: 'specs',
-    rules: { required: true },
-  })
-
-  const volumesCtrl = useController({
-    control,
-    name: 'volumes',
-    rules: { required: false },
-  })
-
-  const envVarsCtrl = useController({
-    control,
-    name: 'envVars',
-    rules: { required: false },
-  })
-
-  const domainsCtrl = useController({
-    control,
-    name: 'domains',
-    rules: { required: false },
-  })
-
-  const nameAndTagsCtrl = useController({
-    control,
-    name: 'nameAndTags',
-    rules: { required: true },
-  })
-
-  const isPersistentCtrl = useController({
-    control,
-    name: 'isPersistent',
-    rules: {
-      validate: {
-        required: (value) => typeof value === 'boolean',
-      },
-    },
-  })
+  const { control, handleSubmit } = useForm({ defaultValues, onSubmit })
+  // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
+  const values = useWatch({ control }) as NewFunctionFormState
 
   const { totalCost } = useMemo(
     () =>
       ProgramManager.getCost({
-        specs: specsCtrl.field.value,
-        isPersistent: isPersistentCtrl.field.value,
-        volumes: volumesCtrl.field.value,
+        specs: values.specs,
+        isPersistent: values.isPersistent,
+        volumes: values.volumes,
         capabilities: {},
       }),
-    [
-      isPersistentCtrl.field.value,
-      specsCtrl.field.value,
-      volumesCtrl.field.value,
-    ],
+    [values.isPersistent, values.specs, values.volumes],
   )
 
   const canAfford = (accountBalance || 0) > totalCost
@@ -189,21 +123,13 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     (id: string) => router.push(`/dashboard/${id}`),
     [router],
   )
-
   return {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
-    functionCodeCtrl,
-    runtimeCtrl,
-    specsCtrl,
-    volumesCtrl,
-    envVarsCtrl,
-    domainsCtrl,
-    nameAndTagsCtrl,
-    isPersistentCtrl,
     handleSubmit,
     handleChangeEntityTab,
     values,
+    control,
   }
 }

@@ -1,6 +1,7 @@
-import { ChangeEvent, useCallback, useState } from 'react'
+import { formValidationRules } from '@/helpers/errors'
+import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
-const defaultCodeString = `from fastapi import FastAPI
+const defaultText = `from fastapi import FastAPI
 
 app = FastAPI()
 @app.get("/")
@@ -8,111 +9,81 @@ async def root():
   return {"message": "Hello World"}
 `
 
-export const defaultCode: FunctionCodeProp = {
+export const defaultCode: FunctionCodeField = {
   lang: 'python',
-  code: defaultCodeString,
+  type: 'text',
+  text: defaultText,
 }
 
-export type FunctionCodeProp = {
+export type FunctionCodeField = {
   lang: string
-  code?: string | File
+  type: 'text' | 'file'
+  text?: string
+  file?: File
 }
 
 export type UseAddFunctionCodeProps = {
-  value?: FunctionCodeProp
-  onChange: (code: FunctionCodeProp) => void
+  name?: string
+  control: Control
+  defaultValue?: FunctionCodeField
 }
 
 export type UseAddFunctionCodeReturn = {
-  tab: string
-  code: FunctionCodeProp
-  codeFile?: File
-  codeString?: string
-  handleTabChange: (tab: string) => void
-  handleCodeFileChange: (codeFile?: File) => void
-  handleCodeStringChange: (codeString?: string) => void
-  handleCodeLanguageChange: (
-    _: ChangeEvent<HTMLInputElement>,
-    lang: unknown,
-  ) => void
+  langCtrl: UseControllerReturn<any, any>
+  typeCtrl: UseControllerReturn<any, any>
+  fileCtrl: UseControllerReturn<any, any>
+  textCtrl: UseControllerReturn<any, any>
 }
 
 export function useAddFunctionCode({
-  value: codeProp,
-  onChange,
+  name = 'code',
+  control,
+  defaultValue = defaultCode,
 }: UseAddFunctionCodeProps): UseAddFunctionCodeReturn {
-  const [codeState, setCodeState] = useState<FunctionCodeProp>(defaultCode)
-  const code = codeProp || codeState
+  const { required } = formValidationRules
 
-  const [tab, setTab] = useState<string>('string')
-  const [codeFile, setCodeFile] = useState<File | undefined>()
-  const [codeString, setCodeString] = useState<string | undefined>(
-    defaultCodeString,
-  )
+  const langCtrl = useController({
+    control,
+    name: `${name}.lang`,
+    defaultValue: defaultValue?.lang,
+    rules: { required },
+  })
 
-  const handleCodeFileChange = useCallback(
-    (codeFile?: File) => {
-      setCodeFile(codeFile)
+  const typeCtrl = useController({
+    control,
+    name: `${name}.type`,
+    defaultValue: defaultValue?.type,
+    rules: { required },
+  })
 
-      if (tab !== 'file') return
+  const isText = typeCtrl.field.value === 'text'
 
-      const updatedCode = { ...code, code: codeFile }
-
-      setCodeState(updatedCode)
-      onChange(updatedCode)
+  const fileCtrl = useController({
+    control,
+    name: `${name}.file`,
+    defaultValue: defaultValue?.file,
+    rules: {
+      validate: {
+        required: (v) => isText || !!v,
+      },
     },
-    [code, onChange, tab],
-  )
+  })
 
-  const handleCodeStringChange = useCallback(
-    (codeString?: string) => {
-      setCodeString(codeString)
-
-      if (tab !== 'string') return
-
-      const updatedCode = { ...code, code: codeString }
-
-      setCodeState(updatedCode)
-      onChange(updatedCode)
+  const textCtrl = useController({
+    control,
+    name: `${name}.name`,
+    defaultValue: defaultCode?.text,
+    rules: {
+      validate: {
+        required: (v) => !isText || !!v,
+      },
     },
-    [code, onChange, tab],
-  )
-
-  const handleTabChange = useCallback(
-    (tab: string) => {
-      setTab(tab)
-
-      const updatedCode = {
-        ...code,
-        code: tab === 'string' ? codeString : codeFile,
-      }
-
-      setCodeState(updatedCode)
-      onChange(updatedCode)
-    },
-    [code, codeFile, codeString, onChange],
-  )
-
-  const handleCodeLanguageChange = useCallback(
-    (_: ChangeEvent<HTMLInputElement>, value: unknown) => {
-      if (!value) return
-
-      const updatedCode = { ...code, lang: value as string }
-
-      setCodeState(updatedCode)
-      onChange(updatedCode)
-    },
-    [code, onChange],
-  )
+  })
 
   return {
-    tab,
-    code,
-    codeFile,
-    codeString,
-    handleTabChange,
-    handleCodeFileChange,
-    handleCodeStringChange,
-    handleCodeLanguageChange,
+    langCtrl,
+    typeCtrl,
+    fileCtrl,
+    textCtrl,
   }
 }

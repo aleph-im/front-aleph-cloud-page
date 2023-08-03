@@ -1,67 +1,57 @@
-import { EntityType } from '@/helpers/constants'
-import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import { EntityType, EntityTypeName } from '@/helpers/constants'
+import { formValidationRules } from '@/helpers/errors'
+import { useMemo } from 'react'
+import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
-export type NameAndTagsProp = {
-  name?: string
-  tags?: string[]
+export type NameAndTagsField = {
+  name: string
+  tags: string[]
 }
 
-export const defaultNameAndTags: NameAndTagsProp = {}
+export const defaultNameAndTags: NameAndTagsField = {
+  name: '',
+  tags: [],
+}
 
 export type UseNameAndTagsProps = {
-  value?: NameAndTagsProp
+  name?: string
+  control: Control
+  defaultValue?: NameAndTagsField
   entityType: EntityType.Instance | EntityType.Program
-  onChange: (state: NameAndTagsProp) => void
 }
 
-export type UseNameAndTagsReturn = NameAndTagsProp & {
+export type UseNameAndTagsReturn = {
   entityName: string
-  handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleTagsChange: (tags: string[]) => void
+  nameCtrl: UseControllerReturn<any, any>
+  tagsCtrl: UseControllerReturn<any, any>
 }
 
 export function useAddNameAndTags({
-  value: nameAndTagsProp,
-  onChange,
+  name = '',
+  control,
+  defaultValue,
   entityType,
 }: UseNameAndTagsProps): UseNameAndTagsReturn {
-  const [nameAndTagsState, setNameAndTagsState] = useState<NameAndTagsProp>()
-  const nameAndTags = nameAndTagsProp || nameAndTagsState
+  const { required } = formValidationRules
 
-  const handleNameChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const name = e.target.value
-      const updatedNameAndTags: NameAndTagsProp = { ...nameAndTags, name }
+  const nameCtrl = useController({
+    control,
+    name: `${name}.name`,
+    defaultValue: defaultValue?.name,
+    rules: { required },
+  })
 
-      setNameAndTagsState(updatedNameAndTags)
-      onChange(updatedNameAndTags)
-    },
-    [onChange, nameAndTags],
-  )
+  const tagsCtrl = useController({
+    control,
+    name: `${name}.tags`,
+    defaultValue: defaultValue?.tags,
+  })
 
-  const handleTagsChange = useCallback(
-    (tags: string[]) => {
-      const updatedNameAndTags: NameAndTagsProp = { ...nameAndTags }
-
-      if (tags.length > 0) {
-        updatedNameAndTags.tags = tags
-      }
-
-      setNameAndTagsState(updatedNameAndTags)
-      onChange(updatedNameAndTags)
-    },
-    [onChange, nameAndTags],
-  )
-
-  const entityName = useMemo(
-    () => (entityType === EntityType.Instance ? 'Instance' : 'Function'),
-    [entityType],
-  )
+  const entityName = useMemo(() => EntityTypeName[entityType], [entityType])
 
   return {
-    ...nameAndTags,
     entityName,
-    handleNameChange,
-    handleTagsChange,
+    nameCtrl,
+    tagsCtrl,
   }
 }

@@ -6,17 +6,17 @@ import E_ from '../helpers/errors'
 import { EntityType, defaultInstanceChannel } from '../helpers/constants'
 import { getDate, getExplorerURL, isValidItemHash } from '../helpers/utils'
 import { MachineVolume, MessageType } from 'aleph-sdk-ts/dist/messages/types'
-import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
-import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
-import { SSHKeyProp } from '@/hooks/form/useAddSSHKeys'
+import { EnvVarField } from '@/hooks/form/useAddEnvVars'
+import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
+import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
 import { InstanceContent } from 'aleph-sdk-ts/dist/messages/instance/types'
 import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
-import { VolumeProp } from '@/hooks/form/useAddVolume'
-import { InstanceImageProp } from '@/hooks/form/useSelectInstanceImage'
+import { VolumeField } from '@/hooks/form/useAddVolume'
+import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
 import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
 import { VolumeManager } from './volume'
-import { DomainProp } from '@/hooks/form/useAddDomains'
+import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
 
@@ -24,14 +24,14 @@ export type AddInstance = Omit<
   InstancePublishConfiguration,
   'image' | 'account' | 'channel' | 'authorized_keys' | 'resources' | 'volumes'
 > & {
-  image?: InstanceImageProp
+  image?: InstanceImageField
   name?: string
   tags?: string[]
-  sshKeys?: SSHKeyProp[]
-  envVars?: EnvVarProp[]
-  specs?: InstanceSpecsProp
-  volumes?: VolumeProp[]
-  domains?: DomainProp[]
+  sshKeys?: SSHKeyField[]
+  envVars?: EnvVarField[]
+  specs?: InstanceSpecsField
+  volumes?: VolumeField[]
+  domains?: DomainField[]
 }
 
 // @todo: Refactor
@@ -181,7 +181,7 @@ export class InstanceManager
   }
 
   protected async parseSSHKeys(
-    sshKeys?: SSHKeyProp[],
+    sshKeys?: SSHKeyField[],
   ): Promise<string[] | undefined> {
     if (!sshKeys) return
 
@@ -199,8 +199,8 @@ export class InstanceManager
       })
   }
 
-  protected parseImage(image?: InstanceImageProp): string {
-    const ref = image?.id
+  protected parseImage(image?: InstanceImageField): string {
+    const ref = image
     if (!ref || !isValidItemHash(ref)) throw new Error('Invalid image ref')
 
     return ref

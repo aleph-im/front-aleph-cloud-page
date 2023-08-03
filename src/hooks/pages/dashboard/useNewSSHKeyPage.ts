@@ -6,6 +6,7 @@ import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { UseControllerReturn, useController } from 'react-hook-form'
+import { formValidationRules } from '@/helpers/errors'
 
 export type NewSSHKeyFormState = {
   key: string
@@ -48,16 +49,18 @@ export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
     onSubmit,
   })
 
+  const { required } = formValidationRules
+
   const keyCtrl = useController({
     control,
     name: 'key',
-    rules: { required: true },
+    rules: { required },
   })
 
   const labelCtrl = useController({
     control,
     name: 'label',
-    rules: { required: true },
+    rules: { required },
   })
 
   return {

@@ -1,14 +1,16 @@
-import { SSHKeyProp } from '@/hooks/form/useAddSSHKeys'
+import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
+import { Control } from 'react-hook-form'
 
 export type SSHKeyItemProps = {
-  sshKey: SSHKeyProp
-  onChange: (sshKey: SSHKeyProp) => void
-  onRemove: (sshKeyId: string) => void
+  name?: string
   index: number
+  control: Control
   allowRemove: boolean
+  defaultValue: SSHKeyField
+  onRemove: (index?: number) => void
 }
 
 export type AddSSHKeysProps = {
-  value?: SSHKeyProp[]
-  onChange: (sshKeys: SSHKeyProp[]) => void
+  name: string
+  control: Control
 }

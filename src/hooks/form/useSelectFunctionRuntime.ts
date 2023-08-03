@@ -1,11 +1,20 @@
-import { ChangeEvent, useCallback, useState } from 'react'
 import {
   FunctionRuntime,
   FunctionRuntimeId,
   FunctionRuntimes,
 } from '@/domain/runtime'
+import { Control, UseControllerReturn, useController } from 'react-hook-form'
+import { formValidationRules } from '@/helpers/errors'
 
-export type FunctionRuntimeProp = FunctionRuntime
+export type FunctionRuntimeField = {
+  id: string
+  custom: string
+}
+
+export const defaultFunctionRuntime: FunctionRuntimeField = {
+  id: FunctionRuntimeId.Runtime1,
+  custom: '',
+}
 
 export const defaultFunctionRuntimeOptions = [
   FunctionRuntimes[FunctionRuntimeId.Runtime1],
@@ -14,67 +23,59 @@ export const defaultFunctionRuntimeOptions = [
 ]
 
 export type UseSelectFunctionRuntimeProps = {
-  value?: FunctionRuntimeProp
-  options?: FunctionRuntimeProp[]
-  onChange: (runtime: FunctionRuntimeProp) => void
+  name?: string
+  control: Control
+  defaultValue?: FunctionRuntimeField
+  options?: FunctionRuntime[]
 }
 
 export type UseSelectFunctionRuntimeReturn = {
-  runtime?: FunctionRuntimeProp
-  options: FunctionRuntimeProp[]
-  handleRuntimeChange: (
-    _: ChangeEvent<HTMLInputElement>,
-    runtime?: unknown,
-  ) => void
-  handleCustomRuntimeHashChange: (e: ChangeEvent<HTMLInputElement>) => void
+  idCtrl: UseControllerReturn<any, any>
+  customCtrl: UseControllerReturn<any, any>
+  options: FunctionRuntime[]
+  isCustomDisabled: boolean
 }
 
 export function useSelectFunctionRuntime({
-  value: runtimeProp,
+  name = 'runtime',
+  control,
+  defaultValue,
   options: optionsProp,
-  onChange,
 }: UseSelectFunctionRuntimeProps): UseSelectFunctionRuntimeReturn {
-  const [runtimeState, setFunctionRuntimeState] = useState<
-    FunctionRuntimeProp | undefined
-  >()
-  const runtime = runtimeProp || runtimeState
   const options = optionsProp || defaultFunctionRuntimeOptions
 
-  const handleRuntimeChange = useCallback(
-    (_: ChangeEvent<HTMLInputElement>, runtimeId?: unknown) => {
-      const runtime = options.find((opt) => opt.id === runtimeId)
-      if (!runtime) return
+  const { required } = formValidationRules
 
-      const updatedRuntime: FunctionRuntimeProp = { ...runtime }
-      updatedRuntime.meta =
-        runtime.id === FunctionRuntimeId.Custom
-          ? updatedRuntime.meta
-          : undefined
-
-      setFunctionRuntimeState(runtime)
-      onChange(runtime)
+  const idCtrl = useController({
+    control,
+    name: `${name}.id`,
+    defaultValue: defaultValue?.id,
+    rules: {
+      required,
+      onChange(e) {
+        if (e.target.value === FunctionRuntimeId.Custom) return
+        customCtrl.field.onChange('')
+      },
     },
-    [onChange],
-  )
+  })
 
-  const handleCustomRuntimeHashChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (!runtime) return
+  const isCustomDisabled = idCtrl.field.value !== FunctionRuntimeId.Custom
 
-      // @note: Custom hash string
-      const meta = e.target.value
-      const updatedRuntime: FunctionRuntimeProp = { ...runtime, meta }
-
-      setFunctionRuntimeState(updatedRuntime)
-      onChange(updatedRuntime)
+  const customCtrl = useController({
+    control,
+    name: `${name}.custom`,
+    defaultValue: defaultValue?.custom,
+    rules: {
+      validate: {
+        required: (v) => isCustomDisabled || !!v,
+      },
     },
-    [onChange, runtime],
-  )
+  })
 
   return {
-    runtime,
+    idCtrl,
+    customCtrl,
     options,
-    handleRuntimeChange,
-    handleCustomRuntimeHashChange,
+    isCustomDisabled,
   }
 }

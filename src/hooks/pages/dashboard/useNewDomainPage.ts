@@ -8,6 +8,7 @@ import { ActionTypes } from '@/helpers/store'
 import { AddDomain, AddDomainTarget } from '@/domain/domain'
 import { EntityType } from '@/helpers/constants'
 import { UseControllerReturn, useController } from 'react-hook-form'
+import { formValidationRules } from '@/helpers/errors'
 
 export type NewDomainFormState = AddDomain
 
@@ -60,17 +61,19 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     onSubmit,
   })
 
+  const { required } = formValidationRules
+
   const nameCtrl = useController({
     control,
     name: 'name',
-    rules: { required: true },
+    rules: { required },
   })
 
   const programTypeCtrl = useController({
     control,
     name: 'programType',
     rules: {
-      required: true,
+      required,
       onChange() {
         setValue('ref', '')
       },
@@ -80,7 +83,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   const refCtrl = useController({
     control,
     name: 'ref',
-    rules: { required: true },
+    rules: { required },
   })
 
   const entityType = programTypeCtrl.field.value

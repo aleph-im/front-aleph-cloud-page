@@ -1,6 +1,6 @@
-import { FunctionCodeProp } from '@/hooks/form/useAddFunctionCode'
+import { Control } from 'react-hook-form'
 
 export type AddFunctionCodeProps = {
-  value?: FunctionCodeProp
-  onChange: (code: FunctionCodeProp) => void
+  name?: string
+  control: Control
 }

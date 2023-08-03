@@ -106,7 +106,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
       sshKeys = sshKeys.filter((sshKey) => !currentSSHKeySet.has(sshKey.key))
     }
 
-    return sshKeys.map((sshKey: AddSSHKey) => {
+    const newKeys = sshKeys.map((sshKey: AddSSHKey) => {
       const key = sshKey.key.trim()
       const label = sshKey.label?.trim()
 
@@ -119,6 +119,10 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
 
       return { ...sshKey, key, label }
     })
+
+    // @todo: dedup
+
+    return newKeys
   }
 
   // @todo: Type not exported from SDK...

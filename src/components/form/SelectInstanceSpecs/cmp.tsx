@@ -1,7 +1,7 @@
 import React from 'react'
 /* eslint-disable @next/next/no-img-element */
 import { useSelectInstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
-import { Button, Icon, TableColumn } from '@aleph-front/aleph-core'
+import { Button, FormError, Icon, TableColumn } from '@aleph-front/aleph-core'
 import { useCallback, useMemo } from 'react'
 import { convertBitUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
@@ -11,7 +11,7 @@ import { EntityType } from '@/helpers/constants'
 
 export const SelectInstanceSpecs = React.memo(
   (props: SelectInstanceSpecsProps) => {
-    const { type, specs, options, isPersistent, handleChange } =
+    const { specsCtrl, options, type, isPersistent } =
       useSelectInstanceSpecs(props)
 
     const columns = useMemo(() => {
@@ -20,40 +20,32 @@ export const SelectInstanceSpecs = React.memo(
           label: 'Cores',
           sortable: true,
           sortBy: (row: SpecsDetail) => row.specs.cpu,
-          render: (row: SpecsDetail) => {
-            const isActive = specs?.id === row.specs.id
-            const className = `${isActive ? 'text-main0' : ''} tp-body2`
-            return <span className={className}>{row.specs.cpu} x86 64bit</span>
-          },
+          render: (row: SpecsDetail) => (
+            <span className={row.className}>{row.specs.cpu} x86 64bit</span>
+          ),
         },
         {
           label: 'Memory',
           align: 'right',
           sortable: true,
           sortBy: (row: SpecsDetail) => row.ram,
-          render: (row: SpecsDetail) => {
-            const isActive = specs?.id === row.specs.id
-            const className = `${isActive ? 'text-main0' : ''}`
-            return <span className={className}>{row.ram}</span>
-          },
+          render: (row: SpecsDetail) => (
+            <span className={row.className}>{row.ram}</span>
+          ),
         },
         {
           label: 'Hold',
           align: 'right',
           sortable: true,
           sortBy: (row: SpecsDetail) => row.price,
-          render: (row: SpecsDetail) => {
-            const isActive = specs?.id === row.specs.id
-            const className = `${isActive ? 'text-main0' : ''}`
-            return <span className={className}>{row.price}</span>
-          },
+          render: (row: SpecsDetail) => (
+            <span className={row.className}>{row.price}</span>
+          ),
         },
         {
           label: '',
           align: 'right',
           render: (row: SpecsDetail) => {
-            const active = specs?.id === row.specs.id
-
             return (
               <Button
                 color="main0"
@@ -63,7 +55,7 @@ export const SelectInstanceSpecs = React.memo(
                 forwardedAs="button"
                 type="button"
                 // TODO: Fix this
-                style={{ visibility: active ? 'visible' : 'hidden' }}
+                style={{ visibility: row.isActive ? 'visible' : 'hidden' }}
                 onClick={(e) => e.preventDefault()}
               >
                 <Icon name="check" />
@@ -80,15 +72,13 @@ export const SelectInstanceSpecs = React.memo(
           sortable: true,
           sortBy: (row: SpecsDetail) => row.storage,
           render: (row: SpecsDetail) => {
-            const isActive = specs?.id === row.specs.id
-            const className = `${isActive ? 'text-main0' : ''}`
-            return <span className={className}>{row.storage}</span>
+            return <span className={row.className}>{row.storage}</span>
           },
         })
       }
 
       return cols
-    }, [specs, type])
+    }, [type])
 
     const data: SpecsDetail[] = useMemo(() => {
       return options.map((specs) => {
@@ -99,8 +89,13 @@ export const SelectInstanceSpecs = React.memo(
           isPersistent,
         })
 
+        const isActive = specsCtrl.field.value.cpu === specs.cpu
+        const className = `${isActive ? 'text-main0' : ''}`
+
         return {
           specs,
+          isActive,
+          className,
           storage: convertBitUnits(storage, {
             from: 'mb',
             to: 'gb',
@@ -114,13 +109,17 @@ export const SelectInstanceSpecs = React.memo(
           price: price.computeTotalCost + ' ALEPH',
         }
       })
-    }, [type, isPersistent, options])
+    }, [options, type, isPersistent, specsCtrl.field.value])
 
-    const handleRowKey = useCallback((row: SpecsDetail) => row.specs.id, [])
+    const getRowKey = useCallback((row: SpecsDetail) => row.specs.cpu + '', [])
+
+    const { onChange } = specsCtrl.field
 
     const handleRowProps = useCallback(
-      (row: SpecsDetail) => ({ onClick: () => handleChange(row.specs) }),
-      [handleChange],
+      (row: SpecsDetail) => ({
+        onClick: () => onChange(row.specs),
+      }),
+      [onChange],
     )
 
     return (
@@ -128,11 +127,14 @@ export const SelectInstanceSpecs = React.memo(
         <StyledTable
           borderType="none"
           oddRowNoise
-          rowKey={handleRowKey}
+          rowKey={getRowKey}
           rowProps={handleRowProps}
           columns={columns}
           data={data}
         />
+        {specsCtrl.fieldState.error && (
+          <FormError error={specsCtrl.fieldState.error} />
+        )}
       </div>
     )
   },

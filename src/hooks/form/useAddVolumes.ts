@@ -1,67 +1,40 @@
-import { useCallback, useState } from 'react'
-import { VolumeProp, defaultVolume } from './useAddVolume'
+import { useCallback } from 'react'
+import { VolumeField, defaultVolume } from './useAddVolume'
+import { Control, useFieldArray } from 'react-hook-form'
 
 export type UseAddVolumesProps = {
-  value?: VolumeProp[]
-  onChange: (volumes: VolumeProp[]) => void
+  name?: string
+  control: Control
 }
 
 export type UseAddVolumesReturn = {
-  volumes: VolumeProp[]
-  handleChange: (volumes: VolumeProp) => void
+  name: string
+  control: Control
+  fields: (VolumeField & { id: string })[]
   handleAdd: () => void
-  handleRemove: (volumeId: string) => void
+  handleRemove: (index?: number) => void
 }
 
 export function useAddVolumes({
-  value: volumesProp,
-  onChange,
+  name = 'volumes',
+  control,
 }: UseAddVolumesProps): UseAddVolumesReturn {
-  const [volumesState, setVolumesState] = useState<VolumeProp[]>([])
-  const volumes = volumesProp || volumesState
+  const volumesCtrl = useFieldArray({
+    control,
+    name,
+  })
 
-  const handleChange = useCallback(
-    (volume: VolumeProp) => {
-      const updatedVolumes = [...volumes]
-      const index = volumes.findIndex((vol) => vol.id === volume.id)
-
-      if (index !== -1) {
-        updatedVolumes[index] = volume
-      } else {
-        updatedVolumes.push(volume)
-      }
-
-      setVolumesState(updatedVolumes)
-      onChange(updatedVolumes)
-    },
-    [onChange, volumes],
-  )
+  const { remove: handleRemove, append } = volumesCtrl
+  const fields = volumesCtrl.fields as (VolumeField & { id: string })[]
 
   const handleAdd = useCallback(() => {
-    const newVolume = {
-      ...defaultVolume,
-      id: `volume-${Date.now()}`,
-    }
-
-    const updatedVolumes = [...volumes, newVolume]
-
-    setVolumesState(updatedVolumes)
-    onChange(updatedVolumes)
-  }, [onChange, volumes])
-
-  const handleRemove = useCallback(
-    (volumeId: string) => {
-      const updatedVolumes = volumes.filter((vol) => vol.id !== volumeId)
-
-      setVolumesState(updatedVolumes)
-      onChange(updatedVolumes)
-    },
-    [onChange, volumes],
-  )
+    append({ ...defaultVolume })
+  }, [append])
 
   return {
-    volumes,
-    handleChange,
+    name,
+    control,
+    fields,
     handleAdd,
     handleRemove,
   }

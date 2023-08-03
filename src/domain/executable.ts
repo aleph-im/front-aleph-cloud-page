@@ -1,4 +1,4 @@
-import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
+import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   MachineResources,
   MachineVolume,
@@ -12,9 +12,9 @@ import {
   VolumeCostProps,
 } from './volume'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
-import { VolumeProp } from '@/hooks/form/useAddVolume'
-import { DomainProp } from '@/hooks/form/useAddDomains'
+import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
+import { VolumeField } from '@/hooks/form/useAddVolume'
+import { DomainField } from '@/hooks/form/useAddDomains'
 import { AddDomain, AddDomainTarget, DomainManager } from './domain'
 import { EntityType } from '@/helpers/constants'
 
@@ -27,7 +27,7 @@ type ExecutableCapabilitiesProps = {
 export type ExecutableCostProps = VolumeCostProps & {
   type: EntityType.Instance | EntityType.Program
   isPersistent?: boolean
-  specs?: InstanceSpecsProp
+  specs?: InstanceSpecsField
   capabilities?: ExecutableCapabilitiesProps
 }
 
@@ -53,7 +53,7 @@ export abstract class Executable {
       return {
         computeTotalCost: 0,
         volumeTotalCost: 0,
-        perVolumeCost: {},
+        perVolumeCost: [],
         totalCost: 0,
       }
 
@@ -67,14 +67,10 @@ export abstract class Executable {
 
     const computeTotalCost = basePrice * specs.cpu * capabilitiesCost
 
-    const newVolumes = volumes.filter(
-      (volume) => volume.volumeType !== VolumeType.Existing,
-    )
-
     const sizeDiscount = type === EntityType.Instance ? 0 : specs.storage
 
     const { perVolumeCost, totalCost: volumeTotalCost } = VolumeManager.getCost(
-      { volumes: newVolumes, sizeDiscount },
+      { volumes, sizeDiscount },
     )
 
     const totalCost = volumeTotalCost + computeTotalCost
@@ -94,7 +90,7 @@ export abstract class Executable {
   ) {}
 
   protected parseEnvVars(
-    envVars?: EnvVarProp[],
+    envVars?: EnvVarField[],
   ): Record<string, string> | undefined {
     if (!envVars) return
 
@@ -114,7 +110,7 @@ export abstract class Executable {
   protected async parseDomains(
     programType: EntityType.Program | EntityType.Instance,
     ref: string,
-    domains?: DomainProp[],
+    domains?: DomainField[],
   ): Promise<void> {
     if (!domains) return
 
@@ -131,7 +127,7 @@ export abstract class Executable {
   }
 
   protected async parseVolumes(
-    volumes?: VolumeProp | VolumeProp[],
+    volumes?: VolumeField | VolumeField[],
   ): Promise<MachineVolume[] | undefined> {
     if (!volumes) return
 
@@ -178,7 +174,7 @@ export abstract class Executable {
   }
 
   protected parseSpecs(
-    specs?: InstanceSpecsProp,
+    specs?: InstanceSpecsField,
   ): Omit<MachineResources, 'seconds'> {
     if (!specs) throw new Error('Invalid program specs')
     if (!specs.cpu) throw new Error('Invalid program cpu cores')

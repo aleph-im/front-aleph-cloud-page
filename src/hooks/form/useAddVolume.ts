@@ -1,260 +1,250 @@
-import { ChangeEvent, useCallback, useId, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { convertBitUnits } from '@/helpers/utils'
 import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
+import { Control, UseControllerReturn, useController } from 'react-hook-form'
+import { formValidationRules } from '@/helpers/errors'
 
-export type NewVolumeProp = {
-  id: string
+export type NewVolumeStandaloneField = {
   volumeType: VolumeType.New
   fileSrc?: File
-  mountPath?: string
-  useLatest?: boolean
-  size?: number
 }
 
-export type ExistingVolumeProp = {
-  id: string
+export type NewVolumeField = NewVolumeStandaloneField & {
+  mountPath: string
+  useLatest: boolean
+}
+
+export type ExistingVolumeField = {
   volumeType: VolumeType.Existing
   mountPath: string
   refHash: string
   useLatest: boolean
-  size?: number
 }
 
-export type PersistentVolumeProp = {
-  id: string
+export type PersistentVolumeField = {
   volumeType: VolumeType.Persistent
   name: string
   mountPath: string
   size: number
 }
 
-export const defaultVolume: NewVolumeProp = {
-  id: `volume-0`,
+export const defaultVolume: NewVolumeStandaloneField = {
   volumeType: VolumeType.New,
-  mountPath: '',
-  size: 0,
-  useLatest: true,
 }
 
-export type VolumeProp =
-  | NewVolumeProp
-  | ExistingVolumeProp
-  | PersistentVolumeProp
+export type VolumeField =
+  | NewVolumeStandaloneField
+  | NewVolumeField
+  | ExistingVolumeField
+  | PersistentVolumeField
 
-export type UseAddNewVolumeProps = {
-  volume: NewVolumeProp
-  isStandAlone?: boolean
-  onChange: (volume: NewVolumeProp) => void
-  onRemove?: (volumeId: string) => void
+export type UseAddVolumeCommonProps = {
+  name: string
+  index?: number
+  control: Control
+  onRemove?: () => void
+}
+
+export type UseAddNewVolumeProps = UseAddVolumeCommonProps & {
+  defaultValue?: NewVolumeField
 }
 
 export type UseAddNewVolumeReturn = {
-  id: string
-  volume: NewVolumeProp
+  isStandAlone: boolean
+  mountPathCtrl: UseControllerReturn<any, any>
+  useLatestCtrl: UseControllerReturn<any, any>
+  fileSrcCtrl: UseControllerReturn<any, any>
   volumeSize: string
-  isStandAlone?: boolean
-  handleFileSrcChange: (fileSrc?: File) => void
-  handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleUseLatestChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleRemove?: (volumeId: string) => void
+  handleRemove?: () => void
 }
+export function useAddNewVolumeProps(
+  props: UseAddNewVolumeProps,
+): UseAddNewVolumeReturn {
+  const { name, index, control, defaultValue, onRemove: handleRemove } = props
 
-export function useAddNewVolumeProps({
-  volume,
-  onChange,
-  onRemove: handleRemove,
-  isStandAlone,
-}: UseAddNewVolumeProps): UseAddNewVolumeReturn {
-  const id = useId()
+  const { required } = formValidationRules
 
-  const handleFileSrcChange = useCallback(
-    (fileSrc: File | undefined) => {
-      const newVolume: NewVolumeProp = { ...volume, fileSrc }
+  const isStandAlone = index === undefined
+  const n = isStandAlone ? name : `${name}.${index}`
 
-      const size = VolumeManager.getVolumeSize(newVolume)
-      newVolume.size = size
+  const fileSrcCtrl = useController({
+    control,
+    name: `${n}.fileSrc`,
+    defaultValue: defaultValue?.fileSrc,
+    rules: { required },
+  })
 
-      onChange(newVolume)
+  const mountPathCtrl = useController({
+    control,
+    name: `${n}.mountPath`,
+    defaultValue: defaultValue?.mountPath,
+    rules: {
+      validate: {
+        required: (v) => isStandAlone || !!v,
+      },
     },
-    [onChange, volume],
-  )
+  })
 
-  const handleMountPathChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const mountPath = e.target.value
-      const newVolume: NewVolumeProp = { ...volume, mountPath }
-      onChange(newVolume)
+  const useLatestCtrl = useController({
+    control,
+    name: `${n}.useLatest`,
+    defaultValue: defaultValue?.useLatest,
+    rules: {
+      validate: {
+        required: (v) => isStandAlone || !!v,
+      },
     },
-    [onChange, volume],
-  )
+  })
 
-  const handleUseLatestChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const useLatest = e.target.checked
-      const newVolume: NewVolumeProp = { ...volume, useLatest }
-      onChange(newVolume)
-    },
-    [onChange, volume],
-  )
+  const { value: fileSrc } = fileSrcCtrl.field
 
-  const volumeSize = useMemo(
-    () =>
-      convertBitUnits(volume.size || 0, {
-        from: 'mb',
-        to: 'mb',
-        displayUnit: true,
-      }) as string,
-    [volume],
-  )
+  const volumeSize = useMemo(() => {
+    const size = VolumeManager.getVolumeSize({
+      volumeType: VolumeType.New,
+      fileSrc,
+    } as Volume)
+
+    return convertBitUnits(size, {
+      from: 'mb',
+      to: 'mb',
+      displayUnit: true,
+    }) as string
+  }, [fileSrc])
 
   return {
-    id,
-    volume,
+    isStandAlone: index === undefined,
+    fileSrcCtrl,
+    mountPathCtrl,
+    useLatestCtrl,
     volumeSize,
-    isStandAlone,
-    handleFileSrcChange,
-    handleMountPathChange,
-    handleUseLatestChange,
     handleRemove,
   }
 }
 
 // -------------
 
-export type UseAddExistingVolumeProps = {
-  volume: ExistingVolumeProp
-  onChange: (volume: ExistingVolumeProp) => void
-  onRemove?: (volumeId: string) => void
+export type UseAddExistingVolumeProps = UseAddVolumeCommonProps & {
+  defaultValue?: ExistingVolumeField
 }
 
 export type UseAddExistingVolumeReturn = {
-  id: string
-  volume: ExistingVolumeProp
-  handleRefHashChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleUseLatestChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleRemove?: (volumeId: string) => void
+  refHashCtrl: UseControllerReturn<any, any>
+  mountPathCtrl: UseControllerReturn<any, any>
+  useLatestCtrl: UseControllerReturn<any, any>
+  handleRemove?: () => void
 }
 
 export function useAddExistingVolumeProps({
-  volume,
-  onChange,
+  name,
+  index,
+  control,
+  defaultValue,
   onRemove: handleRemove,
 }: UseAddExistingVolumeProps): UseAddExistingVolumeReturn {
-  const id = useId()
+  const { required } = formValidationRules
 
-  const handleRefHashChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const refHash = e.target.value
-      // @todo: Get the file from ipfs, compute and update the size
-      const newVolume: ExistingVolumeProp = { ...volume, refHash }
-      onChange(newVolume)
-    },
-    [onChange, volume],
-  )
+  const refHashCtrl = useController({
+    control,
+    name: `${name}.${index}.refHash`,
+    defaultValue: defaultValue?.refHash,
+    rules: { required },
+  })
 
-  const handleMountPathChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const mountPath = e.target.value
-      const newVolume: ExistingVolumeProp = { ...volume, mountPath }
-      onChange(newVolume)
-    },
-    [onChange, volume],
-  )
+  const mountPathCtrl = useController({
+    control,
+    name: `${name}.${index}.mountPath`,
+    defaultValue: defaultValue?.mountPath,
+    rules: { required },
+  })
 
-  const handleUseLatestChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const useLatest = e.target.checked
-      const newVolume: ExistingVolumeProp = { ...volume, useLatest }
-      onChange(newVolume)
-    },
-    [onChange, volume],
-  )
+  const useLatestCtrl = useController({
+    control,
+    name: `${name}.${index}.useLatest`,
+    defaultValue: defaultValue?.useLatest,
+    rules: { required },
+  })
 
   return {
-    id,
-    volume,
-    handleRefHashChange,
-    handleMountPathChange,
-    handleUseLatestChange,
+    refHashCtrl,
+    mountPathCtrl,
+    useLatestCtrl,
     handleRemove,
   }
 }
 
 // -------------
 
-export type UseAddPersistentVolumeProps = {
-  volume: PersistentVolumeProp
-  onChange: (volume: PersistentVolumeProp) => void
-  onRemove?: (volumeId: string) => void
+export type UseAddPersistentVolumeProps = UseAddVolumeCommonProps & {
+  defaultValue?: PersistentVolumeField
 }
 
 export type UseAddPersistentVolumeReturn = {
-  id: string
-  volume: PersistentVolumeProp
+  nameCtrl: UseControllerReturn<any, any>
+  mountPathCtrl: UseControllerReturn<any, any>
+  sizeCtrl: UseControllerReturn<any, any>
   volumeSize: number
-  handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleMountPathChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleSizeChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleRemove?: (volumeId: string) => void
+  handleRemove?: () => void
 }
 
 export function useAddPersistentVolumeProps({
-  volume,
-  onChange,
+  name = 'volumes',
+  index,
+  control,
+  defaultValue,
   onRemove: handleRemove,
 }: UseAddPersistentVolumeProps): UseAddPersistentVolumeReturn {
-  const id = useId()
+  const { required } = formValidationRules
 
-  const handleNameChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const name = e.target.value
-      const newVolume: PersistentVolumeProp = { ...volume, name }
-      onChange(newVolume)
+  const nameCtrl = useController({
+    control,
+    name: `${name}.${index}.name`,
+    defaultValue: defaultValue?.name,
+    rules: { required },
+  })
+
+  const mountPathCtrl = useController({
+    control,
+    name: `${name}.${index}.mountPath`,
+    defaultValue: defaultValue?.mountPath,
+    rules: { required },
+  })
+
+  const sizeCtrl = useController({
+    control,
+    name: `${name}.${index}.size`,
+    defaultValue: defaultValue?.size || 0,
+    rules: {
+      required,
+      onChange(e) {
+        if (typeof e.target.value !== 'string') return
+
+        const sizeGB = Number(e.target.value)
+        const size = convertBitUnits(sizeGB, {
+          from: 'gb',
+          to: 'mb',
+          displayUnit: false,
+        }) as number
+
+        sizeCtrl.field.onChange(size)
+      },
     },
-    [onChange, volume],
-  )
+  })
 
-  const handleMountPathChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const mountPath = e.target.value
-      const newVolume: PersistentVolumeProp = { ...volume, mountPath }
-      onChange(newVolume)
-    },
-    [onChange, volume],
-  )
+  const { value: size } = sizeCtrl.field
 
-  const handleSizeChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const sizeGB = Number(e.target.value)
-      const size = convertBitUnits(sizeGB, {
-        from: 'gb',
-        to: 'mb',
-        displayUnit: false,
-      }) as number
-      const newVolume: PersistentVolumeProp = { ...volume, size }
-      onChange(newVolume)
-    },
-    [onChange, volume],
-  )
-
-  const volumeSize = useMemo(
-    () =>
-      convertBitUnits(volume.size, {
-        from: 'mb',
-        to: 'gb',
-        displayUnit: false,
-      }) as number,
-    [volume],
-  )
+  const volumeSize = useMemo(() => {
+    return convertBitUnits(size, {
+      from: 'mb',
+      to: 'gb',
+      displayUnit: false,
+    }) as number
+  }, [size])
 
   return {
-    id,
-    volume,
+    nameCtrl,
+    mountPathCtrl,
+    sizeCtrl,
     volumeSize,
-    handleNameChange,
-    handleMountPathChange,
-    handleSizeChange,
     handleRemove,
   }
 }
@@ -262,52 +252,48 @@ export function useAddPersistentVolumeProps({
 // -------------
 
 export type UseAddVolumeProps = {
-  value?: VolumeProp
-  isStandAlone?: boolean
-  onChange: (volume: VolumeProp) => void
-  onRemove?: (volumeId: string) => void
+  name?: string
+  index?: number
+  control: Control
+  volumeType?: VolumeType
+  onRemove?: (index?: number) => void
 }
 
 export type UseAddVolumeReturn = {
-  volume: VolumeProp
-  isStandAlone: boolean
-  handleChange: (volume: VolumeProp) => void
-  handleVolumeTypeChange: (type: string | VolumeType) => void
-  handleRemove?: (volumeId: string) => void
+  name: string
+  index?: number
+  control: Control
+  volumeTypeCtrl: UseControllerReturn<any, any>
+  onRemove?: () => void
 }
 
 export function useAddVolume({
-  value: volumeProp,
-  isStandAlone = false,
-  onChange,
-  onRemove: handleRemove,
+  name = 'volumes',
+  index,
+  control,
+  onRemove,
 }: UseAddVolumeProps): UseAddVolumeReturn {
-  const [volumeState, setVolumeState] = useState<VolumeProp>({
-    ...defaultVolume,
+  const { required } = formValidationRules
+
+  const isStandAlone = index === undefined
+  const n = isStandAlone ? name : `${name}.${index}`
+
+  const volumeTypeCtrl = useController({
+    control,
+    name: `${n}.volumeType`,
+    defaultValue: VolumeType.New,
+    rules: { required },
   })
-  const volume = volumeProp || volumeState
 
-  const handleChange = useCallback(
-    (volume: VolumeProp) => {
-      setVolumeState(volume)
-      onChange(volume)
-    },
-    [onChange],
-  )
-
-  const handleVolumeTypeChange = useCallback(
-    (type: string | VolumeType) => {
-      const newVolume = { ...volume, volumeType: type } as Volume
-      handleChange(newVolume)
-    },
-    [handleChange, volume],
-  )
+  const handleRemove = useCallback(() => {
+    onRemove && onRemove(index)
+  }, [index, onRemove])
 
   return {
-    volume,
-    isStandAlone,
-    handleChange,
-    handleVolumeTypeChange,
-    handleRemove,
+    name,
+    index,
+    control,
+    volumeTypeCtrl,
+    onRemove: handleRemove,
   }
 }

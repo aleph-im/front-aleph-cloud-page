@@ -5,30 +5,31 @@ import { useSelectInstanceImage } from '@/hooks/form/useSelectInstanceImage'
 import { SelectInstanceImageItemProps, SelectInstanceImageProps } from './types'
 import { StyledFlatCard, StyledFlatCardContainer } from './styles'
 import React from 'react'
+import { FormError } from '@aleph-front/aleph-core'
 
 const SelectInstanceImageItem = React.memo(
-  ({ image, selected, onChange }: SelectInstanceImageItemProps) => {
+  ({ option, value, onChange }: SelectInstanceImageItemProps) => {
+    const selected = value === option.id
     const basePath = useBasePath()
     const imgPrefix = `${basePath}/img`
 
     const handleClick = useCallback(() => {
-      if (image.disabled) return
-
-      onChange(image)
-    }, [image, onChange])
+      if (option.disabled) return
+      onChange(option.id)
+    }, [option, onChange])
 
     return (
       <StyledFlatCard
         onClick={handleClick}
         $selected={selected}
-        $disabled={image.disabled}
+        $disabled={option.disabled}
       >
         <img
-          src={`${imgPrefix}/image/${image.dist}.svg`}
-          alt={`${image.name} image image logo`}
+          src={`${imgPrefix}/image/${option.dist}.svg`}
+          alt={`${option.name} image image logo`}
           tw="mb-4"
         />
-        {image.name}
+        {option.name}
       </StyledFlatCard>
     )
   },
@@ -37,7 +38,7 @@ SelectInstanceImageItem.displayName = 'SelectInstanceImageItem'
 
 export const SelectInstanceImage = React.memo(
   (props: SelectInstanceImageProps) => {
-    const { image, options, handleChange } = useSelectInstanceImage(props)
+    const { imageCtrl, options } = useSelectInstanceImage(props)
 
     return (
       <div tw="overflow-x-auto md:overflow-x-visible w-full">
@@ -45,15 +46,14 @@ export const SelectInstanceImage = React.memo(
           {options.map((option) => (
             <SelectInstanceImageItem
               key={option.id}
-              {...{
-                option,
-                image: option,
-                selected: option.id === image?.id,
-                onChange: handleChange,
-              }}
+              {...imageCtrl.field}
+              option={option}
             />
           ))}
         </StyledFlatCardContainer>
+        {imageCtrl.fieldState.error && (
+          <FormError error={imageCtrl.fieldState.error} />
+        )}
       </div>
     )
   },
