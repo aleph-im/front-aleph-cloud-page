@@ -3,6 +3,7 @@ import { forget, store, any } from 'aleph-sdk-ts/dist/messages'
 import E_ from '../helpers/errors'
 import {
   EntityType,
+  VolumeType,
   defaultVolumeChannel,
   programStorageURL,
 } from '../helpers/constants'
@@ -11,16 +12,16 @@ import { MessageType, StoreContent } from 'aleph-sdk-ts/dist/messages/types'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
 import { EntityManager } from './types'
+import {
+  newIsolatedVolumeSchema,
+  newIsolatedVolumesSchema,
+} from '@/helpers/schemas'
 
-export enum VolumeType {
-  New = 'new',
-  Existing = 'existing',
-  Persistent = 'persistent',
-}
+export { VolumeType }
 
 export type AddNewVolume = {
   volumeType: VolumeType.New
-  fileSrc?: File
+  file?: File
 }
 
 export type AddExistingVolume = {
@@ -53,7 +54,7 @@ export type BaseVolume = StoreContent & {
 export type NewVolume = BaseVolume & {
   type: EntityType.Volume
   volumeType: VolumeType.New
-  fileSrc?: File
+  file?: File
   mountPath: string
   useLatest: boolean
   size?: number
@@ -99,12 +100,15 @@ export type VolumeCost = {
 }
 
 export class VolumeManager implements EntityManager<Volume, AddVolume> {
+  static addSchema = newIsolatedVolumeSchema
+  static addManySchema = newIsolatedVolumesSchema
+
   /**
    * Returns the size of a volume in mb
    */
   static getVolumeSize(volume: Volume | AddVolume): number {
     if (volume.volumeType === VolumeType.New) {
-      return (volume?.fileSrc?.size || 0) / 10 ** 6
+      return (volume?.file?.size || 0) / 10 ** 6
     }
 
     return volume.size || 0
@@ -215,7 +219,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       const { account, channel } = this
 
       const response = await Promise.all(
-        newVolumes.map(async ({ fileSrc: fileObject }) =>
+        newVolumes.map(async ({ file: fileObject }) =>
           store.Publish({
             account,
             channel,
@@ -253,14 +257,12 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return downloadBlob(blob, `Volume_${volumeOrId.slice(-12)}.sqsh`)
   }
 
-  protected parseNewVolumes(
-    volumes: VolumeField | VolumeField[],
-  ): Required<AddNewVolume>[] {
-    volumes = Array.isArray(volumes) ? volumes : [volumes]
+  protected parseNewVolumes(volumes: VolumeField[]): Required<AddNewVolume>[] {
+    volumes = VolumeManager.addManySchema.parse(volumes)
 
     const newVolumes = volumes.filter(
       (volume: VolumeField): volume is Required<AddNewVolume> =>
-        volume.volumeType === VolumeType.New && !!volume.fileSrc,
+        volume.volumeType === VolumeType.New && !!volume.file,
     )
 
     return newVolumes

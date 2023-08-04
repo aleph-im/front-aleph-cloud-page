@@ -6,6 +6,7 @@ import {
   UseFormProps as UseFormPropsLib,
   FieldErrors,
 } from 'react-hook-form'
+import { ZodError } from 'zod'
 
 export type UseFormProps<
   FormState extends Record<string, any>,
@@ -39,8 +40,18 @@ export function useForm<FormState extends Record<string, any>, Response>({
         onSuccess(response)
       } catch (e) {
         const err = e as Error
-        form.setError('root', { message: err.message })
-        onError(e as Error)
+        const error =
+          err instanceof ZodError
+            ? new Error('Validation error, check highlighted form fields')
+            : ((err?.cause || err) as Error)
+
+        // @note: form.setError is cloning the error obj loosing the message prop
+        form.setError('root.serverError', {
+          ...error,
+          message: error?.message,
+        })
+
+        onError(error)
       }
     },
     [form, onError, onLoad, onSubmit, onSuccess],
@@ -51,10 +62,6 @@ export function useForm<FormState extends Record<string, any>, Response>({
       console.log(errors)
 
       let error: Error | undefined
-
-      if (!error && errors.root) {
-        error = new Error(errors.root?.message)
-      }
 
       if (!error) {
         const [firstError] = Object.entries(errors)

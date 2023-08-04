@@ -6,7 +6,6 @@ import {
   useController,
   useFieldArray,
 } from 'react-hook-form'
-import { formValidationRules } from '@/helpers/errors'
 
 export type SSHKeyField = {
   key: string
@@ -49,27 +48,22 @@ export function useSSHKeyItem({
   defaultValue,
   onRemove,
 }: UseSSHKeyItemProps): UseSSHKeyItemReturn {
-  const { required } = formValidationRules
-
   const isSelectedCtrl = useController({
     control,
     name: `${name}.${index}.isSelected`,
     defaultValue: defaultValue?.isSelected,
-    rules: { required },
   })
 
   const keyCtrl = useController({
     control,
     name: `${name}.${index}.key`,
     defaultValue: defaultValue?.key,
-    rules: { required },
   })
 
   const labelCtrl = useController({
     control,
     name: `${name}.${index}.label`,
     defaultValue: defaultValue?.label,
-    rules: { required },
   })
 
   const isNew = defaultValue?.isNew || false

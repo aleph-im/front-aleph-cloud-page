@@ -1,4 +1,3 @@
-import { formValidationRules } from '@/helpers/errors'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 const defaultText = `from fastapi import FastAPI
@@ -16,11 +15,19 @@ export const defaultCode: FunctionCodeField = {
 }
 
 export type FunctionCodeField = {
-  lang: string
-  type: 'text' | 'file'
-  text?: string
-  file?: File
-}
+  lang: 'python' | 'javascript'
+} & (
+  | {
+      type: 'text'
+      text: string
+      file?: File
+    }
+  | {
+      type: 'file'
+      file: File
+      text?: string
+    }
+)
 
 export type UseAddFunctionCodeProps = {
   name?: string
@@ -40,44 +47,28 @@ export function useAddFunctionCode({
   control,
   defaultValue = defaultCode,
 }: UseAddFunctionCodeProps): UseAddFunctionCodeReturn {
-  const { required } = formValidationRules
-
   const langCtrl = useController({
     control,
     name: `${name}.lang`,
     defaultValue: defaultValue?.lang,
-    rules: { required },
   })
 
   const typeCtrl = useController({
     control,
     name: `${name}.type`,
     defaultValue: defaultValue?.type,
-    rules: { required },
   })
-
-  const isText = typeCtrl.field.value === 'text'
 
   const fileCtrl = useController({
     control,
     name: `${name}.file`,
     defaultValue: defaultValue?.file,
-    rules: {
-      validate: {
-        required: (v) => isText || !!v,
-      },
-    },
   })
 
   const textCtrl = useController({
     control,
-    name: `${name}.name`,
+    name: `${name}.text`,
     defaultValue: defaultCode?.text,
-    rules: {
-      validate: {
-        required: (v) => !isText || !!v,
-      },
-    },
   })
 
   return {

@@ -1,4 +1,3 @@
-import { formValidationRules } from '@/helpers/errors'
 import { ChangeEvent, useCallback, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
@@ -21,15 +20,10 @@ export function useSelectFunctionPersistence({
   control,
   defaultValue,
 }: UseSelectFunctionPersistenceProps): UseSelectFunctionPersistenceReturn {
-  const { requiredBoolean } = formValidationRules
-
   const isPersistentCtrl = useController({
     control,
     name,
     defaultValue,
-    rules: {
-      validate: { requiredBoolean },
-    },
   })
 
   const isPersistentHandleChange = useCallback(

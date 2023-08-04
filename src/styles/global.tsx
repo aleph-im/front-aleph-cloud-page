@@ -7,10 +7,6 @@ export const GlobalStylesOverride = createGlobalStyle`
     min-height: 100vh;
   }
 
-  main {
-    flex: 1 0 auto;
-  }
-
   // @note: Use it only for development
   /* html {
     font-size: 16px;

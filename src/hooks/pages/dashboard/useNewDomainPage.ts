@@ -5,15 +5,22 @@ import { useForm } from '@/hooks/common/useForm'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
-import { AddDomain, AddDomainTarget } from '@/domain/domain'
+import { AddDomain, AddDomainTarget, DomainManager } from '@/domain/domain'
 import { EntityType } from '@/helpers/constants'
-import { UseControllerReturn, useController } from 'react-hook-form'
-import { formValidationRules } from '@/helpers/errors'
+import {
+  FieldErrors,
+  UseControllerReturn,
+  useController,
+} from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 export type NewDomainFormState = AddDomain
 
-export const defaultValues: Partial<NewDomainFormState> = {
+export const defaultValues: NewDomainFormState = {
+  name: '',
+  ref: '',
   target: AddDomainTarget.Program,
+  programType: EntityType.Instance,
 }
 
 export type DomainRefOptions = {
@@ -30,6 +37,7 @@ export type UseNewDomainPageReturn = {
   nameCtrl: UseControllerReturn<NewDomainFormState, 'name'>
   programTypeCtrl: UseControllerReturn<NewDomainFormState, 'programType'>
   refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
+  errors: FieldErrors<NewDomainFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
 }
 
@@ -56,24 +64,26 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     [dispatch, manager, router],
   )
 
-  const { control, handleSubmit, setValue } = useForm({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
     defaultValues,
     onSubmit,
+    resolver: zodResolver(DomainManager.addSchema),
   })
-
-  const { required } = formValidationRules
 
   const nameCtrl = useController({
     control,
     name: 'name',
-    rules: { required },
   })
 
   const programTypeCtrl = useController({
     control,
     name: 'programType',
     rules: {
-      required,
       onChange() {
         setValue('ref', '')
       },
@@ -83,7 +93,6 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   const refCtrl = useController({
     control,
     name: 'ref',
-    rules: { required },
   })
 
   const entityType = programTypeCtrl.field.value
@@ -127,6 +136,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     nameCtrl,
     programTypeCtrl,
     refCtrl,
+    errors,
     handleSubmit,
   }
 }

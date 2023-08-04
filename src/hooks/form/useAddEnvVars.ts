@@ -1,4 +1,3 @@
-import { formValidationRules } from '@/helpers/errors'
 import { useCallback } from 'react'
 import {
   Control,
@@ -39,20 +38,16 @@ export function useEnvVarItem({
   defaultValue,
   onRemove,
 }: UseEnvVarItemProps): UseEnvVarItemReturn {
-  const { required } = formValidationRules
-
   const nameCtrl = useController({
     control,
     name: `${name}.${index}.name`,
     defaultValue: defaultValue?.name,
-    rules: { required },
   })
 
   const valueCtrl = useController({
     control,
     name: `${name}.${index}.value`,
     defaultValue: defaultValue?.value,
-    rules: { required },
   })
 
   const handleRemove = useCallback(() => {

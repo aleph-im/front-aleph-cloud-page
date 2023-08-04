@@ -8,6 +8,7 @@ import {
 } from '../helpers/constants'
 import { getDate, getExplorerURL } from '../helpers/utils'
 import { EntityManager } from './types'
+import { sshKeySchema, sshKeysSchema } from '@/helpers/schemas'
 
 export type AddSSHKey = {
   key: string
@@ -23,6 +24,9 @@ export type SSHKey = AddSSHKey & {
 }
 
 export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
+  static addSchema = sshKeySchema
+  static addManySchema = sshKeysSchema
+
   constructor(
     protected account: Account,
     protected type = defaultSSHPostType,
@@ -99,30 +103,23 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     sshKeys: AddSSHKey[],
     throwOnCollision = true,
   ): Promise<AddSSHKey[]> {
+    sshKeys = SSHKeyManager.addManySchema.parse(sshKeys)
+
     const currentSSHKeys = await this.getAll()
     const currentSSHKeySet = new Set<string>(currentSSHKeys.map((d) => d.key))
 
     if (!throwOnCollision) {
-      sshKeys = sshKeys.filter((sshKey) => !currentSSHKeySet.has(sshKey.key))
+      return sshKeys.filter((sshKey) => !currentSSHKeySet.has(sshKey.key))
+    } else {
+      return sshKeys.map((sshKey: AddSSHKey) => {
+        if (!currentSSHKeySet.has(sshKey.key)) return sshKey
+        throw new Error(
+          `SSH key already exists on your collection: ${
+            sshKey.label || sshKey.key
+          }`,
+        )
+      })
     }
-
-    const newKeys = sshKeys.map((sshKey: AddSSHKey) => {
-      const key = sshKey.key.trim()
-      const label = sshKey.label?.trim()
-
-      if (!key) throw new Error('Invalid ssh key')
-
-      if (!label) throw new Error('Invalid ssh key label')
-
-      if (throwOnCollision && currentSSHKeySet.has(key))
-        throw new Error(`SSH key already exists: ${label || key}`)
-
-      return { ...sshKey, key, label }
-    })
-
-    // @todo: dedup
-
-    return newKeys
   }
 
   // @todo: Type not exported from SDK...

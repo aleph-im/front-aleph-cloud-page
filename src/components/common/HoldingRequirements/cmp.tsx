@@ -17,6 +17,8 @@ import { InstanceManager } from '@/domain/instance'
 import { ProgramManager } from '@/domain/program'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import InfoTooltipButton from '../InfoTooltipButton'
+import Container from '@/components/common/CenteredContainer'
+import { TextGradient } from '@aleph-front/aleph-core'
 
 const HoldingRequirementsSpecsLine = React.memo(
   ({ type, specs, cost }: HoldingRequirementsSpecsLineProps) => {
@@ -179,6 +181,8 @@ export default function HoldingRequirements({
   volumes,
   domains,
   isPersistent = type === EntityType.Instance,
+  button: ButtonCmp,
+  description,
 }: HoldingRequirementsProps) {
   const { computeTotalCost, perVolumeCost, totalCost } = useMemo(() => {
     switch (type) {
@@ -204,63 +208,89 @@ export default function HoldingRequirements({
   }, [isPersistent, specs, type, volumes])
 
   return (
-    <div tw="max-w-full overflow-auto">
-      <StyledHoldingSummaryLine isHeader>
-        <div>UNLOCKED</div>
-        <div className="tp-body1">current wallet {ellipseAddress(address)}</div>
-        <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
-      </StyledHoldingSummaryLine>
+    <>
+      <div tw="md:mt-32" />
+      <section
+        className="fx-noise-light"
+        tw="px-0 pt-6 pb-24 md:pt-16 md:pb-32 md:mt-auto"
+      >
+        <Container>
+          <TextGradient forwardedAs="h2" type="h5" tw="mb-1">
+            Estimated holding requirements
+          </TextGradient>
+          {description && (
+            <div tw="mt-1 mb-6">
+              <p className="text-main2">{description}</p>
+            </div>
+          )}
+          <div tw="my-7">
+            <div tw="max-w-full overflow-auto">
+              <StyledHoldingSummaryLine isHeader>
+                <div>UNLOCKED</div>
+                <div className="tp-body1">
+                  current wallet {ellipseAddress(address)}
+                </div>
+                <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
+              </StyledHoldingSummaryLine>
 
-      {specs && (
-        <HoldingRequirementsSpecsLine
-          {...{
-            type,
-            specs,
-            isPersistent,
-            perVolumeCost,
-            cost: computeTotalCost,
-          }}
-        />
-      )}
+              {specs && (
+                <HoldingRequirementsSpecsLine
+                  {...{
+                    type,
+                    specs,
+                    isPersistent,
+                    perVolumeCost,
+                    cost: computeTotalCost,
+                  }}
+                />
+              )}
 
-      {volumes &&
-        volumes.map((volume, index) => {
-          return (
-            <HoldingRequirementsVolumeLine
-              key={volume.volumeType + index}
-              {...{
-                volume,
-                specs,
-                cost: perVolumeCost[index],
-              }}
-            />
-          )
-        })}
+              {volumes &&
+                volumes.map((volume, index) => {
+                  return (
+                    <HoldingRequirementsVolumeLine
+                      key={volume.volumeType + index}
+                      {...{
+                        volume,
+                        specs,
+                        cost: perVolumeCost[index],
+                      }}
+                    />
+                  )
+                })}
 
-      {type === EntityType.Program && (
-        <StyledHoldingSummaryLine>
-          <div>TYPE</div>
-          <div>{isPersistent ? 'persistent' : 'on-demand'}</div>
-          <div>-</div>
-        </StyledHoldingSummaryLine>
-      )}
+              {type === EntityType.Program && (
+                <StyledHoldingSummaryLine>
+                  <div>TYPE</div>
+                  <div>{isPersistent ? 'persistent' : 'on-demand'}</div>
+                  <div>-</div>
+                </StyledHoldingSummaryLine>
+              )}
 
-      {domains &&
-        domains.map((domain) => {
-          return (
-            <HoldingRequirementsDomainLine key={domain.name} domain={domain} />
-          )
-        })}
+              {domains &&
+                domains.map((domain) => {
+                  return (
+                    <HoldingRequirementsDomainLine
+                      key={domain.name}
+                      domain={domain}
+                    />
+                  )
+                })}
 
-      <StyledHoldingSummaryLine>
-        <div></div>
-        <div className="tp-body2">Total</div>
-        <div>
-          <span className="text-main1">
-            {humanReadableCurrency(totalCost)} ALEPH
-          </span>
-        </div>
-      </StyledHoldingSummaryLine>
-    </div>
+              <StyledHoldingSummaryLine>
+                <div></div>
+                <div className="tp-body2">Total</div>
+                <div>
+                  <span className="text-main1">
+                    {humanReadableCurrency(totalCost)} ALEPH
+                  </span>
+                </div>
+              </StyledHoldingSummaryLine>
+            </div>
+          </div>
+          {ButtonCmp && <div tw="mt-7 text-center">{ButtonCmp}</div>}
+        </Container>
+      </section>
+    </>
   )
 }

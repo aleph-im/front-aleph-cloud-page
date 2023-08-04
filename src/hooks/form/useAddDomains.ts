@@ -1,4 +1,3 @@
-import { formValidationRules } from '@/helpers/errors'
 import { useCallback } from 'react'
 import {
   Control,
@@ -36,13 +35,10 @@ export function useDomainItem({
   defaultValue,
   onRemove,
 }: UseDomainItemProps): UseDomainItemReturn {
-  const { required } = formValidationRules
-
   const nameCtrl = useController({
     control,
     name: `${name}.${index}.name`,
     defaultValue: defaultValue?.name,
-    rules: { required },
   })
 
   const handleRemove = useCallback(() => {

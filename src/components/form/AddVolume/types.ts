@@ -7,7 +7,7 @@ import {
 import { Control } from 'react-hook-form'
 
 export type AddVolumeCommonProps = {
-  name: string
+  name?: string
   index?: number
   control: Control
   onRemove?: (index?: number) => void

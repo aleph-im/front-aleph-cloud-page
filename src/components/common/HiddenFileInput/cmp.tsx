@@ -1,15 +1,12 @@
-import React, { ChangeEvent, memo, useCallback, useRef, useState } from 'react'
-import { Button, Icon } from '@aleph-front/aleph-core'
+import React, { ChangeEvent, memo, useCallback, useRef } from 'react'
+import { Button, FormError, Icon } from '@aleph-front/aleph-core'
 import { HiddenFileInputProps } from './types'
 import { StyledHiddenFileInput } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 
 export const HiddenFileInput = memo(
-  ({ onChange, accept, value, children }: HiddenFileInputProps) => {
+  ({ onChange, accept, value, children, error }: HiddenFileInputProps) => {
     const inputRef = useRef<HTMLInputElement>(null)
-    const [state, setState] = useState<File | undefined>(undefined)
-
-    const file = value || state
 
     const handleClick = useCallback(() => {
       if (!inputRef.current) return
@@ -17,7 +14,6 @@ export const HiddenFileInput = memo(
     }, [])
 
     const handleRemoveFile = useCallback(() => {
-      setState(undefined)
       onChange(undefined)
     }, [onChange])
 
@@ -29,7 +25,6 @@ export const HiddenFileInput = memo(
 
         if (files) {
           const fileUploaded = files[0]
-          setState(fileUploaded)
           onChange(fileUploaded)
         }
       },
@@ -38,7 +33,7 @@ export const HiddenFileInput = memo(
 
     return (
       <>
-        {file ? (
+        {value ? (
           <Button
             onClick={handleRemoveFile}
             type="button"
@@ -47,7 +42,7 @@ export const HiddenFileInput = memo(
             size="regular"
             variant="tertiary"
           >
-            {ellipseAddress(file.name)} <Icon name="trash" tw="ml-5" />
+            {ellipseAddress(value.name)} <Icon name="trash" tw="ml-5" />
           </Button>
         ) : (
           <Button
@@ -61,6 +56,8 @@ export const HiddenFileInput = memo(
             {children}
           </Button>
         )}
+
+        {error && <FormError error={error} />}
 
         <StyledHiddenFileInput
           type="file"

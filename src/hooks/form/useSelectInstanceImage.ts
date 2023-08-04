@@ -1,5 +1,4 @@
 import { InstanceImage, InstanceImageId, InstanceImages } from '@/domain/image'
-import { formValidationRules } from '@/helpers/errors'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 export type InstanceImageField = string
@@ -32,13 +31,10 @@ export function useSelectInstanceImage({
 }: UseSelectInstanceImageProps): UseSelectInstanceImageReturn {
   const options = optionsProp || defaultInstanceImageOptions
 
-  const { required } = formValidationRules
-
   const imageCtrl = useController({
     control,
     name,
     defaultValue,
-    rules: { required },
   })
 
   return {

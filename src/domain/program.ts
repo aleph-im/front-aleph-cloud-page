@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import JSZip from 'jszip'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, program, any } from 'aleph-sdk-ts/dist/messages'
@@ -102,6 +103,13 @@ export class ProgramManager
   extends Executable
   implements EntityManager<Program, AddProgram>
 {
+  static addSchema = z.object({
+    key: z.string(),
+    label: z.string().trim().optional(),
+  })
+
+  static addManySchema = z.array(this.addSchema)
+
   /**
    * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
    */

@@ -1,5 +1,4 @@
 import { EntityType, EntityTypeName } from '@/helpers/constants'
-import { formValidationRules } from '@/helpers/errors'
 import { useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
@@ -32,13 +31,10 @@ export function useAddNameAndTags({
   defaultValue,
   entityType,
 }: UseNameAndTagsProps): UseNameAndTagsReturn {
-  const { required } = formValidationRules
-
   const nameCtrl = useController({
     control,
     name: `${name}.name`,
     defaultValue: defaultValue?.name,
-    rules: { required },
   })
 
   const tagsCtrl = useController({

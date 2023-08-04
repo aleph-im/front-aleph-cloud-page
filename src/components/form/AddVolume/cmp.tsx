@@ -46,7 +46,7 @@ RemoveVolume.displayName = 'RemoveVolume'
 export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
   const {
     isStandAlone,
-    fileSrcCtrl,
+    fileCtrl,
     mountPathCtrl,
     useLatestCtrl,
     volumeSize,
@@ -63,7 +63,7 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
       </p>
       <NoisyContainer>
         <div tw="py-4">
-          <HiddenFileInput {...fileSrcCtrl.field} {...fileSrcCtrl.fieldState}>
+          <HiddenFileInput {...fileCtrl.field} {...fileCtrl.fieldState}>
             Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
           </HiddenFileInput>
         </div>
@@ -77,7 +77,7 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
             />
           </div>
         )}
-        {fileSrcCtrl.field.value && (
+        {fileCtrl.field.value && (
           <div tw="mt-4">
             <TextInput label="Size" name="size" value={volumeSize} disabled />
           </div>

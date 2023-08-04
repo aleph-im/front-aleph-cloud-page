@@ -7,15 +7,12 @@ import { useForm } from '@/hooks/common/useForm'
 import { NewVolumeStandaloneField } from '@/hooks/form/useAddVolume'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { ActionTypes } from '@/helpers/store'
-import { Control } from 'react-hook-form'
+import { Control, FieldErrors } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-export type NewVolumeFormState = {
-  volume: NewVolumeStandaloneField
-}
+export type NewVolumeFormState = NewVolumeStandaloneField
 
-export const defaultValues: Partial<NewVolumeFormState> = {
-  volume: { volumeType: VolumeType.New },
-}
+export const defaultValues: NewVolumeFormState = { volumeType: VolumeType.New }
 
 export type UseNewVolumePageReturn = {
   address: string
@@ -24,6 +21,7 @@ export type UseNewVolumePageReturn = {
   handleSubmit: (e: FormEvent) => Promise<void>
   values: any
   control: Control<any>
+  errors: FieldErrors<NewVolumeFormState>
 }
 
 export function useNewVolumePage(): UseNewVolumePageReturn {
@@ -39,7 +37,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     async (state: NewVolumeFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const [accountVolume] = await manager.add(state.volume)
+      const [accountVolume] = await manager.add(state)
 
       dispatch({
         type: ActionTypes.addAccountVolume,
@@ -51,13 +49,22 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     [dispatch, manager, router],
   )
 
-  const { watch, control, handleSubmit } = useForm({ defaultValues, onSubmit })
+  const {
+    watch,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+    onSubmit,
+    resolver: zodResolver(VolumeManager.addSchema),
+  })
   const values = watch()
 
   const accountBalance = appState?.accountBalance || 0
   const { totalCost } = useMemo(
-    () => VolumeManager.getCost({ volumes: [values.volume] }),
-    [values.volume],
+    () => VolumeManager.getCost({ volumes: [values] }),
+    [values],
   )
 
   const canAfford = accountBalance > totalCost
@@ -70,8 +77,9 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     address: account?.address || '',
     accountBalance: appState.accountBalance || 0,
     isCreateButtonDisabled,
-    handleSubmit,
     values,
     control,
+    errors,
+    handleSubmit,
   }
 }

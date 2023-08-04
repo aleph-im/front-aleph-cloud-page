@@ -2,11 +2,10 @@ import { useCallback, useMemo } from 'react'
 import { convertBitUnits } from '@/helpers/utils'
 import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
-import { formValidationRules } from '@/helpers/errors'
 
 export type NewVolumeStandaloneField = {
   volumeType: VolumeType.New
-  fileSrc?: File
+  file?: File
 }
 
 export type NewVolumeField = NewVolumeStandaloneField & {
@@ -39,7 +38,7 @@ export type VolumeField =
   | PersistentVolumeField
 
 export type UseAddVolumeCommonProps = {
-  name: string
+  name?: string
   index?: number
   control: Control
   onRemove?: () => void
@@ -53,55 +52,44 @@ export type UseAddNewVolumeReturn = {
   isStandAlone: boolean
   mountPathCtrl: UseControllerReturn<any, any>
   useLatestCtrl: UseControllerReturn<any, any>
-  fileSrcCtrl: UseControllerReturn<any, any>
+  fileCtrl: UseControllerReturn<any, any>
   volumeSize: string
   handleRemove?: () => void
 }
-export function useAddNewVolumeProps(
-  props: UseAddNewVolumeProps,
-): UseAddNewVolumeReturn {
-  const { name, index, control, defaultValue, onRemove: handleRemove } = props
-
-  const { required } = formValidationRules
-
+export function useAddNewVolumeProps({
+  name = '',
+  index,
+  control,
+  defaultValue,
+  onRemove: handleRemove,
+}: UseAddNewVolumeProps): UseAddNewVolumeReturn {
   const isStandAlone = index === undefined
   const n = isStandAlone ? name : `${name}.${index}`
 
-  const fileSrcCtrl = useController({
+  const fileCtrl = useController({
     control,
-    name: `${n}.fileSrc`,
-    defaultValue: defaultValue?.fileSrc,
-    rules: { required },
+    name: `${n}.file`,
+    defaultValue: defaultValue?.file,
   })
 
   const mountPathCtrl = useController({
     control,
     name: `${n}.mountPath`,
     defaultValue: defaultValue?.mountPath,
-    rules: {
-      validate: {
-        required: (v) => isStandAlone || !!v,
-      },
-    },
   })
 
   const useLatestCtrl = useController({
     control,
     name: `${n}.useLatest`,
     defaultValue: defaultValue?.useLatest,
-    rules: {
-      validate: {
-        required: (v) => isStandAlone || !!v,
-      },
-    },
   })
 
-  const { value: fileSrc } = fileSrcCtrl.field
+  const { value: file } = fileCtrl.field
 
   const volumeSize = useMemo(() => {
     const size = VolumeManager.getVolumeSize({
       volumeType: VolumeType.New,
-      fileSrc,
+      file,
     } as Volume)
 
     return convertBitUnits(size, {
@@ -109,11 +97,11 @@ export function useAddNewVolumeProps(
       to: 'mb',
       displayUnit: true,
     }) as string
-  }, [fileSrc])
+  }, [file])
 
   return {
     isStandAlone: index === undefined,
-    fileSrcCtrl,
+    fileCtrl,
     mountPathCtrl,
     useLatestCtrl,
     volumeSize,
@@ -135,33 +123,28 @@ export type UseAddExistingVolumeReturn = {
 }
 
 export function useAddExistingVolumeProps({
-  name,
+  name = '',
   index,
   control,
   defaultValue,
   onRemove: handleRemove,
 }: UseAddExistingVolumeProps): UseAddExistingVolumeReturn {
-  const { required } = formValidationRules
-
   const refHashCtrl = useController({
     control,
     name: `${name}.${index}.refHash`,
     defaultValue: defaultValue?.refHash,
-    rules: { required },
   })
 
   const mountPathCtrl = useController({
     control,
     name: `${name}.${index}.mountPath`,
     defaultValue: defaultValue?.mountPath,
-    rules: { required },
   })
 
   const useLatestCtrl = useController({
     control,
     name: `${name}.${index}.useLatest`,
     defaultValue: defaultValue?.useLatest,
-    rules: { required },
   })
 
   return {
@@ -187,47 +170,28 @@ export type UseAddPersistentVolumeReturn = {
 }
 
 export function useAddPersistentVolumeProps({
-  name = 'volumes',
+  name = '',
   index,
   control,
   defaultValue,
   onRemove: handleRemove,
 }: UseAddPersistentVolumeProps): UseAddPersistentVolumeReturn {
-  const { required } = formValidationRules
-
   const nameCtrl = useController({
     control,
     name: `${name}.${index}.name`,
     defaultValue: defaultValue?.name,
-    rules: { required },
   })
 
   const mountPathCtrl = useController({
     control,
     name: `${name}.${index}.mountPath`,
     defaultValue: defaultValue?.mountPath,
-    rules: { required },
   })
 
   const sizeCtrl = useController({
     control,
     name: `${name}.${index}.size`,
     defaultValue: defaultValue?.size || 0,
-    rules: {
-      required,
-      onChange(e) {
-        if (typeof e.target.value !== 'string') return
-
-        const sizeGB = Number(e.target.value)
-        const size = convertBitUnits(sizeGB, {
-          from: 'gb',
-          to: 'mb',
-          displayUnit: false,
-        }) as number
-
-        sizeCtrl.field.onChange(size)
-      },
-    },
   })
 
   const { value: size } = sizeCtrl.field
@@ -273,8 +237,6 @@ export function useAddVolume({
   control,
   onRemove,
 }: UseAddVolumeProps): UseAddVolumeReturn {
-  const { required } = formValidationRules
-
   const isStandAlone = index === undefined
   const n = isStandAlone ? name : `${name}.${index}`
 
@@ -282,7 +244,6 @@ export function useAddVolume({
     control,
     name: `${n}.volumeType`,
     defaultValue: VolumeType.New,
-    rules: { required },
   })
 
   const handleRemove = useCallback(() => {

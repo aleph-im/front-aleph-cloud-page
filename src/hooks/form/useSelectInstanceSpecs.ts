@@ -1,5 +1,4 @@
 import { EntityType } from '@/helpers/constants'
-import { formValidationRules } from '@/helpers/errors'
 import { useEffect } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
@@ -61,13 +60,10 @@ export function useSelectInstanceSpecs({
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
   const options = optionsProp || getDefaultSpecsOptions(isPersistent)
 
-  const { required } = formValidationRules
-
   const specsCtrl = useController({
     control,
     name,
     defaultValue,
-    rules: { required },
   })
 
   const { value, onChange } = specsCtrl.field

@@ -2,12 +2,15 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { aggregate } from 'aleph-sdk-ts/dist/messages'
 import E_ from '../helpers/errors'
 import {
+  AddDomainTarget,
   EntityType,
   defaultDomainAggregateKey,
   defaultDomainChannel,
 } from '../helpers/constants'
 import { EntityManager } from './types'
-import { isValidItemHash } from '@/helpers/utils'
+import { domainSchema, domainsSchema } from '@/helpers/schemas'
+
+export { AddDomainTarget }
 
 export type DomainAggregateItem = {
   type: AddDomainTarget
@@ -16,11 +19,6 @@ export type DomainAggregateItem = {
 }
 
 export type DomainAggregate = Record<string, DomainAggregateItem | null>
-
-export enum AddDomainTarget {
-  IPFS = 'ipfs',
-  Program = 'program',
-}
 
 export type AddDomain = {
   name: string
@@ -48,6 +46,9 @@ export type DomainStatus = {
 }
 
 export class DomainManager implements EntityManager<Domain, AddDomain> {
+  static addSchema = domainSchema
+  static addManySchema = domainsSchema
+
   constructor(
     protected account: Account,
     protected key = defaultDomainAggregateKey,
@@ -154,26 +155,21 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     domains: AddDomain[],
     throwOnCollision = true,
   ): Promise<AddDomain[]> {
+    domains = DomainManager.addManySchema.parse(domains)
+
     const currentDomains = await this.getAll()
     const currentDomainSet = new Set<string>(currentDomains.map((d) => d.name))
 
     if (!throwOnCollision) {
-      domains = domains.filter((domain) => !currentDomainSet.has(domain.name))
+      return domains.filter((domain) => !currentDomainSet.has(domain.name))
+    } else {
+      return domains.map((domain: AddDomain) => {
+        if (!currentDomainSet.has(domain.name)) return domain
+        throw new Error(
+          `Domain name already used by another resource: ${domain.name}`,
+        )
+      })
     }
-
-    return domains.map((domain: AddDomain) => {
-      const ref = domain.ref.trim()
-      const name = domain.name.trim()
-
-      if (!ref || !isValidItemHash(ref)) throw new Error('Invalid domain ref')
-
-      if (!name) throw new Error('Invalid domain name')
-
-      if (throwOnCollision && currentDomainSet.has(name))
-        throw new Error(`Domain name already used by another resource: ${name}`)
-
-      return { ...domain, ref, name }
-    })
   }
 
   // @todo: Type not exported from SDK...

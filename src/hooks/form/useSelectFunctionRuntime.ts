@@ -4,7 +4,6 @@ import {
   FunctionRuntimes,
 } from '@/domain/runtime'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
-import { formValidationRules } from '@/helpers/errors'
 
 export type FunctionRuntimeField = {
   id: string
@@ -44,14 +43,11 @@ export function useSelectFunctionRuntime({
 }: UseSelectFunctionRuntimeProps): UseSelectFunctionRuntimeReturn {
   const options = optionsProp || defaultFunctionRuntimeOptions
 
-  const { required } = formValidationRules
-
   const idCtrl = useController({
     control,
     name: `${name}.id`,
     defaultValue: defaultValue?.id,
     rules: {
-      required,
       onChange(e) {
         if (e.target.value === FunctionRuntimeId.Custom) return
         customCtrl.field.onChange('')
@@ -65,11 +61,6 @@ export function useSelectFunctionRuntime({
     control,
     name: `${name}.custom`,
     defaultValue: defaultValue?.custom,
-    rules: {
-      validate: {
-        required: (v) => isCustomDisabled || !!v,
-      },
-    },
   })
 
   return {

@@ -3,6 +3,7 @@ import { EntityType } from '@/helpers/constants'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
+import { ReactNode } from 'react'
 
 export type HoldingRequirementsProps = {
   address: string
@@ -12,6 +13,8 @@ export type HoldingRequirementsProps = {
   specs?: InstanceSpecsField
   volumes?: VolumeField[]
   domains?: DomainField[]
+  button?: ReactNode
+  description?: ReactNode
 }
 
 export type HoldingRequirementsSpecsLineProps = {
