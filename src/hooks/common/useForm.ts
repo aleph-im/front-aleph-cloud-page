@@ -1,72 +1,119 @@
-import { FormEvent, useCallback, useReducer } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import { RequestState, useRequestState } from './useRequestState'
+import {
+  useForm as useFormLib,
+  UseFormReturn as UseFormReturnLib,
+  UseFormProps as UseFormPropsLib,
+  FieldErrors,
+  FieldValues,
+} from 'react-hook-form'
+import { ZodError } from 'zod'
 
-export type UseFormProps<FormState, Response = void> = {
-  initialState: FormState
+export type UseFormProps<
+  FormState extends Record<string, any>,
+  Response = void,
+> = UseFormPropsLib<FormState> & {
   onSubmit: (state: FormState) => Promise<Response>
 }
 
-export type UseFormReturn<FormState, Response = void> = {
-  state: FormState
+export type UseFormReturn<
+  FormState extends Record<string, any>,
+  Response = void,
+> = Omit<UseFormReturnLib<FormState>, 'handleSubmit'> & {
   requestState: RequestState<Response>
-  setFormValue: (field: keyof FormState, value: unknown) => void
   handleSubmit: (e: FormEvent) => Promise<void>
 }
 
-export function useForm<FormState, Response>({
-  initialState,
-  onSubmit,
-}: UseFormProps<FormState, Response>): UseFormReturn<FormState, Response> {
-  const [state, dispatchState] = useReducer(
-    (
-      state: FormState,
-      action: {
-        type: string
-        payload: { key: keyof FormState; value: unknown }
-      },
-    ): FormState => {
-      switch (action.type) {
-        case 'SET_VALUE':
-          return {
-            ...state,
-            [action.payload.key]: action.payload.value,
-          }
+function getFirstError<T extends FieldValues>(errors: FieldErrors<T>) {
+  const [firstError] = Object.entries(errors)
+  if (!firstError) return
 
-        default:
-          return state
-      }
-    },
-    initialState,
-  )
+  const [field, err] = firstError
+
+  if (Array.isArray(err)) {
+    const subError = err[err.length - 1]
+    return getFirstError(subError)
+  }
+
+  return [field, err]
+}
+
+export function useForm<FormState extends Record<string, any>, Response>({
+  onSubmit,
+  ...props
+}: UseFormProps<FormState, Response>): UseFormReturn<FormState, Response> {
+  const form = useFormLib<FormState>(props)
 
   const [requestState, { onLoad, onSuccess, onError }] =
     useRequestState<Response>()
 
-  const handleSubmit = useCallback(
-    async (e: FormEvent) => {
-      e.preventDefault()
-
+  const handleSubmitRequest = useCallback(
+    async (state: FormState) => {
       try {
         onLoad()
         const response = await onSubmit(state)
         onSuccess(response)
       } catch (e) {
-        onError(e as Error)
+        const err = e as Error
+        const error =
+          err instanceof ZodError
+            ? new Error('Validation error, check highlighted form fields')
+            : ((err?.cause || err) as Error)
+
+        // @note: form.setError is cloning the error obj loosing the message prop
+        form.setError('root.serverError', {
+          ...error,
+          message: error?.message,
+        })
+
+        onError(error)
       }
     },
-    [state, onError, onLoad, onSubmit, onSuccess],
+    [form, onError, onLoad, onSubmit, onSuccess],
   )
 
-  const setFormValue = useCallback(
-    (key: keyof FormState, value: unknown) =>
-      dispatchState({ type: 'SET_VALUE', payload: { key, value } }),
-    [],
+  const handleValidationError = useCallback(
+    async (errors: FieldErrors<FormState>) => {
+      console.log(errors)
+
+      let error: Error | undefined
+
+      if (!error) {
+        const firstError = getFirstError(errors)
+
+        if (firstError) {
+          const [field, err] = firstError
+
+          const description =
+            typeof err === 'string'
+              ? err
+              : err?.message
+              ? `: ${err.message}`
+              : err?.type
+              ? `: "${err?.type}" validation not satisfied`
+              : ''
+
+          error = new Error(`Error on field "${field}"${description}`)
+        }
+      }
+
+      if (!error) {
+        error = new Error('Validation error')
+      }
+
+      onError(error)
+    },
+    [onError],
+  )
+
+  const handleSubmit = useMemo(
+    () => form.handleSubmit(handleSubmitRequest, handleValidationError),
+    [form, handleSubmitRequest, handleValidationError],
   )
 
   return {
-    state,
+    ...form,
     requestState,
     handleSubmit,
-    setFormValue,
   }
 }

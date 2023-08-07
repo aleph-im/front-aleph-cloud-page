@@ -6,8 +6,7 @@ import NoisyContainer from '@/components/common/NoisyContainer'
 import { AddNameAndTagsProps } from './types'
 
 export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
-  const { entityName, name, tags, handleNameChange, handleTagsChange } =
-    useAddNameAndTags(props)
+  const { entityName, nameCtrl, tagsCtrl } = useAddNameAndTags(props)
 
   return (
     <NoisyContainer>
@@ -35,10 +34,9 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
           </InfoTooltipButton>
         </div>
         <TextInput
+          {...nameCtrl.field}
+          {...nameCtrl.fieldState}
           placeholder="Give it a name"
-          error={name ? undefined : { message: 'This field is required' }}
-          name="__config_function_name"
-          onChange={handleNameChange}
         />
       </div>
       <div tw="mt-4">
@@ -66,10 +64,9 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
           </InfoTooltipButton>
         </div>
         <ChipInput
+          {...tagsCtrl.field}
+          {...tagsCtrl.fieldState}
           placeholder="Tags (press enter to add a new tag)"
-          name="__config_function_tags"
-          value={tags}
-          onChange={handleTagsChange}
         />
       </div>
     </NoisyContainer>

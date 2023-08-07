@@ -9,7 +9,6 @@ export type FunctionRuntime = {
   id: string
   name: string
   dist: string
-  meta?: string
 }
 
 export const FunctionRuntimes: Record<FunctionRuntimeId, FunctionRuntime> = {

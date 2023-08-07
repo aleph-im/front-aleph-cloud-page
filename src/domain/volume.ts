@@ -3,29 +3,28 @@ import { forget, store, any } from 'aleph-sdk-ts/dist/messages'
 import E_ from '../helpers/errors'
 import {
   EntityType,
+  VolumeType,
   defaultVolumeChannel,
   programStorageURL,
 } from '../helpers/constants'
 import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
 import { MessageType, StoreContent } from 'aleph-sdk-ts/dist/messages/types'
-import { VolumeProp } from '@/hooks/form/useAddVolume'
+import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
 import { EntityManager } from './types'
+import {
+  newIsolatedVolumeSchema,
+  newIsolatedVolumesSchema,
+} from '@/helpers/schemas'
 
-export enum VolumeType {
-  New = 'new',
-  Existing = 'existing',
-  Persistent = 'persistent',
-}
+export { VolumeType }
 
 export type AddNewVolume = {
-  id: string
   volumeType: VolumeType.New
-  fileSrc?: File
+  file?: File
 }
 
 export type AddExistingVolume = {
-  id: string
   volumeType: VolumeType.Existing
   mountPath: string
   refHash: string
@@ -34,7 +33,6 @@ export type AddExistingVolume = {
 }
 
 export type AddPersistentVolume = {
-  id: string
   volumeType: VolumeType.Persistent
   name: string
   mountPath: string
@@ -46,6 +44,7 @@ export type AddPersistentVolume = {
 export type AddVolume = AddNewVolume | AddExistingVolume | AddPersistentVolume
 
 export type BaseVolume = StoreContent & {
+  id: string
   url: string
   date: string
   size?: number
@@ -54,9 +53,8 @@ export type BaseVolume = StoreContent & {
 
 export type NewVolume = BaseVolume & {
   type: EntityType.Volume
-  id: string
   volumeType: VolumeType.New
-  fileSrc?: File
+  file?: File
   mountPath: string
   useLatest: boolean
   size?: number
@@ -64,7 +62,6 @@ export type NewVolume = BaseVolume & {
 
 export type ExistingVolume = BaseVolume & {
   type: EntityType.Volume
-  id: string
   volumeType: VolumeType.Existing
   mountPath: string
   refHash: string
@@ -74,7 +71,6 @@ export type ExistingVolume = BaseVolume & {
 
 export type PersistentVolume = BaseVolume & {
   type: EntityType.Volume
-  id: string
   volumeType: VolumeType.Persistent
   name: string
   mountPath: string
@@ -86,6 +82,7 @@ export type Volume = NewVolume | ExistingVolume | PersistentVolume
 export type VolumeCostProps = {
   volumes?: (Volume | AddVolume)[]
   sizeDiscount?: number
+  exclude?: VolumeType[]
 }
 
 export type PerVolumeCostItem = {
@@ -95,7 +92,7 @@ export type PerVolumeCostItem = {
   cost: number
 }
 
-export type PerVolumeCost = Record<string, PerVolumeCostItem>
+export type PerVolumeCost = PerVolumeCostItem[]
 
 export type VolumeCost = {
   perVolumeCost: PerVolumeCost
@@ -103,12 +100,15 @@ export type VolumeCost = {
 }
 
 export class VolumeManager implements EntityManager<Volume, AddVolume> {
+  static addSchema = newIsolatedVolumeSchema
+  static addManySchema = newIsolatedVolumesSchema
+
   /**
    * Returns the size of a volume in mb
    */
   static getVolumeSize(volume: Volume | AddVolume): number {
     if (volume.volumeType === VolumeType.New) {
-      return (volume?.fileSrc?.size || 0) / 10 ** 6
+      return (volume?.file?.size || 0) / 10 ** 6
     }
 
     return volume.size || 0
@@ -121,9 +121,21 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   static getPerVolumeCost({
     volumes = [],
     sizeDiscount = 0,
+    exclude = [VolumeType.Existing],
   }: VolumeCostProps): PerVolumeCost {
-    return volumes.reduce((acc, volume) => {
+    return volumes.map((volume) => {
+      const isExcluded = exclude.includes(volume.volumeType)
       const size = this.getVolumeSize(volume) || 0
+
+      if (isExcluded) {
+        return {
+          size,
+          price: 0,
+          discount: 0,
+          cost: 0,
+        }
+      }
+
       let newSize = size
 
       if (sizeDiscount > 0) {
@@ -140,19 +152,17 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       // @note: medium article =>  https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
       // @note: code is law => https://github.com/aleph-im/aleph-vm-scheduler/blob/master/scheduler/balance.py#L82
       // const cost = newSize * 20
-      const discount = 1 - newSize / size
+      const discount = size > 0 ? 1 - newSize / size : 0
       const price = size * (1 / 3)
       const cost = newSize * (1 / 3)
 
-      acc[volume.id] = {
+      return {
         size,
         price,
         discount,
         cost,
       }
-
-      return acc
-    }, {} as PerVolumeCost)
+    }, [] as PerVolumeCost)
   }
 
   static getCost(props: VolumeCostProps): VolumeCost {
@@ -203,12 +213,13 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
     const newVolumes = this.parseNewVolumes(volumes)
+    if (newVolumes.length === 0) return []
 
     try {
       const { account, channel } = this
 
       const response = await Promise.all(
-        newVolumes.map(async ({ fileSrc: fileObject }) =>
+        newVolumes.map(async ({ file: fileObject }) =>
           store.Publish({
             account,
             channel,
@@ -246,15 +257,15 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return downloadBlob(blob, `Volume_${volumeOrId.slice(-12)}.sqsh`)
   }
 
-  protected parseNewVolumes(
-    volumes: VolumeProp | VolumeProp[],
-  ): Required<AddNewVolume>[] {
-    volumes = Array.isArray(volumes) ? volumes : [volumes]
-
-    return volumes.filter(
-      (volume: VolumeProp): volume is Required<AddNewVolume> =>
-        volume.volumeType === VolumeType.New && !!volume.fileSrc,
+  protected parseNewVolumes(volumes: VolumeField[]): Required<AddNewVolume>[] {
+    const newVolumes = volumes.filter(
+      (volume: VolumeField): volume is Required<AddNewVolume> =>
+        volume.volumeType === VolumeType.New && !!volume.file,
     )
+
+    volumes = VolumeManager.addManySchema.parse(newVolumes)
+
+    return newVolumes
   }
 
   // @todo: Type not exported from SDK...

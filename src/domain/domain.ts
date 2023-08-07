@@ -2,35 +2,36 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { aggregate } from 'aleph-sdk-ts/dist/messages'
 import E_ from '../helpers/errors'
 import {
+  AddDomainTarget,
   EntityType,
   defaultDomainAggregateKey,
   defaultDomainChannel,
 } from '../helpers/constants'
 import { EntityManager } from './types'
-import { isValidItemHash } from '@/helpers/utils'
+import { domainSchema, domainsSchema } from '@/helpers/schemas'
+
+export { AddDomainTarget }
 
 export type DomainAggregateItem = {
   type: AddDomainTarget
   message_id: string
+  programType?: EntityType.Instance | EntityType.Program
 }
 
 export type DomainAggregate = Record<string, DomainAggregateItem | null>
 
-export enum AddDomainTarget {
-  IPFS = 'ipfs',
-  Program = 'program',
-}
-
 export type AddDomain = {
   name: string
   target: AddDomainTarget
+  programType: EntityType.Instance | EntityType.Program
   ref: string
 }
 
-export type Domain = AddDomain & {
+export type Domain = Omit<AddDomain, 'programType'> & {
   type: EntityType.Domain
   id: string
   confirmed?: boolean
+  programType?: EntityType.Instance | EntityType.Program
 }
 
 export type DomainStatus = {
@@ -45,6 +46,9 @@ export type DomainStatus = {
 }
 
 export class DomainManager implements EntityManager<Domain, AddDomain> {
+  static addSchema = domainSchema
+  static addManySchema = domainsSchema
+
   constructor(
     protected account: Account,
     protected key = defaultDomainAggregateKey,
@@ -69,19 +73,32 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     return entities.find((entity) => entity.id === id)
   }
 
-  async add(domains: AddDomain | AddDomain[]): Promise<Domain[]> {
+  async add(
+    domains: AddDomain | AddDomain[],
+    throwOnCollision?: boolean,
+  ): Promise<Domain[]> {
     domains = Array.isArray(domains) ? domains : [domains]
 
-    domains = await this.parseDomains(domains)
+    domains = await this.parseDomains(domains, throwOnCollision)
 
     try {
-      const content: DomainAggregate = domains.reduce((ac, cv) => {
-        const { name, ref, target } = cv
+      if (!domains.length) return []
 
-        ac[name] = {
+      const content: DomainAggregate = domains.reduce((ac, cv) => {
+        const { name, ref, target, programType } = cv
+
+        const domain = {
           message_id: ref,
+          programType,
           type: target,
         }
+
+        // @note: legacy domains don't include programType (default to Instance)
+        if (target === AddDomainTarget.Program) {
+          domain.programType = cv.programType || EntityType.Instance
+        }
+
+        ac[name] = domain
 
         return ac
       }, {} as DomainAggregate)
@@ -134,23 +151,25 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     return response
   }
 
-  protected async parseDomains(domains: AddDomain[]): Promise<AddDomain[]> {
+  protected async parseDomains(
+    domains: AddDomain[],
+    throwOnCollision = true,
+  ): Promise<AddDomain[]> {
+    domains = DomainManager.addManySchema.parse(domains)
+
     const currentDomains = await this.getAll()
     const currentDomainSet = new Set<string>(currentDomains.map((d) => d.name))
 
-    return domains.map((domain: AddDomain) => {
-      const ref = domain.ref.trim()
-      const name = domain.name.trim()
-
-      if (!ref || !isValidItemHash(ref)) throw new Error('Invalid domain ref')
-
-      if (!name) throw new Error('Invalid domain name')
-
-      if (currentDomainSet.has(name))
-        throw new Error('Domain name already used by another resource')
-
-      return { ...domain, ref, name }
-    })
+    if (!throwOnCollision) {
+      return domains.filter((domain) => !currentDomainSet.has(domain.name))
+    } else {
+      return domains.map((domain: AddDomain) => {
+        if (!currentDomainSet.has(domain.name)) return domain
+        throw new Error(
+          `Domain name already used by another resource: ${domain.name}`,
+        )
+      })
+    }
   }
 
   // @todo: Type not exported from SDK...
@@ -179,9 +198,11 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregateItem(
     name: string,
-    { message_id, type }: DomainAggregateItem,
+    content: DomainAggregateItem,
   ): Domain {
-    return {
+    const { message_id, type } = content
+
+    const domain: Domain = {
       type: EntityType.Domain,
       id: name,
       name,
@@ -189,5 +210,12 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       ref: message_id,
       confirmed: true,
     }
+
+    // @note: legacy domains don't include programType (default to Instance)
+    if (type === AddDomainTarget.Program) {
+      domain.programType = content.programType || EntityType.Instance
+    }
+
+    return domain
   }
 }

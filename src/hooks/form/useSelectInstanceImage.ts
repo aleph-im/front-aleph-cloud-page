@@ -1,7 +1,9 @@
 import { InstanceImage, InstanceImageId, InstanceImages } from '@/domain/image'
-import { useCallback, useState } from 'react'
+import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
-export type InstanceImageProp = InstanceImage
+export type InstanceImageField = string
+
+export const defaultInstanceImage = InstanceImageId.Debian11
 
 export const defaultInstanceImageOptions = [
   InstanceImages[InstanceImageId.Debian11],
@@ -10,42 +12,33 @@ export const defaultInstanceImageOptions = [
 ]
 
 export type UseSelectInstanceImageProps = {
-  image?: InstanceImageProp
-  options?: InstanceImageProp[]
-  onChange: (image: InstanceImageProp) => void
+  name?: string
+  control: Control
+  defaultValue?: InstanceImageField
+  options?: InstanceImage[]
 }
 
 export type UseSelectInstanceImageReturn = {
-  image?: InstanceImageProp
-  options: InstanceImageProp[]
-  handleChange: (image: InstanceImageProp) => void
+  imageCtrl: UseControllerReturn<any, any>
+  options: InstanceImage[]
 }
 
 export function useSelectInstanceImage({
-  image: imageProp,
+  name = 'image',
+  control,
+  defaultValue,
   options: optionsProp,
-  onChange,
 }: UseSelectInstanceImageProps): UseSelectInstanceImageReturn {
-  const [imageState, setInstanceImageState] = useState<
-    InstanceImageProp | undefined
-  >()
-  const image = imageProp || imageState
   const options = optionsProp || defaultInstanceImageOptions
 
-  // @note: Test overflowding items
-  // options = [...options, ...options, ...options, ...options]
-
-  const handleChange = useCallback(
-    (image: InstanceImageProp) => {
-      setInstanceImageState(image)
-      onChange(image)
-    },
-    [onChange],
-  )
+  const imageCtrl = useController({
+    control,
+    name,
+    defaultValue,
+  })
 
   return {
-    image,
+    imageCtrl,
     options,
-    handleChange,
   }
 }

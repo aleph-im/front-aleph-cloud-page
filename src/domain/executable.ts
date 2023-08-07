@@ -1,4 +1,4 @@
-import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
+import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   MachineResources,
   MachineVolume,
@@ -12,10 +12,10 @@ import {
   VolumeCostProps,
 } from './volume'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
-import { VolumeProp } from '@/hooks/form/useAddVolume'
-import { DomainProp } from '@/hooks/form/useAddDomains'
-import { AddDomain, AddDomainTarget, Domain, DomainManager } from './domain'
+import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
+import { VolumeField } from '@/hooks/form/useAddVolume'
+import { DomainField } from '@/hooks/form/useAddDomains'
+import { Domain, DomainManager } from './domain'
 import { EntityType } from '@/helpers/constants'
 
 type ExecutableCapabilitiesProps = {
@@ -27,7 +27,7 @@ type ExecutableCapabilitiesProps = {
 export type ExecutableCostProps = VolumeCostProps & {
   type: EntityType.Instance | EntityType.Program
   isPersistent?: boolean
-  specs?: InstanceSpecsProp
+  specs?: InstanceSpecsField
   capabilities?: ExecutableCapabilitiesProps
 }
 
@@ -53,7 +53,7 @@ export abstract class Executable {
       return {
         computeTotalCost: 0,
         volumeTotalCost: 0,
-        perVolumeCost: {},
+        perVolumeCost: [],
         totalCost: 0,
       }
 
@@ -67,14 +67,10 @@ export abstract class Executable {
 
     const computeTotalCost = basePrice * specs.cpu * capabilitiesCost
 
-    const newVolumes = volumes.filter(
-      (volume) => volume.volumeType !== VolumeType.Existing,
-    )
-
     const sizeDiscount = type === EntityType.Instance ? 0 : specs.storage
 
     const { perVolumeCost, totalCost: volumeTotalCost } = VolumeManager.getCost(
-      { volumes: newVolumes, sizeDiscount },
+      { volumes, sizeDiscount },
     )
 
     const totalCost = volumeTotalCost + computeTotalCost
@@ -94,46 +90,34 @@ export abstract class Executable {
   ) {}
 
   protected parseEnvVars(
-    envVars?: EnvVarProp[],
+    envVars?: EnvVarField[],
   ): Record<string, string> | undefined {
-    if (!envVars) return
-
-    return envVars.reduce((acc, env) => {
-      const name = env.name.trim()
-      const value = env.value.trim()
-
-      if (name.length <= 0) throw new Error(`Invalid env var name "${name}"`)
-      if (value.length <= 0) throw new Error(`Invalid env var value "${value}"`)
-
-      acc[name] = value
-
-      return acc
-    }, {} as Record<string, string>)
+    if (!envVars || envVars.length === 0) return
+    return Object.fromEntries(envVars.map(({ name, value }) => [name, value]))
   }
 
   protected async parseDomains(
     ref: string,
-    domains?: DomainProp[],
-  ): Promise<void> {
-    if (!domains) return
+    domains?: Omit<DomainField, 'ref'>[],
+  ): Promise<Domain[]> {
+    if (!domains || domains.length === 0) return []
 
-    const parsedDomains: AddDomain[] = domains.map(({ name }) => {
-      return {
-        name,
-        ref,
-        target: AddDomainTarget.Program,
-      }
-    })
+    const parsedDomains = domains.map((domain) => ({
+      ...domain,
+      ref,
+    }))
 
-    await this.domainManager.add(parsedDomains)
+    return this.domainManager.add(parsedDomains, false)
   }
 
   protected async parseVolumes(
-    volumes?: VolumeProp | VolumeProp[],
+    volumes?: VolumeField | VolumeField[],
   ): Promise<MachineVolume[] | undefined> {
     if (!volumes) return
 
     volumes = Array.isArray(volumes) ? volumes : [volumes]
+
+    if (volumes.length === 0) return
 
     // @note: Create new volumes before and cast them to ExistingVolume type
 
@@ -176,12 +160,8 @@ export abstract class Executable {
   }
 
   protected parseSpecs(
-    specs?: InstanceSpecsProp,
+    specs: InstanceSpecsField,
   ): Omit<MachineResources, 'seconds'> {
-    if (!specs) throw new Error('Invalid program specs')
-    if (!specs.cpu) throw new Error('Invalid program cpu cores')
-    if (!specs.ram) throw new Error('Invalid program ram size')
-
     return {
       vcpus: specs.cpu,
       memory: specs.ram,
@@ -192,13 +172,7 @@ export abstract class Executable {
     name = 'Untitled',
     tags?: string[],
   ): Record<string, unknown> {
-    const metadata: Record<string, unknown> = {}
-
-    name = name.trim()
-
-    if (name) {
-      metadata.name = name
-    }
+    const metadata: Record<string, unknown> = { name }
 
     if (tags && tags.length > 0) {
       metadata.tags = tags

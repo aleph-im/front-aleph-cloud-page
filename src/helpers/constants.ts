@@ -45,6 +45,17 @@ export enum EntityType {
   Domain = 'domain',
 }
 
+export enum AddDomainTarget {
+  IPFS = 'ipfs',
+  Program = 'program',
+}
+
+export enum VolumeType {
+  New = 'new',
+  Existing = 'existing',
+  Persistent = 'persistent',
+}
+
 export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.Volume]: 'Volume',
   [EntityType.Program]: 'Function',
