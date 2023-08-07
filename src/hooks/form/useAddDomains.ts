@@ -18,7 +18,7 @@ export type DomainField = {
 export const defaultValues: DomainField = {
   name: '',
   ref: '',
-  target: AddDomainTarget.Program,
+  target: AddDomainTarget.Instance,
   programType: EntityType.Instance,
 }
 

@@ -6,7 +6,7 @@ import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { DomainManager } from '@/domain/domain'
-import { EntityType } from '@/helpers/constants'
+import { EntityType, AddDomainTarget } from '@/helpers/constants'
 import {
   FieldErrors,
   UseControllerReturn,
@@ -85,8 +85,14 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     control,
     name: 'programType',
     rules: {
-      onChange() {
+      onChange(state) {
         setValue('ref', '')
+
+        if(state.target.value === EntityType.Program) {
+          setValue('target', AddDomainTarget.Program)
+        } else if(state.target.value === EntityType.Instance) {
+          setValue('target', AddDomainTarget.Instance)
+        }
       },
     },
   })
