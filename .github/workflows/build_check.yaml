@@ -1,15 +1,11 @@
-name: Publish
+name: Build Check
 
 on:
-  push:
-    branches:
-      - main
-
-env:
-  IS_GH_PAGES: gh-pages
+  pull_request:
+    branches: [main]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,11 +26,3 @@ jobs:
           npm config set "//npm.fontawesome.com/:_authToken" FONTAWESOME_NPM_AUTH_TOKEN
           npm ci
           npm run build
-          npm run export
-          touch out/.nojekyll
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: out
