@@ -13,7 +13,7 @@ import Container from '@/components/common/CenteredContainer'
 import AddFunctionCode from '@/components/form/AddFunctionCode'
 import SelectFunctionPersistence from '@/components/form/SelectFunctionPersistence'
 import BorderBox from '@/components/common/BorderBox'
-import { convertBitUnits } from '@/helpers/utils'
+import { convertByteUnits } from '@/helpers/utils'
 import Form from '@/components/form/Form'
 
 export default function NewFunctionPage() {
@@ -137,9 +137,9 @@ export default function NewFunctionPage() {
             <BorderBox $color="main2" tw="mt-4" className="tp-body1">
               Good news! Your selected package already includes{' '}
               <span className="text-main0">
-                {convertBitUnits(values.specs.storage, {
-                  from: 'mb',
-                  to: 'gb',
+                {convertByteUnits(values.specs.storage, {
+                  from: 'MiB',
+                  to: 'GB',
                   displayUnit: true,
                 })}
               </span>{' '}

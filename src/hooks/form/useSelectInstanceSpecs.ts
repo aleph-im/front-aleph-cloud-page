@@ -1,4 +1,5 @@
 import { EntityType } from '@/helpers/constants'
+import { convertByteUnits } from '@/helpers/utils'
 import { useEffect } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
@@ -14,7 +15,10 @@ export function updateSpecsStorage(
 ): InstanceSpecsField {
   return {
     ...specs,
-    storage: specs.cpu * 2 * (isPersistent ? 10 : 1) * 10 ** 3, // MB
+    storage: convertByteUnits(specs.cpu * 2 * (isPersistent ? 10 : 1), {
+      from: 'GiB',
+      to: 'MiB',
+    }),
   }
 }
 
@@ -26,7 +30,7 @@ export function getDefaultSpecsOptions(
     updateSpecsStorage(
       {
         cpu,
-        ram: cpu * 2 * 10 ** 3, // MB
+        ram: convertByteUnits(cpu * 2, { from: 'GiB', to: 'MiB' }),
         storage: 0,
       },
       isPersistent,

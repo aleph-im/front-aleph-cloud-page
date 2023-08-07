@@ -4,7 +4,7 @@ import { FunctionsTabContentProps } from './types'
 import { Table } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/common/ButtonLink'
 import {
-  convertBitUnits,
+  convertByteUnits,
   ellipseAddress,
   humanReadableSize,
 } from '@/helpers/utils'
@@ -43,16 +43,17 @@ export const FunctionsTabContent = React.memo(
                     align: 'right',
                     sortable: true,
                     render: (row) =>
-                      convertBitUnits(row?.resources?.memory || 0, {
-                        from: 'mb',
-                        to: 'gb',
+                      convertByteUnits(row?.resources?.memory || 0, {
+                        from: 'MiB',
+                        to: 'GB',
+                        displayUnit: true,
                       }),
                   },
                   {
                     label: 'Size',
                     align: 'right',
                     sortable: true,
-                    render: (row) => humanReadableSize(row.size, 'mb'),
+                    render: (row) => humanReadableSize(row.size, 'MiB'),
                   },
                   {
                     label: 'Date',

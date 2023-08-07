@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { AddDomainTarget, EntityType, VolumeType } from './constants'
+import { convertByteUnits } from './utils'
 
 export const requiredString = z
   .string()
@@ -191,12 +192,15 @@ export const addSpecsSchema = z
     ram: z.number().gt(0),
     storage: z.number().gt(0),
   })
-  .refine(({ cpu, ram }) => ram === cpu * 2 * 10 ** 3, {
-    message: 'Invalid specs',
-  })
+  .refine(
+    ({ cpu, ram }) =>
+      ram === convertByteUnits(cpu * 2, { from: 'GiB', to: 'MiB' }),
+    { message: 'Invalid specs' },
+  )
   .refine(
     ({ cpu, storage }) =>
-      storage === cpu * 2 * 10 ** 3 || storage === cpu * 2 * 10 ** 4,
+      storage === convertByteUnits(cpu * 20, { from: 'GiB', to: 'MiB' }) ||
+      storage === convertByteUnits(cpu * 2, { from: 'GiB', to: 'MiB' }),
     { message: 'Invalid specs' },
   )
 

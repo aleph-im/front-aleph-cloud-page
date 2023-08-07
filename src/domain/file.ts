@@ -1,5 +1,5 @@
 import { defaultConsoleChannel } from '@/helpers/constants'
-import { Mutex } from '@/helpers/utils'
+import { Mutex, convertByteUnits } from '@/helpers/utils'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 
 export type AccountFileObject = {
@@ -67,8 +67,8 @@ export class FileManager {
   protected parseSizesMap(files: AccountFileObject[]): void {
     this.lastFetch = Date.now()
     this.sizesMapCache = files.reduce((ac, cv) => {
-      // @note: Cast from bytes to MBs
-      ac[cv.item_hash] = cv.size / 10 ** 6
+      // @note: Cast from bytes to MiB
+      ac[cv.item_hash] = convertByteUnits(cv.size, { from: 'B', to: 'MiB' })
       return ac
     }, {} as Record<string, number>)
   }

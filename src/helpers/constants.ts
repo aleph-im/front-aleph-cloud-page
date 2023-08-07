@@ -63,3 +63,6 @@ export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.SSHKey]: 'SSH Key',
   [EntityType.Domain]: 'Domain',
 }
+
+// export const pricePerMiB = 1 / 3
+export const pricePerMiB = 20

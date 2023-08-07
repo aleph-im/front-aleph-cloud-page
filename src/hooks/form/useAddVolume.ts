@@ -1,5 +1,5 @@
 import { ChangeEvent, useCallback, useMemo } from 'react'
-import { convertBitUnits } from '@/helpers/utils'
+import { convertByteUnits, humanReadableSize } from '@/helpers/utils'
 import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
@@ -92,11 +92,7 @@ export function useAddNewVolumeProps({
       file,
     } as Volume)
 
-    return convertBitUnits(size, {
-      from: 'mb',
-      to: 'mb',
-      displayUnit: true,
-    }) as string
+    return humanReadableSize(size, 'MiB')
   }, [file])
 
   return {
@@ -198,11 +194,11 @@ export function useAddPersistentVolumeProps({
   const sizeHandleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const val = Number(e.target.value)
-      const size = convertBitUnits(val, {
-        from: 'gb',
-        to: 'mb',
+      const size = convertByteUnits(val, {
+        from: 'GB',
+        to: 'MiB',
         displayUnit: false,
-      }) as number
+      })
       sizeCtrl.field.onChange(size)
     },
     [sizeCtrl.field],
@@ -210,11 +206,11 @@ export function useAddPersistentVolumeProps({
 
   const sizeValue = useMemo(() => {
     return sizeCtrl.field.value
-      ? (convertBitUnits(sizeCtrl.field.value, {
-          from: 'mb',
-          to: 'gb',
+      ? convertByteUnits(sizeCtrl.field.value, {
+          from: 'MiB',
+          to: 'GB',
           displayUnit: false,
-        }) as number)
+        })
       : undefined
   }, [sizeCtrl.field])
 

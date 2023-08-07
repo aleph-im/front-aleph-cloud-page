@@ -5,9 +5,15 @@ import {
   EntityType,
   VolumeType,
   defaultVolumeChannel,
+  pricePerMiB,
   programStorageURL,
 } from '../helpers/constants'
-import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
+import {
+  convertByteUnits,
+  downloadBlob,
+  getDate,
+  getExplorerURL,
+} from '../helpers/utils'
 import { MessageType, StoreContent } from 'aleph-sdk-ts/dist/messages/types'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
@@ -108,7 +114,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
    */
   static getVolumeSize(volume: Volume | AddVolume): number {
     if (volume.volumeType === VolumeType.New) {
-      return (volume?.file?.size || 0) / 10 ** 6
+      return convertByteUnits(volume?.file?.size || 0, { from: 'B', to: 'MiB' })
     }
 
     return volume.size || 0
@@ -153,8 +159,8 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       // @note: code is law => https://github.com/aleph-im/aleph-vm-scheduler/blob/master/scheduler/balance.py#L82
       // const cost = newSize * 20
       const discount = size > 0 ? 1 - newSize / size : 0
-      const price = size * (1 / 3)
-      const cost = newSize * (1 / 3)
+      const price = size * pricePerMiB
+      const cost = newSize * pricePerMiB
 
       return {
         size,
