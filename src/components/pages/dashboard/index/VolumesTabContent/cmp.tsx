@@ -31,7 +31,7 @@ export const VolumesTabContent = React.memo(
                     label: 'Size',
                     align: 'right',
                     sortable: true,
-                    render: (row) => humanReadableSize(row.size || 0, 'mb'),
+                    render: (row) => humanReadableSize(row.size || 0, 'MiB'),
                   },
                   {
                     label: 'Date',
