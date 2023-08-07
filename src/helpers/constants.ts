@@ -48,7 +48,7 @@ export enum EntityType {
 export enum AddDomainTarget {
   IPFS = 'ipfs',
   Program = 'program',
-  Instance = 'instance'
+  Instance = 'instance',
 }
 
 export enum VolumeType {

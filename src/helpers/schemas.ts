@@ -68,7 +68,11 @@ export const sshKeysSchema = z.array(sshKeySchema)
 
 export const domainSchema = z.object({
   name: domainName,
-  target: z.enum([AddDomainTarget.IPFS, AddDomainTarget.Program, AddDomainTarget.Instance]),
+  target: z.enum([
+    AddDomainTarget.IPFS,
+    AddDomainTarget.Program,
+    AddDomainTarget.Instance,
+  ]),
   programType,
   ref: messageHash,
 })

@@ -88,9 +88,9 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
       onChange(state) {
         setValue('ref', '')
 
-        if(state.target.value === EntityType.Program) {
+        if (state.target.value === EntityType.Program) {
           setValue('target', AddDomainTarget.Program)
-        } else if(state.target.value === EntityType.Instance) {
+        } else if (state.target.value === EntityType.Instance) {
           setValue('target', AddDomainTarget.Instance)
         }
       },
