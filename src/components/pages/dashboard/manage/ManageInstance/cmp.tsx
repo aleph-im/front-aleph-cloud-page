@@ -130,9 +130,9 @@ export default function ManageInstance() {
                   </IconText>
                 ) : (
                   <div tw="flex items-end">
-                    <GrayText tw="mr-1" className="text-main2">
+                    <span tw="mr-1" className="tp-body1 fs-sm text-main2">
                       Allocating
-                    </GrayText>
+                    </span>
                     <ThreeDots
                       width=".8rem"
                       height="1rem"

@@ -4,12 +4,11 @@ import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 export type NameAndTagsField = {
   name: string
-  tags: string[]
+  tags?: string[]
 }
 
 export const defaultNameAndTags: NameAndTagsField = {
   name: '',
-  tags: [],
 }
 
 export type UseNameAndTagsProps = {

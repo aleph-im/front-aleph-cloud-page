@@ -9,14 +9,13 @@ import {
 
 export type SSHKeyField = {
   key: string
-  label: string
+  label?: string
   isSelected: boolean
   isNew: boolean
 }
 
 export const defaultValues: SSHKeyField = {
   key: '',
-  label: '',
   isSelected: true,
   isNew: true,
 }

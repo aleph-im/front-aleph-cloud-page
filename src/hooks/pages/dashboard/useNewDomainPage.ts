@@ -5,7 +5,7 @@ import { useForm } from '@/hooks/common/useForm'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
-import { AddDomain, AddDomainTarget, DomainManager } from '@/domain/domain'
+import { DomainManager } from '@/domain/domain'
 import { EntityType } from '@/helpers/constants'
 import {
   FieldErrors,
@@ -13,14 +13,15 @@ import {
   useController,
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import {
+  DomainField,
+  defaultValues as defaultDomain,
+} from '@/hooks/form/useAddDomains'
 
-export type NewDomainFormState = AddDomain
+export type NewDomainFormState = DomainField
 
 export const defaultValues: NewDomainFormState = {
-  name: '',
-  ref: '',
-  target: AddDomainTarget.Program,
-  programType: EntityType.Instance,
+  ...defaultDomain,
 }
 
 export type DomainRefOptions = {

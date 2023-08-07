@@ -11,31 +11,35 @@ import {
 } from '../../form/useSelectInstanceSpecs'
 import { VolumeField } from '../../form/useAddVolume'
 import { EnvVarField } from '../../form/useAddEnvVars'
-import { NameAndTagsField } from '../../form/useAddNameAndTags'
+import {
+  NameAndTagsField,
+  defaultNameAndTags,
+} from '../../form/useAddNameAndTags'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { ActionTypes } from '@/helpers/store'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { ProgramManager } from '@/domain/program'
-import { Control, useWatch } from 'react-hook-form'
+import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-export type NewFunctionFormState = {
-  code?: FunctionCodeField
-  nameAndTags?: NameAndTagsField
+export type NewFunctionFormState = NameAndTagsField & {
+  code: FunctionCodeField
   runtime: FunctionRuntimeField
+  specs: InstanceSpecsField
   isPersistent: boolean
   volumes?: VolumeField[]
-  specs?: InstanceSpecsField
   envVars?: EnvVarField[]
   domains?: DomainField[]
 }
 
 const defaultValues: Partial<NewFunctionFormState> = {
+  ...defaultNameAndTags,
   code: { ...defaultCode },
-  runtime: defaultFunctionRuntime,
-  specs: getDefaultSpecsOptions(false)[0],
+  runtime: { ...defaultFunctionRuntime },
+  specs: { ...getDefaultSpecsOptions(false)[0] },
   isPersistent: false,
 }
 
@@ -45,10 +49,11 @@ export type UseNewFunctionPage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
-  handleSubmit: (e: FormEvent) => Promise<void>
-  handleChangeEntityTab: (tabId: string) => void
   values: any
   control: Control<any>
+  errors: FieldErrors<NewFunctionFormState>
+  handleSubmit: (e: FormEvent) => Promise<void>
+  handleChangeEntityTab: (tabId: string) => void
 }
 
 export function useNewFunctionPage(): UseNewFunctionPage {
@@ -64,27 +69,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     async (state: NewFunctionFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const {
-        runtime,
-        nameAndTags,
-        isPersistent,
-        envVars,
-        domains,
-        volumes,
-        specs,
-        code,
-      } = state
-
-      const accountFunction = await manager.add({
-        ...nameAndTags,
-        runtime,
-        envVars,
-        domains,
-        specs,
-        volumes,
-        isPersistent,
-        code,
-      })
+      const accountFunction = await manager.add(state)
 
       dispatch({
         type: ActionTypes.addAccountFunction,
@@ -98,7 +83,15 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     [dispatch, manager, router],
   )
 
-  const { control, handleSubmit } = useForm({ defaultValues, onSubmit })
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+    onSubmit,
+    resolver: zodResolver(ProgramManager.addSchema),
+  })
   // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as NewFunctionFormState
 
@@ -127,9 +120,10 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
-    handleSubmit,
-    handleChangeEntityTab,
     values,
     control,
+    errors,
+    handleSubmit,
+    handleChangeEntityTab,
   }
 }

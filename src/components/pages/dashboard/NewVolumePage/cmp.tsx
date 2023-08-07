@@ -19,45 +19,40 @@ export default function NewVolumePage() {
   } = useNewVolumePage()
 
   return (
-    <>
-      <section>
-        <pre>{JSON.stringify(values, null, 2)}</pre>
+    <Form onSubmit={handleSubmit} errors={errors}>
+      <section tw="px-0 pt-20 pb-6 md:py-10">
+        <Container>
+          <CompositeTitle as="h2" number="1">
+            Add volume
+          </CompositeTitle>
+          <AddNewVolume control={control} />
+        </Container>
       </section>
-      <Form onSubmit={handleSubmit} errors={errors}>
-        <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
-            <CompositeTitle as="h2" number="1">
-              Add volume
-            </CompositeTitle>
-            <AddNewVolume control={control} />
-          </Container>
-        </section>
-        <HoldingRequirements
-          address={address}
-          type={EntityType.Volume}
-          volumes={[values]}
-          unlockedAmount={accountBalance}
-          description={
-            <>
-              This amount needs to be present in your wallet until the function
-              is removed. Tokens won &#39;t be locked nor consumed. The function
-              will be garbage collected once funds are removed from the wallet.
-            </>
-          }
-          button={
-            <Button
-              type="submit"
-              color="main0"
-              kind="neon"
-              size="big"
-              variant="primary"
-              disabled={isCreateButtonDisabled}
-            >
-              Create volume
-            </Button>
-          }
-        />
-      </Form>
-    </>
+      <HoldingRequirements
+        address={address}
+        type={EntityType.Volume}
+        volumes={[values]}
+        unlockedAmount={accountBalance}
+        description={
+          <>
+            This amount needs to be present in your wallet until the function is
+            removed. Tokens won &#39;t be locked nor consumed. The function will
+            be garbage collected once funds are removed from the wallet.
+          </>
+        }
+        button={
+          <Button
+            type="submit"
+            color="main0"
+            kind="neon"
+            size="big"
+            variant="primary"
+            disabled={isCreateButtonDisabled}
+          >
+            Create volume
+          </Button>
+        }
+      />
+    </Form>
   )
 }

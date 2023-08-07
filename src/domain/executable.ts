@@ -15,7 +15,7 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { AddDomain, AddDomainTarget, DomainManager } from './domain'
+import { Domain, DomainManager } from './domain'
 import { EntityType } from '@/helpers/constants'
 
 type ExecutableCapabilitiesProps = {
@@ -92,38 +92,22 @@ export abstract class Executable {
   protected parseEnvVars(
     envVars?: EnvVarField[],
   ): Record<string, string> | undefined {
-    if (!envVars) return
-
-    return envVars.reduce((acc, env) => {
-      const name = env.name.trim()
-      const value = env.value.trim()
-
-      if (name.length <= 0) throw new Error(`Invalid env var name "${name}"`)
-      if (value.length <= 0) throw new Error(`Invalid env var value "${value}"`)
-
-      acc[name] = value
-
-      return acc
-    }, {} as Record<string, string>)
+    if (!envVars || envVars.length === 0) return
+    return Object.fromEntries(envVars.map(({ name, value }) => [name, value]))
   }
 
   protected async parseDomains(
-    programType: EntityType.Program | EntityType.Instance,
     ref: string,
-    domains?: DomainField[],
-  ): Promise<void> {
-    if (!domains) return
+    domains?: Omit<DomainField, 'ref'>[],
+  ): Promise<Domain[]> {
+    if (!domains || domains.length === 0) return []
 
-    const parsedDomains: AddDomain[] = domains.map(({ name }) => {
-      return {
-        name,
-        ref,
-        programType,
-        target: AddDomainTarget.Program,
-      }
-    })
+    const parsedDomains = domains.map((domain) => ({
+      ...domain,
+      ref,
+    }))
 
-    await this.domainManager.add(parsedDomains, false)
+    return this.domainManager.add(parsedDomains, false)
   }
 
   protected async parseVolumes(
@@ -132,6 +116,8 @@ export abstract class Executable {
     if (!volumes) return
 
     volumes = Array.isArray(volumes) ? volumes : [volumes]
+
+    if (volumes.length === 0) return
 
     // @note: Create new volumes before and cast them to ExistingVolume type
 
@@ -174,12 +160,8 @@ export abstract class Executable {
   }
 
   protected parseSpecs(
-    specs?: InstanceSpecsField,
+    specs: InstanceSpecsField,
   ): Omit<MachineResources, 'seconds'> {
-    if (!specs) throw new Error('Invalid program specs')
-    if (!specs.cpu) throw new Error('Invalid program cpu cores')
-    if (!specs.ram) throw new Error('Invalid program ram size')
-
     return {
       vcpus: specs.cpu,
       memory: specs.ram,
@@ -190,13 +172,7 @@ export abstract class Executable {
     name = 'Untitled',
     tags?: string[],
   ): Record<string, unknown> {
-    const metadata: Record<string, unknown> = {}
-
-    name = name.trim()
-
-    if (name) {
-      metadata.name = name
-    }
+    const metadata: Record<string, unknown> = { name }
 
     if (tags && tags.length > 0) {
       metadata.tags = tags

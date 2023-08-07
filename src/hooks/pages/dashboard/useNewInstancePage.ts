@@ -4,8 +4,14 @@ import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
-import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
+import {
+  NameAndTagsField,
+  defaultNameAndTags,
+} from '@/hooks/form/useAddNameAndTags'
+import {
+  SSHKeyField,
+  // defaultValues as sshKeyDefaultValues,
+} from '@/hooks/form/useAddSSHKeys'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import {
   InstanceImageField,
@@ -19,37 +25,34 @@ import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager
 import { ActionTypes } from '@/helpers/store'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
-import {
-  Control,
-  UseControllerReturn,
-  useController,
-  useWatch,
-} from 'react-hook-form'
+import { Control, FieldErrors, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-export type NewInstanceFormState = {
-  nameAndTags?: NameAndTagsField
-  image?: InstanceImageField
-  specs?: InstanceSpecsField
+export type NewInstanceFormState = NameAndTagsField & {
+  image: InstanceImageField
+  specs: InstanceSpecsField
+  sshKeys: SSHKeyField[]
   volumes?: VolumeField[]
   envVars?: EnvVarField[]
-  sshKeys?: SSHKeyField[]
   domains?: DomainField[]
 }
 
 export const defaultValues: Partial<NewInstanceFormState> = {
+  ...defaultNameAndTags,
   image: defaultInstanceImage,
-  specs: getDefaultSpecsOptions(true)[0],
+  specs: { ...getDefaultSpecsOptions(true)[0] },
+  // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
 export type UseNewInstancePage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
-  volumesCtrl: UseControllerReturn<NewInstanceFormState, 'volumes'>
-  handleSubmit: (e: FormEvent) => Promise<void>
-  handleChangeEntityTab: (tabId: string) => void
   values: any
   control: Control<any>
+  errors: FieldErrors<NewInstanceFormState>
+  handleSubmit: (e: FormEvent) => Promise<void>
+  handleChangeEntityTab: (tabId: string) => void
 }
 
 export function useNewInstancePage(): UseNewInstancePage {
@@ -65,18 +68,7 @@ export function useNewInstancePage(): UseNewInstancePage {
     async (state: NewInstanceFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const { image, nameAndTags, envVars, domains, sshKeys, volumes, specs } =
-        state
-
-      const accountInstance = await manager.add({
-        ...nameAndTags,
-        envVars,
-        sshKeys,
-        domains,
-        volumes,
-        specs,
-        image,
-      })
+      const accountInstance = await manager.add(state)
 
       dispatch({
         type: ActionTypes.addAccountInstance,
@@ -90,23 +82,25 @@ export function useNewInstancePage(): UseNewInstancePage {
     [dispatch, manager, router],
   )
 
-  const { control, handleSubmit } = useForm({ defaultValues, onSubmit })
-  const values = useWatch({ control }) as NewInstanceFormState
-
-  const volumesCtrl = useController({
+  const {
     control,
-    name: 'volumes',
-    rules: {},
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+    onSubmit,
+    resolver: zodResolver(InstanceManager.addSchema),
   })
+  const values = useWatch({ control }) as NewInstanceFormState
 
   const { totalCost } = useMemo(
     () =>
       InstanceManager.getCost({
         specs: values.specs,
-        volumes: volumesCtrl.field.value,
+        volumes: values.volumes,
         capabilities: {},
       }),
-    [values.specs, volumesCtrl.field.value],
+    [values.specs, values.volumes],
   )
 
   const canAfford = (accountBalance || 0) > totalCost
@@ -126,10 +120,10 @@ export function useNewInstancePage(): UseNewInstancePage {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
-    volumesCtrl,
-    handleSubmit,
-    handleChangeEntityTab,
     values,
     control,
+    errors,
+    handleSubmit,
+    handleChangeEntityTab,
   }
 }

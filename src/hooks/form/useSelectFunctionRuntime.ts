@@ -7,12 +7,11 @@ import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 export type FunctionRuntimeField = {
   id: string
-  custom: string
+  custom?: string
 }
 
 export const defaultFunctionRuntime: FunctionRuntimeField = {
   id: FunctionRuntimeId.Runtime1,
-  custom: '',
 }
 
 export const defaultFunctionRuntimeOptions = [

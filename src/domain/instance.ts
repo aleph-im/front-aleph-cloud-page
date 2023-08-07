@@ -4,7 +4,7 @@ import { InstancePublishConfiguration } from 'aleph-sdk-ts/dist/messages/instanc
 
 import E_ from '../helpers/errors'
 import { EntityType, defaultInstanceChannel } from '../helpers/constants'
-import { getDate, getExplorerURL, isValidItemHash } from '../helpers/utils'
+import { getDate, getExplorerURL } from '../helpers/utils'
 import { MachineVolume, MessageType } from 'aleph-sdk-ts/dist/messages/types'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
@@ -19,20 +19,21 @@ import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
+import { instanceSchema } from '@/helpers/schemas'
+import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
   'image' | 'account' | 'channel' | 'authorized_keys' | 'resources' | 'volumes'
-> & {
-  image?: InstanceImageField
-  name?: string
-  tags?: string[]
-  sshKeys?: SSHKeyField[]
-  envVars?: EnvVarField[]
-  specs?: InstanceSpecsField
-  volumes?: VolumeField[]
-  domains?: DomainField[]
-}
+> &
+  NameAndTagsField & {
+    image: InstanceImageField
+    specs: InstanceSpecsField
+    sshKeys: SSHKeyField[]
+    volumes?: VolumeField[]
+    envVars?: EnvVarField[]
+    domains?: Omit<DomainField, 'ref'>[]
+  }
 
 // @todo: Refactor
 export type Instance = InstanceContent & {
@@ -70,6 +71,8 @@ export class InstanceManager
   extends Executable
   implements EntityManager<Instance, AddInstance>
 {
+  static addSchema = instanceSchema
+
   /**
    * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
    */
@@ -118,35 +121,14 @@ export class InstanceManager
 
   async add(newInstance: AddInstance): Promise<Instance> {
     try {
-      const { account, channel } = this
-      const { envVars, sshKeys, specs, name, tags } = newInstance
+      const instanceMessage = await this.parseInstance(newInstance)
 
-      const variables = this.parseEnvVars(envVars)
-      const resources = this.parseSpecs(specs)
-      const metadata = this.parseMetadata(name, tags)
-      const image = this.parseImage(newInstance.image)
-      const authorized_keys = await this.parseSSHKeys(sshKeys)
-      const volumes = await this.parseVolumes(newInstance.volumes)
-
-      const response = await instance.publish({
-        account,
-        channel,
-        variables,
-        authorized_keys,
-        resources,
-        image,
-        volumes,
-        metadata,
-      })
+      const response = await instance.publish(instanceMessage)
 
       const [entity] = await this.parseMessages([response])
 
       // @note: Add the domain link
-      await this.parseDomains(
-        EntityType.Instance,
-        entity.id,
-        newInstance.domains,
-      )
+      await this.parseDomains(entity.id, newInstance.domains)
 
       return entity
     } catch (err) {
@@ -180,30 +162,43 @@ export class InstanceManager
     return response
   }
 
+  protected async parseInstance(
+    newInstance: AddInstance,
+  ): Promise<InstancePublishConfiguration> {
+    newInstance = InstanceManager.addSchema.parse(newInstance)
+
+    const { account, channel } = this
+
+    const { envVars, specs, image, sshKeys, name, tags } = newInstance
+
+    const variables = this.parseEnvVars(envVars)
+    const resources = this.parseSpecs(specs)
+    const metadata = this.parseMetadata(name, tags)
+    const authorized_keys = await this.parseSSHKeys(sshKeys)
+    const volumes = await this.parseVolumes(newInstance.volumes)
+
+    return {
+      account,
+      channel,
+      variables,
+      resources,
+      metadata,
+      image,
+      authorized_keys,
+      volumes,
+    }
+  }
+
   protected async parseSSHKeys(
     sshKeys?: SSHKeyField[],
   ): Promise<string[] | undefined> {
-    if (!sshKeys) return
+    if (!sshKeys || sshKeys.length === 0) return
 
     // @note: Create new keys before instance
     const newKeys = sshKeys.filter((key) => key.isNew && key.isSelected)
     await this.sshKeyManager.add(newKeys, false)
 
-    return sshKeys
-      .filter((key) => key.isSelected)
-      .map(({ key }) => {
-        key = key.trim()
-        if (key.length <= 0) throw new Error(`Invalid ssh key "${key}"`)
-
-        return key
-      })
-  }
-
-  protected parseImage(image?: InstanceImageField): string {
-    const ref = image
-    if (!ref || !isValidItemHash(ref)) throw new Error('Invalid image ref')
-
-    return ref
+    return sshKeys.filter((key) => key.isSelected).map(({ key }) => key)
   }
 
   // @todo: Type not exported from SDK...

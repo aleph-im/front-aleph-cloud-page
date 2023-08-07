@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { ChangeEvent, useCallback, useMemo } from 'react'
 import { convertBitUnits } from '@/helpers/utils'
 import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
@@ -165,7 +165,8 @@ export type UseAddPersistentVolumeReturn = {
   nameCtrl: UseControllerReturn<any, any>
   mountPathCtrl: UseControllerReturn<any, any>
   sizeCtrl: UseControllerReturn<any, any>
-  volumeSize: number
+  sizeValue: number | undefined
+  sizeHandleChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleRemove?: () => void
 }
 
@@ -191,24 +192,38 @@ export function useAddPersistentVolumeProps({
   const sizeCtrl = useController({
     control,
     name: `${name}.${index}.size`,
-    defaultValue: defaultValue?.size || 0,
+    defaultValue: defaultValue?.size,
   })
 
-  const { value: size } = sizeCtrl.field
+  const sizeHandleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const val = Number(e.target.value)
+      const size = convertBitUnits(val, {
+        from: 'gb',
+        to: 'mb',
+        displayUnit: false,
+      }) as number
+      sizeCtrl.field.onChange(size)
+    },
+    [sizeCtrl.field],
+  )
 
-  const volumeSize = useMemo(() => {
-    return convertBitUnits(size, {
-      from: 'mb',
-      to: 'gb',
-      displayUnit: false,
-    }) as number
-  }, [size])
+  const sizeValue = useMemo(() => {
+    return sizeCtrl.field.value
+      ? (convertBitUnits(sizeCtrl.field.value, {
+          from: 'mb',
+          to: 'gb',
+          displayUnit: false,
+        }) as number)
+      : undefined
+  }, [sizeCtrl.field])
 
   return {
     nameCtrl,
     mountPathCtrl,
     sizeCtrl,
-    volumeSize,
+    sizeValue,
+    sizeHandleChange,
     handleRemove,
   }
 }

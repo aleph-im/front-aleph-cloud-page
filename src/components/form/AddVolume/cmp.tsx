@@ -133,6 +133,7 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
           <Checkbox
             {...useLatestCtrl.field}
             {...useLatestCtrl.fieldState}
+            checked={!!useLatestCtrl.field.value}
             label="Always update to the latest version"
           />
         </div>
@@ -144,8 +145,14 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
 AddExistingVolume.displayName = 'AddExistingVolume'
 
 const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
-  const { nameCtrl, mountPathCtrl, sizeCtrl, volumeSize, handleRemove } =
-    useAddPersistentVolumeProps(props)
+  const {
+    nameCtrl,
+    mountPathCtrl,
+    sizeCtrl,
+    sizeValue,
+    sizeHandleChange,
+    handleRemove,
+  } = useAddPersistentVolumeProps(props)
 
   return (
     <>
@@ -176,9 +183,11 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           <TextInput
             {...sizeCtrl.field}
             {...sizeCtrl.fieldState}
-            value={volumeSize}
+            value={sizeValue}
+            onChange={sizeHandleChange}
+            type="number"
             label="Size (GB)"
-            placeholder="2"
+            placeholder="0"
           />
         </div>
         {handleRemove && <RemoveVolume onRemove={handleRemove} />}

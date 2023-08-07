@@ -12,16 +12,18 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 export type NewVolumeFormState = NewVolumeStandaloneField
 
-export const defaultValues: NewVolumeFormState = { volumeType: VolumeType.New }
+export const defaultValues: NewVolumeFormState = {
+  volumeType: VolumeType.New,
+}
 
 export type UseNewVolumePageReturn = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
-  handleSubmit: (e: FormEvent) => Promise<void>
   values: any
   control: Control<any>
   errors: FieldErrors<NewVolumeFormState>
+  handleSubmit: (e: FormEvent) => Promise<void>
 }
 
 export function useNewVolumePage(): UseNewVolumePageReturn {

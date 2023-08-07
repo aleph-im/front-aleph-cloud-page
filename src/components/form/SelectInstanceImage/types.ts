@@ -4,6 +4,7 @@ import { Control } from 'react-hook-form'
 
 export type SelectInstanceImageItemProps = {
   option: InstanceImage
+  index: number
   value?: InstanceImageField
   onChange: (value: InstanceImageField) => void
 }

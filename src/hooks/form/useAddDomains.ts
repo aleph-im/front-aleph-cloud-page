@@ -1,3 +1,4 @@
+import { AddDomainTarget, EntityType } from '@/helpers/constants'
 import { useCallback } from 'react'
 import {
   Control,
@@ -9,10 +10,16 @@ import {
 
 export type DomainField = {
   name: string
+  ref: string
+  target: AddDomainTarget
+  programType: EntityType.Instance | EntityType.Program
 }
 
 export const defaultValues: DomainField = {
   name: '',
+  ref: '',
+  target: AddDomainTarget.Program,
+  programType: EntityType.Instance,
 }
 
 export type UseDomainItemProps = {
@@ -56,6 +63,7 @@ export function useDomainItem({
 export type UseDomainsProps = {
   name?: string
   control: Control
+  entityType: EntityType.Program | EntityType.Instance
 }
 
 export type UseDomainsReturn = {
@@ -69,6 +77,7 @@ export type UseDomainsReturn = {
 export function useAddDomains({
   name = 'domains',
   control,
+  entityType: programType,
 }: UseDomainsProps): UseDomainsReturn {
   const domainsCtrl = useFieldArray({
     control,
@@ -78,8 +87,8 @@ export function useAddDomains({
   const { fields, remove: handleRemove, append } = domainsCtrl
 
   const handleAdd = useCallback(() => {
-    append({ ...defaultValues })
-  }, [append])
+    append({ ...defaultValues, programType })
+  }, [append, programType])
 
   return {
     name,

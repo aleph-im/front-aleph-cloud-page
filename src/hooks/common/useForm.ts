@@ -5,6 +5,7 @@ import {
   UseFormReturn as UseFormReturnLib,
   UseFormProps as UseFormPropsLib,
   FieldErrors,
+  FieldValues,
 } from 'react-hook-form'
 import { ZodError } from 'zod'
 
@@ -21,6 +22,20 @@ export type UseFormReturn<
 > = Omit<UseFormReturnLib<FormState>, 'handleSubmit'> & {
   requestState: RequestState<Response>
   handleSubmit: (e: FormEvent) => Promise<void>
+}
+
+function getFirstError<T extends FieldValues>(errors: FieldErrors<T>) {
+  const [firstError] = Object.entries(errors)
+  if (!firstError) return
+
+  const [field, err] = firstError
+
+  if (Array.isArray(err)) {
+    const subError = err[err.length - 1]
+    return getFirstError(subError)
+  }
+
+  return [field, err]
 }
 
 export function useForm<FormState extends Record<string, any>, Response>({
@@ -64,16 +79,19 @@ export function useForm<FormState extends Record<string, any>, Response>({
       let error: Error | undefined
 
       if (!error) {
-        const [firstError] = Object.entries(errors)
+        const firstError = getFirstError(errors)
 
         if (firstError) {
-          const [field, opts] = firstError
+          const [field, err] = firstError
 
-          const description = opts?.message
-            ? `: ${opts.message}`
-            : opts?.type
-            ? `: "${opts?.type}" validation not satisfied`
-            : ''
+          const description =
+            typeof err === 'string'
+              ? err
+              : err?.message
+              ? `: ${err.message}`
+              : err?.type
+              ? `: "${err?.type}" validation not satisfied`
+              : ''
 
           error = new Error(`Error on field "${field}"${description}`)
         }

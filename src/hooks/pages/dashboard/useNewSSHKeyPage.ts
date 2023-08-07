@@ -16,7 +16,7 @@ import { SSHKeyManager } from '@/domain/ssh'
 
 export type NewSSHKeyFormState = {
   key: string
-  label?: string
+  label: string
 }
 
 export const defaultValues: NewSSHKeyFormState = {

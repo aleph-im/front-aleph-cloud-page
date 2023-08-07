@@ -258,12 +258,12 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   protected parseNewVolumes(volumes: VolumeField[]): Required<AddNewVolume>[] {
-    volumes = VolumeManager.addManySchema.parse(volumes)
-
     const newVolumes = volumes.filter(
       (volume: VolumeField): volume is Required<AddNewVolume> =>
         volume.volumeType === VolumeType.New && !!volume.file,
     )
+
+    volumes = VolumeManager.addManySchema.parse(newVolumes)
 
     return newVolumes
   }
