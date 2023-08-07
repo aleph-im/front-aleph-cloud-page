@@ -3,7 +3,7 @@ import React, { KeyboardEvent, memo } from 'react'
 import { useSelectInstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 import { Button, FormError, Icon, TableColumn } from '@aleph-front/aleph-core'
 import { useCallback, useMemo } from 'react'
-import { convertBitUnits } from '@/helpers/utils'
+import { convertByteUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
 import { StyledTable } from './styles'
 import { Executable } from '@/domain/executable'
@@ -96,16 +96,16 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         specs,
         isActive,
         className,
-        storage: convertBitUnits(storage, {
-          from: 'mb',
-          to: 'gb',
+        storage: convertByteUnits(storage, {
+          from: 'MiB',
+          to: 'GiB',
           displayUnit: true,
-        }) as string,
-        ram: convertBitUnits(ram, {
-          from: 'mb',
-          to: 'gb',
+        }),
+        ram: convertByteUnits(ram, {
+          from: 'MiB',
+          to: 'GiB',
           displayUnit: true,
-        }) as string,
+        }),
         price: price.computeTotalCost + ' ALEPH',
       }
     })

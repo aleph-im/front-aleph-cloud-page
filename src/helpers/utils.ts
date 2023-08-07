@@ -1,4 +1,3 @@
-import { BrowserProvider, Contract } from 'ethers'
 import E_ from './errors'
 import {
   EphemeralVolume,
@@ -39,14 +38,6 @@ export const ellipseText = (text: string, start = 10, end = 0) => {
  */
 export const ellipseAddress = (address: string) => {
   return ellipseText(address, 6, 4)
-}
-
-/**
- * Checks if a string is a valid Aleph message item hash
- */
-export const isValidItemHash = (hash: string) => {
-  const regex = /^[0-9a-f]{64}$/
-  return regex.test(hash)
 }
 
 /**
@@ -91,51 +82,99 @@ export const getSOLBalance = async (address: string) => {
   }
 }
 
-type BitUnit = 'b' | 'kb' | 'mb' | 'gb' | 'tb'
-type ConvertBitUnitOptions = {
-  from: BitUnit
-  to: BitUnit
-  displayUnit: boolean
+export function round(num: number, decimals = 2) {
+  const pow = 10 ** decimals
+  return Math.round((num + Number.EPSILON) * pow) / pow
 }
-const units = {
-  b: 1,
-  kb: 1000,
-  mb: 1000 ** 2,
-  gb: 1000 ** 3,
-  tb: 1000 ** 4,
+
+export type ByteUnit =
+  | 'B'
+  | 'kB'
+  | 'MB'
+  | 'GB'
+  | 'TB'
+  | 'KiB'
+  | 'MiB'
+  | 'GiB'
+  | 'TiB'
+
+export type ConvertBitUnitOptions<D extends boolean> = {
+  from: ByteUnit
+  to: ByteUnit
+  displayUnit?: D
 }
-export const convertBitUnits = (
+type R<D> = D extends true ? string : number
+
+export const byteUnits: Record<ByteUnit, number> = {
+  // byte
+  B: 1,
+  // kilo
+  kB: 10 ** 3,
+  MB: 10 ** 6,
+  GB: 10 ** 9,
+  TB: 10 ** 12,
+  // kibi
+  KiB: 2 ** 10,
+  MiB: 2 ** 20,
+  GiB: 2 ** 30,
+  TiB: 2 ** 40,
+}
+
+export const byteUnitSubfix: Record<ByteUnit, ByteUnit> = {
+  B: 'B',
+  kB: 'kB',
+  MB: 'MB',
+  GB: 'GB',
+  TB: 'TB',
+  // @note: It is wrong and confusing, I know....
+  KiB: 'kB',
+  MiB: 'MB',
+  GiB: 'GB',
+  TiB: 'TB',
+}
+
+export function convertByteUnits<D extends boolean = false>(
   value: number,
   {
-    from = 'mb',
-    to = 'gb',
-    displayUnit = true,
-  }: Partial<ConvertBitUnitOptions>,
-) => {
-  const result = (value * units[from]) / units[to]
-  return displayUnit ? `${result} ${to.toUpperCase()}` : result
+    from = 'MiB',
+    to = 'GiB',
+    displayUnit = false as D,
+  }: ConvertBitUnitOptions<D>,
+): R<D> {
+  const result = (value * byteUnits[from]) / byteUnits[to]
+
+  return (
+    displayUnit ? `${result.toFixed(2)} ${byteUnitSubfix[to]}` : result
+  ) as R<D>
+}
+
+function getHumanReadableUnit(
+  value: number,
+  units: ByteUnit[] = ['B', 'KiB', 'MiB', 'GiB', 'TiB'],
+): ByteUnit {
+  let optimalUnit: ByteUnit = 'B'
+
+  for (const unit of units) {
+    if (value < byteUnits[unit]) break
+    optimalUnit = unit
+  }
+
+  return optimalUnit
 }
 
 /**
  * Converts a number of bytes to a human readable size
  */
-export const humanReadableSize = (
+export function humanReadableSize(
   value?: number,
-  from: 'b' | 'kb' | 'mb' | 'gb' | 'tb' = 'b',
-): string => {
+  from: ByteUnit = 'B',
+): string {
   if (value === undefined) return 'n/a'
   if (value === 0) return '-'
 
-  const units = ['b', 'kb', 'mb', 'gb', 'tb']
-  const pow = units.indexOf(from)
-  value = value * 1000 ** pow
-
-  let i = -1
-  while (value >= 1000 ** (i + 1) && i < units.length) {
-    i++
-  }
-
-  return `${(value / 1000 ** i).toFixed(2)} ${units[i].toUpperCase()}`
+  const bits = convertByteUnits(value, { from, to: 'B' })
+  const to = getHumanReadableUnit(bits)
+  return convertByteUnits(value, { from, to, displayUnit: true })
 }
 
 /**

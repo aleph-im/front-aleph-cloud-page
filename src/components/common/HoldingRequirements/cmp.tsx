@@ -1,7 +1,8 @@
 import {
   ellipseAddress,
   humanReadableCurrency,
-  convertBitUnits,
+  convertByteUnits,
+  humanReadableSize,
 } from '@/helpers/utils'
 import { GreyLabel, StyledHoldingSummaryLine } from './styles'
 import {
@@ -28,9 +29,9 @@ const HoldingRequirementsSpecsLine = React.memo(
 
     const ramStr = useMemo(
       () =>
-        `${convertBitUnits(ram, {
-          from: 'mb',
-          to: 'gb',
+        `${convertByteUnits(ram, {
+          from: 'MiB',
+          to: 'GiB',
           displayUnit: false,
         })}GB-RAM`,
       [ram],
@@ -38,9 +39,9 @@ const HoldingRequirementsSpecsLine = React.memo(
 
     const storageStr = useMemo(
       () =>
-        `${convertBitUnits(storage, {
-          from: 'mb',
-          to: 'gb',
+        `${convertByteUnits(storage, {
+          from: 'MiB',
+          to: 'GiB',
           displayUnit: false,
         })}GB-HDD`,
       [storage],
@@ -92,13 +93,7 @@ const HoldingRequirementsVolumeLine = React.memo(
           </div>
         </div>
         <div>
-          <div>
-            {convertBitUnits(size, {
-              from: 'mb',
-              to: 'gb',
-              displayUnit: true,
-            })}
-          </div>
+          <div>{humanReadableSize(size, 'MiB')}</div>
         </div>
         <div>
           <div>
@@ -132,9 +127,9 @@ const HoldingRequirementsVolumeLine = React.memo(
                             <>
                               {` for `}
                               <span className="text-main0">
-                                {convertBitUnits(specs.storage, {
-                                  from: 'mb',
-                                  to: 'gb',
+                                {convertByteUnits(specs.storage, {
+                                  from: 'MiB',
+                                  to: 'GiB',
                                   displayUnit: true,
                                 })}
                               </span>{' '}

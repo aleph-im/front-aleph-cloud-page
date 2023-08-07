@@ -10,12 +10,7 @@ import {
   defaultVMURL,
   programStorageURL,
 } from '../helpers/constants'
-import {
-  downloadBlob,
-  getDate,
-  getExplorerURL,
-  isValidItemHash,
-} from '../helpers/utils'
+import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
 import {
   ItemType,
   MachineVolume,
