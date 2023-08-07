@@ -24,7 +24,9 @@ export type UseFormReturn<
   handleSubmit: (e: FormEvent) => Promise<void>
 }
 
-function getFirstError<T extends FieldValues>(errors: FieldErrors<T>) {
+function getFirstError<T extends FieldValues>(
+  errors: FieldErrors<T>,
+): [string, any] | undefined {
   const [firstError] = Object.entries(errors)
   if (!firstError) return
 
