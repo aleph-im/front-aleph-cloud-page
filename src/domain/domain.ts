@@ -144,7 +144,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       body: JSON.stringify({
         name: domain.name,
         owner: this.account.address,
-        type: domain.target,
+        target: domain.target,
       }),
     })
     const response = await query.json()
