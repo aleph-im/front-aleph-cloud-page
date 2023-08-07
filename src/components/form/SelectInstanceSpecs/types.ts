@@ -12,8 +12,8 @@ export type SelectInstanceSpecsProps = {
 
 export type SpecsDetail = {
   specs: InstanceSpecsField
-  storage: string // in GB
-  ram: string // in GB
+  storage: string // in GiB
+  ram: string // in GiB
   price: string // in ALEPH
   isActive: boolean
   className: string

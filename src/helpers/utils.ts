@@ -120,24 +120,37 @@ export const byteUnits: Record<ByteUnit, number> = {
   TiB: 2 ** 40,
 }
 
+export const byteUnitSubfix: Record<ByteUnit, ByteUnit> = {
+  B: 'B',
+  kB: 'kB',
+  MB: 'MB',
+  GB: 'GB',
+  TB: 'TB',
+  // @note: It is wrong and confusing, I know....
+  KiB: 'kB',
+  MiB: 'MB',
+  GiB: 'GB',
+  TiB: 'TB',
+}
+
 export function convertByteUnits<D extends boolean = false>(
   value: number,
   {
-    from = 'MB',
-    to = 'GB',
+    from = 'MiB',
+    to = 'GiB',
     displayUnit = false as D,
   }: ConvertBitUnitOptions<D>,
 ): R<D> {
   const result = (value * byteUnits[from]) / byteUnits[to]
 
   return (
-    displayUnit ? `${result.toFixed(2)} ${to.toUpperCase()}` : result
+    displayUnit ? `${result.toFixed(2)} ${byteUnitSubfix[to]}` : result
   ) as R<D>
 }
 
 function getHumanReadableUnit(
   value: number,
-  units: ByteUnit[] = ['B', 'kB', 'MB', 'GB', 'TB'],
+  units: ByteUnit[] = ['B', 'KiB', 'MiB', 'GiB', 'TiB'],
 ): ByteUnit {
   let optimalUnit: ByteUnit = 'B'
 

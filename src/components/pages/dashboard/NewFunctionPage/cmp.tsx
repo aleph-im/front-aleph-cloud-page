@@ -139,7 +139,7 @@ export default function NewFunctionPage() {
               <span className="text-main0">
                 {convertByteUnits(values.specs.storage, {
                   from: 'MiB',
-                  to: 'GB',
+                  to: 'GiB',
                   displayUnit: true,
                 })}
               </span>{' '}

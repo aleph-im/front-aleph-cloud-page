@@ -98,12 +98,12 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         className,
         storage: convertByteUnits(storage, {
           from: 'MiB',
-          to: 'GB',
+          to: 'GiB',
           displayUnit: true,
         }),
         ram: convertByteUnits(ram, {
           from: 'MiB',
-          to: 'GB',
+          to: 'GiB',
           displayUnit: true,
         }),
         price: price.computeTotalCost + ' ALEPH',

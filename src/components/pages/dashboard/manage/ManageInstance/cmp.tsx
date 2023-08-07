@@ -104,7 +104,7 @@ export default function ManageInstance() {
                   <GrayText>
                     {convertByteUnits(instance.resources.memory, {
                       from: 'MiB',
-                      to: 'GB',
+                      to: 'GiB',
                       displayUnit: true,
                     })}
                   </GrayText>

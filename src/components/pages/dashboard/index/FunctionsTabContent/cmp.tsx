@@ -45,7 +45,7 @@ export const FunctionsTabContent = React.memo(
                     render: (row) =>
                       convertByteUnits(row?.resources?.memory || 0, {
                         from: 'MiB',
-                        to: 'GB',
+                        to: 'GiB',
                         displayUnit: true,
                       }),
                   },

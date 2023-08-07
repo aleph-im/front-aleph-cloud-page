@@ -31,7 +31,7 @@ const HoldingRequirementsSpecsLine = React.memo(
       () =>
         `${convertByteUnits(ram, {
           from: 'MiB',
-          to: 'GB',
+          to: 'GiB',
           displayUnit: false,
         })}GB-RAM`,
       [ram],
@@ -41,7 +41,7 @@ const HoldingRequirementsSpecsLine = React.memo(
       () =>
         `${convertByteUnits(storage, {
           from: 'MiB',
-          to: 'GB',
+          to: 'GiB',
           displayUnit: false,
         })}GB-HDD`,
       [storage],
@@ -129,7 +129,7 @@ const HoldingRequirementsVolumeLine = React.memo(
                               <span className="text-main0">
                                 {convertByteUnits(specs.storage, {
                                   from: 'MiB',
-                                  to: 'GB',
+                                  to: 'GiB',
                                   displayUnit: true,
                                 })}
                               </span>{' '}

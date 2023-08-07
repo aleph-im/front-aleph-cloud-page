@@ -195,7 +195,7 @@ export function useAddPersistentVolumeProps({
     (e: ChangeEvent<HTMLInputElement>) => {
       const val = Number(e.target.value)
       const size = convertByteUnits(val, {
-        from: 'GB',
+        from: 'GiB',
         to: 'MiB',
         displayUnit: false,
       })
@@ -208,7 +208,7 @@ export function useAddPersistentVolumeProps({
     return sizeCtrl.field.value
       ? convertByteUnits(sizeCtrl.field.value, {
           from: 'MiB',
-          to: 'GB',
+          to: 'GiB',
           displayUnit: false,
         })
       : undefined

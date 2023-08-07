@@ -28,6 +28,9 @@ export { VolumeType }
 export type AddNewVolume = {
   volumeType: VolumeType.New
   file?: File
+  mountPath?: string
+  useLatest?: boolean
+  size?: number
 }
 
 export type AddExistingVolume = {
@@ -120,6 +123,16 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return volume.size || 0
   }
 
+  /**
+   * Returns the size of a volume in mb
+   */
+  static getVolumeMiBPrice(volume: Volume | AddVolume): number {
+    if (volume.volumeType !== VolumeType.New) return 20
+    if (volume.mountPath) return 20
+
+    return 1 / 3
+  }
+
   // @note: The algorithm for calculating the cost per volume is as follows:
   // 1. Calculate the storage allowance for the function, the more compute units, the more storage allowance
   // 2. For each volume, subtract the storage allowance from the volume size
@@ -132,6 +145,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return volumes.map((volume) => {
       const isExcluded = exclude.includes(volume.volumeType)
       const size = this.getVolumeSize(volume) || 0
+      const mibPrice = this.getVolumeMiBPrice(volume)
 
       if (isExcluded) {
         return {
@@ -159,8 +173,8 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       // @note: code is law => https://github.com/aleph-im/aleph-vm-scheduler/blob/master/scheduler/balance.py#L82
       // const cost = newSize * 20
       const discount = size > 0 ? 1 - newSize / size : 0
-      const price = size * pricePerMiB
-      const cost = newSize * pricePerMiB
+      const price = size * mibPrice
+      const cost = newSize * mibPrice
 
       return {
         size,
