@@ -5,7 +5,6 @@ import {
   EntityType,
   VolumeType,
   defaultVolumeChannel,
-  pricePerMiB,
   programStorageURL,
 } from '../helpers/constants'
 import {

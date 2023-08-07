@@ -100,7 +100,7 @@ export default function ManageVolume() {
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
                   <GrayText className="fs-xs tp-body1">
-                    {humanReadableSize(volume.size, 'mb')}
+                    {humanReadableSize(volume.size, 'MiB')}
                   </GrayText>
                 </div>
               </div>

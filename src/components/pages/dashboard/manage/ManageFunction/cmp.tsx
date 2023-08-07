@@ -118,7 +118,7 @@ export default function ManageFunction() {
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
                   <GrayText className="fs-xs tp-body1">
-                    {humanReadableSize(func.size, 'mb')}
+                    {humanReadableSize(func.size, 'MiB')}
                   </GrayText>
                 </div>
               </div>
