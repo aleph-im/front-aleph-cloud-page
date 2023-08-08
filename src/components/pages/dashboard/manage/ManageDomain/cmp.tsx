@@ -157,9 +157,38 @@ export default function ManageDomain() {
                                 {domain.name}.instance.public.aleph.sh.
                               </span>
                             )}
+                            {domain.target == AddDomainTarget.IPFS && (
+                              <span className="text-main0" tw="mx-2">
+                                ipfs.public.aleph.sh.
+                              </span>
+                            )}
                           </div>
                         </div>
                       </GrayText>
+                      {domain.target == AddDomainTarget.IPFS && (
+                        <GrayText>
+                          <div tw="flex mt-2">
+                            <BulletItem
+                              kind={
+                                status.tasks_status.delegation
+                                  ? 'success'
+                                  : 'warning'
+                              }
+                              title={''}
+                            />
+                            <div>
+                              Create a CNAME record
+                              <span className="text-main0" tw="mx-2">
+                                _dnslink.{domain.name}
+                              </span>
+                              with value
+                              <span className="text-main0" tw="mx-2">
+                                _dnslink.{domain.name}.static.public.aleph.sh.
+                              </span>
+                            </div>
+                          </div>
+                        </GrayText>
+                      )}
                       <GrayText>
                         <div tw="flex mt-2">
                           <BulletItem
