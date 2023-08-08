@@ -1,7 +1,11 @@
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import IconText from '@/components/common/IconText'
 import NoisyContainer from '@/components/common/NoisyContainer'
-import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
+import {
+  EntityTypeName,
+  breadcrumbNames,
+  AddDomainTarget,
+} from '@/helpers/constants'
 import {
   BulletItem,
   Button,
@@ -143,9 +147,16 @@ export default function ManageDomain() {
                               {domain.name}
                             </span>
                             with value
-                            <span className="text-main0" tw="mx-2">
-                              program.public.aleph.sh.
-                            </span>
+                            {domain.target == AddDomainTarget.Program && (
+                              <span className="text-main0" tw="mx-2">
+                                {domain.name}.program.public.aleph.sh.
+                              </span>
+                            )}
+                            {domain.target == AddDomainTarget.Instance && (
+                              <span className="text-main0" tw="mx-2">
+                                {domain.name}.instance.public.aleph.sh.
+                              </span>
+                            )}
                           </div>
                         </div>
                       </GrayText>
