@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import ButtonLink from '@/components/common/ButtonLink'
 import Container from '@/components/common/CenteredContainer'
 import CompositeTitle from '@/components/common/CompositeTitle'
@@ -6,6 +7,7 @@ import NoisyContainer from '@/components/common/NoisyContainer'
 import Form from '@/components/form/Form'
 import { EntityType, EntityTypeName } from '@/helpers/constants'
 import { useNewDomainPage } from '@/hooks/pages/dashboard/useNewDomainPage'
+import { Tabs } from '@aleph-front/aleph-core'
 import {
   Button,
   Dropdown,
@@ -24,9 +26,12 @@ export default function NewDomain() {
     nameCtrl,
     programTypeCtrl,
     refCtrl,
+    ipfsRefCtrl,
     errors,
     handleSubmit,
   } = useNewDomainPage()
+
+  const [tabId, setTabId] = useState('compute')
 
   return (
     <>
@@ -85,40 +90,78 @@ export default function NewDomain() {
                   function, depending on what you want your custom domain to
                   point to.
                 </p>
-                <NoisyContainer tw="z-10!">
-                  <RadioGroup
-                    {...programTypeCtrl.field}
-                    {...programTypeCtrl.fieldState}
-                    direction="row"
-                    label="Choose resource type"
-                  >
-                    <Radio
-                      label={EntityTypeName[EntityType.Program]}
-                      value={EntityType.Program}
-                      disabled={!hasFunctions}
-                    />
-                    <Radio
-                      label={EntityTypeName[EntityType.Instance]}
-                      value={EntityType.Instance}
-                      disabled={!hasInstances}
-                    />
-                  </RadioGroup>
-                  {entities.length > 0 && (
-                    <div tw="mt-10">
-                      <Dropdown
-                        {...refCtrl.field}
-                        {...refCtrl.fieldState}
-                        label="Select the specific resource from the dropdown"
+                <div tw="py-10">
+                  <Tabs
+                    align="left"
+                    selected={tabId}
+                    onTabChange={setTabId}
+                    tabs={[
+                      {
+                        id: 'compute',
+                        name: 'Compute',
+                      },
+                      {
+                        id: 'ipfs',
+                        name: 'IPFS',
+                      },
+                    ]}
+                  />
+                </div>
+                <div role="tabpanel">
+                  {tabId === 'compute' ? (
+                    <NoisyContainer tw="z-10!">
+                      <RadioGroup
+                        {...programTypeCtrl.field}
+                        {...programTypeCtrl.fieldState}
+                        direction="row"
+                        label="Choose resource type"
                       >
-                        {entities.map(({ label, value }) => (
-                          <DropdownOption key={value} value={value}>
-                            {label}
-                          </DropdownOption>
-                        ))}
-                      </Dropdown>
+                        <Radio
+                          label={EntityTypeName[EntityType.Program]}
+                          value={EntityType.Program}
+                          disabled={!hasFunctions}
+                        />
+                        <Radio
+                          label={EntityTypeName[EntityType.Instance]}
+                          value={EntityType.Instance}
+                          disabled={!hasInstances}
+                        />
+                      </RadioGroup>
+                      {entities.length > 0 && (
+                        <div tw="mt-10">
+                          <Dropdown
+                            {...refCtrl.field}
+                            {...refCtrl.fieldState}
+                            label="Select the specific resource from the dropdown"
+                          >
+                            {entities.map(({ label, value }) => (
+                              <DropdownOption key={value} value={value}>
+                                {label}
+                              </DropdownOption>
+                            ))}
+                          </Dropdown>
+                        </div>
+                      )}
+                    </NoisyContainer>
+                  ) : tabId === 'ipfs' ? (
+                    <div>
+                      <p tw="mb-6">
+                        To get started, provide the corresponding IPFS content
+                        identifier (Message ID).
+                      </p>
+                      <NoisyContainer>
+                        <TextInput
+                          {...ipfsRefCtrl.field}
+                          {...ipfsRefCtrl.fieldState}
+                          label="Link your custom domain to an Aleph Message ID"
+                          placeholder="Paste your IPFS Aleph Message ID"
+                        />
+                      </NoisyContainer>
                     </div>
+                  ) : (
+                    <></>
                   )}
-                </NoisyContainer>
+                </div>
                 <div tw="mt-10 text-center z-0">
                   <Button
                     type="submit"

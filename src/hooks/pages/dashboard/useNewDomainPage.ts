@@ -38,6 +38,7 @@ export type UseNewDomainPageReturn = {
   nameCtrl: UseControllerReturn<NewDomainFormState, 'name'>
   programTypeCtrl: UseControllerReturn<NewDomainFormState, 'programType'>
   refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
+  ipfsRefCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
   errors: FieldErrors<NewDomainFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
 }
@@ -102,6 +103,16 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     name: 'ref',
   })
 
+  const ipfsRefCtrl = useController({
+    control,
+    name: 'ref',
+    rules: {
+      onChange(state) {
+        setValue('target', AddDomainTarget.IPFS)
+      },
+    },
+  })
+
   const entityType = programTypeCtrl.field.value
 
   const entities = useMemo(() => {
@@ -143,6 +154,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     nameCtrl,
     programTypeCtrl,
     refCtrl,
+    ipfsRefCtrl,
     errors,
     handleSubmit,
   }
