@@ -26,10 +26,7 @@ export const Header = () => {
   const divRef = useRef<HTMLDivElement | null>(null)
   useOnClickOutside(divRef, () => setDisplayWalletPicker(false))
 
-  const handleDisplayWalletPicker = (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    event.stopPropagation()
+  const handleDisplayWalletPicker = () => {
     setDisplayWalletPicker(!displayWalletPicker)
   }
 
