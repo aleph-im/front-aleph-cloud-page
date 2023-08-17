@@ -10,7 +10,8 @@ import Link from 'next/link'
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 import { useHeader } from '@/hooks/pages/useHeader'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
+import { useOnClickOutside } from 'usehooks-ts'
 
 export const Header = () => {
   const {
@@ -22,22 +23,8 @@ export const Header = () => {
     setDisplayWalletPicker,
     accountBalance,
   } = useHeader()
-  const [isDivClicked, setDivClicked] = useState(false)
   const divRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (divRef.current && !divRef.current.contains(event.target as Node)) {
-        setDisplayWalletPicker(false)
-      }
-    }
-
-    document.addEventListener('click', handleClickOutside)
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside)
-    }
-  }, [])
+  useOnClickOutside(divRef, () => setDisplayWalletPicker(false))
 
   const handleDisplayWalletPicker = (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -111,8 +98,8 @@ export const Header = () => {
               ) : (
                 <Button
                   as="button"
-                  variant="secondary"
-                  color="main1"
+                  variant="tertiary"
+                  color="main0"
                   kind="neon"
                   size="regular"
                   onClick={handleDisplayWalletPicker}
@@ -146,6 +133,8 @@ export const Header = () => {
                     onConnect={handleConnect}
                     onDisconnect={handleConnect}
                     address={account?.address}
+                    addressHref={`https://etherscan.io/address/${account?.address}`}
+                    balance={accountBalance}
                     size="regular"
                   />
                 )}
