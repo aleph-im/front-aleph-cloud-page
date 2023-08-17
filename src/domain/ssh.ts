@@ -8,6 +8,7 @@ import {
 } from '../helpers/constants'
 import { getDate, getExplorerURL } from '../helpers/utils'
 import { EntityManager } from './types'
+import { sshKeySchema, sshKeysSchema } from '@/helpers/schemas'
 
 export type AddSSHKey = {
   key: string
@@ -23,6 +24,9 @@ export type SSHKey = AddSSHKey & {
 }
 
 export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
+  static addSchema = sshKeySchema
+  static addManySchema = sshKeysSchema
+
   constructor(
     protected account: Account,
     protected type = defaultSSHPostType,
@@ -55,18 +59,27 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     return entity
   }
 
-  async add(sshKey: AddSSHKey): Promise<SSHKey> {
+  async add(
+    sshKeys: AddSSHKey | AddSSHKey[],
+    throwOnCollision?: boolean,
+  ): Promise<SSHKey[]> {
+    sshKeys = Array.isArray(sshKeys) ? sshKeys : [sshKeys]
+
+    sshKeys = await this.parseSSHKeys(sshKeys, throwOnCollision)
+
     try {
-      const { key, label } = sshKey
+      const response = await Promise.all(
+        sshKeys.map(({ key, label }) =>
+          post.Publish({
+            account: this.account,
+            postType: this.type,
+            channel: this.channel,
+            content: { key, label },
+          }),
+        ),
+      )
 
-      const response = await post.Publish({
-        account: this.account,
-        postType: this.type,
-        channel: this.channel,
-        content: { key, label },
-      })
-
-      return this.parseNewPost(response)
+      return this.parseNewPosts(response)
     } catch (err) {
       throw E_.RequestFailed(err)
     }
@@ -86,10 +99,39 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     }
   }
 
+  protected async parseSSHKeys(
+    sshKeys: AddSSHKey[],
+    throwOnCollision = true,
+  ): Promise<AddSSHKey[]> {
+    sshKeys = SSHKeyManager.addManySchema.parse(sshKeys)
+
+    const currentSSHKeys = await this.getAll()
+    const currentSSHKeySet = new Set<string>(currentSSHKeys.map((d) => d.key))
+
+    if (!throwOnCollision) {
+      return sshKeys.filter((sshKey) => !currentSSHKeySet.has(sshKey.key))
+    } else {
+      return sshKeys.map((sshKey: AddSSHKey) => {
+        if (!currentSSHKeySet.has(sshKey.key)) return sshKey
+        throw new Error(
+          `SSH key already exists on your collection: ${
+            sshKey.label || sshKey.key
+          }`,
+        )
+      })
+    }
+  }
+
   // @todo: Type not exported from SDK...
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parsePosts(posts: any[]): SSHKey[] {
     return posts.map((post) => this.parsePost(post, post.content))
+  }
+
+  // @todo: Type not exported from SDK...
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected parseNewPosts(posts: any[]): SSHKey[] {
+    return posts.map((post) => this.parsePost(post, post.content.content))
   }
 
   // @todo: Type not exported from SDK...

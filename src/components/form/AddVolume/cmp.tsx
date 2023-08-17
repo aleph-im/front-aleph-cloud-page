@@ -1,4 +1,3 @@
-import { isValidItemHash } from '@/helpers/utils'
 import {
   Tabs,
   Icon,
@@ -13,48 +12,44 @@ import {
   AddNewVolumeProps,
   AddPersistentVolumeProps,
 } from './types'
-import React, { useCallback, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import {
   useAddVolume,
   useAddExistingVolumeProps,
   useAddNewVolumeProps,
   useAddPersistentVolumeProps,
 } from '@/hooks/form/useAddVolume'
-import { VolumeType, Volume } from '@/domain/volume'
+import { VolumeType } from '@/domain/volume'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import HiddenFileInput from '@/components/common/HiddenFileInput'
 
-const RemoveVolume = React.memo(({ volume, onRemove }: RemoveVolumeProps) => {
-  const handleRemove = useCallback(() => {
-    onRemove(volume.id)
-  }, [onRemove, volume.id])
-
-  return (
-    <div tw="mt-4 pt-6 text-right">
-      <Button
-        type="button"
-        onClick={handleRemove}
-        color="main2"
-        variant="secondary"
-        kind="neon"
-        size="regular"
-      >
-        Remove
-      </Button>
-    </div>
-  )
-})
+const RemoveVolume = React.memo(
+  ({ onRemove: handleRemove }: RemoveVolumeProps) => {
+    return (
+      <div tw="mt-4 pt-6 text-right">
+        <Button
+          type="button"
+          onClick={handleRemove}
+          color="main2"
+          variant="secondary"
+          kind="neon"
+          size="regular"
+        >
+          Remove
+        </Button>
+      </div>
+    )
+  },
+)
 RemoveVolume.displayName = 'RemoveVolume'
 
 export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
   const {
-    id,
-    volume,
-    volumeSize,
     isStandAlone,
-    handleFileSrcChange,
-    handleMountPathChange,
-    handleUseLatestChange,
+    fileCtrl,
+    mountPathCtrl,
+    useLatestCtrl,
+    volumeSize,
     handleRemove,
   } = useAddNewVolumeProps(props)
 
@@ -68,46 +63,35 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
       </p>
       <NoisyContainer>
         <div tw="py-4">
-          <HiddenFileInput
-            value={volume.fileSrc}
-            onChange={handleFileSrcChange}
-          >
+          <HiddenFileInput {...fileCtrl.field} {...fileCtrl.fieldState}>
             Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
           </HiddenFileInput>
         </div>
         {!isStandAlone && (
           <div tw="mt-4">
             <TextInput
+              {...mountPathCtrl.field}
+              {...mountPathCtrl.fieldState}
               label="Mount"
               placeholder="/mount/opt"
-              value={volume.mountPath}
-              onChange={handleMountPathChange}
-              name={`${id}_mount`}
             />
           </div>
         )}
-        {volume.fileSrc && (
+        {fileCtrl.field.value && (
           <div tw="mt-4">
-            <TextInput
-              label="Size"
-              value={volumeSize}
-              name={`${id}_size`}
-              disabled
-            />
+            <TextInput label="Size" name="size" value={volumeSize} disabled />
           </div>
         )}
         {!isStandAlone && (
           <>
             <div tw="mt-4 py-4">
               <Checkbox
+                {...useLatestCtrl.field}
+                {...useLatestCtrl.fieldState}
                 label="Always update to the latest version"
-                checked={volume.useLatest}
-                onChange={handleUseLatestChange}
               />
             </div>
-            {handleRemove && (
-              <RemoveVolume volume={volume} onRemove={handleRemove} />
-            )}
+            {handleRemove && <RemoveVolume onRemove={handleRemove} />}
           </>
         )}
       </NoisyContainer>
@@ -117,14 +101,8 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
 AddNewVolume.displayName = 'AddNewVolume'
 
 const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
-  const {
-    id,
-    volume,
-    handleRefHashChange,
-    handleMountPathChange,
-    handleUseLatestChange,
-    handleRemove,
-  } = useAddExistingVolumeProps(props)
+  const { refHashCtrl, mountPathCtrl, useLatestCtrl, handleRemove } =
+    useAddExistingVolumeProps(props)
 
   return (
     <>
@@ -137,37 +115,29 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
       <NoisyContainer>
         <div>
           <TextInput
+            {...mountPathCtrl.field}
+            {...mountPathCtrl.fieldState}
             label="Mount"
             placeholder="/mount/opt"
-            onChange={handleMountPathChange}
-            value={volume.mountPath}
-            name={`${id}_mount`}
           />
         </div>
         <div tw="mt-4">
           <TextInput
+            {...refHashCtrl.field}
+            {...refHashCtrl.fieldState}
             label="Item hash"
             placeholder="3335ad270a571b..."
-            onChange={handleRefHashChange}
-            value={volume.refHash}
-            error={
-              volume.refHash && !isValidItemHash(volume.refHash || '')
-                ? { message: 'Invalid hash' }
-                : undefined
-            }
-            name={`${id}_refhash`}
           />
         </div>
         <div tw="mt-4 py-4">
           <Checkbox
+            {...useLatestCtrl.field}
+            {...useLatestCtrl.fieldState}
+            checked={!!useLatestCtrl.field.value}
             label="Always update to the latest version"
-            checked={volume.useLatest}
-            onChange={handleUseLatestChange}
           />
         </div>
-        {handleRemove && (
-          <RemoveVolume volume={volume} onRemove={handleRemove} />
-        )}
+        {handleRemove && <RemoveVolume onRemove={handleRemove} />}
       </NoisyContainer>
     </>
   )
@@ -176,12 +146,11 @@ AddExistingVolume.displayName = 'AddExistingVolume'
 
 const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
   const {
-    id,
-    volume,
-    volumeSize,
-    handleNameChange,
-    handleMountPathChange,
-    handleSizeChange,
+    nameCtrl,
+    mountPathCtrl,
+    sizeCtrl,
+    sizeValue,
+    sizeHandleChange,
     handleRemove,
   } = useAddPersistentVolumeProps(props)
 
@@ -196,39 +165,32 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
       <NoisyContainer>
         <div>
           <TextInput
+            {...nameCtrl.field}
+            {...nameCtrl.fieldState}
             label="Volume name"
             placeholder="Redis volume"
-            onChange={handleNameChange}
-            value={volume.name}
-            name={`${id}_name`}
-            error={
-              volume.name === ''
-                ? new Error('Please provide a name')
-                : undefined
-            }
           />
         </div>
         <div tw="mt-4">
           <TextInput
+            {...mountPathCtrl.field}
+            {...mountPathCtrl.fieldState}
             label="Mount"
             placeholder="/mount/opt"
-            onChange={handleMountPathChange}
-            value={volume.mountPath}
-            name={`${id}_mount`}
           />
         </div>
         <div tw="mt-4">
           <TextInput
+            {...sizeCtrl.field}
+            {...sizeCtrl.fieldState}
+            value={sizeValue}
+            onChange={sizeHandleChange}
+            type="number"
             label="Size (GB)"
-            placeholder="2"
-            onChange={handleSizeChange}
-            value={volumeSize}
-            name={`${id}_size`}
+            placeholder="0"
           />
         </div>
-        {handleRemove && (
-          <RemoveVolume volume={volume} onRemove={handleRemove} />
-        )}
+        {handleRemove && <RemoveVolume onRemove={handleRemove} />}
       </NoisyContainer>
     </>
   )
@@ -241,59 +203,40 @@ const CmpMap = {
   [VolumeType.Persistent]: AddPersistentVolume,
 }
 
-export const AddVolume = React.memo(
-  ({ isStandAlone, volume: volumeProp, onChange, ...rest }: AddVolumeProps) => {
-    const { volume, handleChange } = useAddVolume({
-      volume: volumeProp,
-      onChange,
-    })
+export const AddVolume = React.memo((props: AddVolumeProps) => {
+  const { volumeTypeCtrl, ...rest } = useAddVolume(props)
+  const volumeType = volumeTypeCtrl.field.value as VolumeType
 
-    const handleVolumeTypeChange = useCallback(
-      (type: string | VolumeType) => {
-        const newVolume = { ...volume, volumeType: type } as Volume
-        handleChange(newVolume)
-      },
-      [handleChange, volume],
-    )
+  const Cmp = useMemo(() => CmpMap[volumeType], [volumeType])
 
-    const Cmp = useMemo(() => CmpMap[volume.volumeType], [volume.volumeType])
+  return (
+    <>
+      <div tw="px-0 pt-6 pb-3">
+        <Tabs
+          selected={volumeType}
+          align="left"
+          onTabChange={volumeTypeCtrl.field.onChange}
+          tabs={[
+            {
+              id: VolumeType.New,
+              name: 'New volume',
+            },
+            {
+              id: VolumeType.Existing,
+              name: 'Existing volume',
+            },
+            {
+              id: VolumeType.Persistent,
+              name: 'Persistent Storage',
+            },
+          ]}
+        />
+      </div>
 
-    if (isStandAlone)
-      return (
-        <AddNewVolume {...{ volume: volume as never, onChange, ...rest }} />
-      )
-
-    return (
-      <>
-        <div tw="px-0 pt-6 pb-3">
-          <Tabs
-            selected={volume.volumeType}
-            align="left"
-            onTabChange={handleVolumeTypeChange}
-            tabs={[
-              {
-                id: VolumeType.New,
-                name: 'New volume',
-              },
-              {
-                id: VolumeType.Existing,
-                name: 'Existing volume',
-              },
-              {
-                id: VolumeType.Persistent,
-                name: 'Persistent Storage',
-              },
-            ]}
-          />
-        </div>
-
-        <div role="tabpanel">
-          {<Cmp {...{ volume: volume as never, onChange, ...rest }} />}
-        </div>
-      </>
-    )
-  },
-)
+      <div role="tabpanel">{<Cmp {...rest} />}</div>
+    </>
+  )
+})
 AddVolume.displayName = 'AddVolume'
 
 export default AddVolume

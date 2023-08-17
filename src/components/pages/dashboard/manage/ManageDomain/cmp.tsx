@@ -1,7 +1,11 @@
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import IconText from '@/components/common/IconText'
 import NoisyContainer from '@/components/common/NoisyContainer'
-import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
+import {
+  EntityTypeName,
+  breadcrumbNames,
+  AddDomainTarget,
+} from '@/helpers/constants'
 import {
   BulletItem,
   Button,
@@ -143,12 +147,48 @@ export default function ManageDomain() {
                               {domain.name}
                             </span>
                             with value
-                            <span className="text-main0" tw="mx-2">
-                              program.public.aleph.sh.
-                            </span>
+                            {domain.target == AddDomainTarget.Program && (
+                              <span className="text-main0" tw="mx-2">
+                                {domain.name}.program.public.aleph.sh.
+                              </span>
+                            )}
+                            {domain.target == AddDomainTarget.Instance && (
+                              <span className="text-main0" tw="mx-2">
+                                {domain.name}.instance.public.aleph.sh.
+                              </span>
+                            )}
+                            {domain.target == AddDomainTarget.IPFS && (
+                              <span className="text-main0" tw="mx-2">
+                                ipfs.public.aleph.sh.
+                              </span>
+                            )}
                           </div>
                         </div>
                       </GrayText>
+                      {domain.target == AddDomainTarget.IPFS && (
+                        <GrayText>
+                          <div tw="flex mt-2">
+                            <BulletItem
+                              kind={
+                                status.tasks_status.delegation
+                                  ? 'success'
+                                  : 'warning'
+                              }
+                              title={''}
+                            />
+                            <div>
+                              Create a CNAME record
+                              <span className="text-main0" tw="mx-2">
+                                _dnslink.{domain.name}
+                              </span>
+                              with value
+                              <span className="text-main0" tw="mx-2">
+                                _dnslink.{domain.name}.static.public.aleph.sh.
+                              </span>
+                            </div>
+                          </div>
+                        </GrayText>
+                      )}
                       <GrayText>
                         <div tw="flex mt-2">
                           <BulletItem

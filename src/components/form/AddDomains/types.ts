@@ -1,12 +1,15 @@
-import { DomainProp } from '@/hooks/form/useAddDomains'
+import { EntityType } from '@/helpers/constants'
+import { Control } from 'react-hook-form'
 
 export type DomainItemProps = {
-  domain: DomainProp
-  onChange: (domain: DomainProp) => void
-  onRemove: (domainId: string) => void
+  name?: string
+  index: number
+  control: Control
+  onRemove: (index?: number) => void
 }
 
 export type AddDomainsProps = {
-  domains?: DomainProp[]
-  onChange: (domains: DomainProp[]) => void
+  control: Control
+  name: string
+  entityType: EntityType.Program | EntityType.Instance
 }

@@ -1,10 +1,10 @@
-import { VolumeProp } from '@/hooks/form/useAddVolume'
+import { Control } from 'react-hook-form'
 
 export type RemoveVolumeProps = {
   onRemove: () => void
 }
 
 export type AddVolumesProps = {
-  volumes?: VolumeProp[]
-  onChange: (volumes: VolumeProp[]) => void
+  name?: string
+  control: Control
 } & Partial<RemoveVolumeProps>

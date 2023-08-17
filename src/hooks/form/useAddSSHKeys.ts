@@ -1,81 +1,84 @@
-import { ChangeEvent, useCallback, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useAccountSSHKeys } from '../common/useAccountEntity/useAccountSSHKeys'
+import {
+  Control,
+  UseControllerReturn,
+  useController,
+  useFieldArray,
+} from 'react-hook-form'
 
-export type SSHKeyProp = {
-  id: string
+export type SSHKeyField = {
   key: string
-  label: string
-  isSelected?: boolean
-  isNew?: boolean
+  label?: string
+  isSelected: boolean
+  isNew: boolean
 }
 
-export const defaultSSHKey: SSHKeyProp = {
-  id: `sshkey-0`,
+export const defaultValues: SSHKeyField = {
   key: '',
-  label: '',
   isSelected: true,
   isNew: true,
 }
 
 export type UseSSHKeyItemProps = {
-  sshKey: SSHKeyProp
-  onChange: (sshKeys: SSHKeyProp) => void
-  onRemove: (sshKeyId: string) => void
+  name?: string
+  index: number
+  control: Control
+  allowRemove: boolean
+  defaultValue?: SSHKeyField
+  onRemove: (index?: number) => void
 }
 
 export type UseSSHKeyItemReturn = {
-  id: string
-  sshKey: SSHKeyProp
-  handleIsSelectedChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleKeyChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleLabelChange: (e: ChangeEvent<HTMLInputElement>) => void
+  isSelectedCtrl: UseControllerReturn<any, any>
+  keyCtrl: UseControllerReturn<any, any>
+  labelCtrl: UseControllerReturn<any, any>
+  index: number
+  allowRemove: boolean
+  isNew: boolean
   handleRemove: () => void
 }
 
 export function useSSHKeyItem({
-  sshKey,
-  onChange,
+  name = 'sshKeys',
+  index,
+  control,
+  allowRemove,
+  defaultValue,
   onRemove,
 }: UseSSHKeyItemProps): UseSSHKeyItemReturn {
-  const id = useId()
+  const isSelectedCtrl = useController({
+    control,
+    name: `${name}.${index}.isSelected`,
+    defaultValue: defaultValue?.isSelected,
+  })
 
-  const handleIsSelectedChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const isSelected = e.target.checked
-      const newSSHKey: SSHKeyProp = { ...sshKey, isSelected }
-      onChange(newSSHKey)
-    },
-    [onChange, sshKey],
-  )
+  const keyCtrl = useController({
+    control,
+    name: `${name}.${index}.key`,
+    defaultValue: defaultValue?.key,
+  })
 
-  const handleKeyChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const key = e.target.value
-      const newSSHKey: SSHKeyProp = { ...sshKey, key }
-      onChange(newSSHKey)
-    },
-    [onChange, sshKey],
-  )
+  const labelCtrl = useController({
+    control,
+    name: `${name}.${index}.label`,
+    defaultValue: defaultValue?.label,
+  })
 
-  const handleLabelChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const label = e.target.value
-      const newSSHKey: SSHKeyProp = { ...sshKey, label }
-      onChange(newSSHKey)
-    },
-    [onChange, sshKey],
-  )
+  const isNew = defaultValue?.isNew || false
 
   const handleRemove = useCallback(() => {
-    onRemove(sshKey.id)
-  }, [sshKey.id, onRemove])
+    if (!isNew) return
+    onRemove(index)
+  }, [index, isNew, onRemove])
 
   return {
-    id,
-    sshKey,
-    handleIsSelectedChange,
-    handleKeyChange,
-    handleLabelChange,
+    index,
+    isSelectedCtrl,
+    keyCtrl,
+    labelCtrl,
+    allowRemove,
+    isNew,
     handleRemove,
   }
 }
@@ -83,30 +86,36 @@ export function useSSHKeyItem({
 // --------------------
 
 export type UseSSHKeysProps = {
-  sshKeys?: SSHKeyProp[]
-  onChange: (sshKeys: SSHKeyProp[]) => void
+  name?: string
+  control: Control
 }
 
 export type UseSSHKeysReturn = {
-  sshKeys: SSHKeyProp[]
-  handleChange: (sshKeys: SSHKeyProp) => void
+  name: string
+  control: Control
+  fields: (SSHKeyField & { id: string })[]
   handleAdd: () => void
-  handleRemove: (sshKeyId: string) => void
+  handleRemove: (index?: number) => void
   allowRemove: boolean
 }
 
 export function useAddSSHKeys({
-  sshKeys: sshKeysProp,
-  onChange,
+  name = 'sshKeys',
+  control,
 }: UseSSHKeysProps): UseSSHKeysReturn {
-  const [sshKeysState, setSSHKeysState] = useState<SSHKeyProp[]>([])
-  const newSSHKeys = sshKeysProp || sshKeysState
+  const sshKeysCtrl = useFieldArray({
+    control,
+    name,
+  })
+
+  const { remove: handleRemove, append, replace, prepend } = sshKeysCtrl
+  const fields = sshKeysCtrl.fields as (SSHKeyField & { id: string })[]
 
   const [accountSSHKeys] = useAccountSSHKeys()
-  const accountSSHKeyItems: SSHKeyProp[] = useMemo(
+
+  const accountSSHKeyItems: SSHKeyField[] = useMemo(
     () =>
-      (accountSSHKeys || []).map(({ id, key, label = '' }) => ({
-        id,
+      (accountSSHKeys || []).map(({ key, label = '' }) => ({
         key,
         label,
         isSelected: false,
@@ -115,67 +124,34 @@ export function useAddSSHKeys({
     [accountSSHKeys],
   )
 
-  const sshKeys: SSHKeyProp[] = useMemo(() => {
-    const newKeysMap = new Map(newSSHKeys.map((key) => [key.id, key]))
-    const accountKeysMap = new Map(
-      accountSSHKeyItems.map((key) => [key.id, key]),
-    )
+  useEffect(() => {
+    let newValues = accountSSHKeyItems
 
-    return [
-      ...accountSSHKeyItems.map((key) => newKeysMap.get(key.id) || key),
-      ...newSSHKeys.filter((key) => !accountKeysMap.has(key.id)),
-    ]
-  }, [accountSSHKeyItems, newSSHKeys])
+    if (fields.length === 0) {
+      replace(newValues)
+      return
+    }
 
-  const allowRemove = useMemo(() => sshKeys.some((key) => key.isNew), [sshKeys])
+    const set = new Set(fields.map((field) => field.key))
+    newValues = accountSSHKeyItems.filter((field) => !set.has(field.key))
 
-  const handleChange = useCallback(
-    (sshKey: SSHKeyProp) => {
-      let updatedSSHKeys = [...newSSHKeys]
-      const index = updatedSSHKeys.findIndex((key) => key.id === sshKey.id)
+    if (newValues.length === 0) return
+    prepend(newValues)
+  }, [accountSSHKeyItems, fields, replace, prepend])
 
-      if (index !== -1) {
-        updatedSSHKeys[index] = sshKey
-      } else {
-        updatedSSHKeys.push(sshKey)
-      }
-
-      // @note: Filter not selected account keys
-      updatedSSHKeys = updatedSSHKeys.filter(
-        (key) => key.isNew || key.isSelected,
-      )
-
-      setSSHKeysState(updatedSSHKeys)
-      onChange(updatedSSHKeys)
-    },
-    [newSSHKeys, onChange],
+  const allowRemove = useMemo(
+    () => fields.some((field) => field.isNew),
+    [fields],
   )
 
   const handleAdd = useCallback(() => {
-    const newSSHKey = {
-      ...defaultSSHKey,
-      id: `sshkey-${Date.now()}`,
-    }
-
-    const updatedSSHKeys = [...newSSHKeys, newSSHKey]
-
-    setSSHKeysState(updatedSSHKeys)
-    onChange(updatedSSHKeys)
-  }, [newSSHKeys, onChange])
-
-  const handleRemove = useCallback(
-    (sshKeyId: string) => {
-      const updatedSSHKeys = newSSHKeys.filter((key) => key.id !== sshKeyId)
-
-      setSSHKeysState(updatedSSHKeys)
-      onChange(updatedSSHKeys)
-    },
-    [newSSHKeys, onChange],
-  )
+    append({ ...defaultValues })
+  }, [append])
 
   return {
-    sshKeys,
-    handleChange,
+    name,
+    control,
+    fields,
     handleAdd,
     handleRemove,
     allowRemove,

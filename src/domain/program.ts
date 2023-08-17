@@ -1,3 +1,4 @@
+import JSZip from 'jszip'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, program, any } from 'aleph-sdk-ts/dist/messages'
 // import { ProgramPublishConfiguration } from 'aleph-sdk-ts/dist/messages/program/publish'
@@ -9,52 +10,63 @@ import {
   defaultVMURL,
   programStorageURL,
 } from '../helpers/constants'
-import {
-  downloadBlob,
-  getDate,
-  getExplorerURL,
-  isValidItemHash,
-} from '../helpers/utils'
+import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
 import {
   ItemType,
   MachineVolume,
   MessageType,
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/types'
-import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
+import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { ProgramContent } from 'aleph-sdk-ts/dist/messages/program/programModel'
-import JSZip from 'jszip'
-import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
 import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
-import { VolumeProp } from '@/hooks/form/useAddVolume'
-import { FunctionRuntime, FunctionRuntimeId } from './runtime'
+import { VolumeField } from '@/hooks/form/useAddVolume'
+import { FunctionRuntimeId } from './runtime'
 import { FileManager } from './file'
 import { MessageManager } from './message'
 import { VolumeManager } from './volume'
-import { DomainProp } from '@/hooks/form/useAddDomains'
+import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
+import { FunctionRuntimeField } from '@/hooks/form/useSelectFunctionRuntime'
+import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
+import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
+import { functionSchema } from '@/helpers/schemas'
+import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 
 // @todo: Export this type from sdk and remove here
-declare type ProgramPublishConfiguration = {
-  account: Account
-  channel: string
-  isPersistent?: boolean
-  storageEngine?: ItemType.ipfs | ItemType.storage
-  inlineRequested?: boolean
-  APIServer?: string
-  file?: Buffer | Blob
-  programRef?: string
-  encoding?: Encoding
-  entrypoint: string
-  subscription?: Record<string, unknown>[]
-  memory?: number
-  vcpus?: number
-  runtime?: string
-  volumes?: MachineVolume[]
-  metadata?: Record<string, unknown>
-  variables?: Record<string, string>
-}
+export declare type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<
+  T,
+  Exclude<keyof T, Keys>
+> &
+  {
+    [K in Keys]-?: Required<Pick<T, K>> &
+      Partial<Record<Exclude<Keys, K>, undefined>>
+  }[Keys]
+
+// @todo: Export this type from sdk and remove here
+export type ProgramPublishConfiguration = RequireOnlyOne<
+  {
+    account: Account
+    channel: string
+    isPersistent?: boolean
+    storageEngine?: ItemType.ipfs | ItemType.storage
+    inlineRequested?: boolean
+    APIServer?: string
+    file?: Buffer | Blob
+    programRef?: string
+    encoding?: Encoding
+    entrypoint: string
+    subscription?: Record<string, unknown>[]
+    memory?: number
+    vcpus?: number
+    runtime?: string
+    volumes?: MachineVolume[]
+    metadata?: Record<string, unknown>
+    variables?: Record<string, string>
+  },
+  'programRef' | 'file'
+>
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -66,18 +78,17 @@ export type AddProgram = Omit<
   | 'runtime'
   | 'volumes'
   | 'entrypoint'
-> & {
-  file?: string | File
-  entrypoint?: string
-  isPersistent: boolean
-  runtime?: FunctionRuntime
-  name?: string
-  tags?: string[]
-  envVars?: EnvVarProp[]
-  specs?: InstanceSpecsProp
-  volumes?: VolumeProp[]
-  domains?: DomainProp[]
-}
+> &
+  NameAndTagsField & {
+    isPersistent: boolean
+    code: FunctionCodeField
+    runtime: FunctionRuntimeField
+    specs: InstanceSpecsField
+    entrypoint?: string
+    envVars?: EnvVarField[]
+    volumes?: VolumeField[]
+    domains?: Omit<DomainField, 'ref'>[]
+  }
 
 // @todo: Refactor
 export type Program = Omit<ProgramContent, 'type'> & {
@@ -100,6 +111,8 @@ export class ProgramManager
   extends Executable
   implements EntityManager<Program, AddProgram>
 {
+  static addSchema = functionSchema
+
   /**
    * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
    */
@@ -148,36 +161,9 @@ export class ProgramManager
 
   async add(newProgram: AddProgram): Promise<Program> {
     try {
-      const { account, channel } = this
-      const {
-        name,
-        tags,
-        isPersistent,
-        envVars,
-        specs,
-        entrypoint = 'main:app', // @todo: Entrypoint,
-      } = newProgram
+      const programMessage = await this.parseProgram(newProgram)
 
-      const variables = this.parseEnvVars(envVars)
-      const { memory, vcpus } = this.parseSpecs(specs)
-      const metadata = this.parseMetadata(name, tags)
-      const runtime = this.parseRuntime(newProgram.runtime)
-      const volumes = await this.parseVolumes(newProgram.volumes)
-      const file = await this.parseCode(newProgram.file)
-
-      const response = await program.publish({
-        account,
-        channel,
-        runtime,
-        isPersistent,
-        entrypoint,
-        file,
-        variables,
-        memory,
-        vcpus,
-        volumes,
-        metadata,
-      })
+      const response = await program.publish(programMessage)
 
       const [entity] = await this.parseMessages([response])
 
@@ -215,31 +201,66 @@ export class ProgramManager
     return downloadBlob(blob, `VM_${program.id.slice(-12)}.zip`)
   }
 
-  protected async parseCode(codeOrFile?: string | File): Promise<File> {
-    if (typeof codeOrFile === 'string') {
+  protected async parseCode(code: FunctionCodeField): Promise<File> {
+    if (code.type === 'text') {
       const jsZip = new JSZip()
-      jsZip.file('main.py', codeOrFile || '')
+      jsZip.file('main.py', code.text)
       const zip = await jsZip.generateAsync({ type: 'blob' })
       return new File([zip], 'main.py.zip', { type: 'application/zip' })
     }
 
-    if (codeOrFile instanceof File) {
-      return codeOrFile
+    if (code.type === 'file') {
+      if (!code.file) throw new Error('Invalid function code file')
+
+      return code.file
     }
 
-    throw new Error('Invalid code or file')
+    throw new Error('Invalid function code type')
   }
 
-  protected parseRuntime(runtime?: FunctionRuntime): string {
-    const ref = (
-      runtime?.id !== FunctionRuntimeId.Custom
-        ? runtime?.id || ''
-        : runtime.meta || ''
-    ).trim()
+  protected async parseProgram(
+    newProgram: AddProgram,
+  ): Promise<ProgramPublishConfiguration> {
+    newProgram = ProgramManager.addSchema.parse(newProgram)
 
-    if (!ref || !isValidItemHash(ref)) throw new Error('Invalid runtime ref')
+    const { account, channel } = this
 
-    return ref
+    const {
+      name,
+      tags,
+      isPersistent,
+      envVars,
+      specs,
+      // @todo: Entrypoint
+      entrypoint = 'main:app',
+    } = newProgram
+
+    const variables = this.parseEnvVars(envVars)
+    const { memory, vcpus } = this.parseSpecs(specs)
+    const metadata = this.parseMetadata(name, tags)
+    const runtime = this.parseRuntime(newProgram.runtime)
+    const volumes = await this.parseVolumes(newProgram.volumes)
+    const file = await this.parseCode(newProgram.code)
+
+    return {
+      account,
+      channel,
+      runtime,
+      isPersistent,
+      entrypoint,
+      file,
+      variables,
+      memory,
+      vcpus,
+      volumes,
+      metadata,
+    }
+  }
+
+  protected parseRuntime(runtime: FunctionRuntimeField): string {
+    const ref =
+      runtime.id !== FunctionRuntimeId.Custom ? runtime.id : runtime.custom
+    return ref as string
   }
 
   // @todo: Type not exported from SDK...

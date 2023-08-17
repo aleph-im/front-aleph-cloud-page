@@ -3,54 +3,56 @@ import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
-import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
-import { NameAndTagsProp } from '@/hooks/form/useAddNameAndTags'
-import { SSHKeyProp } from '@/hooks/form/useAddSSHKeys'
-import { VolumeProp, defaultVolume } from '@/hooks/form/useAddVolume'
+import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
-  InstanceImageProp,
-  defaultInstanceImageOptions,
+  NameAndTagsField,
+  defaultNameAndTags,
+} from '@/hooks/form/useAddNameAndTags'
+import {
+  SSHKeyField,
+  // defaultValues as sshKeyDefaultValues,
+} from '@/hooks/form/useAddSSHKeys'
+import { VolumeField } from '@/hooks/form/useAddVolume'
+import {
+  InstanceImageField,
+  defaultInstanceImage,
 } from '@/hooks/form/useSelectInstanceImage'
 import {
-  InstanceSpecsProp,
+  InstanceSpecsField,
   getDefaultSpecsOptions,
 } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { ActionTypes } from '@/helpers/store'
-import { DomainProp } from '@/hooks/form/useAddDomains'
+import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
+import { Control, FieldErrors, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-export type NewInstanceFormState = {
-  name?: string
-  tags?: string[]
-  image?: InstanceImageProp
-  specs?: InstanceSpecsProp
-  volumes?: VolumeProp[]
-  envVars?: EnvVarProp[]
-  sshKeys?: SSHKeyProp[]
-  domains?: DomainProp[]
+export type NewInstanceFormState = NameAndTagsField & {
+  image: InstanceImageField
+  specs: InstanceSpecsField
+  sshKeys: SSHKeyField[]
+  volumes?: VolumeField[]
+  envVars?: EnvVarField[]
+  domains?: DomainField[]
 }
 
-export const initialState: NewInstanceFormState = {
-  image: defaultInstanceImageOptions[0],
-  specs: getDefaultSpecsOptions(true)[0],
-  volumes: [{ ...defaultVolume }],
+export const defaultValues: Partial<NewInstanceFormState> = {
+  ...defaultNameAndTags,
+  image: defaultInstanceImage,
+  specs: { ...getDefaultSpecsOptions(true)[0] },
+  // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
 export type UseNewInstancePage = {
-  formState: NewInstanceFormState
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
+  values: any
+  control: Control<any>
+  errors: FieldErrors<NewInstanceFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
   handleChangeEntityTab: (tabId: string) => void
-  handleChangeInstanceImage: (image: InstanceImageProp) => void
-  handleChangeInstanceSpecs: (specs: InstanceSpecsProp) => void
-  handleChangeVolumes: (volumes: VolumeProp[]) => void
-  handleChangeEnvVars: (envVars: EnvVarProp[]) => void
-  handleChangeSSHKeys: (sshKeys: SSHKeyProp[]) => void
-  handleChangeDomains: (domains: DomainProp[]) => void
-  handleChangeNameAndTags: (nameAndTags: NameAndTagsProp) => void
 }
 
 export function useNewInstancePage(): UseNewInstancePage {
@@ -66,19 +68,7 @@ export function useNewInstancePage(): UseNewInstancePage {
     async (state: NewInstanceFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const { image, name, tags, envVars, domains, sshKeys, volumes, specs } =
-        state
-
-      const accountInstance = await manager.add({
-        name,
-        tags,
-        envVars,
-        sshKeys,
-        domains,
-        volumes,
-        specs,
-        image,
-      })
+      const accountInstance = await manager.add(state)
 
       dispatch({
         type: ActionTypes.addAccountInstance,
@@ -93,57 +83,24 @@ export function useNewInstancePage(): UseNewInstancePage {
   )
 
   const {
-    state: formState,
-    setFormValue,
+    control,
     handleSubmit,
-  } = useForm({ initialState, onSubmit })
-
-  const handleChangeInstanceImage = useCallback(
-    (image: InstanceImageProp) => setFormValue('image', image),
-    [setFormValue],
-  )
-
-  const handleChangeInstanceSpecs = useCallback(
-    (specs: InstanceSpecsProp) => setFormValue('specs', specs),
-    [setFormValue],
-  )
-
-  const handleChangeVolumes = useCallback(
-    (volumes: VolumeProp[]) => setFormValue('volumes', volumes),
-    [setFormValue],
-  )
-
-  const handleChangeEnvVars = useCallback(
-    (envVars: EnvVarProp[]) => setFormValue('envVars', envVars),
-    [setFormValue],
-  )
-
-  const handleChangeSSHKeys = useCallback(
-    (sshKeys: SSHKeyProp[]) => setFormValue('sshKeys', sshKeys),
-    [setFormValue],
-  )
-
-  const handleChangeDomains = useCallback(
-    (domains: DomainProp[]) => setFormValue('domains', domains),
-    [setFormValue],
-  )
-
-  const handleChangeNameAndTags = useCallback(
-    ({ name, tags }: NameAndTagsProp) => {
-      setFormValue('name', name)
-      setFormValue('tags', tags)
-    },
-    [setFormValue],
-  )
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+    onSubmit,
+    resolver: zodResolver(InstanceManager.addSchema),
+  })
+  const values = useWatch({ control }) as NewInstanceFormState
 
   const { totalCost } = useMemo(
     () =>
       InstanceManager.getCost({
-        specs: formState.specs,
-        volumes: formState.volumes,
+        specs: values.specs,
+        volumes: values.volumes,
         capabilities: {},
       }),
-    [formState],
+    [values.specs, values.volumes],
   )
 
   const canAfford = (accountBalance || 0) > totalCost
@@ -160,18 +117,13 @@ export function useNewInstancePage(): UseNewInstancePage {
   )
 
   return {
-    formState,
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
+    values,
+    control,
+    errors,
     handleSubmit,
     handleChangeEntityTab,
-    handleChangeInstanceImage,
-    handleChangeInstanceSpecs,
-    handleChangeVolumes,
-    handleChangeEnvVars,
-    handleChangeSSHKeys,
-    handleChangeDomains,
-    handleChangeNameAndTags,
   }
 }

@@ -1,31 +1,34 @@
 import { PerVolumeCostItem } from '@/domain/volume'
 import { EntityType } from '@/helpers/constants'
-import { DomainProp } from '@/hooks/form/useAddDomains'
-import { VolumeProp } from '@/hooks/form/useAddVolume'
-import { InstanceSpecsProp } from '@/hooks/form/useSelectInstanceSpecs'
+import { DomainField } from '@/hooks/form/useAddDomains'
+import { VolumeField } from '@/hooks/form/useAddVolume'
+import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
+import { ReactNode } from 'react'
 
 export type HoldingRequirementsProps = {
   address: string
   unlockedAmount: number
   type: EntityType.Program | EntityType.Instance | EntityType.Volume
   isPersistent?: boolean
-  specs?: InstanceSpecsProp
-  volumes?: VolumeProp[]
-  domains?: DomainProp[]
+  specs?: InstanceSpecsField
+  volumes?: VolumeField[]
+  domains?: DomainField[]
+  button?: ReactNode
+  description?: ReactNode
 }
 
 export type HoldingRequirementsSpecsLineProps = {
   type: EntityType.Program | EntityType.Instance | EntityType.Volume
-  specs: InstanceSpecsProp
+  specs: InstanceSpecsField
   cost: number
 }
 
 export type HoldingRequirementsVolumeLineProps = {
-  volume: VolumeProp
-  specs?: InstanceSpecsProp
+  volume: VolumeField
+  specs?: InstanceSpecsField
   cost?: PerVolumeCostItem
 }
 
 export type HoldingRequirementsDomainLineProps = {
-  domain: DomainProp
+  domain: DomainField
 }

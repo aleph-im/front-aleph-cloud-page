@@ -33,12 +33,15 @@ export default function InfoTooltipButton({
   return (
     <>
       {plain ? (
-        <span ref={targetRef} tw="cursor-help flex items-center gap-2.5">
+        <span ref={targetRef} tw="cursor-help inline-flex items-center gap-2.5">
           {children}
           {iconElm}
         </span>
       ) : (
-        <StyledInfoTooltipButton ref={targetRef} tw="flex items-center gap-2.5">
+        <StyledInfoTooltipButton
+          ref={targetRef}
+          tw="inline-flex items-center gap-2.5"
+        >
           {children}
           {iconElm}
         </StyledInfoTooltipButton>

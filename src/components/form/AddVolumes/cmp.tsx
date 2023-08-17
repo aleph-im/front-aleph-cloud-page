@@ -6,17 +6,21 @@ import AddVolume from '../AddVolume'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 
 export const AddVolumes = React.memo((props: AddVolumesProps) => {
-  const { volumes, handleAdd, handleRemove, handleChange } =
+  const { name, control, fields, handleAdd, handleRemove } =
     useAddVolumes(props)
 
   return (
     <>
-      {volumes.map((volume) => (
+      {fields.map((field, index) => (
         <AddVolume
-          key={volume.id}
-          volume={volume}
-          onRemove={handleRemove}
-          onChange={handleChange}
+          key={field.id}
+          {...{
+            name,
+            index,
+            control,
+            defaultValue: field,
+            onRemove: handleRemove,
+          }}
         />
       ))}
       <div tw="mt-6 mx-6">
@@ -28,7 +32,7 @@ export const AddVolumes = React.memo((props: AddVolumesProps) => {
           kind="neon"
           size="regular"
         >
-          {volumes.length > 0 ? 'Add another volume' : 'Add volume'}
+          {fields.length > 0 ? 'Add another volume' : 'Add volume'}
         </Button>
       </div>
       <div tw="mt-6 text-right">

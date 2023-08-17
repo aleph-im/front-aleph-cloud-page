@@ -1,29 +1,37 @@
-import { ChangeEvent, FormEvent, useCallback } from 'react'
+import { FormEvent, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import useConnectedWard from '@/hooks/common/useConnectedWard'
+import {
+  FieldErrors,
+  UseControllerReturn,
+  useController,
+} from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
 import { useForm } from '@/hooks/common/useForm'
+import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
+import { SSHKeyManager } from '@/domain/ssh'
 
 export type NewSSHKeyFormState = {
   key: string
-  label?: string
+  label: string
 }
 
-export const initialState: NewSSHKeyFormState = {
+export const defaultValues: NewSSHKeyFormState = {
   key: '',
   label: '',
 }
 
-export type UseNewSSHKeyPage = {
-  formState: NewSSHKeyFormState
+export type UseNewSSHKeyPageReturn = {
+  keyCtrl: UseControllerReturn<NewSSHKeyFormState, 'key'>
+  labelCtrl: UseControllerReturn<NewSSHKeyFormState, 'label'>
+  errors: FieldErrors<NewSSHKeyFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
-  handleChangeKey: (e: ChangeEvent<HTMLTextAreaElement>) => void
-  handleChangeLabel: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
-export function useNewSSHKeyPage() {
+export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
   useConnectedWard()
 
   const router = useRouter()
@@ -34,7 +42,7 @@ export function useNewSSHKeyPage() {
     async (state: NewSSHKeyFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const accountSSHKey = await manager.add(state)
+      const [accountSSHKey] = await manager.add(state)
 
       dispatch({
         type: ActionTypes.addAccountSSHKey,
@@ -47,26 +55,29 @@ export function useNewSSHKeyPage() {
   )
 
   const {
-    state: formState,
-    setFormValue,
+    control,
     handleSubmit,
-  } = useForm({ initialState, onSubmit })
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+    onSubmit,
+    resolver: zodResolver(SSHKeyManager.addSchema),
+  })
 
-  const handleChangeKey = useCallback(
-    (e: ChangeEvent<HTMLTextAreaElement>) =>
-      setFormValue('key', e.target.value),
-    [setFormValue],
-  )
+  const keyCtrl = useController({
+    control,
+    name: 'key',
+  })
 
-  const handleChangeLabel = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => setFormValue('label', e.target.value),
-    [setFormValue],
-  )
+  const labelCtrl = useController({
+    control,
+    name: 'label',
+  })
 
   return {
-    ...formState,
-    handleChangeKey,
-    handleChangeLabel,
+    keyCtrl,
+    labelCtrl,
     handleSubmit,
+    errors,
   }
 }

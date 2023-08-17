@@ -2,72 +2,58 @@ import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import {
-  FunctionRuntimeProp,
-  defaultFunctionRuntimeOptions,
+  FunctionRuntimeField,
+  defaultFunctionRuntime,
 } from '../../form/useSelectFunctionRuntime'
 import {
-  InstanceSpecsProp,
+  InstanceSpecsField,
   getDefaultSpecsOptions,
 } from '../../form/useSelectInstanceSpecs'
-import { VolumeProp, defaultVolume } from '../../form/useAddVolume'
-import { EnvVarProp } from '../../form/useAddEnvVars'
-import { NameAndTagsProp } from '../../form/useAddNameAndTags'
+import { VolumeField } from '../../form/useAddVolume'
+import { EnvVarField } from '../../form/useAddEnvVars'
+import {
+  NameAndTagsField,
+  defaultNameAndTags,
+} from '../../form/useAddNameAndTags'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { ActionTypes } from '@/helpers/store'
-import { DomainProp } from '@/hooks/form/useAddDomains'
+import { DomainField } from '@/hooks/form/useAddDomains'
 import { ProgramManager } from '@/domain/program'
+import { Control, FieldErrors, useWatch } from 'react-hook-form'
+import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-export type NewFunctionFormState = {
-  runtime: FunctionRuntimeProp
+export type NewFunctionFormState = NameAndTagsField & {
+  code: FunctionCodeField
+  runtime: FunctionRuntimeField
+  specs: InstanceSpecsField
   isPersistent: boolean
-  volumes: VolumeProp[]
-  codeOrFile: 'code' | 'file'
-  codeLanguage: string
-  functionCode?: string
-  functionFile?: File
-  specs?: InstanceSpecsProp
-  envVars?: EnvVarProp[]
-  domains?: DomainProp[]
-  tags?: string[]
-  name?: string
+  volumes?: VolumeField[]
+  envVars?: EnvVarField[]
+  domains?: DomainField[]
 }
 
-const samplePythonCode = `from fastapi import FastAPI
-
-app = FastAPI()
-@app.get("/")
-async def root():
-  return {"message": "Hello World"}
-`
-
-const initialState: NewFunctionFormState = {
-  runtime: defaultFunctionRuntimeOptions[0],
-  specs: getDefaultSpecsOptions(false)[0],
-  volumes: [{ ...defaultVolume }],
+const defaultValues: Partial<NewFunctionFormState> = {
+  ...defaultNameAndTags,
+  code: { ...defaultCode },
+  runtime: { ...defaultFunctionRuntime },
+  specs: { ...getDefaultSpecsOptions(false)[0] },
   isPersistent: false,
-  functionCode: samplePythonCode,
-  codeLanguage: 'python',
-  codeOrFile: 'code',
 }
 
 // @todo: Split this into reusable hooks by composition
 
 export type UseNewFunctionPage = {
-  formState: NewFunctionFormState
-  handleSubmit: (e: FormEvent) => Promise<void>
-  setFormValue: (name: keyof NewFunctionFormState, value: unknown) => void
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
-  handleChangeFunctionRuntime: (runtime: FunctionRuntimeProp) => void
+  values: any
+  control: Control<any>
+  errors: FieldErrors<NewFunctionFormState>
+  handleSubmit: (e: FormEvent) => Promise<void>
   handleChangeEntityTab: (tabId: string) => void
-  handleChangeInstanceSpecs: (specs: InstanceSpecsProp) => void
-  handleChangeVolumes: (volumes: VolumeProp[]) => void
-  handleChangeEnvVars: (envVars: EnvVarProp[]) => void
-  handleChangeDomains: (domains: DomainProp[]) => void
-  handleChangeNameAndTags: (nameAndTags: NameAndTagsProp) => void
 }
 
 export function useNewFunctionPage(): UseNewFunctionPage {
@@ -83,35 +69,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     async (state: NewFunctionFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const {
-        runtime,
-        name,
-        tags,
-        isPersistent,
-        envVars,
-        domains,
-        volumes,
-        specs,
-        codeOrFile,
-        functionCode,
-        functionFile,
-      } = state
-
-      const file = codeOrFile === 'code' ? functionCode : functionFile
-
-      const accountFunction = await manager.add({
-        runtime,
-        name,
-        tags,
-        envVars,
-        domains,
-        specs,
-        volumes,
-        isPersistent,
-        // @todo: Move this to a new FunctionCode component that will always return
-        // a file and an entrypoint depending on the selected language and code
-        file,
-      })
+      const accountFunction = await manager.add(state)
 
       dispatch({
         type: ActionTypes.addAccountFunction,
@@ -126,53 +84,26 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   )
 
   const {
-    state: formState,
-    setFormValue,
+    control,
     handleSubmit,
-  } = useForm({ initialState, onSubmit })
-
-  const handleChangeFunctionRuntime = useCallback(
-    (runtime: FunctionRuntimeProp) => setFormValue('runtime', runtime),
-    [setFormValue],
-  )
-
-  const handleChangeInstanceSpecs = useCallback(
-    (specs: InstanceSpecsProp) => setFormValue('specs', specs),
-    [setFormValue],
-  )
-
-  const handleChangeVolumes = useCallback(
-    (volumes: VolumeProp[]) => setFormValue('volumes', volumes),
-    [setFormValue],
-  )
-
-  const handleChangeEnvVars = useCallback(
-    (envVars: EnvVarProp[]) => setFormValue('envVars', envVars),
-    [setFormValue],
-  )
-
-  const handleChangeDomains = useCallback(
-    (domains: DomainProp[]) => setFormValue('domains', domains),
-    [setFormValue],
-  )
-
-  const handleChangeNameAndTags = useCallback(
-    ({ name, tags }: NameAndTagsProp) => {
-      setFormValue('name', name)
-      setFormValue('tags', tags)
-    },
-    [setFormValue],
-  )
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+    onSubmit,
+    resolver: zodResolver(ProgramManager.addSchema),
+  })
+  // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
+  const values = useWatch({ control }) as NewFunctionFormState
 
   const { totalCost } = useMemo(
     () =>
       ProgramManager.getCost({
-        specs: formState.specs,
-        isPersistent: formState.isPersistent,
-        volumes: formState.volumes,
+        specs: values.specs,
+        isPersistent: values.isPersistent,
+        volumes: values.volumes,
         capabilities: {},
       }),
-    [formState],
+    [values.isPersistent, values.specs, values.volumes],
   )
 
   const canAfford = (accountBalance || 0) > totalCost
@@ -185,20 +116,14 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     (id: string) => router.push(`/dashboard/${id}`),
     [router],
   )
-
   return {
-    formState,
-    handleSubmit,
-    setFormValue,
     address: account?.address || '',
     accountBalance: accountBalance || 0,
     isCreateButtonDisabled,
+    values,
+    control,
+    errors,
+    handleSubmit,
     handleChangeEntityTab,
-    handleChangeFunctionRuntime,
-    handleChangeInstanceSpecs,
-    handleChangeVolumes,
-    handleChangeEnvVars,
-    handleChangeDomains,
-    handleChangeNameAndTags,
   }
 }

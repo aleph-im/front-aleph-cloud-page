@@ -1,26 +1,32 @@
-import { useCallback, useMemo } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { VolumeManager } from '@/domain/volume'
+import { VolumeManager, VolumeType } from '@/domain/volume'
 import { useAppState } from '@/contexts/appState'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
-import {
-  NewVolumeProp,
-  defaultVolume,
-  VolumeProp,
-} from '@/hooks/form/useAddVolume'
+import { NewVolumeStandaloneField } from '@/hooks/form/useAddVolume'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { ActionTypes } from '@/helpers/store'
+import { Control, FieldErrors } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-export type NewVolumeFormState = {
-  volume: NewVolumeProp
+export type NewVolumeFormState = NewVolumeStandaloneField
+
+export const defaultValues: NewVolumeFormState = {
+  volumeType: VolumeType.New,
 }
 
-export const initialState: NewVolumeFormState = {
-  volume: { ...defaultVolume },
+export type UseNewVolumePageReturn = {
+  address: string
+  accountBalance: number
+  isCreateButtonDisabled: boolean
+  values: any
+  control: Control<any>
+  errors: FieldErrors<NewVolumeFormState>
+  handleSubmit: (e: FormEvent) => Promise<void>
 }
 
-export function useNewVolumePage() {
+export function useNewVolumePage(): UseNewVolumePageReturn {
   useConnectedWard()
 
   const router = useRouter()
@@ -33,7 +39,7 @@ export function useNewVolumePage() {
     async (state: NewVolumeFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const [accountVolume] = await manager.add(state.volume)
+      const [accountVolume] = await manager.add(state)
 
       dispatch({
         type: ActionTypes.addAccountVolume,
@@ -46,20 +52,21 @@ export function useNewVolumePage() {
   )
 
   const {
-    state: formState,
-    setFormValue,
+    watch,
+    control,
     handleSubmit,
-  } = useForm({ initialState, onSubmit })
-
-  const handleChangeVolume = useCallback(
-    (volume: VolumeProp) => setFormValue('volume', volume),
-    [setFormValue],
-  )
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+    onSubmit,
+    resolver: zodResolver(VolumeManager.addSchema),
+  })
+  const values = watch()
 
   const accountBalance = appState?.accountBalance || 0
   const { totalCost } = useMemo(
-    () => VolumeManager.getCost({ volumes: [formState.volume] }),
-    [formState],
+    () => VolumeManager.getCost({ volumes: [values] }),
+    [values],
   )
 
   const canAfford = accountBalance > totalCost
@@ -69,11 +76,12 @@ export function useNewVolumePage() {
   }
 
   return {
-    formState,
-    handleSubmit,
-    handleChangeVolume,
     address: account?.address || '',
     accountBalance: appState.accountBalance || 0,
     isCreateButtonDisabled,
+    values,
+    control,
+    errors,
+    handleSubmit,
   }
 }

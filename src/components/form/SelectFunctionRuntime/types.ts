@@ -1,14 +1,8 @@
-import { FunctionRuntimeProp } from '@/hooks/form/useSelectFunctionRuntime'
-
-export type SelectFunctionRuntimeItemProps = {
-  runtime: FunctionRuntimeProp
-  selected: boolean
-  onChange: (runtime: FunctionRuntimeProp) => void
-}
+import { FunctionRuntime } from '@/domain/runtime'
+import { Control } from 'react-hook-form'
 
 export type SelectFunctionRuntimeProps = {
-  runtime?: FunctionRuntimeProp
-  customRuntimeHash?: string
-  options?: FunctionRuntimeProp[]
-  onChange: (runtime: FunctionRuntimeProp) => void
+  name?: string
+  control: Control
+  options?: FunctionRuntime[]
 }

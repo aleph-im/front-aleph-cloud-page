@@ -1,12 +1,13 @@
-import { EnvVarProp } from '@/hooks/form/useAddEnvVars'
+import { Control } from 'react-hook-form'
 
 export type EnvVarItemProps = {
-  envVar: EnvVarProp
-  onChange: (envVar: EnvVarProp) => void
-  onRemove: (envVarId: string) => void
+  name?: string
+  index: number
+  control: Control
+  onRemove: (index?: number) => void
 }
 
 export type AddEnvVarsProps = {
-  envVars?: EnvVarProp[]
-  onChange: (envVars: EnvVarProp[]) => void
+  name: string
+  control: Control
 }

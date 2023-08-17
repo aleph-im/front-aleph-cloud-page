@@ -6,7 +6,7 @@ import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/aleph-core'
 import { useManageInstance } from '@/hooks/pages/dashboard/manage/useManageInstance'
 import {
-  convertBitUnits,
+  convertByteUnits,
   ellipseAddress,
   ellipseText,
   humanReadableSize,
@@ -102,9 +102,9 @@ export default function ManageInstance() {
                 <div className="tp-info text-main0">RAM</div>
                 <div>
                   <GrayText>
-                    {convertBitUnits(instance.resources.memory, {
-                      from: 'mb',
-                      to: 'gb',
+                    {convertByteUnits(instance.resources.memory, {
+                      from: 'MiB',
+                      to: 'GiB',
                       displayUnit: true,
                     })}
                   </GrayText>
@@ -130,9 +130,9 @@ export default function ManageInstance() {
                   </IconText>
                 ) : (
                   <div tw="flex items-end">
-                    <GrayText tw="mr-1" className="text-main2">
+                    <span tw="mr-1" className="tp-body1 fs-sm text-main2">
                       Allocating
-                    </GrayText>
+                    </span>
                     <ThreeDots
                       width=".8rem"
                       height="1rem"
@@ -166,7 +166,7 @@ export default function ManageInstance() {
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
                   <GrayText className="fs-xs tp-body1">
-                    {humanReadableSize(instance.size, 'mb')}
+                    {humanReadableSize(instance.size, 'MiB')}
                   </GrayText>
                 </div>
               </div>

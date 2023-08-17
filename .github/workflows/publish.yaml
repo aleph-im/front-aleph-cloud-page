@@ -7,7 +7,7 @@ on:
 
 env:
   IS_GH_PAGES: gh-pages
-  
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -19,7 +19,7 @@ jobs:
       - name: Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           cache: npm
 
       - name: Install and Build

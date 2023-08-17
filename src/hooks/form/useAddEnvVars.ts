@@ -1,65 +1,62 @@
-import { ChangeEvent, useCallback, useId, useState } from 'react'
+import { useCallback } from 'react'
+import {
+  Control,
+  FieldArrayWithId,
+  UseControllerReturn,
+  useController,
+  useFieldArray,
+} from 'react-hook-form'
 
-export type EnvVarProp = {
-  id: string
+export type EnvVarField = {
   name: string
   value: string
 }
 
-export const defaultEnvVar: EnvVarProp = {
-  id: `envvar-0`,
+export const defaultValues: EnvVarField = {
   name: '',
   value: '',
 }
 
 export type UseEnvVarItemProps = {
-  envVar: EnvVarProp
-  onChange: (envVars: EnvVarProp) => void
-  onRemove: (envVarId: string) => void
+  name?: string
+  index: number
+  control: Control
+  defaultValue?: EnvVarField
+  onRemove: (index?: number) => void
 }
 
 export type UseEnvVarItemReturn = {
-  id: string
-  envVar: EnvVarProp
-  handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleValueChange: (e: ChangeEvent<HTMLInputElement>) => void
+  nameCtrl: UseControllerReturn<any, any>
+  valueCtrl: UseControllerReturn<any, any>
   handleRemove: () => void
 }
 
 export function useEnvVarItem({
-  envVar,
-  onChange,
+  name = 'envVars',
+  index,
+  control,
+  defaultValue,
   onRemove,
 }: UseEnvVarItemProps): UseEnvVarItemReturn {
-  const id = useId()
+  const nameCtrl = useController({
+    control,
+    name: `${name}.${index}.name`,
+    defaultValue: defaultValue?.name,
+  })
 
-  const handleNameChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const name = e.target.value
-      const newEnvVar: EnvVarProp = { ...envVar, name }
-      onChange(newEnvVar)
-    },
-    [onChange, envVar],
-  )
-
-  const handleValueChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      const newEnvVar: EnvVarProp = { ...envVar, value }
-      onChange(newEnvVar)
-    },
-    [onChange, envVar],
-  )
+  const valueCtrl = useController({
+    control,
+    name: `${name}.${index}.value`,
+    defaultValue: defaultValue?.value,
+  })
 
   const handleRemove = useCallback(() => {
-    onRemove(envVar.id)
-  }, [envVar.id, onRemove])
+    onRemove(index)
+  }, [index, onRemove])
 
   return {
-    id,
-    envVar,
-    handleNameChange,
-    handleValueChange,
+    nameCtrl,
+    valueCtrl,
     handleRemove,
   }
 }
@@ -67,66 +64,37 @@ export function useEnvVarItem({
 // --------------------
 
 export type UseEnvVarsProps = {
-  envVars?: EnvVarProp[]
-  onChange: (envVars: EnvVarProp[]) => void
+  name?: string
+  control: Control
 }
 
 export type UseEnvVarsReturn = {
-  envVars: EnvVarProp[]
-  handleChange: (envVars: EnvVarProp) => void
+  name: string
+  control: Control
+  fields: FieldArrayWithId[]
   handleAdd: () => void
-  handleRemove: (envVarId: string) => void
+  handleRemove: (index?: number) => void
 }
 
 export function useAddEnvVars({
-  envVars: envVarsProp,
-  onChange,
+  name = 'envVars',
+  control,
 }: UseEnvVarsProps): UseEnvVarsReturn {
-  const [envVarsState, setEnvVarsState] = useState<EnvVarProp[]>([])
-  const envVars = envVarsProp || envVarsState
+  const envVarsCtrl = useFieldArray({
+    control,
+    name,
+  })
 
-  const handleChange = useCallback(
-    (envVar: EnvVarProp) => {
-      const updatedEnvVars = [...envVars]
-      const index = envVars.findIndex((envVar) => envVar.id === envVar.id)
-
-      if (index !== -1) {
-        updatedEnvVars[index] = envVar
-      } else {
-        updatedEnvVars.push(envVar)
-      }
-
-      setEnvVarsState(updatedEnvVars)
-      onChange(updatedEnvVars)
-    },
-    [onChange, envVars],
-  )
+  const { fields, remove: handleRemove, append } = envVarsCtrl
 
   const handleAdd = useCallback(() => {
-    const newEnvVar = {
-      ...defaultEnvVar,
-      id: `envvar-${Date.now()}`,
-    }
-
-    const updatedEnvVars = [...envVars, newEnvVar]
-
-    setEnvVarsState(updatedEnvVars)
-    onChange(updatedEnvVars)
-  }, [onChange, envVars])
-
-  const handleRemove = useCallback(
-    (envVarId: string) => {
-      const updatedEnvVars = envVars.filter((envVar) => envVar.id !== envVarId)
-
-      setEnvVarsState(updatedEnvVars)
-      onChange(updatedEnvVars)
-    },
-    [onChange, envVars],
-  )
+    append({ ...defaultValues })
+  }, [append])
 
   return {
-    envVars,
-    handleChange,
+    name,
+    control,
+    fields,
     handleAdd,
     handleRemove,
   }

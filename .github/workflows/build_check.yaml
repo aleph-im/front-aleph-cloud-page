@@ -1,0 +1,28 @@
+name: Build Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install and Build
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+        run: |
+          npm config set "@fortawesome:registry" https://npm.fontawesome.com/
+          npm config set "//npm.fontawesome.com/:_authToken" FONTAWESOME_NPM_AUTH_TOKEN
+          npm ci
+          npm run build
