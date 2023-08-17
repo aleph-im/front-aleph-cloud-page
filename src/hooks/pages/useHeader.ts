@@ -67,7 +67,6 @@ export function useHeader(): Header {
 
   const [displayWalletPicker, setDisplayWalletPicker] = useState(false)
 
-
   return {
     theme,
     handleConnect,

@@ -123,7 +123,7 @@ export const Header = () => {
                             icon: 'circle',
                             name: 'Metamask',
                             provider: () => window.ethereum,
-                          }
+                          },
                         ],
                       },
                     ]}
