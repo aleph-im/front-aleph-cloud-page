@@ -24,7 +24,10 @@ export const Header = () => {
     accountBalance,
   } = useHeader()
   const divRef = useRef<HTMLDivElement | null>(null)
-  useOnClickOutside(divRef, () => setDisplayWalletPicker(false))
+  useOnClickOutside(divRef, () => {
+    if(displayWalletPicker)
+      setDisplayWalletPicker(false)
+  })
 
   const handleDisplayWalletPicker = () => {
     setDisplayWalletPicker(!displayWalletPicker)
