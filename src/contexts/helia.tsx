@@ -23,7 +23,7 @@ export const HeliaContext = createContext<HeliaContextType>({
   starting: true,
 })
 
-export const HeliaProvider = ({ children }: PropsWithChildren<{}>) => {
+export const HeliaProvider = ({ children }: PropsWithChildren<object>) => {
   const [helia, setHelia] = useState<null | Helia>(null)
   const [fs, setFs] = useState<null | UnixFS>(null)
   const [starting, setStarting] = useState<boolean>(true)
@@ -34,8 +34,8 @@ export const HeliaProvider = ({ children }: PropsWithChildren<{}>) => {
       console.info('helia already started')
     } else if (window.helia) {
       console.info('found a windowed instance of helia, populating ...')
-      setHelia(window.helia)
-      setFs(unixfs(helia))
+      setHelia(window.helia as unknown as Helia)
+      setFs(unixfs(helia as unknown as Helia))
       setStarting(false)
     } else {
       try {
