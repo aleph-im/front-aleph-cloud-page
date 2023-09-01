@@ -5,7 +5,7 @@ import {
   useState,
   useCallback,
   createContext,
-  PropsWithChildren
+  PropsWithChildren,
 } from 'react'
 import { getP2PNode } from '@/helpers/ipfs'
 
@@ -20,7 +20,7 @@ export const HeliaContext = createContext<HeliaContextType>({
   helia: null,
   fs: null,
   error: false,
-  starting: true
+  starting: true,
 })
 
 export const HeliaProvider = ({ children }: PropsWithChildren<{}>) => {
@@ -62,8 +62,10 @@ export const HeliaProvider = ({ children }: PropsWithChildren<{}>) => {
         helia,
         fs,
         error,
-        starting
+        starting,
       }}
-    >{children}</HeliaContext.Provider>
+    >
+      {children}
+    </HeliaContext.Provider>
   )
 }
