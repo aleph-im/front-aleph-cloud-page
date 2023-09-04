@@ -108,7 +108,9 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                   Upload code <Icon name="arrow-up" tw="ml-4" />
                 </HiddenFileInput>
               </div>
+            </NoisyContainer>
 
+            <NoisyContainer tw="mt-6">
               <div>
                 <InfoTooltipButton
                   plain
@@ -127,7 +129,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                     </div>
                   }
                 >
-                  Entry point
+                  <div tw='my-3'>Entry point</div>
                 </InfoTooltipButton>
                 <TextInput
                   {...entryPointCtrl.field}
