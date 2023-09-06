@@ -27,7 +27,7 @@ export default function ManageInstance() {
     handleCopyIpv6,
     handleDelete,
     copyAndNotify,
-    mappedKeys
+    mappedKeys,
   } = useManageInstance()
 
   const theme = useTheme()
@@ -146,7 +146,7 @@ export default function ManageInstance() {
               <TextGradient type="h7" color="main1">
                 Connection methods
               </TextGradient>
-              
+
               <div tw="my-5">
                 <div className="tp-info text-main0">SSH COMMAND</div>
                 <div>
@@ -169,7 +169,7 @@ export default function ManageInstance() {
                 </div>
               </div>
 
-              <div tw='my-5'>
+              <div tw="my-5">
                 <div className="tp-info text-main0">IPv6</div>
                 <div>
                   {status && (
@@ -185,13 +185,15 @@ export default function ManageInstance() {
               <TextGradient type="h7" color="main1">
                 Accessible for
               </TextGradient>
-              
+
               <div tw="my-5 flex">
-                {
-                  mappedKeys.map((key, i) => (
+                {mappedKeys.map(
+                  (key, i) =>
                     key && (
                       <div key={key?.id} tw="mr-5">
-                        <div className="tp-info text-main0">SSH KEY #{i+1}</div>
+                        <div className="tp-info text-main0">
+                          SSH KEY #{i + 1}
+                        </div>
 
                         <Link
                           className="tp-body1 fs-sm"
@@ -203,9 +205,8 @@ export default function ManageInstance() {
                           </IconText>
                         </Link>
                       </div>
-                    )
-                  ))
-                }
+                    ),
+                )}
               </div>
             </div>
 
