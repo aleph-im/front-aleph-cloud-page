@@ -59,6 +59,11 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     return entity
   }
 
+  async getByValues(values: string[]): Promise<(SSHKey | undefined)[]> {
+    const all = await this.getAll()
+    return values.map((value) => all.find((d) => d.key === value))
+  }
+
   async add(
     sshKeys: AddSSHKey | AddSSHKey[],
     throwOnCollision?: boolean,
