@@ -84,7 +84,6 @@ export type AddProgram = Omit<
     code: FunctionCodeField
     runtime: FunctionRuntimeField
     specs: InstanceSpecsField
-    entrypoint?: string
     envVars?: EnvVarField[]
     volumes?: VolumeField[]
     domains?: Omit<DomainField, 'ref'>[]
@@ -106,6 +105,8 @@ export type ProgramCostProps = Omit<ExecutableCostProps, 'type'> & {
 }
 
 export type ProgramCost = ExecutableCost
+
+export type ParsedCodeType = { entrypoint: string; file: any }
 
 export class ProgramManager
   extends Executable
@@ -163,6 +164,8 @@ export class ProgramManager
     try {
       const programMessage = await this.parseProgram(newProgram)
 
+      console.log('programMessage', programMessage)
+
       const response = await program.publish(programMessage)
 
       const [entity] = await this.parseMessages([response])
@@ -201,21 +204,25 @@ export class ProgramManager
     return downloadBlob(blob, `VM_${program.id.slice(-12)}.zip`)
   }
 
-  protected async parseCode(code: FunctionCodeField): Promise<File> {
+  protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {
+    const ret: ParsedCodeType = {
+      // @note: This is the default entrypoint for python, adapt for node.js
+      entrypoint: code.entrypoint || 'main:app',
+      file: null,
+    }
+
     if (code.type === 'text') {
       const jsZip = new JSZip()
       jsZip.file('main.py', code.text)
       const zip = await jsZip.generateAsync({ type: 'blob' })
-      return new File([zip], 'main.py.zip', { type: 'application/zip' })
-    }
-
-    if (code.type === 'file') {
+      ret.file = new File([zip], 'main.py.zip', { type: 'application/zip' })
+    } else if (code.type === 'file') {
       if (!code.file) throw new Error('Invalid function code file')
 
-      return code.file
-    }
+      ret.file = code.file
+    } else throw new Error('Invalid function code type')
 
-    throw new Error('Invalid function code type')
+    return ret
   }
 
   protected async parseProgram(
@@ -225,22 +232,14 @@ export class ProgramManager
 
     const { account, channel } = this
 
-    const {
-      name,
-      tags,
-      isPersistent,
-      envVars,
-      specs,
-      // @todo: Entrypoint
-      entrypoint = 'main:app',
-    } = newProgram
+    const { name, tags, isPersistent, envVars, specs } = newProgram
 
     const variables = this.parseEnvVars(envVars)
     const { memory, vcpus } = this.parseSpecs(specs)
     const metadata = this.parseMetadata(name, tags)
     const runtime = this.parseRuntime(newProgram.runtime)
     const volumes = await this.parseVolumes(newProgram.volumes)
-    const file = await this.parseCode(newProgram.code)
+    const { file, entrypoint } = await this.parseCode(newProgram.code)
 
     return {
       account,
