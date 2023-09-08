@@ -129,7 +129,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                     </div>
                   }
                 >
-                  <div tw='my-3'>Entry point</div>
+                  <div tw="my-3">Entry point</div>
                 </InfoTooltipButton>
                 <TextInput
                   {...entryPointCtrl.field}
