@@ -12,6 +12,7 @@ export const defaultCode: FunctionCodeField = {
   lang: 'python',
   type: 'text',
   text: defaultText,
+  entrypoint: 'main:app',
 }
 
 export type FunctionCodeField = {
@@ -21,11 +22,13 @@ export type FunctionCodeField = {
       type: 'text'
       text: string
       file?: File
+      entrypoint?: string
     }
   | {
       type: 'file'
       file: File
       text?: string
+      entrypoint: string
     }
 )
 
@@ -40,6 +43,7 @@ export type UseAddFunctionCodeReturn = {
   typeCtrl: UseControllerReturn<any, any>
   fileCtrl: UseControllerReturn<any, any>
   textCtrl: UseControllerReturn<any, any>
+  entryPointCtrl: UseControllerReturn<any, any>
 }
 
 export function useAddFunctionCode({
@@ -51,6 +55,12 @@ export function useAddFunctionCode({
     control,
     name: `${name}.lang`,
     defaultValue: defaultValue?.lang,
+  })
+
+  const entryPointCtrl = useController({
+    control,
+    name: `${name}.entrypoint`,
+    defaultValue: defaultValue?.entrypoint,
   })
 
   const typeCtrl = useController({
@@ -76,5 +86,6 @@ export function useAddFunctionCode({
     typeCtrl,
     fileCtrl,
     textCtrl,
+    entryPointCtrl,
   }
 }

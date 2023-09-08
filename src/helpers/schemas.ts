@@ -141,6 +141,7 @@ export const addCodeSchema = z.discriminatedUnion('type', [
   defaultCode.extend({
     type: z.literal('file'),
     file: codeFile,
+    entrypoint: requiredString,
   }),
   defaultCode.extend({
     type: z.literal('text'),

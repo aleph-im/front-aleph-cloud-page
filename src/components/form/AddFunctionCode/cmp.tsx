@@ -8,12 +8,14 @@ import {
   Radio,
   RadioGroup,
   Tabs,
+  TextInput,
 } from '@aleph-front/aleph-core'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import { useAddFunctionCode } from '@/hooks/form/useAddFunctionCode'
 
 export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
-  const { langCtrl, typeCtrl, textCtrl, fileCtrl } = useAddFunctionCode(props)
+  const { langCtrl, typeCtrl, textCtrl, fileCtrl, entryPointCtrl } =
+    useAddFunctionCode(props)
 
   return (
     <>
@@ -95,14 +97,9 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
               To get started, compress your code into a zip file and upload it
               here.
             </p>
-            <p tw="mb-6">
-              Your zip archive should contain a{' '}
-              <strong tw="font-bold">main</strong> file (ex: main.py) at its
-              root that exposes an <strong tw="font-bold">app</strong> function.
-              This will serve as an entrypoint to the program
-            </p>
+
             <NoisyContainer>
-              <div tw="py-5 text-center">
+              <div tw="mb-6 py-5 text-center">
                 <HiddenFileInput
                   {...fileCtrl.field}
                   {...fileCtrl.fieldState}
@@ -110,6 +107,35 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                 >
                   Upload code <Icon name="arrow-up" tw="ml-4" />
                 </HiddenFileInput>
+              </div>
+            </NoisyContainer>
+
+            <NoisyContainer tw="mt-6">
+              <div>
+                <InfoTooltipButton
+                  plain
+                  my="bottom-left"
+                  at="bottom-right"
+                  tooltipContent={
+                    <div tw="text-left">
+                      <div>
+                        <div className="tp-body2 fs-md">Entrypoint</div>
+                        <div className="tp-body1 fs-md">
+                          Define an entrypoint to your program. For example if
+                          you have a file called main.py and a function called
+                          app, you should enter main:app.
+                        </div>
+                      </div>
+                    </div>
+                  }
+                >
+                  <div tw="my-3">Entry point</div>
+                </InfoTooltipButton>
+                <TextInput
+                  {...entryPointCtrl.field}
+                  {...entryPointCtrl.fieldState}
+                  placeholder="main:app"
+                />
               </div>
             </NoisyContainer>
           </>
