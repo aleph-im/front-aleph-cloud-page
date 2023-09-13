@@ -1,4 +1,3 @@
-import JSZip from 'jszip'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, program, any } from 'aleph-sdk-ts/dist/messages'
 // import { ProgramPublishConfiguration } from 'aleph-sdk-ts/dist/messages/program/publish'
@@ -106,7 +105,11 @@ export type ProgramCostProps = Omit<ExecutableCostProps, 'type'> & {
 
 export type ProgramCost = ExecutableCost
 
-export type ParsedCodeType = { entrypoint: string; file: any }
+export type ParsedCodeType = {
+  encoding: Encoding
+  entrypoint: string
+  file: any
+}
 
 export class ProgramManager
   extends Executable
@@ -209,13 +212,12 @@ export class ProgramManager
       // @note: This is the default entrypoint for python, adapt for node.js
       entrypoint: code.entrypoint || 'main:app',
       file: null,
+      encoding: Encoding.zip,
     }
 
     if (code.type === 'text') {
-      const jsZip = new JSZip()
-      jsZip.file('main.py', code.text)
-      const zip = await jsZip.generateAsync({ type: 'blob' })
-      ret.file = new File([zip], 'main.py.zip', { type: 'application/zip' })
+      ret.file = new Blob([code.text], { type: 'text/plain' })
+      ret.encoding = Encoding.plain
     } else if (code.type === 'file') {
       if (!code.file) throw new Error('Invalid function code file')
 
@@ -239,7 +241,7 @@ export class ProgramManager
     const metadata = this.parseMetadata(name, tags)
     const runtime = this.parseRuntime(newProgram.runtime)
     const volumes = await this.parseVolumes(newProgram.volumes)
-    const { file, entrypoint } = await this.parseCode(newProgram.code)
+    const { file, entrypoint, encoding } = await this.parseCode(newProgram.code)
 
     return {
       account,
@@ -253,6 +255,7 @@ export class ProgramManager
       vcpus,
       volumes,
       metadata,
+      encoding,
     }
   }
 
