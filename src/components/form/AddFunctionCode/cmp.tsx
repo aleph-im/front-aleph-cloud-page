@@ -94,7 +94,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
         ) : (
           <>
             <p tw="mb-2">
-              To get started, compress your code into a zip file and upload it
+              To get started, compress your code into a zip or squashfs (.sqsh) file and upload it
               here.
             </p>
 
@@ -103,7 +103,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                 <HiddenFileInput
                   {...fileCtrl.field}
                   {...fileCtrl.fieldState}
-                  accept=".zip"
+                  accept=".zip,.sqsh"
                 >
                   Upload code <Icon name="arrow-up" tw="ml-4" />
                 </HiddenFileInput>
