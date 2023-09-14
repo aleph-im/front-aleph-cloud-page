@@ -94,8 +94,8 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
         ) : (
           <>
             <p tw="mb-2">
-              To get started, compress your code into a zip or squashfs (.sqsh) file and upload it
-              here.
+              To get started, compress your code into a zip or squashfs (.sqsh)
+              file and upload it here.
             </p>
 
             <NoisyContainer>
