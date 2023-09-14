@@ -208,23 +208,29 @@ export class ProgramManager
   }
 
   protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {
-    const ret: ParsedCodeType = {
-      // @note: This is the default entrypoint for python, adapt for node.js
-      entrypoint: code.entrypoint || 'main:app',
-      file: null,
-      encoding: Encoding.zip,
-    }
-
     if (code.type === 'text') {
-      ret.file = new Blob([code.text], { type: 'text/plain' })
-      ret.encoding = Encoding.plain
+      return {
+        entrypoint: 'main:app',
+        file: new Blob([code.text], { type: 'text/plain' }),
+        encoding: Encoding.plain,
+      }
     } else if (code.type === 'file') {
       if (!code.file) throw new Error('Invalid function code file')
-
-      ret.file = code.file
+      const fileName = code.file.name
+      let encoding: Encoding
+      if (fileName.endsWith('.zip')) {
+        encoding = Encoding.zip
+      } else if (fileName.endsWith('.sqsh')) {
+        encoding = Encoding.squashfs
+      } else {
+        throw new Error('Invalid function code file')
+      }
+      return {
+        entrypoint: code.entrypoint,
+        file: code.file,
+        encoding,
+      }
     } else throw new Error('Invalid function code type')
-
-    return ret
   }
 
   protected async parseProgram(

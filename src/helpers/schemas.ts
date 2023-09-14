@@ -34,7 +34,7 @@ const volumeFile = z
     (file) => {
       return (
         (file.type === 'application/zip' && file.name.endsWith('.zip')) ||
-        (file.type === '' && file.name.endsWith('.sqsh'))
+        file.name.endsWith('.sqsh')
       )
     },
     { message: 'only .zip and .sqsh formats are valid' },
@@ -46,7 +46,13 @@ const volumeFile = z
 const codeFile = z
   .custom<File>((val) => val instanceof File, 'Required file')
   .refine(
-    (file) => file.type === 'application/zip' && file.name.endsWith('.zip'),
+    (file) => {
+      console.log(file)
+      return (
+        (file.type === 'application/zip' && file.name.endsWith('.zip')) ||
+        file.name.endsWith('.sqsh')
+      )
+    },
     { message: 'only .zip and .sqsh formats are valid' },
   )
   .refine((file) => file.size > 0, {
