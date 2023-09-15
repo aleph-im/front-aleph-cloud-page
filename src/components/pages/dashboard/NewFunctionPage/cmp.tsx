@@ -15,6 +15,7 @@ import SelectFunctionPersistence from '@/components/form/SelectFunctionPersisten
 import BorderBox from '@/components/common/BorderBox'
 import { convertByteUnits } from '@/helpers/utils'
 import Form from '@/components/form/Form'
+import AddFunctionCapabilities from '@/components/form/AddFunctionCapabilities'
 
 export default function NewFunctionPage() {
   const {
@@ -117,6 +118,20 @@ export default function NewFunctionPage() {
       <section tw="px-0 py-6 md:py-10">
         <Container>
           <CompositeTitle as="h2" number="5">
+            Function capabilities
+          </CompositeTitle>
+          <p tw="mb-6">
+            Enable advanced capabilities for your decentralized functions with
+            additional capabilities. Choose from outgoing internet access,
+            blockchain RPC nodes, or future options like automated snapshots.
+            Note: some features are still in development.
+          </p>
+          <AddFunctionCapabilities name="capabilities" control={control} />
+        </Container>
+      </section>
+      <section tw="px-0 py-6 md:py-10">
+        <Container>
+          <CompositeTitle as="h2" number="6">
             Name and tags
           </CompositeTitle>
           <p tw="mb-6">
@@ -130,7 +145,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="6">
+          <CompositeTitle as="h2" number="7">
             Add volumes
           </CompositeTitle>
           {values.specs && (
@@ -153,7 +168,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="7">
+          <CompositeTitle as="h2" number="8">
             Add environment variables
           </CompositeTitle>
           <p tw="mb-6">
@@ -167,7 +182,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="8">
+          <CompositeTitle as="h2" number="9">
             Custom domain
           </CompositeTitle>
           <p tw="mb-6">

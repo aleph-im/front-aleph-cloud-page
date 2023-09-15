@@ -167,8 +167,6 @@ export class ProgramManager
     try {
       const programMessage = await this.parseProgram(newProgram)
 
-      console.log('programMessage', programMessage)
-
       const response = await program.publish(programMessage)
 
       const [entity] = await this.parseMessages([response])
