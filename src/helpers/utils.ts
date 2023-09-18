@@ -350,3 +350,26 @@ export class Mutex {
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
+
+/**
+ * An util to track progress of a task
+ */
+export class Progress extends EventTarget {
+  len: number
+  progress: number = 0
+
+  constructor(len: number) {
+    super()
+    this.len = len
+  }
+
+  update() {
+    this.progress++
+    if (this.progress === this.len - 1) {
+      return this.dispatchEvent(new CustomEvent('complete'))
+    }
+    return this.dispatchEvent(
+      new CustomEvent('update', { detail: this.progress }),
+    )
+  }
+}
