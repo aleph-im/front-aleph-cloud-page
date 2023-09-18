@@ -1,5 +1,5 @@
 import { Helia, createHelia } from 'helia'
-import { unixfs, UnixFS } from '@helia/unixfs'
+import { mfs, MFS } from '@helia/mfs'
 import {
   useEffect,
   useState,
@@ -11,7 +11,7 @@ import { getP2PNode } from '@/helpers/ipfs'
 
 export type HeliaContextType = {
   helia: null | Helia
-  fs: null | UnixFS
+  fs: null | MFS
   error: null | boolean
   starting: boolean
 }
@@ -25,7 +25,7 @@ export const HeliaContext = createContext<HeliaContextType>({
 
 export const HeliaProvider = ({ children }: PropsWithChildren<object>) => {
   const [helia, setHelia] = useState<null | Helia>(null)
-  const [fs, setFs] = useState<null | UnixFS>(null)
+  const [fs, setFs] = useState<null | MFS>(null)
   const [starting, setStarting] = useState<boolean>(true)
   const [error, setError] = useState<null | boolean>(null)
 
@@ -35,7 +35,7 @@ export const HeliaProvider = ({ children }: PropsWithChildren<object>) => {
     } else if (window.helia) {
       console.info('found a windowed instance of helia, populating ...')
       setHelia(window.helia as unknown as Helia)
-      setFs(unixfs(helia as unknown as Helia))
+      setFs(mfs(helia as unknown as Helia))
       setStarting(false)
     } else {
       try {
@@ -43,7 +43,7 @@ export const HeliaProvider = ({ children }: PropsWithChildren<object>) => {
         console.info('Starting Helia')
         const helia = await createHelia({ libp2p })
         setHelia(helia)
-        setFs(unixfs(helia))
+        setFs(mfs(helia))
         setStarting(false)
       } catch (e) {
         console.error(e)
