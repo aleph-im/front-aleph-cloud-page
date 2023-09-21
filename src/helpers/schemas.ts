@@ -241,3 +241,10 @@ export const instanceSchema = z
     domains: addDomainsSchema,
   })
   .merge(addNameAndTagsSchema)
+
+// IPFS
+
+export const addIPFSPinSchema = z.object({
+  cid: requiredString,
+  name: requiredString,
+})

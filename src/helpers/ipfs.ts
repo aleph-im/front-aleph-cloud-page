@@ -22,7 +22,7 @@ export const getP2PNode = async () =>
 
 export const addDirectoryToFilesystem = async (fs: MFS, dir: FileList) => {
   const directories = new Set<string>()
-  for (let file of Array.from(dir)) {
+  for (const file of Array.from(dir)) {
     const content = await file.arrayBuffer()
     const splittedName = file.webkitRelativePath.split('/').slice(1)
 
@@ -40,7 +40,7 @@ export const addDirectoryToFilesystem = async (fs: MFS, dir: FileList) => {
 }
 
 export const addFilesToFileSystem = async (fs: MFS, files: FileList) => {
-  for (let file of Array.from(files)) {
+  for (const file of Array.from(files)) {
     const content = await file.arrayBuffer()
     await fs.writeBytes(new Uint8Array(content), `/${file.name}`)
   }

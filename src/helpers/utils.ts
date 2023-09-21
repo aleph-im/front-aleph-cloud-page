@@ -356,7 +356,7 @@ export function sleep(ms: number): Promise<void> {
  */
 export class Progress extends EventTarget {
   len: number
-  progress: number = 0
+  progress = 0
 
   constructor(len: number) {
     super()

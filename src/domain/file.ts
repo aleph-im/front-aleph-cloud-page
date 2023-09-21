@@ -1,4 +1,5 @@
 import { defaultConsoleChannel } from '@/helpers/constants'
+import { addIPFSPinSchema } from '@/helpers/schemas'
 import { Mutex, convertByteUnits } from '@/helpers/utils'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 
@@ -19,6 +20,8 @@ export class FileManager {
   protected sizesMapCache: Record<string, number> = {}
   protected lastFetch = 0
   protected mutex = new Mutex()
+
+  static addSchema = addIPFSPinSchema
 
   constructor(
     protected account: Account,
@@ -63,6 +66,8 @@ export class FileManager {
 
     return this.sizesMapCache
   }
+
+  async add(file: File): Promise<AccountFileObject> {}
 
   protected parseSizesMap(files: AccountFileObject[]): void {
     this.lastFetch = Date.now()

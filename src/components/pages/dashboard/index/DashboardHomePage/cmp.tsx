@@ -10,6 +10,7 @@ import VolumesTabContent from '../VolumesTabContent/cmp'
 import AllTabContent from '../AllTabContent'
 import { useDashboardHomePage } from '@/hooks/pages/dashboard/useDashboardHomePage'
 import DomainsTabContent from '../DomainsTabContent/cmp'
+import IPFSPinningTabContent from '../IPFSPinningTabContent'
 
 const Container = styled(CenteredContainer).attrs((props) => ({
   ...props,
@@ -71,6 +72,12 @@ export default function DashboardHomePage() {
                 label: getLabel(domains, true),
                 labelPosition: 'top',
               },
+              {
+                id: 'ipfs_pinning',
+                name: 'IPFS Pinning',
+                label: 'wip',
+                labelPosition: 'top',
+              },
             ]}
             onTabChange={setTabId}
           />
@@ -88,6 +95,8 @@ export default function DashboardHomePage() {
             <SSHKeysTabContent data={sshKeys} />
           ) : tabId === 'domain' ? (
             <DomainsTabContent data={domains} />
+          ) : tabId === 'ipfs_pinning' ? (
+            <IPFSPinningTabContent />
           ) : (
             <></>
           )}
