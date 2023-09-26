@@ -2,7 +2,9 @@ export enum FunctionRuntimeId {
   Runtime1 = 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4',
   // @note: Added trailing blank spaces for generating different unique ids (it will be safely .trim() before sending the request) until the right hashes are provided
   Runtime2 = 'bd79839bf96e595a06da5ac0b6ba51dea6f7e2591bb913deccded04d831d29f4 ',
-  Runtime3 = 'a14560e617f24338517902599a019890fc265425f3311d29b56c7e7603defc32',
+  // @note: old nvm runtime
+  // Runtime3 = 'a14560e617f24338517902599a019890fc265425f3311d29b56c7e7603defc32',
+  Runtime3 = '3c238dd3ffba73ab9b2cccb90a11e40e78aff396152de922a6d794a0a65a305e',
   Custom = 'custom',
 }
 

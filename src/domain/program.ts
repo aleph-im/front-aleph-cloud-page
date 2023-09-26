@@ -72,6 +72,7 @@ export type AddProgram = Omit<
   | 'account'
   | 'channel'
   | 'file'
+  | 'programRef'
   | 'vcpus'
   | 'memory'
   | 'runtime'
@@ -108,8 +109,16 @@ export type ProgramCost = ExecutableCost
 export type ParsedCodeType = {
   encoding: Encoding
   entrypoint: string
-  file: any
-}
+} & (
+  | {
+      file?: undefined
+      programRef: string
+    }
+  | {
+      file: Blob | Buffer
+      programRef?: undefined
+    }
+)
 
 export class ProgramManager
   extends Executable
@@ -165,9 +174,15 @@ export class ProgramManager
 
   async add(newProgram: AddProgram): Promise<Program> {
     try {
+      console.log('newProgram', newProgram)
+
       const programMessage = await this.parseProgram(newProgram)
 
       console.log('programMessage', programMessage)
+
+      // delete programMessage.file
+      // programMessage.programRef =
+      //   'c1e49386bbd7ad5d531766c6ce92bb891287a71eac74290b96d32c6db4188cb9'
 
       const response = await program.publish(programMessage)
 
@@ -211,13 +226,15 @@ export class ProgramManager
     if (code.type === 'text') {
       return {
         entrypoint: 'main:app',
-        file: new Blob([code.text], { type: 'text/plain' }),
+        file: new Blob([code.text], { type: 'text/plain' }) as File,
         encoding: Encoding.plain,
       }
     } else if (code.type === 'file') {
       if (!code.file) throw new Error('Invalid function code file')
       const fileName = code.file.name
+
       let encoding: Encoding
+
       if (fileName.endsWith('.zip')) {
         encoding = Encoding.zip
       } else if (fileName.endsWith('.sqsh')) {
@@ -225,10 +242,17 @@ export class ProgramManager
       } else {
         throw new Error('Invalid function code file')
       }
+
       return {
         entrypoint: code.entrypoint,
         file: code.file,
         encoding,
+      }
+    } else if (code.type === 'ref') {
+      return {
+        entrypoint: code.entrypoint,
+        encoding: code.encoding,
+        programRef: code.programRef,
       }
     } else throw new Error('Invalid function code type')
   }
@@ -244,24 +268,22 @@ export class ProgramManager
 
     const variables = this.parseEnvVars(envVars)
     const { memory, vcpus } = this.parseSpecs(specs)
-    const metadata = this.parseMetadata(name, tags)
+    const metadata = this.parseMetadata(name, tags, newProgram.metadata)
     const runtime = this.parseRuntime(newProgram.runtime)
     const volumes = await this.parseVolumes(newProgram.volumes)
-    const { file, entrypoint, encoding } = await this.parseCode(newProgram.code)
+    const code = await this.parseCode(newProgram.code)
 
     return {
       account,
       channel,
       runtime,
       isPersistent,
-      entrypoint,
-      file,
       variables,
       memory,
       vcpus,
       volumes,
+      ...code,
       metadata,
-      encoding,
     }
   }
 
