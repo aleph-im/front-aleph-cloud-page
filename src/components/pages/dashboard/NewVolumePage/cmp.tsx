@@ -35,8 +35,8 @@ export default function NewVolumePage() {
         unlockedAmount={accountBalance}
         description={
           <>
-            This amount needs to be present in your wallet until the function is
-            removed. Tokens won &#39;t be locked nor consumed. The function will
+            This amount needs to be present in your wallet until the volume is
+            removed. Tokens won &#39;t be locked nor consumed. The volume will
             be garbage collected once funds are removed from the wallet.
           </>
         }
