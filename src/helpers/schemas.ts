@@ -54,10 +54,11 @@ export const volumeFileSchema = z
     (file) => {
       return (
         (file.type === 'application/zip' && file.name.endsWith('.zip')) ||
-        file.name.endsWith('.sqsh')
+        file.name.endsWith('.sqsh') ||
+        file.name.endsWith('.squashfs')
       )
     },
-    { message: 'only .zip and .sqsh formats are valid' },
+    { message: 'only .zip, .sqsh and .squashfs formats are valid' },
   )
   .refine((file) => file.size > 0, {
     message: 'File size should be greater than 0',
@@ -70,10 +71,11 @@ export const codeFileSchema = z
       console.log(file)
       return (
         (file.type === 'application/zip' && file.name.endsWith('.zip')) ||
-        file.name.endsWith('.sqsh')
+        file.name.endsWith('.sqsh') ||
+        file.name.endsWith('.squashfs')
       )
     },
-    { message: 'only .zip and .sqsh formats are valid' },
+    { message: 'only .zip, .sqsh and .squashfs formats are valid' },
   )
   .refine((file) => file.size > 0, {
     message: 'File size should be greater than 0',
