@@ -271,7 +271,7 @@ export const instanceSchema = z
   .object({
     image: instanceImageSchema,
     specs: addSpecsSchema,
-    sshKeys: addSSHKeysSchema.optional(),
+    sshKeys: addSSHKeysSchema,
     volumes: addVolumesSchema.optional(),
     envVars: addEnvVarsSchema.optional(),
     domains: addDomainsSchema.optional(),

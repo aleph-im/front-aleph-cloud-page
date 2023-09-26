@@ -11,7 +11,7 @@ import {
 export type IndexerBlockchainNetworkField = {
   id: string
   rpcUrl: string
-  abiUrl: string
+  abiUrl?: string
   blockchain: IndexerBlockchain
 }
 
