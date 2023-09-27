@@ -174,15 +174,7 @@ export class ProgramManager
 
   async add(newProgram: AddProgram): Promise<Program> {
     try {
-      console.log('newProgram', newProgram)
-
       const programMessage = await this.parseProgram(newProgram)
-
-      console.log('programMessage', programMessage)
-
-      // delete programMessage.file
-      // programMessage.programRef =
-      //   'c1e49386bbd7ad5d531766c6ce92bb891287a71eac74290b96d32c6db4188cb9'
 
       const response = await program.publish(programMessage)
 
