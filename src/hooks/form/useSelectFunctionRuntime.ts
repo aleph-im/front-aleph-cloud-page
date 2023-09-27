@@ -17,6 +17,7 @@ export const defaultFunctionRuntime: FunctionRuntimeField = {
 export const defaultFunctionRuntimeOptions = [
   FunctionRuntimes[FunctionRuntimeId.Runtime1],
   FunctionRuntimes[FunctionRuntimeId.Runtime2],
+  FunctionRuntimes[FunctionRuntimeId.Runtime3],
   FunctionRuntimes[FunctionRuntimeId.Custom],
 ]
 

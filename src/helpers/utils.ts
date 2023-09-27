@@ -350,3 +350,15 @@ export class Mutex {
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
+
+export function toKebabCase(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_\\-]/g, '')
+    .replace(/_/g, '-')
+}
+
+export function toSnakeCase(input: string): string {
+  return toKebabCase(input).replace(/-/g, '_')
+}

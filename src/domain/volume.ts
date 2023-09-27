@@ -243,6 +243,8 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
             account,
             channel,
             fileObject,
+            // fileHash: 'IPFS_HASH',
+            // storageEngine: ItemType.ipfs,
           }),
         ),
       )

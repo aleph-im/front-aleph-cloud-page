@@ -1,79 +1,57 @@
 import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import {
-  FunctionRuntimeField,
-  defaultFunctionRuntime,
-} from '../../form/useSelectFunctionRuntime'
-import {
-  InstanceSpecsField,
-  getDefaultSpecsOptions,
-} from '../../form/useSelectInstanceSpecs'
-import { VolumeField } from '../../form/useAddVolume'
-import { EnvVarField } from '../../form/useAddEnvVars'
-import {
-  NameAndTagsField,
-  defaultNameAndTags,
-} from '../../form/useAddNameAndTags'
+import { NameAndTagsField } from '../../form/useAddNameAndTags'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
-import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
+import { useIndexerManager } from '@/hooks/common/useManager/useIndexerManager'
 import { ActionTypes } from '@/helpers/store'
-import { DomainField } from '@/hooks/form/useAddDomains'
-import { ProgramManager } from '@/domain/program'
+import { IndexerManager } from '@/domain/indexer'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
-import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { IndexerBlockchainNetworkField } from '@/hooks/form/useAddIndexerBlockchainNetworks'
+import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccounts'
 
-export type NewFunctionFormState = NameAndTagsField & {
-  code: FunctionCodeField
-  runtime: FunctionRuntimeField
-  specs: InstanceSpecsField
-  isPersistent: boolean
-  volumes?: VolumeField[]
-  envVars?: EnvVarField[]
-  domains?: DomainField[]
+export type NewIndexerFormState = NameAndTagsField & {
+  networks: IndexerBlockchainNetworkField[]
+  accounts: IndexerTokenAccountField[]
 }
 
-export const defaultValues: Partial<NewFunctionFormState> = {
-  ...defaultNameAndTags,
-  code: { ...defaultCode },
-  runtime: { ...defaultFunctionRuntime },
-  specs: { ...getDefaultSpecsOptions(false)[0] },
-  isPersistent: false,
-}
+const defaultValues: Partial<NewIndexerFormState> = {}
 
 // @todo: Split this into reusable hooks by composition
 
-export type UseNewFunctionPage = {
+export type UseNewIndexerPage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
   values: any
   control: Control<any>
-  errors: FieldErrors<NewFunctionFormState>
+  errors: FieldErrors<NewIndexerFormState>
+  holdingRequirementsProps: Record<string, unknown>
   handleSubmit: (e: FormEvent) => Promise<void>
   handleChangeEntityTab: (tabId: string) => void
 }
 
-export function useNewFunctionPage(): UseNewFunctionPage {
+export function useNewIndexerPage(): UseNewIndexerPage {
   useConnectedWard()
 
   const router = useRouter()
   const [appState, dispatch] = useAppState()
   const { account, accountBalance } = appState
 
-  const manager = useProgramManager()
+  const manager = useIndexerManager()
 
   const onSubmit = useCallback(
-    async (state: NewFunctionFormState) => {
+    async (state: NewIndexerFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const accountFunction = await manager.add(state)
+      const accountIndexer = await manager.add(state)
 
+      // @todo: Change this
       dispatch({
         type: ActionTypes.addAccountFunction,
-        payload: { accountFunction },
+        payload: { accountFunction: accountIndexer },
       })
 
       // @todo: Check new volumes and domains being created to add them to the store
@@ -90,20 +68,23 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   } = useForm({
     defaultValues,
     onSubmit,
-    resolver: zodResolver(ProgramManager.addSchema),
+    resolver: zodResolver(IndexerManager.addSchema),
   })
   // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
-  const values = useWatch({ control }) as NewFunctionFormState
+  const values = useWatch({ control }) as NewIndexerFormState
+
+  const holdingRequirementsProps = IndexerManager.getStaticProgramConfig()
+  const { specs, isPersistent, volumes } = holdingRequirementsProps
 
   const { totalCost } = useMemo(
     () =>
-      ProgramManager.getCost({
-        specs: values.specs,
-        isPersistent: values.isPersistent,
-        volumes: values.volumes,
+      IndexerManager.getCost({
+        specs,
+        isPersistent,
+        volumes,
         capabilities: {},
       }),
-    [values.isPersistent, values.specs, values.volumes],
+    [isPersistent, specs, volumes],
   )
 
   const canAfford = (accountBalance || 0) > totalCost
@@ -116,6 +97,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     (id: string) => router.push(`/dashboard/${id}`),
     [router],
   )
+
   return {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
@@ -123,6 +105,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     values,
     control,
     errors,
+    holdingRequirementsProps,
     handleSubmit,
     handleChangeEntityTab,
   }

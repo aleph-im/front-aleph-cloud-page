@@ -98,7 +98,7 @@ export default function ManageFunction() {
             </div>
 
             <div tw="my-5">
-              <span className="tp-info text-main0">FUNCTION LINE</span>
+              <span className="tp-info text-main0">API ENTRYPOINT</span>
               <div>
                 <a
                   className="tp-body1 fs-sm"
