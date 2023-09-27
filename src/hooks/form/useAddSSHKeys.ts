@@ -127,6 +127,8 @@ export function useAddSSHKeys({
   useEffect(() => {
     let newValues = accountSSHKeyItems
 
+    if (newValues.length === 0) return
+
     if (fields.length === 0) {
       replace(newValues)
       return
