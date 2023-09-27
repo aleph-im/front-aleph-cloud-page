@@ -132,29 +132,18 @@ export default function HomePage() {
                 <strong>decentralized indexers</strong> on{' '}
                 <strong>Aleph.im&apos;s infrastructure</strong>.
               </p>
-              <div tw="flex gap-6 flex-wrap items-center">
-                <Button
-                  kind="neon"
-                  variant="primary"
-                  size="big"
-                  color="main2"
-                  onClick={navigate.indexer}
-                >
-                  Create Indexer
-                </Button>
-                <Button
-                  forwardedAs="a"
-                  href="https://bit.ly/3GAAjii"
-                  target="_blank"
-                  kind="neon"
-                  variant="primary"
-                  size="big"
-                  color="main0"
-                  tw="!my-0"
-                >
-                  Get in touch with us
-                </Button>
-              </div>
+              <Button
+                forwardedAs="a"
+                href="https://bit.ly/3GAAjii"
+                target="_blank"
+                kind="neon"
+                variant="primary"
+                size="big"
+                color="main0"
+                tw="!my-0"
+              >
+                Get in touch with us
+              </Button>
             </Col>
           </Row>
         </Container>

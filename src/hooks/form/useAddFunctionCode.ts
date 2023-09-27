@@ -1,4 +1,3 @@
-import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 const defaultText = `from fastapi import FastAPI
@@ -21,25 +20,15 @@ export type FunctionCodeField = {
 } & (
   | {
       type: 'text'
-      entrypoint?: string
       text: string
-      ref?: undefined
-      file?: undefined
-    }
-  | {
-      type: 'ref'
-      encoding: Encoding
-      entrypoint: string
-      programRef: string
-      text?: undefined
-      file?: undefined
+      file?: File
+      entrypoint?: string
     }
   | {
       type: 'file'
-      entrypoint: string
       file: File
-      text?: undefined
-      ref?: undefined
+      text?: string
+      entrypoint: string
     }
 )
 

@@ -171,17 +171,13 @@ export abstract class Executable {
   protected parseMetadata(
     name = 'Untitled',
     tags?: string[],
-    metadata?: Record<string, unknown>,
   ): Record<string, unknown> {
-    const out: Record<string, unknown> = { name }
+    const metadata: Record<string, unknown> = { name }
 
     if (tags && tags.length > 0) {
-      out.tags = tags
+      metadata.tags = tags
     }
 
-    return {
-      ...metadata,
-      ...out,
-    }
+    return metadata
   }
 }

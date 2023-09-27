@@ -35,7 +35,7 @@ export type NewFunctionFormState = NameAndTagsField & {
   domains?: DomainField[]
 }
 
-export const defaultValues: Partial<NewFunctionFormState> = {
+const defaultValues: Partial<NewFunctionFormState> = {
   ...defaultNameAndTags,
   code: { ...defaultCode },
   runtime: { ...defaultFunctionRuntime },

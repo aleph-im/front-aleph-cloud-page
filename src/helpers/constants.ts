@@ -43,7 +43,6 @@ export enum EntityType {
   Instance = 'instance',
   SSHKey = 'sshKey',
   Domain = 'domain',
-  Indexer = 'indexer',
 }
 
 export enum AddDomainTarget {
@@ -64,14 +63,4 @@ export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.Instance]: 'Instance',
   [EntityType.SSHKey]: 'SSH Key',
   [EntityType.Domain]: 'Domain',
-  [EntityType.Indexer]: 'Indexer',
-}
-
-export enum IndexerBlockchain {
-  Ethereum = 'ethereum',
-}
-
-export const BlockchainDefaultABIUrl: Record<IndexerBlockchain, string> = {
-  [IndexerBlockchain.Ethereum]:
-    'https://api.etherscan.io/api?module=contract&action=getabi&address=$ADDRESS',
 }

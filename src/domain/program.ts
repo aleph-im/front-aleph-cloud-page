@@ -72,7 +72,6 @@ export type AddProgram = Omit<
   | 'account'
   | 'channel'
   | 'file'
-  | 'programRef'
   | 'vcpus'
   | 'memory'
   | 'runtime'
@@ -109,16 +108,8 @@ export type ProgramCost = ExecutableCost
 export type ParsedCodeType = {
   encoding: Encoding
   entrypoint: string
-} & (
-  | {
-      file?: undefined
-      programRef: string
-    }
-  | {
-      file: Blob | Buffer
-      programRef?: undefined
-    }
-)
+  file: any
+}
 
 export class ProgramManager
   extends Executable
@@ -176,6 +167,8 @@ export class ProgramManager
     try {
       const programMessage = await this.parseProgram(newProgram)
 
+      console.log('programMessage', programMessage)
+
       const response = await program.publish(programMessage)
 
       const [entity] = await this.parseMessages([response])
@@ -218,15 +211,13 @@ export class ProgramManager
     if (code.type === 'text') {
       return {
         entrypoint: 'main:app',
-        file: new Blob([code.text], { type: 'text/plain' }) as File,
+        file: new Blob([code.text], { type: 'text/plain' }),
         encoding: Encoding.plain,
       }
     } else if (code.type === 'file') {
       if (!code.file) throw new Error('Invalid function code file')
       const fileName = code.file.name
-
       let encoding: Encoding
-
       if (fileName.endsWith('.zip')) {
         encoding = Encoding.zip
       } else if (fileName.endsWith('.sqsh')) {
@@ -234,17 +225,10 @@ export class ProgramManager
       } else {
         throw new Error('Invalid function code file')
       }
-
       return {
         entrypoint: code.entrypoint,
         file: code.file,
         encoding,
-      }
-    } else if (code.type === 'ref') {
-      return {
-        entrypoint: code.entrypoint,
-        encoding: code.encoding,
-        programRef: code.programRef,
       }
     } else throw new Error('Invalid function code type')
   }
@@ -260,22 +244,24 @@ export class ProgramManager
 
     const variables = this.parseEnvVars(envVars)
     const { memory, vcpus } = this.parseSpecs(specs)
-    const metadata = this.parseMetadata(name, tags, newProgram.metadata)
+    const metadata = this.parseMetadata(name, tags)
     const runtime = this.parseRuntime(newProgram.runtime)
     const volumes = await this.parseVolumes(newProgram.volumes)
-    const code = await this.parseCode(newProgram.code)
+    const { file, entrypoint, encoding } = await this.parseCode(newProgram.code)
 
     return {
       account,
       channel,
       runtime,
       isPersistent,
+      entrypoint,
+      file,
       variables,
       memory,
       vcpus,
       volumes,
-      ...code,
       metadata,
+      encoding,
     }
   }
 
