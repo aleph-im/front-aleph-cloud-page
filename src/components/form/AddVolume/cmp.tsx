@@ -208,8 +208,7 @@ const CmpMap = {
 }
 
 export const AddVolume = React.memo((props: AddVolumeProps) => {
-  const { volumeTypeCtrl, ...rest } = useAddVolume(props)
-  const { isFake } = rest
+  const { volumeTypeCtrl, isFake, defaultValue, ...rest } = useAddVolume(props)
   const volumeType = volumeTypeCtrl.field.value as VolumeType
 
   const Cmp = useMemo(() => CmpMap[volumeType], [volumeType])
@@ -251,7 +250,9 @@ export const AddVolume = React.memo((props: AddVolumeProps) => {
         />
       </div>
 
-      <div role="tabpanel">{<Cmp {...rest} />}</div>
+      <div role="tabpanel">
+        {<Cmp {...rest} defaultValue={defaultValue as any} />}
+      </div>
     </>
   )
 })
