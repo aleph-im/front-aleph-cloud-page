@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback, useMemo } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
@@ -12,7 +12,7 @@ import {
   SSHKeyField,
   // defaultValues as sshKeyDefaultValues,
 } from '@/hooks/form/useAddSSHKeys'
-import { VolumeField } from '@/hooks/form/useAddVolume'
+import { PersistentVolumeField, VolumeField } from '@/hooks/form/useAddVolume'
 import {
   InstanceImageField,
   defaultInstanceImage,
@@ -27,6 +27,7 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { VolumeType } from '@/helpers/constants'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -37,10 +38,21 @@ export type NewInstanceFormState = NameAndTagsField & {
   domains?: DomainField[]
 }
 
+const specs = { ...getDefaultSpecsOptions(true)[0] }
+
 export const defaultValues: Partial<NewInstanceFormState> = {
   ...defaultNameAndTags,
   image: defaultInstanceImage,
-  specs: { ...getDefaultSpecsOptions(true)[0] },
+  specs,
+  volumes: [
+    {
+      volumeType: VolumeType.Persistent,
+      name: 'System',
+      mountPath: '/',
+      size: specs.storage,
+      isFake: true,
+    },
+  ],
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
@@ -86,12 +98,27 @@ export function useNewInstancePage(): UseNewInstancePage {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     defaultValues,
     onSubmit,
     resolver: zodResolver(InstanceManager.addSchema),
   })
   const values = useWatch({ control }) as NewInstanceFormState
+
+  const { storage } = values.specs
+  const fakeVolume = values.volumes?.find((volume) => volume.isFake) as
+    | PersistentVolumeField
+    | undefined
+
+  // @note: Change default System fake volume size when the specs changes
+  useEffect(() => {
+    if (!storage) return
+    if (!fakeVolume) return
+    if (fakeVolume.size === storage) return
+
+    setValue('volumes.0.size', storage)
+  }, [storage, fakeVolume, setValue])
 
   const { totalCost } = useMemo(
     () =>

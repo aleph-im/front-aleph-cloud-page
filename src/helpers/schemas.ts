@@ -101,6 +101,7 @@ export const newIsolatedVolumesSchema = z.array(newIsolatedVolumeSchema)
 export const newVolumeSchema = newIsolatedVolumeSchema.extend({
   mountPath: linuxPath,
   useLatest: z.coerce.boolean(),
+  isFake: z.boolean().optional(),
 })
 
 // EXECUTION
@@ -110,6 +111,7 @@ export const existingVolumeSchema = z.object({
   refHash: messageHash,
   mountPath: linuxPath,
   useLatest: z.coerce.boolean(),
+  isFake: z.boolean().optional(),
 })
 
 export const persistentVolumeSchema = z.object({
@@ -117,6 +119,7 @@ export const persistentVolumeSchema = z.object({
   name: requiredString,
   mountPath: linuxPath,
   size: z.number().gt(0),
+  isFake: z.boolean().optional(),
 })
 
 export const addVolumeSchema = z.discriminatedUnion('volumeType', [
