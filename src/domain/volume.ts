@@ -88,7 +88,7 @@ export type PersistentVolume = BaseVolume & {
 export type Volume = NewVolume | ExistingVolume | PersistentVolume
 
 export type VolumeCostProps = {
-  volumes?: (Volume | AddVolume)[]
+  volumes?: (Volume | AddVolume | VolumeField)[]
   sizeDiscount?: number
   exclude?: VolumeType[]
 }
@@ -185,6 +185,13 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   static getCost(props: VolumeCostProps): VolumeCost {
+    props = {
+      ...props,
+      volumes: props.volumes?.filter(
+        (volume) => !(volume as VolumeField).isFake,
+      ),
+    }
+
     const perVolumeCost = this.getPerVolumeCost(props)
 
     const totalCost = Math.ceil(
