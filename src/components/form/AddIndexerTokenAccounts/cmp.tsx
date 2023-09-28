@@ -37,8 +37,9 @@ const IndexerTokenAccountItem = React.memo(
           <Dropdown
             {...networkCtrl.field}
             {...networkCtrl.fieldState}
-            label="Blockchain"
-            placeholder="ethereum"
+            disabled={!networks.length}
+            label="Network"
+            placeholder="Select network"
           >
             {networks.map(({ id }) => (
               <DropdownOption key={id} value={id}>

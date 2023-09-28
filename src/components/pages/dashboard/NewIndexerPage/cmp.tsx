@@ -42,7 +42,7 @@ export default function NewIndexerPage() {
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <CompositeTitle as="h2" number="2">
-            Token accounts
+            Configure Your Token Account
           </CompositeTitle>
           <p tw="mb-6">
             Define the core parameters associated with the token, like the
@@ -62,7 +62,7 @@ export default function NewIndexerPage() {
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <CompositeTitle as="h2" number="3">
-            Configure Your Token Account
+            Name and tags
           </CompositeTitle>
           <p tw="mb-6">
             Organize and identify your indexers more effectively by assigning a
