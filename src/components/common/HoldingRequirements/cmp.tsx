@@ -276,7 +276,7 @@ export default function HoldingRequirements({
 
               <StyledHoldingSummaryLine>
                 <div></div>
-                <div className="tp-body2">Total</div>
+                <div className="tp-body2">Total Staked</div>
                 <div>
                   <span className="text-main1">
                     {humanReadableCurrency(totalCost)} ALEPH
