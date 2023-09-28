@@ -142,7 +142,7 @@ export const AddIndexerTokenAccounts = React.memo(
             kind="neon"
             size="regular"
           >
-            Add network
+            Add account
           </Button>
         </div>
       </>
