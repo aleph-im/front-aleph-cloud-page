@@ -143,9 +143,7 @@ export default function NewFunctionPage() {
                   displayUnit: true,
                 })}
               </span>{' '}
-              of storage at no additional cost. This has been factored into your
-              configuration to maximize efficiency and value. Feel free to
-              adjust as necessary.
+              of storage at no additional cost. Feel free to add it here.
             </BorderBox>
           )}
           <AddVolumes name="volumes" control={control} />

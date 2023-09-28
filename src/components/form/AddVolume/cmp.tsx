@@ -150,6 +150,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
     mountPathCtrl,
     sizeCtrl,
     sizeValue,
+    isFake,
     sizeHandleChange,
     handleRemove,
   } = useAddPersistentVolumeProps(props)
@@ -167,6 +168,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           <TextInput
             {...nameCtrl.field}
             {...nameCtrl.fieldState}
+            disabled={isFake}
             label="Volume name"
             placeholder="Redis volume"
           />
@@ -175,6 +177,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           <TextInput
             {...mountPathCtrl.field}
             {...mountPathCtrl.fieldState}
+            disabled={isFake}
             label="Mount"
             placeholder="/mount/opt"
           />
@@ -183,6 +186,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           <TextInput
             {...sizeCtrl.field}
             {...sizeCtrl.fieldState}
+            disabled={isFake}
             value={sizeValue}
             onChange={sizeHandleChange}
             type="number"
@@ -190,7 +194,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
             placeholder="0"
           />
         </div>
-        {handleRemove && <RemoveVolume onRemove={handleRemove} />}
+        {!isFake && handleRemove && <RemoveVolume onRemove={handleRemove} />}
       </NoisyContainer>
     </>
   )
@@ -204,10 +208,36 @@ const CmpMap = {
 }
 
 export const AddVolume = React.memo((props: AddVolumeProps) => {
-  const { volumeTypeCtrl, ...rest } = useAddVolume(props)
+  const { volumeTypeCtrl, isFake, defaultValue, ...rest } = useAddVolume(props)
   const volumeType = volumeTypeCtrl.field.value as VolumeType
 
   const Cmp = useMemo(() => CmpMap[volumeType], [volumeType])
+
+  const tabs = useMemo(() => {
+    if (isFake) {
+      return [
+        {
+          id: VolumeType.Persistent,
+          name: 'System Volume',
+        },
+      ]
+    }
+
+    return [
+      {
+        id: VolumeType.New,
+        name: 'New volume',
+      },
+      {
+        id: VolumeType.Existing,
+        name: 'Existing volume',
+      },
+      {
+        id: VolumeType.Persistent,
+        name: 'Persistent Storage',
+      },
+    ]
+  }, [isFake])
 
   return (
     <>
@@ -216,24 +246,13 @@ export const AddVolume = React.memo((props: AddVolumeProps) => {
           selected={volumeType}
           align="left"
           onTabChange={volumeTypeCtrl.field.onChange}
-          tabs={[
-            {
-              id: VolumeType.New,
-              name: 'New volume',
-            },
-            {
-              id: VolumeType.Existing,
-              name: 'Existing volume',
-            },
-            {
-              id: VolumeType.Persistent,
-              name: 'Persistent Storage',
-            },
-          ]}
+          tabs={tabs}
         />
       </div>
 
-      <div role="tabpanel">{<Cmp {...rest} />}</div>
+      <div role="tabpanel">
+        {<Cmp {...rest} defaultValue={defaultValue as any} />}
+      </div>
     </>
   )
 })

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - release/**
 
 env:
   IS_GH_PAGES: gh-pages

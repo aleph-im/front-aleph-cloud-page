@@ -189,6 +189,19 @@ export class InstanceManager
     }
   }
 
+  protected async parseVolumes(
+    volumes?: VolumeField | VolumeField[],
+  ): Promise<MachineVolume[] | undefined> {
+    if (!volumes) return
+
+    volumes = Array.isArray(volumes) ? volumes : [volumes]
+
+    // @note: Remove the fake volumes from the instance volume list configuration
+    volumes = volumes.filter((volume) => !volume.isFake)
+
+    return super.parseVolumes(volumes)
+  }
+
   protected async parseSSHKeys(
     sshKeys?: SSHKeyField[],
   ): Promise<string[] | undefined> {
