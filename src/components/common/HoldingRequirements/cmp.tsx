@@ -179,6 +179,8 @@ export default function HoldingRequirements({
   button: ButtonCmp,
   description,
 }: HoldingRequirementsProps) {
+  volumes = volumes?.filter((volume) => !volume.isFake)
+
   const { computeTotalCost, perVolumeCost, totalCost } = useMemo(() => {
     switch (type) {
       case EntityType.Program:
