@@ -143,7 +143,7 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
   }
 
   protected async parseIndexers(newIndexer: AddIndexer): Promise<AddProgram> {
-    newIndexer = IndexerManager.addSchema.parse(newIndexer)
+    newIndexer = await IndexerManager.addSchema.parseAsync(newIndexer)
 
     const { name, tags } = newIndexer
     const envVars = this.parseEnvVars(newIndexer)

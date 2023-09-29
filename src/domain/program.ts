@@ -252,7 +252,7 @@ export class ProgramManager
   protected async parseProgram(
     newProgram: AddProgram,
   ): Promise<ProgramPublishConfiguration> {
-    newProgram = ProgramManager.addSchema.parse(newProgram)
+    newProgram = await ProgramManager.addSchema.parseAsync(newProgram)
 
     const { account, channel } = this
 

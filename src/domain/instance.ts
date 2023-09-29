@@ -165,7 +165,7 @@ export class InstanceManager
   protected async parseInstance(
     newInstance: AddInstance,
   ): Promise<InstancePublishConfiguration> {
-    newInstance = InstanceManager.addSchema.parse(newInstance)
+    newInstance = await InstanceManager.addSchema.parseAsync(newInstance)
 
     const { account, channel } = this
 

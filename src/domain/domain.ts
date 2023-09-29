@@ -155,7 +155,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     domains: AddDomain[],
     throwOnCollision = true,
   ): Promise<AddDomain[]> {
-    domains = DomainManager.addManySchema.parse(domains)
+    domains = await DomainManager.addManySchema.parseAsync(domains)
 
     const currentDomains = await this.getAll()
     const currentDomainSet = new Set<string>(currentDomains.map((d) => d.name))
