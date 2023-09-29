@@ -357,7 +357,8 @@ export const indexerSchema = z
       try {
         abi = JSON.parse(response?.result)
       } catch {
-        // ignore
+        // @note: Skip getting stuck in rate limit scenarios
+        if (response?.result.includes('rate limit')) return z.NEVER
       }
 
       if (!abi) {
