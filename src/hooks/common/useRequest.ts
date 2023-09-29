@@ -8,6 +8,7 @@ import {
 export type UseRequestProps<T> = UseRequestStateProps<T> & {
   doRequest: () => Promise<T>
   triggerOnMount?: boolean
+  triggerDeps?: any[]
 }
 
 export type UseRequestReturn<T> = RequestState<T> & {
@@ -17,6 +18,7 @@ export type UseRequestReturn<T> = RequestState<T> & {
 export function useRequest<T>({
   doRequest,
   triggerOnMount,
+  triggerDeps = [],
   ...rest
 }: UseRequestProps<T>): UseRequestReturn<T> {
   const [reqState, { onLoad, onSuccess, onError }] = useRequestState(rest)
@@ -37,7 +39,7 @@ export function useRequest<T>({
     if (!triggerOnMount) return
     request()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, triggerDeps)
 
   return { ...reqState, request }
 }

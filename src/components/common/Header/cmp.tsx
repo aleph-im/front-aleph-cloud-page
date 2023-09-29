@@ -50,7 +50,7 @@ export const Header = () => {
         connect()
       })
     }
-  })
+  }, [])
 
   return (
     <StyledHeader>

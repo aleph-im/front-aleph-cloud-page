@@ -50,6 +50,7 @@ export function useAccountVolumes({
     onSuccess,
     onError,
     triggerOnMount,
+    triggerDeps: [appState.account],
   })
 
   const entities = appState.accountVolumes
