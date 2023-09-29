@@ -19,7 +19,7 @@ export const defaultValues: Partial<IndexerBlockchainNetworkField> = {
   id: '',
   blockchain: IndexerBlockchain.Ethereum,
   rpcUrl: '',
-  // abiUrl: '',
+  abiUrl: '',
 }
 
 export type UseIndexerBlockchainNetworkItemProps = {
@@ -34,7 +34,7 @@ export type UseIndexerBlockchainNetworkItemReturn = {
   idCtrl: UseControllerReturn<any, any>
   blockchainCtrl: UseControllerReturn<any, any>
   rpcUrlCtrl: UseControllerReturn<any, any>
-  // abiUrlCtrl: UseControllerReturn<any, any>
+  abiUrlCtrl: UseControllerReturn<any, any>
   networks: IndexerBlockchain[]
   handleRemove: () => void
 }
@@ -64,11 +64,11 @@ export function useIndexerBlockchainNetworkItem({
     defaultValue: defaultValue?.rpcUrl,
   })
 
-  // const abiUrlCtrl = useController({
-  //   control,
-  //   name: `${name}.${index}.abiUrl`,
-  //   defaultValue: defaultValue?.abiUrl,
-  // })
+  const abiUrlCtrl = useController({
+    control,
+    name: `${name}.${index}.abiUrl`,
+    defaultValue: defaultValue?.abiUrl,
+  })
 
   const networks = Object.values(IndexerBlockchain)
 
@@ -80,7 +80,7 @@ export function useIndexerBlockchainNetworkItem({
     idCtrl,
     blockchainCtrl,
     rpcUrlCtrl,
-    // abiUrlCtrl,
+    abiUrlCtrl,
     networks,
     handleRemove,
   }

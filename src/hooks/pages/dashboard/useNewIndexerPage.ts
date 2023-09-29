@@ -11,13 +11,30 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IndexerBlockchainNetworkField } from '@/hooks/form/useAddIndexerBlockchainNetworks'
 import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccounts'
+import { IndexerBlockchain } from '@/helpers/constants'
 
 export type NewIndexerFormState = NameAndTagsField & {
   networks: IndexerBlockchainNetworkField[]
   accounts: IndexerTokenAccountField[]
 }
 
-const defaultValues: Partial<NewIndexerFormState> = {}
+const defaultValues: Partial<NewIndexerFormState> = {
+  networks: [
+    {
+      id: '',
+      blockchain: IndexerBlockchain.Ethereum,
+      rpcUrl: '',
+    },
+  ],
+  accounts: [
+    {
+      network: '',
+      contract: '',
+      deployer: '',
+      supply: '',
+    } as IndexerTokenAccountField,
+  ],
+}
 
 // @todo: Split this into reusable hooks by composition
 

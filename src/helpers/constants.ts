@@ -73,5 +73,6 @@ export enum IndexerBlockchain {
 
 export const BlockchainDefaultABIUrl: Record<IndexerBlockchain, string> = {
   [IndexerBlockchain.Ethereum]:
-    'https://api.etherscan.io/api?module=contract&action=getabi&address=$ADDRESS',
+    // @note: Fixed ethereum ALEPH token contract address as "generic" ERC20 ABI
+    'https://api.etherscan.io/api?module=contract&action=getabi&address=0x27702a26126e0B3702af63Ee09aC4d1A084EF628',
 }

@@ -13,6 +13,10 @@ export const requiredStringSchema = z
   .trim()
   .min(1, { message: 'Required field' })
 
+function optionalString(schema: z.ZodString) {
+  return schema.optional().or(z.literal(''))
+}
+
 export const optionalStringSchema = z.string().trim().optional()
 
 export const messageHashSchema = requiredStringSchema.regex(/^[0-9a-f]{64}$/, {
@@ -286,9 +290,7 @@ export const instanceSchema = z
 
 export const indexerNetworkIdSchema = requiredStringSchema.regex(
   /^[0-9a-z-]+$/,
-  {
-    message: 'Network id should be provided in kebab-case-format',
-  },
+  { message: 'Network id should be provided in kebab-case-format' },
 )
 
 export const abiUrlSchema = urlSchema.includes('$ADDRESS', {
@@ -300,7 +302,7 @@ export const indexerNetworkSchema = z.object({
   id: indexerNetworkIdSchema,
   blockchain: indexerBlockchainSchema,
   rpcUrl: urlSchema,
-  abiUrl: abiUrlSchema.optional(),
+  abiUrl: optionalString(abiUrlSchema),
 })
 
 export const indexerNetworksSchema = z.array(indexerNetworkSchema)
@@ -321,17 +323,53 @@ export const indexerSchema = z
     accounts: IndexerTokenAccountsSchema.min(1),
   })
   .merge(addNameAndTagsSchema)
-  .superRefine(({ networks, accounts }, ctx) =>
-    accounts.every((account, i) => {
-      const ok = networks.some((network) => network.id === account.network)
-      if (ok) return true
+  .superRefine(async ({ networks, accounts }, ctx) => {
+    for (const [i, account] of Object.entries(accounts)) {
+      const j = networks.findIndex((network) => network.id === account.network)
+      const accountNetwork = networks[j]
 
-      ctx.addIssue({
-        fatal: true,
-        code: z.ZodIssueCode.invalid_intersection_types,
-        message:
-          'Invalid network. It should be one of the defined blockchain networks ids',
-        path: [`accounts.${i}.network`],
-      })
-    }),
-  )
+      if (!accountNetwork) {
+        ctx.addIssue({
+          fatal: true,
+          code: z.ZodIssueCode.custom,
+          message:
+            'Invalid network. It should be one of the defined blockchain networks ids',
+          path: [`accounts.${i}.network`],
+        })
+
+        return z.NEVER
+      }
+
+      if (!account.contract) return z.NEVER
+      if (!accountNetwork.abiUrl) return z.NEVER
+      if (!accountNetwork.abiUrl.includes('$ADDRESS')) return z.NEVER
+
+      const abiAddress = accountNetwork.abiUrl.replace(
+        '$ADDRESS',
+        account.contract,
+      )
+
+      const query = await fetch(abiAddress)
+      const response = await query.json()
+
+      let abi = undefined
+
+      try {
+        abi = JSON.parse(response?.result)
+      } catch {
+        // ignore
+      }
+
+      if (!abi) {
+        ctx.addIssue({
+          fatal: true,
+          code: z.ZodIssueCode.custom,
+          message:
+            'Invalid ABI url. It should return a valid ABI json inside response.body.result field',
+          path: [`networks.${j}.abiUrl`],
+        })
+
+        return z.NEVER
+      }
+    }
+  })

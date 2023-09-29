@@ -27,6 +27,7 @@ const IndexerTokenAccountItem = React.memo(
       decimalsValue,
       networks,
       supplyPreview,
+      networkDisabled,
       decimalsHandleChange,
       handleRemove,
     } = useIndexerTokenAccountItem(props)
@@ -37,9 +38,10 @@ const IndexerTokenAccountItem = React.memo(
           <Dropdown
             {...networkCtrl.field}
             {...networkCtrl.fieldState}
-            disabled={!networks.length}
-            label="Network"
-            placeholder="Select network"
+            required
+            disabled={networkDisabled}
+            label="Network ID"
+            placeholder="Select network ID"
           >
             {networks.map(({ id }) => (
               <DropdownOption key={id} value={id}>
@@ -52,6 +54,7 @@ const IndexerTokenAccountItem = React.memo(
           <TextInput
             {...contractCtrl.field}
             {...contractCtrl.fieldState}
+            required
             label="Contract address"
             placeholder="0x27702a26126e0B3702af63Ee09aC4d1A084EF628"
           />
@@ -60,6 +63,7 @@ const IndexerTokenAccountItem = React.memo(
           <TextInput
             {...deployerCtrl.field}
             {...deployerCtrl.fieldState}
+            required
             label="Deployer address"
             placeholder="0xb6e45ADfa0C7D70886bBFC990790d64620F1BAE8"
           />
@@ -68,6 +72,7 @@ const IndexerTokenAccountItem = React.memo(
           <TextInput
             {...supplyCtrl.field}
             {...supplyCtrl.fieldState}
+            required
             type="number"
             label="Initial token supply"
             placeholder="500000000000000000000000000"
@@ -77,18 +82,20 @@ const IndexerTokenAccountItem = React.memo(
           <TextInput
             {...decimalsCtrl.field}
             {...decimalsCtrl.fieldState}
+            required
             value={decimalsValue}
             onChange={decimalsHandleChange}
             type="number"
             label="Token decimals"
             placeholder="18"
           />
+          {supplyPreview && (
+            <div tw="mt-2 text-ellipsis overflow-hidden" className="fs-xs">
+              Supply: <span className="text-main0">{supplyPreview}</span>
+            </div>
+          )}
         </div>
-        {supplyPreview && (
-          <div tw="mt-4 text-ellipsis overflow-hidden opacity-50">
-            Supply: {supplyPreview}
-          </div>
-        )}
+
         <div tw="mt-4 pt-6 text-right">
           <Button
             color="main2"

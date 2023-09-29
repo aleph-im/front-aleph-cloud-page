@@ -18,8 +18,14 @@ import NoisyContainer from '@/components/common/NoisyContainer'
 
 const IndexerBlockchainNetworkItem = React.memo(
   (props: IndexerBlockchainNetworkItemProps) => {
-    const { idCtrl, blockchainCtrl, rpcUrlCtrl, networks, handleRemove } =
-      useIndexerBlockchainNetworkItem(props)
+    const {
+      idCtrl,
+      blockchainCtrl,
+      rpcUrlCtrl,
+      abiUrlCtrl,
+      networks,
+      handleRemove,
+    } = useIndexerBlockchainNetworkItem(props)
 
     return (
       <>
@@ -27,7 +33,8 @@ const IndexerBlockchainNetworkItem = React.memo(
           <TextInput
             {...idCtrl.field}
             {...idCtrl.fieldState}
-            label="Id"
+            required
+            label="Network ID"
             placeholder="ethereum-mainnet"
           />
         </div>
@@ -35,8 +42,9 @@ const IndexerBlockchainNetworkItem = React.memo(
           <Dropdown
             {...blockchainCtrl.field}
             {...blockchainCtrl.fieldState}
+            required
             label="Blockchain"
-            placeholder="ethereum"
+            placeholder="Select blockchain"
           >
             {networks.map((value) => (
               <DropdownOption key={value} value={value}>
@@ -50,18 +58,24 @@ const IndexerBlockchainNetworkItem = React.memo(
           <TextInput
             {...rpcUrlCtrl.field}
             {...rpcUrlCtrl.fieldState}
+            required
             label="RPC node url"
             placeholder="https://eth.mainnet.rpc/url"
           />
         </div>
-        {/* <div tw="mt-4">
+        <div tw="mt-4">
           <TextInput
             {...abiUrlCtrl.field}
             {...abiUrlCtrl.fieldState}
-            label="ABI url"
-            placeholder="https://eth.scan/path-to-abi-address-will-be-replaced/$ADDRESS"
+            label="Custom ABI url"
+            placeholder="https://my.abiurl.io/$ADDRESS"
           />
-        </div> */}
+          <div tw="mt-2" className="fs-xs">
+            Incl. the placeholder <span className="text-main0">$ADDRESS</span>{' '}
+            in the URL. The system will replace it with the token address you
+            provide in step 02, autofilling the form.
+          </div>
+        </div>
         <div tw="mt-4 pt-6 text-right">
           <Button
             color="main2"

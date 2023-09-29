@@ -40,6 +40,7 @@ export type UseIndexerTokenAccountItemReturn = {
   decimalsCtrl: UseControllerReturn<any, any>
   decimalsValue: number | undefined
   networks: IndexerBlockchainNetworkField[]
+  networkDisabled: boolean
   supplyPreview: string
   decimalsHandleChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleRemove: () => void
@@ -84,7 +85,7 @@ export function useIndexerTokenAccountItem({
   })
 
   const decimalsValue = useMemo(() => {
-    return decimalsCtrl.field.value || undefined
+    return decimalsCtrl.field.value
   }, [decimalsCtrl.field])
 
   const dec = decimalsCtrl.field.value
@@ -100,9 +101,11 @@ export function useIndexerTokenAccountItem({
         }${dec > 0 ? '.' : ''}${sup.substring(supLen - dec)}`
       : ''
 
+  const networkDisabled = !networks.some((network) => !!network.id)
+
   const decimalsHandleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      const val = Number(e.target.value)
+      const val = e.target.value !== '' ? Number(e.target.value) : undefined
       decimalsCtrl.field.onChange(val)
     },
     [decimalsCtrl.field],
@@ -121,6 +124,7 @@ export function useIndexerTokenAccountItem({
     decimalsValue,
     networks,
     supplyPreview,
+    networkDisabled,
     decimalsHandleChange,
     handleRemove,
   }
