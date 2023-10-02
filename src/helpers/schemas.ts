@@ -90,7 +90,10 @@ export const programTypeSchema = z.enum([
   EntityType.Program,
 ])
 
-export const indexerBlockchainSchema = z.enum([IndexerBlockchain.Ethereum])
+export const indexerBlockchainSchema = z.enum([
+  IndexerBlockchain.Ethereum,
+  IndexerBlockchain.Bsc,
+])
 
 export const metadataSchema = z.record(requiredStringSchema, z.unknown())
 

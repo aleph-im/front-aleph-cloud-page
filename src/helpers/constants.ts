@@ -69,10 +69,14 @@ export const EntityTypeName: Record<EntityType, string> = {
 
 export enum IndexerBlockchain {
   Ethereum = 'ethereum',
+  Bsc = 'bsc',
 }
 
+const ERC20AbiUrl =
+  'https://api.etherscan.io/api?module=contract&action=getabi&address=0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
+
 export const BlockchainDefaultABIUrl: Record<IndexerBlockchain, string> = {
-  [IndexerBlockchain.Ethereum]:
-    // @note: Fixed ethereum ALEPH token contract address as "generic" ERC20 ABI
-    'https://api.etherscan.io/api?module=contract&action=getabi&address=0x27702a26126e0B3702af63Ee09aC4d1A084EF628',
+  // @note: Fixed ethereum ALEPH token contract address as "generic" ERC20 ABI for all EVM compatible blockchains
+  [IndexerBlockchain.Ethereum]: ERC20AbiUrl,
+  [IndexerBlockchain.Bsc]: ERC20AbiUrl,
 }
