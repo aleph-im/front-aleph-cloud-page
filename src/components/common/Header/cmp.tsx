@@ -10,8 +10,9 @@ import Link from 'next/link'
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 import { useHeader } from '@/hooks/pages/useHeader'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useOnClickOutside } from 'usehooks-ts'
+import { useConnect } from '@/hooks/common/useConnect'
 
 export const Header = () => {
   const {
@@ -23,6 +24,8 @@ export const Header = () => {
     setDisplayWalletPicker,
     accountBalance,
   } = useHeader()
+
+  const { connect } = useConnect()
   const divRef = useRef<HTMLDivElement | null>(null)
   useOnClickOutside(divRef, () => {
     if (displayWalletPicker) setDisplayWalletPicker(false)
@@ -31,6 +34,23 @@ export const Header = () => {
   const handleDisplayWalletPicker = () => {
     setDisplayWalletPicker(!displayWalletPicker)
   }
+
+  const provider = () => {
+    window.ethereum.on('accountsChanged', function () {
+      connect()
+    })
+
+    return window.ethereum
+  }
+
+  useEffect(() => {
+    provider()
+    return () => {
+      window.ethereum.removeListener('accountsChanged', () => {
+        connect()
+      })
+    }
+  }, [])
 
   return (
     <StyledHeader>
@@ -124,7 +144,7 @@ export const Header = () => {
                             color: 'orange',
                             icon: 'circle',
                             name: 'Metamask',
-                            provider: () => window.ethereum,
+                            provider: () => provider(),
                           },
                         ],
                       },
