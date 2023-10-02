@@ -55,7 +55,7 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
       encoding: Encoding.squashfs,
       entrypoint: 'dist/run.js',
       programRef:
-        'd4a9f4abb451edb361504cc093e78e2d507fb3bb9244ffd746ababaf4c8537a9', // @note: token program
+        '32c3ac6e4810a18d3d3f64cb4dd6b2eb111993e9f9832124d3ad5efba93ce13e', // @note: token program
     }
     const volumes: VolumeField[] = [
       {
