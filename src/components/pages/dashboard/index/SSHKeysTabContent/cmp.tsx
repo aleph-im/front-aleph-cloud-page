@@ -1,8 +1,8 @@
 import React from 'react'
 import tw from 'twin.macro'
 import { SSHKeysTabContentProps } from './types'
-import { Table } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/common/ButtonLink'
+import EntityTable from '@/components/common/EntityTable'
 
 export const SSHKeysTabContent = React.memo(
   ({ data }: SSHKeysTabContentProps) => {
@@ -11,7 +11,7 @@ export const SSHKeysTabContent = React.memo(
         {data.length > 0 ? (
           <>
             <div tw="overflow-auto max-w-full">
-              <Table
+              <EntityTable
                 borderType="none"
                 oddRowNoise
                 rowKey={(row) => row.key}
@@ -23,7 +23,7 @@ export const SSHKeysTabContent = React.memo(
                   {
                     label: 'SSH Key',
                     sortable: true,
-                    width: '75%',
+                    width: '100%',
                     render: (row) => row.key,
                     cellProps: () => ({
                       css: tw`max-w-0 whitespace-nowrap overflow-hidden text-ellipsis pr-3!`,
@@ -39,7 +39,6 @@ export const SSHKeysTabContent = React.memo(
                   },
                   {
                     label: '',
-                    width: '0',
                     align: 'right',
                     render: (row) => (
                       <ButtonLink

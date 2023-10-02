@@ -1,9 +1,9 @@
 import React from 'react'
 import tw from 'twin.macro'
 import { DomainsTabContentProps } from './types'
-import { Table } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/common/ButtonLink'
 import { EntityType } from '@/helpers/constants'
+import EntityTable from '@/components/common/EntityTable'
 
 export const DomainsTabContent = React.memo(
   ({ data }: DomainsTabContentProps) => {
@@ -12,7 +12,7 @@ export const DomainsTabContent = React.memo(
         {data.length > 0 ? (
           <>
             <div tw="overflow-auto max-w-full">
-              <Table
+              <EntityTable
                 borderType="none"
                 oddRowNoise
                 rowKey={(row) => row.id}
@@ -23,6 +23,7 @@ export const DomainsTabContent = React.memo(
                 columns={[
                   {
                     label: 'Name',
+                    width: '50%',
                     sortable: true,
                     render: (row) => row.name,
                   },
@@ -33,8 +34,8 @@ export const DomainsTabContent = React.memo(
                   },
                   {
                     label: 'Ref',
+                    width: '50%',
                     sortable: true,
-                    width: '60%',
                     render: (row) => row.ref,
                     cellProps: () => ({
                       css: tw`max-w-0 whitespace-nowrap overflow-hidden text-ellipsis px-3!`,
@@ -42,7 +43,6 @@ export const DomainsTabContent = React.memo(
                   },
                   {
                     label: '',
-                    width: '0',
                     align: 'right',
                     render: (row) => (
                       <ButtonLink

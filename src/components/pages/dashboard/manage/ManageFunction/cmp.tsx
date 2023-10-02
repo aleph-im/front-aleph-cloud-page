@@ -43,7 +43,7 @@ export default function ManageFunction() {
               />
             </div>
             <div>
-              <Button
+              {/* <Button
                 size="regular"
                 variant="tertiary"
                 color="main0"
@@ -53,7 +53,7 @@ export default function ManageFunction() {
                 onClick={handleDownload}
               >
                 Download
-              </Button>
+              </Button> */}
               <Button
                 size="regular"
                 variant="tertiary"
