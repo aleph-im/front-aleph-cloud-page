@@ -1,4 +1,4 @@
-import { Button, Tabs } from '@aleph-front/aleph-core'
+import { Button, Tabs, TextGradient } from '@aleph-front/aleph-core'
 import { EntityType } from '@/helpers/constants'
 import CompositeTitle from '@/components/common/CompositeTitle'
 import { useNewFunctionPage } from '@/hooks/pages/dashboard/useNewFunctionPage'
@@ -15,6 +15,7 @@ import SelectFunctionPersistence from '@/components/form/SelectFunctionPersisten
 import BorderBox from '@/components/common/BorderBox'
 import { convertByteUnits } from '@/helpers/utils'
 import Form from '@/components/form/Form'
+import ToggleContainer from '@/components/common/ToggleContainer'
 
 export default function NewFunctionPage() {
   const {
@@ -128,58 +129,75 @@ export default function NewFunctionPage() {
           <AddNameAndTags control={control} entityType={EntityType.Program} />
         </Container>
       </section>
-      <section tw="px-0 py-6 md:py-10">
+
+      <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <CompositeTitle as="h2" number="6">
-            Add volumes
-          </CompositeTitle>
-          {values.specs && (
-            <BorderBox $color="main2" tw="mt-4" className="tp-body1">
-              Good news! Your selected package already includes{' '}
-              <span className="text-main0">
-                {convertByteUnits(values.specs.storage, {
-                  from: 'MiB',
-                  to: 'GiB',
-                  displayUnit: true,
-                })}
-              </span>{' '}
-              of storage at no additional cost. Feel free to add it here.
-            </BorderBox>
-          )}
-          <AddVolumes name="volumes" control={control} />
-        </Container>
-      </section>
-      <section tw="px-0 py-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="7">
-            Add environment variables
+            Advanced Configuration Options
           </CompositeTitle>
           <p tw="mb-6">
-            Define key-value pairs that act as configuration settings for your
-            web3 function. Environment variables offer a convenient way to store
-            information, manage configurations, and modify your
-            application&apos;s behaviour without altering the source code.
+            Customize your function with our Advanced Configuration Options. Add
+            volumes, environment variables, and custom domains to meet your
+            specific needs.
           </p>
-          <AddEnvVars name="envVars" control={control} />
+          <div tw="px-0 my-6">
+            <div tw="mb-4">
+              <ToggleContainer label="Add Volume">
+                <TextGradient forwardedAs="h2" type="h6" color="main0">
+                  Add volumes
+                </TextGradient>
+                {values.specs && (
+                  <BorderBox $color="main2" tw="mt-4" className="tp-body1">
+                    Good news! Your selected package already includes{' '}
+                    <span className="text-main0">
+                      {convertByteUnits(values.specs.storage, {
+                        from: 'MiB',
+                        to: 'GiB',
+                        displayUnit: true,
+                      })}
+                    </span>{' '}
+                    of storage at no additional cost. Feel free to add it here.
+                  </BorderBox>
+                )}
+                <AddVolumes name="volumes" control={control} />
+              </ToggleContainer>
+            </div>
+            <div tw="mb-4">
+              <ToggleContainer label="Add Environmental Variables">
+                <TextGradient forwardedAs="h2" type="h6" color="main0">
+                  Add environment variables
+                </TextGradient>
+                <p tw="mb-6">
+                  Define key-value pairs that act as configuration settings for
+                  your web3 function. Environment variables offer a convenient
+                  way to store information, manage configurations, and modify
+                  your application&apos;s behaviour without altering the source
+                  code.
+                </p>
+                <AddEnvVars name="envVars" control={control} />
+              </ToggleContainer>
+            </div>
+            <div tw="mb-4">
+              <ToggleContainer label="Add Custom Domain">
+                <TextGradient forwardedAs="h2" type="h6" color="main0">
+                  Custom domain
+                </TextGradient>
+                <p tw="mb-6">
+                  Configure a user-friendly domain name for your web3 function,
+                  providing a more accessible and professional way for users to
+                  interact with your application.
+                </p>
+                <AddDomains
+                  name="domains"
+                  control={control}
+                  entityType={EntityType.Program}
+                />
+              </ToggleContainer>
+            </div>
+          </div>
         </Container>
       </section>
-      <section tw="px-0 py-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="8">
-            Custom domain
-          </CompositeTitle>
-          <p tw="mb-6">
-            Configure a user-friendly domain name for your web3 function,
-            providing a more accessible and professional way for users to
-            interact with your application.
-          </p>
-          <AddDomains
-            name="domains"
-            control={control}
-            entityType={EntityType.Program}
-          />
-        </Container>
-      </section>
+
       <HoldingRequirements
         address={address}
         type={EntityType.Program}

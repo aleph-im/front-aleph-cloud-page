@@ -47,7 +47,7 @@ export const AddEnvVars = React.memo((props: AddEnvVarsProps) => {
   return (
     <>
       {fields.length > 0 && (
-        <NoisyContainer>
+        <NoisyContainer $type="dark">
           <div tw="flex flex-col gap-x-6 gap-y-4">
             <p tw="-mb-2">Set</p>
             {fields.map((field, index) => (

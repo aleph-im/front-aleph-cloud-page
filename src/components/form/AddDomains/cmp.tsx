@@ -40,7 +40,7 @@ export const AddDomains = React.memo((props: AddDomainsProps) => {
   return (
     <>
       {fields.length > 0 && (
-        <NoisyContainer>
+        <NoisyContainer $type="dark">
           <div tw="flex flex-col gap-x-6 gap-y-4">
             {fields.map((field, index) => (
               <DomainItem

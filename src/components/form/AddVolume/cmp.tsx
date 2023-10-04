@@ -61,7 +61,7 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
         role in managing dependencies and providing a volume within your
         application.
       </p>
-      <NoisyContainer>
+      <NoisyContainer $type="dark">
         <div tw="py-4">
           <HiddenFileInput {...fileCtrl.field} {...fileCtrl.fieldState}>
             Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
@@ -112,7 +112,7 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
         managing dependencies within your application.
       </p>
 
-      <NoisyContainer>
+      <NoisyContainer $type="dark">
         <div>
           <TextInput
             {...mountPathCtrl.field}
@@ -163,7 +163,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
         or sessions. You can set up a customized storage solution tailored to
         your application&apos;s requirements.
       </p>
-      <NoisyContainer>
+      <NoisyContainer $type="dark">
         <div>
           <TextInput
             {...nameCtrl.field}
