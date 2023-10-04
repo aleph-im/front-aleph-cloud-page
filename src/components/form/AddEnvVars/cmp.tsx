@@ -13,6 +13,7 @@ const EnvVarItem = React.memo((props: EnvVarItemProps) => {
         <TextInput
           {...nameCtrl.field}
           {...nameCtrl.fieldState}
+          required
           placeholder="Name"
         />
       </div>
@@ -20,6 +21,7 @@ const EnvVarItem = React.memo((props: EnvVarItemProps) => {
         <TextInput
           {...valueCtrl.field}
           {...valueCtrl.fieldState}
+          required
           placeholder="Value"
         />
       </div>

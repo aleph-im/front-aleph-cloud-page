@@ -39,6 +39,7 @@ const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
             <TextInput
               {...keyCtrl.field}
               {...keyCtrl.fieldState}
+              required
               label={`Key #${index + 1}`}
               placeholder="AAAAB3NzaC1yc2EAAAAB ... B3NzaaC1=="
               disabled={!isNew}

@@ -72,6 +72,7 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
             <TextInput
               {...mountPathCtrl.field}
               {...mountPathCtrl.fieldState}
+              required
               label="Mount"
               placeholder="/mount/opt"
             />
@@ -117,6 +118,7 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
           <TextInput
             {...mountPathCtrl.field}
             {...mountPathCtrl.fieldState}
+            required
             label="Mount"
             placeholder="/mount/opt"
           />
@@ -125,6 +127,7 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
           <TextInput
             {...refHashCtrl.field}
             {...refHashCtrl.fieldState}
+            required
             label="Item hash"
             placeholder="3335ad270a571b..."
           />
@@ -169,6 +172,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
             {...nameCtrl.field}
             {...nameCtrl.fieldState}
             disabled={isFake}
+            required
             label="Volume name"
             placeholder="Redis volume"
           />
@@ -178,6 +182,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
             {...mountPathCtrl.field}
             {...mountPathCtrl.fieldState}
             disabled={isFake}
+            required
             label="Mount"
             placeholder="/mount/opt"
           />
@@ -189,6 +194,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
             disabled={isFake}
             value={sizeValue}
             onChange={sizeHandleChange}
+            required
             type="number"
             label="Size (GB)"
             placeholder="0"

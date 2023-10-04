@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextInput, ChipInput } from '@aleph-front/aleph-core'
+import { TextInput, ChipInput, FormLabel } from '@aleph-front/aleph-core'
 import { useAddNameAndTags } from '@/hooks/form/useAddNameAndTags'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 import NoisyContainer from '@/components/common/NoisyContainer'
@@ -11,11 +11,12 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
   return (
     <NoisyContainer>
       <div>
-        <div tw="mb-3">
+        <div tw="mb-2">
           <InfoTooltipButton
             plain
             my="bottom-left"
             at="bottom-right"
+            vAlign="top"
             tooltipContent={
               <div tw="text-left">
                 <div>
@@ -30,21 +31,27 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
               </div>
             }
           >
-            {entityName} name
+            <FormLabel
+              label={`${entityName} name`}
+              required
+              error={nameCtrl.fieldState.error}
+            />
           </InfoTooltipButton>
         </div>
         <TextInput
           {...nameCtrl.field}
           {...nameCtrl.fieldState}
+          required
           placeholder="Give it a name"
         />
       </div>
       <div tw="mt-4">
-        <div tw="mb-3">
+        <div tw="mb-2">
           <InfoTooltipButton
             plain
             my="bottom-left"
             at="bottom-right"
+            vAlign="top"
             tooltipContent={
               <div tw="text-left">
                 <div>
@@ -60,7 +67,7 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
               </div>
             }
           >
-            Tags
+            <FormLabel label="Tags" error={tagsCtrl.fieldState.error} />
           </InfoTooltipButton>
         </div>
         <ChipInput

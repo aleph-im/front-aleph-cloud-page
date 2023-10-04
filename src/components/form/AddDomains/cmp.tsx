@@ -13,6 +13,7 @@ const DomainItem = React.memo((props: DomainItemProps) => {
         <TextInput
           {...nameCtrl.field}
           {...nameCtrl.fieldState}
+          required
           placeholder="Name"
         />
       </div>

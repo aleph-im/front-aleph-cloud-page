@@ -9,6 +9,7 @@ export default function InfoTooltipButton({
   tooltipContent,
   plain,
   align = 'right',
+  vAlign = 'center',
   ...rest
 }: InfoTooltipButtonProps) {
   // @note: https://reactjs.org/link/uselayouteffect-ssr
@@ -26,9 +27,11 @@ export default function InfoTooltipButton({
     ? tw`!fixed !left-0 !top-0 !transform-none m-6 !z-20 !w-[calc(100% - 3rem)] !h-[calc(100% - 3rem)] !max-w-full`
     : tw``
 
-  const iconElm = (
-    <Icon name="info-circle" css={align === 'left' ? tw`-order-1` : ''} />
-  )
+  const alignClass = align === 'left' ? tw`-order-1` : ''
+  const vAlignClass = vAlign === 'top' ? tw`mb-2` : ''
+  const iconCss = [alignClass, vAlignClass]
+
+  const iconElm = <Icon name="info-circle" css={iconCss} />
 
   return (
     <>

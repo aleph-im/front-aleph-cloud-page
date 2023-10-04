@@ -4,6 +4,7 @@ import HiddenFileInput from '@/components/common/HiddenFileInput'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 import {
   CodeEditor,
+  FormLabel,
   Icon,
   Radio,
   RadioGroup,
@@ -51,10 +52,12 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                 <RadioGroup
                   {...langCtrl.field}
                   {...langCtrl.fieldState}
+                  required
                   direction="row"
                 >
                   <Radio label="Python 3.9" value={FunctionLangId.Python} />
                   <Radio label="Node.js 18" value={FunctionLangId.Node} />
+                  <Radio label="Other" value={FunctionLangId.Other} />
                 </RadioGroup>
               </NoisyContainer>
             </div>
@@ -62,6 +65,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
               <CodeEditor
                 {...textCtrl.field}
                 {...textCtrl.fieldState}
+                required
                 defaultValue={defaultCodeText}
                 defaultLanguage={langCtrl.field.value}
                 language={langCtrl.field.value}
@@ -77,10 +81,11 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
             </p>
             <NoisyContainer>
               <div tw="mb-10">
-                <div tw="mb-3">Language</div>
                 <RadioGroup
                   {...langCtrl.field}
                   {...langCtrl.fieldState}
+                  required
+                  label="Language"
                   direction="row"
                 >
                   <Radio label="Python 3.9" value={FunctionLangId.Python} />
@@ -89,58 +94,58 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                 </RadioGroup>
               </div>
               <div tw="mb-10">
-                <div tw="mb-3">
-                  <InfoTooltipButton
-                    plain
-                    my="top-left"
-                    at="top-right"
-                    tooltipContent={
-                      <div className="text-left tp-body1 fs-md">
-                        <div tw="mb-10">
-                          The entry point is the name of the script or file used
-                          to invoke your function. It&apos;s essentially the
-                          &apos;doorway&apos; to your code.
-                        </div>
-                        <div>
-                          <div>Examples:</div>
-                          <ul tw="list-disc pl-6">
-                            <li>
-                              <strong>Python:</strong> If you have a function
-                              named &apos;app&apos; in a file called
-                              &apos;main.py&apos;, your entry point would be
-                              main:app
-                            </li>
-                            <li>
-                              <strong>Node.js:</strong> If your primary file is
-                              &apos;index.js&apos;, then your entry point is
-                              simply index.js
-                            </li>
-                          </ul>
-                        </div>
-                        <div tw="mt-10">
-                          Different languages and frameworks may have unique
-                          conventions. Always refer to your language&apos;s
-                          documentation or the specific framework&apos;s
-                          guidance to determine the appropriate entry point for
-                          your code.
-                        </div>
+                <InfoTooltipButton
+                  plain
+                  my="top-left"
+                  at="top-right"
+                  vAlign="top"
+                  tooltipContent={
+                    <div className="text-left tp-body1 fs-md">
+                      <div tw="mb-10">
+                        The entry point is the name of the script or file used
+                        to invoke your function. It&apos;s essentially the
+                        &apos;doorway&apos; to your code.
                       </div>
-                    }
-                  >
-                    Define an entry point
-                  </InfoTooltipButton>
-                </div>
+                      <div>
+                        <div>Examples:</div>
+                        <ul tw="list-disc pl-6">
+                          <li>
+                            <strong>Python:</strong> If you have a function
+                            named &apos;app&apos; in a file called
+                            &apos;main.py&apos;, your entry point would be
+                            main:app
+                          </li>
+                          <li>
+                            <strong>Node.js:</strong> If your primary file is
+                            &apos;index.js&apos;, then your entry point is
+                            simply index.js
+                          </li>
+                        </ul>
+                      </div>
+                      <div tw="mt-10">
+                        Different languages and frameworks may have unique
+                        conventions. Always refer to your language&apos;s
+                        documentation or the specific framework&apos;s guidance
+                        to determine the appropriate entry point for your code.
+                      </div>
+                    </div>
+                  }
+                >
+                  <FormLabel label="Define an entry point" required />
+                </InfoTooltipButton>
                 <TextInput
                   {...entryPointCtrl.field}
                   {...entryPointCtrl.fieldState}
+                  required
                   placeholder="main:app, index.js, ..."
                 />
               </div>
               <div>
-                <div tw="mb-3">Upload your code</div>
                 <HiddenFileInput
                   {...fileCtrl.field}
                   {...fileCtrl.fieldState}
+                  required
+                  label="Upload your code"
                   accept=".zip,.sqsh"
                 >
                   Upload code <Icon name="arrow-up" tw="ml-4" />

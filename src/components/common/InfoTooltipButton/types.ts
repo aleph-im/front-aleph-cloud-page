@@ -6,4 +6,5 @@ export type InfoTooltipButtonProps = Omit<TooltipProps, 'targetRef'> & {
   tooltipContent: ReactNode
   plain?: boolean
   align?: 'left' | 'right'
+  vAlign?: 'top' | 'center'
 }
