@@ -7,6 +7,7 @@ import {
 } from './constants'
 import { convertByteUnits } from './utils'
 import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { FunctionLangId } from '@/domain/lang'
 
 export const requiredStringSchema = z
   .string()
@@ -179,7 +180,11 @@ export const addEnvVarSchema = z.object({
 export const addEnvVarsSchema = z.array(addEnvVarSchema)
 
 export const defaultCode = z.object({
-  lang: z.enum(['python', 'javascript']),
+  lang: z.enum([
+    FunctionLangId.Python,
+    FunctionLangId.Node,
+    FunctionLangId.Other,
+  ]),
 })
 
 export const addCodeSchema = z.discriminatedUnion('type', [
@@ -219,20 +224,6 @@ export const addSSHKeysSchema = z
 
 export const isPersistentSchema = z.coerce.boolean()
 
-export const functionRuntimeSchema = z
-  .object({
-    id: z.union([messageHashSchema, z.literal('custom')]),
-    custom: optionalStringSchema,
-  })
-  .superRefine(({ id, custom }, { addIssue }) => {
-    if (id !== 'custom') return true
-    const result = messageHashSchema.safeParse(custom, { path: ['custom'] })
-
-    if (!result.success) {
-      result.error.issues.forEach((issue) => addIssue(issue))
-    }
-  })
-
 export const instanceImageSchema = messageHashSchema
 
 export const addSpecsSchema = z
@@ -262,18 +253,24 @@ export const addSpecsSchema = z
 
 // FUNCTION
 
+export const addRuntimeSchema = optionalString(messageHashSchema)
+
 export const functionSchema = z
   .object({
     code: addCodeSchema,
-    runtime: functionRuntimeSchema,
     isPersistent: isPersistentSchema,
     specs: addSpecsSchema,
+    runtime: addRuntimeSchema.optional(),
     volumes: addVolumesSchema.optional(),
     envVars: addEnvVarsSchema.optional(),
     domains: addDomainsSchema.optional(),
     metadata: metadataSchema.optional(),
   })
   .merge(addNameAndTagsSchema)
+  .refine(
+    ({ code, runtime }) => !!runtime || code.lang !== FunctionLangId.Other,
+    { message: 'Invalid function runtime', path: ['runtime'] },
+  )
 
 // INSTANCE
 

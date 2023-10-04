@@ -36,3 +36,5 @@ export const FunctionRuntimes: Record<FunctionRuntimeId, FunctionRuntime> = {
     dist: 'ubuntu',
   },
 }
+
+export type CustomFunctionRuntimeField = string

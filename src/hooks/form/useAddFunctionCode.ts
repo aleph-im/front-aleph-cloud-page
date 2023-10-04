@@ -1,7 +1,8 @@
+import { FunctionLangId } from '@/domain/lang'
 import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
-const defaultText = `from fastapi import FastAPI
+export const defaultCodeText = `from fastapi import FastAPI
 
 app = FastAPI()
 @app.get("/")
@@ -9,15 +10,14 @@ async def root():
   return {"message": "Hello World"}
 `
 
-export const defaultCode: FunctionCodeField = {
-  lang: 'python',
-  type: 'text',
-  text: defaultText,
+export const defaultCode: Partial<FunctionCodeField> = {
+  lang: FunctionLangId.Python,
+  type: 'file',
   entrypoint: 'main:app',
 }
 
 export type FunctionCodeField = {
-  lang: 'python' | 'javascript'
+  lang: FunctionLangId
 } & (
   | {
       type: 'text'
@@ -60,7 +60,7 @@ export type UseAddFunctionCodeReturn = {
 export function useAddFunctionCode({
   name = 'code',
   control,
-  defaultValue = defaultCode,
+  defaultValue,
 }: UseAddFunctionCodeProps): UseAddFunctionCodeReturn {
   const langCtrl = useController({
     control,
@@ -89,7 +89,7 @@ export function useAddFunctionCode({
   const textCtrl = useController({
     control,
     name: `${name}.text`,
-    defaultValue: defaultCode?.text,
+    defaultValue: defaultValue?.text,
   })
 
   return {

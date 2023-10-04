@@ -2,10 +2,6 @@ import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import {
-  FunctionRuntimeField,
-  defaultFunctionRuntime,
-} from '../../form/useSelectFunctionRuntime'
-import {
   InstanceSpecsField,
   getDefaultSpecsOptions,
 } from '../../form/useSelectInstanceSpecs'
@@ -24,21 +20,21 @@ import { ProgramManager } from '@/domain/program'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { CustomFunctionRuntimeField } from '@/domain/runtime'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
-  runtime: FunctionRuntimeField
   specs: InstanceSpecsField
   isPersistent: boolean
+  runtime?: CustomFunctionRuntimeField
   volumes?: VolumeField[]
   envVars?: EnvVarField[]
   domains?: DomainField[]
 }
 
-export const defaultValues: Partial<NewFunctionFormState> = {
+const defaultValues: Partial<NewFunctionFormState> = {
   ...defaultNameAndTags,
-  code: { ...defaultCode },
-  runtime: { ...defaultFunctionRuntime },
+  code: { ...defaultCode } as FunctionCodeField,
   specs: { ...getDefaultSpecsOptions(false)[0] },
   isPersistent: false,
 }

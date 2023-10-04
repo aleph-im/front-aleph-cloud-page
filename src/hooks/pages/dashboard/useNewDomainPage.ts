@@ -107,7 +107,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     control,
     name: 'ref',
     rules: {
-      onChange(state) {
+      onChange() {
         setValue('target', AddDomainTarget.IPFS)
       },
     },

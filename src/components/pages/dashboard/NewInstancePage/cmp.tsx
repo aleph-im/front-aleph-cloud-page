@@ -13,7 +13,6 @@ import Container from '@/components/common/CenteredContainer'
 import { useNewInstancePage } from '@/hooks/pages/dashboard/useNewInstancePage'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer/cmp'
-import NoisyContainer from '@/components/common/NoisyContainer/styles'
 
 export default function NewInstancePage() {
   const {

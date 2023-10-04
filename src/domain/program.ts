@@ -20,18 +20,18 @@ import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { ProgramContent } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
-import { FunctionRuntimeId } from './runtime'
+import { CustomFunctionRuntimeField } from './runtime'
 import { FileManager } from './file'
 import { MessageManager } from './message'
 import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
-import { FunctionRuntimeField } from '@/hooks/form/useSelectFunctionRuntime'
 import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { functionSchema } from '@/helpers/schemas'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
+import { FunctionLangId, FunctionLanguage } from './lang'
 
 // @todo: Export this type from sdk and remove here
 export declare type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<
@@ -82,8 +82,8 @@ export type AddProgram = Omit<
   NameAndTagsField & {
     isPersistent: boolean
     code: FunctionCodeField
-    runtime: FunctionRuntimeField
     specs: InstanceSpecsField
+    runtime?: CustomFunctionRuntimeField
     envVars?: EnvVarField[]
     volumes?: VolumeField[]
     domains?: Omit<DomainField, 'ref'>[]
@@ -261,7 +261,7 @@ export class ProgramManager
     const variables = this.parseEnvVars(envVars)
     const { memory, vcpus } = this.parseSpecs(specs)
     const metadata = this.parseMetadata(name, tags, newProgram.metadata)
-    const runtime = this.parseRuntime(newProgram.runtime)
+    const runtime = this.parseRuntime(newProgram)
     const volumes = await this.parseVolumes(newProgram.volumes)
     const code = await this.parseCode(newProgram.code)
 
@@ -279,10 +279,13 @@ export class ProgramManager
     }
   }
 
-  protected parseRuntime(runtime: FunctionRuntimeField): string {
-    const ref =
-      runtime.id !== FunctionRuntimeId.Custom ? runtime.id : runtime.custom
-    return ref as string
+  protected parseRuntime({ code, runtime }: AddProgram): string {
+    if (runtime) return runtime
+
+    if (code.lang === FunctionLangId.Other)
+      throw new Error('Custom runtime should be added')
+
+    return FunctionLanguage[code.lang].runtime
   }
 
   // @todo: Type not exported from SDK...

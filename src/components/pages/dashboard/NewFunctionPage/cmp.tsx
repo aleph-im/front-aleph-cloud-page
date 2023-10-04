@@ -8,7 +8,6 @@ import AddVolumes from '@/components/form/AddVolumes'
 import AddEnvVars from '@/components/form/AddEnvVars'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
-import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime'
 import Container from '@/components/common/CenteredContainer'
 import AddFunctionCode from '@/components/form/AddFunctionCode'
 import SelectFunctionPersistence from '@/components/form/SelectFunctionPersistence'
@@ -16,6 +15,7 @@ import BorderBox from '@/components/common/BorderBox'
 import { convertByteUnits } from '@/helpers/utils'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
+import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime/cmp'
 
 export default function NewFunctionPage() {
   const {
@@ -74,19 +74,6 @@ export default function NewFunctionPage() {
       <section tw="px-0 py-6 md:py-10">
         <Container>
           <CompositeTitle as="h2" number="2">
-            Select runtime
-          </CompositeTitle>
-          <p tw="mb-6">
-            Select the optimal environment for executing your functions,
-            tailored to your specific requirements. Below are the available
-            options
-          </p>
-          <SelectFunctionRuntime name="runtime" control={control} />
-        </Container>
-      </section>
-      <section tw="px-0 py-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="3">
             Type of scheduling
           </CompositeTitle>
           <p tw="mb-6">
@@ -99,7 +86,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="4">
+          <CompositeTitle as="h2" number="3">
             Select an instance size
           </CompositeTitle>
           <p tw="mb-6">
@@ -117,7 +104,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="5">
+          <CompositeTitle as="h2" number="4">
             Name and tags
           </CompositeTitle>
           <p tw="mb-6">
@@ -132,7 +119,7 @@ export default function NewFunctionPage() {
 
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="6">
+          <CompositeTitle as="h2" number="5">
             Advanced Configuration Options
           </CompositeTitle>
           <p tw="mb-6">
@@ -141,6 +128,11 @@ export default function NewFunctionPage() {
             specific needs.
           </p>
           <div tw="px-0 my-6">
+            <div tw="mb-4">
+              <ToggleContainer label="Use Custom Runtime">
+                <SelectCustomFunctionRuntime name="runtime" control={control} />
+              </ToggleContainer>
+            </div>
             <div tw="mb-4">
               <ToggleContainer label="Add Volume">
                 <TextGradient forwardedAs="h2" type="h6" color="main0">

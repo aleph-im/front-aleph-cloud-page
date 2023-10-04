@@ -5,12 +5,7 @@ import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/aleph-core'
 import { useManageInstance } from '@/hooks/pages/dashboard/manage/useManageInstance'
-import {
-  convertByteUnits,
-  ellipseAddress,
-  ellipseText,
-  humanReadableSize,
-} from '@/helpers/utils'
+import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import StatusLabel from '@/components/common/StatusLabel'

@@ -11,7 +11,7 @@ import VolumeList from '../VolumeList/cmp'
 import StatusLabel from '@/components/common/StatusLabel/cmp'
 
 export default function ManageFunction() {
-  const { func, handleCopyHash, handleDelete, handleDownload, copyAndNotify } =
+  const { func, handleCopyHash, handleDelete, copyAndNotify } =
     useManageFunction()
 
   if (!func) {

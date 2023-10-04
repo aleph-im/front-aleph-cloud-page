@@ -9,7 +9,6 @@ import {
 } from './program'
 import { indexerSchema } from '@/helpers/schemas'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
-import { FunctionRuntimeId } from './runtime'
 import { getDefaultSpecsOptions } from '@/hooks/form/useSelectInstanceSpecs'
 import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
@@ -20,6 +19,7 @@ import { VolumeType } from './volume'
 import { IndexerBlockchainNetworkField } from '@/hooks/form/useAddIndexerBlockchainNetworks'
 import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccounts'
 import { BlockchainDefaultABIUrl } from '@/helpers/constants'
+import { FunctionLangId, FunctionLanguage } from './lang'
 
 export type AddIndexer = NameAndTagsField & {
   networks: IndexerBlockchainNetworkField[]
@@ -48,15 +48,15 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
     const isPersistent = true
     const metadata = { indexer: true }
     const specs = { ...getDefaultSpecsOptions(true)[1] }
-    const runtime = { id: FunctionRuntimeId.Runtime3 } // @note: Nodejs + nvm
     const code: FunctionCodeField = {
+      lang: FunctionLangId.Node,
       type: 'ref',
-      lang: 'javascript',
       encoding: Encoding.squashfs,
       entrypoint: 'dist/run.js',
       programRef:
         '32c3ac6e4810a18d3d3f64cb4dd6b2eb111993e9f9832124d3ad5efba93ce13e', // @note: token program
     }
+    const runtime = FunctionLanguage[code.lang].runtime
     const volumes: VolumeField[] = [
       {
         volumeType: VolumeType.Persistent,
