@@ -36,17 +36,19 @@ export const Header = () => {
   }
 
   const provider = () => {
-    window.ethereum.on('accountsChanged', function () {
+    window.ethereum?.on('accountsChanged', function () {
       connect()
     })
 
     return window.ethereum
   }
 
+  // @todo: handle this on the provider method of the WalletConnect component
+  // the provider function should initialize the provider and return a dispose function
   useEffect(() => {
     provider()
     return () => {
-      window.ethereum.removeListener('accountsChanged', () => {
+      window.ethereum?.removeListener('accountsChanged', () => {
         connect()
       })
     }
@@ -144,7 +146,7 @@ export const Header = () => {
                             color: 'orange',
                             icon: 'circle',
                             name: 'Metamask',
-                            provider: () => provider(),
+                            provider,
                           },
                         ],
                       },
