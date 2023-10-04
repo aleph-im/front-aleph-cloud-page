@@ -133,7 +133,7 @@ export default function HomePage() {
                 <strong>Aleph.im&apos;s infrastructure</strong>.
               </p>
               <div tw="flex gap-6 flex-wrap items-center">
-                <Button
+                {/* <Button
                   kind="neon"
                   variant="primary"
                   size="big"
@@ -141,7 +141,7 @@ export default function HomePage() {
                   onClick={navigate.indexer}
                 >
                   Create Indexer
-                </Button>
+                </Button> */}
                 <Button
                   forwardedAs="a"
                   href="https://bit.ly/3GAAjii"
