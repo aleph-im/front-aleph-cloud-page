@@ -1,8 +1,8 @@
-import { Switch, useBounds } from '@aleph-front/aleph-core'
+import { Switch } from '@aleph-front/aleph-core'
 import NoisyContainer from '../NoisyContainer'
 import { ToggleContainerProps } from './types'
 import { StyledToggleContainer } from './styles'
-import { ChangeEvent, useCallback, useMemo, useRef, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
 
 export default function ToggleContainer({
   label,
@@ -16,18 +16,58 @@ export default function ToggleContainer({
     [setOpen],
   )
 
+  const wrapRef = useRef<HTMLDivElement>(null)
   const ref = useRef<HTMLDivElement>(null)
-  const [bounds] = useBounds(undefined, ref, [ref])
 
-  const $height = useMemo(
-    () => `${open ? bounds?.height || 0 : 0}px`,
-    [bounds?.height, open],
-  )
+  const [height, setHeight] = useState(open ? 'auto' : '0')
+
+  useEffect(() => {
+    let openIt: any
+    let closeIt: any
+
+    function getHeights() {
+      const divHeight = ref?.current?.getBoundingClientRect()?.height || 0
+      const wrapHeight = wrapRef?.current?.getBoundingClientRect()?.height || 0
+
+      return [divHeight, wrapHeight]
+    }
+
+    async function openInterval() {
+      const [divHeight, wrapHeight] = getHeights()
+      if (wrapHeight < divHeight) return
+
+      setHeight('auto')
+      openIt && clearInterval(openIt)
+    }
+
+    async function closeInterval() {
+      const [divHeight, wrapHeight] = getHeights()
+      if (wrapHeight < divHeight) return
+
+      setHeight('0')
+      closeIt && clearInterval(closeIt)
+    }
+
+    const [divHeight] = getHeights()
+
+    if (open) {
+      setHeight(`${divHeight}px`)
+      openIt = setInterval(openInterval, 700)
+    } else {
+      setHeight(`${divHeight}px`)
+      closeIt = setInterval(closeInterval, 0)
+    }
+
+    return () => {
+      openIt && clearInterval(openIt)
+      closeIt && clearInterval(closeIt)
+    }
+  }, [open])
 
   return (
     <NoisyContainer {...rest}>
       <Switch label={label} onChange={handleChange} checked={open} />
-      <StyledToggleContainer $height={$height}>
+      <StyledToggleContainer $height={height} ref={wrapRef}>
         <div tw="mt-4 py-6" ref={ref}>
           {children}
         </div>
