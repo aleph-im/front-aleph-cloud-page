@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import {
   Button,
   Icon,
@@ -5,13 +7,11 @@ import {
   NavbarLink,
   NavbarLinkList,
   WalletPicker,
+  useClickOutside,
 } from '@aleph-front/aleph-core'
-import Link from 'next/link'
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 import { useHeader } from '@/hooks/pages/useHeader'
-import { useEffect, useRef } from 'react'
-import { useOnClickOutside } from 'usehooks-ts'
 import { useConnect } from '@/hooks/common/useConnect'
 
 export const Header = () => {
@@ -26,10 +26,12 @@ export const Header = () => {
   } = useHeader()
 
   const { connect } = useConnect()
-  const divRef = useRef<HTMLDivElement | null>(null)
-  useOnClickOutside(divRef, () => {
+
+  const divRef = useRef<HTMLDivElement>(null)
+
+  useClickOutside(() => {
     if (displayWalletPicker) setDisplayWalletPicker(false)
-  })
+  }, [divRef])
 
   const handleDisplayWalletPicker = () => {
     setDisplayWalletPicker(!displayWalletPicker)
@@ -54,9 +56,21 @@ export const Header = () => {
     }
   }, [])
 
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleToggleOpen = useCallback((open: boolean) => {
+    setIsOpen(open)
+  }, [])
+
+  const handleCloseMenu = useCallback(() => {
+    setIsOpen(false)
+  }, [setIsOpen])
+
   return (
     <StyledHeader>
       <StyledNavbar
+        open={isOpen}
+        onToggle={handleToggleOpen}
         logo={
           <Link href="/">
             <Logo />
@@ -79,7 +93,7 @@ export const Header = () => {
           )
         }
       >
-        <NavbarLinkList withSlash>
+        <NavbarLinkList withSlash onClick={handleCloseMenu}>
           <NavbarLink isActive={isOnPath('/')}>
             <Link key="solutions" href="/">
               Solutions
