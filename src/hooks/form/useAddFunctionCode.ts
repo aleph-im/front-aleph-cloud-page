@@ -1,4 +1,5 @@
 import { FunctionLangId } from '@/domain/lang'
+import { useResponsiveMax } from '@aleph-front/aleph-core'
 import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
@@ -55,6 +56,7 @@ export type UseAddFunctionCodeReturn = {
   fileCtrl: UseControllerReturn<any, any>
   textCtrl: UseControllerReturn<any, any>
   entryPointCtrl: UseControllerReturn<any, any>
+  radioDirection: 'row' | 'column'
 }
 
 export function useAddFunctionCode({
@@ -89,8 +91,11 @@ export function useAddFunctionCode({
   const textCtrl = useController({
     control,
     name: `${name}.text`,
-    defaultValue: defaultValue?.text,
+    defaultValue: defaultValue?.text || defaultCodeText,
   })
+
+  const isMobile = useResponsiveMax('sm')
+  const radioDirection = isMobile ? 'column' : 'row'
 
   return {
     langCtrl,
@@ -98,5 +103,6 @@ export function useAddFunctionCode({
     fileCtrl,
     textCtrl,
     entryPointCtrl,
+    radioDirection,
   }
 }

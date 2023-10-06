@@ -19,8 +19,14 @@ import {
 import { FunctionLangId } from '@/domain/lang'
 
 export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
-  const { langCtrl, typeCtrl, textCtrl, fileCtrl, entryPointCtrl } =
-    useAddFunctionCode(props)
+  const {
+    langCtrl,
+    typeCtrl,
+    textCtrl,
+    fileCtrl,
+    entryPointCtrl,
+    radioDirection,
+  } = useAddFunctionCode(props)
 
   return (
     <>
@@ -53,7 +59,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                   {...langCtrl.field}
                   {...langCtrl.fieldState}
                   required
-                  direction="row"
+                  direction={radioDirection}
                 >
                   <Radio label="Python 3.9" value={FunctionLangId.Python} />
                   <Radio label="Node.js 18" value={FunctionLangId.Node} />
@@ -86,7 +92,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                   {...langCtrl.fieldState}
                   required
                   label="Language"
-                  direction="row"
+                  direction={radioDirection}
                 >
                   <Radio label="Python 3.9" value={FunctionLangId.Python} />
                   <Radio label="Node.js 18" value={FunctionLangId.Node} />
