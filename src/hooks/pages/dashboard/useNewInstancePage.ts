@@ -47,7 +47,7 @@ export const defaultValues: Partial<NewInstanceFormState> = {
   volumes: [
     {
       volumeType: VolumeType.Persistent,
-      name: 'System',
+      name: 'System Volume',
       mountPath: '/',
       size: specs.storage,
       isFake: true,

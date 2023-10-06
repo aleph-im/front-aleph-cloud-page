@@ -161,10 +161,20 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
   return (
     <>
       <p tw="mb-6">
-        Create and configure persistent storage for your web3 functions,
-        enabling your application to maintain data across multiple invocations
-        or sessions. You can set up a customized storage solution tailored to
-        your application&apos;s requirements.
+        {isFake ? (
+          <>
+            This system volume is included with your setup. You can easily
+            expand your storage capacity to meet your application&apos;s
+            requirements by adding additional volumes below.
+          </>
+        ) : (
+          <>
+            Create and configure persistent storage for your web3 functions,
+            enabling your application to maintain data across multiple
+            invocations or sessions. You can set up a customized storage
+            solution tailored to your application&apos;s requirements.
+          </>
+        )}
       </p>
       <NoisyContainer $type="dark">
         <div>
@@ -219,17 +229,8 @@ export const AddVolume = React.memo((props: AddVolumeProps) => {
 
   const Cmp = useMemo(() => CmpMap[volumeType], [volumeType])
 
-  const tabs = useMemo(() => {
-    if (isFake) {
-      return [
-        {
-          id: VolumeType.Persistent,
-          name: 'System Volume',
-        },
-      ]
-    }
-
-    return [
+  const tabs = useMemo(
+    () => [
       {
         id: VolumeType.New,
         name: 'New volume',
@@ -242,19 +243,22 @@ export const AddVolume = React.memo((props: AddVolumeProps) => {
         id: VolumeType.Persistent,
         name: 'Persistent Storage',
       },
-    ]
-  }, [isFake])
+    ],
+    [],
+  )
 
   return (
     <>
-      <div tw="px-0 pt-6 pb-3">
-        <Tabs
-          selected={volumeType}
-          align="left"
-          onTabChange={volumeTypeCtrl.field.onChange}
-          tabs={tabs}
-        />
-      </div>
+      {!isFake && (
+        <div tw="px-0 pt-6 pb-3">
+          <Tabs
+            selected={volumeType}
+            align="left"
+            onTabChange={volumeTypeCtrl.field.onChange}
+            tabs={tabs}
+          />
+        </div>
+      )}
 
       <div role="tabpanel">
         {<Cmp {...rest} defaultValue={defaultValue as any} />}
