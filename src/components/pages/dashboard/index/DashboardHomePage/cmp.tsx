@@ -38,38 +38,32 @@ export default function DashboardHomePage() {
               {
                 id: 'all',
                 name: 'All',
-                label: getLabel(all),
-                labelPosition: 'bottom',
+                label: { label: getLabel(all), position: 'bottom' },
               },
               {
                 id: 'function',
                 name: 'Functions',
-                label: getLabel(functions),
-                labelPosition: 'bottom',
+                label: { label: getLabel(functions), position: 'bottom' },
               },
               {
                 id: 'instance',
                 name: 'Instances',
-                label: getLabel(instances, true),
-                labelPosition: 'top',
+                label: { label: getLabel(instances, true), position: 'top' },
               },
               {
                 id: 'volume',
                 name: 'Immutable Volumes',
-                label: getLabel(volumes),
-                labelPosition: 'bottom',
+                label: { label: getLabel(volumes), position: 'bottom' },
               },
               {
                 id: 'ssh',
                 name: 'SSH Keys',
-                label: getLabel(sshKeys, true),
-                labelPosition: 'top',
+                label: { label: getLabel(sshKeys, true), position: 'top' },
               },
               {
                 id: 'domain',
                 name: 'Domains',
-                label: getLabel(domains, true),
-                labelPosition: 'top',
+                label: { label: getLabel(domains, true), position: 'top' },
               },
             ]}
             onTabChange={setTabId}

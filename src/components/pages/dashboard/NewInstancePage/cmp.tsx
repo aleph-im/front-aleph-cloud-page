@@ -41,15 +41,13 @@ export default function NewInstancePage() {
               {
                 id: 'instance',
                 name: 'Instance',
-                label: 'BETA',
-                labelPosition: 'top',
+                label: { label: 'BETA', position: 'top' },
               },
               {
                 id: 'confidential',
                 name: 'Confidential',
                 disabled: true,
-                label: 'SOON',
-                labelPosition: 'top',
+                label: { label: 'SOON', position: 'top' },
               },
             ]}
             tw="overflow-auto"

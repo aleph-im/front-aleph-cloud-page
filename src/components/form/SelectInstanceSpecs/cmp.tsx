@@ -17,6 +17,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     const cols = [
       {
         label: 'Cores',
+        width: '100%',
         sortable: true,
         sortBy: (row: SpecsDetail) => row.specs.cpu,
         render: (row: SpecsDetail) => (
