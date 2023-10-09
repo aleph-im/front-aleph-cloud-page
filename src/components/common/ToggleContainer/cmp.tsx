@@ -21,54 +21,52 @@ export default function ToggleContainer({
 
   const [height, setHeight] = useState(open ? 'auto' : '0')
 
+  function getHeights() {
+    const divHeight = ref?.current?.getBoundingClientRect()?.height || 0
+    const wrapHeight = wrapRef?.current?.getBoundingClientRect()?.height || 0
+
+    return [divHeight, wrapHeight]
+  }
+
   useEffect(() => {
-    let openIt: any
-    let closeIt: any
+    let frame: number
 
-    function getHeights() {
-      const divHeight = ref?.current?.getBoundingClientRect()?.height || 0
-      const wrapHeight = wrapRef?.current?.getBoundingClientRect()?.height || 0
-
-      return [divHeight, wrapHeight]
+    function clear() {
+      frame && cancelAnimationFrame(frame)
+      wrapRef?.current?.removeEventListener('transitionend', openFn)
     }
 
-    async function openInterval() {
-      const [divHeight, wrapHeight] = getHeights()
-      if (wrapHeight < divHeight) return
-
+    async function openFn() {
       setHeight('auto')
-      openIt && clearInterval(openIt)
     }
 
-    async function closeInterval() {
-      const [divHeight, wrapHeight] = getHeights()
-      if (wrapHeight < divHeight) return
-
+    async function closeFn() {
       setHeight('0')
-      closeIt && clearInterval(closeIt)
     }
 
-    const [divHeight] = getHeights()
+    const [divHeight, wrapHeight] = getHeights()
+
+    clear()
 
     if (open) {
-      setHeight(`${divHeight}px`)
-      openIt = setInterval(openInterval, 700)
+      setHeight(() => {
+        wrapRef?.current?.addEventListener('transitionend', openFn)
+        return `${divHeight}px`
+      })
     } else {
-      setHeight(`${divHeight}px`)
-      closeIt = setInterval(closeInterval, 0)
+      setHeight(() => {
+        frame = requestAnimationFrame(closeFn)
+        return `${wrapHeight}px`
+      })
     }
 
-    return () => {
-      openIt && clearInterval(openIt)
-      closeIt && clearInterval(closeIt)
-    }
+    return clear
   }, [open])
-
   return (
     <NoisyContainer {...rest}>
       <Switch label={label} onChange={handleChange} checked={open} />
       <StyledToggleContainer $height={height} ref={wrapRef}>
-        <div tw="mt-4 py-6" ref={ref}>
+        <div tw="pt-10 pb-6" ref={ref}>
           {children}
         </div>
       </StyledToggleContainer>
