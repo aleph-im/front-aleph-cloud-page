@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   Button,
@@ -7,64 +6,26 @@ import {
   NavbarLink,
   NavbarLinkList,
   WalletPicker,
-  useClickOutside,
 } from '@aleph-front/aleph-core'
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 import { useHeader } from '@/hooks/pages/useHeader'
-import { useConnect } from '@/hooks/common/useConnect'
 
 export const Header = () => {
   const {
     theme,
-    handleConnect,
     account,
-    isOnPath,
     displayWalletPicker,
-    setDisplayWalletPicker,
     accountBalance,
+    isOpen,
+    divRef,
+    isOnPath,
+    handleToggleOpen,
+    handleCloseMenu,
+    handleConnect,
+    handleDisplayWalletPicker,
+    provider,
   } = useHeader()
-
-  const { connect } = useConnect()
-
-  const divRef = useRef<HTMLDivElement>(null)
-
-  useClickOutside(() => {
-    if (displayWalletPicker) setDisplayWalletPicker(false)
-  }, [divRef])
-
-  const handleDisplayWalletPicker = () => {
-    setDisplayWalletPicker(!displayWalletPicker)
-  }
-
-  const provider = () => {
-    window.ethereum?.on('accountsChanged', function () {
-      connect()
-    })
-
-    return window.ethereum
-  }
-
-  // @todo: handle this on the provider method of the WalletConnect component
-  // the provider function should initialize the provider and return a dispose function
-  useEffect(() => {
-    provider()
-    return () => {
-      window.ethereum?.removeListener('accountsChanged', () => {
-        connect()
-      })
-    }
-  }, [])
-
-  const [isOpen, setIsOpen] = useState(false)
-
-  const handleToggleOpen = useCallback((open: boolean) => {
-    setIsOpen(open)
-  }, [])
-
-  const handleCloseMenu = useCallback(() => {
-    setIsOpen(false)
-  }, [setIsOpen])
 
   return (
     <StyledHeader>
