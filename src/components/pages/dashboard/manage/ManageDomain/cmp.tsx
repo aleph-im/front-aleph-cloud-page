@@ -216,13 +216,12 @@ export default function ManageDomain() {
                     </div>
 
                     <div tw="my-5">
-                      <div className="tp-info text-main0">ERROR</div>
-                      <GrayText>{status.err}</GrayText>
+                      <div className="tp-info text-main0">FINAL STEP</div>
+                      <GrayText>After configuring the domain records you can retry to link them again here</GrayText>
                     </div>
 
                     <div tw="my-5">
-                      <div className="tp-info text-main0">TIPS</div>
-                      <GrayText>{status.help}</GrayText>
+                      <Button size="regular" variant="secondary" color="main0" kind="neon">Retry</Button>
                     </div>
                   </>
                 )}
