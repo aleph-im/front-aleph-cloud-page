@@ -14,7 +14,7 @@ import {
 import { Container, GrayText, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import StatusLabel from '@/components/common/StatusLabel'
-import { ThreeDots } from 'react-loader-spinner'
+import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import Link from 'next/link'
 
@@ -59,11 +59,20 @@ export default function ManageInstance() {
               <StatusLabel
                 variant={
                   instance.confirmed && status?.vm_ipv6
-                    ? 'running'
-                    : 'confirming'
+                    ? 'success'
+                    : 'warning'
                 }
                 tw="ml-4"
-              />
+              >
+                { 
+                  (instance.confirmed && status?.vm_ipv6) ?
+                    'READY' :
+                    <div tw="flex items-center">
+                      <div tw="mr-2">CONFIRMING</div>
+                      <RotatingLines strokeColor={theme.color.base2} width=".8rem" />
+                    </div>
+                }
+              </StatusLabel>
             </div>
             <div>
               <Button

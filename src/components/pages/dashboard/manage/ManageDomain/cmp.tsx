@@ -46,9 +46,11 @@ export default function ManageDomain() {
               <Icon name="input-text" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
               <StatusLabel
-                variant={domain.confirmed ? 'ready' : 'confirming'}
+                variant={status?.status ? 'success' : 'error'}
                 tw="ml-4"
-              />
+              >
+                DOMAIN RECORDS NOT CONFIGURED
+              </StatusLabel>
             </div>
             <div>
               <Button
