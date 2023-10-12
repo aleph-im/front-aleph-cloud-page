@@ -20,7 +20,7 @@ import StatusLabel from '@/components/common/StatusLabel'
 import ButtonLink from '@/components/common/ButtonLink'
 
 export default function ManageDomain() {
-  const { domain, status, refEntity, account, handleDelete, handleCopyRef } =
+  const { domain, status, refEntity, account, handleDelete, handleCopyRef, handleRetry } =
     useManageDomain()
 
   if (!domain) {
@@ -221,7 +221,7 @@ export default function ManageDomain() {
                     </div>
 
                     <div tw="my-5">
-                      <Button size="regular" variant="secondary" color="main0" kind="neon">Retry</Button>
+                      <Button onClick={handleRetry} size="regular" variant="secondary" color="main0" kind="neon">Retry</Button>
                     </div>
                   </>
                 )}

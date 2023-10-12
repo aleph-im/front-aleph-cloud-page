@@ -23,7 +23,7 @@ export type DomainAggregate = Record<string, DomainAggregateItem | null>
 export type AddDomain = {
   name: string
   target: AddDomainTarget
-  programType: EntityType.Instance | EntityType.Program
+  programType?: EntityType.Instance | EntityType.Program
   ref: string
 }
 
@@ -71,6 +71,25 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   async get(id: string): Promise<Domain | undefined> {
     const entities = await this.getAll()
     return entities.find((entity) => entity.id === id)
+  }
+
+  async retry(domain: Domain) {
+    const content = {
+      message_id: domain.ref,
+      type: domain.target,
+      programType: domain.programType,
+    }
+
+    try {
+      await aggregate.Publish({
+        account: this.account,
+        key: this.key,
+        channel: this.channel,
+        content,
+      })
+    } catch (err) {
+      throw E_.RequestFailed(err)
+    }
   }
 
   async add(
