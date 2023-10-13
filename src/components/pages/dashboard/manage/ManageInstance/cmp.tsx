@@ -58,20 +58,21 @@ export default function ManageInstance() {
               <div className="tp-body2">{name}</div>
               <StatusLabel
                 variant={
-                  instance.confirmed && status?.vm_ipv6
-                    ? 'success'
-                    : 'warning'
+                  instance.confirmed && status?.vm_ipv6 ? 'success' : 'warning'
                 }
                 tw="ml-4"
               >
-                { 
-                  (instance.confirmed && status?.vm_ipv6) ?
-                    'READY' :
-                    <div tw="flex items-center">
-                      <div tw="mr-2">CONFIRMING</div>
-                      <RotatingLines strokeColor={theme.color.base2} width=".8rem" />
-                    </div>
-                }
+                {instance.confirmed && status?.vm_ipv6 ? (
+                  'READY'
+                ) : (
+                  <div tw="flex items-center">
+                    <div tw="mr-2">CONFIRMING</div>
+                    <RotatingLines
+                      strokeColor={theme.color.base2}
+                      width=".8rem"
+                    />
+                  </div>
+                )}
               </StatusLabel>
             </div>
             <div>

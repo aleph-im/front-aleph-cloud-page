@@ -9,7 +9,7 @@ export const StatusLabel = React.memo(
 
     return (
       <Label {...rest} variant={variant}>
-        { children }
+        {children}
       </Label>
     )
   },

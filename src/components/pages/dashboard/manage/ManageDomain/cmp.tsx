@@ -20,8 +20,15 @@ import StatusLabel from '@/components/common/StatusLabel'
 import ButtonLink from '@/components/common/ButtonLink'
 
 export default function ManageDomain() {
-  const { domain, status, refEntity, account, handleDelete, handleCopyRef, handleRetry } =
-    useManageDomain()
+  const {
+    domain,
+    status,
+    refEntity,
+    account,
+    handleDelete,
+    handleCopyRef,
+    handleRetry,
+  } = useManageDomain()
 
   if (!domain) {
     return (
@@ -217,11 +224,22 @@ export default function ManageDomain() {
 
                     <div tw="my-5">
                       <div className="tp-info text-main0">FINAL STEP</div>
-                      <GrayText>After configuring the domain records you can retry to link them again here</GrayText>
+                      <GrayText>
+                        After configuring the domain records you can retry to
+                        link them again here
+                      </GrayText>
                     </div>
 
                     <div tw="my-5">
-                      <Button onClick={handleRetry} size="regular" variant="secondary" color="main0" kind="neon">Retry</Button>
+                      <Button
+                        onClick={handleRetry}
+                        size="regular"
+                        variant="secondary"
+                        color="main0"
+                        kind="neon"
+                      >
+                        Retry
+                      </Button>
                     </div>
                   </>
                 )}
