@@ -8,10 +8,14 @@ import { useManageVolume } from '@/hooks/pages/dashboard/manage/useManageVolume'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import StatusLabel from '@/components/common/StatusLabel'
+import { RotatingLines } from 'react-loader-spinner'
+import { useTheme } from 'styled-components'
 
 export default function ManageVolume() {
   const { volume, handleCopyHash, handleDelete, handleDownload } =
     useManageVolume()
+
+  const theme = useTheme()
 
   if (!volume) {
     return (
@@ -36,9 +40,21 @@ export default function ManageVolume() {
               <Icon name="floppy-disk" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
               <StatusLabel
-                variant={volume.confirmed ? 'ready' : 'confirming'}
+                variant={volume.confirmed ? 'success' : 'warning'}
                 tw="ml-4"
-              />
+              >
+                {volume.confirmed ? (
+                  'READY'
+                ) : (
+                  <div tw="flex items-center">
+                    <div tw="mr-2">CONFIRMING</div>
+                    <RotatingLines
+                      strokeColor={theme.color.base2}
+                      width=".8rem"
+                    />
+                  </div>
+                )}
+              </StatusLabel>
             </div>
             <div>
               <Button

@@ -8,10 +8,14 @@ import { useManageSSHKey } from '@/hooks/pages/dashboard/manage/useManageSSHKey'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import StatusLabel from '@/components/common/StatusLabel'
+import { RotatingLines } from 'react-loader-spinner'
+import { useTheme } from 'styled-components'
 
 export default function ManageSSHKey() {
   const { sshKey, handleCopyKey, handleCopyLabel, handleDelete } =
     useManageSSHKey()
+
+  const theme = useTheme()
 
   if (!sshKey) {
     return (
@@ -36,9 +40,21 @@ export default function ManageSSHKey() {
               <Icon name="key" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
               <StatusLabel
-                variant={sshKey.confirmed ? 'ready' : 'confirming'}
+                variant={sshKey.confirmed ? 'success' : 'warning'}
                 tw="ml-4"
-              />
+              >
+                {sshKey.confirmed ? (
+                  'READY'
+                ) : (
+                  <div tw="flex items-center">
+                    <div tw="mr-2">CONFIRMING</div>
+                    <RotatingLines
+                      strokeColor={theme.color.base2}
+                      width=".8rem"
+                    />
+                  </div>
+                )}
+              </StatusLabel>
             </div>
             <div>
               <Button
