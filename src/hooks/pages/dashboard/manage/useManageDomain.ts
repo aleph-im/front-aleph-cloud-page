@@ -80,6 +80,7 @@ export function useManageDomain(): ManageDomain {
       await manager.retry(domain)
 
       onSuccess(true)
+      router.replace('/dashboard')
     } catch (e) {
       onError(e as Error)
     }
