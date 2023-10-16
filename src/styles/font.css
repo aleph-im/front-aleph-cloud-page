@@ -1,6 +1,0 @@
-/* 
-  @note: This is a temporal workaround
-  https://styled-components.com/docs/faqs#note-regarding-css-import-and-createglobalstyle 
-  https://github.com/styled-components/styled-components/issues/3038
-*/
-@import 'https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;1,400;1,700&family=Source+Code+Pro:wght@400;700&family=Rubik:ital,wght@0,500;1,600;1,800&display=swap';
