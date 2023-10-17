@@ -1,9 +1,6 @@
 import { createGlobalStyle } from 'styled-components'
-import { fontAwesomeCss } from './fa'
 
 export const GlobalStylesOverride = createGlobalStyle`
-  ${fontAwesomeCss}
-
   body, #__next {
     display: flex;
     flex-direction: column;
