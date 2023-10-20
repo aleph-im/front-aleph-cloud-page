@@ -10,7 +10,6 @@ import {
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 import { useHeader } from '@/hooks/pages/useHeader'
-import { Wallet } from 'ethers'
 
 export const Header = () => {
   const {
