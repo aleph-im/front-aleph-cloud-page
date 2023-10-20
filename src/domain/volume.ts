@@ -123,13 +123,13 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   /**
-   * Returns the size of a volume in mb
+   * Returns the price per mb of a volume
    */
   static getVolumeMiBPrice(volume: Volume | AddVolume): number {
-    if (volume.volumeType !== VolumeType.New) return 20
-    if (volume.mountPath) return 20
-
-    return 1 / 3
+    // Volume is always 20 ALEPH per mb
+    // If it's a new volume you also pay for the storage (1/3 ALEPH per mb)
+    if (volume.volumeType === VolumeType.New) return 20 + 1 / 3
+    return 20
   }
 
   // @note: The algorithm for calculating the cost per volume is as follows:
