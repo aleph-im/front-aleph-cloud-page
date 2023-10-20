@@ -10,6 +10,7 @@ import {
 import { StyledHeader, StyledButton, StyledNavbar } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 import { useHeader } from '@/hooks/pages/useHeader'
+import { Wallet } from 'ethers'
 
 export const Header = () => {
   const {
@@ -19,6 +20,7 @@ export const Header = () => {
     accountBalance,
     isOpen,
     divRef,
+    divRefMobile,
     isOnPath,
     handleToggleOpen,
     handleCloseMenu,
@@ -26,6 +28,33 @@ export const Header = () => {
     handleDisplayWalletPicker,
     provider,
   } = useHeader()
+
+  const WalletPickerComponent = () => {
+    return (
+      <WalletPicker
+        networks={[
+          {
+            icon: 'ethereum',
+            name: 'Ethereum',
+            wallets: [
+              {
+                color: 'orange',
+                icon: 'circle',
+                name: 'Metamask',
+                provider,
+              },
+            ],
+          },
+        ]}
+        onConnect={handleConnect}
+        onDisconnect={handleConnect}
+        address={account?.address}
+        addressHref={`https://etherscan.io/address/${account?.address}`}
+        balance={accountBalance}
+        size="regular"
+      />
+    )
+  }
 
   return (
     <StyledHeader>
@@ -38,20 +67,26 @@ export const Header = () => {
           </Link>
         }
         mobileTopContent={
-          account ? (
-            <Button
-              variant="secondary"
-              color="main1"
-              kind="neon"
-              size="regular"
-            >
-              <Icon name="meteor" size="md" color={theme.color.main1} />
-            </Button>
-          ) : (
-            <StyledButton onClick={handleConnect}>
-              <Icon name="meteor" size="md" color={theme.color.main0} />
-            </StyledButton>
-          )
+          <>
+            {account ? (
+              <Button
+                variant="secondary"
+                color="main1"
+                kind="neon"
+                size="regular"
+                onClick={handleDisplayWalletPicker}
+              >
+                <Icon name="meteor" size="md" color={theme.color.main1} />
+              </Button>
+            ) : (
+              <StyledButton onClick={handleDisplayWalletPicker}>
+                <Icon name="meteor" size="md" color={theme.color.main0} />
+              </StyledButton>
+            )}
+            <div tw="absolute right-0 mt-10" ref={divRefMobile}>
+              {displayWalletPicker && WalletPickerComponent()}
+            </div>
+          </>
         }
       >
         <NavbarLinkList withSlash onClick={handleCloseMenu}>
@@ -110,30 +145,7 @@ export const Header = () => {
                 </Button>
               )}
               <div tw="absolute right-0 mt-10" ref={divRef}>
-                {displayWalletPicker && (
-                  <WalletPicker
-                    networks={[
-                      {
-                        icon: 'ethereum',
-                        name: 'Ethereum',
-                        wallets: [
-                          {
-                            color: 'orange',
-                            icon: 'circle',
-                            name: 'Metamask',
-                            provider,
-                          },
-                        ],
-                      },
-                    ]}
-                    onConnect={handleConnect}
-                    onDisconnect={handleConnect}
-                    address={account?.address}
-                    addressHref={`https://etherscan.io/address/${account?.address}`}
-                    balance={accountBalance}
-                    size="regular"
-                  />
-                )}
+                {displayWalletPicker && WalletPickerComponent()}
               </div>
             </NavbarLink>
           </div>
