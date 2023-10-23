@@ -84,7 +84,7 @@ export default function ManageFunction() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-sm" tw="mr-4 whitespace-nowrap">
+              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -101,7 +101,7 @@ export default function ManageFunction() {
               <div className="tp-info text-main0">EXPLORER</div>
               <div>
                 <a
-                  className="tp-body1 fs-sm"
+                  className="tp-body1 fs-16"
                   href={func.url}
                   target="_blank"
                   referrerPolicy="no-referrer"
@@ -117,7 +117,7 @@ export default function ManageFunction() {
               <span className="tp-info text-main0">API ENTRYPOINT</span>
               <div>
                 <a
-                  className="tp-body1 fs-sm"
+                  className="tp-body1 fs-16"
                   href={func.urlVM}
                   target="_blank"
                   referrerPolicy="no-referrer"
@@ -133,7 +133,7 @@ export default function ManageFunction() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
-                  <GrayText className="fs-xs tp-body1">
+                  <GrayText className="fs-10 tp-body1">
                     {humanReadableSize(func.size, 'MiB')}
                   </GrayText>
                 </div>
@@ -142,7 +142,7 @@ export default function ManageFunction() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <GrayText className="fs-xs tp-body1">{func.date}</GrayText>
+                  <GrayText className="fs-10 tp-body1">{func.date}</GrayText>
                 </div>
               </div>
             </div>

@@ -90,7 +90,7 @@ const IndexerTokenAccountItem = React.memo(
             placeholder="18"
           />
           {supplyPreview && (
-            <div tw="mt-2 text-ellipsis overflow-hidden" className="fs-xs">
+            <div tw="mt-2 text-ellipsis overflow-hidden" className="fs-10">
               Supply: <span className="text-main0">{supplyPreview}</span>
             </div>
           )}

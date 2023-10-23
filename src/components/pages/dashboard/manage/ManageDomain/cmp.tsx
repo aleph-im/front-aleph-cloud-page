@@ -74,14 +74,14 @@ export default function ManageDomain() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-sm" tw="mr-4 whitespace-nowrap">
+              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
                 <div className="tp-info text-main0">NAME</div>
                 <div>
                   <a
-                    className="tp-body1 fs-sm"
+                    className="tp-body1 fs-16"
                     href={`https://${domain.name}`}
                     target="_blank"
                     referrerPolicy="no-referrer"
@@ -275,7 +275,7 @@ export default function ManageDomain() {
                   <div className="tp-info text-main0">EXPLORER</div>
                   <div>
                     <a
-                      className="tp-body1 fs-sm"
+                      className="tp-body1 fs-16"
                       href={refEntity.url}
                       target="_blank"
                       referrerPolicy="no-referrer"

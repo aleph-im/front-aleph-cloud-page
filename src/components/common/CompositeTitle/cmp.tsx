@@ -15,7 +15,7 @@ export default function CompositeTitle({
   return (
     <As style={{ lineHeight: '1rem', margin: 0 }}>
       <span className={disabled ? 'unavailable-content' : ''}>
-        <span className="tp-body1 fs-xl text-base0" tw="inline">
+        <span className="tp-body1 fs-28 text-base0" tw="inline">
           {String(number).padStart(2, '0')}/&nbsp;
         </span>
         <TextGradient

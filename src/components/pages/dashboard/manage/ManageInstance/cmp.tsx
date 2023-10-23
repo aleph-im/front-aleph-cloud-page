@@ -85,7 +85,7 @@ export default function ManageInstance() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-sm" tw="mr-4 whitespace-nowrap">
+              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -133,7 +133,7 @@ export default function ManageInstance() {
               <div className="tp-info text-main0">EXPLORER</div>
               <div>
                 <a
-                  className="tp-body1 fs-sm"
+                  className="tp-body1 fs-16"
                   href={instance.url}
                   target="_blank"
                   referrerPolicy="no-referrer"
@@ -161,7 +161,7 @@ export default function ManageInstance() {
                     </IconText>
                   ) : (
                     <div tw="flex items-end">
-                      <span tw="mr-1" className="tp-body1 fs-sm text-main2">
+                      <span tw="mr-1" className="tp-body1 fs-16 text-main2">
                         Allocating
                       </span>
                       <ThreeDots
@@ -201,7 +201,7 @@ export default function ManageInstance() {
                         </div>
 
                         <Link
-                          className="tp-body1 fs-sm"
+                          className="tp-body1 fs-16"
                           href={'?hash=' + key.id}
                           referrerPolicy="no-referrer"
                         >
@@ -234,7 +234,7 @@ export default function ManageInstance() {
                   <div className="tp-info text-main0">URL</div>
                   <div>
                     <a
-                      className="tp-body1 fs-sm"
+                      className="tp-body1 fs-16"
                       href={status.node.url}
                       target="_blank"
                       referrerPolicy="no-referrer"

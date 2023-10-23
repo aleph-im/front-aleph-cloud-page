@@ -105,7 +105,7 @@ const HoldingRequirementsVolumeLine = React.memo(
                 at="bottom-right"
                 tooltipContent={
                   <div tw="text-left">
-                    <div className="tp-body1 fs-md">
+                    <div className="tp-body1 fs-18">
                       {fullDiscount ? (
                         <>
                           The cost displayed for the added storage is{' '}

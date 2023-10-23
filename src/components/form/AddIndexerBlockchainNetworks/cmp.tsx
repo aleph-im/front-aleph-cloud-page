@@ -70,7 +70,7 @@ const IndexerBlockchainNetworkItem = React.memo(
             label="Custom ABI url"
             placeholder="https://my.abiurl.io/$ADDRESS"
           />
-          <div tw="mt-2" className="fs-xs">
+          <div tw="mt-2" className="fs-10">
             Incl. the placeholder <span className="text-main0">$ADDRESS</span>{' '}
             in the URL. The system will replace it with the token address you
             provide in step 02, autofilling the form.

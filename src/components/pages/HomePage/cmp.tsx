@@ -30,7 +30,7 @@ export default function HomePage() {
               <div tw="flex flex-col md:block">
                 <div tw="py-12">
                   <H1 tw="mb-12 md:mb-6">Infrastructure solutions</H1>
-                  <p className="tp-body fs-lg" tw="my-0">
+                  <p className="tp-body fs-24" tw="my-0">
                     Aleph.im offers cutting-edge <Strong>computing</Strong> and{' '}
                     <Strong>storage</Strong> solutions for your web3 needs. Our
                     unique payment model supports the holder tier, allowing you

@@ -20,8 +20,8 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
             tooltipContent={
               <div tw="text-left">
                 <div>
-                  <div className="tp-body2 fs-md">{entityName} name</div>
-                  <div className="tp-body1 fs-md">
+                  <div className="tp-body2 fs-18">{entityName} name</div>
+                  <div className="tp-body1 fs-18">
                     Assign a descriptive and unique name to your function,
                     allowing you to quickly identify it among others in your
                     application, understand the function&apos;s purpose and
@@ -55,8 +55,8 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
             tooltipContent={
               <div tw="text-left">
                 <div>
-                  <div className="tp-body2 fs-md">Tags</div>
-                  <div className="tp-body1 fs-md">
+                  <div className="tp-body2 fs-18">Tags</div>
+                  <div className="tp-body1 fs-18">
                     Add relevant tags to categorize your functions based on
                     their functionality, purpose, or any other criteria that
                     provide personal context. Tags enable easy filtering and

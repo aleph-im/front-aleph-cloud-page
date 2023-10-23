@@ -106,7 +106,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                   at="top-right"
                   vAlign="top"
                   tooltipContent={
-                    <div className="text-left tp-body1 fs-md">
+                    <div className="text-left tp-body1 fs-18">
                       <div tw="mb-10">
                         The entry point is the name of the script or file used
                         to invoke your function. It&apos;s essentially the
@@ -167,15 +167,15 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
             tooltipContent={
               <div tw="text-left">
                 <div>
-                  <div className="tp-body2 fs-md">Write code</div>
-                  <div className="tp-body1 fs-md">
+                  <div className="tp-body2 fs-18">Write code</div>
+                  <div className="tp-body1 fs-18">
                     Your code should have an app function that will serve as an
                     entrypoint to the program.
                   </div>
                 </div>
                 <div tw="mt-6">
-                  <div className="tp-body2 fs-md">Upload code</div>
-                  <div className="tp-body1 fs-md">
+                  <div className="tp-body2 fs-18">Upload code</div>
+                  <div className="tp-body1 fs-18">
                     Your zip file should contain a main file (ex: main.py) at
                     its root that exposes an app function. This will serve as an
                     entrypoint to the program.

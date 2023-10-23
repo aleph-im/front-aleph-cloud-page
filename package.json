@@ -11,7 +11,7 @@
     "lint:fix": "next lint --fix"
   },
   "dependencies": {
-    "@aleph-front/aleph-core": "^1.5.8",
+    "@aleph-front/aleph-core": "^1.5.10",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
     "@helia/unixfs": "^1.4.1",
     "@hookform/resolvers": "^3.1.1",
