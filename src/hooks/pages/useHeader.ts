@@ -50,9 +50,6 @@ export function useHeader(): UseHeaderReturn {
   const handleConnect = useCallback(async () => {
     if (!isConnected) {
       setkeepAccountAlive(true)
-      const acc = await connect()
-      if (!acc) return
-      router.push('/dashboard')
     } else {
       setkeepAccountAlive(false)
       await disconnect()

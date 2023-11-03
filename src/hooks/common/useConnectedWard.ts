@@ -10,10 +10,4 @@ import { useAppState } from '@/contexts/appState'
 export default function useConnectedWard(route = '/') {
   const [state] = useAppState()
   const router = useRouter()
-
-  useEffect(() => {
-    if (!state.account) {
-      router.replace(route)
-    }
-  })
 }
