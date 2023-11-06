@@ -1,7 +1,10 @@
 import { defaultConsoleChannel } from '@/helpers/constants'
 import { addIPFSPinSchema } from '@/helpers/schemas'
 import { Mutex, convertByteUnits } from '@/helpers/utils'
+import { NewIPFSPinningFormState } from '@/hooks/pages/dashboard/useNewIPFSPinningPage'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { MFS } from '@helia/mfs'
+import { messages } from 'aleph-sdk-ts'
 
 export type AccountFileObject = {
   file_hash: string
@@ -25,6 +28,7 @@ export class FileManager {
 
   constructor(
     protected account: Account,
+    protected fs: MFS,
     protected channel = defaultConsoleChannel,
   ) {}
 
@@ -67,7 +71,23 @@ export class FileManager {
     return this.sizesMapCache
   }
 
-  async add(file: File): Promise<AccountFileObject> {}
+  async add(formState: NewIPFSPinningFormState): Promise<AccountFileObject> {
+    let fileHash: string = ''
+
+    const storeMsg = await messages.store.Pin({
+      account: this.account,
+      fileHash,
+      channel: this.channel,
+    })
+
+    return {
+      file_hash: fileHash,
+      size: storeMsg.size,
+      type: 'file',
+      created: new Date().toISOString(),
+      item_hash: storeMsg.item_hash,
+    }
+  }
 
   protected parseSizesMap(files: AccountFileObject[]): void {
     this.lastFetch = Date.now()

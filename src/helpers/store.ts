@@ -115,9 +115,9 @@ export const reducer = (
 ) => {
   switch (type) {
     case ActionTypes.connect: {
-      const { account } = payload
+      const { account, fs } = payload
 
-      const fileManager = new FileManager(account)
+      const fileManager = new FileManager(account, fs)
       const messageManager = new MessageManager(account)
       const sshKeyManager = new SSHKeyManager(account)
       const domainManager = new DomainManager(account)

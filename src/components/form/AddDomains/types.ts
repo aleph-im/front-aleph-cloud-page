@@ -11,5 +11,5 @@ export type DomainItemProps = {
 export type AddDomainsProps = {
   control: Control
   name: string
-  entityType: EntityType.Program | EntityType.Instance
+  entityType: EntityType.Program | EntityType.Instance | EntityType.File
 }

@@ -20,35 +20,56 @@ export const getP2PNode = async () =>
     connectionEncryption: [noise()],
   })
 
-export const addDirectoryToFilesystem = async (fs: MFS, dir: FileList) => {
-  const directories = new Set<string>()
-  for (const file of Array.from(dir)) {
-    const content = await file.arrayBuffer()
-    const splittedName = file.webkitRelativePath.split('/').slice(1)
+export class LocalFS {
+  fs: MFS
 
-    if (splittedName.length > 1) {
-      for (let i = 0; i < splittedName.length - 1; i++) {
-        const dirName = splittedName.slice(0, i + 1).join('/')
-        if (!directories.has(dirName)) {
-          await fs.mkdir(`/${dirName}`)
+  constructor(fs: MFS) {
+    this.fs = fs
+  }
+
+  async addDirectory(dir: FileList) {
+    const directories = new Set<string>()
+    for (const file of Array.from(dir)) {
+      const content = await file.arrayBuffer()
+      const splittedName = file.webkitRelativePath.split('/').slice(1)
+
+      if (splittedName.length > 1) {
+        for (let i = 0; i < splittedName.length - 1; i++) {
+          const dirName = splittedName.slice(0, i + 1).join('/')
+          if (!directories.has(dirName)) {
+            await this.fs.mkdir(`/${dirName}`)
+          }
         }
       }
+
+      await this.fs.writeBytes(
+        new Uint8Array(content),
+        `/${splittedName.join('/')}`,
+      )
     }
-
-    await fs.writeBytes(new Uint8Array(content), `/${splittedName.join('/')}`)
   }
-}
 
-export const addFilesToFileSystem = async (fs: MFS, files: FileList) => {
-  for (const file of Array.from(files)) {
+  async addFiles(files: FileList) {
+    for (const file of Array.from(files)) {
+      this.addFile(file)
+    }
+  }
+
+  async addFile(file: File) {
     const content = await file.arrayBuffer()
-    await fs.writeBytes(new Uint8Array(content), `/${file.name}`)
+    await this.fs.writeBytes(new Uint8Array(content), `/${file.name}`)
   }
-}
 
-export const resetFileSystem = async (fs: MFS) => await fs.rm('/')
+  async reset() {
+    try {
+      await this.fs.rm('/')
+    } catch (e) {
+      console.log('Could not erase fs', e)
+    }
+  }
 
-export const getRootCID = async (fs: MFS) => {
-  const { cid } = await fs.stat('/')
-  return cid
+  async getRootCID() {
+    const { cid } = await this.fs.stat('/')
+    return cid
+  }
 }

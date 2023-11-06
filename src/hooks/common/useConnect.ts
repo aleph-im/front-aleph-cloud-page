@@ -6,6 +6,7 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { useCallback } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
+import { useHelia } from './useHelia'
 
 export type UseConnectReturn = {
   connect: () => Promise<Account | undefined>
@@ -17,6 +18,7 @@ export type UseConnectReturn = {
 
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
+  const { fs } = useHelia()
   const noti = useNotification()
   const [keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
     'keepAccountAlive',
@@ -58,7 +60,7 @@ export function useConnect(): UseConnectReturn {
       onError(err.message)
     })
 
-    dispatch({ type: ActionTypes.connect, payload: { account } })
+    dispatch({ type: ActionTypes.connect, payload: { account, fs } })
 
     return account
   }, [setKeepAccountAlive, getBalance, dispatch, onError])

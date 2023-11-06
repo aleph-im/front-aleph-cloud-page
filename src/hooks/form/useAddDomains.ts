@@ -12,7 +12,7 @@ export type DomainField = {
   name: string
   ref: string
   target: AddDomainTarget
-  programType: EntityType.Instance | EntityType.Program
+  programType: EntityType.Instance | EntityType.Program | EntityType.File
 }
 
 export const defaultValues: DomainField = {

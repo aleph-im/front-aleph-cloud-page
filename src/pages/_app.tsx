@@ -18,6 +18,7 @@ import AutoBreadcrumb from '@/components/common/AutoBreadcrumb/cmp'
 import { breadcrumbNames } from '@/helpers/constants'
 import { useRouter } from 'next/router'
 import Main from '@/components/common/Main'
+import { HeliaProvider } from '@/contexts/helia'
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter()
@@ -27,6 +28,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <ThemeProvider theme={themes.dark}>
       <GlobalStyles />
       <GlobalStylesOverride />
+      <HeliaProvider>
       <AppStateProvider>
         <NotificationProvider>
           <Header />
@@ -37,6 +39,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <Footer small={true} />
         </NotificationProvider>
       </AppStateProvider>
+      </HeliaProvider>
     </ThemeProvider>
   )
 }

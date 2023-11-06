@@ -14,7 +14,7 @@ import { ellipseAddress } from '@/helpers/utils'
 export const HiddenFileInput = memo(
   forwardRef(
     (
-      { onChange, accept, value, children, error }: HiddenFileInputProps,
+      { onChange, accept, value, children, error, directory }: HiddenFileInputProps,
       ref: ForwardedRef<HTMLDivElement>,
     ) => {
       const inputRef = useRef<HTMLInputElement>(null)
@@ -30,17 +30,25 @@ export const HiddenFileInput = memo(
 
       const handleChange = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => {
-          // This is verbose to avoid a type error on e.target.files[0] being undefined
+          // @note: This is verbose to avoid a type error on e.target.files[0] being undefined
           const target = e.target as HTMLInputElement
           const { files } = target
 
-          if (files) {
+          if(!files) return
+          if (files?.length === 1) {
             const fileUploaded = files[0]
             onChange(fileUploaded)
+          }
+          else if (files?.length > 1) {
+            onChange(files)
           }
         },
         [onChange],
       )
+      // @note: This is needed to forward a non-standard attribute to the DOM
+      const castedDirectory = directory ? 'true' : undefined
+
+      const displayName = value instanceof File ? value.name : value instanceof FileList ? value[0].webkitRelativePath : ''
 
       return (
         <div tabIndex={-1} ref={ref}>
@@ -53,7 +61,7 @@ export const HiddenFileInput = memo(
               size="regular"
               variant="tertiary"
             >
-              {ellipseAddress(value.name)} <Icon name="trash" tw="ml-5" />
+              {ellipseAddress(displayName)} <Icon name="trash" tw="ml-5" />
             </Button>
           ) : (
             <Button
@@ -75,6 +83,8 @@ export const HiddenFileInput = memo(
             ref={inputRef}
             onChange={handleChange}
             accept={accept}
+            directory={castedDirectory}
+            webkitDirectory={castedDirectory}
           />
         </div>
       )

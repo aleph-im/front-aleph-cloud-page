@@ -43,6 +43,7 @@ export enum EntityType {
   Instance = 'instance',
   SSHKey = 'sshKey',
   Domain = 'domain',
+  File = 'file',
 }
 
 export enum AddDomainTarget {
@@ -63,4 +64,5 @@ export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.Instance]: 'Instance',
   [EntityType.SSHKey]: 'SSH Key',
   [EntityType.Domain]: 'Domain',
+  [EntityType.File]: 'Pinned File',
 }
