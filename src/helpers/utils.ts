@@ -362,3 +362,10 @@ export function toKebabCase(input: string): string {
 export function toSnakeCase(input: string): string {
   return toKebabCase(input).replace(/-/g, '_')
 }
+
+/**
+ * Returns an hex string to use for as a payload for arbitrary signing with a wallet
+ */
+export function getSignableBuffer(input: object): string {
+  return Buffer.from(JSON.stringify(input)).toString('hex')
+}
