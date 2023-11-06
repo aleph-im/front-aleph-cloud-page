@@ -1,4 +1,3 @@
-import JSZip from 'jszip'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, program, any } from 'aleph-sdk-ts/dist/messages'
 // import { ProgramPublishConfiguration } from 'aleph-sdk-ts/dist/messages/program/publish'
@@ -21,18 +20,18 @@ import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { ProgramContent } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
-import { FunctionRuntimeId } from './runtime'
+import { CustomFunctionRuntimeField } from './runtime'
 import { FileManager } from './file'
 import { MessageManager } from './message'
 import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
-import { FunctionRuntimeField } from '@/hooks/form/useSelectFunctionRuntime'
 import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { functionSchema } from '@/helpers/schemas'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
+import { FunctionLangId, FunctionLanguage } from './lang'
 
 // @todo: Export this type from sdk and remove here
 export declare type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<
@@ -73,6 +72,7 @@ export type AddProgram = Omit<
   | 'account'
   | 'channel'
   | 'file'
+  | 'programRef'
   | 'vcpus'
   | 'memory'
   | 'runtime'
@@ -82,9 +82,8 @@ export type AddProgram = Omit<
   NameAndTagsField & {
     isPersistent: boolean
     code: FunctionCodeField
-    runtime: FunctionRuntimeField
     specs: InstanceSpecsField
-    entrypoint?: string
+    runtime?: CustomFunctionRuntimeField
     envVars?: EnvVarField[]
     volumes?: VolumeField[]
     domains?: Omit<DomainField, 'ref'>[]
@@ -106,6 +105,20 @@ export type ProgramCostProps = Omit<ExecutableCostProps, 'type'> & {
 }
 
 export type ProgramCost = ExecutableCost
+
+export type ParsedCodeType = {
+  encoding: Encoding
+  entrypoint: string
+} & (
+  | {
+      file?: undefined
+      programRef: string
+    }
+  | {
+      file: Blob | Buffer
+      programRef?: undefined
+    }
+)
 
 export class ProgramManager
   extends Executable
@@ -201,66 +214,78 @@ export class ProgramManager
     return downloadBlob(blob, `VM_${program.id.slice(-12)}.zip`)
   }
 
-  protected async parseCode(code: FunctionCodeField): Promise<File> {
+  protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {
     if (code.type === 'text') {
-      const jsZip = new JSZip()
-      jsZip.file('main.py', code.text)
-      const zip = await jsZip.generateAsync({ type: 'blob' })
-      return new File([zip], 'main.py.zip', { type: 'application/zip' })
-    }
-
-    if (code.type === 'file') {
+      return {
+        entrypoint: 'main:app',
+        file: new Blob([code.text], { type: 'text/plain' }) as File,
+        encoding: Encoding.plain,
+      }
+    } else if (code.type === 'file') {
       if (!code.file) throw new Error('Invalid function code file')
+      const fileName = code.file.name
 
-      return code.file
-    }
+      let encoding: Encoding
 
-    throw new Error('Invalid function code type')
+      if (fileName.endsWith('.zip')) {
+        encoding = Encoding.zip
+      } else if (fileName.endsWith('.sqsh')) {
+        encoding = Encoding.squashfs
+      } else {
+        throw new Error('Invalid function code file')
+      }
+
+      return {
+        entrypoint: code.entrypoint,
+        file: code.file,
+        encoding,
+      }
+    } else if (code.type === 'ref') {
+      return {
+        entrypoint: code.entrypoint,
+        encoding: code.encoding,
+        programRef: code.programRef,
+      }
+    } else throw new Error('Invalid function code type')
   }
 
   protected async parseProgram(
     newProgram: AddProgram,
   ): Promise<ProgramPublishConfiguration> {
-    newProgram = ProgramManager.addSchema.parse(newProgram)
+    newProgram = await ProgramManager.addSchema.parseAsync(newProgram)
 
     const { account, channel } = this
 
-    const {
-      name,
-      tags,
-      isPersistent,
-      envVars,
-      specs,
-      // @todo: Entrypoint
-      entrypoint = 'main:app',
-    } = newProgram
+    const { name, tags, isPersistent, envVars, specs } = newProgram
 
     const variables = this.parseEnvVars(envVars)
     const { memory, vcpus } = this.parseSpecs(specs)
-    const metadata = this.parseMetadata(name, tags)
-    const runtime = this.parseRuntime(newProgram.runtime)
+    const metadata = this.parseMetadata(name, tags, newProgram.metadata)
+    const runtime = this.parseRuntime(newProgram)
     const volumes = await this.parseVolumes(newProgram.volumes)
-    const file = await this.parseCode(newProgram.code)
+    const code = await this.parseCode(newProgram.code)
 
     return {
       account,
       channel,
       runtime,
       isPersistent,
-      entrypoint,
-      file,
       variables,
       memory,
       vcpus,
       volumes,
+      ...code,
       metadata,
     }
   }
 
-  protected parseRuntime(runtime: FunctionRuntimeField): string {
-    const ref =
-      runtime.id !== FunctionRuntimeId.Custom ? runtime.id : runtime.custom
-    return ref as string
+  protected parseRuntime({ code, runtime }: AddProgram): string {
+    if (runtime) return runtime
+
+    if (code.lang === FunctionLangId.Other)
+      throw new Error('Custom runtime should be added')
+
+    return FunctionLanguage[code.lang].runtime
   }
 
   // @todo: Type not exported from SDK...

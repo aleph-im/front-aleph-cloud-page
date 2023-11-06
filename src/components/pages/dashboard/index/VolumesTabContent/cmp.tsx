@@ -1,9 +1,9 @@
 import React from 'react'
 import tw from 'twin.macro'
 import { VolumesTabContentProps } from './types'
-import { Table } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
+import EntityTable from '@/components/common/EntityTable'
 
 export const VolumesTabContent = React.memo(
   ({ data }: VolumesTabContentProps) => {
@@ -12,7 +12,7 @@ export const VolumesTabContent = React.memo(
         {data.length > 0 ? (
           <>
             <div tw="overflow-auto max-w-full">
-              <Table
+              <EntityTable
                 borderType="none"
                 oddRowNoise
                 rowKey={(row) => row.id}
@@ -23,7 +23,7 @@ export const VolumesTabContent = React.memo(
                 columns={[
                   {
                     label: 'Name',
-                    width: '65%',
+                    width: '100%',
                     sortable: true,
                     render: (row) => ellipseAddress(row.id || ''),
                   },
@@ -41,7 +41,6 @@ export const VolumesTabContent = React.memo(
                   },
                   {
                     label: '',
-                    width: '0',
                     align: 'right',
                     render: (row) => (
                       <ButtonLink

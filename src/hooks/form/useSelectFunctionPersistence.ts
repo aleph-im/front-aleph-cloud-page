@@ -33,6 +33,7 @@ export function useSelectFunctionPersistence({
     },
     [isPersistentCtrl.field],
   )
+
   const isPersistentValue = useMemo(
     () => isPersistentCtrl.field.value + '',
     [isPersistentCtrl.field],

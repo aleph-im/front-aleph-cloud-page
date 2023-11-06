@@ -24,7 +24,7 @@ export const VolumeList = React.memo(
               <div tw="my-5">
                 <div className="tp-info text-main0">PERSISTENT VOLUME</div>
                 <div>
-                  <GrayText className="fs-xs tp-body1">
+                  <GrayText className="fs-10 tp-body1">
                     {humanReadableSize(volume.size_mib, 'MiB')}
                   </GrayText>
                 </div>
@@ -33,7 +33,7 @@ export const VolumeList = React.memo(
               <div tw="my-5">
                 <div className="tp-info text-main0">EPHEMERAL VOLUME</div>
                 <div>
-                  <GrayText className="fs-xs tp-body1">
+                  <GrayText className="fs-10 tp-body1">
                     {humanReadableSize(volume.size_mib, 'MiB')}
                   </GrayText>
                 </div>
@@ -43,7 +43,7 @@ export const VolumeList = React.memo(
                 <div className="tp-info text-main0">IMMUTABLE VOLUME</div>
                 <div>
                   <Link
-                    className="tp-body1 fs-sm"
+                    className="tp-body1 fs-16"
                     href={`/dashboard/manage?hash=${volume.ref}`}
                   >
                     <IconText iconName="square-up-right">

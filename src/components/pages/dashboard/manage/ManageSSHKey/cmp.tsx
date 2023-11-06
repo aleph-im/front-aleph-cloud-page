@@ -8,10 +8,14 @@ import { useManageSSHKey } from '@/hooks/pages/dashboard/manage/useManageSSHKey'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import StatusLabel from '@/components/common/StatusLabel'
+import { RotatingLines } from 'react-loader-spinner'
+import { useTheme } from 'styled-components'
 
 export default function ManageSSHKey() {
   const { sshKey, handleCopyKey, handleCopyLabel, handleDelete } =
     useManageSSHKey()
+
+  const theme = useTheme()
 
   if (!sshKey) {
     return (
@@ -36,9 +40,21 @@ export default function ManageSSHKey() {
               <Icon name="key" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
               <StatusLabel
-                variant={sshKey.confirmed ? 'ready' : 'confirming'}
+                variant={sshKey.confirmed ? 'success' : 'warning'}
                 tw="ml-4"
-              />
+              >
+                {sshKey.confirmed ? (
+                  'READY'
+                ) : (
+                  <div tw="flex items-center">
+                    <div tw="mr-2">CONFIRMING</div>
+                    <RotatingLines
+                      strokeColor={theme.color.base2}
+                      width=".8rem"
+                    />
+                  </div>
+                )}
+              </StatusLabel>
             </div>
             <div>
               <Button
@@ -55,7 +71,7 @@ export default function ManageSSHKey() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-sm" tw="mr-4 whitespace-nowrap">
+              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -83,7 +99,7 @@ export default function ManageSSHKey() {
               <div className="tp-info text-main0">EXPLORER</div>
               <div>
                 <a
-                  className="tp-body1 fs-sm"
+                  className="tp-body1 fs-16"
                   href={sshKey.url}
                   target="_blank"
                   referrerPolicy="no-referrer"
@@ -98,7 +114,7 @@ export default function ManageSSHKey() {
             <div tw="my-5">
               <div className="tp-info text-main0">CREATED ON</div>
               <div>
-                <GrayText className="fs-xs tp-body1">{sshKey.date}</GrayText>
+                <GrayText className="fs-10 tp-body1">{sshKey.date}</GrayText>
               </div>
             </div>
           </NoisyContainer>

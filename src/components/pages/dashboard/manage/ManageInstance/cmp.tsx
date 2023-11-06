@@ -5,17 +5,13 @@ import NoisyContainer from '@/components/common/NoisyContainer'
 import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/aleph-core'
 import { useManageInstance } from '@/hooks/pages/dashboard/manage/useManageInstance'
-import {
-  convertByteUnits,
-  ellipseAddress,
-  ellipseText,
-  humanReadableSize,
-} from '@/helpers/utils'
+import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import StatusLabel from '@/components/common/StatusLabel'
-import { ThreeDots } from 'react-loader-spinner'
+import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
+import Link from 'next/link'
 
 export default function ManageInstance() {
   const {
@@ -23,8 +19,10 @@ export default function ManageInstance() {
     status,
     handleCopyHash,
     handleCopyConnect,
+    handleCopyIpv6,
     handleDelete,
     copyAndNotify,
+    mappedKeys,
   } = useManageInstance()
 
   const theme = useTheme()
@@ -55,12 +53,22 @@ export default function ManageInstance() {
               <div className="tp-body2">{name}</div>
               <StatusLabel
                 variant={
-                  instance.confirmed && status?.vm_ipv6
-                    ? 'running'
-                    : 'confirming'
+                  instance.confirmed && status?.vm_ipv6 ? 'success' : 'warning'
                 }
                 tw="ml-4"
-              />
+              >
+                {instance.confirmed && status?.vm_ipv6 ? (
+                  'READY'
+                ) : (
+                  <div tw="flex items-center">
+                    <div tw="mr-2">CONFIRMING</div>
+                    <RotatingLines
+                      strokeColor={theme.color.base2}
+                      width=".8rem"
+                    />
+                  </div>
+                )}
+              </StatusLabel>
             </div>
             <div>
               <Button
@@ -77,7 +85,7 @@ export default function ManageInstance() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-sm" tw="mr-4 whitespace-nowrap">
+              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -122,34 +130,10 @@ export default function ManageInstance() {
             </div>
 
             <div tw="mr-5">
-              <div className="tp-info text-main0">SSH COMMAND</div>
-              <div>
-                {status ? (
-                  <IconText iconName="copy" onClick={handleCopyConnect}>
-                    <GrayText>&gt;_ ssh root@{status.vm_ipv6}</GrayText>
-                  </IconText>
-                ) : (
-                  <div tw="flex items-end">
-                    <span tw="mr-1" className="tp-body1 fs-sm text-main2">
-                      Allocating
-                    </span>
-                    <ThreeDots
-                      width=".8rem"
-                      height="1rem"
-                      color={theme.color.main2}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <Separator />
-
-            <div tw="my-5">
               <div className="tp-info text-main0">EXPLORER</div>
               <div>
                 <a
-                  className="tp-body1 fs-sm"
+                  className="tp-body1 fs-16"
                   href={instance.url}
                   target="_blank"
                   referrerPolicy="no-referrer"
@@ -161,23 +145,73 @@ export default function ManageInstance() {
               </div>
             </div>
 
-            <div tw="flex my-5">
-              <div tw="mr-5">
-                <div className="tp-info text-main0">SIZE</div>
+            <Separator />
+
+            <div tw="my-5">
+              <TextGradient type="h7" color="main1">
+                Connection methods
+              </TextGradient>
+
+              <div tw="my-5">
+                <div className="tp-info text-main0">SSH COMMAND</div>
                 <div>
-                  <GrayText className="fs-xs tp-body1">
-                    {humanReadableSize(instance.size, 'MiB')}
-                  </GrayText>
+                  {status ? (
+                    <IconText iconName="copy" onClick={handleCopyConnect}>
+                      <GrayText>&gt;_ ssh root@{status.vm_ipv6}</GrayText>
+                    </IconText>
+                  ) : (
+                    <div tw="flex items-end">
+                      <span tw="mr-1" className="tp-body1 fs-16 text-main2">
+                        Allocating
+                      </span>
+                      <ThreeDots
+                        width=".8rem"
+                        height="1rem"
+                        color={theme.color.main2}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div tw="mr-5">
-                <div className="tp-info text-main0">CREATED ON</div>
+              <div tw="my-5">
+                <div className="tp-info text-main0">IPv6</div>
                 <div>
-                  <GrayText className="fs-xs tp-body1">
-                    {instance.date}
-                  </GrayText>
+                  {status && (
+                    <IconText iconName="copy" onClick={handleCopyIpv6}>
+                      <GrayText>{status.vm_ipv6}</GrayText>
+                    </IconText>
+                  )}
                 </div>
+              </div>
+            </div>
+
+            <div tw="my-5">
+              <TextGradient type="h7" color="main1">
+                Accessible for
+              </TextGradient>
+
+              <div tw="my-5 flex">
+                {mappedKeys.map(
+                  (key, i) =>
+                    key && (
+                      <div key={key?.id} tw="mr-5">
+                        <div className="tp-info text-main0">
+                          SSH KEY #{i + 1}
+                        </div>
+
+                        <Link
+                          className="tp-body1 fs-16"
+                          href={'?hash=' + key.id}
+                          referrerPolicy="no-referrer"
+                        >
+                          <IconText iconName="square-up-right">
+                            <GrayText>{key.label}</GrayText>
+                          </IconText>
+                        </Link>
+                      </div>
+                    ),
+                )}
               </div>
             </div>
 
@@ -200,7 +234,7 @@ export default function ManageInstance() {
                   <div className="tp-info text-main0">URL</div>
                   <div>
                     <a
-                      className="tp-body1 fs-sm"
+                      className="tp-body1 fs-16"
                       href={status.node.url}
                       target="_blank"
                       referrerPolicy="no-referrer"

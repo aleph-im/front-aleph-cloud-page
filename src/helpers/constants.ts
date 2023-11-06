@@ -43,6 +43,7 @@ export enum EntityType {
   Instance = 'instance',
   SSHKey = 'sshKey',
   Domain = 'domain',
+  Indexer = 'indexer',
 }
 
 export enum AddDomainTarget {
@@ -63,4 +64,19 @@ export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.Instance]: 'Instance',
   [EntityType.SSHKey]: 'SSH Key',
   [EntityType.Domain]: 'Domain',
+  [EntityType.Indexer]: 'Indexer',
+}
+
+export enum IndexerBlockchain {
+  Ethereum = 'ethereum',
+  Bsc = 'bsc',
+}
+
+const ERC20AbiUrl =
+  'https://api.etherscan.io/api?module=contract&action=getabi&address=0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
+
+export const BlockchainDefaultABIUrl: Record<IndexerBlockchain, string> = {
+  // @note: Fixed ethereum ALEPH token contract address as "generic" ERC20 ABI for all EVM compatible blockchains
+  [IndexerBlockchain.Ethereum]: ERC20AbiUrl,
+  [IndexerBlockchain.Bsc]: ERC20AbiUrl,
 }

@@ -165,7 +165,7 @@ export class InstanceManager
   protected async parseInstance(
     newInstance: AddInstance,
   ): Promise<InstancePublishConfiguration> {
-    newInstance = InstanceManager.addSchema.parse(newInstance)
+    newInstance = await InstanceManager.addSchema.parseAsync(newInstance)
 
     const { account, channel } = this
 
@@ -187,6 +187,19 @@ export class InstanceManager
       authorized_keys,
       volumes,
     }
+  }
+
+  protected async parseVolumes(
+    volumes?: VolumeField | VolumeField[],
+  ): Promise<MachineVolume[] | undefined> {
+    if (!volumes) return
+
+    volumes = Array.isArray(volumes) ? volumes : [volumes]
+
+    // @note: Remove the fake volumes from the instance volume list configuration
+    volumes = volumes.filter((volume) => !volume.isFake)
+
+    return super.parseVolumes(volumes)
   }
 
   protected async parseSSHKeys(

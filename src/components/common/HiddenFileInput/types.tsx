@@ -6,4 +6,6 @@ export type HiddenFileInputProps = {
   value?: File
   children: React.ReactNode
   error?: FieldError
+  label?: string
+  required?: boolean
 }

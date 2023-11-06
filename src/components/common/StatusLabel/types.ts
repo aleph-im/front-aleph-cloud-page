@@ -1,10 +1,6 @@
 import { HTMLAttributes } from 'react'
 
-export type StatusLabelVariant =
-  | 'ready'
-  | 'running'
-  | 'confirming'
-  | 'unresponsive'
+export type StatusLabelVariant = 'success' | 'warning' | 'error'
 
 export type StatusLabelProps = HTMLAttributes<HTMLSpanElement> & {
   variant?: StatusLabelVariant

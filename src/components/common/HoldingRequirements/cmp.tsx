@@ -105,7 +105,7 @@ const HoldingRequirementsVolumeLine = React.memo(
                 at="bottom-right"
                 tooltipContent={
                   <div tw="text-left">
-                    <div className="tp-body1 fs-md">
+                    <div className="tp-body1 fs-18">
                       {fullDiscount ? (
                         <>
                           The cost displayed for the added storage is{' '}
@@ -179,6 +179,8 @@ export default function HoldingRequirements({
   button: ButtonCmp,
   description,
 }: HoldingRequirementsProps) {
+  volumes = volumes?.filter((volume) => !volume.isFake)
+
   const { computeTotalCost, perVolumeCost, totalCost } = useMemo(() => {
     switch (type) {
       case EntityType.Program:
@@ -274,7 +276,7 @@ export default function HoldingRequirements({
 
               <StyledHoldingSummaryLine>
                 <div></div>
-                <div className="tp-body2">Total</div>
+                <div className="tp-body2">Total Staked</div>
                 <div>
                   <span className="text-main1">
                     {humanReadableCurrency(totalCost)} ALEPH

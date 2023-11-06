@@ -10,6 +10,7 @@ export type HomePage = {
     function: () => void
     instance: () => void
     volume: () => void
+    indexer: () => void
   }
   scroll: {
     function: { ref: RefObject<HTMLElement>; handle: () => void }
@@ -57,12 +58,23 @@ export function useHomePage(): HomePage {
     router.push('/dashboard/volume')
   }, [connect, isConnected, router])
 
+  // @note: wait till account is connected and redirect
+  const navigateIndexer = useCallback(async () => {
+    if (!isConnected) {
+      const acc = await connect()
+      if (!acc) return
+    }
+
+    router.push('/dashboard/indexer')
+  }, [connect, isConnected, router])
+
   return {
     featureSectionBg,
     navigate: {
       function: navigateFunction,
       instance: navigateInstance,
       volume: navigateVolume,
+      indexer: navigateIndexer,
     },
     scroll: {
       function: { ref: scroll1[0], handle: scroll1[1] },

@@ -42,8 +42,8 @@ export const AddVolumes = React.memo((props: AddVolumesProps) => {
           tooltipContent={
             <div tw="text-left">
               <div>
-                <div className="tp-body2 fs-md">New volume</div>
-                <div className="tp-body1 fs-md">
+                <div className="tp-body2 fs-18">New volume</div>
+                <div className="tp-body1 fs-18">
                   <p>
                     Many Python programs require additional packages beyond
                     those present on the system by default.
@@ -57,7 +57,7 @@ export const AddVolumes = React.memo((props: AddVolumesProps) => {
                 </div>
               </div>
               <div tw="mt-6">
-                <div className="tp-body2 fs-md">Existing volume</div>
+                <div className="tp-body2 fs-18">Existing volume</div>
                 <p>
                   If this function uses the same dependencies as another
                   program, you can reference the volume hash to avoid data
@@ -65,7 +65,7 @@ export const AddVolumes = React.memo((props: AddVolumesProps) => {
                 </p>
               </div>
               <div tw="mt-6">
-                <div className="tp-body2 fs-md">Persistent storage</div>
+                <div className="tp-body2 fs-18">Persistent storage</div>
                 <p>
                   By default function data are flushed on each run. A persistent
                   storage will allow you to persist data on disk.

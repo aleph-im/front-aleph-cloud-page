@@ -88,7 +88,7 @@ export type PersistentVolume = BaseVolume & {
 export type Volume = NewVolume | ExistingVolume | PersistentVolume
 
 export type VolumeCostProps = {
-  volumes?: (Volume | AddVolume)[]
+  volumes?: (Volume | AddVolume | VolumeField)[]
   sizeDiscount?: number
   exclude?: VolumeType[]
 }
@@ -185,6 +185,13 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   static getCost(props: VolumeCostProps): VolumeCost {
+    props = {
+      ...props,
+      volumes: props.volumes?.filter(
+        (volume) => !(volume as VolumeField).isFake,
+      ),
+    }
+
     const perVolumeCost = this.getPerVolumeCost(props)
 
     const totalCost = Math.ceil(
@@ -231,7 +238,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   async add(volumes: AddVolume | AddVolume[]): Promise<Volume[]> {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
-    const newVolumes = this.parseNewVolumes(volumes)
+    const newVolumes = await this.parseNewVolumes(volumes)
     if (newVolumes.length === 0) return []
 
     try {
@@ -243,6 +250,8 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
             account,
             channel,
             fileObject,
+            // fileHash: 'IPFS_HASH',
+            // storageEngine: ItemType.ipfs,
           }),
         ),
       )
@@ -276,13 +285,15 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return downloadBlob(blob, `Volume_${volumeOrId.slice(-12)}.sqsh`)
   }
 
-  protected parseNewVolumes(volumes: VolumeField[]): Required<AddNewVolume>[] {
+  protected async parseNewVolumes(
+    volumes: VolumeField[],
+  ): Promise<Required<AddNewVolume>[]> {
     const newVolumes = volumes.filter(
       (volume: VolumeField): volume is Required<AddNewVolume> =>
         volume.volumeType === VolumeType.New && !!volume.file,
     )
 
-    volumes = VolumeManager.addManySchema.parse(newVolumes)
+    volumes = await VolumeManager.addManySchema.parseAsync(newVolumes)
 
     return newVolumes
   }

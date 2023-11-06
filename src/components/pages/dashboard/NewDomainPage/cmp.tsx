@@ -68,6 +68,7 @@ export default function NewDomain() {
                   <TextInput
                     {...nameCtrl.field}
                     {...nameCtrl.fieldState}
+                    required
                     label="Enter your desired custom domain in the field below"
                     placeholder="yourdomain.io"
                   />
@@ -90,7 +91,7 @@ export default function NewDomain() {
                   function, depending on what you want your custom domain to
                   point to.
                 </p>
-                <div tw="py-10">
+                <div tw="my-10">
                   <Tabs
                     align="left"
                     selected={tabId}
@@ -113,18 +114,19 @@ export default function NewDomain() {
                       <RadioGroup
                         {...programTypeCtrl.field}
                         {...programTypeCtrl.fieldState}
-                        direction="row"
+                        required
                         label="Choose resource type"
+                        direction="row"
                       >
-                        <Radio
-                          label={EntityTypeName[EntityType.Program]}
-                          value={EntityType.Program}
-                          disabled={!hasFunctions}
-                        />
                         <Radio
                           label={EntityTypeName[EntityType.Instance]}
                           value={EntityType.Instance}
                           disabled={!hasInstances}
+                        />
+                        <Radio
+                          label={EntityTypeName[EntityType.Program]}
+                          value={EntityType.Program}
+                          disabled={!hasFunctions}
                         />
                       </RadioGroup>
                       {entities.length > 0 && (
@@ -132,6 +134,7 @@ export default function NewDomain() {
                           <Dropdown
                             {...refCtrl.field}
                             {...refCtrl.fieldState}
+                            required
                             label="Select the specific resource from the dropdown"
                           >
                             {entities.map(({ label, value }) => (
@@ -153,6 +156,7 @@ export default function NewDomain() {
                         <TextInput
                           {...ipfsRefCtrl.field}
                           {...ipfsRefCtrl.fieldState}
+                          required
                           label="Link your custom domain to an Aleph Message ID"
                           placeholder="Paste your IPFS Aleph Message ID"
                         />

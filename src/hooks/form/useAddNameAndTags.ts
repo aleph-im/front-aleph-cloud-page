@@ -15,7 +15,7 @@ export type UseNameAndTagsProps = {
   name?: string
   control: Control
   defaultValue?: NameAndTagsField
-  entityType: EntityType.Instance | EntityType.Program
+  entityType: EntityType.Instance | EntityType.Program | EntityType.Indexer
 }
 
 export type UseNameAndTagsReturn = {

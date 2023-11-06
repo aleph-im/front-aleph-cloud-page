@@ -1,6 +1,9 @@
+import { FunctionLangId } from '@/domain/lang'
+import { useResponsiveMax } from '@aleph-front/aleph-core'
+import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
-const defaultText = `from fastapi import FastAPI
+export const defaultCodeText = `from fastapi import FastAPI
 
 app = FastAPI()
 @app.get("/")
@@ -8,24 +11,36 @@ async def root():
   return {"message": "Hello World"}
 `
 
-export const defaultCode: FunctionCodeField = {
-  lang: 'python',
-  type: 'text',
-  text: defaultText,
+export const defaultCode: Partial<FunctionCodeField> = {
+  lang: FunctionLangId.Python,
+  type: 'file',
+  entrypoint: 'main:app',
 }
 
 export type FunctionCodeField = {
-  lang: 'python' | 'javascript'
+  lang: FunctionLangId
 } & (
   | {
       type: 'text'
+      entrypoint?: string
       text: string
-      file?: File
+      ref?: undefined
+      file?: undefined
+    }
+  | {
+      type: 'ref'
+      encoding: Encoding
+      entrypoint: string
+      programRef: string
+      text?: undefined
+      file?: undefined
     }
   | {
       type: 'file'
+      entrypoint: string
       file: File
-      text?: string
+      text?: undefined
+      ref?: undefined
     }
 )
 
@@ -40,17 +55,25 @@ export type UseAddFunctionCodeReturn = {
   typeCtrl: UseControllerReturn<any, any>
   fileCtrl: UseControllerReturn<any, any>
   textCtrl: UseControllerReturn<any, any>
+  entryPointCtrl: UseControllerReturn<any, any>
+  radioDirection: 'row' | 'column'
 }
 
 export function useAddFunctionCode({
   name = 'code',
   control,
-  defaultValue = defaultCode,
+  defaultValue,
 }: UseAddFunctionCodeProps): UseAddFunctionCodeReturn {
   const langCtrl = useController({
     control,
     name: `${name}.lang`,
     defaultValue: defaultValue?.lang,
+  })
+
+  const entryPointCtrl = useController({
+    control,
+    name: `${name}.entrypoint`,
+    defaultValue: defaultValue?.entrypoint,
   })
 
   const typeCtrl = useController({
@@ -68,13 +91,18 @@ export function useAddFunctionCode({
   const textCtrl = useController({
     control,
     name: `${name}.text`,
-    defaultValue: defaultCode?.text,
+    defaultValue: defaultValue?.text || defaultCodeText,
   })
+
+  const isMobile = useResponsiveMax('sm')
+  const radioDirection = isMobile ? 'column' : 'row'
 
   return {
     langCtrl,
     typeCtrl,
     fileCtrl,
     textCtrl,
+    entryPointCtrl,
+    radioDirection,
   }
 }
