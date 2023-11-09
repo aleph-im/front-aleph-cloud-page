@@ -21,6 +21,7 @@ export default function ManageInstance() {
     handleCopyConnect,
     handleCopyIpv6,
     handleDelete,
+    handleStop,
     copyAndNotify,
     mappedKeys,
   } = useManageInstance()
@@ -70,16 +71,29 @@ export default function ManageInstance() {
                 )}
               </StatusLabel>
             </div>
-            <div>
-              <Button
-                size="regular"
-                variant="tertiary"
-                color="main2"
-                kind="neon"
-                onClick={handleDelete}
-              >
-                Delete
-              </Button>
+            <div tw="flex">
+              <div tw="mr-3">
+                <Button
+                  size="regular"
+                  variant="tertiary"
+                  color="main2"
+                  kind="neon"
+                  onClick={handleStop}
+                >
+                  Stop
+                </Button>
+              </div>
+              <div>
+                <Button
+                  size="regular"
+                  variant="tertiary"
+                  color="main2"
+                  kind="neon"
+                  onClick={handleDelete}
+                >
+                  Delete
+                </Button>
+              </div>
             </div>
           </div>
 

@@ -373,11 +373,13 @@ export function getSignableBuffer(input: object): string {
 /**
  * Takes a signed token (with a JSON payload) and returns a token with a hex encoded payload
  */
-export function toWebHeaderToken(token: SignedHeaderType): SignedWebHeaderType {
-  return {
+export function toWebHeaderToken(token: SignedHeaderType): string {
+  const webToken: SignedWebHeaderType = {
     payload: getSignableBuffer(token.payload),
     signature: token.signature,
   }
+
+  return JSON.stringify(webToken)
 }
 
 export const getECDSAKeyPair = async () => {
