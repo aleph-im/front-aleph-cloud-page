@@ -1,3 +1,4 @@
+import JSZip from 'jszip'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, program, any } from 'aleph-sdk-ts/dist/messages'
 // import { ProgramPublishConfiguration } from 'aleph-sdk-ts/dist/messages/program/publish'
@@ -216,10 +217,15 @@ export class ProgramManager
 
   protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {
     if (code.type === 'text') {
+      const jsZip = new JSZip()
+      const fileExt = code.lang === FunctionLangId.Python ? 'py' : 'js'
+      jsZip.file('main.' + fileExt, code.text)
+      const zip = await jsZip.generateAsync({ type: 'blob' })
+
       return {
         entrypoint: 'main:app',
-        file: new Blob([code.text], { type: 'text/plain' }) as File,
-        encoding: Encoding.plain,
+        file: zip as File,
+        encoding: Encoding.zip,
       }
     } else if (code.type === 'file') {
       if (!code.file) throw new Error('Invalid function code file')
