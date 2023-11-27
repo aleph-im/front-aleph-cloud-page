@@ -10,6 +10,7 @@ import { ActionTypes } from '@/helpers/store'
 import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
+import { useTrustedOperation } from '@/hooks/common/useTrustedOperation'
 
 export type ManageInstance = {
   instance?: Instance
@@ -18,6 +19,7 @@ export type ManageInstance = {
   handleCopyConnect: () => void
   handleCopyIpv6: () => void
   handleDelete: () => void
+  handleStop: () => void
   copyAndNotify: (text: string) => void
   mappedKeys: (SSHKey | undefined)[]
 }
@@ -36,6 +38,7 @@ export function useManageInstance(): ManageInstance {
 
   const manager = useInstanceManager()
   const sshKeyManager = useSSHKeyManager()
+  const { stopMachine } = useTrustedOperation()
 
   useEffect(() => {
     if (!instance || !sshKeyManager) return
@@ -83,6 +86,14 @@ export function useManageInstance(): ManageInstance {
     }
   }, [instance, manager, onLoad, dispatch, onSuccess, router, onError])
 
+  const handleStop = useCallback(async () => {
+    if (!instance) throw new Error('Invalid function')
+    if (!manager) throw new Error('Manager not ready')
+    if (!status?.vm_ipv6) throw new Error('Invalid VM IPv6 address')
+
+    stopMachine(status.vm_ipv6, instance.id)
+  }, [])
+
   return {
     instance,
     status,
@@ -90,6 +101,7 @@ export function useManageInstance(): ManageInstance {
     handleCopyConnect,
     handleCopyIpv6,
     handleDelete,
+    handleStop,
     copyAndNotify,
     mappedKeys,
   }

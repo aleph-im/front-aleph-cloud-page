@@ -80,3 +80,39 @@ export const BlockchainDefaultABIUrl: Record<IndexerBlockchain, string> = {
   [IndexerBlockchain.Ethereum]: ERC20AbiUrl,
   [IndexerBlockchain.Bsc]: ERC20AbiUrl,
 }
+
+export const SignedPubkeyHeaderName = 'X-SignedPubKey'
+
+export const SignedOperationHeaderName = 'X-SignedOperation'
+
+export type SignedPubkeyHeaderType = {
+  payload: {
+    pubkey: JsonWebKey
+    address: string
+    expires: Date
+
+    // @note: Unused for now
+    domain: string
+  }
+  signature: string
+}
+
+export type SignedOperationHeaderType = {
+  payload: {
+    // @note: Time is used for replay protection
+    time: Date
+
+    path: string
+    method: 'POST' | 'GET'
+  }
+  signature: string
+}
+
+export type SignedHeaderType =
+  | SignedPubkeyHeaderType
+  | SignedOperationHeaderType
+
+export type SignedWebHeaderType = {
+  payload: string
+  signature: string
+}

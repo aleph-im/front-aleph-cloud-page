@@ -9,7 +9,7 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/types'
 import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
-import { EntityType } from './constants'
+import { EntityType, SignedHeaderType, SignedWebHeaderType } from './constants'
 import { SSHKey } from '../domain/ssh'
 import { Instance } from '../domain/instance'
 import { Volume } from '@/domain/volume'
@@ -361,4 +361,35 @@ export function toKebabCase(input: string): string {
 
 export function toSnakeCase(input: string): string {
   return toKebabCase(input).replace(/-/g, '_')
+}
+
+/**
+ * Returns an hex string to use for as a payload for arbitrary signing with a wallet
+ */
+export function getSignableBuffer(input: object): string {
+  return Buffer.from(JSON.stringify(input)).toString('hex')
+}
+
+/**
+ * Takes a signed token (with a JSON payload) and returns a token with a hex encoded payload
+ */
+export function toWebHeaderToken(token: SignedHeaderType): string {
+  const webToken: SignedWebHeaderType = {
+    payload: getSignableBuffer(token.payload),
+    signature: token.signature,
+  }
+
+  return JSON.stringify(webToken)
+}
+
+export const getECDSAKeyPair = async () => {
+  const keyPair = await crypto.subtle.generateKey(
+    {
+      name: 'ECDSA',
+      namedCurve: 'P-256',
+    },
+    true,
+    ['sign', 'verify'],
+  )
+  return keyPair
 }
