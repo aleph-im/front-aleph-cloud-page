@@ -65,7 +65,7 @@ export default function HomePage() {
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
               <H2 label="Solutions">Computing</H2>
-              <p className="fs-md" tw="mt-0">
+              <p className="fs-18" tw="mt-0">
                 With Aleph.im&apos;s computing services, you can process data
                 quickly and securely using on-demand and persistent functions,
                 virtual machine instances, and confidential VMs.
@@ -124,7 +124,7 @@ export default function HomePage() {
                 SOLANA - ETHEREUM - BINANCE SMART CHAIN
               </span>
               <H2 className="tp-h4 md:tp-h3">Indexing framework</H2>
-              <p className="fs-md" tw="mt-0 mb-16">
+              <p className="fs-18" tw="mt-0 mb-16">
                 Consider using the Aleph Indexer Framework for indexing
                 blockchain data. It&apos;s <strong>open-source</strong>,{' '}
                 <strong>multi-chain</strong>, and provides an easy-to-use
@@ -164,7 +164,7 @@ export default function HomePage() {
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
               <H2 label="Solutions">Storage</H2>
-              <p className="fs-md">
+              <p className="fs-18">
                 With support for immutable, temporary, and persistent volumes,
                 as well as databases using key-value pairs, Aleph.im provides a
                 flexible and powerful storage solution for a wide range of use
