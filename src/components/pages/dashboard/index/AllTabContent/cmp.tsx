@@ -14,7 +14,7 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
           <div tw="overflow-auto max-w-full">
             <EntityTable
               borderType="none"
-              oddRowNoise
+              rowNoise
               rowKey={(row) => row.id}
               data={data}
               rowProps={(row) => ({

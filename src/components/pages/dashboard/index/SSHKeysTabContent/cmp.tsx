@@ -13,7 +13,7 @@ export const SSHKeysTabContent = React.memo(
             <div tw="overflow-auto max-w-full">
               <EntityTable
                 borderType="none"
-                oddRowNoise
+                rowNoise
                 rowKey={(row) => row.key}
                 data={data}
                 rowProps={(row) => ({

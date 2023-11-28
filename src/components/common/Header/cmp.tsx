@@ -50,7 +50,6 @@ export const Header = () => {
         address={account?.address}
         addressHref={`https://etherscan.io/address/${account?.address}`}
         balance={accountBalance}
-        size="regular"
       />
     )
   }

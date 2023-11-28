@@ -134,7 +134,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     <div tw="max-w-full overflow-y-hidden overflow-x-auto">
       <StyledTable
         borderType="none"
-        oddRowNoise
+        rowNoise
         rowKey={getRowKey}
         rowProps={handleRowProps}
         columns={columns}
