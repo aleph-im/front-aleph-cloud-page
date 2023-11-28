@@ -13,6 +13,7 @@ export type UseHeaderReturn = {
   displayWalletPicker: boolean
   accountBalance?: number
   divRef: RefObject<HTMLDivElement>
+  divRefMobile: RefObject<HTMLDivElement>
   isOpen: boolean
   isOnPath: (path: string) => boolean
   handleToggleOpen: (open: boolean) => void
@@ -75,10 +76,11 @@ export function useHeader(): UseHeaderReturn {
   // --------------------
 
   const divRef = useRef<HTMLDivElement>(null)
+  const divRefMobile = useRef<HTMLDivElement>(null)
 
   useClickOutside(() => {
     if (displayWalletPicker) setDisplayWalletPicker(false)
-  }, [divRef])
+  }, [divRef, divRefMobile])
 
   const handleDisplayWalletPicker = () => {
     setDisplayWalletPicker(!displayWalletPicker)
@@ -119,6 +121,7 @@ export function useHeader(): UseHeaderReturn {
     displayWalletPicker,
     accountBalance,
     divRef,
+    divRefMobile,
     isOpen,
     isOnPath,
     handleToggleOpen,
