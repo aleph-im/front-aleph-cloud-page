@@ -112,9 +112,6 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       const content: DomainAggregate = domains.reduce((ac, cv) => {
         const { name, ref, target, programType } = cv
 
-        console.log('programType', programType)
-        console.log('target', target)
-
         const domain = {
           message_id: ref,
           programType,
