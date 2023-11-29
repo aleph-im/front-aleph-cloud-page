@@ -14,7 +14,7 @@ import { domainSchema, domainsSchema } from '@/helpers/schemas/domain'
 export { AddDomainTarget }
 
 export type DomainAggregateItem = {
-  type: AddDomainTarget
+  type: AddDomainTarget | EntityType.Program | EntityType.Instance
   message_id: string
   programType?: EntityType.Instance | EntityType.Program
   updated_at: string
@@ -24,8 +24,8 @@ export type DomainAggregate = Record<string, DomainAggregateItem | null>
 
 export type AddDomain = {
   name: string
-  target: AddDomainTarget
-  programType?: EntityType.Instance | EntityType.Program
+  target: AddDomainTarget | EntityType.Program | EntityType.Instance
+  programType: EntityType.Instance | EntityType.Program
   ref: string
 }
 
@@ -112,23 +112,19 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       const content: DomainAggregate = domains.reduce((ac, cv) => {
         const { name, ref, target, programType } = cv
 
+        console.log('programType', programType)
+        console.log('target', target)
+
         const domain = {
           message_id: ref,
           programType,
-          type: target,
+          type: target === AddDomainTarget.IPFS ? target : programType,
           updated_at: new Date().toISOString(),
         }
 
         // @note: legacy domains don't include programType (default to Instance)
         if (target === AddDomainTarget.Program) {
           domain.programType = cv.programType || EntityType.Instance
-        }
-
-        // @note: temporary dirty fix
-        if (programType !== undefined) {
-          // @fixme:
-          // Those two enums are overlapping even though they do not share the same reference
-          domain.type = programType as unknown as AddDomainTarget
         }
 
         ac[name] = domain
