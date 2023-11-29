@@ -1,4 +1,10 @@
-import { Button, Tabs, TextGradient } from '@aleph-front/aleph-core'
+import {
+  Button,
+  Tabs,
+  TextGradient,
+  Icon,
+  WalletPicker,
+} from '@aleph-front/aleph-core'
 import { EntityType } from '@/helpers/constants'
 import CompositeTitle from '@/components/common/CompositeTitle'
 import { useNewFunctionPage } from '@/hooks/pages/dashboard/useNewFunctionPage'
@@ -16,6 +22,7 @@ import { convertByteUnits } from '@/helpers/utils'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime/cmp'
+import { useHeader } from '@/hooks/pages/useHeader'
 
 export default function NewFunctionPage() {
   const {
@@ -28,6 +35,43 @@ export default function NewFunctionPage() {
     handleSubmit,
     handleChangeEntityTab,
   } = useNewFunctionPage()
+
+  const {
+    theme,
+    account,
+    displayWalletPicker,
+    divRef,
+    handleConnect,
+    handleDisplayWalletPicker,
+    provider,
+  } = useHeader()
+
+  const WalletPickerComponent = () => {
+    return (
+      <WalletPicker
+        networks={[
+          {
+            icon: 'ethereum',
+            name: 'Ethereum',
+            wallets: [
+              {
+                color: 'orange',
+                icon: 'circle',
+                name: 'Metamask',
+                provider,
+              },
+            ],
+          },
+        ]}
+        onConnect={handleConnect}
+        onDisconnect={handleConnect}
+        address={account?.address}
+        addressHref={`https://etherscan.io/address/${account?.address}`}
+        balance={accountBalance}
+        size="regular"
+      />
+    )
+  }
 
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
@@ -204,16 +248,43 @@ export default function NewFunctionPage() {
           </>
         }
         button={
-          <Button
-            type="submit"
-            color="main0"
-            kind="neon"
-            size="big"
-            variant="primary"
-            disabled={isCreateButtonDisabled}
-          >
-            Create function
-          </Button>
+          <>
+            {address ? (
+              <Button
+                type="submit"
+                color="main0"
+                kind="neon"
+                size="big"
+                variant="primary"
+                disabled={isCreateButtonDisabled}
+              >
+                Create function
+              </Button>
+            ) : (
+              <>
+                <Button
+                  as="button"
+                  type="button"
+                  variant="tertiary"
+                  color="main0"
+                  kind="neon"
+                  size="regular"
+                  onClick={handleDisplayWalletPicker}
+                >
+                  Connect{' '}
+                  <Icon
+                    name="meteor"
+                    size="lg"
+                    tw="ml-2.5"
+                    color={theme.color.main0}
+                  />
+                </Button>
+                <div tw="flex justify-center my-6" ref={divRef}>
+                  {displayWalletPicker && WalletPickerComponent()}
+                </div>
+              </>
+            )}
+          </>
         }
       />
     </Form>
