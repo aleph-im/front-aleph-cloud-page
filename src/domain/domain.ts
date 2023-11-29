@@ -124,6 +124,13 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
           domain.programType = cv.programType || EntityType.Instance
         }
 
+        // @note: temporary dirty fix
+        if (programType !== undefined) {
+          // @fixme:
+          // Those two enums are overlapping even though they do not share the same reference
+          domain.type = programType as unknown as AddDomainTarget
+        }
+
         ac[name] = domain
 
         return ac
