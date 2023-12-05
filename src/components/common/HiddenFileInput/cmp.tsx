@@ -33,6 +33,8 @@ export const HiddenFileInput = memo(
       }, [])
 
       const handleRemoveFile = useCallback(() => {
+        if (!inputRef.current) return
+        inputRef.current.value = ''
         onChange(undefined)
       }, [onChange])
 
