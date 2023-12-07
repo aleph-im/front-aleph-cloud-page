@@ -11,6 +11,12 @@ export const StyledTable = styled(Table<SpecsDetail>)`
         &:hover {
           color: ${theme.color.main0};
         }
+
+        &.disabled {
+          color: ${theme.color.base0};
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
       }
     }
 

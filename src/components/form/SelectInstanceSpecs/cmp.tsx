@@ -8,6 +8,7 @@ import { SelectInstanceSpecsProps, SpecsDetail } from './types'
 import { StyledTable } from './styles'
 import { Executable } from '@/domain/executable'
 import { EntityType } from '@/helpers/constants'
+import tw from 'twin.macro'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { specsCtrl, options, type, isPersistent } =
@@ -47,20 +48,28 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         align: 'right',
         render: (row: SpecsDetail) => {
           return (
-            <Button
-              color="main0"
-              variant="tertiary"
-              kind="neon"
-              size="regular"
-              forwardedAs="button"
-              type="button"
-              tabIndex={-1}
-              // TODO: Fix this
-              style={{ visibility: row.isActive ? 'visible' : 'hidden' }}
-              onClick={(e) => e.preventDefault()}
-            >
-              <Icon name="check" />
-            </Button>
+            <>
+              {row.specs.disabled ? (
+                <div className="fs-12 tp-body2" tw="text-center">
+                  (Soon)
+                </div>
+              ) : (
+                <Button
+                  color="main0"
+                  variant="tertiary"
+                  kind="neon"
+                  size="regular"
+                  forwardedAs="button"
+                  type="button"
+                  tabIndex={-1}
+                  // TODO: Fix this
+                  style={{ visibility: row.isActive ? 'visible' : 'hidden' }}
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <Icon name="check" />
+                </Button>
+              )}
+            </>
           )
         },
       },
@@ -118,7 +127,10 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
 
   const handleRowProps = useCallback(
     (row: SpecsDetail, rowIndex: number) => ({
-      onClick: () => onChange(row.specs),
+      onClick: () => {
+        if (row.specs.disabled) return
+        onChange(row.specs)
+      },
       onKeyDown: (e: KeyboardEvent) => {
         if (e.code !== 'Space' && e.code !== 'Enter') return
         e.preventDefault()
@@ -126,6 +138,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
       },
       tabIndex: 0,
       ref: rowIndex === 0 ? ref : undefined,
+      className: row.specs.disabled ? 'disabled' : '',
     }),
     [onChange, ref],
   )

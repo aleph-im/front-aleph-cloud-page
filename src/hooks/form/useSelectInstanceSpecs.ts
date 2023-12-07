@@ -7,6 +7,7 @@ export type InstanceSpecsField = {
   cpu: number
   ram: number
   storage: number
+  disabled?: boolean
 }
 
 export function updateSpecsStorage(
@@ -15,6 +16,7 @@ export function updateSpecsStorage(
 ): InstanceSpecsField {
   return {
     ...specs,
+    disabled: isPersistent && specs.cpu >= 6,
     storage: convertByteUnits(specs.cpu * 2 * (isPersistent ? 10 : 1), {
       from: 'GiB',
       to: 'MiB',
