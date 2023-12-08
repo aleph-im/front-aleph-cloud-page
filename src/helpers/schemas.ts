@@ -86,6 +86,11 @@ export const codeFileSchema = z
     message: 'File size should be greater than 0',
   })
 
+export const ipfsCIDSchema = requiredStringSchema.regex(
+  /^Qm[1-9A-Za-z]{44}[^OIl]$/,
+  { message: 'Invalid IPFS CID hash' },
+)
+
 export const programTypeSchema = z.enum([
   EntityType.Instance,
   EntityType.Program,

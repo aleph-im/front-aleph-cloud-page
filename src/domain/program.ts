@@ -130,7 +130,7 @@ export class ProgramManager
   /**
    * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
    */
-  static getCost = (props: ProgramCostProps): ProgramCost => {
+  static async getCost(props: ProgramCostProps): Promise<ProgramCost> {
     return Executable.getExecutableCost({
       ...props,
       type: EntityType.Program,

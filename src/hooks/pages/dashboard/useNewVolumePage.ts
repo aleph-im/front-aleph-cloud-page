@@ -9,6 +9,8 @@ import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { ActionTypes } from '@/helpers/store'
 import { Control, FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEntityCost } from '@/hooks/common/useEntityCost'
+import { EntityType } from '@/helpers/constants'
 
 export type NewVolumeFormState = NewVolumeStandaloneField
 
@@ -64,12 +66,18 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
   const values = watch()
 
   const accountBalance = appState?.accountBalance || 0
-  const { totalCost } = useMemo(
-    () => VolumeManager.getCost({ volumes: [values] }),
-    [values],
-  )
 
-  const canAfford = accountBalance > totalCost
+  const volumes = useMemo(() => [values], [values])
+
+  const { cost } = useEntityCost({
+    entityType: EntityType.Volume,
+    props: {
+      volumes,
+    },
+  })
+
+  const canAfford =
+    accountBalance > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false

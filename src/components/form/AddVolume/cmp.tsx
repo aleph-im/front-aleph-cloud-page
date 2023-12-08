@@ -102,8 +102,13 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
 AddNewVolume.displayName = 'AddNewVolume'
 
 const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
-  const { refHashCtrl, mountPathCtrl, useLatestCtrl, handleRemove } =
-    useAddExistingVolumeProps(props)
+  const {
+    refHashCtrl,
+    mountPathCtrl,
+    useLatestCtrl,
+    volumeSize,
+    handleRemove,
+  } = useAddExistingVolumeProps(props)
 
   return (
     <>
@@ -132,6 +137,11 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
             placeholder="3335ad270a571b..."
           />
         </div>
+        {refHashCtrl.field.value && volumeSize && (
+          <div tw="mt-4">
+            <TextInput label="Size" name="size" value={volumeSize} disabled />
+          </div>
+        )}
         <div tw="mt-4 py-4">
           <Checkbox
             {...useLatestCtrl.field}

@@ -34,7 +34,7 @@ export type IndexerCost = ProgramCost
 export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
   static addSchema = indexerSchema
 
-  static getCost = (props: IndexerCostProps): IndexerCost => {
+  static async getCost(props: IndexerCostProps): Promise<IndexerCost> {
     const { specs } = this.getStaticProgramConfig()
 
     return ProgramManager.getCost({

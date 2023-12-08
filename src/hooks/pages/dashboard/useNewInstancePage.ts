@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback, useEffect, useMemo } from 'react'
+import { FormEvent, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
@@ -27,7 +27,8 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { VolumeType } from '@/helpers/constants'
+import { EntityType, VolumeType } from '@/helpers/constants'
+import { useEntityCost } from '@/hooks/common/useEntityCost'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -120,17 +121,16 @@ export function useNewInstancePage(): UseNewInstancePage {
     setValue('volumes.0.size', storage)
   }, [storage, fakeVolume, setValue])
 
-  const { totalCost } = useMemo(
-    () =>
-      InstanceManager.getCost({
-        specs: values.specs,
-        volumes: values.volumes,
-        capabilities: {},
-      }),
-    [values.specs, values.volumes],
-  )
+  const { cost } = useEntityCost({
+    entityType: EntityType.Instance,
+    props: {
+      specs: values.specs,
+      volumes: values.volumes,
+    },
+  })
 
-  const canAfford = (accountBalance || 0) > totalCost
+  const canAfford =
+    (accountBalance || 0) > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false

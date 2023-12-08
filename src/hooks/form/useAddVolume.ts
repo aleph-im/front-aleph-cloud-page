@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useMemo } from 'react'
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { convertByteUnits, humanReadableSize } from '@/helpers/utils'
 import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
@@ -88,14 +88,19 @@ export function useAddNewVolumeProps({
   })
 
   const { value: file } = fileCtrl.field
+  const [volumeSize, setVolumeSize] = useState<string>('')
 
-  const volumeSize = useMemo(() => {
-    const size = VolumeManager.getVolumeSize({
-      volumeType: VolumeType.New,
-      file,
-    } as Volume)
+  useEffect(() => {
+    async function load() {
+      const size = await VolumeManager.getVolumeSize({
+        volumeType: VolumeType.New,
+        file,
+      } as Volume)
 
-    return humanReadableSize(size, 'MiB')
+      const hSize = humanReadableSize(size, 'MiB')
+      setVolumeSize(hSize)
+    }
+    load()
   }, [file])
 
   return {
@@ -118,6 +123,7 @@ export type UseAddExistingVolumeReturn = {
   refHashCtrl: UseControllerReturn<any, any>
   mountPathCtrl: UseControllerReturn<any, any>
   useLatestCtrl: UseControllerReturn<any, any>
+  volumeSize: string
   handleRemove?: () => void
 }
 
@@ -146,10 +152,27 @@ export function useAddExistingVolumeProps({
     defaultValue: defaultValue?.useLatest,
   })
 
+  const { value: refHash } = refHashCtrl.field
+  const [volumeSize, setVolumeSize] = useState<string>('')
+
+  useEffect(() => {
+    async function load() {
+      const size = await VolumeManager.getVolumeSize({
+        volumeType: VolumeType.Existing,
+        refHash,
+      } as Volume)
+
+      const hSize = humanReadableSize(size, 'MiB')
+      setVolumeSize(hSize)
+    }
+    load()
+  }, [refHash])
+
   return {
     refHashCtrl,
     mountPathCtrl,
     useLatestCtrl,
+    volumeSize,
     handleRemove,
   }
 }

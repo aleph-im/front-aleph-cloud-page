@@ -169,6 +169,7 @@ export function humanReadableSize(
   value?: number,
   from: ByteUnit = 'B',
 ): string {
+  if (value === Number.POSITIVE_INFINITY) return 'n/a'
   if (value === undefined) return 'n/a'
   if (value === 0) return '-'
 
@@ -181,6 +182,7 @@ export function humanReadableSize(
  * Transforms a number into a multiple of 1000 with a suffix, (ex: 625217 -> 625.2K)
  */
 export const humanReadableCurrency = (value?: number) => {
+  if (value === Number.POSITIVE_INFINITY) return 'n/a'
   if (value === undefined) return 'n/a'
   if (value === 0) return value
   if (value < 1_000) return value.toFixed(1)

@@ -11,15 +11,14 @@ import {
   HoldingRequirementsSpecsLineProps,
   HoldingRequirementsVolumeLineProps,
 } from './types'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import React from 'react'
 import { EntityType, EntityTypeName } from '@/helpers/constants'
-import { InstanceManager } from '@/domain/instance'
-import { ProgramManager } from '@/domain/program'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import InfoTooltipButton from '../InfoTooltipButton'
 import Container from '@/components/common/CenteredContainer'
 import { TextGradient } from '@aleph-front/aleph-core'
+import { useEntityCost } from '@/hooks/common/useEntityCost'
 
 const HoldingRequirementsSpecsLine = React.memo(
   ({ type, specs, cost }: HoldingRequirementsSpecsLineProps) => {
@@ -74,7 +73,17 @@ HoldingRequirementsSpecsLine.displayName = 'HoldingRequirementsSpecsLine'
 
 const HoldingRequirementsVolumeLine = React.memo(
   ({ volume, cost, specs }: HoldingRequirementsVolumeLineProps) => {
-    const size = VolumeManager.getVolumeSize(volume)
+    const [size, setSize] = useState<number>(0)
+
+    useEffect(() => {
+      async function load() {
+        const size = await VolumeManager.getVolumeSize(volume)
+        setSize(size)
+      }
+
+      load()
+    }, [volume])
+
     if (!cost) return <></>
 
     const hasDiscount = !!cost.discount
@@ -179,30 +188,19 @@ export default function HoldingRequirements({
   button: ButtonCmp,
   description,
 }: HoldingRequirementsProps) {
-  volumes = volumes?.filter((volume) => !volume.isFake)
+  volumes = useMemo(
+    () => volumes?.filter((volume) => !volume.isFake),
+    [volumes],
+  )
 
-  const { computeTotalCost, perVolumeCost, totalCost } = useMemo(() => {
-    switch (type) {
-      case EntityType.Program:
-        return ProgramManager.getCost({
-          specs,
-          volumes,
-          isPersistent,
-        })
-      case EntityType.Instance:
-        return InstanceManager.getCost({
-          specs,
-          volumes,
-        })
-      case EntityType.Volume:
-        return {
-          ...VolumeManager.getCost({
-            volumes,
-          }),
-          computeTotalCost: 0,
-        }
-    }
-  }, [isPersistent, specs, type, volumes])
+  const { cost } = useEntityCost({
+    entityType: type,
+    props: {
+      specs,
+      volumes,
+      isPersistent,
+    },
+  })
 
   return (
     <>
@@ -235,9 +233,7 @@ export default function HoldingRequirements({
                   {...{
                     type,
                     specs,
-                    isPersistent,
-                    perVolumeCost,
-                    cost: computeTotalCost,
+                    cost: (cost as any)?.computeTotalCost,
                   }}
                 />
               )}
@@ -250,7 +246,7 @@ export default function HoldingRequirements({
                       {...{
                         volume,
                         specs,
-                        cost: perVolumeCost[index],
+                        cost: cost?.perVolumeCost[index],
                       }}
                     />
                   )
@@ -279,7 +275,7 @@ export default function HoldingRequirements({
                 <div className="tp-body2">Total Staked</div>
                 <div>
                   <span className="text-main1">
-                    {humanReadableCurrency(totalCost)} ALEPH
+                    {humanReadableCurrency(cost?.totalCost)} ALEPH
                   </span>
                 </div>
               </StyledHoldingSummaryLine>

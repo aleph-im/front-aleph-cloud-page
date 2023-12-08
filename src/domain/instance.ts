@@ -76,7 +76,7 @@ export class InstanceManager
   /**
    * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
    */
-  static getCost = (props: InstanceCostProps): InstanceCost => {
+  static getCost = (props: InstanceCostProps): Promise<InstanceCost> => {
     return Executable.getExecutableCost({
       ...props,
       type: EntityType.Instance,

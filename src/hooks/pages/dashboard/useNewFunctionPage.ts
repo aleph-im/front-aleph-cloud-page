@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback, useMemo } from 'react'
+import { FormEvent, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import {
   InstanceSpecsField,
@@ -21,6 +21,8 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CustomFunctionRuntimeField } from '@/domain/runtime'
+import { useEntityCost } from '@/hooks/common/useEntityCost'
+import { EntityType } from '@/helpers/constants'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -91,18 +93,17 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as NewFunctionFormState
 
-  const { totalCost } = useMemo(
-    () =>
-      ProgramManager.getCost({
-        specs: values.specs,
-        isPersistent: values.isPersistent,
-        volumes: values.volumes,
-        capabilities: {},
-      }),
-    [values.isPersistent, values.specs, values.volumes],
-  )
+  const { cost } = useEntityCost({
+    entityType: EntityType.Program,
+    props: {
+      specs: values.specs,
+      isPersistent: values.isPersistent,
+      volumes: values.volumes,
+    },
+  })
 
-  const canAfford = (accountBalance || 0) > totalCost
+  const canAfford =
+    (accountBalance || 0) > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false

@@ -42,13 +42,13 @@ export abstract class Executable {
    * Calculates the amount of tokens required to deploy a function
    * https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
    */
-  static getExecutableCost = ({
+  static async getExecutableCost({
     type,
     isPersistent,
     specs,
     capabilities = {},
     volumes = [],
-  }: ExecutableCostProps): ExecutableCost => {
+  }: ExecutableCostProps): Promise<ExecutableCost> {
     if (!specs)
       return {
         computeTotalCost: 0,
@@ -69,9 +69,8 @@ export abstract class Executable {
 
     const sizeDiscount = type === EntityType.Instance ? 0 : specs.storage
 
-    const { perVolumeCost, totalCost: volumeTotalCost } = VolumeManager.getCost(
-      { volumes, sizeDiscount },
-    )
+    const { perVolumeCost, totalCost: volumeTotalCost } =
+      await VolumeManager.getCost({ volumes, sizeDiscount })
 
     const totalCost = volumeTotalCost + computeTotalCost
 

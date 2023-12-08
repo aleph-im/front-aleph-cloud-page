@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback, useMemo } from 'react'
+import { FormEvent, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { NameAndTagsField } from '../../form/useAddNameAndTags'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
@@ -11,7 +11,8 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IndexerBlockchainNetworkField } from '@/hooks/form/useAddIndexerBlockchainNetworks'
 import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccounts'
-import { IndexerBlockchain } from '@/helpers/constants'
+import { EntityType, IndexerBlockchain } from '@/helpers/constants'
+import { useEntityCost } from '@/hooks/common/useEntityCost'
 
 export type NewIndexerFormState = NameAndTagsField & {
   networks: IndexerBlockchainNetworkField[]
@@ -93,18 +94,17 @@ export function useNewIndexerPage(): UseNewIndexerPage {
   const holdingRequirementsProps = IndexerManager.getStaticProgramConfig()
   const { specs, isPersistent, volumes } = holdingRequirementsProps
 
-  const { totalCost } = useMemo(
-    () =>
-      IndexerManager.getCost({
-        specs,
-        isPersistent,
-        volumes,
-        capabilities: {},
-      }),
-    [isPersistent, specs, volumes],
-  )
+  const { cost } = useEntityCost({
+    entityType: EntityType.Indexer,
+    props: {
+      specs,
+      isPersistent,
+      volumes,
+    },
+  })
 
-  const canAfford = (accountBalance || 0) > totalCost
+  const canAfford =
+    (accountBalance || 0) > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false

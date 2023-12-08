@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, memo } from 'react'
+import React, { KeyboardEvent, memo, useEffect, useState } from 'react'
 /* eslint-disable @next/next/no-img-element */
 import { useSelectInstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 import { Button, FormError, Icon, TableColumn } from '@aleph-front/aleph-core'
@@ -8,7 +8,6 @@ import { SelectInstanceSpecsProps, SpecsDetail } from './types'
 import { StyledTable } from './styles'
 import { Executable } from '@/domain/executable'
 import { EntityType } from '@/helpers/constants'
-import tw from 'twin.macro'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { specsCtrl, options, type, isPersistent } =
@@ -90,36 +89,48 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     return cols
   }, [type])
 
-  const data: SpecsDetail[] = useMemo(() => {
-    return options.map((specs) => {
-      const { ram, storage } = specs
-      const price = Executable.getExecutableCost({
-        type,
-        specs,
-        isPersistent,
-      })
+  // ------------------------------------------
 
-      const isActive = specsCtrl.field.value.cpu === specs.cpu
-      const className = `${isActive ? 'text-main0' : ''}`
+  const [data, setData] = useState<SpecsDetail[]>([])
 
-      return {
-        specs,
-        isActive,
-        className,
-        storage: convertByteUnits(storage, {
-          from: 'MiB',
-          to: 'GiB',
-          displayUnit: true,
+  useEffect(() => {
+    async function load(): Promise<void> {
+      const loadedData = await Promise.all(
+        options.map(async (specs) => {
+          const { ram, storage } = specs
+          const price = await Executable.getExecutableCost({
+            type,
+            specs,
+            isPersistent,
+          })
+
+          const isActive = specsCtrl.field.value.cpu === specs.cpu
+          const className = `${isActive ? 'text-main0' : ''}`
+
+          return {
+            specs,
+            isActive,
+            className,
+            storage: convertByteUnits(storage, {
+              from: 'MiB',
+              to: 'GiB',
+              displayUnit: true,
+            }),
+            ram: convertByteUnits(ram, {
+              from: 'MiB',
+              to: 'GiB',
+              displayUnit: true,
+            }),
+            price: price.computeTotalCost + ' ALEPH',
+          }
         }),
-        ram: convertByteUnits(ram, {
-          from: 'MiB',
-          to: 'GiB',
-          displayUnit: true,
-        }),
-        price: price.computeTotalCost + ' ALEPH',
-      }
-    })
-  }, [options, type, isPersistent, specsCtrl.field.value])
+      )
+
+      setData(loadedData)
+    }
+
+    load()
+  }, [isPersistent, options, specsCtrl.field.value.cpu, type])
 
   const getRowKey = useCallback((row: SpecsDetail) => row.specs.cpu + '', [])
 
