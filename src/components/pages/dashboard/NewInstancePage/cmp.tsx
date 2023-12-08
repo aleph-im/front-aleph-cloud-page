@@ -119,7 +119,7 @@ export default function NewInstancePage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="4">
+          <CompositeTitle as="h2" number="5">
             Advanced Configuration Options
           </CompositeTitle>
           <p tw="mb-6">
