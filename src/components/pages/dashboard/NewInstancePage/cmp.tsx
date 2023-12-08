@@ -90,6 +90,22 @@ export default function NewInstancePage() {
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <CompositeTitle as="h2" number="3">
+            Configure SSH Key
+          </CompositeTitle>
+          <p>
+            Access your cloud instances securely. Give existing key’s below
+            access to this instance or add new keys. Remember, storing private
+            keys safely is crucial for security. If you need help, our support
+            team is always ready to assist.
+          </p>
+          <div tw="px-0 my-6">
+            <AddSSHKeys name="sshKeys" control={control} />
+          </div>
+        </Container>
+      </section>
+      <section tw="px-0 pt-20 pb-6 md:py-10">
+        <Container>
+          <CompositeTitle as="h2" number="4">
             Name and tags
           </CompositeTitle>
           <p tw="mb-6">
@@ -133,20 +149,6 @@ export default function NewInstancePage() {
                   code.
                 </p>
                 <AddEnvVars name="envVars" control={control} />
-              </ToggleContainer>
-            </div>
-            <div tw="mb-4">
-              <ToggleContainer label="Add SSH Key">
-                <TextGradient forwardedAs="h2" type="h6" color="main0">
-                  Configure SSH Key
-                </TextGradient>
-                <p tw="mb-6">
-                  Access your cloud instances securely. Give existing key’s
-                  below access to this instance or add new keys. Remember,
-                  storing private keys safely is crucial for security. If you
-                  need help, our support team is always ready to assist.
-                </p>
-                <AddSSHKeys name="sshKeys" control={control} />
               </ToggleContainer>
             </div>
             <div tw="mb-4">
