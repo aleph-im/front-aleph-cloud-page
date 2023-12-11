@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback, useMemo } from 'react'
+import { FormEvent, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
@@ -12,7 +12,7 @@ import {
   SSHKeyField,
   // defaultValues as sshKeyDefaultValues,
 } from '@/hooks/form/useAddSSHKeys'
-import { VolumeField } from '@/hooks/form/useAddVolume'
+import { PersistentVolumeField, VolumeField } from '@/hooks/form/useAddVolume'
 import {
   InstanceImageField,
   defaultInstanceImage,
@@ -27,6 +27,8 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { EntityType, VolumeType } from '@/helpers/constants'
+import { useEntityCost } from '@/hooks/common/useEntityCost'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -37,10 +39,21 @@ export type NewInstanceFormState = NameAndTagsField & {
   domains?: DomainField[]
 }
 
+const specs = { ...getDefaultSpecsOptions(true)[0] }
+
 export const defaultValues: Partial<NewInstanceFormState> = {
   ...defaultNameAndTags,
   image: defaultInstanceImage,
-  specs: { ...getDefaultSpecsOptions(true)[0] },
+  specs,
+  volumes: [
+    {
+      volumeType: VolumeType.Persistent,
+      name: 'System Volume',
+      mountPath: '/',
+      size: specs.storage,
+      isFake: true,
+    },
+  ],
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
@@ -86,6 +99,7 @@ export function useNewInstancePage(): UseNewInstancePage {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     defaultValues,
     onSubmit,
@@ -93,17 +107,30 @@ export function useNewInstancePage(): UseNewInstancePage {
   })
   const values = useWatch({ control }) as NewInstanceFormState
 
-  const { totalCost } = useMemo(
-    () =>
-      InstanceManager.getCost({
-        specs: values.specs,
-        volumes: values.volumes,
-        capabilities: {},
-      }),
-    [values.specs, values.volumes],
-  )
+  const { storage } = values.specs
+  const fakeVolume = values.volumes?.find((volume) => volume.isFake) as
+    | PersistentVolumeField
+    | undefined
 
-  const canAfford = (accountBalance || 0) > totalCost
+  // @note: Change default System fake volume size when the specs changes
+  useEffect(() => {
+    if (!storage) return
+    if (!fakeVolume) return
+    if (fakeVolume.size === storage) return
+
+    setValue('volumes.0.size', storage)
+  }, [storage, fakeVolume, setValue])
+
+  const { cost } = useEntityCost({
+    entityType: EntityType.Instance,
+    props: {
+      specs: values.specs,
+      volumes: values.volumes,
+    },
+  })
+
+  const canAfford =
+    (accountBalance || 0) > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false

@@ -1,10 +1,10 @@
 import React from 'react'
 import tw from 'twin.macro'
 import { AllTabContentProps } from './types'
-import { Table } from '@aleph-front/aleph-core'
 import ButtonLink from '@/components/common/ButtonLink'
 import { humanReadableSize } from '@/helpers/utils'
 import { EntityType, EntityTypeName } from '@/helpers/constants'
+import EntityTable from '@/components/common/EntityTable'
 
 export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
   return (
@@ -12,9 +12,9 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
       {data.length > 0 ? (
         <>
           <div tw="overflow-auto max-w-full">
-            <Table
+            <EntityTable
               borderType="none"
-              oddRowNoise
+              rowNoise
               rowKey={(row) => row.id}
               data={data}
               rowProps={(row) => ({
@@ -28,7 +28,7 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                 },
                 {
                   label: 'Name',
-                  width: '55%',
+                  width: '100%',
                   sortable: true,
                   render: (row) => row.name,
                 },
@@ -46,7 +46,6 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                 },
                 {
                   label: '',
-                  width: '0',
                   align: 'right',
                   render: (row) => (
                     <ButtonLink

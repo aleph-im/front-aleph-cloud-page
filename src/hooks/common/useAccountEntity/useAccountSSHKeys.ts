@@ -50,6 +50,7 @@ export function useAccountSSHKeys({
     onSuccess,
     onError,
     triggerOnMount,
+    triggerDeps: [appState.account],
   })
 
   const entities = appState.accountSSHKeys

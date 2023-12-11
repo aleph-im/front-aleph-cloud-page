@@ -108,7 +108,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     sshKeys: AddSSHKey[],
     throwOnCollision = true,
   ): Promise<AddSSHKey[]> {
-    sshKeys = SSHKeyManager.addManySchema.parse(sshKeys)
+    sshKeys = await SSHKeyManager.addManySchema.parseAsync(sshKeys)
 
     const currentSSHKeys = await this.getAll()
     const currentSSHKeySet = new Set<string>(currentSSHKeys.map((d) => d.key))

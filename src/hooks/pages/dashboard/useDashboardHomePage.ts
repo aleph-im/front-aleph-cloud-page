@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { AnyEntity, ellipseAddress } from '@/helpers/utils'
+import { AnyEntity, convertByteUnits, ellipseAddress } from '@/helpers/utils'
 import { EntityType } from '@/helpers/constants'
 import {
   UseAccountEntitiesReturn,
@@ -40,7 +40,10 @@ export function useDashboardHomePage(): DashboardHomePage {
 
         const size =
           (type === EntityType.SSHKey
-            ? new Blob([entity.key]).size
+            ? convertByteUnits(new Blob([entity.key]).size, {
+                from: 'B',
+                to: 'MiB',
+              })
             : type === EntityType.Domain
             ? 0
             : entity.size) || 0

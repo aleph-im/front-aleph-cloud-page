@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { Domain, DomainStatus } from '@/domain/domain'
+import { AddDomain, Domain, DomainStatus } from '@/domain/domain'
 import { useAccountDomain } from '@/hooks/common/useAccountEntity/useAccountDomain'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useRequestState } from '@/hooks/common/useRequestState'
@@ -20,6 +20,7 @@ export type ManageDomain = {
   account?: Account
   handleCopyRef: () => void
   handleDelete: () => void
+  handleRetry: () => void
 }
 
 export function useManageDomain(): ManageDomain {
@@ -67,6 +68,24 @@ export function useManageDomain(): ManageDomain {
     }
   }, [domain, manager, onLoad, dispatch, onSuccess, router, onError])
 
+  const handleRetry = useCallback(async () => {
+    if (!domain) throw new Error('Invalid key')
+    if (!manager) throw new Error('Manager not ready')
+
+    console.log(domain)
+
+    try {
+      onLoad()
+
+      await manager.retry(domain)
+
+      onSuccess(true)
+      router.replace('/dashboard')
+    } catch (e) {
+      onError(e as Error)
+    }
+  }, [domain, manager, onLoad, onSuccess, onError])
+
   return {
     domain,
     status,
@@ -74,5 +93,6 @@ export function useManageDomain(): ManageDomain {
     account,
     handleCopyRef,
     handleDelete,
+    handleRetry,
   }
 }

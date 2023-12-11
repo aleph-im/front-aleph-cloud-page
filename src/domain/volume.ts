@@ -88,9 +88,8 @@ export type PersistentVolume = BaseVolume & {
 export type Volume = NewVolume | ExistingVolume | PersistentVolume
 
 export type VolumeCostProps = {
-  volumes?: (Volume | AddVolume)[]
+  volumes?: (Volume | AddVolume | VolumeField)[]
   sizeDiscount?: number
-  exclude?: VolumeType[]
 }
 
 export type PerVolumeCostItem = {
@@ -114,9 +113,13 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   /**
    * Returns the size of a volume in mb
    */
-  static getVolumeSize(volume: Volume | AddVolume): number {
+  static async getVolumeSize(volume: Volume | AddVolume): Promise<number> {
     if (volume.volumeType === VolumeType.New) {
-      return convertByteUnits(volume?.file?.size || 0, { from: 'B', to: 'MiB' })
+      return FileManager.getFileSize(volume?.file)
+    }
+
+    if (volume.volumeType === VolumeType.Existing) {
+      return FileManager.getFileSize(volume.refHash)
     }
 
     return volume.size || 0
@@ -125,67 +128,86 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   /**
    * Returns the size of a volume in mb
    */
-  static getVolumeMiBPrice(volume: Volume | AddVolume): number {
-    if (volume.volumeType !== VolumeType.New) return 20
-    if (volume.mountPath) return 20
+  static getStorageVolumeMiBPrice(volume: Volume | AddVolume): number {
+    // @todo: Right now we are not taking into account storage costs of the additional
+    // volumes (they are considered included as part of the free storage tiers)
+    return 0
 
-    return 1 / 3
+    // if (volume.volumeType !== VolumeType.New) return 0
+    // return 1 / 3
+  }
+
+  /**
+   * Returns the size of a volume in mb
+   */
+  static getExecutionVolumeMiBPrice(volume: Volume | AddVolume): number {
+    return 1 / 20
   }
 
   // @note: The algorithm for calculating the cost per volume is as follows:
   // 1. Calculate the storage allowance for the function, the more compute units, the more storage allowance
   // 2. For each volume, subtract the storage allowance from the volume size
   // 3. If there is more storage than allowance left, the additional storage is charged at ~20~ 1/3 tokens per mb
-  static getPerVolumeCost({
+  static async getPerVolumeCost({
     volumes = [],
     sizeDiscount = 0,
-    exclude = [VolumeType.Existing],
-  }: VolumeCostProps): PerVolumeCost {
-    return volumes.map((volume) => {
-      const isExcluded = exclude.includes(volume.volumeType)
-      const size = this.getVolumeSize(volume) || 0
-      const mibPrice = this.getVolumeMiBPrice(volume)
+  }: VolumeCostProps): Promise<PerVolumeCost> {
+    return Promise.all(
+      volumes.map(async (volume) => {
+        const size = await this.getVolumeSize(volume)
+        const mibStoragePrice = this.getStorageVolumeMiBPrice(volume)
+        const mibExecutionPrice = this.getExecutionVolumeMiBPrice(volume)
 
-      if (isExcluded) {
+        if (size === Number.POSITIVE_INFINITY) {
+          sizeDiscount = 0
+
+          return {
+            size,
+            price: Number.POSITIVE_INFINITY,
+            discount: 0,
+            cost: Number.POSITIVE_INFINITY,
+          }
+        }
+
+        let newSize = size
+
+        if (sizeDiscount > 0) {
+          if (newSize <= sizeDiscount) {
+            sizeDiscount -= newSize
+            newSize = 0
+          } else {
+            newSize -= sizeDiscount
+            sizeDiscount = 0
+          }
+        }
+
+        // @todo: Check extra price calculation (on the medium article it is 20ALEPH per 1MB / scheduler code checks 1/3ALEPH per 1MB)
+        // @note: medium article =>  https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
+        // @note: code is law => https://github.com/aleph-im/aleph-vm-scheduler/blob/master/scheduler/balance.py#L82
+        // const cost = newSize * 20
+        const discount = size > 0 ? 1 - newSize / size : 0
+        const price = size * mibStoragePrice + size * mibExecutionPrice
+        const cost = size * mibStoragePrice + newSize * mibExecutionPrice
+
         return {
           size,
-          price: 0,
-          discount: 0,
-          cost: 0,
+          price,
+          discount,
+          cost,
         }
-      }
-
-      let newSize = size
-
-      if (sizeDiscount > 0) {
-        if (newSize <= sizeDiscount) {
-          sizeDiscount -= newSize
-          newSize = 0
-        } else {
-          newSize -= sizeDiscount
-          sizeDiscount = 0
-        }
-      }
-
-      // @todo: Check extra price calculation (on the medium article it is 20ALEPH per 1MB / scheduler code checks 1/3ALEPH per 1MB)
-      // @note: medium article =>  https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
-      // @note: code is law => https://github.com/aleph-im/aleph-vm-scheduler/blob/master/scheduler/balance.py#L82
-      // const cost = newSize * 20
-      const discount = size > 0 ? 1 - newSize / size : 0
-      const price = size * mibPrice
-      const cost = newSize * mibPrice
-
-      return {
-        size,
-        price,
-        discount,
-        cost,
-      }
-    }, [] as PerVolumeCost)
+      }, [] as PerVolumeCost),
+    )
   }
 
-  static getCost(props: VolumeCostProps): VolumeCost {
-    const perVolumeCost = this.getPerVolumeCost(props)
+  static async getCost(props: VolumeCostProps): Promise<VolumeCost> {
+    props = {
+      ...props,
+      volumes: props.volumes?.filter(
+        (volume) => !(volume as VolumeField).isFake,
+      ),
+    }
+
+    const perVolumeCost = await this.getPerVolumeCost(props)
 
     const totalCost = Math.ceil(
       Object.values(perVolumeCost).reduce((ac, cv) => ac + cv.cost, 0),
@@ -231,7 +253,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   async add(volumes: AddVolume | AddVolume[]): Promise<Volume[]> {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
-    const newVolumes = this.parseNewVolumes(volumes)
+    const newVolumes = await this.parseNewVolumes(volumes)
     if (newVolumes.length === 0) return []
 
     try {
@@ -243,6 +265,8 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
             account,
             channel,
             fileObject,
+            // fileHash: 'IPFS_HASH',
+            // storageEngine: ItemType.ipfs,
           }),
         ),
       )
@@ -276,13 +300,15 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return downloadBlob(blob, `Volume_${volumeOrId.slice(-12)}.sqsh`)
   }
 
-  protected parseNewVolumes(volumes: VolumeField[]): Required<AddNewVolume>[] {
+  protected async parseNewVolumes(
+    volumes: VolumeField[],
+  ): Promise<Required<AddNewVolume>[]> {
     const newVolumes = volumes.filter(
       (volume: VolumeField): volume is Required<AddNewVolume> =>
         volume.volumeType === VolumeType.New && !!volume.file,
     )
 
-    volumes = VolumeManager.addManySchema.parse(newVolumes)
+    volumes = await VolumeManager.addManySchema.parseAsync(newVolumes)
 
     return newVolumes
   }

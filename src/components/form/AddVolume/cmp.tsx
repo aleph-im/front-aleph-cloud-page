@@ -61,7 +61,7 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
         role in managing dependencies and providing a volume within your
         application.
       </p>
-      <NoisyContainer>
+      <NoisyContainer $type="dark">
         <div tw="py-4">
           <HiddenFileInput {...fileCtrl.field} {...fileCtrl.fieldState}>
             Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
@@ -72,6 +72,7 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
             <TextInput
               {...mountPathCtrl.field}
               {...mountPathCtrl.fieldState}
+              required
               label="Mount"
               placeholder="/mount/opt"
             />
@@ -101,8 +102,13 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
 AddNewVolume.displayName = 'AddNewVolume'
 
 const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
-  const { refHashCtrl, mountPathCtrl, useLatestCtrl, handleRemove } =
-    useAddExistingVolumeProps(props)
+  const {
+    refHashCtrl,
+    mountPathCtrl,
+    useLatestCtrl,
+    volumeSize,
+    handleRemove,
+  } = useAddExistingVolumeProps(props)
 
   return (
     <>
@@ -112,11 +118,12 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
         managing dependencies within your application.
       </p>
 
-      <NoisyContainer>
+      <NoisyContainer $type="dark">
         <div>
           <TextInput
             {...mountPathCtrl.field}
             {...mountPathCtrl.fieldState}
+            required
             label="Mount"
             placeholder="/mount/opt"
           />
@@ -125,10 +132,16 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
           <TextInput
             {...refHashCtrl.field}
             {...refHashCtrl.fieldState}
+            required
             label="Item hash"
             placeholder="3335ad270a571b..."
           />
         </div>
+        {refHashCtrl.field.value && volumeSize && (
+          <div tw="mt-4">
+            <TextInput label="Size" name="size" value={volumeSize} disabled />
+          </div>
+        )}
         <div tw="mt-4 py-4">
           <Checkbox
             {...useLatestCtrl.field}
@@ -150,6 +163,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
     mountPathCtrl,
     sizeCtrl,
     sizeValue,
+    isFake,
     sizeHandleChange,
     handleRemove,
   } = useAddPersistentVolumeProps(props)
@@ -157,16 +171,28 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
   return (
     <>
       <p tw="mb-6">
-        Create and configure persistent storage for your web3 functions,
-        enabling your application to maintain data across multiple invocations
-        or sessions. You can set up a customized storage solution tailored to
-        your application&apos;s requirements.
+        {isFake ? (
+          <>
+            This system volume is included with your setup. You can easily
+            expand your storage capacity to meet your application&apos;s
+            requirements by adding additional volumes below.
+          </>
+        ) : (
+          <>
+            Create and configure persistent storage for your web3 functions,
+            enabling your application to maintain data across multiple
+            invocations or sessions. You can set up a customized storage
+            solution tailored to your application&apos;s requirements.
+          </>
+        )}
       </p>
-      <NoisyContainer>
+      <NoisyContainer $type="dark">
         <div>
           <TextInput
             {...nameCtrl.field}
             {...nameCtrl.fieldState}
+            disabled={isFake}
+            required
             label="Volume name"
             placeholder="Redis volume"
           />
@@ -175,6 +201,8 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           <TextInput
             {...mountPathCtrl.field}
             {...mountPathCtrl.fieldState}
+            disabled={isFake}
+            required
             label="Mount"
             placeholder="/mount/opt"
           />
@@ -183,14 +211,16 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           <TextInput
             {...sizeCtrl.field}
             {...sizeCtrl.fieldState}
+            disabled={isFake}
             value={sizeValue}
             onChange={sizeHandleChange}
+            required
             type="number"
             label="Size (GB)"
             placeholder="0"
           />
         </div>
-        {handleRemove && <RemoveVolume onRemove={handleRemove} />}
+        {!isFake && handleRemove && <RemoveVolume onRemove={handleRemove} />}
       </NoisyContainer>
     </>
   )
@@ -204,36 +234,45 @@ const CmpMap = {
 }
 
 export const AddVolume = React.memo((props: AddVolumeProps) => {
-  const { volumeTypeCtrl, ...rest } = useAddVolume(props)
+  const { volumeTypeCtrl, isFake, defaultValue, ...rest } = useAddVolume(props)
   const volumeType = volumeTypeCtrl.field.value as VolumeType
 
   const Cmp = useMemo(() => CmpMap[volumeType], [volumeType])
 
+  const tabs = useMemo(
+    () => [
+      {
+        id: VolumeType.New,
+        name: 'New volume',
+      },
+      {
+        id: VolumeType.Existing,
+        name: 'Existing volume',
+      },
+      {
+        id: VolumeType.Persistent,
+        name: 'Persistent Storage',
+      },
+    ],
+    [],
+  )
+
   return (
     <>
-      <div tw="px-0 pt-6 pb-3">
-        <Tabs
-          selected={volumeType}
-          align="left"
-          onTabChange={volumeTypeCtrl.field.onChange}
-          tabs={[
-            {
-              id: VolumeType.New,
-              name: 'New volume',
-            },
-            {
-              id: VolumeType.Existing,
-              name: 'Existing volume',
-            },
-            {
-              id: VolumeType.Persistent,
-              name: 'Persistent Storage',
-            },
-          ]}
-        />
-      </div>
+      {!isFake && (
+        <div tw="px-0 pt-6 pb-3">
+          <Tabs
+            selected={volumeType}
+            align="left"
+            onTabChange={volumeTypeCtrl.field.onChange}
+            tabs={tabs}
+          />
+        </div>
+      )}
 
-      <div role="tabpanel">{<Cmp {...rest} />}</div>
+      <div role="tabpanel">
+        {<Cmp {...rest} defaultValue={defaultValue as any} />}
+      </div>
     </>
   )
 })

@@ -1,6 +1,6 @@
 import { createGlobalStyle } from 'styled-components'
 
-export const GlobalStylesOverride = createGlobalStyle`  
+export const GlobalStylesOverride = createGlobalStyle`
   body, #__next {
     display: flex;
     flex-direction: column;

@@ -2,6 +2,8 @@ name: Push on IPFS
 
 on:
   push:
+    branches:
+      - release/**
     tags:
       - '*'
 

@@ -30,7 +30,7 @@ export default function HomePage() {
               <div tw="flex flex-col md:block">
                 <div tw="py-12">
                   <H1 tw="mb-12 md:mb-6">Infrastructure solutions</H1>
-                  <p className="tp-body fs-lg" tw="my-0">
+                  <p className="tp-body fs-24" tw="my-0">
                     Aleph.im offers cutting-edge <Strong>computing</Strong> and{' '}
                     <Strong>storage</Strong> solutions for your web3 needs. Our
                     unique payment model supports the holder tier, allowing you
@@ -65,7 +65,7 @@ export default function HomePage() {
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
               <H2 label="Solutions">Computing</H2>
-              <p className="fs-md" tw="mt-0">
+              <p className="fs-18" tw="mt-0">
                 With Aleph.im&apos;s computing services, you can process data
                 quickly and securely using on-demand and persistent functions,
                 virtual machine instances, and confidential VMs.
@@ -124,7 +124,7 @@ export default function HomePage() {
                 SOLANA - ETHEREUM - BINANCE SMART CHAIN
               </span>
               <H2 className="tp-h4 md:tp-h3">Indexing framework</H2>
-              <p className="fs-md" tw="mt-0 mb-16">
+              <p className="fs-18" tw="mt-0 mb-16">
                 Consider using the Aleph Indexer Framework for indexing
                 blockchain data. It&apos;s <strong>open-source</strong>,{' '}
                 <strong>multi-chain</strong>, and provides an easy-to-use
@@ -132,18 +132,29 @@ export default function HomePage() {
                 <strong>decentralized indexers</strong> on{' '}
                 <strong>Aleph.im&apos;s infrastructure</strong>.
               </p>
-              <Button
-                forwardedAs="a"
-                href="https://bit.ly/3GAAjii"
-                target="_blank"
-                kind="neon"
-                variant="primary"
-                size="big"
-                color="main0"
-                tw="!my-0"
-              >
-                Get in touch with us
-              </Button>
+              <div tw="flex gap-6 flex-wrap items-center">
+                {/* <Button
+                  kind="neon"
+                  variant="primary"
+                  size="big"
+                  color="main2"
+                  onClick={navigate.indexer}
+                >
+                  Create Indexer
+                </Button> */}
+                <Button
+                  forwardedAs="a"
+                  href="https://bit.ly/3GAAjii"
+                  target="_blank"
+                  kind="neon"
+                  variant="primary"
+                  size="big"
+                  color="main0"
+                  tw="!my-0"
+                >
+                  Get in touch with us
+                </Button>
+              </div>
             </Col>
           </Row>
         </Container>
@@ -153,7 +164,7 @@ export default function HomePage() {
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
               <H2 label="Solutions">Storage</H2>
-              <p className="fs-md">
+              <p className="fs-18">
                 With support for immutable, temporary, and persistent volumes,
                 as well as databases using key-value pairs, Aleph.im provides a
                 flexible and powerful storage solution for a wide range of use

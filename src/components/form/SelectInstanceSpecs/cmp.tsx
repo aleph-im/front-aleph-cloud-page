@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, memo } from 'react'
+import React, { KeyboardEvent, memo, useEffect, useState } from 'react'
 /* eslint-disable @next/next/no-img-element */
 import { useSelectInstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 import { Button, FormError, Icon, TableColumn } from '@aleph-front/aleph-core'
@@ -17,6 +17,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     const cols = [
       {
         label: 'Cores',
+        width: '100%',
         sortable: true,
         sortBy: (row: SpecsDetail) => row.specs.cpu,
         render: (row: SpecsDetail) => (
@@ -46,20 +47,28 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         align: 'right',
         render: (row: SpecsDetail) => {
           return (
-            <Button
-              color="main0"
-              variant="tertiary"
-              kind="neon"
-              size="regular"
-              forwardedAs="button"
-              type="button"
-              tabIndex={-1}
-              // TODO: Fix this
-              style={{ visibility: row.isActive ? 'visible' : 'hidden' }}
-              onClick={(e) => e.preventDefault()}
-            >
-              <Icon name="check" />
-            </Button>
+            <>
+              {row.specs.disabled ? (
+                <div className="fs-12 tp-body2" tw="text-center">
+                  (Soon)
+                </div>
+              ) : (
+                <Button
+                  color="main0"
+                  variant="tertiary"
+                  kind="neon"
+                  size="regular"
+                  forwardedAs="button"
+                  type="button"
+                  tabIndex={-1}
+                  // TODO: Fix this
+                  style={{ visibility: row.isActive ? 'visible' : 'hidden' }}
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <Icon name="check" />
+                </Button>
+              )}
+            </>
           )
         },
       },
@@ -80,36 +89,48 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     return cols
   }, [type])
 
-  const data: SpecsDetail[] = useMemo(() => {
-    return options.map((specs) => {
-      const { ram, storage } = specs
-      const price = Executable.getExecutableCost({
-        type,
-        specs,
-        isPersistent,
-      })
+  // ------------------------------------------
 
-      const isActive = specsCtrl.field.value.cpu === specs.cpu
-      const className = `${isActive ? 'text-main0' : ''}`
+  const [data, setData] = useState<SpecsDetail[]>([])
 
-      return {
-        specs,
-        isActive,
-        className,
-        storage: convertByteUnits(storage, {
-          from: 'MiB',
-          to: 'GiB',
-          displayUnit: true,
+  useEffect(() => {
+    async function load(): Promise<void> {
+      const loadedData = await Promise.all(
+        options.map(async (specs) => {
+          const { ram, storage } = specs
+          const price = await Executable.getExecutableCost({
+            type,
+            specs,
+            isPersistent,
+          })
+
+          const isActive = specsCtrl.field.value.cpu === specs.cpu
+          const className = `${isActive ? 'text-main0' : ''}`
+
+          return {
+            specs,
+            isActive,
+            className,
+            storage: convertByteUnits(storage, {
+              from: 'MiB',
+              to: 'GiB',
+              displayUnit: true,
+            }),
+            ram: convertByteUnits(ram, {
+              from: 'MiB',
+              to: 'GiB',
+              displayUnit: true,
+            }),
+            price: price.computeTotalCost + ' ALEPH',
+          }
         }),
-        ram: convertByteUnits(ram, {
-          from: 'MiB',
-          to: 'GiB',
-          displayUnit: true,
-        }),
-        price: price.computeTotalCost + ' ALEPH',
-      }
-    })
-  }, [options, type, isPersistent, specsCtrl.field.value])
+      )
+
+      setData(loadedData)
+    }
+
+    load()
+  }, [isPersistent, options, specsCtrl.field.value.cpu, type])
 
   const getRowKey = useCallback((row: SpecsDetail) => row.specs.cpu + '', [])
 
@@ -117,7 +138,10 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
 
   const handleRowProps = useCallback(
     (row: SpecsDetail, rowIndex: number) => ({
-      onClick: () => onChange(row.specs),
+      onClick: () => {
+        if (row.specs.disabled) return
+        onChange(row.specs)
+      },
       onKeyDown: (e: KeyboardEvent) => {
         if (e.code !== 'Space' && e.code !== 'Enter') return
         e.preventDefault()
@@ -125,6 +149,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
       },
       tabIndex: 0,
       ref: rowIndex === 0 ? ref : undefined,
+      className: row.specs.disabled ? 'disabled' : '',
     }),
     [onChange, ref],
   )
@@ -133,7 +158,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     <div tw="max-w-full overflow-y-hidden overflow-x-auto">
       <StyledTable
         borderType="none"
-        oddRowNoise
+        rowNoise
         rowKey={getRowKey}
         rowProps={handleRowProps}
         columns={columns}

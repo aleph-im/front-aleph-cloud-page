@@ -8,10 +8,14 @@ import { useManageVolume } from '@/hooks/pages/dashboard/manage/useManageVolume'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import StatusLabel from '@/components/common/StatusLabel'
+import { RotatingLines } from 'react-loader-spinner'
+import { useTheme } from 'styled-components'
 
 export default function ManageVolume() {
   const { volume, handleCopyHash, handleDelete, handleDownload } =
     useManageVolume()
+
+  const theme = useTheme()
 
   if (!volume) {
     return (
@@ -36,9 +40,21 @@ export default function ManageVolume() {
               <Icon name="floppy-disk" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
               <StatusLabel
-                variant={volume.confirmed ? 'ready' : 'confirming'}
+                variant={volume.confirmed ? 'success' : 'warning'}
                 tw="ml-4"
-              />
+              >
+                {volume.confirmed ? (
+                  'READY'
+                ) : (
+                  <div tw="flex items-center">
+                    <div tw="mr-2">CONFIRMING</div>
+                    <RotatingLines
+                      strokeColor={theme.color.base2}
+                      width=".8rem"
+                    />
+                  </div>
+                )}
+              </StatusLabel>
             </div>
             <div>
               <Button
@@ -66,7 +82,7 @@ export default function ManageVolume() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-sm" tw="mr-4 whitespace-nowrap">
+              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -83,7 +99,7 @@ export default function ManageVolume() {
               <div className="tp-info text-main0">EXPLORER</div>
               <div>
                 <a
-                  className="tp-body1 fs-sm"
+                  className="tp-body1 fs-16"
                   href={volume.url}
                   target="_blank"
                   referrerPolicy="no-referrer"
@@ -99,7 +115,7 @@ export default function ManageVolume() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
-                  <GrayText className="fs-xs tp-body1">
+                  <GrayText className="fs-10 tp-body1">
                     {humanReadableSize(volume.size, 'MiB')}
                   </GrayText>
                 </div>
@@ -108,7 +124,7 @@ export default function ManageVolume() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <GrayText className="fs-xs tp-body1">{volume.date}</GrayText>
+                  <GrayText className="fs-10 tp-body1">{volume.date}</GrayText>
                 </div>
               </div>
             </div>

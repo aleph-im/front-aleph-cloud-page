@@ -1,23 +1,29 @@
 import { useRouter } from 'next/router'
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useRef, RefObject } from 'react'
 import { DefaultTheme, useTheme } from 'styled-components'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { useAppState } from '@/contexts/appState'
 import { useConnect } from '../common/useConnect'
 import { useSessionStorage } from 'usehooks-ts'
+import { useClickOutside } from '@aleph-front/aleph-core'
 
-export type Header = {
+export type UseHeaderReturn = {
   theme: DefaultTheme
-  handleConnect: () => void
   account: Account | undefined
-  isOnPath: (path: string) => boolean
   displayWalletPicker: boolean
-  setDisplayWalletPicker: (value: boolean) => void
   accountBalance?: number
-  ethereumClient?: any
+  divRef: RefObject<HTMLDivElement>
+  divRefMobile: RefObject<HTMLDivElement>
+  isOpen: boolean
+  isOnPath: (path: string) => boolean
+  handleToggleOpen: (open: boolean) => void
+  handleCloseMenu: () => void
+  handleConnect: () => void
+  handleDisplayWalletPicker: () => void
+  provider: () => void
 }
 
-export function useHeader(): Header {
+export function useHeader(): UseHeaderReturn {
   const { connect, disconnect, isConnected, account } = useConnect()
   const theme = useTheme()
   const [appState] = useAppState()
@@ -67,13 +73,61 @@ export function useHeader(): Header {
 
   const [displayWalletPicker, setDisplayWalletPicker] = useState(false)
 
+  // --------------------
+
+  const divRef = useRef<HTMLDivElement>(null)
+  const divRefMobile = useRef<HTMLDivElement>(null)
+
+  useClickOutside(() => {
+    if (displayWalletPicker) setDisplayWalletPicker(false)
+  }, [divRef, divRefMobile])
+
+  const handleDisplayWalletPicker = () => {
+    setDisplayWalletPicker(!displayWalletPicker)
+  }
+
+  const provider = () => {
+    window.ethereum?.on('accountsChanged', function () {
+      connect()
+    })
+
+    return window.ethereum
+  }
+
+  // @todo: handle this on the provider method of the WalletConnect component
+  // the provider function should initialize the provider and return a dispose function
+  useEffect(() => {
+    provider()
+    return () => {
+      window.ethereum?.removeListener('accountsChanged', () => {
+        connect()
+      })
+    }
+  }, [])
+
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleToggleOpen = useCallback((open: boolean) => {
+    setIsOpen(open)
+  }, [])
+
+  const handleCloseMenu = useCallback(() => {
+    setIsOpen(false)
+  }, [setIsOpen])
+
   return {
     theme,
-    handleConnect,
     account,
-    isOnPath,
     displayWalletPicker,
-    setDisplayWalletPicker,
     accountBalance,
+    divRef,
+    divRefMobile,
+    isOpen,
+    isOnPath,
+    handleToggleOpen,
+    handleConnect,
+    handleDisplayWalletPicker,
+    handleCloseMenu,
+    provider,
   }
 }

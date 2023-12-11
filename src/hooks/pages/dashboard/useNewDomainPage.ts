@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useMemo } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import useConnectedWard from '@/hooks/common/useConnectedWard'
 import { useForm } from '@/hooks/common/useForm'
@@ -107,7 +107,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     control,
     name: 'ref',
     rules: {
-      onChange(state) {
+      onChange() {
         setValue('target', AddDomainTarget.IPFS)
       },
     },
@@ -145,6 +145,16 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     () => hasInstances || hasFunctions,
     [hasFunctions, hasInstances],
   )
+
+  useEffect(() => {
+    if (entityType === EntityType.Instance && !hasInstances) {
+      setValue('programType', EntityType.Program)
+    }
+
+    if (entityType === EntityType.Program && !hasFunctions) {
+      setValue('programType', EntityType.Instance)
+    }
+  }, [entityType, hasFunctions, hasInstances, setValue])
 
   return {
     entities,

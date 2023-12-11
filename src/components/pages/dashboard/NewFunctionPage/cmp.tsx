@@ -1,4 +1,4 @@
-import { Button, Tabs } from '@aleph-front/aleph-core'
+import { Button, Tabs, TextGradient } from '@aleph-front/aleph-core'
 import { EntityType } from '@/helpers/constants'
 import CompositeTitle from '@/components/common/CompositeTitle'
 import { useNewFunctionPage } from '@/hooks/pages/dashboard/useNewFunctionPage'
@@ -8,13 +8,14 @@ import AddVolumes from '@/components/form/AddVolumes'
 import AddEnvVars from '@/components/form/AddEnvVars'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
-import SelectFunctionRuntime from '@/components/form/SelectFunctionRuntime'
 import Container from '@/components/common/CenteredContainer'
 import AddFunctionCode from '@/components/form/AddFunctionCode'
 import SelectFunctionPersistence from '@/components/form/SelectFunctionPersistence'
 import BorderBox from '@/components/common/BorderBox'
 import { convertByteUnits } from '@/helpers/utils'
 import Form from '@/components/form/Form'
+import ToggleContainer from '@/components/common/ToggleContainer'
+import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime/cmp'
 
 export default function NewFunctionPage() {
   const {
@@ -43,15 +44,13 @@ export default function NewFunctionPage() {
               {
                 id: 'instance',
                 name: 'Instance',
-                label: 'BETA',
-                labelPosition: 'top',
+                label: { label: 'BETA', position: 'top' },
               },
               {
                 id: 'confidential',
                 name: 'Confidential',
                 disabled: true,
-                label: 'SOON',
-                labelPosition: 'top',
+                label: { label: 'SOON', position: 'top' },
               },
             ]}
             tw="overflow-auto"
@@ -73,19 +72,6 @@ export default function NewFunctionPage() {
       <section tw="px-0 py-6 md:py-10">
         <Container>
           <CompositeTitle as="h2" number="2">
-            Select runtime
-          </CompositeTitle>
-          <p tw="mb-6">
-            Select the optimal environment for executing your functions,
-            tailored to your specific requirements. Below are the available
-            options
-          </p>
-          <SelectFunctionRuntime name="runtime" control={control} />
-        </Container>
-      </section>
-      <section tw="px-0 py-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="3">
             Type of scheduling
           </CompositeTitle>
           <p tw="mb-6">
@@ -98,7 +84,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="4">
+          <CompositeTitle as="h2" number="3">
             Select an instance size
           </CompositeTitle>
           <p tw="mb-6">
@@ -116,7 +102,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="5">
+          <CompositeTitle as="h2" number="4">
             Name and tags
           </CompositeTitle>
           <p tw="mb-6">
@@ -128,60 +114,80 @@ export default function NewFunctionPage() {
           <AddNameAndTags control={control} entityType={EntityType.Program} />
         </Container>
       </section>
-      <section tw="px-0 py-6 md:py-10">
+
+      <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="6">
-            Add volumes
-          </CompositeTitle>
-          {values.specs && (
-            <BorderBox $color="main2" tw="mt-4" className="tp-body1">
-              Good news! Your selected package already includes{' '}
-              <span className="text-main0">
-                {convertByteUnits(values.specs.storage, {
-                  from: 'MiB',
-                  to: 'GiB',
-                  displayUnit: true,
-                })}
-              </span>{' '}
-              of storage at no additional cost. This has been factored into your
-              configuration to maximize efficiency and value. Feel free to
-              adjust as necessary.
-            </BorderBox>
-          )}
-          <AddVolumes name="volumes" control={control} />
-        </Container>
-      </section>
-      <section tw="px-0 py-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="7">
-            Add environment variables
+          <CompositeTitle as="h2" number="5">
+            Advanced Configuration Options
           </CompositeTitle>
           <p tw="mb-6">
-            Define key-value pairs that act as configuration settings for your
-            web3 function. Environment variables offer a convenient way to store
-            information, manage configurations, and modify your
-            application&apos;s behaviour without altering the source code.
+            Customize your function with our Advanced Configuration Options. Add
+            volumes, environment variables, and custom domains to meet your
+            specific needs.
           </p>
-          <AddEnvVars name="envVars" control={control} />
+          <div tw="px-0 my-6">
+            <div tw="mb-4">
+              <ToggleContainer label="Use Custom Runtime">
+                <SelectCustomFunctionRuntime name="runtime" control={control} />
+              </ToggleContainer>
+            </div>
+            <div tw="mb-4">
+              <ToggleContainer label="Add Volume">
+                <TextGradient forwardedAs="h2" type="h6" color="main0">
+                  Add volumes
+                </TextGradient>
+                {values.specs && (
+                  <BorderBox $color="main2" tw="mt-4" className="tp-body1">
+                    Good news! Your selected package already includes{' '}
+                    <span className="text-main0">
+                      {convertByteUnits(values.specs.storage, {
+                        from: 'MiB',
+                        to: 'GiB',
+                        displayUnit: true,
+                      })}
+                    </span>{' '}
+                    of storage at no additional cost. Feel free to add it here.
+                  </BorderBox>
+                )}
+                <AddVolumes name="volumes" control={control} />
+              </ToggleContainer>
+            </div>
+            <div tw="mb-4">
+              <ToggleContainer label="Add Environmental Variables">
+                <TextGradient forwardedAs="h2" type="h6" color="main0">
+                  Add environment variables
+                </TextGradient>
+                <p tw="mb-6">
+                  Define key-value pairs that act as configuration settings for
+                  your web3 function. Environment variables offer a convenient
+                  way to store information, manage configurations, and modify
+                  your application&apos;s behaviour without altering the source
+                  code.
+                </p>
+                <AddEnvVars name="envVars" control={control} />
+              </ToggleContainer>
+            </div>
+            <div tw="mb-4">
+              <ToggleContainer label="Add Custom Domain">
+                <TextGradient forwardedAs="h2" type="h6" color="main0">
+                  Custom domain
+                </TextGradient>
+                <p tw="mb-6">
+                  Configure a user-friendly domain name for your web3 function,
+                  providing a more accessible and professional way for users to
+                  interact with your application.
+                </p>
+                <AddDomains
+                  name="domains"
+                  control={control}
+                  entityType={EntityType.Program}
+                />
+              </ToggleContainer>
+            </div>
+          </div>
         </Container>
       </section>
-      <section tw="px-0 py-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="8">
-            Custom domain
-          </CompositeTitle>
-          <p tw="mb-6">
-            Configure a user-friendly domain name for your web3 function,
-            providing a more accessible and professional way for users to
-            interact with your application.
-          </p>
-          <AddDomains
-            name="domains"
-            control={control}
-            entityType={EntityType.Program}
-          />
-        </Container>
-      </section>
+
       <HoldingRequirements
         address={address}
         type={EntityType.Program}

@@ -169,6 +169,7 @@ export function humanReadableSize(
   value?: number,
   from: ByteUnit = 'B',
 ): string {
+  if (value === Number.POSITIVE_INFINITY) return 'n/a'
   if (value === undefined) return 'n/a'
   if (value === 0) return '-'
 
@@ -181,6 +182,7 @@ export function humanReadableSize(
  * Transforms a number into a multiple of 1000 with a suffix, (ex: 625217 -> 625.2K)
  */
 export const humanReadableCurrency = (value?: number) => {
+  if (value === Number.POSITIVE_INFINITY) return 'n/a'
   if (value === undefined) return 'n/a'
   if (value === 0) return value
   if (value < 1_000) return value.toFixed(1)
@@ -351,25 +353,14 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-/**
- * An util to track progress of a task
- */
-export class Progress extends EventTarget {
-  len: number
-  progress = 0
+export function toKebabCase(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_\\-]/g, '')
+    .replace(/_/g, '-')
+}
 
-  constructor(len: number) {
-    super()
-    this.len = len
-  }
-
-  update() {
-    this.progress++
-    if (this.progress === this.len - 1) {
-      return this.dispatchEvent(new CustomEvent('complete'))
-    }
-    return this.dispatchEvent(
-      new CustomEvent('update', { detail: this.progress }),
-    )
-  }
+export function toSnakeCase(input: string): string {
+  return toKebabCase(input).replace(/-/g, '_')
 }

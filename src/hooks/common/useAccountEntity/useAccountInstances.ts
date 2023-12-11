@@ -50,6 +50,7 @@ export function useAccountInstances({
     onSuccess,
     onError,
     triggerOnMount: true,
+    triggerDeps: [appState.account],
   })
 
   const entities = appState.accountInstances

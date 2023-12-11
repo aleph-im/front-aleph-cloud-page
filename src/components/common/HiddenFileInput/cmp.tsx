@@ -6,7 +6,7 @@ import React, {
   useCallback,
   useRef,
 } from 'react'
-import { Button, FormError, Icon } from '@aleph-front/aleph-core'
+import { Button, FormError, FormLabel, Icon } from '@aleph-front/aleph-core'
 import { HiddenFileInputProps } from './types'
 import { StyledHiddenFileInput } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
@@ -14,7 +14,16 @@ import { ellipseAddress } from '@/helpers/utils'
 export const HiddenFileInput = memo(
   forwardRef(
     (
-      { onChange, accept, value, children, error, directory }: HiddenFileInputProps,
+      {
+        onChange,
+        accept,
+        value,
+        children,
+        error,
+        label,
+        required,
+        directory
+      }: HiddenFileInputProps,
       ref: ForwardedRef<HTMLDivElement>,
     ) => {
       const inputRef = useRef<HTMLInputElement>(null)
@@ -25,6 +34,8 @@ export const HiddenFileInput = memo(
       }, [])
 
       const handleRemoveFile = useCallback(() => {
+        if (!inputRef.current) return
+        inputRef.current.value = ''
         onChange(undefined)
       }, [onChange])
 
@@ -52,6 +63,8 @@ export const HiddenFileInput = memo(
 
       return (
         <div tabIndex={-1} ref={ref}>
+          {label && <FormLabel label={label} error={error} required />}
+
           {value ? (
             <Button
               onClick={handleRemoveFile}

@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useMemo } from 'react'
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { convertByteUnits, humanReadableSize } from '@/helpers/utils'
 import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
@@ -6,6 +6,7 @@ import { Control, UseControllerReturn, useController } from 'react-hook-form'
 export type NewVolumeStandaloneField = {
   volumeType: VolumeType.New
   file?: File
+  isFake?: boolean
 }
 
 export type NewVolumeField = NewVolumeStandaloneField & {
@@ -18,6 +19,7 @@ export type ExistingVolumeField = {
   mountPath: string
   refHash: string
   useLatest: boolean
+  isFake?: boolean
 }
 
 export type PersistentVolumeField = {
@@ -25,6 +27,7 @@ export type PersistentVolumeField = {
   name: string
   mountPath: string
   size: number
+  isFake?: boolean
 }
 
 export const defaultVolume: NewVolumeStandaloneField = {
@@ -85,14 +88,19 @@ export function useAddNewVolumeProps({
   })
 
   const { value: file } = fileCtrl.field
+  const [volumeSize, setVolumeSize] = useState<string>('')
 
-  const volumeSize = useMemo(() => {
-    const size = VolumeManager.getVolumeSize({
-      volumeType: VolumeType.New,
-      file,
-    } as Volume)
+  useEffect(() => {
+    async function load() {
+      const size = await VolumeManager.getVolumeSize({
+        volumeType: VolumeType.New,
+        file,
+      } as Volume)
 
-    return humanReadableSize(size, 'MiB')
+      const hSize = humanReadableSize(size, 'MiB')
+      setVolumeSize(hSize)
+    }
+    load()
   }, [file])
 
   return {
@@ -115,6 +123,7 @@ export type UseAddExistingVolumeReturn = {
   refHashCtrl: UseControllerReturn<any, any>
   mountPathCtrl: UseControllerReturn<any, any>
   useLatestCtrl: UseControllerReturn<any, any>
+  volumeSize: string
   handleRemove?: () => void
 }
 
@@ -143,10 +152,27 @@ export function useAddExistingVolumeProps({
     defaultValue: defaultValue?.useLatest,
   })
 
+  const { value: refHash } = refHashCtrl.field
+  const [volumeSize, setVolumeSize] = useState<string>('')
+
+  useEffect(() => {
+    async function load() {
+      const size = await VolumeManager.getVolumeSize({
+        volumeType: VolumeType.Existing,
+        refHash,
+      } as Volume)
+
+      const hSize = humanReadableSize(size, 'MiB')
+      setVolumeSize(hSize)
+    }
+    load()
+  }, [refHash])
+
   return {
     refHashCtrl,
     mountPathCtrl,
     useLatestCtrl,
+    volumeSize,
     handleRemove,
   }
 }
@@ -162,6 +188,7 @@ export type UseAddPersistentVolumeReturn = {
   mountPathCtrl: UseControllerReturn<any, any>
   sizeCtrl: UseControllerReturn<any, any>
   sizeValue: number | undefined
+  isFake: boolean
   sizeHandleChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleRemove?: () => void
 }
@@ -191,6 +218,8 @@ export function useAddPersistentVolumeProps({
     defaultValue: defaultValue?.size,
   })
 
+  const isFake = defaultValue?.isFake || false
+
   const sizeHandleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const val = Number(e.target.value)
@@ -219,6 +248,7 @@ export function useAddPersistentVolumeProps({
     mountPathCtrl,
     sizeCtrl,
     sizeValue,
+    isFake,
     sizeHandleChange,
     handleRemove,
   }
@@ -231,6 +261,7 @@ export type UseAddVolumeProps = {
   index?: number
   control: Control
   volumeType?: VolumeType
+  defaultValue?: VolumeField
   onRemove?: (index?: number) => void
 }
 
@@ -239,6 +270,8 @@ export type UseAddVolumeReturn = {
   index?: number
   control: Control
   volumeTypeCtrl: UseControllerReturn<any, any>
+  defaultValue?: VolumeField
+  isFake?: boolean
   onRemove?: () => void
 }
 
@@ -246,6 +279,7 @@ export function useAddVolume({
   name = 'volumes',
   index,
   control,
+  defaultValue,
   onRemove,
 }: UseAddVolumeProps): UseAddVolumeReturn {
   const isStandAlone = index === undefined
@@ -257,6 +291,8 @@ export function useAddVolume({
     defaultValue: VolumeType.New,
   })
 
+  const isFake = defaultValue?.isFake || false
+
   const handleRemove = useCallback(() => {
     onRemove && onRemove(index)
   }, [index, onRemove])
@@ -266,6 +302,8 @@ export function useAddVolume({
     index,
     control,
     volumeTypeCtrl,
+    defaultValue,
+    isFake,
     onRemove: handleRemove,
   }
 }

@@ -6,6 +6,7 @@ import { Program, ProgramManager } from '@/domain/program'
 import { AccountFilesResponse, FileManager } from '@/domain/file'
 import { MessageManager } from '@/domain/message'
 import { Domain, DomainManager } from '@/domain/domain'
+import { IndexerManager } from '@/domain/indexer'
 
 export enum ActionTypes {
   connect,
@@ -46,6 +47,7 @@ export type State = {
   volumeManager?: VolumeManager
   programManager?: ProgramManager
   instanceManager?: InstanceManager
+  indexerManager?: IndexerManager
 }
 
 export type Action = {
@@ -71,6 +73,7 @@ export const initialState: State = {
   volumeManager: undefined,
   programManager: undefined,
   instanceManager: undefined,
+  indexerManager: undefined,
 }
 
 function addEntitiesToCollection<E extends { id: string }>(
@@ -137,6 +140,8 @@ export const reducer = (
         fileManager,
       )
 
+      const indexerManager = new IndexerManager(account, programManager)
+
       return {
         ...state,
         account,
@@ -148,6 +153,7 @@ export const reducer = (
         volumeManager,
         programManager,
         instanceManager,
+        indexerManager,
       }
     }
 

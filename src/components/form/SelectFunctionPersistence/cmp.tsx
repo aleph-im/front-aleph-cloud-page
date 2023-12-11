@@ -19,6 +19,7 @@ export const SelectFunctionPersistence = React.memo(
             {...isPersistentCtrl.fieldState}
             value={isPersistentValue}
             onChange={isPersistentHandleChange}
+            required
             direction="row"
           >
             <Radio label="Persistent" value="true" />

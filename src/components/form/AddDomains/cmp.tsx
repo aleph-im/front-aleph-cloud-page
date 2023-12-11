@@ -13,6 +13,7 @@ const DomainItem = React.memo((props: DomainItemProps) => {
         <TextInput
           {...nameCtrl.field}
           {...nameCtrl.fieldState}
+          required
           placeholder="Name"
         />
       </div>
@@ -40,7 +41,7 @@ export const AddDomains = React.memo((props: AddDomainsProps) => {
   return (
     <>
       {fields.length > 0 && (
-        <NoisyContainer>
+        <NoisyContainer $type="dark">
           <div tw="flex flex-col gap-x-6 gap-y-4">
             {fields.map((field, index) => (
               <DomainItem

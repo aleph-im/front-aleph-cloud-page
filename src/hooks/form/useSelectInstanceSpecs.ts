@@ -1,12 +1,13 @@
 import { EntityType } from '@/helpers/constants'
 import { convertByteUnits } from '@/helpers/utils'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 export type InstanceSpecsField = {
   cpu: number
   ram: number
   storage: number
+  disabled?: boolean
 }
 
 export function updateSpecsStorage(
@@ -15,6 +16,7 @@ export function updateSpecsStorage(
 ): InstanceSpecsField {
   return {
     ...specs,
+    disabled: isPersistent && specs.cpu >= 6,
     storage: convertByteUnits(specs.cpu * 2 * (isPersistent ? 10 : 1), {
       from: 'GiB',
       to: 'MiB',
@@ -62,7 +64,10 @@ export function useSelectInstanceSpecs({
   options: optionsProp,
   isPersistent = false,
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
-  const options = optionsProp || getDefaultSpecsOptions(isPersistent)
+  const options = useMemo(
+    () => optionsProp || getDefaultSpecsOptions(isPersistent),
+    [isPersistent, optionsProp],
+  )
 
   const specsCtrl = useController({
     control,
@@ -75,11 +80,15 @@ export function useSelectInstanceSpecs({
   useEffect(() => {
     if (!value) return
 
-    const updatedSpecs = updateSpecsStorage(value, isPersistent)
+    let updatedSpecs = updateSpecsStorage(value, isPersistent)
     if (updatedSpecs.storage === value.storage) return
 
+    if (updatedSpecs.disabled) {
+      updatedSpecs = options[0]
+    }
+
     onChange(updatedSpecs)
-  }, [isPersistent, value, onChange])
+  }, [isPersistent, value, onChange, options])
 
   return {
     specsCtrl,

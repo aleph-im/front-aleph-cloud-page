@@ -5,6 +5,8 @@ import { NewIPFSPinningFormState } from '@/hooks/pages/dashboard/useNewIPFSPinni
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { MFS } from '@helia/mfs'
 import { messages } from 'aleph-sdk-ts'
+import { any } from 'aleph-sdk-ts/dist/messages'
+import { ItemType } from 'aleph-sdk-ts/dist/messages/types'
 
 export type AccountFileObject = {
   file_hash: string
@@ -25,6 +27,40 @@ export class FileManager {
   protected mutex = new Mutex()
 
   static addSchema = addIPFSPinSchema
+  static async getFileSize(hash?: string): Promise<number>
+  static async getFileSize(file?: File): Promise<number>
+  static async getFileSize(hashOrFile?: string | File): Promise<number> {
+    if (!hashOrFile) return Number.POSITIVE_INFINITY
+
+    if (hashOrFile instanceof File) {
+      const size = hashOrFile?.size
+      if (size === undefined) return Number.POSITIVE_INFINITY
+      return convertByteUnits(size, { from: 'B', to: 'MiB' })
+    }
+
+    try {
+      const message = await any.GetMessage({ hash: hashOrFile })
+      console.log(message.content)
+      const { item_type, item_hash } = message.content as any
+
+      if (item_type === ItemType.ipfs || item_type === ItemType.storage) {
+        const query = await fetch(
+          `https://api2.aleph.im/api/v0/storage/raw/${item_hash}`,
+          { method: 'HEAD' },
+        )
+
+        const contentLength = query.headers.get('Content-Length')
+        if (!contentLength) return Number.POSITIVE_INFINITY
+
+        return convertByteUnits(Number(contentLength), {
+          from: 'B',
+          to: 'MiB',
+        })
+      }
+    } catch {}
+
+    return Number.POSITIVE_INFINITY
+  }
 
   constructor(
     protected account: Account,

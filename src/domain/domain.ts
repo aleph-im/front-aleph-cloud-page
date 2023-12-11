@@ -16,6 +16,7 @@ export type DomainAggregateItem = {
   type: AddDomainTarget
   message_id: string
   programType?: EntityType.Instance | EntityType.Program
+  updated_at: string
 }
 
 export type DomainAggregate = Record<string, DomainAggregateItem | null>
@@ -23,7 +24,7 @@ export type DomainAggregate = Record<string, DomainAggregateItem | null>
 export type AddDomain = {
   name: string
   target: AddDomainTarget
-  programType: EntityType.Instance | EntityType.Program
+  programType?: EntityType.Instance | EntityType.Program
   ref: string
 }
 
@@ -32,6 +33,7 @@ export type Domain = Omit<AddDomain, 'programType'> & {
   id: string
   confirmed?: boolean
   programType?: EntityType.Instance | EntityType.Program
+  updated_at: string
 }
 
 export type DomainStatus = {
@@ -73,6 +75,26 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     return entities.find((entity) => entity.id === id)
   }
 
+  async retry(domain: Domain) {
+    const content = {
+      message_id: domain.ref,
+      type: domain.target,
+      programType: domain.programType,
+      updated_at: new Date().toISOString(),
+    }
+
+    try {
+      await aggregate.Publish({
+        account: this.account,
+        key: this.key,
+        channel: this.channel,
+        content,
+      })
+    } catch (err) {
+      throw E_.RequestFailed(err)
+    }
+  }
+
   async add(
     domains: AddDomain | AddDomain[],
     throwOnCollision?: boolean,
@@ -91,6 +113,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
           message_id: ref,
           programType,
           type: target,
+          updated_at: new Date().toISOString(),
         }
 
         // @note: legacy domains don't include programType (default to Instance)
@@ -155,7 +178,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     domains: AddDomain[],
     throwOnCollision = true,
   ): Promise<AddDomain[]> {
-    domains = DomainManager.addManySchema.parse(domains)
+    domains = await DomainManager.addManySchema.parseAsync(domains)
 
     const currentDomains = await this.getAll()
     const currentDomainSet = new Set<string>(currentDomains.map((d) => d.name))
@@ -201,6 +224,9 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     content: DomainAggregateItem,
   ): Domain {
     const { message_id, type } = content
+    // @note: legacy domains don't have updated_at property
+    // Cast to string to avoid type errors
+    const updated_at = content?.updated_at || 'unknown'
 
     const domain: Domain = {
       type: EntityType.Domain,
@@ -209,6 +235,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       target: type,
       ref: message_id,
       confirmed: true,
+      updated_at: updated_at,
     }
 
     // @note: legacy domains don't include programType (default to Instance)

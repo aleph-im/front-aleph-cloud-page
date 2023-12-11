@@ -20,8 +20,15 @@ import StatusLabel from '@/components/common/StatusLabel'
 import ButtonLink from '@/components/common/ButtonLink'
 
 export default function ManageDomain() {
-  const { domain, status, refEntity, account, handleDelete, handleCopyRef } =
-    useManageDomain()
+  const {
+    domain,
+    status,
+    refEntity,
+    account,
+    handleDelete,
+    handleCopyRef,
+    handleRetry,
+  } = useManageDomain()
 
   if (!domain) {
     return (
@@ -46,9 +53,11 @@ export default function ManageDomain() {
               <Icon name="input-text" tw="mr-4" className="text-main1" />
               <div className="tp-body2">{name}</div>
               <StatusLabel
-                variant={domain.confirmed ? 'ready' : 'confirming'}
+                variant={status?.status ? 'success' : 'error'}
                 tw="ml-4"
-              />
+              >
+                DOMAIN RECORDS NOT CONFIGURED
+              </StatusLabel>
             </div>
             <div>
               <Button
@@ -65,14 +74,14 @@ export default function ManageDomain() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-sm" tw="mr-4 whitespace-nowrap">
+              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
                 <div className="tp-info text-main0">NAME</div>
                 <div>
                   <a
-                    className="tp-body1 fs-sm"
+                    className="tp-body1 fs-16"
                     href={`https://${domain.name}`}
                     target="_blank"
                     referrerPolicy="no-referrer"
@@ -214,13 +223,23 @@ export default function ManageDomain() {
                     </div>
 
                     <div tw="my-5">
-                      <div className="tp-info text-main0">ERROR</div>
-                      <GrayText>{status.err}</GrayText>
+                      <div className="tp-info text-main0">FINAL STEP</div>
+                      <GrayText>
+                        After configuring the domain records you can retry to
+                        link them again here
+                      </GrayText>
                     </div>
 
                     <div tw="my-5">
-                      <div className="tp-info text-main0">TIPS</div>
-                      <GrayText>{status.help}</GrayText>
+                      <Button
+                        onClick={handleRetry}
+                        size="regular"
+                        variant="secondary"
+                        color="main0"
+                        kind="neon"
+                      >
+                        Retry
+                      </Button>
                     </div>
                   </>
                 )}
@@ -256,7 +275,7 @@ export default function ManageDomain() {
                   <div className="tp-info text-main0">EXPLORER</div>
                   <div>
                     <a
-                      className="tp-body1 fs-sm"
+                      className="tp-body1 fs-16"
                       href={refEntity.url}
                       target="_blank"
                       referrerPolicy="no-referrer"

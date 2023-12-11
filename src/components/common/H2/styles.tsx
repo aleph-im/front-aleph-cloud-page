@@ -14,7 +14,7 @@ export const StyledH2 = styled(TextGradient).attrs((props) => {
 `
 
 export const StyledLabel = styled.span.attrs(
-  addClasses('gr-main0 tp-header fs-md'),
+  addClasses('gr-main0 tp-header fs-18'),
 )`
   ${({ theme }) => css`
     position: absolute;

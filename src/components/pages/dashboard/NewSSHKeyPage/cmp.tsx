@@ -26,6 +26,7 @@ export default function NewSSHKey() {
               <TextArea
                 {...keyCtrl.field}
                 {...keyCtrl.fieldState}
+                required
                 label="SSH Public Key"
                 placeholder="SSH Key"
                 tw="h-40 break-all"
