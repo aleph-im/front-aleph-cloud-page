@@ -1,4 +1,5 @@
 // withTwin.js
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path')
 
 // The folders containing files importing twin.macro
@@ -24,7 +25,7 @@ module.exports = function withTwin(nextConfig) {
                 require.resolve('babel-plugin-twin'),
                 require.resolve('babel-plugin-macros'),
                 [
-                  require.resolve('babel-plugin-styled-components'), 
+                  require.resolve('babel-plugin-styled-components'),
                   { ssr: true, displayName: true },
                 ],
                 [

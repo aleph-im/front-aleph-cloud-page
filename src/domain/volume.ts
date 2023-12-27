@@ -7,12 +7,7 @@ import {
   defaultVolumeChannel,
   programStorageURL,
 } from '../helpers/constants'
-import {
-  convertByteUnits,
-  downloadBlob,
-  getDate,
-  getExplorerURL,
-} from '../helpers/utils'
+import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
 import { MessageType, StoreContent } from 'aleph-sdk-ts/dist/messages/types'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'

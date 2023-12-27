@@ -1,156 +1,157 @@
+import { memo } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import {
   Button,
   Icon,
-  Logo,
+  LinkComponent,
   NavbarLink,
   NavbarLinkList,
-  WalletPicker,
+  RouterNavbar,
 } from '@aleph-front/aleph-core'
-import { StyledHeader, StyledButton, StyledNavbar } from './styles'
+import { StyledHeader, StyledButton, StyledWalletPicker } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
-import { useHeader } from '@/hooks/pages/useHeader'
+import {
+  UseAccountButtonProps,
+  useAccountButton,
+  useHeader,
+} from '@/hooks/pages/useHeader'
+import AutoBreadcrumb from '../AutoBreadcrumb'
 
-export const Header = () => {
+export type AccountButtonProps = UseAccountButtonProps & {
+  isMobile?: boolean
+}
+
+export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
   const {
     theme,
     account,
-    displayWalletPicker,
     accountBalance,
-    isOpen,
-    divRef,
-    divRefMobile,
-    isOnPath,
-    handleToggleOpen,
-    handleCloseMenu,
+    displayWalletPicker,
+    walletPickerOpen,
+    walletPickerRef,
+    walletPickerTriggerRef,
+    walletPosition,
+    provider,
     handleConnect,
     handleDisplayWalletPicker,
-    provider,
-  } = useHeader()
-
-  const WalletPickerComponent = () => {
-    return (
-      <WalletPicker
-        networks={[
-          {
-            icon: 'ethereum',
-            name: 'Ethereum',
-            wallets: [
-              {
-                color: 'orange',
-                icon: 'circle',
-                name: 'Metamask',
-                provider,
-              },
-            ],
-          },
-        ]}
-        onConnect={handleConnect}
-        onDisconnect={handleConnect}
-        address={account?.address}
-        addressHref={`https://etherscan.io/address/${account?.address}`}
-        balance={accountBalance}
-      />
-    )
-  }
+  } = useAccountButton(rest)
 
   return (
-    <StyledHeader>
-      <StyledNavbar
-        open={isOpen}
-        onToggle={handleToggleOpen}
-        logo={
-          <Link href="/">
-            <Logo />
-          </Link>
-        }
-        mobileTopContent={
-          <>
-            {account ? (
-              <Button
-                variant="secondary"
-                color="main1"
-                kind="neon"
-                size="regular"
-                onClick={handleDisplayWalletPicker}
-              >
-                <Icon name="meteor" size="md" color={theme.color.main1} />
-              </Button>
-            ) : (
-              <StyledButton onClick={handleDisplayWalletPicker}>
-                <Icon name="meteor" size="md" color={theme.color.main0} />
-              </StyledButton>
-            )}
-            <div tw="absolute right-0 mt-10" ref={divRefMobile}>
-              {displayWalletPicker && WalletPickerComponent()}
-            </div>
-          </>
-        }
-      >
-        <NavbarLinkList withSlash onClick={handleCloseMenu}>
-          <NavbarLink isActive={isOnPath('/')}>
-            <Link key="solutions" href="/">
-              Solutions
-            </Link>
-          </NavbarLink>
-          <NavbarLink isActive={isOnPath('/dashboard')}>
-            <Link key="dashboard" href="/dashboard">
-              Dashboard
-            </Link>
-          </NavbarLink>
-        </NavbarLinkList>
-        <NavbarLinkList onlyDesktop>
-          <NavbarLink>
-            <StyledButton key="link" forwardedAs="button" disabled>
-              <Icon name="ethereum" />
-            </StyledButton>
-          </NavbarLink>
-          <div tw="relative">
-            <NavbarLink>
-              {account ? (
-                <Button
-                  as="button"
-                  variant="secondary"
-                  color="main1"
-                  kind="neon"
-                  size="regular"
-                  onClick={handleDisplayWalletPicker}
-                >
-                  {ellipseAddress(account.address)}{' '}
-                  <Icon
-                    name="meteor"
-                    size="lg"
-                    tw="ml-2.5"
-                    color={theme.color.main1}
-                  />
-                </Button>
-              ) : (
-                <Button
-                  as="button"
-                  variant="tertiary"
-                  color="main0"
-                  kind="neon"
-                  size="regular"
-                  onClick={handleDisplayWalletPicker}
-                >
-                  Connect{' '}
-                  <Icon
-                    name="meteor"
-                    size="lg"
-                    tw="ml-2.5"
-                    color={theme.color.main0}
-                  />
-                </Button>
-              )}
-              <div tw="absolute right-0 mt-10" ref={divRef}>
-                {displayWalletPicker && WalletPickerComponent()}
-              </div>
-            </NavbarLink>
+    <>
+      {account ? (
+        <Button
+          ref={walletPickerTriggerRef}
+          as="button"
+          variant="secondary"
+          color="main1"
+          kind="neon"
+          size="regular"
+          onClick={handleDisplayWalletPicker}
+        >
+          <div tw="flex items-center gap-2.5">
+            {!isMobile && ellipseAddress(account.address)}
+            <Icon name="meteor" size="lg" color={theme.color.main1} />
           </div>
-        </NavbarLinkList>
-      </StyledNavbar>
-    </StyledHeader>
+        </Button>
+      ) : (
+        <Button
+          ref={walletPickerTriggerRef}
+          as="button"
+          variant="tertiary"
+          color="main0"
+          kind="neon"
+          size="regular"
+          onClick={handleDisplayWalletPicker}
+        >
+          <div tw="flex items-center gap-2.5">
+            {!isMobile && 'Connect'}
+            <Icon name="meteor" size="lg" color={theme.color.main0} />
+          </div>
+        </Button>
+      )}
+      {displayWalletPicker &&
+        createPortal(
+          <StyledWalletPicker
+            ref={walletPickerRef}
+            networks={[
+              {
+                icon: 'ethereum',
+                name: 'Ethereum',
+                wallets: [
+                  {
+                    color: 'orange',
+                    icon: 'metamask',
+                    name: 'Metamask',
+                    provider,
+                  },
+                ],
+              },
+            ]}
+            onConnect={handleConnect}
+            onDisconnect={handleConnect}
+            address={account?.address}
+            addressHref={`https://etherscan.io/address/${account?.address}`}
+            balance={accountBalance}
+            $isOpen={walletPickerOpen}
+            $position={walletPosition}
+          />,
+          document.body,
+        )}
+    </>
   )
 }
+AccountButton.displayName = 'AccountButton'
 
-export default Header
+// ----------------------------
+
+export const Header = () => {
+  const {
+    pathname,
+    routes,
+    breadcrumbNames,
+    hasBreadcrumb,
+    isOpen,
+    breakpoint,
+    handleToggle,
+    ...accountProps
+  } = useHeader()
+
+  return (
+    <>
+      <StyledHeader $breakpoint={breakpoint}>
+        <RouterNavbar
+          {...{
+            routes,
+            pathname,
+            open: isOpen,
+            onToggle: handleToggle,
+            Link: Link as LinkComponent,
+            height: '6.5rem',
+            breakpoint: 'lg',
+            mobileTopContent: <AccountButtonMemo {...accountProps} isMobile />,
+          }}
+        >
+          <NavbarLinkList breakpoint={breakpoint} onlyDesktop>
+            <NavbarLink breakpoint={breakpoint}>
+              <StyledButton key="link" forwardedAs="button" disabled>
+                <Icon name="ethereum" />
+              </StyledButton>
+            </NavbarLink>
+            <AccountButtonMemo {...accountProps} />
+          </NavbarLinkList>
+        </RouterNavbar>
+      </StyledHeader>
+      <div tw="block flex-auto grow-0 shrink-0 h-[6.5rem] lg:hidden"></div>
+      {hasBreadcrumb && (
+        <div tw="block my-6 px-5 md:px-16">
+          <AutoBreadcrumb names={breadcrumbNames} />
+        </div>
+      )}
+    </>
+  )
+}
+Header.displayName = 'Header'
+
+export const AccountButtonMemo = memo(AccountButton)
+export default memo(Header)

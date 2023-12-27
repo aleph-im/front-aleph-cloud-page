@@ -1,15 +1,14 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { Breadcrumb } from '@aleph-front/aleph-core'
 import Link from 'next/link'
 import { AutoBreacrumbProps } from './types'
 
-export default function AutoBreadcrumb({
-  names,
-  name: nameProp,
+export const AutoBreadcrumb = ({
+  names = {},
   includeHome = true,
   ...rest
-}: AutoBreacrumbProps) {
+}: AutoBreacrumbProps) => {
   const router = useRouter()
   const isHome = router.pathname === '/'
 
@@ -18,33 +17,19 @@ export default function AutoBreadcrumb({
   const navLinks = useMemo(() => {
     if (isHome) return []
 
-    const links = router.pathname
-      .split('/')
-      .filter((item) => item !== '')
-      .map((item, index, arr) => {
-        const name = names?.[item]
-
-        if (index === arr.length - 1) {
-          const [, hash] = router.asPath.split('#')
-
-          const itemName =
-            nameProp ||
-            (name
-              ? typeof name === 'object'
-                ? name[hash]
-                : name
-              : uppercase(item))
-
-          return <span key={item}>{itemName}</span>
-        }
-
-        const itemName = name ? (name as string) : uppercase(item)
+    const parts = router.pathname.split('/')
+    const links = parts
+      .map((item, index) => {
+        const href = parts.slice(0, index + 1).join('/')
+        let name = names[href] || names[item] || uppercase(item)
+        name = typeof name === 'function' ? name(router) : name
+        return { href, name }
+      })
+      .filter(({ name }) => name !== '' && name !== '-')
+      .map(({ name, href }) => {
         return (
-          <Link
-            key={item}
-            href={String('../').repeat(arr.length - (index + 1)) + item}
-          >
-            {itemName}
+          <Link key={name} href={href}>
+            {name}
           </Link>
         )
       })
@@ -52,15 +37,16 @@ export default function AutoBreadcrumb({
     if (includeHome) {
       links.unshift(
         <Link key={'home'} href={'/'}>
-          {(names?.['/'] as string) || 'HOME'}
+          {(names['/'] as string) || 'HOME'}
         </Link>,
       )
     }
 
     return links
-  }, [router.pathname, router.asPath, nameProp, names, isHome, includeHome])
+  }, [router, names, isHome, includeHome])
 
-  return isHome ? null : (
-    <Breadcrumb navLinks={navLinks} {...rest} tw="py-5 px-6 md:px-16" />
-  )
+  return isHome ? null : <Breadcrumb navLinks={navLinks} {...rest} />
 }
+AutoBreadcrumb.displayName = 'AutoBreadcrumb'
+
+export default memo(AutoBreadcrumb)

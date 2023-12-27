@@ -5,62 +5,125 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { useAppState } from '@/contexts/appState'
 import { useConnect } from '../common/useConnect'
 import { useSessionStorage } from 'usehooks-ts'
-import { useClickOutside } from '@aleph-front/aleph-core'
+import {
+  BreakpointId,
+  useClickOutside,
+  useFloatPosition,
+  useTransitionedEnterExit,
+  useWindowScroll,
+  useWindowSize,
+} from '@aleph-front/aleph-core'
+import { UseRoutesReturn, useRoutes } from '../common/useRoutes'
+import {
+  UseBreadcrumbNamesReturn,
+  useBreadcrumbNames,
+} from '../common/useBreadcrumbNames'
 
-export type UseHeaderReturn = {
+export type UseAccountButtonProps = {
+  handleConnect: () => Promise<void>
+  provider: () => void
+}
+
+export type UseAccountButtonReturn = UseAccountButtonProps & {
   theme: DefaultTheme
   account: Account | undefined
-  displayWalletPicker: boolean
   accountBalance?: number
-  divRef: RefObject<HTMLDivElement>
-  divRefMobile: RefObject<HTMLDivElement>
-  isOpen: boolean
-  isOnPath: (path: string) => boolean
-  handleToggleOpen: (open: boolean) => void
-  handleCloseMenu: () => void
-  handleConnect: () => void
+  displayWalletPicker: boolean
+  walletPickerOpen: boolean
+  walletPickerRef: RefObject<HTMLDivElement>
+  walletPickerTriggerRef: RefObject<HTMLButtonElement>
+  walletPosition: { x: number; y: number }
   handleDisplayWalletPicker: () => void
+}
+
+export function useAccountButton({
+  handleConnect: handleConnectProp,
+  ...rest
+}: UseAccountButtonProps): UseAccountButtonReturn {
+  const { account } = useConnect()
+  const theme = useTheme()
+  const [appState] = useAppState()
+
+  // const { balance: accountBalance } = appState.account
+  const { accountBalance } = appState
+
+  const [displayWalletPicker, setDisplayWalletPicker] = useState(false)
+
+  // --------------------
+
+  const walletPickerRef = useRef<HTMLDivElement>(null)
+  const walletPickerTriggerRef = useRef<HTMLButtonElement>(null)
+
+  useClickOutside(() => {
+    if (displayWalletPicker) setDisplayWalletPicker(false)
+  }, [walletPickerRef, walletPickerTriggerRef])
+
+  const handleDisplayWalletPicker = () => {
+    setDisplayWalletPicker(!displayWalletPicker)
+  }
+
+  const windowSize = useWindowSize(0)
+  const windowScroll = useWindowScroll(0)
+
+  const { shouldMount, state } = useTransitionedEnterExit({
+    onOff: displayWalletPicker,
+    ref: walletPickerRef,
+  })
+
+  const { myRef, atRef, position } = useFloatPosition({
+    my: 'top-right',
+    at: 'bottom-right',
+    myRef: walletPickerRef,
+    atRef: walletPickerTriggerRef,
+    deps: [account, windowSize, windowScroll, shouldMount],
+  })
+
+  const walletPickerOpen = state === 'enter'
+
+  const handleConnect = useCallback(async () => {
+    handleConnectProp()
+    setDisplayWalletPicker(false)
+  }, [handleConnectProp])
+
+  return {
+    theme,
+    account,
+    accountBalance,
+    walletPickerOpen,
+    displayWalletPicker: shouldMount,
+    walletPickerRef: myRef,
+    walletPickerTriggerRef: atRef,
+    walletPosition: position,
+    handleDisplayWalletPicker,
+    handleConnect,
+    ...rest,
+  }
+}
+
+// -----------------------------
+
+export type UseHeaderReturn = UseRoutesReturn & {
+  pathname: string
+  breadcrumbNames: UseBreadcrumbNamesReturn['names']
+  breakpoint: BreakpointId
+  isOpen: boolean
+  hasBreadcrumb: boolean
+  handleToggle: (isOpen: boolean) => void
+  handleConnect: () => Promise<void>
   provider: () => void
 }
 
 export function useHeader(): UseHeaderReturn {
   const { connect, disconnect, isConnected, account } = useConnect()
-  const theme = useTheme()
-  const [appState] = useAppState()
+  const { routes } = useRoutes()
   const router = useRouter()
+
+  const { pathname } = router
 
   const [keepAccountAlive, setkeepAccountAlive] = useSessionStorage(
     'keepAccountAlive',
     false,
   )
-
-  useEffect(() => {
-    ;(async () => {
-      if (!account && keepAccountAlive) {
-        enableConnection()
-      }
-    })()
-  }, [account, keepAccountAlive])
-
-  const isOnPath = (path: string) => router.pathname === path
-
-  const { accountBalance } = appState
-
-  // @note: wait till account is connected and redirect
-  const handleConnect = useCallback(async () => {
-    if (!isConnected) {
-      setkeepAccountAlive(true)
-      const acc = await connect()
-      if (!acc) return
-      router.push('/dashboard')
-    } else {
-      setkeepAccountAlive(false)
-      await disconnect()
-      router.push('/')
-    }
-
-    setDisplayWalletPicker(false)
-  }, [connect, disconnect, isConnected, router])
 
   const enableConnection = useCallback(async () => {
     if (!isConnected) {
@@ -69,22 +132,32 @@ export function useHeader(): UseHeaderReturn {
     } else {
       await disconnect()
     }
-  }, [connect, disconnect, isConnected, account])
+  }, [connect, disconnect, isConnected])
 
-  const [displayWalletPicker, setDisplayWalletPicker] = useState(false)
+  // @note: wait till account is connected and redirect
+  const handleConnect = useCallback(async () => {
+    if (!isConnected) {
+      setkeepAccountAlive(true)
+      const acc = await connect()
+      if (!acc) return
+      // router.push('/dashboard')
+    } else {
+      setkeepAccountAlive(false)
+      await disconnect()
+      router.push('/')
+    }
+  }, [connect, disconnect, isConnected, router, setkeepAccountAlive])
+
+  useEffect(() => {
+    ;(async () => {
+      if (!account && keepAccountAlive) {
+        enableConnection()
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account, keepAccountAlive])
 
   // --------------------
-
-  const divRef = useRef<HTMLDivElement>(null)
-  const divRefMobile = useRef<HTMLDivElement>(null)
-
-  useClickOutside(() => {
-    if (displayWalletPicker) setDisplayWalletPicker(false)
-  }, [divRef, divRefMobile])
-
-  const handleDisplayWalletPicker = () => {
-    setDisplayWalletPicker(!displayWalletPicker)
-  }
 
   const provider = () => {
     window.ethereum?.on('accountsChanged', function () {
@@ -105,29 +178,29 @@ export function useHeader(): UseHeaderReturn {
     }
   }, [])
 
+  // --------------------
+
+  const { names: breadcrumbNames } = useBreadcrumbNames()
+  const hasBreadcrumb = router.pathname !== '/'
+
+  // --------------------
+
+  const breakpoint = 'lg'
+
+  // --------------------
+
   const [isOpen, setIsOpen] = useState(false)
-
-  const handleToggleOpen = useCallback((open: boolean) => {
-    setIsOpen(open)
-  }, [])
-
-  const handleCloseMenu = useCallback(() => {
-    setIsOpen(false)
-  }, [setIsOpen])
+  const handleToggle = useCallback((open: boolean) => setIsOpen(open), [])
 
   return {
-    theme,
-    account,
-    displayWalletPicker,
-    accountBalance,
-    divRef,
-    divRefMobile,
+    pathname,
+    routes,
+    breadcrumbNames,
+    breakpoint,
     isOpen,
-    isOnPath,
-    handleToggleOpen,
+    hasBreadcrumb,
+    handleToggle,
     handleConnect,
-    handleDisplayWalletPicker,
-    handleCloseMenu,
     provider,
   }
 }

@@ -1,8 +1,7 @@
-import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
 import NoisyContainer from '@/components/common/NoisyContainer'
-import { EntityTypeName, breadcrumbNames } from '@/helpers/constants'
+import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag } from '@aleph-front/aleph-core'
 import { useManageVolume } from '@/hooks/pages/dashboard/manage/useManageVolume'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
@@ -32,7 +31,6 @@ export default function ManageVolume() {
 
   return (
     <>
-      <AutoBreadcrumb names={breadcrumbNames} name={name.toUpperCase()} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <div tw="flex justify-between pb-5">

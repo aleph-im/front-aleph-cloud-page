@@ -31,12 +31,6 @@ export const defaultInstanceChannel = defaultConsoleChannel
 export const defaultProgramChannel = defaultConsoleChannel
 export const defaultDomainChannel = defaultConsoleChannel
 
-export const breadcrumbNames = {
-  '/': 'SOLUTIONS',
-  '/dashboard/function': 'SETUP NEW FUNCTION',
-  '/dashboard/volume': 'SETUP NEW VOLUME',
-}
-
 export enum EntityType {
   Volume = 'volume',
   Program = 'program',

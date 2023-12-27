@@ -11,13 +11,15 @@ export default function CenteredContainer({
       {variant === 'default' ? (
         <Row xs={12} gap="0">
           <Col
-            xs={12}
-            lg={10}
-            lgOffset={2}
-            xl={8}
-            xlOffset={3}
-            xxl={6}
-            xxlOffset={4}
+            {...{
+              xs: 12,
+              lg: 10,
+              lgOffset: 2,
+              xl: 8,
+              xlOffset: 3,
+              '2xl': 6,
+              '2xlOffset': 4,
+            }}
           >
             <Container>
               <div tw="max-w-[715px] mx-auto">{children}</div>
