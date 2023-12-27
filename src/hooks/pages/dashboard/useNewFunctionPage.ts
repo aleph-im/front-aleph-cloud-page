@@ -51,7 +51,6 @@ export type UseNewFunctionPage = {
   control: Control<any>
   errors: FieldErrors<NewFunctionFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
-  handleChangeEntityTab: (tabId: string) => void
 }
 
 export function useNewFunctionPage(): UseNewFunctionPage {
@@ -109,10 +108,6 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     isCreateButtonDisabled = false
   }
 
-  const handleChangeEntityTab = useCallback(
-    (id: string) => router.push(`/dashboard/${id}`),
-    [router],
-  )
   return {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
@@ -121,6 +116,5 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     control,
     errors,
     handleSubmit,
-    handleChangeEntityTab,
   }
 }

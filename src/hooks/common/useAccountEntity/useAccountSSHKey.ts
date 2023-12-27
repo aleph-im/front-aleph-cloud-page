@@ -2,9 +2,9 @@ import { useAppState } from '@/contexts/appState'
 import { SSHKey } from '@/domain/ssh'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
-import { UseRequestReturn, useRequest } from '../useRequest'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useSSHKeyManager } from '../useManager/useSSHKeyManager'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
 
 export type UseAccountSSHKeyProps = {
   id: string
@@ -52,7 +52,7 @@ export function useAccountSSHKey({
     [appState.accountSSHKeys, id],
   )
 
-  const reqState = useRequest({
+  const reqState = useLocalRequest({
     doRequest,
     onSuccess,
     onError,

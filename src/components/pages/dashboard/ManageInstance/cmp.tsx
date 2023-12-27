@@ -265,7 +265,7 @@ export default function ManageInstance() {
           </NoisyContainer>
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/dashboard/instance">
+            <ButtonLink variant="primary" href="/dashboard/instance/new">
               Create new instance
             </ButtonLink>
           </div>

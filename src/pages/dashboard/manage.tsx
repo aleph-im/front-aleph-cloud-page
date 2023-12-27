@@ -1,3 +1,3 @@
-import DashboardManagePage from '@/components/pages/dashboard/manage/DashboardManagePage'
+import DashboardManagePage from '@/components/pages/dashboard/DashboardManagePage'
 
 export default DashboardManagePage

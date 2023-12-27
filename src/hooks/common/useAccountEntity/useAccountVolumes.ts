@@ -1,10 +1,10 @@
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { UseRequestReturn, useRequest } from '../useRequest'
 import { Volume } from '@/domain/volume'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useVolumeManager } from '../useManager/useVolumeManager'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
 
 export type UseAccountVolumesProps = {
   triggerOnMount?: boolean
@@ -45,7 +45,7 @@ export function useAccountVolumes({
     [manager],
   )
 
-  const reqState = useRequest({
+  const reqState = useLocalRequest({
     doRequest,
     onSuccess,
     onError,

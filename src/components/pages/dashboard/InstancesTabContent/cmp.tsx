@@ -81,14 +81,14 @@ export const InstancesTabContent = React.memo(
               />
             </div>
             <div tw="mt-20 text-center">
-              <ButtonLink variant="primary" href="/dashboard/instance">
+              <ButtonLink variant="primary" href="/dashboard/instance/new">
                 Create instance
               </ButtonLink>
             </div>
           </>
         ) : (
           <div tw="mt-10 text-center">
-            <ButtonLink variant="primary" href="/dashboard/instance">
+            <ButtonLink variant="primary" href="/dashboard/instance/new">
               Create your first instance
             </ButtonLink>
           </div>

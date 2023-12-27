@@ -364,3 +364,94 @@ export function toKebabCase(input: string): string {
 export function toSnakeCase(input: string): string {
   return toKebabCase(input).replace(/-/g, '_')
 }
+
+// -------------------------- @todo: Refactor in domain package -------------------
+
+/**
+ * Fetches a URL and caches the result in LocalStorage for a given time
+ *
+ * @param {string} url The URL to fetch
+ * @param {string} cacheKey The LocalStorage key to use for cachinng (must be unique)
+ * @param {number} cacheTime The time in ms to cache the data
+ * @returns
+ */
+export async function fetchAndCache<T = unknown, P = unknown>(
+  url: string,
+  cacheKey: string,
+  cacheTime: number,
+  parse?: (data: T) => P | Promise<P>,
+): Promise<P> {
+  const cached = localStorage.getItem(cacheKey)
+  const now = Date.now()
+
+  if (cached) {
+    const { cachedAt, value } = JSON.parse(cached)
+    if (now - cachedAt < cacheTime) {
+      console.log(`Retrieved ${cacheKey} from cache`)
+      return value
+    }
+  }
+
+  try {
+    const data = await fetch(url)
+    let value = await data.json()
+
+    if (parse) {
+      value = await parse(value)
+    }
+
+    const toCache = JSON.stringify({
+      cachedAt: now,
+      value,
+    })
+
+    localStorage.setItem(cacheKey, toCache)
+
+    return value
+  } catch (error) {
+    console.error(`Failed to fetch ${url}`, error)
+    if (cached) return JSON.parse(cached).value
+    throw error
+  }
+}
+
+/**
+ * Takes a list of github releases and returns the latest, the latest prerelease and a list of outdated versions
+ *
+ * @param {Array} payload A list of github releases, returned from the API (https://api.github.com/repos/[owner]/[name]/releases)
+ * @param {Number} outdatedAfter The time in ms after which a release is considered outdated (defaults to 14 days)
+ */
+export function getLatestReleases(
+  payload: any,
+  outdatedAfter = 1000 * 60 * 60 * 24 * 14,
+) {
+  const versions = {
+    latest: null,
+    prerelease: null,
+    outdated: null,
+  }
+
+  let latestReleaseDate = 0
+  if (!payload) return versions
+
+  for (const item of payload) {
+    if (item.prerelease && !versions.prerelease) {
+      versions.prerelease = item.tag_name
+    }
+    if (!item.prerelease && !versions.latest) {
+      versions.latest = item.tag_name
+      latestReleaseDate = new Date(item.published_at).getTime()
+    }
+    if (
+      versions.latest &&
+      versions.prerelease &&
+      !versions.outdated &&
+      !item.prerelease &&
+      Date.now() - latestReleaseDate < outdatedAfter
+    ) {
+      versions.outdated = item.tag_name
+    }
+  }
+
+  return versions
+}

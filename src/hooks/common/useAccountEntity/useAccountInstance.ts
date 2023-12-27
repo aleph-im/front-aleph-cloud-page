@@ -2,9 +2,9 @@ import { useAppState } from '@/contexts/appState'
 import { Instance } from '@/domain/instance'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
-import { UseRequestReturn, useRequest } from '../useRequest'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useInstanceManager } from '../useManager/useInstanceManager'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
 
 export type UseAccountInstanceProps = {
   id: string
@@ -53,7 +53,7 @@ export function useAccountInstance({
     [appState.accountInstances, id],
   )
 
-  const reqState = useRequest({
+  const reqState = useLocalRequest({
     doRequest,
     onSuccess,
     onError,

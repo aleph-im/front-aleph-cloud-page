@@ -1,7 +1,7 @@
-import { defaultConsoleChannel } from '@/helpers/constants'
+import { apiServer, channel, defaultConsoleChannel } from '@/helpers/constants'
 import { Mutex, convertByteUnits } from '@/helpers/utils'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { any } from 'aleph-sdk-ts/dist/messages'
+import { any, store } from 'aleph-sdk-ts/dist/messages'
 import { ItemType } from 'aleph-sdk-ts/dist/messages/types'
 
 export type AccountFileObject = {
@@ -58,11 +58,13 @@ export class FileManager {
   }
 
   constructor(
-    protected account: Account,
+    protected account?: Account,
     protected channel = defaultConsoleChannel,
   ) {}
 
   async getAll(): Promise<AccountFilesResponse> {
+    if (!this.account) throw new Error('Invalid account')
+
     const { address } = this.account
 
     const emptyPayload = {
@@ -99,6 +101,22 @@ export class FileManager {
     }
 
     return this.sizesMapCache
+  }
+
+  async uploadFile(fileObject: File): Promise<string> {
+    if (!this.account) throw new Error('Invalid account')
+
+    // @note: Quick temporal fix to upload files
+    const buffer = Buffer.from(await fileObject.arrayBuffer())
+
+    const message = await store.Publish({
+      account: this.account,
+      channel,
+      APIServer: apiServer,
+      fileObject: buffer,
+    })
+
+    return message.content.item_hash
   }
 
   protected parseSizesMap(files: AccountFileObject[]): void {

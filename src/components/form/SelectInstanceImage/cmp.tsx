@@ -4,8 +4,9 @@ import { useBasePath } from '@/hooks/common/useBasePath'
 import { ForwardedRef, forwardRef, memo, useCallback } from 'react'
 import { useSelectInstanceImage } from '@/hooks/form/useSelectInstanceImage'
 import { SelectInstanceImageItemProps, SelectInstanceImageProps } from './types'
-import { StyledFlatCard, StyledFlatCardContainer } from './styles'
 import { FormError } from '@aleph-front/aleph-core'
+import { FlatCardButtonContainer } from '@/components/common/FlatCardButton'
+import { StyledFlatCardButton } from './styles'
 
 const SelectInstanceImageItem = memo(
   forwardRef(
@@ -32,7 +33,7 @@ const SelectInstanceImageItem = memo(
       )
 
       return (
-        <StyledFlatCard
+        <StyledFlatCardButton
           onClick={handleClick}
           $selected={selected}
           $disabled={option.disabled}
@@ -46,7 +47,7 @@ const SelectInstanceImageItem = memo(
             tw="mb-4"
           />
           {option.name}
-        </StyledFlatCard>
+        </StyledFlatCardButton>
       )
     },
   ),
@@ -58,7 +59,7 @@ export const SelectInstanceImage = memo((props: SelectInstanceImageProps) => {
 
   return (
     <div tw="overflow-x-auto md:overflow-x-visible w-full">
-      <StyledFlatCardContainer>
+      <FlatCardButtonContainer>
         {options.map((option, index) => (
           <SelectInstanceImageItem
             key={option.id}
@@ -69,7 +70,7 @@ export const SelectInstanceImage = memo((props: SelectInstanceImageProps) => {
             }}
           />
         ))}
-      </StyledFlatCardContainer>
+      </FlatCardButtonContainer>
       {imageCtrl.fieldState.error && (
         <FormError error={imageCtrl.fieldState.error} />
       )}

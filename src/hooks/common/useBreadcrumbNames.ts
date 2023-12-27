@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 const defaultNames = {
   '/': 'SOLUTIONS',
   '/dashboard/function': 'SETUP NEW FUNCTION',
-  '/dashboard/instance': 'SETUP NEW INSTANCE',
+  '/dashboard/instance/new': 'SETUP NEW INSTANCE',
   '/dashboard/volume': 'SETUP NEW VOLUME',
   '/dashboard/domain': 'SETUP NEW DOMAIN',
   // @todo: Calculate entity name by hash (refactor routes)

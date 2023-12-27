@@ -1,6 +1,5 @@
-import { Button, Tabs, TextGradient } from '@aleph-front/aleph-core'
+import { Button, TextGradient, CompositeTitle } from '@aleph-front/aleph-core'
 import { EntityType } from '@/helpers/constants'
-import CompositeTitle from '@/components/common/CompositeTitle'
 import { useNewFunctionPage } from '@/hooks/pages/dashboard/useNewFunctionPage'
 import HoldingRequirements from '@/components/common/HoldingRequirements'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
@@ -16,6 +15,7 @@ import { convertByteUnits } from '@/helpers/utils'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime/cmp'
+import NewEntityTab from '../NewEntityTab'
 
 export default function NewFunctionPage() {
   const {
@@ -26,35 +26,13 @@ export default function NewFunctionPage() {
     control,
     errors,
     handleSubmit,
-    handleChangeEntityTab,
   } = useNewFunctionPage()
 
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 py-0 md:py-8">
         <Container>
-          <Tabs
-            selected="function"
-            onTabChange={handleChangeEntityTab}
-            tabs={[
-              {
-                id: 'function',
-                name: 'Function',
-              },
-              {
-                id: 'instance',
-                name: 'Instance',
-                label: { label: 'BETA', position: 'top' },
-              },
-              {
-                id: 'confidential',
-                name: 'Confidential',
-                disabled: true,
-                label: { label: 'SOON', position: 'top' },
-              },
-            ]}
-            tw="overflow-auto"
-          />
+          <NewEntityTab selected="function" />
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">

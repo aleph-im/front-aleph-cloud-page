@@ -65,7 +65,13 @@ export function useSSHKeyItem({
     defaultValue: defaultValue?.label,
   })
 
-  const isNew = defaultValue?.isNew || false
+  const isNewCtrl = useController({
+    control,
+    name: `${name}.${index}.isNew`,
+    defaultValue: defaultValue?.isNew || false,
+  })
+
+  const isNew = isNewCtrl.field.value
 
   const handleRemove = useCallback(() => {
     if (!isNew) return

@@ -4,7 +4,7 @@ import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useDomainManager } from '../useManager/useDomainManager'
-import { UseRequestReturn, useRequest } from '../useRequest'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
 
 export type UseAccountDomainsProps = {
   triggerOnMount?: boolean
@@ -45,7 +45,7 @@ export function useAccountDomains({
     [manager],
   )
 
-  const reqState = useRequest({
+  const reqState = useLocalRequest({
     doRequest,
     onSuccess,
     onError,

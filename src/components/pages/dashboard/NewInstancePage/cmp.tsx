@@ -1,207 +1,100 @@
-import { Button, Tabs, TextGradient } from '@aleph-front/aleph-core'
-import CompositeTitle from '@/components/common/CompositeTitle'
-import SelectInstanceImage from '@/components/form/SelectInstanceImage'
-import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
-import AddVolumes from '@/components/form/AddVolumes'
-import AddEnvVars from '@/components/form/AddEnvVars'
-import AddSSHKeys from '@/components/form/AddSSHKeys'
-import AddDomains from '@/components/form/AddDomains'
-import AddNameAndTags from '@/components/form/AddNameAndTags'
-import HoldingRequirements from '@/components/common/HoldingRequirements'
-import { EntityType } from '@/helpers/constants'
+import { memo } from 'react'
+import { Button, CompositeTitle } from '@aleph-front/aleph-core'
+import FlatCardButton, {
+  FlatCardButtonContainer,
+} from '@/components/common/FlatCardButton'
 import Container from '@/components/common/CenteredContainer'
+import InfoTooltipButton from '@/components/common/InfoTooltipButton'
+import { PaymentMethod } from '@/helpers/constants'
+import NewEntityTab from '../NewEntityTab'
 import { useNewInstancePage } from '@/hooks/pages/dashboard/useNewInstancePage'
-import Form from '@/components/form/Form'
-import ToggleContainer from '@/components/common/ToggleContainer/cmp'
 
-export default function NewInstancePage() {
-  const {
-    address,
-    accountBalance,
-    isCreateButtonDisabled,
-    values,
-    control,
-    errors,
-    handleSubmit,
-    handleChangeEntityTab,
-  } = useNewInstancePage()
+export const NewInstancePage = () => {
+  const { selected, handleClickHOLD, handleClickPAYG, handleContinue } =
+    useNewInstancePage()
 
   return (
-    <Form onSubmit={handleSubmit} errors={errors}>
+    <>
       <section tw="px-0 py-0 md:py-8">
         <Container>
-          <Tabs
-            selected="instance"
-            onTabChange={handleChangeEntityTab}
-            tabs={[
-              {
-                id: 'function',
-                name: 'Function',
-              },
-              {
-                id: 'instance',
-                name: 'Instance',
-                label: { label: 'BETA', position: 'top' },
-              },
-              {
-                id: 'confidential',
-                name: 'Confidential',
-                disabled: true,
-                label: { label: 'SOON', position: 'top' },
-              },
-            ]}
-            tw="overflow-auto"
-          />
+          <NewEntityTab selected="instance" />
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <CompositeTitle as="h2" number="1">
-            Choose an image
+            Configure instance setup
           </CompositeTitle>
-          <p>
-            Chose a base image for your VM. It’s the base system that you will
-            be able to customize.
+          <p className="text-text">
+            Start by choosing your instance setup approach. Select based on your
+            preferred specifications or choose a specific compute node to tailor
+            your virtual machine (VM).
           </p>
           <div tw="px-0 mt-12 mb-6">
-            <SelectInstanceImage name="image" control={control} />
+            <FlatCardButtonContainer tw="flex-wrap md:justify-center">
+              <FlatCardButton
+                $selected={selected === PaymentMethod.HOLD}
+                onClick={handleClickHOLD}
+                tw="flex-auto lg:flex-1 h-40 p-6"
+              >
+                <div className="tp-body1" tw="opacity-60">
+                  Select by specification
+                </div>
+                <div className="tp-body3 fs-24">Automatic node allocation</div>
+              </FlatCardButton>
+              <FlatCardButton
+                $selected={selected === PaymentMethod.PAYG}
+                onClick={handleClickPAYG}
+                tw="flex-auto lg:flex-1 h-40 p-6"
+              >
+                <div className="tp-body1" tw="opacity-60">
+                  Select by node
+                </div>
+                <div className="tp-body3 fs-24">Manual node selection</div>
+              </FlatCardButton>
+            </FlatCardButtonContainer>
+          </div>
+          <div tw="mt-6 text-right">
+            <InfoTooltipButton
+              my="bottom-left"
+              at="top-right"
+              tooltipContent={
+                <div className="tp-body1 fs-18">
+                  <div tw="mb-8">
+                    <div className="tp-body2 fs-18">
+                      Automatic node selection
+                    </div>
+                    Choose your desired specs (like CPU, memory, storage) and
+                    let the system automatically assign an optimal compute node
+                    for your instance.
+                  </div>
+                  <div>
+                    <div className="tp-body2 fs-18">Manual node selection</div>
+                    Pick a specific compute node first based on its
+                    characteristics and then customize the available specs for
+                    your instance on that node.
+                  </div>
+                </div>
+              }
+            >
+              More info
+            </InfoTooltipButton>
+          </div>
+          <div tw="mt-6 text-center">
+            <Button
+              color="main0"
+              kind="neon"
+              variant="primary"
+              size="big"
+              onClick={handleContinue}
+            >
+              Continue
+            </Button>
           </div>
         </Container>
       </section>
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="2">
-            Select an instance size
-          </CompositeTitle>
-          <p>
-            Please select one of the available instance size as a base for your
-            VM. You will be able to customize the volumes later.
-          </p>
-          <div tw="px-0 my-6">
-            <SelectInstanceSpecs
-              name="specs"
-              control={control}
-              type={EntityType.Instance}
-              isPersistent
-            />
-          </div>
-        </Container>
-      </section>
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="3">
-            Configure SSH Key
-          </CompositeTitle>
-          <p>
-            Access your cloud instances securely. Give existing key’s below
-            access to this instance or add new keys. Remember, storing private
-            keys safely is crucial for security. If you need help, our support
-            team is always ready to assist.
-          </p>
-          <div tw="px-0 my-6">
-            <AddSSHKeys name="sshKeys" control={control} />
-          </div>
-        </Container>
-      </section>
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="4">
-            Name and tags
-          </CompositeTitle>
-          <p tw="mb-6">
-            Organize and identify your instances more effectively by assigning a
-            unique name, obtaining a hash reference, and defining multiple tags.
-            This helps streamline your development process and makes it easier
-            to manage your web3 instances.
-          </p>
-          <AddNameAndTags control={control} entityType={EntityType.Instance} />
-        </Container>
-      </section>
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="5">
-            Advanced Configuration Options
-          </CompositeTitle>
-          <p tw="mb-6">
-            Customize your instance with our Advanced Configuration Options. Add
-            volumes, SSH keys, environment variables, and custom domains to meet
-            your specific needs.
-          </p>
-          <div tw="px-0 my-6">
-            <div tw="mb-4">
-              <ToggleContainer label="Add Volume">
-                <TextGradient forwardedAs="h2" type="h6" color="main0">
-                  Add volumes
-                </TextGradient>
-                <AddVolumes name="volumes" control={control} />
-              </ToggleContainer>
-            </div>
-            <div tw="mb-4">
-              <ToggleContainer label="Add Environmental Variables">
-                <TextGradient forwardedAs="h2" type="h6" color="main0">
-                  Add environment variables
-                </TextGradient>
-                <p tw="mb-6">
-                  Define key-value pairs that act as configuration settings for
-                  your web3 instance. Environment variables offer a convenient
-                  way to store information, manage configurations, and modify
-                  your application&apos;s behaviour without altering the source
-                  code.
-                </p>
-                <AddEnvVars name="envVars" control={control} />
-              </ToggleContainer>
-            </div>
-            <div tw="mb-4">
-              <ToggleContainer label="Add Custom Domain">
-                <TextGradient forwardedAs="h2" type="h6" color="main0">
-                  Custom domain
-                </TextGradient>
-                <p tw="mb-6">
-                  You have the ability to configure a domain name to access your
-                  cloud instances. By setting up a user-friendly custom domain,
-                  accessing your instances becomes easier and more intuitive.
-                  It&amp;s another way we&amp;re making web3 cloud management as
-                  straightforward as possible.
-                </p>
-                <AddDomains
-                  name="domains"
-                  control={control}
-                  entityType={EntityType.Instance}
-                />
-              </ToggleContainer>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      <HoldingRequirements
-        address={address}
-        type={EntityType.Instance}
-        isPersistent={true}
-        specs={values.specs}
-        volumes={values.volumes}
-        domains={values.domains}
-        unlockedAmount={accountBalance}
-        description={
-          <>
-            This amount needs to be present in your wallet until the instance is
-            removed. Tokens won&apos;t be locked nor consumed. The instance will
-            be garbage collected once funds are removed from the wallet.
-          </>
-        }
-        button={
-          <Button
-            type="submit"
-            color="main0"
-            kind="neon"
-            size="big"
-            variant="primary"
-            disabled={isCreateButtonDisabled}
-          >
-            Create instance
-          </Button>
-        }
-      />
-    </Form>
+    </>
   )
 }
+
+export default memo(NewInstancePage)

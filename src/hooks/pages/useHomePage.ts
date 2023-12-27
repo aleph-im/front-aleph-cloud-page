@@ -45,7 +45,7 @@ export function useHomePage(): HomePage {
       if (!acc) return
     }
 
-    router.push('/dashboard/instance')
+    router.push('/dashboard/instance/new')
   }, [connect, isConnected, router])
 
   // @note: wait till account is connected and redirect

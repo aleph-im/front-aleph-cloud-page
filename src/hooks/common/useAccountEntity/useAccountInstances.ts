@@ -1,10 +1,11 @@
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
-import { UseRequestReturn, useRequest } from '../useRequest'
+
 import { Instance } from '@/domain/instance'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useInstanceManager } from '../useManager/useInstanceManager'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
 
 export type UseAccountInstancesProps = {
   triggerOnMount?: boolean
@@ -45,7 +46,7 @@ export function useAccountInstances({
     [manager],
   )
 
-  const reqState = useRequest({
+  const reqState = useLocalRequest({
     doRequest,
     onSuccess,
     onError,

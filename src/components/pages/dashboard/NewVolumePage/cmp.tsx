@@ -1,10 +1,9 @@
 import { EntityType } from '@/helpers/constants'
 import { useNewVolumePage } from '@/hooks/pages/dashboard/useNewVolumePage'
-import { Button } from '@aleph-front/aleph-core'
+import { Button, CompositeTitle } from '@aleph-front/aleph-core'
 import HoldingRequirements from '@/components/common/HoldingRequirements'
 import Container from '@/components/common/CenteredContainer'
 import { AddNewVolume } from '@/components/form/AddVolume/cmp'
-import CompositeTitle from '@/components/common/CompositeTitle'
 import { Form } from '@/components/form/Form/cmp'
 
 export default function NewVolumePage() {

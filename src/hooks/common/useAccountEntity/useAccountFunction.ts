@@ -2,9 +2,9 @@ import { useAppState } from '@/contexts/appState'
 import { Program } from '@/domain/program'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
-import { UseRequestReturn, useRequest } from '../useRequest'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useProgramManager } from '../useManager/useProgramManager'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
 
 export type UseAccountFunctionProps = {
   id: string
@@ -53,7 +53,7 @@ export function useAccountFunction({
     [appState.accountFunctions, id],
   )
 
-  const reqState = useRequest({
+  const reqState = useLocalRequest({
     doRequest,
     onSuccess,
     onError,

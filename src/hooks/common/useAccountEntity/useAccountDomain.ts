@@ -2,9 +2,9 @@ import { useAppState } from '@/contexts/appState'
 import { Domain } from '@/domain/domain'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
-import { UseRequestReturn, useRequest } from '../useRequest'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useDomainManager } from '../useManager/useDomainManager'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
 
 export type UseAccountDomainProps = {
   id: string
@@ -52,7 +52,7 @@ export function useAccountDomain({
     [appState.accountDomains, id],
   )
 
-  const reqState = useRequest({
+  const reqState = useLocalRequest({
     doRequest,
     onSuccess,
     onError,

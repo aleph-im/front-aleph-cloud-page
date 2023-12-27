@@ -1,9 +1,13 @@
 import Container from '@/components/common/CenteredContainer'
-import CompositeTitle from '@/components/common/CompositeTitle'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import Form from '@/components/form/Form'
 import { useNewSSHKeyPage } from '@/hooks/pages/dashboard/useNewSSHKeyPage'
-import { Button, TextArea, TextInput } from '@aleph-front/aleph-core'
+import {
+  Button,
+  CompositeTitle,
+  TextArea,
+  TextInput,
+} from '@aleph-front/aleph-core'
 
 export default function NewSSHKey() {
   const { keyCtrl, labelCtrl, handleSubmit, errors } = useNewSSHKeyPage()

@@ -2,9 +2,9 @@ import { useAppState } from '@/contexts/appState'
 import { Volume } from '@/domain/volume'
 import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
-import { UseRequestReturn, useRequest } from '../useRequest'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useVolumeManager } from '../useManager/useVolumeManager'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
 
 export type UseAccountVolumeProps = {
   id: string
@@ -52,7 +52,7 @@ export function useAccountVolume({
     [appState.accountVolumes, id],
   )
 
-  const reqState = useRequest({
+  const reqState = useLocalRequest({
     doRequest,
     onSuccess,
     onError,

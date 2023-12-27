@@ -48,7 +48,6 @@ export type UseNewIndexerPage = {
   errors: FieldErrors<NewIndexerFormState>
   holdingRequirementsProps: Record<string, unknown>
   handleSubmit: (e: FormEvent) => Promise<void>
-  handleChangeEntityTab: (tabId: string) => void
 }
 
 export function useNewIndexerPage(): UseNewIndexerPage {
@@ -110,11 +109,6 @@ export function useNewIndexerPage(): UseNewIndexerPage {
     isCreateButtonDisabled = false
   }
 
-  const handleChangeEntityTab = useCallback(
-    (id: string) => router.push(`/dashboard/${id}`),
-    [router],
-  )
-
   return {
     address: account?.address || '',
     accountBalance: accountBalance || 0,
@@ -124,6 +118,5 @@ export function useNewIndexerPage(): UseNewIndexerPage {
     errors,
     holdingRequirementsProps,
     handleSubmit,
-    handleChangeEntityTab,
   }
 }

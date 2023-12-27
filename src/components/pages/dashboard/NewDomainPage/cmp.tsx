@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import ButtonLink from '@/components/common/ButtonLink'
 import Container from '@/components/common/CenteredContainer'
-import CompositeTitle from '@/components/common/CompositeTitle'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import NoisyContainer from '@/components/common/NoisyContainer'
 import Form from '@/components/form/Form'
 import { EntityType, EntityTypeName } from '@/helpers/constants'
 import { useNewDomainPage } from '@/hooks/pages/dashboard/useNewDomainPage'
-import { Tabs } from '@aleph-front/aleph-core'
 import {
   Button,
   Dropdown,
@@ -15,6 +13,8 @@ import {
   Radio,
   RadioGroup,
   TextInput,
+  Tabs,
+  CompositeTitle,
 } from '@aleph-front/aleph-core'
 
 export default function NewDomain() {
@@ -44,7 +44,7 @@ export default function NewDomain() {
                 an instance or function first
               </p>
               <div tw="mt-10 text-center">
-                <ButtonLink variant="primary" href="/dashboard/instance">
+                <ButtonLink variant="primary" href="/dashboard/instance/new">
                   Create your first instance
                 </ButtonLink>
               </div>
