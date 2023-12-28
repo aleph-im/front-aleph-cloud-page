@@ -3,12 +3,13 @@ import { forget, post } from 'aleph-sdk-ts/dist/messages'
 import E_ from '../helpers/errors'
 import {
   EntityType,
+  apiServer,
   defaultSSHChannel,
   defaultSSHPostType,
 } from '../helpers/constants'
 import { getDate, getExplorerURL } from '../helpers/utils'
 import { EntityManager } from './types'
-import { sshKeySchema, sshKeysSchema } from '@/helpers/schemas'
+import { sshKeySchema, sshKeysSchema } from '@/helpers/schemas/ssh'
 
 export type AddSSHKey = {
   key: string
@@ -39,6 +40,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
         addresses: [this.account.address],
         types: [this.type],
         channels: [this.channel],
+        APIServer: apiServer,
       })
 
       return this.parsePosts(response.posts)
@@ -53,6 +55,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
       types: [this.type],
       channels: [this.channel],
       hashes: [id],
+      APIServer: apiServer,
     })
 
     const [entity] = this.parsePosts(response.posts)
@@ -80,6 +83,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
             postType: this.type,
             channel: this.channel,
             content: { key, label },
+            APIServer: apiServer,
           }),
         ),
       )
@@ -98,6 +102,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
         account: this.account,
         channel: this.channel,
         hashes: [sshKeyOrId],
+        APIServer: apiServer,
       })
     } catch (err) {
       throw E_.RequestFailed(err)

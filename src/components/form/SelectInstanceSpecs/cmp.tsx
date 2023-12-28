@@ -1,47 +1,68 @@
 import React, { KeyboardEvent, memo, useEffect, useState } from 'react'
 /* eslint-disable @next/next/no-img-element */
 import { useSelectInstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
-import { Button, FormError, Icon, TableColumn } from '@aleph-front/aleph-core'
+import {
+  Button,
+  FormError,
+  Icon,
+  Logo,
+  TableColumn,
+} from '@aleph-front/aleph-core'
 import { useCallback, useMemo } from 'react'
 import { convertByteUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
 import { StyledTable } from './styles'
 import { Executable } from '@/domain/executable'
-import { EntityType } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
-  const { specsCtrl, options, type, isPersistent } =
+  const { specsCtrl, options, type, isPersistent, paymentMethod } =
     useSelectInstanceSpecs(props)
 
   const columns = useMemo(() => {
+    const paymentCol =
+      paymentMethod === PaymentMethod.Hold
+        ? {
+            label: 'Hold',
+            align: 'right',
+            sortable: true,
+            sortBy: (row: SpecsDetail) => row.price,
+            render: (row: SpecsDetail) => (
+              <span tw="flex items-center justify-end gap-1">
+                {row.price}
+                <Logo text="" color="currentColor" />
+              </span>
+            ),
+          }
+        : {
+            label: 'Price',
+            align: 'right',
+            sortable: true,
+            sortBy: (row: SpecsDetail) => row.price,
+            render: (row: SpecsDetail) => (
+              <span tw="flex items-center justify-end gap-1">
+                {row.price}
+                <Logo text="" color="currentColor" /> / h
+              </span>
+            ),
+          }
+
     const cols = [
       {
         label: 'Cores',
         width: '100%',
         sortable: true,
         sortBy: (row: SpecsDetail) => row.specs.cpu,
-        render: (row: SpecsDetail) => (
-          <span className={row.className}>{row.specs.cpu} x86 64bit</span>
-        ),
+        render: (row: SpecsDetail) => `${row.specs.cpu} x86 64bit`,
       },
       {
         label: 'Memory',
         align: 'right',
         sortable: true,
         sortBy: (row: SpecsDetail) => row.ram,
-        render: (row: SpecsDetail) => (
-          <span className={row.className}>{row.ram}</span>
-        ),
+        render: (row: SpecsDetail) => row.ram,
       },
-      {
-        label: 'Hold',
-        align: 'right',
-        sortable: true,
-        sortBy: (row: SpecsDetail) => row.price,
-        render: (row: SpecsDetail) => (
-          <span className={row.className}>{row.price}</span>
-        ),
-      },
+      paymentCol,
       {
         label: '',
         align: 'right',
@@ -49,7 +70,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
           return (
             <>
               {row.specs.disabled ? (
-                <div className="fs-12 tp-body2" tw="text-center">
+                <div className="fs-12 tp-body2" tw="text-center py-2">
                   (Soon)
                 </div>
               ) : (
@@ -60,10 +81,14 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
                   size="regular"
                   forwardedAs="button"
                   type="button"
-                  tabIndex={-1}
-                  // TODO: Fix this
-                  style={{ visibility: row.isActive ? 'visible' : 'hidden' }}
                   onClick={(e) => e.preventDefault()}
+                  tabIndex={-1}
+                  style={{
+                    visibility: row.isActive ? 'visible' : 'hidden',
+                    opacity: row.isActive ? '1' : '0',
+                    transition: 'all ease-in-out 500ms 0ms',
+                    transitionProperty: 'opacity visibility',
+                  }}
                 >
                   <Icon name="check" />
                 </Button>
@@ -81,17 +106,18 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         sortable: true,
         sortBy: (row: SpecsDetail) => row.storage,
         render: (row: SpecsDetail) => {
-          return <span className={row.className}>{row.storage}</span>
+          return <span>{row.storage}</span>
         },
       })
     }
 
     return cols
-  }, [type])
+  }, [paymentMethod, type])
 
   // ------------------------------------------
 
   const [data, setData] = useState<SpecsDetail[]>([])
+  const { cpu } = specsCtrl.field.value
 
   useEffect(() => {
     async function load(): Promise<void> {
@@ -102,15 +128,14 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
             type,
             specs,
             isPersistent,
+            paymentMethod,
           })
 
-          const isActive = specsCtrl.field.value.cpu === specs.cpu
-          const className = `${isActive ? 'text-main0' : ''}`
+          const isActive = cpu === specs.cpu
 
           return {
             specs,
             isActive,
-            className,
             storage: convertByteUnits(storage, {
               from: 'MiB',
               to: 'GiB',
@@ -121,7 +146,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
               to: 'GiB',
               displayUnit: true,
             }),
-            price: price.computeTotalCost + ' ALEPH',
+            price: price.computeTotalCost,
           }
         }),
       )
@@ -130,7 +155,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     }
 
     load()
-  }, [isPersistent, options, specsCtrl.field.value.cpu, type])
+  }, [isPersistent, options, paymentMethod, cpu, type])
 
   const getRowKey = useCallback((row: SpecsDetail) => row.specs.cpu + '', [])
 
@@ -138,6 +163,11 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
 
   const handleRowProps = useCallback(
     (row: SpecsDetail, rowIndex: number) => ({
+      tabIndex: row.specs.disabled ? -1 : 0,
+      className: `${row.specs.disabled ? 'disabled' : ''} ${
+        row.isActive ? 'text-main0' : ''
+      }`,
+      ref: rowIndex === 0 ? ref : undefined,
       onClick: () => {
         if (row.specs.disabled) return
         onChange(row.specs)
@@ -147,9 +177,6 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         e.preventDefault()
         onChange(row.specs)
       },
-      tabIndex: 0,
-      ref: rowIndex === 0 ? ref : undefined,
-      className: row.specs.disabled ? 'disabled' : '',
     }),
     [onChange, ref],
   )

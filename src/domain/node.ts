@@ -176,6 +176,7 @@ export type NodesResponse = { ccns: CCN[]; crns: CRN[]; timestamp: number }
 
 export type CRNSpecs = {
   hash: string
+  name?: string
   cpu: {
     count: number
     load_average: {
@@ -206,7 +207,7 @@ export type CRNSpecs = {
       vendor: string
     }
   }
-  active: true
+  active: boolean
 }
 
 // @todo: Refactor (create a domain npm package and move this there)
@@ -232,8 +233,6 @@ export class NodeManager {
 
   async getCRNNodes(): Promise<CRN[]> {
     const res = await this.fetchAllNodes()
-
-    console.log('----', res)
 
     const { ccns } = res
     let { crns } = res
@@ -267,66 +266,43 @@ export class NodeManager {
   }
 
   // @todo: move this to domain package
-  async getCRNSpecs(nodes: CRN[]): Promise<CRNSpecs[]> {
-    const specs = await Promise.all(nodes.map((node) => this.getCRNpecs(node)))
-    return specs.filter((spec) => spec !== undefined) as CRNSpecs[]
+  async getCRNsSpecs(nodes: CRN[]): Promise<CRNSpecs[]> {
+    const specs = await Promise.all(nodes.map((node) => this.getCRNspecs(node)))
+    console.log('specs', specs)
+    const filtered = specs.filter((spec) => spec !== undefined) as CRNSpecs[]
+    console.log('filtered', filtered)
+    return filtered
   }
 
-  async getCRNpecs(node: CRN): Promise<CRNSpecs | undefined> {
+  async getCRNspecs(node: CRN, retries = 2): Promise<CRNSpecs | undefined> {
     if (!node.address) return
 
-    await sleep(1000 * 5)
-
-    return {
-      hash: node.hash,
-      cpu: {
-        count: 12,
-        load_average: {
-          load1: 0.13427734375,
-          load5: 0.14599609375,
-          load15: 0.16455078125,
-        },
-        core_frequencies: {
-          min: 800,
-          max: 4800,
-        },
-      },
-      mem: {
-        total_kB: 67337909,
-        available_kB: 64684527,
-      },
-      disk: {
-        total_kB: 500673052,
-        available_kB: 469886640,
-      },
-      period: {
-        start_timestamp: '2023-12-27T18:38:00+00:00',
-        duration_seconds: 60,
-      },
-      properties: {
-        cpu: {
-          architecture: 'x86_64',
-          vendor: 'GenuineIntel',
-        },
-      },
-      active: true,
-    }
-
-    const url = `${node.address}/about/usage/system`.replaceAll('//', '/')
+    // const url = `${node.address}/about/usage/system`.replaceAll('//', '/')
+    const url =
+      `${node.address}/vm/78451e20da3c19a3e2cd8e97526e09244631fba12f451b9b60cdb2915ab0e414/about/usage/system`.replaceAll(
+        '//',
+        '/',
+      )
 
     try {
       return await fetchAndCache(
         url,
-        `crn_specs_${node.hash}`,
+        `3crn_specs_${node.hash}`,
         3_600,
-        (res: CRNSpecs) => ({
-          ...res,
-          hash: node.hash,
-        }),
+        (res: CRNSpecs) => {
+          if (res.cpu === undefined) throw new Error('invalid response')
+
+          return {
+            ...res,
+            hash: node.hash,
+            name: node.name,
+          }
+        },
       )
     } catch (e) {
-      console.log(e)
-      return
+      if (!retries) return
+      await sleep(100 * 2)
+      return this.getCRNspecs(node, retries - 1)
     }
   }
 
@@ -510,6 +486,7 @@ export class NodeManager {
       addresses: [scoringAddress],
       pagination: 1,
       page: 1,
+      APIServer: apiServer,
     })
 
     return (res.posts[0]?.content as any)?.scores
@@ -524,6 +501,7 @@ export class NodeManager {
       addresses: [scoringAddress],
       pagination: 1,
       page: 1,
+      APIServer: apiServer,
     })
 
     return (res.posts[0]?.content as any)?.metrics

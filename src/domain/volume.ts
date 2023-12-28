@@ -3,7 +3,9 @@ import { forget, store, any } from 'aleph-sdk-ts/dist/messages'
 import E_ from '../helpers/errors'
 import {
   EntityType,
+  PaymentMethod,
   VolumeType,
+  apiServer,
   defaultVolumeChannel,
   programStorageURL,
 } from '../helpers/constants'
@@ -15,7 +17,7 @@ import { EntityManager } from './types'
 import {
   newIsolatedVolumeSchema,
   newIsolatedVolumesSchema,
-} from '@/helpers/schemas'
+} from '@/helpers/schemas/volume'
 
 export { VolumeType }
 
@@ -83,6 +85,7 @@ export type PersistentVolume = BaseVolume & {
 export type Volume = NewVolume | ExistingVolume | PersistentVolume
 
 export type VolumeCostProps = {
+  paymentMethod?: PaymentMethod
   volumes?: (Volume | AddVolume | VolumeField)[]
   sizeDiscount?: number
 }
@@ -135,8 +138,11 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   /**
    * Returns the size of a volume in mb
    */
-  static getExecutionVolumeMiBPrice(volume: Volume | AddVolume): number {
-    return 1 / 20
+  static getExecutionVolumeMiBPrice(
+    volume: Volume | AddVolume,
+    paymentMethod: PaymentMethod,
+  ): number {
+    return paymentMethod === PaymentMethod.Hold ? 1 / 20 : 0.001 / 1024
   }
 
   // @note: The algorithm for calculating the cost per volume is as follows:
@@ -146,12 +152,16 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   static async getPerVolumeCost({
     volumes = [],
     sizeDiscount = 0,
+    paymentMethod = PaymentMethod.Hold,
   }: VolumeCostProps): Promise<PerVolumeCost> {
     return Promise.all(
       volumes.map(async (volume) => {
         const size = await this.getVolumeSize(volume)
         const mibStoragePrice = this.getStorageVolumeMiBPrice(volume)
-        const mibExecutionPrice = this.getExecutionVolumeMiBPrice(volume)
+        const mibExecutionPrice = this.getExecutionVolumeMiBPrice(
+          volume,
+          paymentMethod,
+        )
 
         if (size === Number.POSITIVE_INFINITY) {
           sizeDiscount = 0
@@ -226,6 +236,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
         addresses: [this.account.address],
         messageType: MessageType.store,
         channels: [this.channel],
+        APIServer: apiServer,
       })
 
       return await this.parseMessages(response.messages)
@@ -239,6 +250,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       hash: id,
       messageType: MessageType.store,
       channel: this.channel,
+      APIServer: apiServer,
     })
 
     const [entity] = await this.parseMessages([message])
@@ -260,6 +272,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
             account,
             channel,
             fileObject,
+            APIServer: apiServer,
             // fileHash: 'IPFS_HASH',
             // storageEngine: ItemType.ipfs,
           }),
@@ -280,6 +293,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
         account: this.account,
         channel: this.channel,
         hashes: [volumeOrId],
+        APIServer: apiServer,
       })
     } catch (err) {
       throw E_.RequestFailed(err)

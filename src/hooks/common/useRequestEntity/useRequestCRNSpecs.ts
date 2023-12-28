@@ -1,14 +1,15 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CRN, CRNSpecs, NodeManager } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
-import { useLocalRequest } from '@aleph-front/aleph-core'
+import { RequestState } from '@aleph-front/aleph-core'
 
 export type UseRequestCRNSpecsProps = {
   nodes?: CRN[]
 }
 
 export type UseRequestCRNSpecsReturn = {
-  specs?: Record<string, CRNSpecs>
+  specs: Record<string, RequestState<CRNSpecs>>
+  loading: boolean
 }
 
 export function useRequestCRNSpecs({
@@ -20,24 +21,40 @@ export function useRequestCRNSpecs({
   // @todo: Refactor this (use singleton)
   const nodeManager = useMemo(() => new NodeManager(account), [account])
 
-  const { data: nodeSpecs } = useLocalRequest({
-    doRequest: () => nodeManager.getCRNSpecs(nodes || []),
-    onSuccess: () => null,
-    flushData: false,
-    triggerOnMount: true,
-    triggerDeps: [nodes],
-  })
+  const [specs, setSpecs] = useState<Record<string, RequestState<CRNSpecs>>>({})
+  const [loading, setLoading] = useState<boolean>(true)
 
-  const specs = useMemo(() => {
-    if (!nodeSpecs) return
+  useEffect(() => {
+    async function load() {
+      if (!nodes) return
 
-    return nodeSpecs.reduce((ac, cv) => {
-      ac[cv.hash] = cv
-      return ac
-    }, {} as Record<string, CRNSpecs>)
-  }, [nodeSpecs])
+      await Promise.allSettled(
+        nodes.map(async (node) => {
+          const nodeSpecs = await nodeManager.getCRNspecs(node)
+
+          setSpecs((prev) => ({
+            ...prev,
+            [node.hash]: { data: nodeSpecs, loading: false, error: undefined },
+          }))
+        }),
+      )
+
+      setLoading(false)
+    }
+
+    load()
+  }, [nodeManager, nodes])
+
+  // const { data: nodeSpecs } = useLocalRequest({
+  //   doRequest: () => nodeManager.getCRNSpecs(nodes || []),
+  //   onSuccess: () => null,
+  //   flushData: false,
+  //   triggerOnMount: true,
+  //   triggerDeps: [nodes],
+  // })
 
   return {
     specs,
+    loading,
   }
 }

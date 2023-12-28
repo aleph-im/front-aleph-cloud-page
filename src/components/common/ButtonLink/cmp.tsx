@@ -13,16 +13,20 @@ export default function ButtonLink({
   kind,
   size,
   children,
+  ...rest
 }: ButtonLinkProps &
   Partial<Pick<ButtonProps, 'variant' | 'color' | 'kind' | 'size'>>) {
   return (
     <Link href={href} passHref legacyBehavior>
       <Button
-        as="a"
-        variant={variant || 'secondary'}
-        color={color || 'main0'}
-        kind={kind || 'neon'}
-        size={size || 'regular'}
+        {...{
+          as: 'a',
+          variant: variant || 'secondary',
+          color: color || 'main0',
+          kind: kind || 'neon',
+          size: size || 'regular',
+          ...rest,
+        }}
       >
         {children}
       </Button>

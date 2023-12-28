@@ -2,7 +2,7 @@ import { AnyMessage } from '@/helpers/utils'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { any, forget } from 'aleph-sdk-ts/dist/messages'
 import E_ from '../helpers/errors'
-import { defaultConsoleChannel } from '@/helpers/constants'
+import { apiServer, defaultConsoleChannel } from '@/helpers/constants'
 
 export class MessageManager {
   constructor(
@@ -17,6 +17,7 @@ export class MessageManager {
     try {
       const msg = await any.GetMessage({
         hash: hash,
+        APIServer: apiServer,
       })
 
       return msg
@@ -34,6 +35,7 @@ export class MessageManager {
         account: this.account,
         hashes: [message.item_hash],
         channel: message.channel,
+        APIServer: apiServer,
       })
 
       return msg

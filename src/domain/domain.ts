@@ -4,11 +4,12 @@ import E_ from '../helpers/errors'
 import {
   AddDomainTarget,
   EntityType,
+  apiServer,
   defaultDomainAggregateKey,
   defaultDomainChannel,
 } from '../helpers/constants'
 import { EntityManager } from './types'
-import { domainSchema, domainsSchema } from '@/helpers/schemas'
+import { domainSchema, domainsSchema } from '@/helpers/schemas/domain'
 
 export { AddDomainTarget }
 
@@ -62,6 +63,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       const response: Record<string, unknown> = await aggregate.Get({
         address: this.account.address,
         keys: [this.key],
+        APIServer: apiServer,
       })
 
       return this.parseAggregate(response)
@@ -89,6 +91,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
         key: this.key,
         channel: this.channel,
         content,
+        APIServer: apiServer,
       })
     } catch (err) {
       throw E_.RequestFailed(err)

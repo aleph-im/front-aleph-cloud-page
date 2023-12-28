@@ -6,7 +6,6 @@ import {
   NodeName,
   NodeScore,
   TableColumn,
-  Spinner,
 } from '@aleph-front/aleph-core'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
@@ -16,9 +15,9 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import HoldingRequirements from '@/components/common/HoldingRequirements'
-import { EntityType, apiServer } from '@/helpers/constants'
+import { EntityType, PaymentMethod, apiServer } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
-import { useNewInstancePAYGPage } from '@/hooks/pages/dashboard/useNewInstancePAYGPage'
+import { useNewInstanceStreamPage } from '@/hooks/pages/dashboard/useNewInstanceStreamPage'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer/cmp'
 import NewEntityTab from '../NewEntityTab'
@@ -40,7 +39,7 @@ export default function NewInstancePage() {
     nodeSpecs,
     lastVersion,
     handleSubmit,
-  } = useNewInstancePAYGPage()
+  } = useNewInstanceStreamPage()
 
   const columns = useMemo(() => {
     return [
@@ -109,20 +108,6 @@ export default function NewInstancePage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="1">
-            Choose an image
-          </CompositeTitle>
-          <p>
-            Chose a base image for your VM. It’s the base system that you will
-            be able to customize.
-          </p>
-          <div tw="px-0 mt-12 mb-6">
-            <SelectInstanceImage name="image" control={control} />
-          </div>
-        </Container>
-      </section>
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
           <CompositeTitle as="h2" number="2">
             Select an instance size
           </CompositeTitle>
@@ -136,6 +121,8 @@ export default function NewInstancePage() {
               control={control}
               type={EntityType.Instance}
               isPersistent
+              paymentMethod={PaymentMethod.Stream}
+              nodeSpecs={nodeSpecs}
             />
           </div>
         </Container>
@@ -143,6 +130,20 @@ export default function NewInstancePage() {
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <CompositeTitle as="h2" number="3">
+            Choose an image
+          </CompositeTitle>
+          <p>
+            Chose a base image for your VM. It’s the base system that you will
+            be able to customize.
+          </p>
+          <div tw="px-0 mt-12 mb-6">
+            <SelectInstanceImage name="image" control={control} />
+          </div>
+        </Container>
+      </section>
+      <section tw="px-0 pt-20 pb-6 md:py-10">
+        <Container>
+          <CompositeTitle as="h2" number="4">
             Configure SSH Key
           </CompositeTitle>
           <p>
@@ -158,7 +159,7 @@ export default function NewInstancePage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="4">
+          <CompositeTitle as="h2" number="5">
             Name and tags
           </CompositeTitle>
           <p tw="mb-6">
@@ -172,7 +173,7 @@ export default function NewInstancePage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="5">
+          <CompositeTitle as="h2" number="6">
             Advanced Configuration Options
           </CompositeTitle>
           <p tw="mb-6">

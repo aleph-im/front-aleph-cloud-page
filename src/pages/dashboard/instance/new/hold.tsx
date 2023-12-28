@@ -1,3 +1,3 @@
-import NewInstanceHOLDPage from '@/components/pages/dashboard/NewInstanceHOLDPage'
+import NewInstanceHoldPage from '@/components/pages/dashboard/NewInstanceHoldPage'
 
-export default NewInstanceHOLDPage
+export default NewInstanceHoldPage

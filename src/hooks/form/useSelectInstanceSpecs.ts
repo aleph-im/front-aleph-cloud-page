@@ -1,4 +1,5 @@
-import { EntityType } from '@/helpers/constants'
+import { CRNSpecs } from '@/domain/node'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { convertByteUnits } from '@/helpers/utils'
 import { useEffect, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
@@ -47,6 +48,8 @@ export type UseSelectInstanceSpecsProps = {
   options?: InstanceSpecsField[]
   type: EntityType.Instance | EntityType.Program
   isPersistent?: boolean
+  paymentMethod?: PaymentMethod
+  nodeSpecs?: CRNSpecs
 }
 
 export type UseSelectInstanceSpecsReturn = {
@@ -54,6 +57,19 @@ export type UseSelectInstanceSpecsReturn = {
   options: InstanceSpecsField[]
   type: EntityType.Instance | EntityType.Program
   isPersistent: boolean
+  paymentMethod: PaymentMethod
+  nodeSpecs?: CRNSpecs
+}
+
+export function validateMinNodeSpecs(
+  minSpecs: InstanceSpecsField,
+  nodeSpecs: CRNSpecs,
+): boolean {
+  return (
+    minSpecs.cpu <= nodeSpecs.cpu.count &&
+    minSpecs.ram <= (nodeSpecs.mem.available_kB || 0) / 1024 &&
+    minSpecs.storage <= (nodeSpecs.disk.available_kB || 0) / 1024
+  )
 }
 
 export function useSelectInstanceSpecs({
@@ -63,11 +79,16 @@ export function useSelectInstanceSpecs({
   type,
   options: optionsProp,
   isPersistent = false,
+  paymentMethod = PaymentMethod.Hold,
+  nodeSpecs,
+  ...rest
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
-  const options = useMemo(
-    () => optionsProp || getDefaultSpecsOptions(isPersistent),
-    [isPersistent, optionsProp],
-  )
+  const options = useMemo(() => {
+    const opts = optionsProp || getDefaultSpecsOptions(isPersistent)
+    if (paymentMethod === PaymentMethod.Hold) return opts
+    if (!nodeSpecs) return []
+    return opts.filter((opt) => validateMinNodeSpecs(opt, nodeSpecs))
+  }, [optionsProp, isPersistent, paymentMethod, nodeSpecs])
 
   const specsCtrl = useController({
     control,
@@ -95,5 +116,7 @@ export function useSelectInstanceSpecs({
     options,
     type,
     isPersistent,
+    paymentMethod,
+    ...rest,
   }
 }

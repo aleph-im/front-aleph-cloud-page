@@ -34,13 +34,16 @@ export class FileManager {
     }
 
     try {
-      const message = await any.GetMessage({ hash: hashOrFile })
-      console.log(message.content)
+      const message = await any.GetMessage({
+        hash: hashOrFile,
+        APIServer: apiServer,
+      })
+
       const { item_type, item_hash } = message.content as any
 
       if (item_type === ItemType.ipfs || item_type === ItemType.storage) {
         const query = await fetch(
-          `https://api2.aleph.im/api/v0/storage/raw/${item_hash}`,
+          `${apiServer}/api/v0/storage/raw/${item_hash}`,
           { method: 'HEAD' },
         )
 
@@ -75,7 +78,7 @@ export class FileManager {
 
     try {
       const query = await fetch(
-        `https://api2.aleph.im/api/v0/addresses/${address}/files`,
+        `${apiServer}/api/v0/addresses/${address}/files`,
       )
       const response = ((await query.json()) ||
         emptyPayload) as AccountFilesResponse
@@ -112,8 +115,8 @@ export class FileManager {
     const message = await store.Publish({
       account: this.account,
       channel,
-      APIServer: apiServer,
       fileObject: buffer,
+      APIServer: apiServer,
     })
 
     return message.content.item_hash

@@ -1,9 +1,8 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { AddDomain, Domain, DomainStatus } from '@/domain/domain'
+import { Domain, DomainStatus } from '@/domain/domain'
 import { useAccountDomain } from '@/hooks/common/useAccountEntity/useAccountDomain'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
-import { useRequestState } from '@/hooks/common/useRequestState'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
@@ -29,7 +28,6 @@ export function useManageDomain(): ManageDomain {
   const [, , id] = (hash as string).split('/')
 
   const [domain] = useAccountDomain({ id })
-  const [, { onLoad, onSuccess, onError }] = useRequestState()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [{ account }, dispatch] = useAppState()
 
@@ -51,8 +49,6 @@ export function useManageDomain(): ManageDomain {
     if (!manager) throw new Error('Manager not ready')
 
     try {
-      onLoad()
-
       await manager.del(domain)
 
       dispatch({
@@ -60,31 +56,20 @@ export function useManageDomain(): ManageDomain {
         payload: { id: domain.id },
       })
 
-      onSuccess(true)
-
       router.replace('/dashboard')
-    } catch (e) {
-      onError(e as Error)
-    }
-  }, [domain, manager, onLoad, dispatch, onSuccess, router, onError])
+    } catch (e) {}
+  }, [domain, manager, dispatch, router])
 
   const handleRetry = useCallback(async () => {
     if (!domain) throw new Error('Invalid key')
     if (!manager) throw new Error('Manager not ready')
 
-    console.log(domain)
-
     try {
-      onLoad()
-
       await manager.retry(domain)
 
-      onSuccess(true)
       router.replace('/dashboard')
-    } catch (e) {
-      onError(e as Error)
-    }
-  }, [domain, manager, onLoad, onSuccess, onError])
+    } catch (e) {}
+  }, [domain, manager, router])
 
   return {
     domain,

@@ -1,15 +1,18 @@
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, instance, any } from 'aleph-sdk-ts/dist/messages'
 import { InstancePublishConfiguration } from 'aleph-sdk-ts/dist/messages/instance/publish'
-
-import E_ from '../helpers/errors'
-import { EntityType, defaultInstanceChannel } from '../helpers/constants'
-import { getDate, getExplorerURL } from '../helpers/utils'
+import { InstanceContent } from 'aleph-sdk-ts/dist/messages/instance/types'
 import { MachineVolume, MessageType } from 'aleph-sdk-ts/dist/messages/types'
+import E_ from '../helpers/errors'
+import {
+  EntityType,
+  apiServer,
+  defaultInstanceChannel,
+} from '../helpers/constants'
+import { getDate, getExplorerURL } from '../helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
-import { InstanceContent } from 'aleph-sdk-ts/dist/messages/instance/types'
 import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
@@ -19,7 +22,10 @@ import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
-import { instanceSchema } from '@/helpers/schemas'
+import {
+  instanceSchema,
+  instanceStreamSchema,
+} from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 
 export type AddInstance = Omit<
@@ -72,6 +78,7 @@ export class InstanceManager
   implements EntityManager<Instance, AddInstance>
 {
   static addSchema = instanceSchema
+  static addStreamSchema = instanceStreamSchema
 
   /**
    * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
@@ -100,6 +107,7 @@ export class InstanceManager
         addresses: [this.account.address],
         messageType: MessageType.instance,
         channels: [this.channel],
+        APIServer: apiServer,
       })
 
       return await this.parseMessages(response.messages)
@@ -123,7 +131,10 @@ export class InstanceManager
     try {
       const instanceMessage = await this.parseInstance(newInstance)
 
-      const response = await instance.publish(instanceMessage)
+      const response = await instance.publish({
+        ...instanceMessage,
+        APIServer: apiServer,
+      })
 
       const [entity] = await this.parseMessages([response])
 
@@ -145,6 +156,7 @@ export class InstanceManager
         account: this.account,
         channel: this.channel,
         hashes: [instanceOrId],
+        APIServer: apiServer,
       })
     } catch (err) {
       throw E_.RequestFailed(err)

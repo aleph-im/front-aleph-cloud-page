@@ -5,23 +5,23 @@ import useConnectedWard from '@/hooks/common/useConnectedWard'
 
 export type UseNewInstancePageReturn = {
   selected: PaymentMethod
-  handleClickHOLD: () => void
-  handleClickPAYG: () => void
+  handleClickHold: () => void
+  handleClickStream: () => void
   handleContinue: () => void
 }
 
 export function useNewInstancePage(): UseNewInstancePageReturn {
   useConnectedWard()
 
-  const [selected, setSelected] = useState<PaymentMethod>(PaymentMethod.HOLD)
+  const [selected, setSelected] = useState<PaymentMethod>(PaymentMethod.Hold)
   const router = useRouter()
 
-  const handleClickHOLD = useCallback(() => {
-    setSelected(PaymentMethod.HOLD)
+  const handleClickHold = useCallback(() => {
+    setSelected(PaymentMethod.Hold)
   }, [])
 
-  const handleClickPAYG = useCallback(() => {
-    setSelected(PaymentMethod.PAYG)
+  const handleClickStream = useCallback(() => {
+    setSelected(PaymentMethod.Stream)
   }, [])
 
   const handleContinue = useCallback(() => {
@@ -30,8 +30,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   return {
     selected,
-    handleClickHOLD,
-    handleClickPAYG,
+    handleClickHold,
+    handleClickStream,
     handleContinue,
   }
 }

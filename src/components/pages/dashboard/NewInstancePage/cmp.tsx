@@ -10,7 +10,7 @@ import NewEntityTab from '../NewEntityTab'
 import { useNewInstancePage } from '@/hooks/pages/dashboard/useNewInstancePage'
 
 export const NewInstancePage = () => {
-  const { selected, handleClickHOLD, handleClickPAYG, handleContinue } =
+  const { selected, handleClickHold, handleClickStream, handleContinue } =
     useNewInstancePage()
 
   return (
@@ -33,8 +33,8 @@ export const NewInstancePage = () => {
           <div tw="px-0 mt-12 mb-6">
             <FlatCardButtonContainer tw="flex-wrap md:justify-center">
               <FlatCardButton
-                $selected={selected === PaymentMethod.HOLD}
-                onClick={handleClickHOLD}
+                $selected={selected === PaymentMethod.Hold}
+                onClick={handleClickHold}
                 tw="flex-auto lg:flex-1 h-40 p-6"
               >
                 <div className="tp-body1" tw="opacity-60">
@@ -43,8 +43,8 @@ export const NewInstancePage = () => {
                 <div className="tp-body3 fs-24">Automatic node allocation</div>
               </FlatCardButton>
               <FlatCardButton
-                $selected={selected === PaymentMethod.PAYG}
-                onClick={handleClickPAYG}
+                $selected={selected === PaymentMethod.Stream}
+                onClick={handleClickStream}
                 tw="flex-auto lg:flex-1 h-40 p-6"
               >
                 <div className="tp-body1" tw="opacity-60">

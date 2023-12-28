@@ -16,7 +16,7 @@ import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { Domain, DomainManager } from './domain'
-import { EntityType } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -27,6 +27,7 @@ type ExecutableCapabilitiesProps = {
 export type ExecutableCostProps = VolumeCostProps & {
   type: EntityType.Instance | EntityType.Program
   isPersistent?: boolean
+  paymentMethod?: PaymentMethod
   specs?: InstanceSpecsField
   capabilities?: ExecutableCapabilitiesProps
 }
@@ -46,6 +47,7 @@ export abstract class Executable {
     type,
     isPersistent,
     specs,
+    paymentMethod = PaymentMethod.Hold,
     capabilities = {},
     volumes = [],
   }: ExecutableCostProps): Promise<ExecutableCost> {
@@ -58,7 +60,9 @@ export abstract class Executable {
       }
 
     isPersistent = type === EntityType.Instance ? true : isPersistent
-    const basePrice = isPersistent ? 2_000 : 200
+
+    const basePrice =
+      paymentMethod === PaymentMethod.Hold ? (isPersistent ? 2_000 : 200) : 0.11
 
     const capabilitiesCost = Object.values(capabilities).reduce(
       (ac, cv) => ac + Number(cv),
@@ -70,7 +74,7 @@ export abstract class Executable {
     const sizeDiscount = type === EntityType.Instance ? 0 : specs.storage
 
     const { perVolumeCost, totalCost: volumeTotalCost } =
-      await VolumeManager.getCost({ volumes, sizeDiscount })
+      await VolumeManager.getCost({ volumes, sizeDiscount, paymentMethod })
 
     const totalCost = volumeTotalCost + computeTotalCost
 

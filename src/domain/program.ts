@@ -6,6 +6,7 @@ import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import E_ from '../helpers/errors'
 import {
   EntityType,
+  apiServer,
   defaultProgramChannel,
   defaultVMURL,
   programStorageURL,
@@ -30,7 +31,7 @@ import { DomainManager } from './domain'
 import { EntityManager } from './types'
 import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
-import { functionSchema } from '@/helpers/schemas'
+import { functionSchema } from '@/helpers/schemas/program'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { FunctionLangId, FunctionLanguage } from './lang'
 
@@ -154,6 +155,7 @@ export class ProgramManager
         addresses: [this.account.address],
         messageType: MessageType.program,
         channels: [this.channel],
+        APIServer: apiServer,
       })
 
       return await this.parseMessages(response.messages)
@@ -167,6 +169,7 @@ export class ProgramManager
       hash: id,
       messageType: MessageType.program,
       channel: this.channel,
+      APIServer: apiServer,
     })
 
     const [entity] = await this.parseMessages([message])
@@ -177,7 +180,10 @@ export class ProgramManager
     try {
       const programMessage = await this.parseProgram(newProgram)
 
-      const response = await program.publish(programMessage)
+      const response = await program.publish({
+        ...programMessage,
+        APIServer: apiServer,
+      })
 
       const [entity] = await this.parseMessages([response])
 
@@ -198,6 +204,7 @@ export class ProgramManager
         account: this.account,
         channel: this.channel,
         hashes: [programOrId],
+        APIServer: apiServer,
       })
     } catch (err) {
       throw E_.RequestFailed(err)

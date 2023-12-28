@@ -9,7 +9,7 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/types'
 import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
-import { EntityType } from './constants'
+import { EntityType, apiServer } from './constants'
 import { SSHKey } from '../domain/ssh'
 import { Instance } from '../domain/instance'
 import { Volume } from '@/domain/volume'
@@ -49,7 +49,7 @@ export const ellipseAddress = (address: string) => {
 export const getERC20Balance = async (address: string) => {
   try {
     const query = await fetch(
-      `https://api2.aleph.im/api/v0/addresses/${address}/balance`,
+      `${apiServer}/api/v0/addresses/${address}/balance`,
     )
 
     // @note: 404 means the balance is 0, don't throw error in that case
@@ -380,6 +380,7 @@ export async function fetchAndCache<T = unknown, P = unknown>(
   cacheKey: string,
   cacheTime: number,
   parse?: (data: T) => P | Promise<P>,
+  log = false,
 ): Promise<P> {
   const cached = localStorage.getItem(cacheKey)
   const now = Date.now()
@@ -387,7 +388,7 @@ export async function fetchAndCache<T = unknown, P = unknown>(
   if (cached) {
     const { cachedAt, value } = JSON.parse(cached)
     if (now - cachedAt < cacheTime) {
-      console.log(`Retrieved ${cacheKey} from cache`)
+      log && console.log(`Retrieved ${cacheKey} from cache`)
       return value
     }
   }
@@ -409,7 +410,7 @@ export async function fetchAndCache<T = unknown, P = unknown>(
 
     return value
   } catch (error) {
-    console.error(`Failed to fetch ${url}`, error)
+    log && console.error(`Failed to fetch ${url}`, error)
     if (cached) return JSON.parse(cached).value
     throw error
   }

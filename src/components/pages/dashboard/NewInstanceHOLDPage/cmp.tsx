@@ -9,12 +9,12 @@ import AddNameAndTags from '@/components/form/AddNameAndTags'
 import HoldingRequirements from '@/components/common/HoldingRequirements'
 import { EntityType } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
-import { useNewInstanceHOLDPage } from '@/hooks/pages/dashboard/useNewInstanceHOLDPage'
+import { useNewInstanceHoldPage } from '@/hooks/pages/dashboard/useNewInstanceHoldPage'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer/cmp'
 import NewEntityTab from '../NewEntityTab'
 
-export default function NewInstanceHOLDPage() {
+export default function NewInstanceHoldPage() {
   const {
     address,
     accountBalance,
@@ -23,7 +23,7 @@ export default function NewInstanceHOLDPage() {
     control,
     errors,
     handleSubmit,
-  } = useNewInstanceHOLDPage()
+  } = useNewInstanceHoldPage()
 
   return (
     <Form onSubmit={handleSubmit} errors={errors}>

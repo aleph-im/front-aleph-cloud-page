@@ -20,6 +20,7 @@ import {
 import {
   InstanceSpecsField,
   getDefaultSpecsOptions,
+  validateMinNodeSpecs,
 } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { ActionTypes } from '@/helpers/store'
@@ -27,24 +28,25 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { EntityType, VolumeType } from '@/helpers/constants'
+import { EntityType, PaymentMethod, VolumeType } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
 
-export type NewInstancePAYGFormState = NameAndTagsField & {
+export type NewInstanceStreamFormState = NameAndTagsField & {
   image: InstanceImageField
   specs: InstanceSpecsField
   sshKeys: SSHKeyField[]
   volumes?: VolumeField[]
   envVars?: EnvVarField[]
   domains?: DomainField[]
+  nodeSpecs?: CRNSpecs
 }
 
 const specs = { ...getDefaultSpecsOptions(true)[0] }
 
-export const defaultValues: Partial<NewInstancePAYGFormState> = {
+export const defaultValues: Partial<NewInstanceStreamFormState> = {
   ...defaultNameAndTags,
   image: defaultInstanceImage,
   specs,
@@ -60,20 +62,20 @@ export const defaultValues: Partial<NewInstancePAYGFormState> = {
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
-export type UseNewInstancePAYGPage = {
+export type UseNewInstanceStreamPage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
   values: any
   control: Control<any>
-  errors: FieldErrors<NewInstancePAYGFormState>
+  errors: FieldErrors<NewInstanceStreamFormState>
   node?: CRN
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
   handleSubmit: (e: FormEvent) => Promise<void>
 }
 
-export function useNewInstancePAYGPage(): UseNewInstancePAYGPage {
+export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
   useConnectedWard()
 
   const router = useRouter()
@@ -83,7 +85,7 @@ export function useNewInstancePAYGPage(): UseNewInstancePAYGPage {
   const manager = useInstanceManager()
 
   const onSubmit = useCallback(
-    async (state: NewInstancePAYGFormState) => {
+    async (state: NewInstanceStreamFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
       const accountInstance = await manager.add(state)
@@ -108,10 +110,10 @@ export function useNewInstancePAYGPage(): UseNewInstancePAYGPage {
   } = useForm({
     defaultValues,
     onSubmit,
-    resolver: zodResolver(InstanceManager.addSchema),
+    resolver: zodResolver(InstanceManager.addStreamSchema),
     readyDeps: [],
   })
-  const values = useWatch({ control }) as NewInstancePAYGFormState
+  const values = useWatch({ control }) as NewInstanceStreamFormState
 
   const { storage } = values.specs
   const fakeVolume = values.volumes?.find((volume) => volume.isFake) as
@@ -132,6 +134,7 @@ export function useNewInstancePAYGPage(): UseNewInstancePAYGPage {
     props: {
       specs: values.specs,
       volumes: values.volumes,
+      paymentMethod: PaymentMethod.Stream,
     },
   })
 
@@ -164,8 +167,29 @@ export function useNewInstancePAYGPage(): UseNewInstancePAYGPage {
     if (!node) return
     if (!specs) return
 
-    return specs[node.hash]
+    return specs[node.hash]?.data
   }, [specs, node])
+
+  // @note: Set nodeSpecs
+  useEffect(() => {
+    setValue('nodeSpecs', nodeSpecs)
+  }, [nodeSpecs, setValue])
+
+  // -------------------------
+
+  const minSpecs = useMemo(() => {
+    const [min] = getDefaultSpecsOptions(true)
+    return min
+  }, [])
+
+  useEffect(() => {
+    if (!nodeSpecs) return
+
+    const isValid = validateMinNodeSpecs(minSpecs, nodeSpecs)
+    if (isValid) return
+
+    router.replace('.')
+  }, [minSpecs, nodeSpecs, router])
 
   // -------------------------
 

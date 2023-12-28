@@ -30,7 +30,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, VolumeType } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 
-export type NewInstanceHOLDFormState = NameAndTagsField & {
+export type NewInstanceHoldFormState = NameAndTagsField & {
   image: InstanceImageField
   specs: InstanceSpecsField
   sshKeys: SSHKeyField[]
@@ -41,7 +41,7 @@ export type NewInstanceHOLDFormState = NameAndTagsField & {
 
 const specs = { ...getDefaultSpecsOptions(true)[0] }
 
-export const defaultValues: Partial<NewInstanceHOLDFormState> = {
+export const defaultValues: Partial<NewInstanceHoldFormState> = {
   ...defaultNameAndTags,
   image: defaultInstanceImage,
   specs,
@@ -57,17 +57,17 @@ export const defaultValues: Partial<NewInstanceHOLDFormState> = {
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
-export type UseNewInstanceHOLDPage = {
+export type UseNewInstanceHoldPage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
   values: any
   control: Control<any>
-  errors: FieldErrors<NewInstanceHOLDFormState>
+  errors: FieldErrors<NewInstanceHoldFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
 }
 
-export function useNewInstanceHOLDPage(): UseNewInstanceHOLDPage {
+export function useNewInstanceHoldPage(): UseNewInstanceHoldPage {
   useConnectedWard()
 
   const router = useRouter()
@@ -77,7 +77,7 @@ export function useNewInstanceHOLDPage(): UseNewInstanceHOLDPage {
   const manager = useInstanceManager()
 
   const onSubmit = useCallback(
-    async (state: NewInstanceHOLDFormState) => {
+    async (state: NewInstanceHoldFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
       const accountInstance = await manager.add(state)
@@ -104,7 +104,7 @@ export function useNewInstanceHOLDPage(): UseNewInstanceHOLDPage {
     onSubmit,
     resolver: zodResolver(InstanceManager.addSchema),
   })
-  const values = useWatch({ control }) as NewInstanceHOLDFormState
+  const values = useWatch({ control }) as NewInstanceHoldFormState
 
   const { storage } = values.specs
   const fakeVolume = values.volumes?.find((volume) => volume.isFake) as

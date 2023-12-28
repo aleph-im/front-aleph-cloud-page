@@ -7,7 +7,7 @@ import {
   ProgramCostProps,
   ProgramManager,
 } from './program'
-import { indexerSchema } from '@/helpers/schemas'
+import { indexerSchema } from '@/helpers/schemas/indexer'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { getDefaultSpecsOptions } from '@/hooks/form/useSelectInstanceSpecs'
 import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
