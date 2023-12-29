@@ -7,6 +7,7 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { messages } from 'aleph-sdk-ts'
 import { fetchAndCache, getLatestReleases, sleep } from '@/helpers/utils'
 import { FileManager } from './file'
+import { urlSchema } from '@/helpers/schemas/base'
 
 const { post } = messages
 
@@ -277,12 +278,13 @@ export class NodeManager {
   async getCRNspecs(node: CRN, retries = 2): Promise<CRNSpecs | undefined> {
     if (!node.address) return
 
-    // const url = `${node.address}/about/usage/system`.replaceAll('//', '/')
-    const url =
-      `${node.address}/vm/78451e20da3c19a3e2cd8e97526e09244631fba12f451b9b60cdb2915ab0e414/about/usage/system`.replaceAll(
-        '//',
-        '/',
-      )
+    const address = node.address.toLowerCase().replace(/\/$/, '')
+    const url = `${address}/vm/78451e20da3c19a3e2cd8e97526e09244631fba12f451b9b60cdb2915ab0e414/about/usage/system`
+
+    const { success } = urlSchema.safeParse(url)
+    if (!success) return
+
+    console.log(url)
 
     try {
       return await fetchAndCache(
