@@ -14,12 +14,12 @@ import AddEnvVars from '@/components/form/AddEnvVars'
 import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
-import HoldingRequirements from '@/components/common/HoldingRequirements'
-import { EntityType, PaymentMethod, apiServer } from '@/helpers/constants'
+import HoldingRequirements from '@/components/form/HoldingRequirements'
+import { EntityType, apiServer } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstanceStreamPage } from '@/hooks/pages/dashboard/useNewInstanceStreamPage'
 import Form from '@/components/form/Form'
-import ToggleContainer from '@/components/common/ToggleContainer/cmp'
+import ToggleContainer from '@/components/common/ToggleContainer'
 import NewEntityTab from '../NewEntityTab'
 import NodesTable from '@/components/common/NodesTable'
 import { useMemo } from 'react'
@@ -115,13 +115,14 @@ export default function NewInstancePage() {
             Please select one of the available instance size as a base for your
             VM. You will be able to customize the volumes later.
           </p>
-          <div tw="px-0 my-6">
+          <div tw="px-0 my-6 relative">
+            <SpinnerOverlay show={!nodeSpecs} />
             <SelectInstanceSpecs
               name="specs"
               control={control}
               type={EntityType.Instance}
               isPersistent
-              paymentMethod={PaymentMethod.Stream}
+              paymentMethod={values.paymentMethod}
               nodeSpecs={nodeSpecs}
             />
           </div>
@@ -229,18 +230,24 @@ export default function NewInstancePage() {
       </section>
 
       <HoldingRequirements
+        control={control}
         address={address}
         type={EntityType.Instance}
         isPersistent={true}
         specs={values.specs}
         volumes={values.volumes}
         domains={values.domains}
+        receiverAddress={node?.reward}
         unlockedAmount={accountBalance}
+        paymentMethod={values.paymentMethod}
+        streamDuration={values.streamDuration}
         description={
           <>
-            This amount needs to be present in your wallet until the instance is
-            removed. Tokens won&apos;t be locked nor consumed. The instance will
-            be garbage collected once funds are removed from the wallet.
+            You can either leverage the traditional method of holding tokens in
+            your wallet for resource access, or opt for the Pay-As-You-Go (PAYG)
+            system, which allows you to pay precisely for what you use, for the
+            duration you need. The PAYG option includes a token stream feature,
+            enabling real-time payment for resources as you use them.
           </>
         }
         button={

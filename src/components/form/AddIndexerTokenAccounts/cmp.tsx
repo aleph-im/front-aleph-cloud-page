@@ -5,6 +5,7 @@ import {
   Button,
   Dropdown,
   DropdownOption,
+  NoisyContainer,
 } from '@aleph-front/aleph-core'
 import {
   useAddIndexerTokenAccounts,
@@ -14,7 +15,6 @@ import {
   IndexerTokenAccountItemProps,
   AddIndexerTokenAccountsProps,
 } from './types'
-import NoisyContainer from '@/components/common/NoisyContainer'
 
 const IndexerTokenAccountItem = React.memo(
   (props: IndexerTokenAccountItemProps) => {

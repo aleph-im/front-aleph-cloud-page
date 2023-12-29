@@ -1,11 +1,11 @@
-import { EntityType } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useNewIndexerPage } from '@/hooks/pages/dashboard/useNewIndexerPage'
 import { Button, CompositeTitle } from '@aleph-front/aleph-core'
-import HoldingRequirements from '@/components/common/HoldingRequirements'
+import HoldingRequirements from '@/components/form/HoldingRequirements'
 import Container from '@/components/common/CenteredContainer'
-import { AddIndexerBlockchainNetworks } from '@/components/form/AddIndexerBlockchainNetworks/cmp'
-import { Form } from '@/components/form/Form/cmp'
-import AddIndexerTokenAccounts from '@/components/form/AddIndexerTokenAccounts/cmp'
+import { AddIndexerBlockchainNetworks } from '@/components/form/AddIndexerBlockchainNetworks'
+import { Form } from '@/components/form/Form'
+import AddIndexerTokenAccounts from '@/components/form/AddIndexerTokenAccounts'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 
 export default function NewIndexerPage() {
@@ -76,6 +76,7 @@ export default function NewIndexerPage() {
         address={address}
         type={EntityType.Program}
         unlockedAmount={accountBalance}
+        paymentMethod={PaymentMethod.Hold}
         {...holdingRequirementsProps}
         description={
           <>

@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelectCustomFunctionRuntime } from '@/hooks/form/useSelectCustomFunctionRuntime'
 import { TextInput } from '@aleph-front/aleph-core'
-import NoisyContainer from '@/components/common/NoisyContainer'
+import { NoisyContainer } from '@aleph-front/aleph-core'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { SelectCustomFunctionRuntimeProps } from './types'
 

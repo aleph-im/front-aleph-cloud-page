@@ -1,2 +1,2 @@
 export { default } from './cmp'
-export type { H1Props } from './types'
+export type { StrongProps } from './types'

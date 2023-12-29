@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { EntityType } from '../constants'
+import { EntityType, PaymentMethod } from '../constants'
 
 export const requiredStringSchema = z
   .string()
@@ -86,4 +86,9 @@ export const ipfsCIDSchema = requiredStringSchema.regex(
 export const programTypeSchema = z.enum([
   EntityType.Instance,
   EntityType.Program,
+])
+
+export const paymentMethodSchema = z.enum([
+  PaymentMethod.Hold,
+  PaymentMethod.Stream,
 ])

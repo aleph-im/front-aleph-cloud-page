@@ -1,4 +1,4 @@
-import NoisyContainer from '@/components/common/NoisyContainer'
+import { NoisyContainer } from '@aleph-front/aleph-core'
 import { useDashboardManagePage } from '@/hooks/pages/dashboard/manage/useDashboardManagePage'
 import { EntityType } from '@/helpers/constants'
 import { Container } from '../common'

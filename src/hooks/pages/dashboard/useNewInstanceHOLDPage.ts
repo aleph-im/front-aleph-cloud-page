@@ -27,7 +27,7 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { EntityType, VolumeType } from '@/helpers/constants'
+import { EntityType, PaymentMethod, VolumeType } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 
 export type NewInstanceHoldFormState = NameAndTagsField & {
@@ -37,6 +37,7 @@ export type NewInstanceHoldFormState = NameAndTagsField & {
   volumes?: VolumeField[]
   envVars?: EnvVarField[]
   domains?: DomainField[]
+  paymentMethod: PaymentMethod
 }
 
 const specs = { ...getDefaultSpecsOptions(true)[0] }
@@ -54,6 +55,7 @@ export const defaultValues: Partial<NewInstanceHoldFormState> = {
       isFake: true,
     },
   ],
+  paymentMethod: PaymentMethod.Hold,
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 

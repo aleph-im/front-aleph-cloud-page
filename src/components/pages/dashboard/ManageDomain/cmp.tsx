@@ -1,5 +1,5 @@
 import IconText from '@/components/common/IconText'
-import NoisyContainer from '@/components/common/NoisyContainer'
+import { NoisyContainer } from '@aleph-front/aleph-core'
 import { EntityTypeName, AddDomainTarget } from '@/helpers/constants'
 import {
   BulletItem,

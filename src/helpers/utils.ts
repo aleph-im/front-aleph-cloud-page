@@ -181,14 +181,14 @@ export function humanReadableSize(
 /**
  * Transforms a number into a multiple of 1000 with a suffix, (ex: 625217 -> 625.2K)
  */
-export const humanReadableCurrency = (value?: number) => {
+export const humanReadableCurrency = (value?: number, decimals = 2) => {
   if (value === Number.POSITIVE_INFINITY) return 'n/a'
   if (value === undefined) return 'n/a'
   if (value === 0) return value
-  if (value < 1_000) return value.toFixed(1)
-  else if (value < 10 ** 6) return (value / 1_000).toFixed(1) + 'K'
-  else if (value < 10 ** 9) return (value / 10 ** 6).toFixed(1) + 'M'
-  else return (value / 10 ** 9).toFixed(1) + 'B'
+  if (value < 1_000) return value.toFixed(decimals)
+  else if (value < 10 ** 6) return (value / 1_000).toFixed(decimals) + 'K'
+  else if (value < 10 ** 9) return (value / 10 ** 6).toFixed(decimals) + 'M'
+  else return (value / 10 ** 9).toFixed(decimals) + 'B'
 }
 
 /**
@@ -455,4 +455,30 @@ export function getLatestReleases(
   }
 
   return versions
+}
+
+export const humanReadableDurationUnit = (
+  streamDuration?: {
+    duration: number
+    unit: 'h' | 'd' | 'm' | 'y'
+  },
+  plural = true,
+) => {
+  if (!streamDuration) return ''
+
+  const { duration, unit } = streamDuration || {}
+  if (!unit || !duration) return ''
+
+  const s = duration === 1 ? '' : plural ? 's' : ''
+
+  const subfix =
+    unit === 'h'
+      ? `hour${s}`
+      : unit === 'd'
+      ? `day${s}`
+      : unit === 'm'
+      ? `month${s}`
+      : `year${s}`
+
+  return `${duration} ${subfix}`
 }

@@ -2,7 +2,7 @@
 import React from 'react'
 import { useSelectFunctionPersistence } from '@/hooks/form/useSelectFunctionPersistence'
 import { Radio, RadioGroup } from '@aleph-front/aleph-core'
-import NoisyContainer from '@/components/common/NoisyContainer'
+import { NoisyContainer } from '@aleph-front/aleph-core'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { SelectFunctionPersistenceProps } from './types'
 

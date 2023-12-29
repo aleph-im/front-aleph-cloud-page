@@ -1,6 +1,6 @@
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import NoisyContainer from '@/components/common/NoisyContainer'
+import { NoisyContainer } from '@aleph-front/aleph-core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag } from '@aleph-front/aleph-core'
 import { useManageSSHKey } from '@/hooks/pages/dashboard/manage/useManageSSHKey'

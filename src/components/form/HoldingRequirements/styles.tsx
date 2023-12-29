@@ -1,5 +1,5 @@
-import { addClasses } from '@aleph-front/aleph-core'
-import styled, { css } from 'styled-components'
+import { Icon, addClasses } from '@aleph-front/aleph-core'
+import styled, { css, keyframes } from 'styled-components'
 import tw from 'twin.macro'
 
 type StyledHoldingSummaryLineProps = {
@@ -40,3 +40,31 @@ export const GreyLabel = styled.span.attrs(addClasses('tp-info'))`
 `
 
 export const BlueLabel = styled.span.attrs(addClasses('tp-info text-main0'))``
+
+const transfer1 = keyframes` 
+  0%  {
+    opacity: 0;
+    transform: translate3d(-100%,0,0);
+  }
+ 
+  50% {
+    opacity: 1;
+    transform: translate3d(0,0,0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(100%,0,0);
+  }
+`
+
+export const StyledArrowIcon = styled(Icon).attrs((props) => {
+  return {
+    ...props,
+    name: 'angle-double-right',
+    size: '1.5',
+  }
+})`
+  ${tw`p-1 origin-center`}
+  animation: 1000ms linear 0ms infinite ${transfer1};
+`

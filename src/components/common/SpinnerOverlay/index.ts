@@ -1,1 +1,1 @@
-export { default, default as SpinnerOverlay } from './cmp'
+export { default } from './cmp'

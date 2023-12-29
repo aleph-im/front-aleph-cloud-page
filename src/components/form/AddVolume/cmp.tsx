@@ -20,7 +20,7 @@ import {
   useAddPersistentVolumeProps,
 } from '@/hooks/form/useAddVolume'
 import { VolumeType } from '@/domain/volume'
-import NoisyContainer from '@/components/common/NoisyContainer'
+import { NoisyContainer } from '@aleph-front/aleph-core'
 import HiddenFileInput from '@/components/common/HiddenFileInput'
 
 const RemoveVolume = React.memo(
@@ -42,6 +42,8 @@ const RemoveVolume = React.memo(
   },
 )
 RemoveVolume.displayName = 'RemoveVolume'
+
+// -------------------------------------------------
 
 export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
   const {
@@ -101,6 +103,8 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
 })
 AddNewVolume.displayName = 'AddNewVolume'
 
+// -------------------------------------------------
+
 const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
   const {
     refHashCtrl,
@@ -156,6 +160,8 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
   )
 })
 AddExistingVolume.displayName = 'AddExistingVolume'
+
+// -------------------------------------------------
 
 const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
   const {
@@ -226,6 +232,8 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
   )
 })
 AddPersistentVolume.displayName = 'AddPersistentVolume'
+
+// -------------------------------------------------
 
 const CmpMap = {
   [VolumeType.New]: AddNewVolume,

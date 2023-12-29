@@ -17,6 +17,10 @@ import { VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { Domain, DomainManager } from './domain'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
+import {
+  StreamDurationField,
+  getStreamCostPerHour,
+} from '@/hooks/form/useSelectStreamDuration'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -30,12 +34,14 @@ export type ExecutableCostProps = VolumeCostProps & {
   paymentMethod?: PaymentMethod
   specs?: InstanceSpecsField
   capabilities?: ExecutableCapabilitiesProps
+  streamDuration?: StreamDurationField
 }
 
 export type ExecutableCost = Omit<VolumeCost, 'totalCost'> & {
   computeTotalCost: number
   volumeTotalCost: number
   totalCost: number
+  totalStreamCost: number
 }
 
 export abstract class Executable {
@@ -47,6 +53,7 @@ export abstract class Executable {
     type,
     isPersistent,
     specs,
+    streamDuration,
     paymentMethod = PaymentMethod.Hold,
     capabilities = {},
     volumes = [],
@@ -57,6 +64,7 @@ export abstract class Executable {
         volumeTotalCost: 0,
         perVolumeCost: [],
         totalCost: 0,
+        totalStreamCost: 0,
       }
 
     isPersistent = type === EntityType.Instance ? true : isPersistent
@@ -74,15 +82,28 @@ export abstract class Executable {
     const sizeDiscount = type === EntityType.Instance ? 0 : specs.storage
 
     const { perVolumeCost, totalCost: volumeTotalCost } =
-      await VolumeManager.getCost({ volumes, sizeDiscount, paymentMethod })
+      await VolumeManager.getCost({
+        volumes,
+        sizeDiscount,
+        paymentMethod,
+        streamDuration,
+      })
 
     const totalCost = volumeTotalCost + computeTotalCost
+
+    const streamCostPerHour =
+      paymentMethod === PaymentMethod.Stream && streamDuration
+        ? getStreamCostPerHour(streamDuration)
+        : Number.POSITIVE_INFINITY
+
+    const totalStreamCost = totalCost * streamCostPerHour
 
     return {
       computeTotalCost,
       perVolumeCost,
       volumeTotalCost,
       totalCost,
+      totalStreamCost,
     }
   }
 

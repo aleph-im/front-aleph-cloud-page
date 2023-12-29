@@ -10,7 +10,7 @@ export const Form = ({ children, onSubmit, errors }: FormProps) => {
       <Container>
         {errors?.root &&
           Object.values<FormErrorProps['error']>(errors.root).map((error) => (
-            <FormError key={error + ''} error={error} />
+            <FormError key={error + ''} error={error} tw="break-all" />
           ))}
       </Container>
     </StyledForm>

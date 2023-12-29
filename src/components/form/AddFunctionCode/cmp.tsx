@@ -6,12 +6,12 @@ import {
   CodeEditor,
   FormLabel,
   Icon,
+  NoisyContainer,
   Radio,
   RadioGroup,
   Tabs,
   TextInput,
 } from '@aleph-front/aleph-core'
-import NoisyContainer from '@/components/common/NoisyContainer'
 import {
   defaultCodeText,
   useAddFunctionCode,

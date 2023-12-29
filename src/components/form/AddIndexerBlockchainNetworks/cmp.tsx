@@ -5,6 +5,7 @@ import {
   Button,
   Dropdown,
   DropdownOption,
+  NoisyContainer,
 } from '@aleph-front/aleph-core'
 import {
   useAddIndexerBlockchainNetworks,
@@ -14,7 +15,6 @@ import {
   IndexerBlockchainNetworkItemProps,
   AddIndexerBlockchainNetworksProps,
 } from './types'
-import NoisyContainer from '@/components/common/NoisyContainer'
 
 const IndexerBlockchainNetworkItem = React.memo(
   (props: IndexerBlockchainNetworkItemProps) => {

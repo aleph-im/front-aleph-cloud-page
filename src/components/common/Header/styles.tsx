@@ -4,7 +4,6 @@ import {
   BreakpointId,
   Button,
   FloatPosition,
-  RouterNavbar,
   WalletPicker,
   getResponsiveCss,
 } from '@aleph-front/aleph-core'

@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Instance, InstanceStatus } from '@/domain/instance'
 import { useAccountInstance } from '@/hooks/common/useAccountEntity/useAccountInstance'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
-import { useRequestState } from '@/hooks/common/useRequestState'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
@@ -28,7 +27,6 @@ export function useManageInstance(): ManageInstance {
 
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
   const [instance] = useAccountInstance({ id: hash as string })
-  const [, { onLoad, onSuccess, onError }] = useRequestState()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [, dispatch] = useAppState()
 
@@ -66,8 +64,6 @@ export function useManageInstance(): ManageInstance {
     if (!manager) throw new Error('Manager not ready')
 
     try {
-      onLoad()
-
       await manager.del(instance)
 
       dispatch({
@@ -75,13 +71,9 @@ export function useManageInstance(): ManageInstance {
         payload: { id: instance.id },
       })
 
-      onSuccess(true)
-
       router.replace('/dashboard')
-    } catch (e) {
-      onError(e as Error)
-    }
-  }, [instance, manager, onLoad, dispatch, onSuccess, router, onError])
+    } catch (e) {}
+  }, [instance, manager, dispatch, router])
 
   return {
     instance,

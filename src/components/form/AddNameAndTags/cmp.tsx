@@ -2,7 +2,7 @@ import React from 'react'
 import { TextInput, ChipInput, FormLabel } from '@aleph-front/aleph-core'
 import { useAddNameAndTags } from '@/hooks/form/useAddNameAndTags'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
-import NoisyContainer from '@/components/common/NoisyContainer'
+import { NoisyContainer } from '@aleph-front/aleph-core'
 import { AddNameAndTagsProps } from './types'
 
 export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {

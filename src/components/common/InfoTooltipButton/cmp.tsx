@@ -1,17 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { StyledInfoTooltipButton } from './styles'
 import { InfoTooltipButtonProps } from './types'
 import { Icon, Tooltip, useResponsiveMax } from '@aleph-front/aleph-core'
 import tw from 'twin.macro'
 
-export default function InfoTooltipButton({
+export const InfoTooltipButton = ({
   children,
   tooltipContent,
   plain,
   align = 'right',
   vAlign = 'center',
   ...rest
-}: InfoTooltipButtonProps) {
+}: InfoTooltipButtonProps) => {
   // @note: https://reactjs.org/link/uselayouteffect-ssr
   // Wait until after client-side hydration to show
   const [renderTooltip, setRenderTooltip] = useState(false)
@@ -60,3 +60,6 @@ export default function InfoTooltipButton({
     </>
   )
 }
+InfoTooltipButton.displayName = 'InfoTooltipButton'
+
+export default memo(InfoTooltipButton) as typeof InfoTooltipButton

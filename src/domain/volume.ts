@@ -18,6 +18,7 @@ import {
   newIsolatedVolumeSchema,
   newIsolatedVolumesSchema,
 } from '@/helpers/schemas/volume'
+import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
 
 export { VolumeType }
 
@@ -88,6 +89,7 @@ export type VolumeCostProps = {
   paymentMethod?: PaymentMethod
   volumes?: (Volume | AddVolume | VolumeField)[]
   sizeDiscount?: number
+  streamDuration?: StreamDurationField
 }
 
 export type PerVolumeCostItem = {
@@ -102,6 +104,7 @@ export type PerVolumeCost = PerVolumeCostItem[]
 export type VolumeCost = {
   perVolumeCost: PerVolumeCost
   totalCost: number
+  totalStreamCost: number
 }
 
 export class VolumeManager implements EntityManager<Volume, AddVolume> {
@@ -214,13 +217,18 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
     const perVolumeCost = await this.getPerVolumeCost(props)
 
-    const totalCost = Math.ceil(
-      Object.values(perVolumeCost).reduce((ac, cv) => ac + cv.cost, 0),
+    const totalCost = Object.values(perVolumeCost).reduce(
+      (ac, cv) => ac + cv.cost,
+      0,
     )
+
+    // @todo: fix this
+    const totalStreamCost = Number.POSITIVE_INFINITY
 
     return {
       perVolumeCost,
       totalCost,
+      totalStreamCost,
     }
   }
 

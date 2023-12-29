@@ -1,1 +1,2 @@
-export { default, default as AutoBreadcrumb } from './cmp'
+export { default } from './cmp'
+export type { AutoBreacrumbProps } from './types'

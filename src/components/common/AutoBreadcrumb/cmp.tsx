@@ -49,4 +49,4 @@ export const AutoBreadcrumb = ({
 }
 AutoBreadcrumb.displayName = 'AutoBreadcrumb'
 
-export default memo(AutoBreadcrumb)
+export default memo(AutoBreadcrumb) as typeof AutoBreadcrumb

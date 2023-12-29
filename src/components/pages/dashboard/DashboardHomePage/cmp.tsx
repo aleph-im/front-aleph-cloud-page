@@ -4,12 +4,12 @@ import { Tabs } from '@aleph-front/aleph-core'
 import CenteredContainer from '@/components/common/CenteredContainer'
 import React from 'react'
 import SSHKeysTabContent from '../SSHKeysTabContent'
-import FunctionsTabContent from '../FunctionsTabContent/cmp'
+import FunctionsTabContent from '../FunctionsTabContent'
 import InstancesTabContent from '../InstancesTabContent'
-import VolumesTabContent from '../VolumesTabContent/cmp'
+import VolumesTabContent from '../VolumesTabContent'
 import AllTabContent from '../AllTabContent'
 import { useDashboardHomePage } from '@/hooks/pages/dashboard/useDashboardHomePage'
-import DomainsTabContent from '../DomainsTabContent/cmp'
+import DomainsTabContent from '../DomainsTabContent'
 
 const Container = styled(CenteredContainer).attrs((props) => ({
   ...props,

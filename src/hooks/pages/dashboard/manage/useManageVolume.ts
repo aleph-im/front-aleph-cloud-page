@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import { Volume } from '@/domain/volume'
 import { useAccountVolume } from '@/hooks/common/useAccountEntity/useAccountVolume'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
-import { useRequestState } from '@/hooks/common/useRequestState'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { ActionTypes } from '@/helpers/store'
 import { useAppState } from '@/contexts/appState'
@@ -20,7 +19,6 @@ export function useManageVolume(): ManageVolume {
   const { hash } = router.query
 
   const [volume] = useAccountVolume({ id: hash as string })
-  const [, { onLoad, onSuccess, onError }] = useRequestState()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [, dispatch] = useAppState()
 
@@ -35,8 +33,6 @@ export function useManageVolume(): ManageVolume {
     if (!volume) throw new Error('Invalid volume')
 
     try {
-      onLoad()
-
       await manager.del(volume)
 
       dispatch({
@@ -44,13 +40,9 @@ export function useManageVolume(): ManageVolume {
         payload: { id: volume.id },
       })
 
-      onSuccess(true)
-
       router.replace('/dashboard')
-    } catch (e) {
-      onError(e as Error)
-    }
-  }, [manager, volume, onLoad, dispatch, onSuccess, router, onError])
+    } catch (e) {}
+  }, [manager, volume, dispatch, router])
 
   const handleDownload = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')

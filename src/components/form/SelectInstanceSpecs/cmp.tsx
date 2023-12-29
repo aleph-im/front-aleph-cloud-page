@@ -116,46 +116,52 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
 
   // ------------------------------------------
 
-  const [data, setData] = useState<SpecsDetail[]>([])
+  const [prices, setPrices] = useState<number[]>([])
   const { cpu } = specsCtrl.field.value
 
   useEffect(() => {
     async function load(): Promise<void> {
       const loadedData = await Promise.all(
         options.map(async (specs) => {
-          const { ram, storage } = specs
-          const price = await Executable.getExecutableCost({
+          const { computeTotalCost } = await Executable.getExecutableCost({
             type,
             specs,
             isPersistent,
             paymentMethod,
           })
 
-          const isActive = cpu === specs.cpu
-
-          return {
-            specs,
-            isActive,
-            storage: convertByteUnits(storage, {
-              from: 'MiB',
-              to: 'GiB',
-              displayUnit: true,
-            }),
-            ram: convertByteUnits(ram, {
-              from: 'MiB',
-              to: 'GiB',
-              displayUnit: true,
-            }),
-            price: price.computeTotalCost,
-          }
+          return computeTotalCost
         }),
       )
 
-      setData(loadedData)
+      setPrices(loadedData)
     }
 
     load()
-  }, [isPersistent, options, paymentMethod, cpu, type])
+  }, [isPersistent, options, paymentMethod, type])
+
+  const data = useMemo(() => {
+    return options.map((specs, i) => {
+      const { storage, ram } = specs
+      const isActive = cpu === specs.cpu
+
+      return {
+        specs,
+        isActive,
+        storage: convertByteUnits(storage, {
+          from: 'MiB',
+          to: 'GiB',
+          displayUnit: true,
+        }),
+        ram: convertByteUnits(ram, {
+          from: 'MiB',
+          to: 'GiB',
+          displayUnit: true,
+        }),
+        price: prices[i],
+      }
+    })
+  }, [cpu, options, prices])
 
   const getRowKey = useCallback((row: SpecsDetail) => row.specs.cpu + '', [])
 

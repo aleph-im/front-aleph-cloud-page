@@ -18,4 +18,4 @@ export const NodesTable = <T extends AlephNode>({
 }
 NodesTable.displayName = 'NodesTable'
 
-export default memo(NodesTable)
+export default memo(NodesTable) as typeof NodesTable

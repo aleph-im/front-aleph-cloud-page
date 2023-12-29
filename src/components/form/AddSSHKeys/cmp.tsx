@@ -8,7 +8,7 @@ import {
 } from '@aleph-front/aleph-core'
 import { useAddSSHKeys, useSSHKeyItem } from '@/hooks/form/useAddSSHKeys'
 import { SSHKeyItemProps, AddSSHKeysProps } from './types'
-import NoisyContainer from '@/components/common/NoisyContainer'
+import { NoisyContainer } from '@aleph-front/aleph-core'
 
 const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
   const {

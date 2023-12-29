@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import { validateMinNodeSpecs } from '@/hooks/form/useSelectInstanceSpecs'
-import { messageHashSchema } from './base'
+import { messageHashSchema, paymentMethodSchema } from './base'
 import {
   addSpecsSchema,
   addVolumesSchema,
@@ -16,41 +16,39 @@ import { humanReadableSize } from '../utils'
 // CRN STREAM
 
 export const nodeSpecsSchema = z.object({
-  nodeSpecs: z.object({
-    hash: z.string(),
-    name: z.string().optional(),
-    cpu: z.object({
-      count: z.number(),
-      load_average: z.object({
-        load1: z.number(),
-        load5: z.number(),
-        load15: z.number(),
-      }),
-      core_frequencies: z.object({
-        min: z.number(),
-        max: z.number(),
-      }),
+  hash: z.string(),
+  name: z.string().optional(),
+  cpu: z.object({
+    count: z.number(),
+    load_average: z.object({
+      load1: z.number(),
+      load5: z.number(),
+      load15: z.number(),
     }),
-    mem: z.object({
-      total_kB: z.number(),
-      available_kB: z.number(),
+    core_frequencies: z.object({
+      min: z.number(),
+      max: z.number(),
     }),
-    disk: z.object({
-      total_kB: z.number(),
-      available_kB: z.number(),
-    }),
-    period: z.object({
-      start_timestamp: z.string(),
-      duration_seconds: z.number(),
-    }),
-    properties: z.object({
-      cpu: z.object({
-        architecture: z.string(),
-        vendor: z.string(),
-      }),
-    }),
-    active: z.boolean(),
   }),
+  mem: z.object({
+    total_kB: z.number(),
+    available_kB: z.number(),
+  }),
+  disk: z.object({
+    total_kB: z.number(),
+    available_kB: z.number(),
+  }),
+  period: z.object({
+    start_timestamp: z.string(),
+    duration_seconds: z.number(),
+  }),
+  properties: z.object({
+    cpu: z.object({
+      architecture: z.string(),
+      vendor: z.string(),
+    }),
+  }),
+  active: z.boolean(),
 })
 
 // SSH
@@ -67,12 +65,22 @@ export const addSSHKeysSchema = z
     path: ['0.isSelected'],
   })
 
+// STREAM DURATION
+
+export const streamDurationUnitSchema = z.enum(['h', 'd', 'm', 'y'])
+
+export const streamDurationSchema = z.object({
+  duration: z.coerce.number(),
+  unit: streamDurationUnitSchema,
+})
+
 // INSTANCE
 
 export const instanceImageSchema = messageHashSchema
 
 export const instanceSchema = z
   .object({
+    paymentMethod: paymentMethodSchema,
     image: instanceImageSchema,
     specs: addSpecsSchema,
     sshKeys: addSSHKeysSchema,
@@ -84,7 +92,13 @@ export const instanceSchema = z
   .merge(addNameAndTagsSchema)
 
 export const instanceStreamSchema = instanceSchema
-  .merge(nodeSpecsSchema)
+  .merge(
+    z.object({
+      nodeSpecs: nodeSpecsSchema,
+      streamDuration: streamDurationSchema,
+      streamCost: z.number(),
+    }),
+  )
   .refine(({ nodeSpecs, specs }) => validateMinNodeSpecs(specs, nodeSpecs), {
     message: 'Insufficient node specs',
     path: ['specs'],

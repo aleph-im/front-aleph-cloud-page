@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import { SSHKey } from '@/domain/ssh'
 import { useAccountSSHKey } from '@/hooks/common/useAccountEntity/useAccountSSHKey'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
-import { useRequestState } from '@/hooks/common/useRequestState'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
@@ -20,7 +19,6 @@ export function useManageSSHKey(): ManageSSHKey {
   const { hash } = router.query
 
   const [sshKey] = useAccountSSHKey({ id: hash as string })
-  const [, { onLoad, onSuccess, onError }] = useRequestState()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [, dispatch] = useAppState()
 
@@ -39,8 +37,6 @@ export function useManageSSHKey(): ManageSSHKey {
     if (!manager) throw new Error('Manager not ready')
 
     try {
-      onLoad()
-
       await manager.del(sshKey)
 
       dispatch({
@@ -48,13 +44,9 @@ export function useManageSSHKey(): ManageSSHKey {
         payload: { id: sshKey.id },
       })
 
-      onSuccess(true)
-
       router.replace('/dashboard')
-    } catch (e) {
-      onError(e as Error)
-    }
-  }, [sshKey, manager, onLoad, dispatch, onSuccess, router, onError])
+    } catch (e) {}
+  }, [sshKey, manager, dispatch, router])
 
   return {
     sshKey,

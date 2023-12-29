@@ -1,13 +1,14 @@
+import { memo } from 'react'
 import { StyledExternalLinkButton } from './styles'
 import { ExternalLinkButtonProps } from './types'
 import { Icon } from '@aleph-front/aleph-core'
 
-export default function ExternalLinkButton({
+export const ExternalLinkButton = ({
   children,
   href,
   size = 'big',
   ...rest
-}: ExternalLinkButtonProps) {
+}: ExternalLinkButtonProps) => {
   return (
     <>
       <StyledExternalLinkButton
@@ -22,3 +23,6 @@ export default function ExternalLinkButton({
     </>
   )
 }
+ExternalLinkButton.displayName = 'ExternalLinkButton'
+
+export default memo(ExternalLinkButton) as typeof ExternalLinkButton

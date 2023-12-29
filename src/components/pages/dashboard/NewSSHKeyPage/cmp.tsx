@@ -1,5 +1,5 @@
 import Container from '@/components/common/CenteredContainer'
-import NoisyContainer from '@/components/common/NoisyContainer'
+import { NoisyContainer } from '@aleph-front/aleph-core'
 import Form from '@/components/form/Form'
 import { useNewSSHKeyPage } from '@/hooks/pages/dashboard/useNewSSHKeyPage'
 import {

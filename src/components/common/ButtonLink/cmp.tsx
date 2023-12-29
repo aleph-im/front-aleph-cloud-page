@@ -1,30 +1,30 @@
+import { memo } from 'react'
 import Link from 'next/link'
-import { Button, ButtonProps } from '@aleph-front/aleph-core'
+import { Button } from '@aleph-front/aleph-core'
 import { ButtonLinkProps } from './types'
 
 /**
  * A wrapper for the nextjs links that are styled as buttons
  * https://stackoverflow.com/questions/49288987/styled-components-with-components-in-nextjs/49306326#49306326
  */
-export default function ButtonLink({
+export const ButtonLink = ({
   href,
-  variant,
-  color,
-  kind,
-  size,
+  variant = 'secondary',
+  color = 'main0',
+  kind = 'neon',
+  size = 'regular',
   children,
   ...rest
-}: ButtonLinkProps &
-  Partial<Pick<ButtonProps, 'variant' | 'color' | 'kind' | 'size'>>) {
+}: ButtonLinkProps) => {
   return (
     <Link href={href} passHref legacyBehavior>
       <Button
         {...{
           as: 'a',
-          variant: variant || 'secondary',
-          color: color || 'main0',
-          kind: kind || 'neon',
-          size: size || 'regular',
+          variant,
+          color,
+          kind,
+          size,
           ...rest,
         }}
       >
@@ -33,3 +33,6 @@ export default function ButtonLink({
     </Link>
   )
 }
+ButtonLink.displayName = 'ButtonLink'
+
+export default memo(ButtonLink) as typeof ButtonLink

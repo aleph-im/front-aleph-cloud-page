@@ -160,7 +160,7 @@ export function useHeader(): UseHeaderReturn {
   // --------------------
 
   const provider = () => {
-    window.ethereum?.on('accountsChanged', function () {
+    ;(window.ethereum as any)?.on('accountsChanged', function () {
       connect()
     })
 
@@ -172,7 +172,7 @@ export function useHeader(): UseHeaderReturn {
   useEffect(() => {
     provider()
     return () => {
-      window.ethereum?.removeListener('accountsChanged', () => {
+      ;(window.ethereum as any)?.removeListener('accountsChanged', () => {
         connect()
       })
     }

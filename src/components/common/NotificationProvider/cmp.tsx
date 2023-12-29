@@ -1,11 +1,11 @@
 import { NotificationProviderProps } from './types'
 import { Notification } from '@aleph-front/aleph-core'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 
 // @note: Take a look at https://nextjs.org/docs/messages/react-hydration-error#possible-ways-to-fix-it
-export default function NotificationProvider({
+export const NotificationProvider = ({
   children,
-}: NotificationProviderProps) {
+}: NotificationProviderProps) => {
   const [isSSR, setIsSSR] = useState(true)
   useEffect(() => setIsSSR(false), [])
 
@@ -17,3 +17,6 @@ export default function NotificationProvider({
     </Notification>
   )
 }
+NotificationProvider.displayName = 'NotificationProvider'
+
+export default memo(NotificationProvider) as typeof NotificationProvider

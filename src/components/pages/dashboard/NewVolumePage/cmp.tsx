@@ -1,10 +1,10 @@
-import { EntityType } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useNewVolumePage } from '@/hooks/pages/dashboard/useNewVolumePage'
 import { Button, CompositeTitle } from '@aleph-front/aleph-core'
-import HoldingRequirements from '@/components/common/HoldingRequirements'
+import HoldingRequirements from '@/components/form/HoldingRequirements'
 import Container from '@/components/common/CenteredContainer'
-import { AddNewVolume } from '@/components/form/AddVolume/cmp'
-import { Form } from '@/components/form/Form/cmp'
+import { AddNewVolume } from '@/components/form/AddVolume'
+import { Form } from '@/components/form/Form'
 
 export default function NewVolumePage() {
   const {
@@ -32,6 +32,7 @@ export default function NewVolumePage() {
         type={EntityType.Volume}
         volumes={[values]}
         unlockedAmount={accountBalance}
+        paymentMethod={PaymentMethod.Hold}
         description={
           <>
             This amount needs to be present in your wallet until the volume is

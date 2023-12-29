@@ -1,7 +1,6 @@
 import type { AppProps } from 'next/app'
 import { ThemeProvider } from 'styled-components'
-import { themes, GlobalStyles } from '@aleph-front/aleph-core'
-import Footer from '@/components/common/Footer'
+import { themes, GlobalStyles, Footer } from '@aleph-front/aleph-core'
 import { GlobalStylesOverride } from '@/styles/global'
 import Header from '@/components/common/Header'
 

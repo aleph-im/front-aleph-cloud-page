@@ -1,8 +1,12 @@
 import React from 'react'
-import { Icon, TextInput, Button } from '@aleph-front/aleph-core'
+import {
+  Icon,
+  TextInput,
+  Button,
+  NoisyContainer,
+} from '@aleph-front/aleph-core'
 import { useAddDomains, useDomainItem } from '@/hooks/form/useAddDomains'
 import { DomainItemProps, AddDomainsProps as AddDomainsProps } from './types'
-import NoisyContainer from '@/components/common/NoisyContainer'
 
 const DomainItem = React.memo((props: DomainItemProps) => {
   const { nameCtrl, handleRemove } = useDomainItem(props)

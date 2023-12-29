@@ -1,11 +1,12 @@
+import { memo } from 'react'
 import { Row, Col } from '@aleph-front/aleph-core'
 import Container from '../Container'
 import { CenteredContainerProps } from './types'
 
-export default function CenteredContainer({
+export const CenteredContainer = ({
   children,
   variant = 'default',
-}: CenteredContainerProps) {
+}: CenteredContainerProps) => {
   return (
     <>
       {variant === 'default' ? (
@@ -38,3 +39,6 @@ export default function CenteredContainer({
     </>
   )
 }
+CenteredContainer.displayName = 'CenteredContainer'
+
+export default memo(CenteredContainer) as typeof CenteredContainer

@@ -1,11 +1,8 @@
+import { memo } from 'react'
 import { Icon } from '@aleph-front/aleph-core'
 import { IconTextProps } from './types'
 
-export default function IconText({
-  children,
-  onClick,
-  iconName,
-}: IconTextProps) {
+export const IconText = ({ children, onClick, iconName }: IconTextProps) => {
   return (
     <div tw="flex items-baseline cursor-pointer" onClick={onClick}>
       <span tw="break-all">{children}</span>
@@ -13,3 +10,6 @@ export default function IconText({
     </div>
   )
 }
+IconText.displayName = 'IconText'
+
+export default memo(IconText) as typeof IconText

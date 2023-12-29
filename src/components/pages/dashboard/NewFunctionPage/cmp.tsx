@@ -1,7 +1,7 @@
 import { Button, TextGradient, CompositeTitle } from '@aleph-front/aleph-core'
-import { EntityType } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useNewFunctionPage } from '@/hooks/pages/dashboard/useNewFunctionPage'
-import HoldingRequirements from '@/components/common/HoldingRequirements'
+import HoldingRequirements from '@/components/form/HoldingRequirements'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
 import AddEnvVars from '@/components/form/AddEnvVars'
@@ -14,7 +14,7 @@ import BorderBox from '@/components/common/BorderBox'
 import { convertByteUnits } from '@/helpers/utils'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
-import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime/cmp'
+import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime'
 import NewEntityTab from '../NewEntityTab'
 
 export default function NewFunctionPage() {
@@ -174,6 +174,7 @@ export default function NewFunctionPage() {
         volumes={values.volumes}
         domains={values.domains}
         unlockedAmount={accountBalance}
+        paymentMethod={PaymentMethod.Hold}
         description={
           <>
             This amount needs to be present in your wallet until the function is

@@ -1,1 +1,1 @@
-export { default, default as NodesTable } from './cmp'
+export { default } from './cmp'

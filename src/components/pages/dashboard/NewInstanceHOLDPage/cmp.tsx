@@ -6,12 +6,12 @@ import AddEnvVars from '@/components/form/AddEnvVars'
 import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
-import HoldingRequirements from '@/components/common/HoldingRequirements'
-import { EntityType } from '@/helpers/constants'
+import HoldingRequirements from '@/components/form/HoldingRequirements'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstanceHoldPage } from '@/hooks/pages/dashboard/useNewInstanceHoldPage'
 import Form from '@/components/form/Form'
-import ToggleContainer from '@/components/common/ToggleContainer/cmp'
+import ToggleContainer from '@/components/common/ToggleContainer'
 import NewEntityTab from '../NewEntityTab'
 
 export default function NewInstanceHoldPage() {
@@ -151,7 +151,6 @@ export default function NewInstanceHoldPage() {
           </div>
         </Container>
       </section>
-
       <HoldingRequirements
         address={address}
         type={EntityType.Instance}
@@ -160,6 +159,7 @@ export default function NewInstanceHoldPage() {
         volumes={values.volumes}
         domains={values.domains}
         unlockedAmount={accountBalance}
+        paymentMethod={PaymentMethod.Hold}
         description={
           <>
             This amount needs to be present in your wallet until the instance is

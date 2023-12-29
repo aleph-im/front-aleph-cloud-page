@@ -1,16 +1,16 @@
 import {
   Switch,
   ToggleContainer as CoreToggleContainer,
+  NoisyContainer,
 } from '@aleph-front/aleph-core'
-import NoisyContainer from '../NoisyContainer'
 import { ToggleContainerProps } from './types'
-import { ChangeEvent, useCallback, useState } from 'react'
+import { ChangeEvent, memo, useCallback, useState } from 'react'
 
-export default function ToggleContainer({
+export const ToggleContainer = ({
   label,
   children,
   ...rest
-}: ToggleContainerProps) {
+}: ToggleContainerProps) => {
   const [open, setOpen] = useState(false)
 
   const handleChange = useCallback(
@@ -27,3 +27,6 @@ export default function ToggleContainer({
     </NoisyContainer>
   )
 }
+ToggleContainer.displayName = 'ToggleContainer'
+
+export default memo(ToggleContainer) as typeof ToggleContainer
