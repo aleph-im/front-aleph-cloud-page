@@ -50,7 +50,9 @@ export default function ManageDomain() {
                 variant={status?.status ? 'success' : 'error'}
                 tw="ml-4"
               >
-                DOMAIN RECORDS NOT CONFIGURED
+                {status?.status
+                  ? 'DOMAIN RECORDS CONFIGURED'
+                  : 'DOMAIN RECORDS NOT CONFIGURED'}
               </StatusLabel>
             </div>
             <div>
