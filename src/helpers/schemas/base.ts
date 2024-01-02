@@ -83,11 +83,6 @@ export const ipfsCIDSchema = requiredStringSchema.regex(
   { message: 'Invalid IPFS CID hash' },
 )
 
-export const programTypeSchema = z.enum([
-  EntityType.Instance,
-  EntityType.Program,
-])
-
 export const paymentMethodSchema = z.enum([
   PaymentMethod.Hold,
   PaymentMethod.Stream,

@@ -11,7 +11,6 @@ export const domainSchema = z.object({
     AddDomainTarget.Program,
     AddDomainTarget.Instance,
   ]),
-  programType: programTypeSchema,
   ref: messageHashSchema,
 })
 

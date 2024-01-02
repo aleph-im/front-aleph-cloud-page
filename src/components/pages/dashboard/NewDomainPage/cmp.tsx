@@ -4,7 +4,7 @@ import Container from '@/components/common/CenteredContainer'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { NoisyContainer } from '@aleph-front/aleph-core'
 import Form from '@/components/form/Form'
-import { EntityType, EntityTypeName } from '@/helpers/constants'
+import { EntityType, EntityTypeName, AddDomainTarget } from '@/helpers/constants'
 import { useNewDomainPage } from '@/hooks/pages/dashboard/useNewDomainPage'
 import {
   Button,
@@ -24,14 +24,23 @@ export default function NewDomain() {
     hasFunctions,
     hasInstances,
     nameCtrl,
-    programTypeCtrl,
+    targetCtrl,
     refCtrl,
-    ipfsRefCtrl,
     errors,
     handleSubmit,
+    setTarget
   } = useNewDomainPage()
 
   const [tabId, setTabId] = useState('compute')
+
+  const onTabChange = (tabId) => {
+    setTabId(tabId)
+    if (tabId == "ipfs") {
+      setTarget(AddDomainTarget.IPFS)
+    } else {
+      setTarget(AddDomainTarget.INSTANCE)
+    }
+  }
 
   return (
     <>
@@ -95,7 +104,7 @@ export default function NewDomain() {
                   <Tabs
                     align="left"
                     selected={tabId}
-                    onTabChange={setTabId}
+                    onTabChange={onTabChange}
                     tabs={[
                       {
                         id: 'compute',
@@ -112,8 +121,8 @@ export default function NewDomain() {
                   {tabId === 'compute' ? (
                     <NoisyContainer tw="z-10!">
                       <RadioGroup
-                        {...programTypeCtrl.field}
-                        {...programTypeCtrl.fieldState}
+                        {...targetCtrl.field}
+                        {...targetCtrl.fieldState}
                         required
                         label="Choose resource type"
                         direction="row"
@@ -154,8 +163,8 @@ export default function NewDomain() {
                       </p>
                       <NoisyContainer>
                         <TextInput
-                          {...ipfsRefCtrl.field}
-                          {...ipfsRefCtrl.fieldState}
+                          {...refCtrl.field}
+                          {...refCtrl.fieldState}
                           required
                           label="Link your custom domain to an Aleph Message ID"
                           placeholder="Paste your IPFS Aleph Message ID"

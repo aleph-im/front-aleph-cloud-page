@@ -27,7 +27,7 @@ export const defaultValues: NewDomainFormState = {
 export type DomainRefOptions = {
   label: string
   value: string
-  type: EntityType
+  type: AddDomainTarget
 }
 
 export type UseNewDomainPageReturn = {
@@ -36,9 +36,8 @@ export type UseNewDomainPageReturn = {
   hasFunctions: boolean
   hasEntities: boolean
   nameCtrl: UseControllerReturn<NewDomainFormState, 'name'>
-  programTypeCtrl: UseControllerReturn<NewDomainFormState, 'programType'>
+  targetCtrl: UseControllerReturn<NewDomainFormState, 'target'>
   refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
-  ipfsRefCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
   errors: FieldErrors<NewDomainFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
 }
@@ -82,18 +81,12 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     name: 'name',
   })
 
-  const programTypeCtrl = useController({
+  const targetCtrl = useController({
     control,
-    name: 'programType',
+    name: 'target',
     rules: {
       onChange(state) {
         setValue('ref', '')
-
-        if (state.target.value === EntityType.Program) {
-          setValue('target', AddDomainTarget.Program)
-        } else if (state.target.value === EntityType.Instance) {
-          setValue('target', AddDomainTarget.Instance)
-        }
       },
     },
   })
@@ -103,17 +96,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     name: 'ref',
   })
 
-  const ipfsRefCtrl = useController({
-    control,
-    name: 'ref',
-    rules: {
-      onChange() {
-        setValue('target', AddDomainTarget.IPFS)
-      },
-    },
-  })
-
-  const entityType = programTypeCtrl.field.value
+  const entityType = targetCtrl.field.value
 
   const entities = useMemo(() => {
     const entities = !entityType
@@ -147,14 +130,19 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   )
 
   useEffect(() => {
-    if (entityType === EntityType.Instance && !hasInstances) {
-      setValue('programType', EntityType.Program)
+    if (entityType === EntityType.Instance && hasInstances) {
+      setValue('target', EntityType.Instance)
     }
 
-    if (entityType === EntityType.Program && !hasFunctions) {
-      setValue('programType', EntityType.Instance)
+    if (entityType === EntityType.Program && hasFunctions) {
+      setValue('target', EntityType.Program)
     }
+
   }, [entityType, hasFunctions, hasInstances, setValue])
+
+  const setTarget = (target) => {
+    setValue('target', target)
+  }
 
   return {
     entities,
@@ -162,10 +150,10 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     hasFunctions,
     hasEntities,
     nameCtrl,
-    programTypeCtrl,
+    targetCtrl,
     refCtrl,
-    ipfsRefCtrl,
     errors,
     handleSubmit,
+    setTarget
   }
 }

@@ -14,9 +14,8 @@ import { domainSchema, domainsSchema } from '@/helpers/schemas/domain'
 export { AddDomainTarget }
 
 export type DomainAggregateItem = {
-  type: AddDomainTarget | EntityType.Program | EntityType.Instance
+  type: AddDomainTarget
   message_id: string
-  programType?: EntityType.Instance | EntityType.Program
   updated_at: string
 }
 
@@ -24,16 +23,14 @@ export type DomainAggregate = Record<string, DomainAggregateItem | null>
 
 export type AddDomain = {
   name: string
-  target: AddDomainTarget | EntityType.Program | EntityType.Instance
-  programType: EntityType.Instance | EntityType.Program
+  target: AddDomainTarget
   ref: string
 }
 
-export type Domain = Omit<AddDomain, 'programType'> & {
+export type Domain = Omit<AddDomain, 'target'> & {
   type: EntityType.Domain
   id: string
   confirmed?: boolean
-  programType?: EntityType.Instance | EntityType.Program
   updated_at: string
 }
 
@@ -81,7 +78,6 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     const content = {
       message_id: domain.ref,
       type: domain.target,
-      programType: domain.programType,
       updated_at: new Date().toISOString(),
     }
 
@@ -110,18 +106,12 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       if (!domains.length) return []
 
       const content: DomainAggregate = domains.reduce((ac, cv) => {
-        const { name, ref, target, programType } = cv
+        const { name, ref, target } = cv
 
         const domain = {
           message_id: ref,
-          programType,
-          type: target === AddDomainTarget.IPFS ? target : programType,
+          type: target,
           updated_at: new Date().toISOString(),
-        }
-
-        // @note: legacy domains don't include programType (default to Instance)
-        if (target === AddDomainTarget.Program) {
-          domain.programType = cv.programType || EntityType.Instance
         }
 
         ac[name] = domain
@@ -239,11 +229,6 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       ref: message_id,
       confirmed: true,
       updated_at: updated_at,
-    }
-
-    // @note: legacy domains don't include programType (default to Instance)
-    if (type === AddDomainTarget.Program) {
-      domain.programType = content.programType || EntityType.Instance
     }
 
     return domain

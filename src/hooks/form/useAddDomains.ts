@@ -12,14 +12,12 @@ export type DomainField = {
   name: string
   ref: string
   target: AddDomainTarget
-  programType: EntityType.Instance | EntityType.Program
 }
 
 export const defaultValues: DomainField = {
   name: '',
   ref: '',
   target: AddDomainTarget.Instance,
-  programType: EntityType.Instance,
 }
 
 export type UseDomainItemProps = {
@@ -77,7 +75,7 @@ export type UseDomainsReturn = {
 export function useAddDomains({
   name = 'domains',
   control,
-  entityType: programType,
+  entityType: target,
 }: UseDomainsProps): UseDomainsReturn {
   const domainsCtrl = useFieldArray({
     control,
@@ -87,8 +85,8 @@ export function useAddDomains({
   const { fields, remove: handleRemove, append } = domainsCtrl
 
   const handleAdd = useCallback(() => {
-    append({ ...defaultValues, programType })
-  }, [append, programType])
+    append({ ...defaultValues, target })
+  }, [append, target])
 
   return {
     name,
