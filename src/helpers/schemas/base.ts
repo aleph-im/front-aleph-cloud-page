@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { EntityType, PaymentMethod } from '../constants'
+import { PaymentMethod } from '../constants'
 
 export const requiredStringSchema = z
   .string()

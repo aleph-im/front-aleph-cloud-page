@@ -137,7 +137,6 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     if (entityType === EntityType.Program && hasFunctions) {
       setValue('target', EntityType.Program)
     }
-
   }, [entityType, hasFunctions, hasInstances, setValue])
 
   const setTarget = (target) => {
@@ -154,6 +153,6 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     refCtrl,
     errors,
     handleSubmit,
-    setTarget
+    setTarget,
   }
 }

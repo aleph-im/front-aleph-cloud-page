@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { domainNameSchema, messageHashSchema, programTypeSchema } from './base'
+import { domainNameSchema, messageHashSchema } from './base'
 import { AddDomainTarget } from '../constants'
 
 // DOMAINS

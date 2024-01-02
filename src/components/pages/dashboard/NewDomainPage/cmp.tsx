@@ -4,7 +4,11 @@ import Container from '@/components/common/CenteredContainer'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { NoisyContainer } from '@aleph-front/aleph-core'
 import Form from '@/components/form/Form'
-import { EntityType, EntityTypeName, AddDomainTarget } from '@/helpers/constants'
+import {
+  EntityType,
+  EntityTypeName,
+  AddDomainTarget,
+} from '@/helpers/constants'
 import { useNewDomainPage } from '@/hooks/pages/dashboard/useNewDomainPage'
 import {
   Button,
@@ -28,14 +32,14 @@ export default function NewDomain() {
     refCtrl,
     errors,
     handleSubmit,
-    setTarget
+    setTarget,
   } = useNewDomainPage()
 
   const [tabId, setTabId] = useState('compute')
 
   const onTabChange = (tabId) => {
     setTabId(tabId)
-    if (tabId == "ipfs") {
+    if (tabId == 'ipfs') {
       setTarget(AddDomainTarget.IPFS)
     } else {
       setTarget(AddDomainTarget.INSTANCE)
