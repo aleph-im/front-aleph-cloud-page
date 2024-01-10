@@ -10,7 +10,7 @@ import {
 import { indexerSchema } from '@/helpers/schemas/indexer'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { getDefaultSpecsOptions } from '@/hooks/form/useSelectInstanceSpecs'
-import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { Encoding } from 'aleph-sdk-ts/dist/messages/types'
 import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { toKebabCase, toSnakeCase } from '@/helpers/utils'

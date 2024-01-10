@@ -36,12 +36,12 @@ import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
-import { Framework } from '@superfluid-finance/sdk-core'
 import { Web3Provider } from '@ethersproject/providers'
 import {
   StreamDurationField,
   defaultStreamDuration,
 } from '@/hooks/form/useSelectStreamDuration'
+import { superfluid } from 'aleph-sdk-ts/src/accounts'
 
 export type NewInstanceStreamFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -147,39 +147,28 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
       console.log(state)
 
       if (!account) throw new Error('Invalid account')
-      if (!node) throw new Error('Invalid node')
+      if (!node || !node.address) throw new Error('Invalid node')
       if (!state?.streamCost) throw new Error('Invalid stream cost')
+      if (window?.ethereum === undefined) throw new Error('No wallet found')
 
-      const web3Provider = new Web3Provider(window?.ethereum)
+      const web3Provider = new Web3Provider(window.ethereum)
 
-      const sf = await Framework.create({
-        chainId: 43113,
-        provider: web3Provider,
-      })
-
-      const signer = sf.createSigner({ web3Provider })
-
-      const flowRate = String(
-        Math.round((state.streamCost * 10 ** 18) / (60 * 60)),
+      const superfluidAccount = new superfluid.SuperfluidAccount(
+        web3Provider,
+        account.address,
       )
 
-      const paymentData = {
-        superToken,
-        flowRate,
-        sender: account.address,
-        receiver: node.reward,
-      }
+      await superfluidAccount.init()
 
-      console.log(paymentData)
+      const superTokenBalance = await superfluidAccount.getALEPHxBalance()
+      console.log('ALEPHx balance:', superTokenBalance)
 
-      const flow = sf.cfaV1.createFlow(paymentData)
-      const txnResponse = await flow.exec(signer)
+      let flow = await superfluidAccount.getALEPHxFlow(node.address)
+      console.log('Current flow:', flow)
 
-      console.log(txnResponse)
-
-      const txnReceipt = await txnResponse.wait()
-
-      console.log(txnReceipt)
+      await superfluidAccount.increaseALEPHxFlow(node.address, state.streamCost)
+      flow = await superfluidAccount.getALEPHxFlow(node.address)
+      console.log('New flow:', flow)
 
       return
 

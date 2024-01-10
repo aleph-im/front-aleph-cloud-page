@@ -2,7 +2,7 @@ import JSZip from 'jszip'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, program, any } from 'aleph-sdk-ts/dist/messages'
 // import { ProgramPublishConfiguration } from 'aleph-sdk-ts/dist/messages/program/publish'
-import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
+import { Encoding, ProgramContent } from 'aleph-sdk-ts/dist/messages/types'
 import E_ from '../helpers/errors'
 import {
   EntityType,
@@ -19,7 +19,6 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/types'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import { ProgramContent } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { CustomFunctionRuntimeField } from './runtime'
