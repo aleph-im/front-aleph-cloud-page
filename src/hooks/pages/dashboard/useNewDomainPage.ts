@@ -6,7 +6,7 @@ import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { DomainManager } from '@/domain/domain'
-import { EntityType, AddDomainTarget } from '@/helpers/constants'
+import { EntityDomainType } from '@/helpers/constants'
 import {
   FieldErrors,
   UseControllerReturn,
@@ -27,7 +27,7 @@ export const defaultValues: NewDomainFormState = {
 export type DomainRefOptions = {
   label: string
   value: string
-  type: EntityType
+  type: EntityDomainType
 }
 
 export type UseNewDomainPageReturn = {
@@ -36,11 +36,11 @@ export type UseNewDomainPageReturn = {
   hasFunctions: boolean
   hasEntities: boolean
   nameCtrl: UseControllerReturn<NewDomainFormState, 'name'>
-  programTypeCtrl: UseControllerReturn<NewDomainFormState, 'programType'>
+  targetCtrl: UseControllerReturn<NewDomainFormState, 'target'>
   refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
-  ipfsRefCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
   errors: FieldErrors<NewDomainFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
+  setTarget: (target: EntityDomainType) => void
 }
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
@@ -82,18 +82,12 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     name: 'name',
   })
 
-  const programTypeCtrl = useController({
+  const targetCtrl = useController({
     control,
-    name: 'programType',
+    name: 'target',
     rules: {
       onChange(state) {
         setValue('ref', '')
-
-        if (state.target.value === EntityType.Program) {
-          setValue('target', AddDomainTarget.Program)
-        } else if (state.target.value === EntityType.Instance) {
-          setValue('target', AddDomainTarget.Instance)
-        }
       },
     },
   })
@@ -103,22 +97,12 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     name: 'ref',
   })
 
-  const ipfsRefCtrl = useController({
-    control,
-    name: 'ref',
-    rules: {
-      onChange() {
-        setValue('target', AddDomainTarget.IPFS)
-      },
-    },
-  })
-
-  const entityType = programTypeCtrl.field.value
+  const entityType = targetCtrl.field.value
 
   const entities = useMemo(() => {
     const entities = !entityType
       ? []
-      : entityType === EntityType.Instance
+      : entityType === EntityDomainType.Instance
       ? accountInstances
       : accountFunctions
 
@@ -147,14 +131,18 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   )
 
   useEffect(() => {
-    if (entityType === EntityType.Instance && !hasInstances) {
-      setValue('programType', EntityType.Program)
+    if (entityType === EntityDomainType.Instance && hasInstances) {
+      setValue('target', EntityDomainType.Instance)
     }
 
-    if (entityType === EntityType.Program && !hasFunctions) {
-      setValue('programType', EntityType.Instance)
+    if (entityType === EntityDomainType.Program && hasFunctions) {
+      setValue('target', EntityDomainType.Program)
     }
   }, [entityType, hasFunctions, hasInstances, setValue])
+
+  const setTarget = (target: EntityDomainType) => {
+    setValue('target', target)
+  }
 
   return {
     entities,
@@ -162,10 +150,10 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     hasFunctions,
     hasEntities,
     nameCtrl,
-    programTypeCtrl,
+    targetCtrl,
     refCtrl,
-    ipfsRefCtrl,
     errors,
     handleSubmit,
+    setTarget,
   }
 }

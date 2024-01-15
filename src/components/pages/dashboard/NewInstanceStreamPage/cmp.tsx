@@ -15,7 +15,7 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import HoldingRequirements from '@/components/form/HoldingRequirements'
-import { EntityType, apiServer } from '@/helpers/constants'
+import { EntityType, apiServer, EntityDomainType } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstanceStreamPage } from '@/hooks/pages/dashboard/useNewInstanceStreamPage'
 import Form from '@/components/form/Form'
@@ -221,7 +221,7 @@ export default function NewInstancePage() {
                 <AddDomains
                   name="domains"
                   control={control}
-                  entityType={EntityType.Instance}
+                  entityType={EntityDomainType.Instance}
                 />
               </ToggleContainer>
             </div>
