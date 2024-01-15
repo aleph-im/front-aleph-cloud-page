@@ -61,10 +61,16 @@ export enum EntityType {
   Indexer = 'indexer',
 }
 
-export enum AddDomainTarget {
+export enum EntityDomainType {
   IPFS = 'ipfs',
   Program = 'program',
   Instance = 'instance',
+}
+
+export const EntityDomainTypeName: Record<EntityDomainType, string> = {
+  [EntityDomainType.IPFS]: 'Ipfs',
+  [EntityDomainType.Program]: 'Function',
+  [EntityDomainType.Instance]: 'Instance',
 }
 
 export enum VolumeType {

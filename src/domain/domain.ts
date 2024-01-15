@@ -2,7 +2,7 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { aggregate } from 'aleph-sdk-ts/dist/messages'
 import E_ from '../helpers/errors'
 import {
-  AddDomainTarget,
+  EntityDomainType,
   EntityType,
   apiServer,
   defaultDomainAggregateKey,
@@ -11,10 +11,10 @@ import {
 import { EntityManager } from './types'
 import { domainSchema, domainsSchema } from '@/helpers/schemas/domain'
 
-export { AddDomainTarget }
+export { EntityDomainType }
 
 export type DomainAggregateItem = {
-  type: AddDomainTarget
+  type: EntityDomainType
   message_id: string
   updated_at: string
 }
@@ -23,11 +23,11 @@ export type DomainAggregate = Record<string, DomainAggregateItem | null>
 
 export type AddDomain = {
   name: string
-  target: AddDomainTarget
+  target: EntityDomainType
   ref: string
 }
 
-export type Domain = Omit<AddDomain, 'target'> & {
+export type Domain = AddDomain & {
   type: EntityType.Domain
   id: string
   confirmed?: boolean

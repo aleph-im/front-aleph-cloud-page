@@ -1,4 +1,4 @@
-import { AddDomainTarget, EntityType } from '@/helpers/constants'
+import { EntityDomainType } from '@/helpers/constants'
 import { useCallback } from 'react'
 import {
   Control,
@@ -11,13 +11,13 @@ import {
 export type DomainField = {
   name: string
   ref: string
-  target: AddDomainTarget
+  target: EntityDomainType
 }
 
 export const defaultValues: DomainField = {
   name: '',
   ref: '',
-  target: AddDomainTarget.Instance,
+  target: EntityDomainType.Instance,
 }
 
 export type UseDomainItemProps = {
@@ -61,7 +61,7 @@ export function useDomainItem({
 export type UseDomainsProps = {
   name?: string
   control: Control
-  entityType: EntityType.Program | EntityType.Instance
+  entityType: EntityDomainType
 }
 
 export type UseDomainsReturn = {

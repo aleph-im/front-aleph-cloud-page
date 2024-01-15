@@ -1,15 +1,15 @@
 import { z } from 'zod'
 import { domainNameSchema, messageHashSchema } from './base'
-import { AddDomainTarget } from '../constants'
+import { EntityDomainType } from '../constants'
 
 // DOMAINS
 
 export const domainSchema = z.object({
   name: domainNameSchema,
   target: z.enum([
-    AddDomainTarget.IPFS,
-    AddDomainTarget.Program,
-    AddDomainTarget.Instance,
+    EntityDomainType.IPFS,
+    EntityDomainType.Program,
+    EntityDomainType.Instance,
   ]),
   ref: messageHashSchema,
 })

@@ -4,11 +4,7 @@ import Container from '@/components/common/CenteredContainer'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { NoisyContainer } from '@aleph-front/aleph-core'
 import Form from '@/components/form/Form'
-import {
-  EntityType,
-  EntityTypeName,
-  AddDomainTarget,
-} from '@/helpers/constants'
+import { EntityDomainTypeName, EntityDomainType } from '@/helpers/constants'
 import { useNewDomainPage } from '@/hooks/pages/dashboard/useNewDomainPage'
 import {
   Button,
@@ -37,12 +33,12 @@ export default function NewDomain() {
 
   const [tabId, setTabId] = useState('compute')
 
-  const onTabChange = (tabId) => {
+  const onTabChange = (tabId: string) => {
     setTabId(tabId)
     if (tabId == 'ipfs') {
-      setTarget(AddDomainTarget.IPFS)
+      setTarget(EntityDomainType.IPFS)
     } else {
-      setTarget(AddDomainTarget.INSTANCE)
+      setTarget(EntityDomainType.Instance)
     }
   }
 
@@ -132,13 +128,15 @@ export default function NewDomain() {
                         direction="row"
                       >
                         <Radio
-                          label={EntityTypeName[EntityType.Instance]}
-                          value={EntityType.Instance}
+                          label={
+                            EntityDomainTypeName[EntityDomainType.Instance]
+                          }
+                          value={EntityDomainType.Instance}
                           disabled={!hasInstances}
                         />
                         <Radio
-                          label={EntityTypeName[EntityType.Program]}
-                          value={EntityType.Program}
+                          label={EntityDomainTypeName[EntityDomainType.Program]}
+                          value={EntityDomainType.Program}
                           disabled={!hasFunctions}
                         />
                       </RadioGroup>

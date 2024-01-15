@@ -6,7 +6,7 @@ import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { DomainManager } from '@/domain/domain'
-import { EntityType, AddDomainTarget } from '@/helpers/constants'
+import { EntityDomainType } from '@/helpers/constants'
 import {
   FieldErrors,
   UseControllerReturn,
@@ -27,7 +27,7 @@ export const defaultValues: NewDomainFormState = {
 export type DomainRefOptions = {
   label: string
   value: string
-  type: AddDomainTarget
+  type: EntityDomainType
 }
 
 export type UseNewDomainPageReturn = {
@@ -40,6 +40,7 @@ export type UseNewDomainPageReturn = {
   refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
   errors: FieldErrors<NewDomainFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
+  setTarget: (target: EntityDomainType) => void
 }
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
@@ -101,7 +102,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   const entities = useMemo(() => {
     const entities = !entityType
       ? []
-      : entityType === EntityType.Instance
+      : entityType === EntityDomainType.Instance
       ? accountInstances
       : accountFunctions
 
@@ -130,16 +131,16 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   )
 
   useEffect(() => {
-    if (entityType === EntityType.Instance && hasInstances) {
-      setValue('target', EntityType.Instance)
+    if (entityType === EntityDomainType.Instance && hasInstances) {
+      setValue('target', EntityDomainType.Instance)
     }
 
-    if (entityType === EntityType.Program && hasFunctions) {
-      setValue('target', EntityType.Program)
+    if (entityType === EntityDomainType.Program && hasFunctions) {
+      setValue('target', EntityDomainType.Program)
     }
   }, [entityType, hasFunctions, hasInstances, setValue])
 
-  const setTarget = (target) => {
+  const setTarget = (target: EntityDomainType) => {
     setValue('target', target)
   }
 

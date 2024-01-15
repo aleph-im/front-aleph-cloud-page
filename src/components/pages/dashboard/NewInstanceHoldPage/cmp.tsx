@@ -7,7 +7,11 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import HoldingRequirements from '@/components/form/HoldingRequirements'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import {
+  EntityType,
+  PaymentMethod,
+  EntityDomainType,
+} from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstanceHoldPage } from '@/hooks/pages/dashboard/useNewInstanceHoldPage'
 import Form from '@/components/form/Form'
@@ -144,7 +148,7 @@ export default function NewInstanceHoldPage() {
                 <AddDomains
                   name="domains"
                   control={control}
-                  entityType={EntityType.Instance}
+                  entityType={EntityDomainType.Instance}
                 />
               </ToggleContainer>
             </div>

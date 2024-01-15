@@ -1,6 +1,6 @@
 import IconText from '@/components/common/IconText'
 import { NoisyContainer } from '@aleph-front/aleph-core'
-import { EntityTypeName, AddDomainTarget } from '@/helpers/constants'
+import { EntityTypeName, EntityDomainType } from '@/helpers/constants'
 import {
   BulletItem,
   Button,
@@ -152,17 +152,17 @@ export default function ManageDomain() {
                               {domain.name}
                             </span>
                             with value
-                            {domain.target == AddDomainTarget.Program && (
+                            {domain.target == EntityDomainType.Program && (
                               <span className="text-main0" tw="mx-2">
                                 {domain.name}.program.public.aleph.sh.
                               </span>
                             )}
-                            {domain.target == AddDomainTarget.Instance && (
+                            {domain.target == EntityDomainType.Instance && (
                               <span className="text-main0" tw="mx-2">
                                 {domain.name}.instance.public.aleph.sh.
                               </span>
                             )}
-                            {domain.target == AddDomainTarget.IPFS && (
+                            {domain.target == EntityDomainType.IPFS && (
                               <span className="text-main0" tw="mx-2">
                                 ipfs.public.aleph.sh.
                               </span>
@@ -170,7 +170,7 @@ export default function ManageDomain() {
                           </div>
                         </div>
                       </GrayText>
-                      {domain.target == AddDomainTarget.IPFS && (
+                      {domain.target == EntityDomainType.IPFS && (
                         <GrayText>
                           <div tw="flex mt-2">
                             <BulletItem

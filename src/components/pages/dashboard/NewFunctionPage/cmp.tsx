@@ -1,5 +1,9 @@
 import { Button, TextGradient, CompositeTitle } from '@aleph-front/aleph-core'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import {
+  EntityType,
+  PaymentMethod,
+  EntityDomainType,
+} from '@/helpers/constants'
 import { useNewFunctionPage } from '@/hooks/pages/dashboard/useNewFunctionPage'
 import HoldingRequirements from '@/components/form/HoldingRequirements'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
@@ -158,7 +162,7 @@ export default function NewFunctionPage() {
                 <AddDomains
                   name="domains"
                   control={control}
-                  entityType={EntityType.Program}
+                  entityType={EntityDomainType.Program}
                 />
               </ToggleContainer>
             </div>
