@@ -42,7 +42,7 @@ import {
   StreamDurationField,
   defaultStreamDuration,
 } from '@/hooks/form/useSelectStreamDuration'
-import { superfluid } from 'aleph-sdk-ts/src/accounts'
+import { superfluid } from 'aleph-sdk-ts/dist/accounts'
 
 export type NewInstanceStreamFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -146,11 +146,8 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
   const onSubmit = useCallback(
     async (state: NewInstanceStreamFormState) => {
       if (!manager) throw new Error('Manager not ready')
-
-      console.log(state)
-
       if (!account) throw new Error('Invalid account')
-      if (!node || !node.address) throw new Error('Invalid node')
+      if (!node || !node.reward) throw new Error('Invalid node')
       if (!state?.streamCost) throw new Error('Invalid stream cost')
       if (window?.ethereum === undefined) throw new Error('No wallet found')
 
@@ -164,14 +161,15 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
       await superfluidAccount.init()
 
       const superTokenBalance = await superfluidAccount.getALEPHxBalance()
-      console.log('ALEPHx balance:', superTokenBalance)
+      console.log('ALEPHx balance:', superTokenBalance.toString())
 
-      let flow = await superfluidAccount.getALEPHxFlow(node.address)
-      console.log('Current flow:', flow)
+      console.log('Target node:', node)
+      let flow = await superfluidAccount.getALEPHxFlow(node.reward)
+      console.log('Current flow:', flow.toString())
 
-      await superfluidAccount.increaseALEPHxFlow(node.address, state.streamCost)
-      flow = await superfluidAccount.getALEPHxFlow(node.address)
-      console.log('New flow:', flow)
+      await superfluidAccount.increaseALEPHxFlow(node.reward, state.streamCost)
+      flow = await superfluidAccount.getALEPHxFlow(node.reward)
+      console.log('New flow:', flow.toString())
 
       return
 
