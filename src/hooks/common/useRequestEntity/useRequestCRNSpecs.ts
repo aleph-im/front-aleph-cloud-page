@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CRN, CRNSpecs, NodeManager } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
-import { RequestState } from '@aleph-front/aleph-core'
+import { RequestState } from '@aleph-front/core'
 
 export type UseRequestCRNSpecsProps = {
   nodes?: CRN[]

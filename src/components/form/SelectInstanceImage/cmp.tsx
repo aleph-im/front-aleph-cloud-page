@@ -4,7 +4,7 @@ import { useBasePath } from '@/hooks/common/useBasePath'
 import { ForwardedRef, forwardRef, memo, useCallback } from 'react'
 import { useSelectInstanceImage } from '@/hooks/form/useSelectInstanceImage'
 import { SelectInstanceImageItemProps, SelectInstanceImageProps } from './types'
-import { FormError } from '@aleph-front/aleph-core'
+import { FormError } from '@aleph-front/core'
 import { FlatCardButtonContainer } from '@/components/common/FlatCardButton'
 import { StyledFlatCardButton } from './styles'
 

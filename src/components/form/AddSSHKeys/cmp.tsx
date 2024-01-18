@@ -5,10 +5,10 @@ import {
   Button,
   Checkbox,
   FormError,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
 import { useAddSSHKeys, useSSHKeyItem } from '@/hooks/form/useAddSSHKeys'
 import { SSHKeyItemProps, AddSSHKeysProps } from './types'
-import { NoisyContainer } from '@aleph-front/aleph-core'
+import { NoisyContainer } from '@aleph-front/core'
 
 const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
   const {

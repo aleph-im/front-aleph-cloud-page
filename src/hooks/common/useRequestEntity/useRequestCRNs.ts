@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { CRN, NodeLastVersions, NodeManager } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
-import { useLocalRequest } from '@aleph-front/aleph-core'
+import { useLocalRequest } from '@aleph-front/core'
 
 export type UseRequestCRNsProps = {
   triggerDeps?: unknown[]

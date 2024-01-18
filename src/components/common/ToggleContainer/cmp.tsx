@@ -2,7 +2,7 @@ import {
   Switch,
   ToggleContainer as CoreToggleContainer,
   NoisyContainer,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
 import { ToggleContainerProps } from './types'
 import { ChangeEvent, memo, useCallback, useState } from 'react'
 

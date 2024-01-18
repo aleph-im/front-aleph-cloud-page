@@ -1,4 +1,4 @@
-import { BreadcrumbProps } from '@aleph-front/aleph-core'
+import { BreadcrumbProps } from '@aleph-front/core'
 import { NextRouter } from 'next/router'
 import { HTMLAttributes } from 'react'
 

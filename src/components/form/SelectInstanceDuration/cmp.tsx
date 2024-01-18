@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { SelectStreamDurationProps } from './types'
 import { useSelectStreamDuration } from '@/hooks/form/useSelectStreamDuration'
-import { Dropdown, DropdownOption, TextInput } from '@aleph-front/aleph-core'
+import { Dropdown, DropdownOption, TextInput } from '@aleph-front/core'
 
 export const SelectStreamDuration = (props: SelectStreamDurationProps) => {
   const { durationCtrl, unitCtrl } = useSelectStreamDuration(props)

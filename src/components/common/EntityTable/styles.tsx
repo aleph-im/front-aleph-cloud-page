@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import tw from 'twin.macro'
-import { Table } from '@aleph-front/aleph-core'
+import { Table } from '@aleph-front/core'
 
 export const StyledTable = styled(Table)`
   & td,

@@ -4,7 +4,7 @@ import {
   TextInput,
   Button,
   NoisyContainer,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
 import { useAddEnvVars, useEnvVarItem } from '@/hooks/form/useAddEnvVars'
 import { EnvVarItemProps, AddEnvVarsProps as AddEnvVarsProps } from './types'
 

@@ -1,4 +1,4 @@
-import { RequestState, useRequestState } from '@aleph-front/aleph-core'
+import { RequestState, useRequestState } from '@aleph-front/core'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   useForm as useFormLib,

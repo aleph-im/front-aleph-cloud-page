@@ -1,4 +1,4 @@
-import { TooltipProps } from '@aleph-front/aleph-core'
+import { TooltipProps } from '@aleph-front/core'
 import { ReactNode } from 'react'
 
 export type InfoTooltipButtonProps = Omit<TooltipProps, 'targetRef'> & {

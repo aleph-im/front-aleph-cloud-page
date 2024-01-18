@@ -1,6 +1,6 @@
 import { FormProps } from './types'
 import { StyledForm } from './styles'
-import { FormError, FormErrorProps } from '@aleph-front/aleph-core'
+import { FormError, FormErrorProps } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
 
 export const Form = ({ children, onSubmit, errors }: FormProps) => {

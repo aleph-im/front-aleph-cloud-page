@@ -1,12 +1,13 @@
-import tw from 'twin.macro'
-import styled, { css } from 'styled-components'
 import {
   BreakpointId,
   Button,
   FloatPosition,
+  RouterNavbar,
   WalletPicker,
   getResponsiveCss,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
+import styled, { css } from 'styled-components'
+import tw from 'twin.macro'
 
 export const StyledButton = styled(Button).attrs((props) => {
   return {
@@ -24,8 +25,6 @@ export const StyledButton = styled(Button).attrs((props) => {
   }
 `
 
-// ---------------------------------
-
 export const StyledWalletPicker = styled(WalletPicker)<{
   $position: FloatPosition
   $isOpen: boolean
@@ -39,6 +38,48 @@ export const StyledWalletPicker = styled(WalletPicker)<{
       transition: opacity ease-in-out 0.25s 0s;
     `
   }}
+`
+
+// --------------------------------------------
+
+export type StyledNavbarDesktopProps = {
+  $breakpoint?: BreakpointId
+}
+
+export const StyledNavbarDesktop = styled.div<StyledNavbarDesktopProps>`
+  ${({ $breakpoint }) => css`
+    ${tw`hidden relative flex-initial shrink-0 m-0 px-16 w-full top-0 z-10 items-center justify-between`}
+    height: 6.5rem;
+    backdrop-filter: blur(50px);
+
+    /* MOBILE LAYOUT */
+    ${getResponsiveCss(
+      $breakpoint,
+      css`
+        ${tw`flex`}
+      `,
+    )}
+  `}
+`
+
+// --------------------------------------------
+
+export type StyledNavbarMobileProps = {
+  $breakpoint?: BreakpointId
+}
+
+export const StyledNavbarMobile = styled(RouterNavbar)<StyledNavbarMobileProps>`
+  ${({ breakpoint }) => css`
+    ${tw`relative block z-10`}
+
+    /* MOBILE LAYOUT */
+    ${getResponsiveCss(
+      breakpoint,
+      css`
+        ${tw`hidden`}
+      `,
+    )}
+  `}
 `
 
 // --------------------------------------------

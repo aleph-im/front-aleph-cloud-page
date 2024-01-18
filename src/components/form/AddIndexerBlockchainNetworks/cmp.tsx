@@ -6,7 +6,7 @@ import {
   Dropdown,
   DropdownOption,
   NoisyContainer,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
 import {
   useAddIndexerBlockchainNetworks,
   useIndexerBlockchainNetworkItem,

@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { Breadcrumb } from '@aleph-front/aleph-core'
+import { Breadcrumb } from '@aleph-front/core'
 import Link from 'next/link'
 import { AutoBreacrumbProps } from './types'
 

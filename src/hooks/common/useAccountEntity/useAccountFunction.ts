@@ -4,7 +4,7 @@ import { ActionTypes } from '@/helpers/store'
 import { useCallback, useMemo } from 'react'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useProgramManager } from '../useManager/useProgramManager'
-import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
 
 export type UseAccountFunctionProps = {
   id: string

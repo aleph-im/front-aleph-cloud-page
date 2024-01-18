@@ -23,7 +23,7 @@ import {
   NoisyContainer,
   TextGradient,
   TextInput,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import { SelectStreamDuration } from '../SelectInstanceDuration'

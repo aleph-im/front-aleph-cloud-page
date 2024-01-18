@@ -1,5 +1,5 @@
 import { NotificationProviderProps } from './types'
-import { Notification } from '@aleph-front/aleph-core'
+import { Notification } from '@aleph-front/core'
 import { memo, useEffect, useState } from 'react'
 
 // @note: Take a look at https://nextjs.org/docs/messages/react-hydration-error#possible-ways-to-fix-it

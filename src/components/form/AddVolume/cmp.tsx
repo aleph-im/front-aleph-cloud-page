@@ -4,7 +4,7 @@ import {
   TextInput,
   Checkbox,
   Button,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
 import {
   RemoveVolumeProps,
   AddVolumeProps,
@@ -20,7 +20,7 @@ import {
   useAddPersistentVolumeProps,
 } from '@/hooks/form/useAddVolume'
 import { VolumeType } from '@/domain/volume'
-import { NoisyContainer } from '@aleph-front/aleph-core'
+import { NoisyContainer } from '@aleph-front/core'
 import HiddenFileInput from '@/components/common/HiddenFileInput'
 
 const RemoveVolume = React.memo(

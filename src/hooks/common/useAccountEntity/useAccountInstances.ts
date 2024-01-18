@@ -5,7 +5,7 @@ import { useCallback } from 'react'
 import { Instance } from '@/domain/instance'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useInstanceManager } from '../useManager/useInstanceManager'
-import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
 
 export type UseAccountInstancesProps = {
   triggerOnMount?: boolean

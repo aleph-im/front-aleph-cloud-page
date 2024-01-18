@@ -3,7 +3,7 @@ import {
   Spinner,
   SpinnerProps,
   useTransitionedEnterExit,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
 import { StyledSpinnerContainer } from './styles'
 import { createPortal } from 'react-dom'
 
@@ -17,6 +17,7 @@ export const SpinnerOverlay = ({
   show,
   center = false,
   fullScreen = false,
+  color = 'main0',
   ...rest
 }: SpinnerOverlayProps) => {
   const { shouldMount, state, ref } = useTransitionedEnterExit<HTMLDivElement>({
@@ -32,7 +33,7 @@ export const SpinnerOverlay = ({
           $center={center}
           $fullScreen={fullScreen}
         >
-          <Spinner {...rest} />
+          <Spinner {...{ color, ...rest }} />
         </StyledSpinnerContainer>
       )}
     </>

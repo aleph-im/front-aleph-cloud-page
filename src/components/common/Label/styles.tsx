@@ -1,4 +1,4 @@
-import { addClasses } from '@aleph-front/aleph-core'
+import { addClasses } from '@aleph-front/core'
 import styled, { css } from 'styled-components'
 import { LabelVariant } from './types'
 

@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Icon } from '@aleph-front/aleph-core'
+import { Icon } from '@aleph-front/core'
 import { IconTextProps } from './types'
 
 export const IconText = ({ children, onClick, iconName }: IconTextProps) => {

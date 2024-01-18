@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import Link from 'next/link'
-import { Button } from '@aleph-front/aleph-core'
+import { Button } from '@aleph-front/core'
 import { ButtonLinkProps } from './types'
 
 /**

@@ -1,4 +1,4 @@
-import { Icon, addClasses } from '@aleph-front/aleph-core'
+import { Icon, addClasses } from '@aleph-front/core'
 import styled, { css, keyframes } from 'styled-components'
 import tw from 'twin.macro'
 

@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import { Switch } from '@aleph-front/aleph-core'
+import { Switch } from '@aleph-front/core'
 import { SelectPaymentMethodProps } from './types'
 import { useSelectPaymentMethod } from '@/hooks/form/useSelectPaymentMethod'
 import { StyledLabel } from './styles'

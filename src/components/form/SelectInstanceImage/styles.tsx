@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { getResponsiveCss } from '@aleph-front/aleph-core'
+import { getResponsiveCss } from '@aleph-front/core'
 import FlatCardButton from '@/components/common/FlatCardButton'
 
 export const StyledFlatCardButton = styled(FlatCardButton)`

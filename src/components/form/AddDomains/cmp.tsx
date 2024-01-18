@@ -4,7 +4,7 @@ import {
   TextInput,
   Button,
   NoisyContainer,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
 import { useAddDomains, useDomainItem } from '@/hooks/form/useAddDomains'
 import { DomainItemProps, AddDomainsProps as AddDomainsProps } from './types'
 

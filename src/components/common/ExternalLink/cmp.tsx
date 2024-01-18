@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { StyledExternalLink } from './styles'
 import { ExternalLinkProps } from './types'
-import { Icon } from '@aleph-front/aleph-core'
+import { Icon } from '@aleph-front/core'
 
 export const ExternalLink = ({ text, href }: ExternalLinkProps) => {
   return (

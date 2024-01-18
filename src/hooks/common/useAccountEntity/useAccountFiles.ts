@@ -3,7 +3,7 @@ import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { AccountFilesResponse } from '@/domain/file'
 import { useFileManager } from '../useManager/useFileManager'
-import { RequestState, useLocalRequest } from '@aleph-front/aleph-core'
+import { RequestState, useLocalRequest } from '@aleph-front/core'
 
 export function useAccountFiles(): [
   AccountFilesResponse | undefined,

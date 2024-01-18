@@ -4,7 +4,7 @@ import { ActionTypes } from '@/helpers/store'
 import { useCallback } from 'react'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useSSHKeyManager } from '../useManager/useSSHKeyManager'
-import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
 
 export type UseAccountSSHKeysProps = {
   triggerOnMount?: boolean

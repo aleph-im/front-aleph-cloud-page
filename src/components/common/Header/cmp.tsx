@@ -1,22 +1,21 @@
 import { memo } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
+import { Button, Icon, RenderLinkProps } from '@aleph-front/core'
 import {
-  Button,
-  Icon,
-  LinkComponent,
-  NavbarLink,
-  NavbarLinkList,
-  RouterNavbar,
-} from '@aleph-front/aleph-core'
-import { StyledHeader, StyledButton, StyledWalletPicker } from './styles'
+  StyledNavbarDesktop,
+  StyledButton,
+  StyledWalletPicker,
+  StyledNavbarMobile,
+  StyledHeader,
+} from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 import {
   UseAccountButtonProps,
   useAccountButton,
   useHeader,
 } from '@/hooks/pages/useHeader'
-import AutoBreadcrumb from '../AutoBreadcrumb'
+import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 
 export type AccountButtonProps = UseAccountButtonProps & {
   isMobile?: boolean
@@ -105,12 +104,17 @@ AccountButton.displayName = 'AccountButton'
 
 // ----------------------------
 
+const CustomLink = (props: RenderLinkProps) => {
+  return props.route.children ? <span {...props} /> : <Link {...props} />
+}
+
+// ----------------------------
+
 export const Header = () => {
   const {
     pathname,
     routes,
     breadcrumbNames,
-    hasBreadcrumb,
     isOpen,
     breakpoint,
     handleToggle,
@@ -120,38 +124,39 @@ export const Header = () => {
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
-        <RouterNavbar
+        <StyledNavbarMobile
           {...{
             routes,
             pathname,
             open: isOpen,
             onToggle: handleToggle,
-            Link: Link as LinkComponent,
+            Link: CustomLinkMemo,
             height: '6.5rem',
             breakpoint: 'lg',
             mobileTopContent: <AccountButtonMemo {...accountProps} isMobile />,
           }}
-        >
-          <NavbarLinkList breakpoint={breakpoint} onlyDesktop>
-            <NavbarLink breakpoint={breakpoint}>
-              <StyledButton key="link" forwardedAs="button" disabled>
-                <Icon name="ethereum" />
-              </StyledButton>
-            </NavbarLink>
+        />
+        <StyledNavbarDesktop $breakpoint={breakpoint}>
+          <div>
+            <AutoBreadcrumb names={breadcrumbNames} />
+          </div>
+          <div tw="relative flex items-center justify-center gap-7">
+            <StyledButton key="link" forwardedAs="button" disabled>
+              <Icon name="ethereum" />
+            </StyledButton>
             <AccountButtonMemo {...accountProps} />
-          </NavbarLinkList>
-        </RouterNavbar>
+          </div>
+        </StyledNavbarDesktop>
       </StyledHeader>
       <div tw="block flex-auto grow-0 shrink-0 h-[6.5rem] lg:hidden"></div>
-      {hasBreadcrumb && (
-        <div tw="block my-6 px-5 md:px-16">
-          <AutoBreadcrumb names={breadcrumbNames} />
-        </div>
-      )}
+      <div tw="block lg:hidden my-6 px-5 md:px-16">
+        <AutoBreadcrumb names={breadcrumbNames} />
+      </div>
     </>
   )
 }
 Header.displayName = 'Header'
 
+export const CustomLinkMemo = memo(CustomLink)
 export const AccountButtonMemo = memo(AccountButton)
 export default memo(Header)

@@ -1,4 +1,4 @@
-import { TextGradient, addClasses } from '@aleph-front/aleph-core'
+import { TextGradient, addClasses } from '@aleph-front/core'
 import styled from 'styled-components'
 
 export const StyledH1 = styled(TextGradient).attrs((props) => {

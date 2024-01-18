@@ -1,4 +1,4 @@
-import { Card, CardProps, getTypoCss } from '@aleph-front/aleph-core'
+import { Card, CardProps, getTypoCss } from '@aleph-front/core'
 import styled, { css } from 'styled-components'
 
 export type StyledCardProps = {

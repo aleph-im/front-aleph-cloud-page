@@ -1,4 +1,4 @@
-import { NotificationProps } from '@aleph-front/aleph-core'
+import { NotificationProps } from '@aleph-front/core'
 
 export type NotificationProviderProps = Omit<
   NotificationProps,

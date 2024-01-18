@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelectFunctionRuntime } from '@/hooks/form/useSelectFunctionRuntime'
-import { Radio, RadioGroup, TextInput } from '@aleph-front/aleph-core'
-import { NoisyContainer } from '@aleph-front/aleph-core'
+import { Radio, RadioGroup, TextInput } from '@aleph-front/core'
+import { NoisyContainer } from '@aleph-front/core'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { SelectFunctionRuntimeProps } from './types'
 

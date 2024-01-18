@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import React from 'react'
 import { useSelectFunctionPersistence } from '@/hooks/form/useSelectFunctionPersistence'
-import { Radio, RadioGroup } from '@aleph-front/aleph-core'
-import { NoisyContainer } from '@aleph-front/aleph-core'
+import { Radio, RadioGroup } from '@aleph-front/core'
+import { NoisyContainer } from '@aleph-front/core'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { SelectFunctionPersistenceProps } from './types'
 

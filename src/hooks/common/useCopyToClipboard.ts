@@ -1,4 +1,4 @@
-import { useNotification } from '@aleph-front/aleph-core'
+import { useNotification } from '@aleph-front/core'
 import { useCallback, useState } from 'react'
 
 export type CopiedValue = string | null

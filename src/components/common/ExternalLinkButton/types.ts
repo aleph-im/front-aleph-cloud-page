@@ -1,4 +1,4 @@
-import { ButtonProps } from '@aleph-front/aleph-core'
+import { ButtonProps } from '@aleph-front/core'
 import { ReactNode } from 'react'
 
 export type ExternalLinkButtonProps = Omit<

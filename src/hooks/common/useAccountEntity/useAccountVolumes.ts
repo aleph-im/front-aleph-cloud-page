@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import { Volume } from '@/domain/volume'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useVolumeManager } from '../useManager/useVolumeManager'
-import { UseRequestReturn, useLocalRequest } from '@aleph-front/aleph-core'
+import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
 
 export type UseAccountVolumesProps = {
   triggerOnMount?: boolean

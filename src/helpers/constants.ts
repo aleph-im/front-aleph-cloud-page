@@ -82,6 +82,24 @@ export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.Indexer]: 'Indexer',
 }
 
+export const EntityTypeUrlSection: Record<EntityType, string> = {
+  [EntityType.Volume]: 'storage',
+  [EntityType.Program]: 'computing',
+  [EntityType.Instance]: 'computing',
+  [EntityType.SSHKey]: 'configure',
+  [EntityType.Domain]: 'configure',
+  [EntityType.Indexer]: 'tools',
+}
+
+export const EntityTypeSlug: Record<EntityType, string> = {
+  [EntityType.Volume]: 'volume',
+  [EntityType.Program]: 'function',
+  [EntityType.Instance]: 'instance',
+  [EntityType.SSHKey]: 'ssh',
+  [EntityType.Domain]: 'domain',
+  [EntityType.Indexer]: 'indexer',
+}
+
 export enum IndexerBlockchain {
   Ethereum = 'ethereum',
   Bsc = 'bsc',

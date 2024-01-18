@@ -1,13 +1,7 @@
 import React, { KeyboardEvent, memo, useEffect, useState } from 'react'
 /* eslint-disable @next/next/no-img-element */
 import { useSelectInstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
-import {
-  Button,
-  FormError,
-  Icon,
-  Logo,
-  TableColumn,
-} from '@aleph-front/aleph-core'
+import { Button, FormError, Icon, Logo, TableColumn } from '@aleph-front/core'
 import { useCallback, useMemo } from 'react'
 import { convertByteUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
@@ -30,7 +24,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
             render: (row: SpecsDetail) => (
               <span tw="flex items-center justify-end gap-1">
                 {row.price}
-                <Logo text="" color="currentColor" />
+                <Logo color="currentColor" />
               </span>
             ),
           }
@@ -42,7 +36,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
             render: (row: SpecsDetail) => (
               <span tw="flex items-center justify-end gap-1">
                 {row.price}
-                <Logo text="" color="currentColor" /> / h
+                <Logo color="currentColor" /> / h
               </span>
             ),
           }

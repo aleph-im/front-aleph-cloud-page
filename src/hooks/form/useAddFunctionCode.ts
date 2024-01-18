@@ -1,5 +1,5 @@
 import { FunctionLangId } from '@/domain/lang'
-import { useResponsiveMax } from '@aleph-front/aleph-core'
+import { useResponsiveMax } from '@aleph-front/core'
 import { Encoding } from 'aleph-sdk-ts/dist/messages/program/programModel'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 

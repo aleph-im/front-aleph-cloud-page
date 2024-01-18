@@ -1,5 +1,5 @@
 import { AlephNode } from '@/domain/node'
-import { Table, TableProps } from '@aleph-front/aleph-core'
+import { Table, TableProps } from '@aleph-front/core'
 import styled from 'styled-components'
 import tw from 'twin.macro'
 

@@ -1,6 +1,6 @@
 import tw from 'twin.macro'
 import styled, { css } from 'styled-components'
-import { Table } from '@aleph-front/aleph-core'
+import { Table } from '@aleph-front/core'
 import { SpecsDetail } from './types'
 
 export const StyledTable = styled(Table<SpecsDetail>)`

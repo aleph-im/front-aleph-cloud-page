@@ -11,7 +11,7 @@ import {
   RadioGroup,
   Tabs,
   TextInput,
-} from '@aleph-front/aleph-core'
+} from '@aleph-front/core'
 import {
   defaultCodeText,
   useAddFunctionCode,

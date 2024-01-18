@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { StyledTable } from './styles'
-import { TableProps } from '@aleph-front/aleph-core'
+import { TableProps } from '@aleph-front/core'
 
 export const EntityTable = <T extends Record<string, unknown>>(
   props: TableProps<T>,

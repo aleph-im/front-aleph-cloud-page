@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from '@aleph-front/aleph-core'
+import { Button } from '@aleph-front/core'
 import { useAddVolumes } from '@/hooks/form/useAddVolumes'
 import { AddVolumesProps } from './types'
 import AddVolume from '../AddVolume'
