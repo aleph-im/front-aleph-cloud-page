@@ -1,10 +1,5 @@
 import React from 'react'
-import {
-  Icon,
-  TextInput,
-  Button,
-  NoisyContainer,
-} from '@aleph-front/core'
+import { Icon, TextInput, Button, NoisyContainer } from '@aleph-front/core'
 import { useAddEnvVars, useEnvVarItem } from '@/hooks/form/useAddEnvVars'
 import { EnvVarItemProps, AddEnvVarsProps as AddEnvVarsProps } from './types'
 
@@ -53,7 +48,7 @@ export const AddEnvVars = React.memo((props: AddEnvVarsProps) => {
   return (
     <>
       {fields.length > 0 && (
-        <NoisyContainer $type="dark">
+        <div className="bg-base1" tw="p-6">
           <div tw="flex flex-col gap-x-6 gap-y-4">
             <p tw="-mb-2">Set</p>
             {fields.map((field, index) => (
@@ -69,7 +64,7 @@ export const AddEnvVars = React.memo((props: AddEnvVarsProps) => {
               />
             ))}
           </div>
-        </NoisyContainer>
+        </div>
       )}
       <div tw="mt-6 mx-6">
         <Button

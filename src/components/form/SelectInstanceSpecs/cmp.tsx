@@ -1,7 +1,14 @@
 import React, { KeyboardEvent, memo, useEffect, useState } from 'react'
 /* eslint-disable @next/next/no-img-element */
 import { useSelectInstanceSpecs } from '@/hooks/form/useSelectInstanceSpecs'
-import { Button, FormError, Icon, Logo, TableColumn } from '@aleph-front/core'
+import {
+  Button,
+  FormError,
+  Icon,
+  Logo,
+  NoisyContainer,
+  TableColumn,
+} from '@aleph-front/core'
 import { useCallback, useMemo } from 'react'
 import { convertByteUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
@@ -164,8 +171,8 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const handleRowProps = useCallback(
     (row: SpecsDetail, rowIndex: number) => ({
       tabIndex: row.specs.disabled ? -1 : 0,
-      className: `${row.specs.disabled ? 'disabled' : ''} ${
-        row.isActive ? 'text-main0' : ''
+      className: `${row.specs.disabled ? '_disabled' : ''} ${
+        row.isActive ? '_active' : ''
       }`,
       ref: rowIndex === 0 ? ref : undefined,
       onClick: () => {
@@ -182,19 +189,21 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   )
 
   return (
-    <div tw="max-w-full overflow-y-hidden overflow-x-auto">
-      <StyledTable
-        borderType="none"
-        rowNoise
-        rowKey={getRowKey}
-        rowProps={handleRowProps}
-        columns={columns}
-        data={data}
-      />
-      {specsCtrl.fieldState.error && (
-        <FormError error={specsCtrl.fieldState.error} />
-      )}
-    </div>
+    <NoisyContainer>
+      <div tw="max-w-full overflow-y-hidden overflow-x-auto">
+        <StyledTable
+          borderType="none"
+          rowNoise
+          rowKey={getRowKey}
+          rowProps={handleRowProps}
+          columns={columns}
+          data={data}
+        />
+        {specsCtrl.fieldState.error && (
+          <FormError error={specsCtrl.fieldState.error} />
+        )}
+      </div>
+    </NoisyContainer>
   )
 })
 SelectInstanceSpecs.displayName = 'SelectInstanceSpecs'

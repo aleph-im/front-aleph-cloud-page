@@ -171,7 +171,7 @@ export default function NewInstanceStreamNodesPage() {
       </section>
       <section tw="relative px-0 pt-20 pb-6 md:py-10">
         <SpinnerOverlay show={!nodes} />
-        <Container variant="dashboard">
+        <Container $variant="xl">
           <NodesTable columns={columns} data={nodes || []} />
         </Container>
       </section>

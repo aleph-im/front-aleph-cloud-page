@@ -1,4 +1,4 @@
-import { Button, TextGradient, CompositeTitle } from '@aleph-front/core'
+import { Button, TextGradient } from '@aleph-front/core'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useNewFunctionPage } from '@/hooks/pages/computing/useNewFunctionPage'
 import HoldingRequirements from '@/components/form/HoldingRequirements'
@@ -16,6 +16,7 @@ import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime'
 import NewEntityTab from '../NewEntityTab'
+import { SectionTitle } from '@/components/common/CompositeTitle'
 
 export default function NewFunctionPage() {
   const {
@@ -37,9 +38,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="1">
-            Code to execute
-          </CompositeTitle>
+          <SectionTitle number="1">Code to execute</SectionTitle>
           <p>
             If your code has any dependencies, you can upload them separately in
             the volume section below to ensure a faster creation.
@@ -49,9 +48,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="2">
-            Type of scheduling
-          </CompositeTitle>
+          <SectionTitle number="2">Type of scheduling</SectionTitle>
           <p tw="mb-6">
             Configure if this program should be running continuously,
             persistent, or only on-demand in response to a user request or an
@@ -62,9 +59,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="3">
-            Select an instance size
-          </CompositeTitle>
+          <SectionTitle number="3">Select an instance size</SectionTitle>
           <p tw="mb-6">
             Select the hardware resources allocated to your functions, ensuring
             optimal performance and efficient resource usage tailored to your
@@ -80,9 +75,7 @@ export default function NewFunctionPage() {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="4">
-            Name and tags
-          </CompositeTitle>
+          <SectionTitle number="4">Name and tags</SectionTitle>
           <p tw="mb-6">
             Organize and identify your functions more effectively by assigning a
             unique name, obtaining a hash reference, and defining multiple tags.
@@ -95,9 +88,7 @@ export default function NewFunctionPage() {
 
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="5">
-            Advanced Configuration Options
-          </CompositeTitle>
+          <SectionTitle number="5">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
             Customize your function with our Advanced Configuration Options. Add
             volumes, environment variables, and custom domains to meet your

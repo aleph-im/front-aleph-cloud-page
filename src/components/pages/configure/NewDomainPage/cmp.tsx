@@ -1,11 +1,4 @@
 import { useState } from 'react'
-import ButtonLink from '@/components/common/ButtonLink'
-import Container from '@/components/common/CenteredContainer'
-import ExternalLinkButton from '@/components/common/ExternalLinkButton'
-import { NoisyContainer } from '@aleph-front/core'
-import Form from '@/components/form/Form'
-import { EntityType, EntityTypeName } from '@/helpers/constants'
-import { useNewDomainPage } from '@/hooks/pages/configure/useNewDomainPage'
 import {
   Button,
   Dropdown,
@@ -14,8 +7,15 @@ import {
   RadioGroup,
   TextInput,
   Tabs,
-  CompositeTitle,
 } from '@aleph-front/core'
+import ButtonLink from '@/components/common/ButtonLink'
+import Container from '@/components/common/CenteredContainer'
+import ExternalLinkButton from '@/components/common/ExternalLinkButton'
+import { NoisyContainer } from '@aleph-front/core'
+import Form from '@/components/form/Form'
+import { EntityType, EntityTypeName } from '@/helpers/constants'
+import { useNewDomainPage } from '@/hooks/pages/configure/useNewDomainPage'
+import { SectionTitle } from '@/components/common/CompositeTitle'
 
 export default function NewDomain() {
   const {
@@ -54,9 +54,7 @@ export default function NewDomain() {
           <>
             <section tw="px-0 pt-20 pb-6 md:py-10">
               <Container>
-                <CompositeTitle as="h2" number="1">
-                  Custom domain
-                </CompositeTitle>
+                <SectionTitle number="1">Custom domain</SectionTitle>
                 <p tw="mb-6">
                   Assign a user-friendly domain to your instance or function to
                   not only simplify access to your web3 application but also
@@ -82,9 +80,7 @@ export default function NewDomain() {
             </section>
             <section tw="px-0 pt-20 pb-6 md:py-10">
               <Container>
-                <CompositeTitle as="h2" number="2">
-                  Select Resource
-                </CompositeTitle>
+                <SectionTitle number="2">Select Resource</SectionTitle>
                 <p tw="mb-6">
                   You&apos;ll need to specify the resource your custom domain
                   will be associated with. This could either be an instance or a

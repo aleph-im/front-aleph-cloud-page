@@ -1,4 +1,4 @@
-import { Button, TextGradient, CompositeTitle } from '@aleph-front/core'
+import { Button, TextGradient } from '@aleph-front/core'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
@@ -13,6 +13,7 @@ import { useNewInstanceHoldPage } from '@/hooks/pages/computing/useNewInstanceHo
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import NewEntityTab from '../NewEntityTab'
+import { SectionTitle } from '@/components/common/CompositeTitle'
 
 export default function NewInstanceHoldPage() {
   const {
@@ -34,26 +35,11 @@ export default function NewInstanceHoldPage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="1">
-            Choose an image
-          </CompositeTitle>
+          <SectionTitle number="1">Select your tier</SectionTitle>
           <p>
-            Chose a base image for your VM. It’s the base system that you will
-            be able to customize.
-          </p>
-          <div tw="px-0 mt-12 mb-6">
-            <SelectInstanceImage name="image" control={control} />
-          </div>
-        </Container>
-      </section>
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
-          <CompositeTitle as="h2" number="2">
-            Select an instance size
-          </CompositeTitle>
-          <p>
-            Please select one of the available instance size as a base for your
-            VM. You will be able to customize the volumes later.
+            Please select one of the available instance tiers as a base for your
+            VM. You will be able to customize the volumes further below in the
+            form.
           </p>
           <div tw="px-0 my-6">
             <SelectInstanceSpecs
@@ -67,9 +53,19 @@ export default function NewInstanceHoldPage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="3">
-            Configure SSH Key
-          </CompositeTitle>
+          <SectionTitle number="2">Choose an image</SectionTitle>
+          <p>
+            Chose a base image for your VM. It’s the base system that you will
+            be able to customize.
+          </p>
+          <div tw="px-0 mt-12 mb-6">
+            <SelectInstanceImage name="image" control={control} />
+          </div>
+        </Container>
+      </section>
+      <section tw="px-0 pt-20 pb-6 md:py-10">
+        <Container>
+          <SectionTitle number="3">Configure SSH Key</SectionTitle>
           <p>
             Access your cloud instances securely. Give existing key’s below
             access to this instance or add new keys. Remember, storing private
@@ -83,9 +79,7 @@ export default function NewInstanceHoldPage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="4">
-            Name and tags
-          </CompositeTitle>
+          <SectionTitle number="4">Name and tags</SectionTitle>
           <p tw="mb-6">
             Organize and identify your instances more effectively by assigning a
             unique name, obtaining a hash reference, and defining multiple tags.
@@ -97,9 +91,7 @@ export default function NewInstanceHoldPage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="5">
-            Advanced Configuration Options
-          </CompositeTitle>
+          <SectionTitle number="5">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
             Customize your instance with our Advanced Configuration Options. Add
             volumes, SSH keys, environment variables, and custom domains to meet

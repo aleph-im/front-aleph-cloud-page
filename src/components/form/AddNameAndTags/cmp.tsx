@@ -9,7 +9,7 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
   const { entityName, nameCtrl, tagsCtrl } = useAddNameAndTags(props)
 
   return (
-    <NoisyContainer>
+    <NoisyContainer $type="grain-3">
       <div>
         <div tw="mb-2">
           <InfoTooltipButton

@@ -1,10 +1,11 @@
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useNewVolumePage } from '@/hooks/pages/storage/useNewVolumePage'
-import { Button, CompositeTitle } from '@aleph-front/core'
+import { Button } from '@aleph-front/core'
 import HoldingRequirements from '@/components/form/HoldingRequirements'
 import Container from '@/components/common/CenteredContainer'
 import { AddNewVolume } from '@/components/form/AddVolume'
 import { Form } from '@/components/form/Form'
+import { SectionTitle } from '@/components/common/CompositeTitle'
 
 export default function NewVolumePage() {
   const {
@@ -21,9 +22,7 @@ export default function NewVolumePage() {
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="1">
-            Add volume
-          </CompositeTitle>
+          <SectionTitle number="1">Add volume</SectionTitle>
           <AddNewVolume control={control} />
         </Container>
       </section>

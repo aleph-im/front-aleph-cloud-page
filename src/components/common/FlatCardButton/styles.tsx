@@ -12,45 +12,34 @@ export type StyledFlatCardProps = {
 
 export const StyledFlatCard = styled.div<StyledFlatCardProps>`
   ${({ theme, $selected, $disabled }) => {
-    const [g0, g1] = theme.gradient.main0.colors
-
     return css`
       ${tw`relative flex flex-col items-center justify-center shrink-0 cursor-pointer`}
-      background-color: #ffffff1a;
+      ${tw`transition-all duration-300`}
+      color: ${theme.color.main0};
+      border: 0.1875rem solid transparent;
       border-radius: 1.5rem;
-      ${$disabled && 'opacity: 0.3;'}
+      background: linear-gradient(118deg, #ede4fb 26.64%, #f4ecff66 118.38%);
+      background-origin: border-box;
 
-      &::after {
-        ${tw`transition-all duration-300`}
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-        border-radius: 1.5rem;
-        z-index: -1;
-        padding: 1px;
-        opacity: 0;
+      ${$selected &&
+      css`
+        border-color: ${theme.color.main0};
+        border-width: 0.1875rem;
+      `}
 
-        background-image: linear-gradient(90deg, ${g0} 0%, ${g1} 100%);
+      &:hover {
+        border-color: ${theme.color.main0};
+        border-width: 0.1875rem;
 
-        -webkit-mask: linear-gradient(#fff 0 0) content-box,
-          linear-gradient(#fff 0 0);
-        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: exclude;
-        mask-composite: exclude;
-        -webkit-mask-composite: xor;
-
-        ${$selected &&
-        css`
-          opacity: 1;
-        `}
+        /* SHADOWS/purple02 */
+        box-shadow: 0px 4px 24px 0px rgba(81, 0, 205, 0.45);
+        backdrop-filter: blur(50px);
       }
 
-      &:hover::after {
-        opacity: 1;
-      }
+      ${$disabled &&
+      css`
+        filter: grayscale(1);
+      `}
     `
   }}
 `

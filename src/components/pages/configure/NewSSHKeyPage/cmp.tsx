@@ -2,12 +2,8 @@ import Container from '@/components/common/CenteredContainer'
 import { NoisyContainer } from '@aleph-front/core'
 import Form from '@/components/form/Form'
 import { useNewSSHKeyPage } from '@/hooks/pages/configure/useNewSSHKeyPage'
-import {
-  Button,
-  CompositeTitle,
-  TextArea,
-  TextInput,
-} from '@aleph-front/core'
+import { Button, TextArea, TextInput } from '@aleph-front/core'
+import { SectionTitle } from '@/components/common/CompositeTitle'
 
 export default function NewSSHKey() {
   const { keyCtrl, labelCtrl, handleSubmit, errors } = useNewSSHKeyPage()
@@ -16,9 +12,7 @@ export default function NewSSHKey() {
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="1">
-            Configure SSH Key
-          </CompositeTitle>
+          <SectionTitle number="1">Configure SSH Key</SectionTitle>
           <p tw="mb-6">
             Access your cloud instances securely. Give existing key’s below
             access to this instance or add new keys. Remember, storing private

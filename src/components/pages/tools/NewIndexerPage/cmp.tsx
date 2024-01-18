@@ -1,12 +1,13 @@
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useNewIndexerPage } from '@/hooks/pages/tools/useNewIndexerPage'
-import { Button, CompositeTitle } from '@aleph-front/core'
+import { Button } from '@aleph-front/core'
 import HoldingRequirements from '@/components/form/HoldingRequirements'
 import Container from '@/components/common/CenteredContainer'
 import { AddIndexerBlockchainNetworks } from '@/components/form/AddIndexerBlockchainNetworks'
 import { Form } from '@/components/form/Form'
 import AddIndexerTokenAccounts from '@/components/form/AddIndexerTokenAccounts'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
+import { SectionTitle } from '@/components/common/CompositeTitle'
 
 export default function NewIndexerPage() {
   const {
@@ -24,9 +25,7 @@ export default function NewIndexerPage() {
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="1">
-            Define Your Blockchain Network
-          </CompositeTitle>
+          <SectionTitle number="1">Define Your Blockchain Network</SectionTitle>
           <p tw="mb-6">
             Specify the blockchain network where you aim to attach accounts. You
             can index unique accounts tailored to each environment. This
@@ -40,9 +39,7 @@ export default function NewIndexerPage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="2">
-            Configure Your Token Account
-          </CompositeTitle>
+          <SectionTitle number="2">Configure Your Token Account</SectionTitle>
           <p tw="mb-6">
             Define the core parameters associated with the token, like the
             contract address, deployer&apos;s details, and initial supply. This
@@ -60,9 +57,7 @@ export default function NewIndexerPage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="3">
-            Name and tags
-          </CompositeTitle>
+          <SectionTitle number="3">Name and tags</SectionTitle>
           <p tw="mb-6">
             Organize and identify your indexers more effectively by assigning a
             unique name, obtaining a hash reference, and defining multiple tags.

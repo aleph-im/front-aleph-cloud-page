@@ -1,7 +1,6 @@
 import React from 'react'
 import { useSelectCustomFunctionRuntime } from '@/hooks/form/useSelectCustomFunctionRuntime'
 import { TextInput } from '@aleph-front/core'
-import { NoisyContainer } from '@aleph-front/core'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { SelectCustomFunctionRuntimeProps } from './types'
 
@@ -11,7 +10,7 @@ export const SelectCustomFunctionRuntime = React.memo(
 
     return (
       <>
-        <NoisyContainer $type="dark">
+        <div className="bg-base1" tw="p-6">
           <TextInput
             {...runtimeCtrl.field}
             {...runtimeCtrl.fieldState}
@@ -23,7 +22,7 @@ export const SelectCustomFunctionRuntime = React.memo(
               Learn more
             </ExternalLinkButton>
           </div>
-        </NoisyContainer>
+        </div>
       </>
     )
   },

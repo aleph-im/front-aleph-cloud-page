@@ -7,12 +7,13 @@ export const Form = ({ children, onSubmit, errors }: FormProps) => {
   return (
     <StyledForm onSubmit={onSubmit} noValidate>
       {children}
-      <Container>
-        {errors?.root &&
-          Object.values<FormErrorProps['error']>(errors.root).map((error) => (
+      {errors?.root && (
+        <Container>
+          {Object.values<FormErrorProps['error']>(errors.root).map((error) => (
             <FormError key={error + ''} error={error} tw="break-all" />
           ))}
-      </Container>
+        </Container>
+      )}
     </StyledForm>
   )
 }

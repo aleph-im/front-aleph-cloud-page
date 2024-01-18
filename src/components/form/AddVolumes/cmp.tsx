@@ -11,19 +11,21 @@ export const AddVolumes = React.memo((props: AddVolumesProps) => {
 
   return (
     <>
-      {fields.map((field, index) => (
-        <AddVolume
-          key={field.id}
-          {...{
-            name,
-            index,
-            control,
-            defaultValue: field,
-            onRemove: handleRemove,
-          }}
-        />
-      ))}
-      <div tw="mt-6 mx-6">
+      <div tw="flex flex-col gap-6">
+        {fields.map((field, index) => (
+          <AddVolume
+            key={field.id}
+            {...{
+              name,
+              index,
+              control,
+              defaultValue: field,
+              onRemove: handleRemove,
+            }}
+          />
+        ))}
+      </div>
+      <div tw="mt-6">
         <Button
           type="button"
           onClick={handleAdd}
@@ -32,7 +34,7 @@ export const AddVolumes = React.memo((props: AddVolumesProps) => {
           kind="neon"
           size="regular"
         >
-          {fields.length > 0 ? 'Add another volume' : 'Add volume'}
+          Add volume
         </Button>
       </div>
       <div tw="mt-6 text-right">

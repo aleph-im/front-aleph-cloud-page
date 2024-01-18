@@ -19,11 +19,7 @@ import { EntityType, EntityTypeName, PaymentMethod } from '@/helpers/constants'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import InfoTooltipButton from '../../common/InfoTooltipButton'
 import Container from '@/components/common/CenteredContainer'
-import {
-  NoisyContainer,
-  TextGradient,
-  TextInput,
-} from '@aleph-front/core'
+import { TextGradient, TextInput } from '@aleph-front/core'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import { SelectStreamDuration } from '../SelectInstanceDuration'
@@ -229,165 +225,171 @@ export const HoldingRequirements = ({
     <>
       <div tw="md:mt-32" />
       <section
-        className="fx-noise-light"
+        className="fx-noise-light fx-grain-4"
         tw="px-0 pt-6 pb-24 md:pt-16 md:pb-32 md:mt-auto"
       >
         <Container>
-          <TextGradient forwardedAs="h2" type="h5" tw="mb-1">
-            Estimated holding requirements
-          </TextGradient>
-          {description && (
-            <div tw="mt-1 mb-6">
-              <p className="text-main2">{description}</p>
-            </div>
-          )}
-
-          {control && (
-            <>
-              <div tw="w-full py-4 my-6">
-                <SelectPaymentMethod
-                  name="paymentMethod"
-                  control={control}
-                  disabledHold
-                />
-              </div>
-              {paymentMethod === PaymentMethod.Stream && (
-                <NoisyContainer>
-                  <TextGradient forwardedAs="h3" type="h7" tw="mb-6">
-                    Instance Duration
-                  </TextGradient>
-                  <SelectStreamDuration
-                    name="streamDuration"
-                    control={control}
-                  />
-                </NoisyContainer>
-              )}
-            </>
-          )}
-
-          <div tw="my-6 p-6">
-            <TextGradient forwardedAs="h3" type="h7" tw="mb-6">
-              Summary
+          <div className="bg-base1" tw="p-6">
+            <TextGradient forwardedAs="h2" type="h5" tw="mb-1">
+              Checkout summary
             </TextGradient>
+            {description && (
+              <div tw="mt-1 mb-6">
+                <p className="text-main2">{description}</p>
+              </div>
+            )}
 
-            <div tw="max-w-full overflow-auto">
-              <StyledHoldingSummaryLine isHeader>
-                <div>UNLOCKED</div>
-                <div className="tp-body1">
-                  current wallet {ellipseAddress(address)}
+            {control && (
+              <>
+                <div tw="w-full my-6 mt-10">
+                  <div className="bg-purple0" tw="p-6">
+                    <TextGradient forwardedAs="h3" type="h7" tw="mb-3">
+                      Payment Method
+                    </TextGradient>
+                    <div tw="my-4">
+                      <SelectPaymentMethod
+                        name="paymentMethod"
+                        control={control}
+                        disabledHold
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
-              </StyledHoldingSummaryLine>
-
-              {specs && (
-                <HoldingRequirementsSpecsLineMemo
-                  {...{
-                    type,
-                    specs,
-                    cost: (cost as any)?.computeTotalCost,
-                  }}
-                />
-              )}
-
-              {volumes &&
-                volumes.map((volume, index) => {
-                  return (
-                    <HoldingRequirementsVolumeLineMemo
-                      key={volume.volumeType + index}
-                      {...{
-                        volume,
-                        specs,
-                        cost: cost?.perVolumeCost[index],
-                      }}
+                {paymentMethod === PaymentMethod.Stream && (
+                  <div className="bg-purple0" tw="p-6">
+                    <TextGradient forwardedAs="h3" type="h7" tw="mb-3">
+                      Instance Duration
+                    </TextGradient>
+                    <SelectStreamDuration
+                      name="streamDuration"
+                      control={control}
                     />
-                  )
-                })}
+                  </div>
+                )}
+              </>
+            )}
 
-              {type === EntityType.Program && (
-                <StyledHoldingSummaryLine>
-                  <div>TYPE</div>
-                  <div>{isPersistent ? 'persistent' : 'on-demand'}</div>
-                  <div>-</div>
+            <div tw="my-6 p-6">
+              <div tw="max-w-full overflow-auto">
+                <StyledHoldingSummaryLine isHeader>
+                  <div>UNLOCKED</div>
+                  <div className="tp-body1">
+                    current wallet {ellipseAddress(address)}
+                  </div>
+                  <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
                 </StyledHoldingSummaryLine>
-              )}
 
-              {domains &&
-                domains.map((domain) => {
-                  return (
-                    <HoldingRequirementsDomainLineMemo
-                      key={domain.name}
-                      domain={domain}
-                    />
-                  )
-                })}
+                {specs && (
+                  <HoldingRequirementsSpecsLineMemo
+                    {...{
+                      type,
+                      specs,
+                      cost: (cost as any)?.computeTotalCost,
+                    }}
+                  />
+                )}
 
-              <StyledHoldingSummaryLine>
-                <div></div>
-                <div className="tp-body2">
-                  {paymentMethod === PaymentMethod.Hold
-                    ? 'Total Staked'
-                    : 'Streamed (per hour)'}
-                </div>
-                <div>
-                  <span className="text-main1">
-                    {humanReadableCurrency(cost?.totalCost)} ALEPH
-                  </span>
-                </div>
-              </StyledHoldingSummaryLine>
+                {volumes &&
+                  volumes.map((volume, index) => {
+                    return (
+                      <HoldingRequirementsVolumeLineMemo
+                        key={volume.volumeType + index}
+                        {...{
+                          volume,
+                          specs,
+                          cost: cost?.perVolumeCost[index],
+                        }}
+                      />
+                    )
+                  })}
 
-              {paymentMethod === PaymentMethod.Stream &&
-                cost?.totalStreamCost && (
+                {type === EntityType.Program && (
                   <StyledHoldingSummaryLine>
-                    <div></div>
-                    <div className="tp-body2">
-                      Total Streamed (
-                      {humanReadableDurationUnit(streamDuration)})
-                    </div>
-                    <div>
-                      <span className="text-main1">
-                        {humanReadableCurrency(cost?.totalStreamCost)} ALEPH
-                      </span>
-                    </div>
+                    <div>TYPE</div>
+                    <div>{isPersistent ? 'persistent' : 'on-demand'}</div>
+                    <div>-</div>
                   </StyledHoldingSummaryLine>
                 )}
+
+                {domains &&
+                  domains.map((domain) => {
+                    return (
+                      <HoldingRequirementsDomainLineMemo
+                        key={domain.name}
+                        domain={domain}
+                      />
+                    )
+                  })}
+
+                <StyledHoldingSummaryLine>
+                  <div></div>
+                  <div className="tp-body2">
+                    {paymentMethod === PaymentMethod.Hold
+                      ? 'Total Staked'
+                      : 'Streamed (per hour)'}
+                  </div>
+                  <div>
+                    <span className="text-main1">
+                      {humanReadableCurrency(cost?.totalCost)} ALEPH
+                    </span>
+                  </div>
+                </StyledHoldingSummaryLine>
+
+                {paymentMethod === PaymentMethod.Stream &&
+                  cost?.totalStreamCost && (
+                    <StyledHoldingSummaryLine>
+                      <div></div>
+                      <div className="tp-body2">
+                        Total Streamed (
+                        {humanReadableDurationUnit(streamDuration)})
+                      </div>
+                      <div>
+                        <span className="text-main1">
+                          {humanReadableCurrency(cost?.totalStreamCost)} ALEPH
+                        </span>
+                      </div>
+                    </StyledHoldingSummaryLine>
+                  )}
+              </div>
             </div>
+
+            {paymentMethod === PaymentMethod.Stream && receiverAddress && (
+              <div className="bg-purple0" tw="p-6">
+                <TextGradient forwardedAs="h3" type="h7" tw="mb-6">
+                  Review the transaction stream
+                </TextGradient>
+                <div tw="w-full flex items-end gap-6">
+                  <div tw="flex-1">
+                    <TextInput
+                      tabIndex={-1}
+                      tw="pointer-events-none"
+                      name="sender"
+                      label="Sender"
+                      value={ellipseText(address, 12, 10)}
+                    />
+                  </div>
+                  <div>
+                    <StyledArrowIcon />
+                  </div>
+                  <div tw="flex-1">
+                    <TextInput
+                      tabIndex={-1}
+                      tw="pointer-events-none"
+                      name="receiver"
+                      label="Receiver"
+                      value={ellipseText(receiverAddress, 12, 10)}
+                    />
+                  </div>
+                </div>
+                <div className="fs-12" tw="text-center mt-6">
+                  Balance: {humanReadableCurrency(cost?.totalCost)} ALEPH per
+                  hour
+                </div>
+              </div>
+            )}
+
+            {ButtonCmp && <div tw="mt-16 text-center">{ButtonCmp}</div>}
           </div>
-
-          {paymentMethod === PaymentMethod.Stream && receiverAddress && (
-            <NoisyContainer>
-              <TextGradient forwardedAs="h3" type="h7" tw="mb-6">
-                Review the transaction stream
-              </TextGradient>
-              <div tw="w-full flex items-end gap-6">
-                <div tw="flex-1">
-                  <TextInput
-                    tabIndex={-1}
-                    tw="pointer-events-none"
-                    name="sender"
-                    label="Sender"
-                    value={ellipseText(address, 12, 10)}
-                  />
-                </div>
-                <div>
-                  <StyledArrowIcon />
-                </div>
-                <div tw="flex-1">
-                  <TextInput
-                    tabIndex={-1}
-                    tw="pointer-events-none"
-                    name="receiver"
-                    label="Receiver"
-                    value={ellipseText(receiverAddress, 12, 10)}
-                  />
-                </div>
-              </div>
-              <div className="fs-12" tw="text-center mt-6">
-                Balance: {humanReadableCurrency(cost?.totalCost)} ALEPH per hour
-              </div>
-            </NoisyContainer>
-          )}
-
-          {ButtonCmp && <div tw="mt-16 text-center">{ButtonCmp}</div>}
         </Container>
       </section>
     </>

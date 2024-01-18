@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Button, CompositeTitle } from '@aleph-front/core'
+import { Button } from '@aleph-front/core'
 import FlatCardButton, {
   FlatCardButtonContainer,
 } from '@/components/common/FlatCardButton'
@@ -8,6 +8,7 @@ import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 import { PaymentMethod } from '@/helpers/constants'
 import NewEntityTab from '../NewEntityTab'
 import { useNewInstancePage } from '@/hooks/pages/computing/useNewInstancePage'
+import { SectionTitle } from '@/components/common/CompositeTitle'
 
 export const NewInstancePage = () => {
   const { selected, handleClickHold, handleClickStream, handleContinue } =
@@ -22,9 +23,7 @@ export const NewInstancePage = () => {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <CompositeTitle as="h2" number="1">
-            Configure instance setup
-          </CompositeTitle>
+          <SectionTitle number="1">Configure instance setup</SectionTitle>
           <p className="text-text">
             Start by choosing your instance setup approach. Select based on your
             preferred specifications or choose a specific compute node to tailor

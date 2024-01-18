@@ -1,10 +1,5 @@
 import React from 'react'
-import {
-  Icon,
-  TextInput,
-  Button,
-  NoisyContainer,
-} from '@aleph-front/core'
+import { Icon, TextInput, Button, NoisyContainer } from '@aleph-front/core'
 import { useAddDomains, useDomainItem } from '@/hooks/form/useAddDomains'
 import { DomainItemProps, AddDomainsProps as AddDomainsProps } from './types'
 
@@ -45,7 +40,7 @@ export const AddDomains = React.memo((props: AddDomainsProps) => {
   return (
     <>
       {fields.length > 0 && (
-        <NoisyContainer $type="dark">
+        <div className="bg-base1" tw="p-6">
           <div tw="flex flex-col gap-x-6 gap-y-4">
             {fields.map((field, index) => (
               <DomainItem
@@ -60,7 +55,7 @@ export const AddDomains = React.memo((props: AddDomainsProps) => {
               />
             ))}
           </div>
-        </NoisyContainer>
+        </div>
       )}
       {fields.length < 1 && (
         <div tw="mt-6 mx-6">

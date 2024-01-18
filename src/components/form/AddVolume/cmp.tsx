@@ -1,10 +1,4 @@
-import {
-  Tabs,
-  Icon,
-  TextInput,
-  Checkbox,
-  Button,
-} from '@aleph-front/core'
+import { Tabs, Icon, TextInput, Checkbox, Button } from '@aleph-front/core'
 import {
   RemoveVolumeProps,
   AddVolumeProps,
@@ -63,7 +57,7 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
         role in managing dependencies and providing a volume within your
         application.
       </p>
-      <NoisyContainer $type="dark">
+      <div>
         <div tw="py-4">
           <HiddenFileInput {...fileCtrl.field} {...fileCtrl.fieldState}>
             Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
@@ -97,7 +91,7 @@ export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
             {handleRemove && <RemoveVolume onRemove={handleRemove} />}
           </>
         )}
-      </NoisyContainer>
+      </div>
     </>
   )
 })
@@ -121,8 +115,7 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
         hash associated with each volume. Volumes are an essential component for
         managing dependencies within your application.
       </p>
-
-      <NoisyContainer $type="dark">
+      <div>
         <div>
           <TextInput
             {...mountPathCtrl.field}
@@ -155,7 +148,7 @@ const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
           />
         </div>
         {handleRemove && <RemoveVolume onRemove={handleRemove} />}
-      </NoisyContainer>
+      </div>
     </>
   )
 })
@@ -192,7 +185,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           </>
         )}
       </p>
-      <NoisyContainer $type="dark">
+      <div>
         <div>
           <TextInput
             {...nameCtrl.field}
@@ -227,7 +220,7 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           />
         </div>
         {!isFake && handleRemove && <RemoveVolume onRemove={handleRemove} />}
-      </NoisyContainer>
+      </div>
     </>
   )
 })
@@ -266,9 +259,9 @@ export const AddVolume = React.memo((props: AddVolumeProps) => {
   )
 
   return (
-    <>
+    <div className="bg-base1" tw="p-6">
       {!isFake && (
-        <div tw="px-0 pt-6 pb-3">
+        <div tw="px-0 pb-3">
           <Tabs
             selected={volumeType}
             align="left"
@@ -281,7 +274,7 @@ export const AddVolume = React.memo((props: AddVolumeProps) => {
       <div role="tabpanel">
         {<Cmp {...rest} defaultValue={defaultValue as any} />}
       </div>
-    </>
+    </div>
   )
 })
 AddVolume.displayName = 'AddVolume'

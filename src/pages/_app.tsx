@@ -6,7 +6,7 @@ import Header from '@/components/common/Header'
 
 import NotificationProvider from '@/components/common/NotificationProvider'
 import Main from '@/components/common/Main'
-import Content from '@/components/Content/cmp'
+import Content from '@/components/common/Content'
 import Viewport from '@/components/common/Viewport'
 import Sidebar from '@/components/common/Sidebar'
 import { useRouterLoadState } from '@/hooks/common/useRouterLoadState'
@@ -14,8 +14,8 @@ import { AppStateProvider } from '@/contexts/appState'
 import Loading from './loading'
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { loading } = useRouterLoadState()
-
+  // const { loading } = useRouterLoadState()
+  const loading = false
   return (
     <ThemeProvider theme={themes.twentysix}>
       <GlobalStyles />
