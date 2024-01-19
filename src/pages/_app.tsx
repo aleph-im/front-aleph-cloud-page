@@ -14,8 +14,8 @@ import { AppStateProvider } from '@/contexts/appState'
 import Loading from './loading'
 
 export default function App({ Component, pageProps }: AppProps) {
-  // const { loading } = useRouterLoadState()
-  const loading = false
+  const { loading } = useRouterLoadState()
+
   return (
     <ThemeProvider theme={themes.twentysix}>
       <GlobalStyles />
