@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  Icon,
-  TextInput,
-  Button,
-  Checkbox,
-  FormError,
-} from '@aleph-front/core'
+import { Icon, TextInput, Button, Checkbox, FormError } from '@aleph-front/core'
 import { useAddSSHKeys, useSSHKeyItem } from '@/hooks/form/useAddSSHKeys'
 import { SSHKeyItemProps, AddSSHKeysProps } from './types'
 import { NoisyContainer } from '@aleph-front/core'

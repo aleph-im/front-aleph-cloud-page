@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import { Button, Col, Row, TextGradient, Icon } from '@aleph-front/core'
-import Container from '@/components/common/Container'
+import Container from '@/components/common/CenteredContainer'
 import FeatureCard from '@/components/common/FeatureCard'
 import H1 from '@/components/common/H1'
 import H2 from '@/components/common/H2'
