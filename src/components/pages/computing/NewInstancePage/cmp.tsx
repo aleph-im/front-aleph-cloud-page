@@ -36,20 +36,22 @@ export const NewInstancePage = () => {
                 onClick={handleClickHold}
                 tw="flex-auto lg:flex-1 h-40 p-6"
               >
-                <div className="tp-body1" tw="opacity-60">
-                  Select by specification
+                <div className="tp-body1 fs-10">Select by specification</div>
+                <div className="tp-h7" tw="text-center mt-4">
+                  <div>Automatic</div>
+                  node allocation
                 </div>
-                <div className="tp-body3 fs-24">Automatic node allocation</div>
               </FlatCardButton>
               <FlatCardButton
                 $selected={selected === PaymentMethod.Stream}
                 onClick={handleClickStream}
                 tw="flex-auto lg:flex-1 h-40 p-6"
               >
-                <div className="tp-body1" tw="opacity-60">
-                  Select by node
+                <div className="tp-body1 fs-10">Select by node</div>
+                <div className="tp-h7" tw="text-center mt-4">
+                  <div>Manual</div>
+                  node allocation
                 </div>
-                <div className="tp-body3 fs-24">Manual node selection</div>
               </FlatCardButton>
             </FlatCardButtonContainer>
           </div>

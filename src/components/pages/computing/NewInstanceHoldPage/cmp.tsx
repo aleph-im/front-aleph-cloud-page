@@ -58,7 +58,7 @@ export default function NewInstanceHoldPage() {
             Chose a base image for your VM. It’s the base system that you will
             be able to customize.
           </p>
-          <div tw="px-0 mt-12 mb-6">
+          <div tw="px-0 my-6">
             <SelectInstanceImage name="image" control={control} />
           </div>
         </Container>
@@ -94,8 +94,8 @@ export default function NewInstanceHoldPage() {
           <SectionTitle number="5">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
             Customize your instance with our Advanced Configuration Options. Add
-            volumes, SSH keys, environment variables, and custom domains to meet
-            your specific needs.
+            volumes, environment variables, and custom domains to meet your
+            specific needs.
           </p>
           <div tw="px-0 my-6">
             <div tw="mb-4">
@@ -154,9 +154,12 @@ export default function NewInstanceHoldPage() {
         paymentMethod={PaymentMethod.Hold}
         description={
           <>
-            This amount needs to be present in your wallet until the instance is
-            removed. Tokens won&apos;t be locked nor consumed. The instance will
-            be garbage collected once funds are removed from the wallet.
+            You can either leverage the traditional method of holding tokens in
+            your wallet for resource access, or opt for the Pay-As-You-Go (PAYG)
+            system, which allows you to pay precisely for what you use, for the
+            duration you need. The PAYG option includes a token stream feature,
+            enabling real-time payment for resources as you use them. PAYG is
+            only available for instances.
           </>
         }
         button={

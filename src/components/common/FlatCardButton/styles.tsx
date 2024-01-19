@@ -18,7 +18,11 @@ export const StyledFlatCard = styled.div<StyledFlatCardProps>`
       color: ${theme.color.main0};
       border: 0.1875rem solid transparent;
       border-radius: 1.5rem;
-      background: linear-gradient(118deg, #ede4fb 26.64%, #f4ecff66 118.38%);
+      background: linear-gradient(
+        118deg,
+        ${theme.color.purple2} 26.64%,
+        #f4ecff66 118.38%
+      );
       background-origin: border-box;
 
       ${$selected &&

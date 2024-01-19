@@ -1,12 +1,10 @@
 import {
   ellipseAddress,
-  humanReadableCurrency,
   convertByteUnits,
   humanReadableSize,
   ellipseText,
-  humanReadableDurationUnit,
 } from '@/helpers/utils'
-import { GreyLabel, StyledArrowIcon, StyledHoldingSummaryLine } from './styles'
+import { Label, StyledArrowIcon, StyledHoldingSummaryLine } from './styles'
 import {
   HoldingRequirementsDomainLineProps,
   HoldingRequirementsProps,
@@ -23,11 +21,13 @@ import { TextGradient, TextInput } from '@aleph-front/core'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import { SelectStreamDuration } from '../SelectInstanceDuration'
+import Price from '@/components/common/Price'
 
 const HoldingRequirementsSpecsLine = ({
   type,
   specs,
   cost,
+  priceDuration,
 }: HoldingRequirementsSpecsLineProps) => {
   const { cpu, ram, storage } = specs
 
@@ -70,7 +70,9 @@ const HoldingRequirementsSpecsLine = ({
         <div>{specsStr}</div>
       </div>
       <div>
-        <div>{humanReadableCurrency(cost)} ALEPH</div>
+        <div>
+          <Price value={cost} duration={priceDuration} />
+        </div>
       </div>
     </StyledHoldingSummaryLine>
   )
@@ -83,6 +85,7 @@ const HoldingRequirementsVolumeLine = ({
   volume,
   cost,
   specs,
+  priceDuration,
 }: HoldingRequirementsVolumeLineProps) => {
   const [size, setSize] = useState<number>(0)
 
@@ -105,11 +108,11 @@ const HoldingRequirementsVolumeLine = ({
       <div>
         <div>
           STORAGE
-          <GreyLabel tw="ml-2">
+          <Label tw="ml-2">
             {volume.volumeType === VolumeType.Persistent
               ? 'PERSISTENT'
               : 'VOLUME'}
-          </GreyLabel>
+          </Label>
         </div>
       </div>
       <div>
@@ -130,7 +133,7 @@ const HoldingRequirementsVolumeLine = ({
                       <>
                         The cost displayed for the added storage is{' '}
                         <span className="text-main0">
-                          {humanReadableCurrency(cost.cost)} ALEPH
+                          <Price value={cost.cost} duration={priceDuration} />
                         </span>{' '}
                         as this resource is already included in your selected
                         package at no additional charge.
@@ -140,7 +143,10 @@ const HoldingRequirementsVolumeLine = ({
                         Good news! The displayed price is lower than usual due
                         to a discount of{' '}
                         <span className="text-main0">
-                          {humanReadableCurrency(cost.price - cost.cost)} ALEPH
+                          <Price
+                            value={cost.price - cost.cost}
+                            duration={priceDuration}
+                          />
                         </span>
                         {specs && (
                           <>
@@ -161,10 +167,12 @@ const HoldingRequirementsVolumeLine = ({
                 </div>
               }
             >
-              {humanReadableCurrency(cost.cost)} ALEPH
+              <Price value={cost.cost} duration={priceDuration} />
             </InfoTooltipButton>
           ) : (
-            <>{humanReadableCurrency(cost.cost)} ALEPH</>
+            <>
+              <Price value={cost.cost} duration={priceDuration} />
+            </>
           )}
         </div>
       </div>
@@ -221,6 +229,8 @@ export const HoldingRequirements = ({
     },
   })
 
+  const priceDuration = paymentMethod === PaymentMethod.Stream ? 'h' : undefined
+
   return (
     <>
       <div tw="md:mt-32" />
@@ -271,12 +281,12 @@ export const HoldingRequirements = ({
 
             <div tw="my-6 p-6">
               <div tw="max-w-full overflow-auto">
-                <StyledHoldingSummaryLine isHeader>
+                <StyledHoldingSummaryLine $isHeader className="tp-body3 fs-12">
                   <div>UNLOCKED</div>
-                  <div className="tp-body1">
-                    current wallet {ellipseAddress(address)}
+                  <div>current wallet {ellipseAddress(address)}</div>
+                  <div>
+                    <Price value={unlockedAmount} />
                   </div>
-                  <div>{humanReadableCurrency(unlockedAmount)} ALEPH</div>
                 </StyledHoldingSummaryLine>
 
                 {specs && (
@@ -285,6 +295,7 @@ export const HoldingRequirements = ({
                       type,
                       specs,
                       cost: (cost as any)?.computeTotalCost,
+                      priceDuration,
                     }}
                   />
                 )}
@@ -298,6 +309,7 @@ export const HoldingRequirements = ({
                           volume,
                           specs,
                           cost: cost?.perVolumeCost[index],
+                          priceDuration,
                         }}
                       />
                     )
@@ -325,12 +337,12 @@ export const HoldingRequirements = ({
                   <div></div>
                   <div className="tp-body2">
                     {paymentMethod === PaymentMethod.Hold
-                      ? 'Total Staked'
-                      : 'Streamed (per hour)'}
+                      ? 'Total'
+                      : 'Total / h'}
                   </div>
                   <div>
-                    <span className="text-main1">
-                      {humanReadableCurrency(cost?.totalCost)} ALEPH
+                    <span className="text-main0 tp-body3">
+                      <Price value={cost?.totalCost} duration={priceDuration} />
                     </span>
                   </div>
                 </StyledHoldingSummaryLine>
@@ -339,13 +351,10 @@ export const HoldingRequirements = ({
                   cost?.totalStreamCost && (
                     <StyledHoldingSummaryLine>
                       <div></div>
-                      <div className="tp-body2">
-                        Total Streamed (
-                        {humanReadableDurationUnit(streamDuration)})
-                      </div>
+                      <div className="tp-body2">Total Streamed</div>
                       <div>
-                        <span className="text-main1">
-                          {humanReadableCurrency(cost?.totalStreamCost)} ALEPH
+                        <span className="text-main0 tp-body3">
+                          <Price value={cost?.totalStreamCost} />
                         </span>
                       </div>
                     </StyledHoldingSummaryLine>
@@ -382,8 +391,8 @@ export const HoldingRequirements = ({
                   </div>
                 </div>
                 <div className="fs-12" tw="text-center mt-6">
-                  Balance: {humanReadableCurrency(cost?.totalCost)} ALEPH per
-                  hour
+                  Balance:
+                  <Price value={cost?.totalCost} /> per hour
                 </div>
               </div>
             )}

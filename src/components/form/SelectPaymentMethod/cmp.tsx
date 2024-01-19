@@ -13,7 +13,7 @@ export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
   } = useSelectPaymentMethod(props)
 
   return (
-    <div tw="flex items-center justify-center gap-4">
+    <div tw="flex items-center justify-center gap-4" className="tp-body3">
       <StyledLabel
         {...{
           onClick: handleClickHold,

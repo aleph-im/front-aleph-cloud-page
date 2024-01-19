@@ -10,12 +10,21 @@ export const StyledTable = styled(Table<SpecsDetail>).attrs(
     const { duration, timing } = theme.transition
 
     return css`
+      thead {
+        color: ${theme.color.text};
+        background-color: ${theme.color.purple0};
+        border-bottom: 0.125rem solid ${theme.color.white};
+        th > div {
+          opacity: 1 !important;
+        }
+      }
+
       tbody {
         tr {
           cursor: pointer;
           transition: background ${timing} ${duration.fast}ms 0ms;
 
-          & td {
+          td {
             &:first-child {
               border-top-left-radius: 3.75rem;
               border-bottom-left-radius: 3.75rem;
@@ -45,9 +54,23 @@ export const StyledTable = styled(Table<SpecsDetail>).attrs(
         }
       }
 
-      & td,
-      & th {
+      td,
+      th {
         ${tw`px-4 w-0 whitespace-nowrap text-ellipsis`}
+      }
+
+      && {
+        button {
+          background: ${theme.color.purple0};
+          color: ${theme.color.main0};
+          width: 3.75rem;
+          height: 2rem;
+          min-height: 2rem;
+
+          &::after {
+            display: none;
+          }
+        }
       }
     `
   }}

@@ -14,7 +14,7 @@ export const widthVariant = {
 export const StyledContainer = styled.div<StyledContainerProps>`
   ${({ $variant = 'lg' }) => {
     return css`
-      ${tw`px-5 md:px-16 pb-16 mx-auto w-full`}
+      ${tw`px-5 md:px-16 mx-auto w-full`}
       max-width: ${widthVariant[$variant]}rem;
     `
   }}

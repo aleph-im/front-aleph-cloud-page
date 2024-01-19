@@ -20,7 +20,12 @@ export const ToggleContainer = ({
 
   return (
     <NoisyContainer {...rest}>
-      <Switch label={label} onChange={handleChange} checked={open} />
+      <Switch
+        label={label}
+        onChange={handleChange}
+        checked={open}
+        className="tp-body3"
+      />
       <CoreToggleContainer open={open}>
         <div tw="pt-10 pb-6">{children}</div>
       </CoreToggleContainer>

@@ -3,7 +3,10 @@ import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
-import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
+import {
+  StreamDurationField,
+  StreamDurationUnit,
+} from '@/hooks/form/useSelectStreamDuration'
 import { ReactNode } from 'react'
 import { Control } from 'react-hook-form'
 
@@ -36,12 +39,14 @@ export type HoldingRequirementsSpecsLineProps = {
   type: EntityType.Program | EntityType.Instance | EntityType.Volume
   specs: InstanceSpecsField
   cost: number
+  priceDuration: StreamDurationUnit | undefined
 }
 
 export type HoldingRequirementsVolumeLineProps = {
   volume: VolumeField
   specs?: InstanceSpecsField
   cost?: PerVolumeCostItem
+  priceDuration: StreamDurationUnit | undefined
 }
 
 export type HoldingRequirementsDomainLineProps = {

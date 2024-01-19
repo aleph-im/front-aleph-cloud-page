@@ -1,12 +1,18 @@
 import React from 'react'
-import { Icon, TextInput, Button, Checkbox, FormError } from '@aleph-front/core'
+import {
+  Icon,
+  TextInput,
+  Button,
+  Checkbox,
+  FormError,
+  TextGradient,
+} from '@aleph-front/core'
 import { useAddSSHKeys, useSSHKeyItem } from '@/hooks/form/useAddSSHKeys'
 import { SSHKeyItemProps, AddSSHKeysProps } from './types'
 import { NoisyContainer } from '@aleph-front/core'
 
 const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
   const {
-    index,
     keyCtrl,
     labelCtrl,
     isSelectedCtrl,
@@ -34,7 +40,7 @@ const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
               {...keyCtrl.field}
               {...keyCtrl.fieldState}
               required
-              label={`Key #${index + 1}`}
+              label={`Key`}
               placeholder="AAAAB3NzaC1yc2EAAAAB ... B3NzaaC1=="
               disabled={!isNew}
             />
@@ -75,24 +81,61 @@ export const AddSSHKeys = React.memo((props: AddSSHKeysProps) => {
   const { name, control, fields, handleAdd, handleRemove, allowRemove } =
     useAddSSHKeys(props)
 
+  const existingKeys = fields
+    .map((field, index) => ({ ...field, index }))
+    .filter((field) => !field.isNew)
+
+  const newKeys = fields
+    .map((field, index) => ({ ...field, index }))
+    .filter((field) => !!field.isNew)
+
+  console.log(existingKeys, newKeys)
+
   return (
     <>
       {fields.length > 0 && (
         <NoisyContainer>
-          <div tw="flex flex-col gap-x-6 gap-y-4">
-            {fields.map((field, index) => (
-              <SSHKeyItem
-                key={field.id}
-                {...{
-                  name,
-                  index,
-                  control,
-                  allowRemove,
-                  defaultValue: field,
-                  onRemove: handleRemove,
-                }}
-              />
-            ))}
+          <div tw="flex flex-col gap-10 pb-6">
+            {existingKeys.length > 0 && (
+              <div tw="flex flex-col gap-6">
+                <TextGradient forwardedAs="h3" type="h7" tw="mb-0 self-start">
+                  Existing key list
+                </TextGradient>
+                {existingKeys.map((field) => (
+                  <SSHKeyItem
+                    key={field.id}
+                    {...{
+                      name,
+                      index: field.index,
+                      control,
+                      allowRemove: true,
+                      defaultValue: field,
+                      onRemove: handleRemove,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            {newKeys.length > 0 && (
+              <div tw="flex flex-col gap-6">
+                <TextGradient forwardedAs="h3" type="h7" tw="mb-0 self-start">
+                  New keys
+                </TextGradient>
+                {newKeys.map((field) => (
+                  <SSHKeyItem
+                    key={field.id}
+                    {...{
+                      name,
+                      index: field.index,
+                      control,
+                      allowRemove,
+                      defaultValue: field,
+                      onRemove: handleRemove,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </NoisyContainer>
       )}

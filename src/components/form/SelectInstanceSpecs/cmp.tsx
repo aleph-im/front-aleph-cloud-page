@@ -8,6 +8,7 @@ import {
   Logo,
   NoisyContainer,
   TableColumn,
+  TextGradient,
 } from '@aleph-front/core'
 import { useCallback, useMemo } from 'react'
 import { convertByteUnits } from '@/helpers/utils'
@@ -15,6 +16,7 @@ import { SelectInstanceSpecsProps, SpecsDetail } from './types'
 import { StyledTable } from './styles'
 import { Executable } from '@/domain/executable'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
+import Price from '@/components/common/Price'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { specsCtrl, options, type, isPersistent, paymentMethod } =
@@ -30,8 +32,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
             sortBy: (row: SpecsDetail) => row.price,
             render: (row: SpecsDetail) => (
               <span tw="flex items-center justify-end gap-1">
-                {row.price}
-                <Logo color="currentColor" />
+                <Price value={row.price} />
               </span>
             ),
           }
@@ -42,8 +43,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
             sortBy: (row: SpecsDetail) => row.price,
             render: (row: SpecsDetail) => (
               <span tw="flex items-center justify-end gap-1">
-                {row.price}
-                <Logo color="currentColor" /> / h
+                <Price value={row.price} duration="h" />
               </span>
             ),
           }
@@ -91,7 +91,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
                     transitionProperty: 'opacity visibility',
                   }}
                 >
-                  <Icon name="check" />
+                  <Icon name="check" size="lg" />
                 </Button>
               )}
             </>
@@ -190,6 +190,9 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
 
   return (
     <NoisyContainer>
+      <TextGradient forwardedAs="h3" type="h7" tw="mb-6">
+        Available resources
+      </TextGradient>
       <div tw="max-w-full overflow-y-hidden overflow-x-auto">
         <StyledTable
           borderType="none"

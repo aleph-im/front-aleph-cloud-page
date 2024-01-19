@@ -43,10 +43,10 @@ const SelectInstanceImageItem = memo(
         >
           <img
             src={`${imgPrefix}/image/${option.dist}.svg`}
-            alt={`${option.name} image image logo`}
+            alt={`${option.name} logo`}
             tw="mb-4"
           />
-          {option.name}
+          <span className="tp-body1 fs-10">{option.name}</span>
         </StyledFlatCardButton>
       )
     },
