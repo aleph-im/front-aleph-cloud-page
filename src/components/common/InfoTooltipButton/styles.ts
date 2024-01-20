@@ -8,7 +8,7 @@ export const StyledInfoTooltipButton = styled(Button).attrs((props) => {
     forwardedAs: 'span',
     onClick: (e: MouseEvent) => e.preventDefault(),
     kind: 'default',
-    size: 'big',
+    size: 'lg',
     variant: 'text-only',
     color: 'main0',
   }
