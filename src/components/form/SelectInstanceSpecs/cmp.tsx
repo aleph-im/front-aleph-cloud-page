@@ -78,8 +78,8 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
                 <Button
                   color="main0"
                   variant="tertiary"
-                  kind="neon"
-                  size="regular"
+                  kind="default"
+                  size="md"
                   forwardedAs="button"
                   type="button"
                   onClick={(e) => e.preventDefault()}

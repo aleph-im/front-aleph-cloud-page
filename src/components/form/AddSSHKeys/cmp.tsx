@@ -60,8 +60,8 @@ const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
                 <Button
                   color="main2"
                   variant="secondary"
-                  kind="neon"
-                  size="regular"
+                  kind="default"
+                  size="md"
                   type="button"
                   onClick={handleRemove}
                 >
@@ -145,8 +145,8 @@ export const AddSSHKeys = React.memo((props: AddSSHKeysProps) => {
           onClick={handleAdd}
           color="main0"
           variant="secondary"
-          kind="neon"
-          size="regular"
+          kind="default"
+          size="md"
         >
           Add SSH key
         </Button>

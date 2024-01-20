@@ -56,10 +56,10 @@ export default function ManageSSHKey() {
             </div>
             <div>
               <Button
-                size="regular"
+                size="md"
                 variant="tertiary"
                 color="main2"
-                kind="neon"
+                kind="default"
                 onClick={handleDelete}
               >
                 Delete

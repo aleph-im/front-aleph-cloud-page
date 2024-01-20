@@ -84,8 +84,8 @@ export default function NewIndexerPage() {
           <Button
             type="submit"
             color="main0"
-            kind="neon"
-            size="big"
+            kind="default"
+            size="lg"
             variant="primary"
             disabled={isCreateButtonDisabled}
           >

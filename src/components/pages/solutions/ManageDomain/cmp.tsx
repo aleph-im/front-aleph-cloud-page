@@ -51,10 +51,10 @@ export default function ManageDomain() {
             </div>
             <div>
               <Button
-                size="regular"
+                size="md"
                 variant="tertiary"
                 color="main2"
-                kind="neon"
+                kind="default"
                 onClick={handleDelete}
               >
                 Delete
@@ -223,10 +223,10 @@ export default function ManageDomain() {
                     <div tw="my-5">
                       <Button
                         onClick={handleRetry}
-                        size="regular"
+                        size="md"
                         variant="secondary"
                         color="main0"
-                        kind="neon"
+                        kind="default"
                       >
                         Retry
                       </Button>

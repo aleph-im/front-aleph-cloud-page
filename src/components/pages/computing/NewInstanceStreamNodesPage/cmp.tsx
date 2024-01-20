@@ -119,8 +119,8 @@ export default function NewInstanceStreamNodesPage() {
             <div tw="flex gap-3 justify-end">
               {isLoading ? (
                 <Button
-                  kind="neon"
-                  size="regular"
+                  kind="default"
+                  size="md"
                   variant="secondary"
                   color="main2"
                   disabled
@@ -132,8 +132,8 @@ export default function NewInstanceStreamNodesPage() {
                 <>
                   {!isValid ? (
                     <Button
-                      kind="neon"
-                      size="regular"
+                      kind="default"
+                      size="md"
                       variant="secondary"
                       color="error"
                       disabled
@@ -143,8 +143,8 @@ export default function NewInstanceStreamNodesPage() {
                     </Button>
                   ) : (
                     <ButtonLink
-                      kind="neon"
-                      size="regular"
+                      kind="default"
+                      size="md"
                       variant="secondary"
                       color="main0"
                       href={`./stream/${node.hash}`}

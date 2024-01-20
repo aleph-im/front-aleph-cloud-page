@@ -70,10 +70,10 @@ export default function ManageInstance() {
             </div>
             <div>
               <Button
-                size="regular"
+                size="md"
                 variant="tertiary"
                 color="main2"
-                kind="neon"
+                kind="default"
                 onClick={handleDelete}
               >
                 Delete

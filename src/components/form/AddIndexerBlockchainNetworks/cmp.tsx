@@ -80,8 +80,8 @@ const IndexerBlockchainNetworkItem = React.memo(
           <Button
             color="main2"
             variant="secondary"
-            kind="neon"
-            size="regular"
+            kind="default"
+            size="md"
             type="button"
             onClick={handleRemove}
           >
@@ -125,8 +125,8 @@ export const AddIndexerBlockchainNetworks = React.memo(
             onClick={handleAdd}
             color="main0"
             variant="secondary"
-            kind="neon"
-            size="regular"
+            kind="default"
+            size="md"
           >
             Add network
           </Button>

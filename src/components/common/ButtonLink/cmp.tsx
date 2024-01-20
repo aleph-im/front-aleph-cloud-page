@@ -11,8 +11,8 @@ export const ButtonLink = ({
   href,
   variant = 'secondary',
   color = 'main0',
-  kind = 'neon',
-  size = 'regular',
+  kind = 'default',
+  size = 'md',
   children,
   ...rest
 }: ButtonLinkProps) => {

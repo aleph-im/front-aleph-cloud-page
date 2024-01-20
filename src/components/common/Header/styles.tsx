@@ -13,7 +13,7 @@ export const StyledButton = styled(Button).attrs((props) => {
   return {
     ...props,
     color: 'main0',
-    kind: 'neon',
+    kind: 'default',
     size: 'regular',
     variant: 'tertiary',
   }

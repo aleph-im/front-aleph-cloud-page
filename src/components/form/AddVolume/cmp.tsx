@@ -26,8 +26,8 @@ const RemoveVolume = React.memo(
           onClick={handleRemove}
           color="main2"
           variant="secondary"
-          kind="neon"
-          size="regular"
+          kind="default"
+          size="md"
         >
           Remove
         </Button>

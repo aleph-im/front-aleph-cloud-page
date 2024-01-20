@@ -28,8 +28,8 @@ const EnvVarItem = React.memo((props: EnvVarItemProps) => {
         <Button
           color="main2"
           variant="secondary"
-          kind="neon"
-          size="regular"
+          kind="default"
+          size="md"
           type="button"
           onClick={handleRemove}
         >
@@ -72,8 +72,8 @@ export const AddEnvVars = React.memo((props: AddEnvVarsProps) => {
           onClick={handleAdd}
           color="main0"
           variant="secondary"
-          kind="neon"
-          size="regular"
+          kind="default"
+          size="md"
         >
           Add var
         </Button>

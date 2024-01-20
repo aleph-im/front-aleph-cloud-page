@@ -31,8 +31,8 @@ export const AddVolumes = React.memo((props: AddVolumesProps) => {
           onClick={handleAdd}
           color="main0"
           variant="secondary"
-          kind="neon"
-          size="regular"
+          kind="default"
+          size="md"
         >
           Add volume
         </Button>

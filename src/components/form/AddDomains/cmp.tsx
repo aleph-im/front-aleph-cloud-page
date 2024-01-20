@@ -20,8 +20,8 @@ const DomainItem = React.memo((props: DomainItemProps) => {
         <Button
           color="main2"
           variant="secondary"
-          kind="neon"
-          size="regular"
+          kind="default"
+          size="md"
           type="button"
           onClick={handleRemove}
         >
@@ -64,8 +64,8 @@ export const AddDomains = React.memo((props: AddDomainsProps) => {
             onClick={handleAdd}
             color="main0"
             variant="secondary"
-            kind="neon"
-            size="regular"
+            kind="default"
+            size="md"
           >
             Add domain
           </Button>

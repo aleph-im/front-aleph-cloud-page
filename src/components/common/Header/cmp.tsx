@@ -44,8 +44,8 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
           as="button"
           variant="secondary"
           color="main1"
-          kind="neon"
-          size="regular"
+          kind="default"
+          size="md"
           onClick={handleDisplayWalletPicker}
         >
           <div tw="flex items-center gap-2.5">
@@ -59,8 +59,8 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
           as="button"
           variant="tertiary"
           color="main0"
-          kind="neon"
-          size="regular"
+          kind="default"
+          size="md"
           onClick={handleDisplayWalletPicker}
         >
           <div tw="flex items-center gap-2.5">

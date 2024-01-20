@@ -166,8 +166,8 @@ export default function NewDomain() {
                   <Button
                     type="submit"
                     color="main0"
-                    kind="neon"
-                    size="regular"
+                    kind="default"
+                    size="md"
                     variant="primary"
                   >
                     Create domain

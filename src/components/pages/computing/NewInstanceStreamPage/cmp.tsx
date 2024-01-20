@@ -75,8 +75,8 @@ export default function NewInstancePage() {
         render: () => (
           <div tw="flex gap-3 justify-end">
             <ButtonLink
-              kind="neon"
-              size="regular"
+              kind="default"
+              size="md"
               variant="secondary"
               color="main2"
               href={`.`}
@@ -245,8 +245,8 @@ export default function NewInstancePage() {
           <Button
             type="submit"
             color="main0"
-            kind="neon"
-            size="big"
+            kind="default"
+            size="lg"
             variant="primary"
             disabled={isCreateButtonDisabled}
           >

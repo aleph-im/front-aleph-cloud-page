@@ -177,8 +177,8 @@ export default function NewFunctionPage() {
           <Button
             type="submit"
             color="main0"
-            kind="neon"
-            size="big"
+            kind="default"
+            size="lg"
             variant="primary"
             disabled={isCreateButtonDisabled}
           >

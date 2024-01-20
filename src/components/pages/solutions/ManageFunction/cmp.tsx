@@ -58,10 +58,10 @@ export default function ManageFunction() {
             </div>
             <div>
               {/* <Button
-                size="regular"
+                size="md"
                 variant="tertiary"
                 color="main0"
-                kind="neon"
+                kind="default"
                 tw="!mr-4"
                 forwardedAs="a"
                 onClick={handleDownload}
@@ -69,10 +69,10 @@ export default function ManageFunction() {
                 Download
               </Button> */}
               <Button
-                size="regular"
+                size="md"
                 variant="tertiary"
                 color="main2"
-                kind="neon"
+                kind="default"
                 onClick={handleDelete}
               >
                 Delete

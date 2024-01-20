@@ -84,9 +84,9 @@ export const NewInstancePage = () => {
           <div tw="mt-6 text-center">
             <Button
               color="main0"
-              kind="neon"
+              kind="default"
               variant="primary"
-              size="big"
+              size="lg"
               onClick={handleContinue}
             >
               Continue

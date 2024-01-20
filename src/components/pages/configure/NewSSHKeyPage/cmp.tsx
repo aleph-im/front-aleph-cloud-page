@@ -43,8 +43,8 @@ export default function NewSSHKey() {
             <Button
               type="submit"
               color="main0"
-              kind="neon"
-              size="regular"
+              kind="default"
+              size="md"
               variant="primary"
             >
               Save SSH Key

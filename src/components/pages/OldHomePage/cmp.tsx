@@ -134,9 +134,9 @@ export default function OldHomePage() {
               </p>
               <div tw="flex gap-6 flex-wrap items-center">
                 {/* <Button
-                  kind="neon"
+                  kind="default"
                   variant="primary"
-                  size="big"
+                  size="lg"
                   color="main2"
                   onClick={navigate.indexer}
                 >
@@ -146,9 +146,9 @@ export default function OldHomePage() {
                   forwardedAs="a"
                   href="https://bit.ly/3GAAjii"
                   target="_blank"
-                  kind="neon"
+                  kind="default"
                   variant="primary"
-                  size="big"
+                  size="lg"
                   color="main0"
                   tw="!my-0"
                 >
