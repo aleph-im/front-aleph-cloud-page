@@ -6,7 +6,7 @@ export const StyledH1Button = styled(Button).attrs((props) => {
   return {
     ...props,
     variant: 'secondary',
-    size: 'lg',
+    size: 'big',
     kind: 'default',
     color: 'main0',
   }

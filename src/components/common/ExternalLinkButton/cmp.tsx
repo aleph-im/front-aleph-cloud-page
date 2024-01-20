@@ -6,7 +6,7 @@ import { Icon } from '@aleph-front/core'
 export const ExternalLinkButton = ({
   children,
   href,
-  size = 'lg',
+  size = 'big',
   ...rest
 }: ExternalLinkButtonProps) => {
   return (
