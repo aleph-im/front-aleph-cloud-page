@@ -1,7 +1,7 @@
 import JSZip from 'jszip'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, program, any } from 'aleph-sdk-ts/dist/messages'
-// import { ProgramPublishConfiguration } from 'aleph-sdk-ts/dist/messages/program/publish'
+import { ProgramPublishConfiguration } from 'aleph-sdk-ts/dist/messages/program/publish'
 import { Encoding, ProgramContent } from 'aleph-sdk-ts/dist/messages/types'
 import E_ from '../helpers/errors'
 import {
@@ -19,7 +19,7 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/types'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
+import { Executable, ExecutableCost, ExecutableCostProps, PaymentConfiguration } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { CustomFunctionRuntimeField } from './runtime'
 import { FileManager } from './file'
@@ -34,40 +34,6 @@ import { functionSchema } from '@/helpers/schemas/program'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { FunctionLangId, FunctionLanguage } from './lang'
 
-// @todo: Export this type from sdk and remove here
-export declare type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<
-  T,
-  Exclude<keyof T, Keys>
-> &
-  {
-    [K in Keys]-?: Required<Pick<T, K>> &
-      Partial<Record<Exclude<Keys, K>, undefined>>
-  }[Keys]
-
-// @todo: Export this type from sdk and remove here
-export type ProgramPublishConfiguration = RequireOnlyOne<
-  {
-    account: Account
-    channel: string
-    isPersistent?: boolean
-    storageEngine?: ItemType.ipfs | ItemType.storage
-    inlineRequested?: boolean
-    APIServer?: string
-    file?: Buffer | Blob
-    programRef?: string
-    encoding?: Encoding
-    entrypoint: string
-    subscription?: Record<string, unknown>[]
-    memory?: number
-    vcpus?: number
-    runtime?: string
-    volumes?: MachineVolume[]
-    metadata?: Record<string, unknown>
-    variables?: Record<string, string>
-  },
-  'programRef' | 'file'
->
-
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
   | 'account'
@@ -79,6 +45,7 @@ export type AddProgram = Omit<
   | 'runtime'
   | 'volumes'
   | 'entrypoint'
+  | 'payment'
 > &
   NameAndTagsField & {
     isPersistent: boolean
@@ -88,6 +55,7 @@ export type AddProgram = Omit<
     envVars?: EnvVarField[]
     volumes?: VolumeField[]
     domains?: Omit<DomainField, 'ref'>[]
+    payment?: PaymentConfiguration
   }
 
 // @todo: Refactor
@@ -276,6 +244,7 @@ export class ProgramManager
     const runtime = this.parseRuntime(newProgram)
     const volumes = await this.parseVolumes(newProgram.volumes)
     const code = await this.parseCode(newProgram.code)
+    const payment = this.parsePayment(newProgram.payment)
 
     return {
       account,
@@ -288,6 +257,7 @@ export class ProgramManager
       volumes,
       ...code,
       metadata,
+      payment,
     }
   }
 

@@ -1,19 +1,18 @@
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { forget, instance, any } from 'aleph-sdk-ts/dist/messages'
 import { InstancePublishConfiguration } from 'aleph-sdk-ts/dist/messages/instance/publish'
-import { InstanceContent } from 'aleph-sdk-ts/dist/messages/instance/types'
-import { MachineVolume, MessageType } from 'aleph-sdk-ts/dist/messages/types'
+import { MachineVolume, MessageType, InstanceContent } from 'aleph-sdk-ts/dist/messages/types'
 import E_ from '../helpers/errors'
 import {
   EntityType,
   apiServer,
-  defaultInstanceChannel,
+  defaultInstanceChannel, PaymentMethod,
 } from '../helpers/constants'
 import { getDate, getExplorerURL } from '../helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
-import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
+import { Executable, ExecutableCost, ExecutableCostProps, PaymentConfiguration } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
 import { FileManager } from './file'
@@ -30,7 +29,7 @@ import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
-  'image' | 'account' | 'channel' | 'authorized_keys' | 'resources' | 'volumes'
+  'image' | 'account' | 'channel' | 'authorized_keys' | 'resources' | 'volumes' | 'payment'
 > &
   NameAndTagsField & {
     image: InstanceImageField
@@ -39,6 +38,7 @@ export type AddInstance = Omit<
     volumes?: VolumeField[]
     envVars?: EnvVarField[]
     domains?: Omit<DomainField, 'ref'>[]
+    payment?: PaymentConfiguration
   }
 
 // @todo: Refactor
@@ -188,6 +188,7 @@ export class InstanceManager
     const metadata = this.parseMetadata(name, tags)
     const authorized_keys = await this.parseSSHKeys(sshKeys)
     const volumes = await this.parseVolumes(newInstance.volumes)
+    const payment = this.parsePayment(newInstance.payment)
 
     return {
       account,
@@ -198,6 +199,7 @@ export class InstanceManager
       image,
       authorized_keys,
       volumes,
+      payment,
     }
   }
 
@@ -226,8 +228,6 @@ export class InstanceManager
     return sshKeys.filter((key) => key.isSelected).map(({ key }) => key)
   }
 
-  // @todo: Type not exported from SDK...
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected async parseMessages(messages: any[]): Promise<Instance[]> {
     const sizesMap = await this.fileManager.getSizesMap()
 

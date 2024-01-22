@@ -1,15 +1,12 @@
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
+import { Chain, MachineResources, MachineVolume, Payment, PaymentType as SDKPaymentType } from 'aleph-sdk-ts/dist/messages/types'
 import {
-  MachineResources,
-  MachineVolume,
-} from 'aleph-sdk-ts/dist/messages/types'
-import {
-  VolumeManager,
-  VolumeType,
   AddExistingVolume,
   AddPersistentVolume,
   VolumeCost,
   VolumeCostProps,
+  VolumeManager,
+  VolumeType,
 } from './volume'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
@@ -17,10 +14,7 @@ import { VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { Domain, DomainManager } from './domain'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
-import {
-  StreamDurationField,
-  getStreamCostPerHour,
-} from '@/hooks/form/useSelectStreamDuration'
+import { getStreamCostPerHour, StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -42,6 +36,12 @@ export type ExecutableCost = Omit<VolumeCost, 'totalCost'> & {
   volumeTotalCost: number
   totalCost: number
   totalStreamCost: number
+}
+
+export type PaymentConfiguration = {
+  chain: Chain
+  type: PaymentMethod
+  receiver?: string
 }
 
 export abstract class Executable {
@@ -206,6 +206,29 @@ export abstract class Executable {
     return {
       ...metadata,
       ...out,
+    }
+  }
+
+  protected parsePayment(
+    payment?: PaymentConfiguration,
+  ): Payment {
+    if (!payment) return {
+      chain: Chain.ETH,
+      type: SDKPaymentType.hold,
+    }
+    if (payment.type === PaymentMethod.Stream) {
+      if (!payment.receiver) throw new Error('Payment receiver is required for stream payments')
+      if (payment.chain === Chain.AVAX)
+        return {
+          chain: Chain.AVAX,
+          type: SDKPaymentType.superfluid,
+          receiver: payment.receiver,
+        }
+      throw new Error('Stream payments are only supported on Avalanche')
+    }
+    return {
+      chain: payment.chain,
+      type: SDKPaymentType.hold,
     }
   }
 }
