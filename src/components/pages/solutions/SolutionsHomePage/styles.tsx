@@ -23,8 +23,8 @@ export const StyledLink = styled(Button).attrs((props) => {
     ...props,
     forwardedAs: 'a',
     kind: 'default',
-    variant: 'text-only',
-    size: 'regular',
+    variant: 'textOnly',
+    size: 'md',
     color: 'main0',
   }
 })``

@@ -6,7 +6,7 @@ export const StyledExternalLinkButton = styled(Button).attrs((props) => {
     ...props,
     forwardedAs: 'a',
     kind: 'default',
-    variant: 'text-only',
+    variant: 'textOnly',
     color: 'main0',
   }
 })``

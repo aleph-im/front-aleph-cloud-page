@@ -15,9 +15,10 @@ import Loading from './loading'
 
 export default function App({ Component, pageProps }: AppProps) {
   const { loading } = useRouterLoadState()
+  const [theme] = Object.values(themes)
 
   return (
-    <ThemeProvider theme={themes.twentysix}>
+    <ThemeProvider theme={theme}>
       <GlobalStyles />
       <GlobalStylesOverride />
       <AppStateProvider>

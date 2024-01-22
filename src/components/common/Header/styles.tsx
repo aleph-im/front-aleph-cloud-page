@@ -14,7 +14,7 @@ export const StyledButton = styled(Button).attrs((props) => {
     ...props,
     color: 'main0',
     kind: 'default',
-    size: 'regular',
+    size: 'md',
     variant: 'tertiary',
   }
 })`

@@ -57,7 +57,7 @@ export const NewInstancePage = () => {
           </div>
           <div tw="mt-6 text-right">
             <InfoTooltipButton
-              my="bottom-left"
+              my="bottom-right"
               at="top-right"
               tooltipContent={
                 <div className="tp-body1 fs-18">
