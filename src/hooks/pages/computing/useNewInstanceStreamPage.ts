@@ -3,45 +3,26 @@ import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import {
-  NameAndTagsField,
-  defaultNameAndTags,
-} from '@/hooks/form/useAddNameAndTags'
-import {
-  SSHKeyField,
-  // defaultValues as sshKeyDefaultValues,
-} from '@/hooks/form/useAddSSHKeys'
+import { defaultNameAndTags, NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
+import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
 import { PersistentVolumeField, VolumeField } from '@/hooks/form/useAddVolume'
-import {
-  InstanceImageField,
-  defaultInstanceImage,
-} from '@/hooks/form/useSelectInstanceImage'
-import {
-  InstanceSpecsField,
-  getDefaultSpecsOptions,
-  validateMinNodeSpecs,
-} from '@/hooks/form/useSelectInstanceSpecs'
+import { defaultInstanceImage, InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
+import { getDefaultSpecsOptions, InstanceSpecsField, validateMinNodeSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { InstanceManager } from '@/domain/instance'
+import { AddInstance, InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  EntityType,
-  PaymentMethod,
-  VolumeType,
-  superToken,
-} from '@/helpers/constants'
+import { EntityType, PaymentMethod, VolumeType } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
 import { Web3Provider } from '@ethersproject/providers'
-import {
-  StreamDurationField,
-  defaultStreamDuration,
-} from '@/hooks/form/useSelectStreamDuration'
+import { defaultStreamDuration, StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
 import { superfluid } from 'aleph-sdk-ts/dist/accounts'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
+import { ActionTypes } from '@/helpers/store'
 
 export type NewInstanceStreamFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -164,22 +145,29 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
       let flow = await superfluidAccount.getALEPHxFlow(node.reward)
       console.log('Current flow:', flow.toString())
 
+      console.log('Setting flow to:', state.streamCost.toString())
+
       await superfluidAccount.increaseALEPHxFlow(node.reward, state.streamCost)
       flow = await superfluidAccount.getALEPHxFlow(node.reward)
       console.log('New flow:', flow.toString())
 
-      return
+      const accountInstance = await manager.add({
+        ...state,
+        payment: {
+          chain: Chain.AVAX,
+          type: PaymentMethod.Stream,
+          receiver: node.reward,
+        },
+      } as AddInstance)
 
-      // const accountInstance = await manager.add(state)
-
-      // dispatch({
-      //   type: ActionTypes.addAccountInstance,
-      //   payload: { accountInstance },
-      // })
+      dispatch({
+        type: ActionTypes.addAccountInstance,
+        payload: { accountInstance },
+      })
 
       // @todo: Check new volumes and domains being created to add them to the store
 
-      // router.replace('/solutions/dashboard')
+      await router.replace('/solutions/dashboard')
     },
     [account, manager, node],
   )
