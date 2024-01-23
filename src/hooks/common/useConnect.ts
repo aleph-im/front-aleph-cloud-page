@@ -8,7 +8,7 @@ import { useCallback } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
 
 export type UseConnectReturn = {
-  connect: () => Promise<Account | undefined>
+  connect: (chain?: Chain) => Promise<Account | undefined>
   disconnect: () => Promise<void>
   isConnected: boolean
   account: Account | undefined
@@ -43,12 +43,13 @@ export function useConnect(): UseConnectReturn {
     [dispatch],
   )
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (chain: Chain = Chain.ETH) => {
     let account
     try {
-      account = await web3Connect(Chain.ETH, window?.ethereum)
+      // @todo: Needs to accommodate for other non-evm chains
+      account = await web3Connect(chain, window.ethereum)
     } catch (err) {
-      onError('You need an Ethereum wallet to use Aleph.im.')
+      onError(err.message)
     }
 
     if (!account) return

@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router'
-import { useCallback, useState, useEffect, useRef, RefObject } from 'react'
+import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { DefaultTheme, useTheme } from 'styled-components'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { useAppState } from '@/contexts/appState'
 import { useConnect } from '../common/useConnect'
 import { useSessionStorage } from 'usehooks-ts'
@@ -13,14 +14,11 @@ import {
   useWindowScroll,
   useWindowSize,
 } from '@aleph-front/aleph-core'
-import { UseRoutesReturn, useRoutes } from '../common/useRoutes'
-import {
-  UseBreadcrumbNamesReturn,
-  useBreadcrumbNames,
-} from '../common/useBreadcrumbNames'
+import { useRoutes, UseRoutesReturn } from '../common/useRoutes'
+import { useBreadcrumbNames, UseBreadcrumbNamesReturn } from '../common/useBreadcrumbNames'
 
 export type UseAccountButtonProps = {
-  handleConnect: () => Promise<void>
+  handleConnect: (chain?: Chain) => Promise<void>
   provider: () => void
 }
 
@@ -34,6 +32,8 @@ export type UseAccountButtonReturn = UseAccountButtonProps & {
   walletPickerTriggerRef: RefObject<HTMLButtonElement>
   walletPosition: { x: number; y: number }
   handleDisplayWalletPicker: () => void
+  selectedNetwork: Chain
+  handleNetworkSelection: (network: Chain) => void
 }
 
 export function useAccountButton({
@@ -48,6 +48,12 @@ export function useAccountButton({
   const { accountBalance } = appState
 
   const [displayWalletPicker, setDisplayWalletPicker] = useState(false)
+
+  const [selectedNetwork, setSelectedNetwork] = useState<Chain>(Chain.ETH);
+
+  const handleNetworkSelection = (network: Chain) => {
+    setSelectedNetwork(network);
+  };
 
   // --------------------
 
@@ -80,8 +86,8 @@ export function useAccountButton({
 
   const walletPickerOpen = state === 'enter'
 
-  const handleConnect = useCallback(async () => {
-    handleConnectProp()
+  const handleConnect = useCallback(async (chain?: Chain) => {
+    handleConnectProp(chain)
     setDisplayWalletPicker(false)
   }, [handleConnectProp])
 
@@ -96,6 +102,8 @@ export function useAccountButton({
     walletPosition: position,
     handleDisplayWalletPicker,
     handleConnect,
+    selectedNetwork,
+    handleNetworkSelection,
     ...rest,
   }
 }
