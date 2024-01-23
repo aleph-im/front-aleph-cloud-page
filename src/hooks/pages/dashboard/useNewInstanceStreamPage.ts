@@ -19,9 +19,7 @@ import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
-import { Web3Provider } from '@ethersproject/providers'
 import { defaultStreamDuration, StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
-import { superfluid } from 'aleph-sdk-ts/dist/accounts'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { ActionTypes } from '@/helpers/store'
 
@@ -131,35 +129,15 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
       if (!node || !node.reward) throw new Error('Invalid node')
       if (!state?.streamCost) throw new Error('Invalid stream cost')
       if (window?.ethereum === undefined) throw new Error('No wallet found')
-
-      const web3Provider = new Web3Provider(window.ethereum)
-
-      const superfluidAccount = new superfluid.SuperfluidAccount(
-        web3Provider,
-        account.address,
-      )
-
-      await superfluidAccount.init()
-
-      const superTokenBalance = await superfluidAccount.getALEPHxBalance()
-      console.log('ALEPHx balance:', superTokenBalance.toString())
-
-      console.log('Target node:', node)
-      let flow = await superfluidAccount.getALEPHxFlow(node.reward)
-      console.log('Current flow:', flow.toString())
-
-      console.log('Setting flow to:', state.streamCost.toString())
-
-      await superfluidAccount.increaseALEPHxFlow(node.reward, state.streamCost)
-      flow = await superfluidAccount.getALEPHxFlow(node.reward)
-      console.log('New flow:', flow.toString())
-
       const accountInstance = await manager.add({
         ...state,
         payment: {
           chain: Chain.AVAX,
           type: PaymentMethod.Stream,
+          sender: account.address,
           receiver: node.reward,
+          streamCost: state.streamCost,
+          streamDuration: state.streamDuration,
         },
       } as AddInstance)
 

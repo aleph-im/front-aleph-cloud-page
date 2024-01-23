@@ -13,7 +13,7 @@ export type InstanceSpecsField = {
 
 export function updateSpecsStorage(
   specs: InstanceSpecsField,
-  isPersistent: boolean,
+  isPersistent: boolean = true,
 ): InstanceSpecsField {
   return {
     ...specs,
@@ -27,7 +27,7 @@ export function updateSpecsStorage(
 
 // @note: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
 export function getDefaultSpecsOptions(
-  isPersistent: boolean,
+  isPersistent: boolean = true,
 ): InstanceSpecsField[] {
   return [1, 2, 4, 6, 8, 12].map((cpu) =>
     updateSpecsStorage(

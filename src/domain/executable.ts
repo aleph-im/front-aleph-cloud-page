@@ -14,7 +14,7 @@ import { VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { Domain, DomainManager } from './domain'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
-import { getStreamCostPerHour, StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
+import { getHours, StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -38,11 +38,21 @@ export type ExecutableCost = Omit<VolumeCost, 'totalCost'> & {
   totalStreamCost: number
 }
 
-export type PaymentConfiguration = {
+export type HoldPaymentConfiguration = {
   chain: Chain
-  type: PaymentMethod
-  receiver?: string
+  type: PaymentMethod.Hold
 }
+
+export type StreamPaymentConfiguration = {
+  chain: Chain
+  type: PaymentMethod.Stream
+  sender: string
+  receiver: string
+  streamCost: number
+  streamDuration: StreamDurationField
+}
+
+export type PaymentConfiguration = HoldPaymentConfiguration | StreamPaymentConfiguration
 
 export abstract class Executable {
   /**
@@ -93,7 +103,7 @@ export abstract class Executable {
 
     const streamCostPerHour =
       paymentMethod === PaymentMethod.Stream && streamDuration
-        ? getStreamCostPerHour(streamDuration)
+        ? getHours(streamDuration)
         : Number.POSITIVE_INFINITY
 
     const totalStreamCost = totalCost * streamCostPerHour

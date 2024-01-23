@@ -8,7 +8,7 @@ export type StreamDurationField = {
   unit: StreamDurationUnit
 }
 
-export function getStreamCostPerHour(
+export function getHours(
   streamDuration: StreamDurationField,
 ): number {
   if (!streamDuration) return 0
