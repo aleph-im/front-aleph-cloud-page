@@ -2,22 +2,12 @@ import { memo } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Button, Icon, RenderLinkProps } from '@aleph-front/core'
-import {
-  StyledNavbarDesktop,
-  StyledButton,
-  StyledWalletPicker,
-  StyledNavbarMobile,
-  StyledHeader,
-} from './styles'
+import { StyledButton, StyledHeader, StyledNavbarDesktop, StyledWalletPicker } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
-import {
-  UseAccountButtonProps,
-  useAccountButton,
-  useHeader,
-} from '@/hooks/pages/useHeader'
+import { useAccountButton, UseAccountButtonProps, useHeader } from '@/hooks/pages/useHeader'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
-import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { useConnect } from '@/hooks/common/useConnect'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 
 export type AccountButtonProps = UseAccountButtonProps & {
   isMobile?: boolean
@@ -135,6 +125,11 @@ export const Header = () => {
     ...accountProps
   } = useHeader()
 
+  const {
+    switchNetwork,
+    selectedNetwork,
+  } = useConnect();
+
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
@@ -143,8 +138,11 @@ export const Header = () => {
             <AutoBreadcrumb names={breadcrumbNames} />
           </div>
           <div tw="relative flex items-center justify-center gap-7">
-            <StyledButton key="link" forwardedAs="button" disabled>
-              <Icon name="ethereum" />
+            <StyledButton key="evm" forwardedAs="button" onClick={() => switchNetwork(Chain.ETH)} disabled={selectedNetwork === Chain.ETH}>
+              <Icon name="ethereum" color={selectedNetwork === Chain.ETH ? 'main1' : 'main0'} />
+            </StyledButton>
+            <StyledButton key="avax" forwardedAs="button" onClick={() => switchNetwork(Chain.AVAX)} disabled={selectedNetwork === Chain.AVAX}>
+              <Icon name="avalanche" color={selectedNetwork === Chain.AVAX ? 'main1' : 'main0'} />
             </StyledButton>
             <AccountButtonMemo {...accountProps} />
           </div>

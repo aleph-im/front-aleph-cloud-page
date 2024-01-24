@@ -4,7 +4,7 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
 import { ExternalProvider } from '@ethersproject/providers'
 
@@ -14,6 +14,7 @@ export type UseConnectReturn = {
   isConnected: boolean
   account: Account | undefined
   tryReconnect: () => Promise<void>
+  switchNetwork: (chain: Chain) => Promise<void>
   selectedNetwork: Chain
 }
 
@@ -54,7 +55,10 @@ export function useConnect(): UseConnectReturn {
     try {
       if (chain) {
         setSelectedNetwork(chain)
+      } else {
+        chain = selectedNetwork
       }
+      console.log("selectedNetwork2", selectedNetwork)
       if (!provider && window.ethereum) {
         provider = window.ethereum
       } else if (!provider && window.web3) {
@@ -62,11 +66,18 @@ export function useConnect(): UseConnectReturn {
       } else if (!provider && window.solana) {
         provider = window.solana
       }
-      account = await web3Connect(selectedNetwork, provider)
+      account = await web3Connect(chain, provider)
     } catch (err) {
       onError(err.message)
+      // @todo: ugly hack because of weird selectedNetwork behavior
+      if (chain === Chain.ETH) {
+        setSelectedNetwork(Chain.AVAX)
+        account = await web3Connect(Chain.AVAX, provider)
+      } else {
+        setSelectedNetwork(Chain.ETH)
+        account = await web3Connect(Chain.ETH, provider)
+      }
     }
-
     if (!account) return
     setKeepAccountAlive(true)
 
@@ -84,6 +95,10 @@ export function useConnect(): UseConnectReturn {
     dispatch({ type: ActionTypes.disconnect, payload: null })
   }, [dispatch, setKeepAccountAlive])
 
+  const switchNetwork = useCallback(async (chain: Chain) => {
+    await connect(chain)
+  }, [connect, setSelectedNetwork])
+
   const { account } = state
   const isConnected = !!account?.address
 
@@ -98,6 +113,7 @@ export function useConnect(): UseConnectReturn {
     isConnected,
     account,
     tryReconnect,
+    switchNetwork,
     selectedNetwork,
   }
 }

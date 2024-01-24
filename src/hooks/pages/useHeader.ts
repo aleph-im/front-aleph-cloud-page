@@ -51,6 +51,19 @@ export function chainNameToEnum(chainName?: string): Chain {
   }
 }
 
+export function chainEnumToName(chain: Chain): string {
+  switch (chain) {
+    case Chain.ETH:
+      return 'Ethereum'
+    case Chain.AVAX:
+      return 'Avalanche'
+    case Chain.SOL:
+      return 'Solana'
+    default:
+      return 'Ethereum'
+  }
+}
+
 export function useAccountButton({
   handleConnect: handleConnectProp,
   ...rest
