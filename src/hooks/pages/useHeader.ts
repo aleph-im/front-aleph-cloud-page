@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useCallback, useState, useEffect, useRef, RefObject } from 'react'
+import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { DefaultTheme, useTheme } from 'styled-components'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { useAppState } from '@/contexts/appState'
@@ -12,15 +12,15 @@ import {
   useTransitionedEnterExit,
   useWindowScroll,
   useWindowSize,
+  WalletPickerProps,
 } from '@aleph-front/core'
-import { UseRoutesReturn, useRoutes } from '../common/useRoutes'
-import {
-  UseBreadcrumbNamesReturn,
-  useBreadcrumbNames,
-} from '../common/useBreadcrumbNames'
+import { useRoutes, UseRoutesReturn } from '../common/useRoutes'
+import { useBreadcrumbNames, UseBreadcrumbNamesReturn } from '../common/useBreadcrumbNames'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 
 export type UseAccountButtonProps = {
-  handleConnect: () => Promise<void>
+  handleConnect: WalletPickerProps['onConnect']
+  handleDisconnect: () => void
   provider: () => void
 }
 
@@ -34,6 +34,20 @@ export type UseAccountButtonReturn = UseAccountButtonProps & {
   walletPickerTriggerRef: RefObject<HTMLButtonElement>
   walletPosition: { x: number; y: number }
   handleDisplayWalletPicker: () => void
+}
+
+
+export function chainNameToEnum(chainName: string): Chain {
+  switch (chainName) {
+    case 'Ethereum':
+      return Chain.ETH
+    case 'Avalanche':
+      return Chain.AVAX
+    case 'Solana':
+      return Chain.SOL
+    default:
+      return Chain.ETH
+  }
 }
 
 export function useAccountButton({
@@ -80,8 +94,8 @@ export function useAccountButton({
 
   const walletPickerOpen = state === 'enter'
 
-  const handleConnect = useCallback(async () => {
-    handleConnectProp()
+  const handleConnect = useCallback((chain: string, provider: any) => {
+    handleConnectProp(chain, provider);
     setDisplayWalletPicker(false)
   }, [handleConnectProp])
 
@@ -109,7 +123,7 @@ export type UseHeaderReturn = UseRoutesReturn & {
   isOpen: boolean
   hasBreadcrumb: boolean
   handleToggle: (isOpen: boolean) => void
-  handleConnect: () => Promise<void>
+  handleConnect: (chain?: string, provider?: any) => Promise<void>
   provider: () => void
 }
 
@@ -135,10 +149,10 @@ export function useHeader(): UseHeaderReturn {
   }, [connect, disconnect, isConnected])
 
   // @note: wait till account is connected and redirect
-  const handleConnect = useCallback(async () => {
+  const handleConnect = useCallback(async (chain: string, provider: any) => {
     if (!isConnected) {
       setkeepAccountAlive(true)
-      const acc = await connect()
+      const acc = await connect(chainNameToEnum(chain), provider)
       if (!acc) return
       // router.push('/solutions/dashboard')
     } else {

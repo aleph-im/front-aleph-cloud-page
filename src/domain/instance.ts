@@ -1,18 +1,20 @@
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { forget, instance, any } from 'aleph-sdk-ts/dist/messages'
+import { any, forget, instance } from 'aleph-sdk-ts/dist/messages'
 import { InstancePublishConfiguration } from 'aleph-sdk-ts/dist/messages/instance/publish'
-import { MachineVolume, MessageType, InstanceContent } from 'aleph-sdk-ts/dist/messages/types'
+import { InstanceContent, MachineVolume, MessageType, PaymentType } from 'aleph-sdk-ts/dist/messages/types'
 import E_ from '../helpers/errors'
-import {
-  EntityType,
-  apiServer,
-  defaultInstanceChannel, PaymentMethod,
-} from '../helpers/constants'
+import { apiServer, defaultInstanceChannel, EntityType, PaymentMethod } from '../helpers/constants'
 import { getDate, getExplorerURL } from '../helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
-import { Executable, ExecutableCost, ExecutableCostProps, PaymentConfiguration } from './executable'
+import {
+  Executable,
+  ExecutableCost,
+  ExecutableCostProps,
+  PaymentConfiguration,
+  StreamPaymentConfiguration,
+} from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
 import { FileManager } from './file'
@@ -21,11 +23,11 @@ import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
-import {
-  instanceSchema,
-  instanceStreamSchema,
-} from '@/helpers/schemas/instance'
+import { instanceSchema, instanceStreamSchema } from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
+import { Web3Provider } from '@ethersproject/providers'
+import { superfluid } from 'aleph-sdk-ts/dist/accounts'
+import { getHours } from '@/hooks/form/useSelectStreamDuration'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -131,6 +133,26 @@ export class InstanceManager
     try {
       const instanceMessage = await this.parseInstance(newInstance)
 
+      if (newInstance.payment?.type === PaymentMethod.Stream) {
+        const { streamCost, streamDuration, sender, receiver } = newInstance.payment
+        const web3Provider = new Web3Provider(window.ethereum)
+
+        const superfluidAccount = new superfluid.SuperfluidAccount(
+          web3Provider,
+          sender,
+        )
+        await superfluidAccount.init()
+        await superfluidAccount.decreaseALEPHxFlow(receiver, 10)
+        const alephxBalance = await superfluidAccount.getALEPHxBalance()
+        const alephxFlow = await superfluidAccount.getALEPHxFlow(receiver)
+        const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
+        const totalRequiredAleph = usedAlephInDuration.add(streamCost)
+        if (alephxBalance.lt(totalRequiredAleph)) {
+          throw new Error(`Insufficient balance: ${totalRequiredAleph.sub(alephxBalance).toString()} ALEPH required. Try to lower the VM cost or the duration.`)
+        }
+        await superfluidAccount.increaseALEPHxFlow(receiver, streamCost / getHours(streamDuration))
+      }
+
       const response = await instance.publish({
         ...instanceMessage,
         APIServer: apiServer,
@@ -148,8 +170,37 @@ export class InstanceManager
   }
 
   async del(instanceOrId: string | Instance): Promise<void> {
-    instanceOrId =
-      typeof instanceOrId === 'string' ? instanceOrId : instanceOrId.id
+    let instance: Instance | undefined
+    if (typeof instanceOrId !== 'string') {
+      instance = instanceOrId
+      instanceOrId = instance.id
+    } else {
+      instance = await this.get(instanceOrId)
+    }
+
+    if (!instance) throw new Error('Invalid instance ID')
+
+    if (instance.payment?.type === PaymentType.superfluid) {
+      const { sender, receiver } = instance.payment as StreamPaymentConfiguration
+      const instanceCosts = await InstanceManager.getCost({
+        paymentMethod: PaymentMethod.Stream,
+        specs: {
+          cpu: instance.resources.vcpus,
+          memory: instance.resources.memory,
+          storage: instance.volumes.reduce((ac, cv) => ac + cv["size_mb"] ?? 0, 0),
+          ram: instance.resources.memory,
+        }
+      })
+      console.log("instanceCosts", instanceCosts)
+      const web3Provider = new Web3Provider(window.ethereum)
+
+      const superfluidAccount = new superfluid.SuperfluidAccount(
+        web3Provider,
+        sender,
+      )
+      await superfluidAccount.init()
+      await superfluidAccount.decreaseALEPHxFlow(receiver, instanceCosts.totalStreamCost)
+    }
 
     try {
       await forget.Publish({

@@ -16,6 +16,8 @@ import {
   useHeader,
 } from '@/hooks/pages/useHeader'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
+import { useConnect } from '@/hooks/common/useConnect'
 
 export type AccountButtonProps = UseAccountButtonProps & {
   isMobile?: boolean
@@ -86,9 +88,21 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
                   },
                 ],
               },
+              {
+                icon: 'avalanche',
+                name: 'Avalanche',
+                wallets: [
+                  {
+                    color: 'orange',
+                    icon: 'metamask',
+                    name: 'Metamask',
+                    provider,
+                  },
+                ],
+              }
             ]}
             onConnect={handleConnect}
-            onDisconnect={handleConnect}
+            onDisconnect={() => handleConnect}
             address={account?.address}
             addressHref={`https://etherscan.io/address/${account?.address}`}
             balance={accountBalance}

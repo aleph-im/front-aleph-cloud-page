@@ -6,13 +6,15 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { useCallback } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
+import { ExternalProvider } from '@ethersproject/providers'
 
 export type UseConnectReturn = {
-  connect: () => Promise<Account | undefined>
+  connect: (chain?: Chain, provider?: any) => Promise<Account | undefined>
   disconnect: () => Promise<void>
   isConnected: boolean
   account: Account | undefined
   tryReconnect: () => Promise<void>
+  selectedNetwork: Chain
 }
 
 export function useConnect(): UseConnectReturn {
@@ -21,6 +23,10 @@ export function useConnect(): UseConnectReturn {
   const [keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
     'keepAccountAlive',
     false,
+  )
+  const [selectedNetwork, setSelectedNetwork] = useSessionStorage<Chain>(
+    'selectedNetwork',
+    Chain.ETH,
   )
 
   const onError = useCallback(
@@ -43,12 +49,22 @@ export function useConnect(): UseConnectReturn {
     [dispatch],
   )
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (chain?: Chain, provider?: ExternalProvider) => {
     let account
     try {
-      account = await web3Connect(Chain.ETH, window?.ethereum)
+      if (chain) {
+        setSelectedNetwork(chain)
+      }
+      if (!provider && window.ethereum) {
+        provider = window.ethereum
+      } else if (!provider && window.web3) {
+        provider = window.web3.currentProvider
+      } else if (!provider && window.solana) {
+        provider = window.solana
+      }
+      account = await web3Connect(selectedNetwork, provider)
     } catch (err) {
-      onError('You need an Ethereum wallet to use Aleph.im.')
+      onError(err.message)
     }
 
     if (!account) return
@@ -82,5 +98,6 @@ export function useConnect(): UseConnectReturn {
     isConnected,
     account,
     tryReconnect,
+    selectedNetwork,
   }
 }
