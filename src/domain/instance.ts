@@ -4,7 +4,7 @@ import { InstancePublishConfiguration } from 'aleph-sdk-ts/dist/messages/instanc
 import { InstanceContent, MachineVolume, MessageType, PaymentType } from 'aleph-sdk-ts/dist/messages/types'
 import E_ from '../helpers/errors'
 import { apiServer, defaultInstanceChannel, EntityType, PaymentMethod } from '../helpers/constants'
-import { getDate, getExplorerURL } from '../helpers/utils'
+import { getDate, getExplorerURL, sleep } from '../helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
@@ -28,6 +28,7 @@ import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { Web3Provider } from '@ethersproject/providers'
 import { superfluid } from 'aleph-sdk-ts/dist/accounts'
 import { getHours } from '@/hooks/form/useSelectStreamDuration'
+import { CRN } from './node'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -41,6 +42,7 @@ export type AddInstance = Omit<
     envVars?: EnvVarField[]
     domains?: Omit<DomainField, 'ref'>[]
     payment?: PaymentConfiguration
+    node?: CRN
   }
 
 // @todo: Refactor
@@ -134,15 +136,16 @@ export class InstanceManager
       const instanceMessage = await this.parseInstance(newInstance)
 
       if (newInstance.payment?.type === PaymentMethod.Stream) {
+        if (!newInstance.node || !newInstance.node.address) throw new Error('Invalid CRN')
         const { streamCost, streamDuration, sender, receiver } = newInstance.payment
         const web3Provider = new Web3Provider(window.ethereum)
 
+        // @note: setup ALEPHx flow
         const superfluidAccount = new superfluid.SuperfluidAccount(
           web3Provider,
           sender,
         )
         await superfluidAccount.init()
-        await superfluidAccount.decreaseALEPHxFlow(receiver, 10)
         const alephxBalance = await superfluidAccount.getALEPHxBalance()
         const alephxFlow = await superfluidAccount.getALEPHxFlow(receiver)
         const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
@@ -162,6 +165,11 @@ export class InstanceManager
 
       // @note: Add the domain link
       await this.parseDomains(entity.id, newInstance.domains)
+
+      // @note: Notify the CRN if it is a targeted stream
+      if (newInstance.payment?.type === PaymentMethod.Stream && newInstance.node) {
+        await this.notifyCRNExecution(newInstance.node, entity.id)
+      }
 
       return entity
     } catch (err) {
@@ -301,5 +309,30 @@ export class InstanceManager
           confirmed: !!message.confirmed,
         }
       })
+  }
+
+  protected async notifyCRNExecution(node: CRN, instanceId: string): Promise<void> {
+    let errorMsg = ''
+    for (let i = 0; i < 5; i++) {
+      try {
+        const req = await fetch(`${node.address}/control/allocation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            instance: instanceId
+          }),
+        })
+        const resp = await req.json()
+        if (resp.success) return
+        errorMsg = resp.errors[instanceId]
+        await sleep(1000)
+      } catch (e) {
+        errorMsg = e.message
+        await sleep(1000)
+      }
+    }
+    throw new Error(`Failed to start instance on CRN ${node.hash}: ${errorMsg}`)
   }
 }

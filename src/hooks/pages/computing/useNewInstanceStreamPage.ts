@@ -136,6 +136,7 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
           streamCost: state.streamCost,
           streamDuration: state.streamDuration,
         },
+        node,
       } as AddInstance)
 
       dispatch({
