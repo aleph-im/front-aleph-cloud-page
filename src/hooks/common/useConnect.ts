@@ -4,7 +4,7 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/aleph-core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
 import { ExternalProvider } from '@ethersproject/providers'
 
@@ -14,6 +14,7 @@ export type UseConnectReturn = {
   isConnected: boolean
   account: Account | undefined
   tryReconnect: () => Promise<void>
+  selectedNetwork: Chain
 }
 
 export function useConnect(): UseConnectReturn {
@@ -22,6 +23,10 @@ export function useConnect(): UseConnectReturn {
   const [keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
     'keepAccountAlive',
     false,
+  )
+  const [selectedNetwork, setSelectedNetwork] = useSessionStorage<Chain>(
+    'selectedNetwork',
+    Chain.ETH,
   )
 
   const onError = useCallback(
@@ -44,18 +49,20 @@ export function useConnect(): UseConnectReturn {
     [dispatch],
   )
 
-  const connect = useCallback(async (chain: Chain | undefined, provider: ExternalProvider | undefined) => {
+  const connect = useCallback(async (chain?: Chain, provider?: ExternalProvider) => {
     let account
     try {
-      if (!chain) {
-        if (provider) {
-          chain =
-          account = await web3Connect(chain, provider)
-        } else {
-          // @todo: Needs to accommodate for other non-evm chains
-          account = await web3Connect(chain, window.ethereum)
-        }
+      if (chain) {
+        setSelectedNetwork(chain)
       }
+      if (!provider && window.ethereum) {
+        provider = window.ethereum
+      } else if (!provider && window.web3) {
+        provider = window.web3.currentProvider
+      } else if (!provider && window.solana) {
+        provider = window.solana
+      }
+      account = await web3Connect(selectedNetwork, provider)
     } catch (err) {
       onError(err.message)
     }
@@ -92,6 +99,5 @@ export function useConnect(): UseConnectReturn {
     account,
     tryReconnect,
     selectedNetwork,
-    handleNetworkSelection,
   }
 }

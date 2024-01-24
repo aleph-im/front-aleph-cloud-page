@@ -39,17 +39,6 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
     handleDisplayWalletPicker,
   } = useAccountButton(rest)
 
-  const chainNameToEnum = (chainName: string): Chain => {
-    switch (chainName) {
-      case 'Ethereum':
-        return Chain.ETH
-      case 'Avalanche':
-        return Chain.AVAX
-      default:
-        return Chain.ETH
-    }
-  }
-
   return (
     <>
       {account ? (
@@ -141,11 +130,6 @@ export const Header = () => {
     handleToggle,
     ...accountProps
   } = useHeader()
-
-  const {
-    selectedNetwork,
-    handleNetworkSelection
-  } = useConnect()
 
   return (
     <>

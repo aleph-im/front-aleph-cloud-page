@@ -16,6 +16,7 @@ import {
 import { useRoutes, UseRoutesReturn } from '../common/useRoutes'
 import { useBreadcrumbNames, UseBreadcrumbNamesReturn } from '../common/useBreadcrumbNames'
 import { WalletPickerProps } from '@aleph-front/aleph-core/dist/cjs/components/modules/WalletPicker/types'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 
 export type UseAccountButtonProps = {
   handleConnect: WalletPickerProps['onConnect']
@@ -33,6 +34,20 @@ export type UseAccountButtonReturn = UseAccountButtonProps & {
   walletPickerTriggerRef: RefObject<HTMLButtonElement>
   walletPosition: { x: number; y: number }
   handleDisplayWalletPicker: () => void
+}
+
+
+export function chainNameToEnum(chainName: string): Chain {
+  switch (chainName) {
+    case 'Ethereum':
+      return Chain.ETH
+    case 'Avalanche':
+      return Chain.AVAX
+    case 'Solana':
+      return Chain.SOL
+    default:
+      return Chain.ETH
+  }
 }
 
 export function useAccountButton({
@@ -79,7 +94,7 @@ export function useAccountButton({
 
   const walletPickerOpen = state === 'enter'
 
-  const handleConnect = useCallback((chain, provider) => {
+  const handleConnect = useCallback((chain: string, provider: any) => {
     handleConnectProp(chain, provider);
     setDisplayWalletPicker(false)
   }, [handleConnectProp])
@@ -108,7 +123,7 @@ export type UseHeaderReturn = UseRoutesReturn & {
   isOpen: boolean
   hasBreadcrumb: boolean
   handleToggle: (isOpen: boolean) => void
-  handleConnect: () => Promise<void>
+  handleConnect: (chain?: string, provider?: any) => Promise<void>
   provider: () => void
 }
 
@@ -134,10 +149,10 @@ export function useHeader(): UseHeaderReturn {
   }, [connect, disconnect, isConnected])
 
   // @note: wait till account is connected and redirect
-  const handleConnect = useCallback(async (chain, provider) => {
+  const handleConnect = useCallback(async (chain: string, provider: any) => {
     if (!isConnected) {
       setkeepAccountAlive(true)
-      const acc = await connect(chain, provider)
+      const acc = await connect(chainNameToEnum(chain), provider)
       if (!acc) return
       // router.push('/dashboard')
     } else {
