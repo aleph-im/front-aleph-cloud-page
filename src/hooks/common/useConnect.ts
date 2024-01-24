@@ -9,7 +9,7 @@ import { useSessionStorage } from 'usehooks-ts'
 import { ExternalProvider } from '@ethersproject/providers'
 
 export type UseConnectReturn = {
-  connect: (chain?: Chain, provider?: any) => Promise<Account | undefined>
+  connect: (chain?: Chain, provider?: ExternalProvider) => Promise<Account | undefined>
   disconnect: () => Promise<void>
   isConnected: boolean
   account: Account | undefined

@@ -102,7 +102,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
               }
             ]}
             onConnect={handleConnect}
-            onDisconnect={() => handleConnect}
+            onDisconnect={() => handleConnect()}
             address={account?.address}
             addressHref={`https://etherscan.io/address/${account?.address}`}
             balance={accountBalance}
@@ -138,18 +138,6 @@ export const Header = () => {
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
-        <StyledNavbarMobile
-          {...{
-            routes,
-            pathname,
-            open: isOpen,
-            onToggle: handleToggle,
-            Link: CustomLinkMemo,
-            height: '6.5rem',
-            breakpoint: 'lg',
-            mobileTopContent: <AccountButtonMemo {...accountProps} isMobile />,
-          }}
-        />
         <StyledNavbarDesktop $breakpoint={breakpoint}>
           <div>
             <AutoBreadcrumb names={breadcrumbNames} />
