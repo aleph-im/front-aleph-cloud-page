@@ -4,11 +4,12 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/aleph-core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
+import { ExternalProvider } from '@ethersproject/providers'
 
 export type UseConnectReturn = {
-  connect: (chain?: Chain) => Promise<Account | undefined>
+  connect: (chain?: Chain, provider?: any) => Promise<Account | undefined>
   disconnect: () => Promise<void>
   isConnected: boolean
   account: Account | undefined
@@ -43,11 +44,18 @@ export function useConnect(): UseConnectReturn {
     [dispatch],
   )
 
-  const connect = useCallback(async (chain: Chain = Chain.ETH) => {
+  const connect = useCallback(async (chain: Chain | undefined, provider: ExternalProvider | undefined) => {
     let account
     try {
-      // @todo: Needs to accommodate for other non-evm chains
-      account = await web3Connect(chain, window.ethereum)
+      if (!chain) {
+        if (provider) {
+          chain =
+          account = await web3Connect(chain, provider)
+        } else {
+          // @todo: Needs to accommodate for other non-evm chains
+          account = await web3Connect(chain, window.ethereum)
+        }
+      }
     } catch (err) {
       onError(err.message)
     }
@@ -83,5 +91,7 @@ export function useConnect(): UseConnectReturn {
     isConnected,
     account,
     tryReconnect,
+    selectedNetwork,
+    handleNetworkSelection,
   }
 }

@@ -18,6 +18,7 @@ import {
 } from '@/hooks/pages/useHeader'
 import AutoBreadcrumb from '../AutoBreadcrumb'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
+import { useConnect } from '@/hooks/common/useConnect'
 
 export type AccountButtonProps = UseAccountButtonProps & {
   isMobile?: boolean
@@ -33,11 +34,9 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
     walletPickerRef,
     walletPickerTriggerRef,
     walletPosition,
-    selectedNetwork,
     provider,
     handleConnect,
     handleDisplayWalletPicker,
-    handleNetworkSelection,
   } = useAccountButton(rest)
 
   const chainNameToEnum = (chainName: string): Chain => {
@@ -114,9 +113,8 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
                 ],
               }
             ]}
-            selectedNetwork={selectedNetwork}
-            onConnect={(chain, provider) => handleConnect(chainNameToEnum(chain))}
-            onDisconnect={handleConnect}
+            onConnect={handleConnect}
+            onDisconnect={() => handleConnect}
             address={account?.address}
             addressHref={`https://etherscan.io/address/${account?.address}`}
             balance={accountBalance}
@@ -143,6 +141,11 @@ export const Header = () => {
     handleToggle,
     ...accountProps
   } = useHeader()
+
+  const {
+    selectedNetwork,
+    handleNetworkSelection
+  } = useConnect()
 
   return (
     <>
