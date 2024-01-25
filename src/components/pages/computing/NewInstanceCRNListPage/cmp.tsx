@@ -124,7 +124,7 @@ export default function NewInstanceCRNListPage() {
 
           return (
             <div tw="flex gap-3 justify-end">
-              {!isLoading ? (
+              {isLoading ? (
                 <Button
                   size="md"
                   color="main2"

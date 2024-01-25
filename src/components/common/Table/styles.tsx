@@ -22,11 +22,15 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
         &::after {
           display: none;
         }
+
+        &:disabled {
+          background: ${theme.color.purple0};
+        }
       }
 
       thead {
         color: ${theme.color.text};
-        background: ${theme.color.purple0};
+        background: ${({ theme }) => theme.color.light0};
         border-bottom: 0.125rem solid ${theme.color.white};
         th > div {
           opacity: 1 !important;
@@ -39,14 +43,26 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
           transition: all ${timing} ${duration.fast}ms 0ms;
 
           td {
+            background: ${theme.color.light1};
+
+            &.fx-noise-light {
+              background: ${theme.color.light0};
+            }
+
             &:first-child {
-              border-top-left-radius: 3.75rem;
-              border-bottom-left-radius: 3.75rem;
+              &:hover,
+              &._active {
+                border-top-left-radius: 3.75rem;
+                border-bottom-left-radius: 3.75rem;
+              }
             }
 
             &:last-child {
-              border-top-right-radius: 3.75rem;
-              border-bottom-right-radius: 3.75rem;
+              &:hover,
+              &._active {
+                border-top-right-radius: 3.75rem;
+                border-bottom-right-radius: 3.75rem;
+              }
             }
           }
 

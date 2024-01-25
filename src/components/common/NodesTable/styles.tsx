@@ -38,8 +38,4 @@ export const StyledTable = styled(Table as any).attrs(
   td {
     border: none;
   }
-
-  .fx-noise-light {
-    background: ${({ theme }) => theme.color.base0};
-  }
 `
