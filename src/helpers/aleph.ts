@@ -4,7 +4,6 @@ import { GetAccountFromProvider as getETHAccount } from 'aleph-sdk-ts/dist/accou
 import { GetAccountFromProvider as getSOLAccount } from 'aleph-sdk-ts/dist/accounts/solana'
 import { GetAccountFromProvider as getAVAXAccount, SuperfluidAccount, createFromAvalancheAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
 import { AvalancheAccount } from 'aleph-sdk-ts/dist/accounts/avalanche'
-import { RpcId } from 'aleph-sdk-ts/dist/accounts/providers/JsonRPCWallet'
 import { getERC20Balance, getSOLBalance } from './utils'
 import E_ from './errors'
 
@@ -21,7 +20,7 @@ export const web3Connect = (chain: Chain, provider: any): Promise<Account> => {
       return getETHAccount(provider)
 
     case Chain.AVAX:
-      return getAVAXAccount(provider, RpcId.AVAX_TESTNET)
+      return getAVAXAccount(provider)
 
     case Chain.SOL:
       return getSOLAccount(provider)
