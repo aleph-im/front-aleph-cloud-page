@@ -136,7 +136,7 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
     async (state: NewInstanceStreamFormState) => {
       if (!manager) throw new Error('Manager not ready')
       if (!account) throw new Error('Invalid account')
-      if (!node || !node.reward) throw new Error('Invalid node')
+      if (!node || !node.stream_reward) throw new Error('Invalid node')
       if (!state?.streamCost) throw new Error('Invalid stream cost')
       if (window?.ethereum === undefined) throw new Error('No wallet found')
       const accountInstance = await manager.add({
@@ -145,7 +145,7 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
           chain: Chain.AVAX,
           type: PaymentMethod.Stream,
           sender: account.address,
-          receiver: node.reward,
+          receiver: node.stream_reward,
           streamCost: state.streamCost,
           streamDuration: state.streamDuration,
         },
