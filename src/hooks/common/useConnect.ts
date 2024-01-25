@@ -9,7 +9,10 @@ import { useSessionStorage } from 'usehooks-ts'
 import { ExternalProvider } from '@ethersproject/providers'
 
 export type UseConnectReturn = {
-  connect: (chain?: Chain, provider?: ExternalProvider) => Promise<Account | undefined>
+  connect: (
+    chain?: Chain,
+    provider?: ExternalProvider,
+  ) => Promise<Account | undefined>
   disconnect: () => Promise<void>
   isConnected: boolean
   account: Account | undefined
@@ -50,58 +53,64 @@ export function useConnect(): UseConnectReturn {
     [dispatch],
   )
 
-  const connect = useCallback(async (chain?: Chain, provider?: ExternalProvider) => {
-    let account
-    try {
-      if (chain) {
-        setSelectedNetwork(chain)
-      } else {
-        chain = selectedNetwork
-      }
-      console.log("selectedNetwork2", selectedNetwork)
-      if (!provider && window.ethereum) {
-        provider = window.ethereum
-      } else if (!provider && window.web3) {
-        provider = window.web3.currentProvider
-      } else if (!provider && window.solana) {
-        provider = window.solana
-      }
-      account = await web3Connect(chain, provider)
-    } catch (err) {
-      onError(err.message)  // we assume because the user denied the connection
-      // @todo: remove ugly hack because of weird selectedNetwork behavior
+  const connect = useCallback(
+    async (chain?: Chain, provider?: ExternalProvider) => {
+      let account
       try {
-        if (chain === Chain.ETH) {
-          account = await web3Connect(Chain.AVAX, provider)
-          setSelectedNetwork(Chain.AVAX)
+        if (chain) {
+          setSelectedNetwork(chain)
         } else {
-          account = await web3Connect(Chain.ETH, provider)
-          setSelectedNetwork(Chain.ETH)
+          chain = selectedNetwork
         }
+        console.log('selectedNetwork2', selectedNetwork)
+        if (!provider && window.ethereum) {
+          provider = window.ethereum
+        } else if (!provider && window.web3) {
+          provider = window.web3.currentProvider
+        } else if (!provider && window.solana) {
+          provider = window.solana
+        }
+        account = await web3Connect(chain, provider)
       } catch (err) {
-        onError(err.message)  // we got fucked
+        onError(err.message) // we assume because the user denied the connection
+        // @todo: remove ugly hack because of weird selectedNetwork behavior
+        try {
+          if (chain === Chain.ETH) {
+            account = await web3Connect(Chain.AVAX, provider)
+            setSelectedNetwork(Chain.AVAX)
+          } else {
+            account = await web3Connect(Chain.ETH, provider)
+            setSelectedNetwork(Chain.ETH)
+          }
+        } catch (err) {
+          onError(err.message) // we got fucked
+        }
       }
-    }
-    if (!account) return
-    setKeepAccountAlive(true)
+      if (!account) return
+      setKeepAccountAlive(true)
 
-    await Promise.all([getBalance(account)]).catch((err) => {
-      onError(err.message)
-    })
+      await Promise.all([getBalance(account)]).catch((err) => {
+        onError(err.message)
+      })
 
-    dispatch({ type: ActionTypes.connect, payload: { account } })
+      dispatch({ type: ActionTypes.connect, payload: { account } })
 
-    return account
-  }, [setKeepAccountAlive, getBalance, dispatch, onError])
+      return account
+    },
+    [setKeepAccountAlive, getBalance, dispatch, onError],
+  )
 
   const disconnect = useCallback(async () => {
     setKeepAccountAlive(false)
     dispatch({ type: ActionTypes.disconnect, payload: null })
   }, [dispatch, setKeepAccountAlive])
 
-  const switchNetwork = useCallback(async (chain: Chain) => {
-    await connect(chain)
-  }, [connect, setSelectedNetwork])
+  const switchNetwork = useCallback(
+    async (chain: Chain) => {
+      await connect(chain)
+    },
+    [connect, setSelectedNetwork],
+  )
 
   const { account } = state
   const isConnected = !!account?.address

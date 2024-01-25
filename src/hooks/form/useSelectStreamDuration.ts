@@ -8,9 +8,7 @@ export type StreamDurationField = {
   unit: StreamDurationUnit
 }
 
-export function getHours(
-  streamDuration: StreamDurationField,
-): number {
+export function getHours(streamDuration: StreamDurationField): number {
   if (!streamDuration) return 0
 
   const { duration, unit } = streamDuration

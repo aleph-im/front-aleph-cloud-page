@@ -3,11 +3,21 @@ import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import { defaultNameAndTags, NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
+import {
+  defaultNameAndTags,
+  NameAndTagsField,
+} from '@/hooks/form/useAddNameAndTags'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
 import { PersistentVolumeField, VolumeField } from '@/hooks/form/useAddVolume'
-import { defaultInstanceImage, InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
-import { getDefaultSpecsOptions, InstanceSpecsField, validateMinNodeSpecs } from '@/hooks/form/useSelectInstanceSpecs'
+import {
+  defaultInstanceImage,
+  InstanceImageField,
+} from '@/hooks/form/useSelectInstanceImage'
+import {
+  getDefaultSpecsOptions,
+  InstanceSpecsField,
+  validateMinNodeSpecs,
+} from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { AddInstance, InstanceManager } from '@/domain/instance'
@@ -18,7 +28,10 @@ import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
-import { defaultStreamDuration, StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
+import {
+  defaultStreamDuration,
+  StreamDurationField,
+} from '@/hooks/form/useSelectStreamDuration'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { ActionTypes } from '@/helpers/store'
 
@@ -123,7 +136,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
     async (state: NewInstanceCRNFormState) => {
       if (!manager) throw new Error('Manager not ready')
       if (!account) throw new Error('Invalid account')
-      if (!node || !node.reward) throw new Error('Invalid node')
+      if (!node || !node.stream_reward) throw new Error('Invalid node')
       if (!state?.streamCost) throw new Error('Invalid stream cost')
       if (window?.ethereum === undefined) throw new Error('No wallet found')
       const accountInstance = await manager.add({
@@ -132,7 +145,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
           chain: Chain.AVAX,
           type: PaymentMethod.Stream,
           sender: account.address,
-          receiver: node.reward,
+          receiver: node.stream_reward,
           streamCost: state.streamCost,
           streamDuration: state.streamDuration,
         },

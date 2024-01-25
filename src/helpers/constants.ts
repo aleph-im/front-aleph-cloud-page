@@ -7,8 +7,8 @@ export const channel = 'FOUNDATION'
 export const tags = ['mainnet']
 export const postType = 'corechan-operation'
 
-export const apiServer = 'https://api3.aleph.im'
-export const wsServer = 'wss://api3.aleph.im'
+export const apiServer = 'https://api1.aleph.im'
+export const wsServer = 'wss://api1.aleph.im'
 export const mbPerAleph = 3
 
 export const scoringAddress = '0x4D52380D3191274a04846c89c069E6C3F2Ed94e4'
