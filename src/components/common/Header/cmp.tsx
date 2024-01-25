@@ -2,9 +2,18 @@ import { memo } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Button, Icon, RenderLinkProps } from '@aleph-front/core'
-import { StyledButton, StyledHeader, StyledNavbarDesktop, StyledWalletPicker } from './styles'
+import {
+  StyledButton,
+  StyledHeader,
+  StyledNavbarDesktop,
+  StyledWalletPicker,
+} from './styles'
 import { ellipseAddress } from '@/helpers/utils'
-import { useAccountButton, UseAccountButtonProps, useHeader } from '@/hooks/pages/useHeader'
+import {
+  useAccountButton,
+  UseAccountButtonProps,
+  useHeader,
+} from '@/hooks/pages/useHeader'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import { useConnect } from '@/hooks/common/useConnect'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
@@ -89,7 +98,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
                     provider,
                   },
                 ],
-              }
+              },
             ]}
             onConnect={handleConnect}
             onDisconnect={() => handleConnect()}
@@ -125,10 +134,7 @@ export const Header = () => {
     ...accountProps
   } = useHeader()
 
-  const {
-    switchNetwork,
-    selectedNetwork,
-  } = useConnect();
+  const { switchNetwork, selectedNetwork } = useConnect()
 
   return (
     <>
@@ -138,11 +144,27 @@ export const Header = () => {
             <AutoBreadcrumb names={breadcrumbNames} />
           </div>
           <div tw="relative flex items-center justify-center gap-7">
-            <StyledButton key="evm" forwardedAs="button" onClick={() => switchNetwork(Chain.ETH)} disabled={selectedNetwork === Chain.ETH}>
-              <Icon name="ethereum" color={selectedNetwork === Chain.ETH ? 'main1' : 'main0'} />
+            <StyledButton
+              key="evm"
+              forwardedAs="button"
+              onClick={() => switchNetwork(Chain.ETH)}
+              disabled={selectedNetwork === Chain.ETH}
+            >
+              <Icon
+                name="ethereum"
+                color={selectedNetwork === Chain.ETH ? 'main1' : 'main0'}
+              />
             </StyledButton>
-            <StyledButton key="avax" forwardedAs="button" onClick={() => switchNetwork(Chain.AVAX)} disabled={selectedNetwork === Chain.AVAX}>
-              <Icon name="avalanche" color={selectedNetwork === Chain.AVAX ? 'main1' : 'main0'} />
+            <StyledButton
+              key="avax"
+              forwardedAs="button"
+              onClick={() => switchNetwork(Chain.AVAX)}
+              disabled={selectedNetwork === Chain.AVAX}
+            >
+              <Icon
+                name="avalanche"
+                color={selectedNetwork === Chain.AVAX ? 'main1' : 'main0'}
+              />
             </StyledButton>
             <AccountButtonMemo {...accountProps} />
           </div>

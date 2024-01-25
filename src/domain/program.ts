@@ -19,7 +19,12 @@ import {
   StoreMessage,
 } from 'aleph-sdk-ts/dist/messages/types'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import { Executable, ExecutableCost, ExecutableCostProps, PaymentConfiguration } from './executable'
+import {
+  Executable,
+  ExecutableCost,
+  ExecutableCostProps,
+  PaymentConfiguration,
+} from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { CustomFunctionRuntimeField } from './runtime'
 import { FileManager } from './file'

@@ -1,9 +1,19 @@
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { any, forget, instance } from 'aleph-sdk-ts/dist/messages'
 import { InstancePublishConfiguration } from 'aleph-sdk-ts/dist/messages/instance/publish'
-import { InstanceContent, MachineVolume, MessageType, PaymentType } from 'aleph-sdk-ts/dist/messages/types'
+import {
+  InstanceContent,
+  MachineVolume,
+  MessageType,
+  PaymentType,
+} from 'aleph-sdk-ts/dist/messages/types'
 import E_ from '../helpers/errors'
-import { apiServer, defaultInstanceChannel, EntityType, PaymentMethod } from '../helpers/constants'
+import {
+  apiServer,
+  defaultInstanceChannel,
+  EntityType,
+  PaymentMethod,
+} from '../helpers/constants'
 import { getDate, getExplorerURL, sleep } from '../helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
@@ -23,7 +33,10 @@ import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
-import { instanceSchema, instanceStreamSchema } from '@/helpers/schemas/instance'
+import {
+  instanceSchema,
+  instanceStreamSchema,
+} from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { Web3Provider } from '@ethersproject/providers'
 import { superfluid } from 'aleph-sdk-ts/dist/accounts'
@@ -32,7 +45,13 @@ import { CRN } from './node'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
-  'image' | 'account' | 'channel' | 'authorized_keys' | 'resources' | 'volumes' | 'payment'
+  | 'image'
+  | 'account'
+  | 'channel'
+  | 'authorized_keys'
+  | 'resources'
+  | 'volumes'
+  | 'payment'
 > &
   NameAndTagsField & {
     image: InstanceImageField
@@ -136,8 +155,10 @@ export class InstanceManager
       const instanceMessage = await this.parseInstance(newInstance)
 
       if (newInstance.payment?.type === PaymentMethod.Stream) {
-        if (!newInstance.node || !newInstance.node.address) throw new Error('Invalid CRN')
-        const { streamCost, streamDuration, sender, receiver } = newInstance.payment
+        if (!newInstance.node || !newInstance.node.address)
+          throw new Error('Invalid CRN')
+        const { streamCost, streamDuration, sender, receiver } =
+          newInstance.payment
         const web3Provider = new Web3Provider(window.ethereum)
 
         // @note: setup ALEPHx flow
@@ -149,13 +170,23 @@ export class InstanceManager
         const alephxBalance = await superfluidAccount.getALEPHxBalance()
         const alephxFlow = await superfluidAccount.getALEPHxFlow(receiver)
         const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
-        if (totalFlow > 1) throw new Error(`Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost.`)
+        if (totalFlow > 1)
+          throw new Error(
+            `Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost.`,
+          )
         const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
         const totalRequiredAleph = usedAlephInDuration.add(streamCost)
         if (alephxBalance.lt(totalRequiredAleph)) {
-          throw new Error(`Insufficient balance: ${totalRequiredAleph.sub(alephxBalance).toString()} ALEPH required. Try to lower the VM cost or the duration.`)
+          throw new Error(
+            `Insufficient balance: ${totalRequiredAleph
+              .sub(alephxBalance)
+              .toString()} ALEPH required. Try to lower the VM cost or the duration.`,
+          )
         }
-        await superfluidAccount.increaseALEPHxFlow(receiver, streamCost / getHours(streamDuration))
+        await superfluidAccount.increaseALEPHxFlow(
+          receiver,
+          streamCost / getHours(streamDuration),
+        )
       }
 
       const response = await instance.publish({
@@ -169,7 +200,10 @@ export class InstanceManager
       await this.parseDomains(entity.id, newInstance.domains)
 
       // @note: Notify the CRN if it is a targeted stream
-      if (newInstance.payment?.type === PaymentMethod.Stream && newInstance.node) {
+      if (
+        newInstance.payment?.type === PaymentMethod.Stream &&
+        newInstance.node
+      ) {
         await this.notifyCRNExecution(newInstance.node, entity.id)
       }
 
@@ -191,17 +225,21 @@ export class InstanceManager
     if (!instance) throw new Error('Invalid instance ID')
 
     if (instance.payment?.type === PaymentType.superfluid) {
-      const { sender, receiver } = instance.payment as StreamPaymentConfiguration
+      const { sender, receiver } =
+        instance.payment as StreamPaymentConfiguration
       const instanceCosts = await InstanceManager.getCost({
         paymentMethod: PaymentMethod.Stream,
         specs: {
           cpu: instance.resources.vcpus,
           memory: instance.resources.memory,
-          storage: instance.volumes.reduce((ac, cv) => ac + cv["size_mb"] ?? 0, 0),
+          storage: instance.volumes.reduce(
+            (ac, cv) => ac + cv['size_mb'] ?? 0,
+            0,
+          ),
           ram: instance.resources.memory,
-        }
+        },
       })
-      console.log("instanceCosts", instanceCosts)
+      console.log('instanceCosts', instanceCosts)
       const web3Provider = new Web3Provider(window.ethereum)
 
       const superfluidAccount = new superfluid.SuperfluidAccount(
@@ -209,7 +247,10 @@ export class InstanceManager
         sender,
       )
       await superfluidAccount.init()
-      await superfluidAccount.decreaseALEPHxFlow(receiver, instanceCosts.totalStreamCost)
+      await superfluidAccount.decreaseALEPHxFlow(
+        receiver,
+        instanceCosts.totalStreamCost,
+      )
     }
 
     try {
@@ -313,7 +354,10 @@ export class InstanceManager
       })
   }
 
-  protected async notifyCRNExecution(node: CRN, instanceId: string): Promise<void> {
+  protected async notifyCRNExecution(
+    node: CRN,
+    instanceId: string,
+  ): Promise<void> {
     let errorMsg = ''
     for (let i = 0; i < 5; i++) {
       try {
@@ -323,7 +367,7 @@ export class InstanceManager
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            instance: instanceId
+            instance: instanceId,
           }),
         })
         const resp = await req.json()

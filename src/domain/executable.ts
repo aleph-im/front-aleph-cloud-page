@@ -1,5 +1,11 @@
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import { Chain, MachineResources, MachineVolume, Payment, PaymentType as SDKPaymentType } from 'aleph-sdk-ts/dist/messages/types'
+import {
+  Chain,
+  MachineResources,
+  MachineVolume,
+  Payment,
+  PaymentType as SDKPaymentType,
+} from 'aleph-sdk-ts/dist/messages/types'
 import {
   AddExistingVolume,
   AddPersistentVolume,
@@ -14,7 +20,10 @@ import { VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { Domain, DomainManager } from './domain'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
-import { getHours, StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
+import {
+  getHours,
+  StreamDurationField,
+} from '@/hooks/form/useSelectStreamDuration'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -52,7 +61,9 @@ export type StreamPaymentConfiguration = {
   streamDuration: StreamDurationField
 }
 
-export type PaymentConfiguration = HoldPaymentConfiguration | StreamPaymentConfiguration
+export type PaymentConfiguration =
+  | HoldPaymentConfiguration
+  | StreamPaymentConfiguration
 
 export abstract class Executable {
   /**
@@ -219,15 +230,15 @@ export abstract class Executable {
     }
   }
 
-  protected parsePayment(
-    payment?: PaymentConfiguration,
-  ): Payment {
-    if (!payment) return {
-      chain: Chain.ETH,
-      type: SDKPaymentType.hold,
-    }
+  protected parsePayment(payment?: PaymentConfiguration): Payment {
+    if (!payment)
+      return {
+        chain: Chain.ETH,
+        type: SDKPaymentType.hold,
+      }
     if (payment.type === PaymentMethod.Stream) {
-      if (!payment.receiver) throw new Error('Payment receiver is required for stream payments')
+      if (!payment.receiver)
+        throw new Error('Payment receiver is required for stream payments')
       if (payment.chain === Chain.AVAX)
         return {
           chain: Chain.AVAX,
