@@ -2,7 +2,11 @@ import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { GetAccountFromProvider as getETHAccount } from 'aleph-sdk-ts/dist/accounts/ethereum'
 import { GetAccountFromProvider as getSOLAccount } from 'aleph-sdk-ts/dist/accounts/solana'
-import { GetAccountFromProvider as getAVAXAccount, SuperfluidAccount, createFromAvalancheAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
+import {
+  GetAccountFromProvider as getAVAXAccount,
+  SuperfluidAccount,
+  createFromAvalancheAccount,
+} from 'aleph-sdk-ts/dist/accounts/superfluid'
 import { AvalancheAccount } from 'aleph-sdk-ts/dist/accounts/avalanche'
 import { getERC20Balance, getSOLBalance } from './utils'
 import E_ from './errors'

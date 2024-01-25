@@ -16,7 +16,10 @@ import {
   NetworkProps,
 } from '@aleph-front/core'
 import { useRoutes, UseRoutesReturn } from '../common/useRoutes'
-import { useBreadcrumbNames, UseBreadcrumbNamesReturn } from '../common/useBreadcrumbNames'
+import {
+  useBreadcrumbNames,
+  UseBreadcrumbNamesReturn,
+} from '../common/useBreadcrumbNames'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 
 export type UseAccountButtonProps = {
@@ -36,7 +39,6 @@ export type UseAccountButtonReturn = UseAccountButtonProps & {
   walletPosition: { x: number; y: number }
   handleDisplayWalletPicker: () => void
 }
-
 
 export function chainNameToEnum(chainName?: string): Chain {
   switch (chainName) {
@@ -108,10 +110,13 @@ export function useAccountButton({
 
   const walletPickerOpen = state === 'enter'
 
-  const handleConnect = useCallback((wallet?: WalletProps, network?: NetworkProps) => {
-    handleConnectProp(wallet, network);
-    setDisplayWalletPicker(false)
-  }, [handleConnectProp])
+  const handleConnect = useCallback(
+    (wallet?: WalletProps, network?: NetworkProps) => {
+      handleConnectProp(wallet, network)
+      setDisplayWalletPicker(false)
+    },
+    [handleConnectProp],
+  )
 
   return {
     theme,
@@ -164,19 +169,25 @@ export function useHeader(): UseHeaderReturn {
   }, [connect, disconnect, isConnected])
 
   // @note: wait till account is connected and redirect
-  const handleConnect = useCallback(async (wallet?: WalletProps, network?: NetworkProps) => {
-    console.log('handleConnect', wallet, network)
-    if (!isConnected && (wallet || network)) {
-      setkeepAccountAlive(true)
-      const acc = await connect(chainNameToEnum(network?.name), wallet?.provider())
-      if (!acc) return
-      // router.push('/')
-    } else {
-      setkeepAccountAlive(false)
-      await disconnect()
-      router.push('/')
-    }
-  }, [connect, disconnect, isConnected, router, setkeepAccountAlive])
+  const handleConnect = useCallback(
+    async (wallet?: WalletProps, network?: NetworkProps) => {
+      console.log('handleConnect', wallet, network)
+      if (!isConnected && (wallet || network)) {
+        setkeepAccountAlive(true)
+        const acc = await connect(
+          chainNameToEnum(network?.name),
+          wallet?.provider(),
+        )
+        if (!acc) return
+        // router.push('/')
+      } else {
+        setkeepAccountAlive(false)
+        await disconnect()
+        router.push('/')
+      }
+    },
+    [connect, disconnect, isConnected, router, setkeepAccountAlive],
+  )
 
   useEffect(() => {
     ;(async () => {
