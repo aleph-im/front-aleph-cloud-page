@@ -148,6 +148,8 @@ export class InstanceManager
         await superfluidAccount.init()
         const alephxBalance = await superfluidAccount.getALEPHxBalance()
         const alephxFlow = await superfluidAccount.getALEPHxFlow(receiver)
+        const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
+        if (totalFlow > 1) throw new Error(`Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost.`)
         const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
         const totalRequiredAleph = usedAlephInDuration.add(streamCost)
         if (alephxBalance.lt(totalRequiredAleph)) {
