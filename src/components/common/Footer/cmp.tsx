@@ -107,7 +107,7 @@ export const Footer = () => {
               },
               {
                 label: 'Decentralized cloud solution',
-                href: 'https://twentysix.cloud/decentralize-cloud-solution',
+                href: 'https://twentysix.cloud/decentralized-cloud-solution',
               },
               {
                 label: 'What is decentralized cloud computing?',

@@ -6,6 +6,7 @@ import {
   StyledButton,
   StyledHeader,
   StyledNavbarDesktop,
+  StyledNavbarMobile,
   StyledWalletPicker,
 } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
@@ -105,46 +106,55 @@ const CustomLink = (props: RenderLinkProps) => {
 // ----------------------------
 
 export const Header = () => {
-  const { breadcrumbNames, breakpoint, handleToggle, ...accountProps } =
-    useHeader()
+  const {
+    pathname,
+    routes,
+    breadcrumbNames,
+    isOpen,
+    breakpoint,
+    handleToggle,
+    ...accountProps
+  } = useHeader()
 
   const { switchNetwork, selectedNetwork } = useConnect()
 
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
+        <StyledNavbarMobile
+          {...{
+            routes,
+            pathname,
+            open: isOpen,
+            onToggle: handleToggle,
+            Link: CustomLinkMemo,
+            height: '6.5rem',
+            breakpoint: 'lg',
+            mobileTopContent: <AccountButtonMemo {...accountProps} isMobile />,
+          }}
+        />
         <StyledNavbarDesktop $breakpoint={breakpoint}>
           <div>
             <AutoBreadcrumb names={breadcrumbNames} />
           </div>
+          {selectedNetwork}
+          {selectedNetwork === Chain.ETH ? 'true' : 'false'}
           <div tw="relative flex items-center justify-center gap-7">
             <StyledButton
               key="evm"
-              forwardedAs="button"
+              kind="rounded"
+              color={selectedNetwork === Chain.ETH ? 'main1' : 'transparent'}
               onClick={() => switchNetwork(Chain.ETH)}
-              disabled={selectedNetwork === Chain.ETH}
             >
-              <Icon
-                name="ethereum"
-                size="xl"
-                tw="w-6"
-                prefix="custom"
-                color={selectedNetwork === Chain.ETH ? 'main1' : 'main0'}
-              />
+              <Icon name="ethereum" size="xl" tw="w-6" prefix="custom" />
             </StyledButton>
             <StyledButton
               key="avax"
-              forwardedAs="button"
+              kind="rounded"
+              color={selectedNetwork === Chain.AVAX ? 'main1' : 'transparent'}
               onClick={() => switchNetwork(Chain.AVAX)}
-              disabled={selectedNetwork === Chain.AVAX}
             >
-              <Icon
-                name="avalanche"
-                size="xl"
-                tw="w-6"
-                prefix="custom"
-                color={selectedNetwork === Chain.AVAX ? 'main1' : 'main0'}
-              />
+              <Icon name="avalanche" size="xl" tw="w-6" prefix="custom" />
             </StyledButton>
             <AccountButtonMemo {...accountProps} />
           </div>

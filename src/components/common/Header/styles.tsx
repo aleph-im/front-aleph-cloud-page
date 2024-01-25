@@ -12,7 +12,6 @@ import tw from 'twin.macro'
 export const StyledButton = styled(Button).attrs((props) => {
   return {
     ...props,
-    color: 'main0',
     kind: 'rounded',
     variant: 'primary',
     size: 'md',
