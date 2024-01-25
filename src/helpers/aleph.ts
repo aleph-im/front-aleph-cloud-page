@@ -25,7 +25,7 @@ export const web3Connect = (chain: Chain, provider: any): Promise<Account> => {
       return getETHAccount(provider)
 
     case Chain.AVAX:
-      return getAVAXAccount(provider, RpcId.AVAX_TESTNET)
+      return getAVAXAccount(provider)
 
     case Chain.SOL:
       return getSOLAccount(provider)
