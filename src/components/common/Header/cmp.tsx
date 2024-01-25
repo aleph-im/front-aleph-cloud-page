@@ -3,19 +3,20 @@ import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Button, Icon, RenderLinkProps } from '@aleph-front/core'
 import {
-  StyledNavbarDesktop,
   StyledButton,
-  StyledWalletPicker,
-  StyledNavbarMobile,
   StyledHeader,
+  StyledNavbarDesktop,
+  StyledWalletPicker,
 } from './styles'
 import { ellipseAddress } from '@/helpers/utils'
 import {
-  UseAccountButtonProps,
   useAccountButton,
+  UseAccountButtonProps,
   useHeader,
 } from '@/hooks/pages/useHeader'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
+import { useConnect } from '@/hooks/common/useConnect'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 
 export type AccountButtonProps = UseAccountButtonProps & {
   isMobile?: boolean
@@ -23,7 +24,6 @@ export type AccountButtonProps = UseAccountButtonProps & {
 
 export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
   const {
-    theme,
     account,
     accountBalance,
     displayWalletPicker,
@@ -82,7 +82,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
               },
             ]}
             onConnect={handleConnect}
-            onDisconnect={handleConnect}
+            onDisconnect={() => handleConnect()}
             address={account?.address}
             addressHref={`https://etherscan.io/address/${account?.address}`}
             balance={accountBalance}
@@ -105,38 +105,46 @@ const CustomLink = (props: RenderLinkProps) => {
 // ----------------------------
 
 export const Header = () => {
-  const {
-    pathname,
-    routes,
-    breadcrumbNames,
-    isOpen,
-    breakpoint,
-    handleToggle,
-    ...accountProps
-  } = useHeader()
+  const { breadcrumbNames, breakpoint, handleToggle, ...accountProps } =
+    useHeader()
+
+  const { switchNetwork, selectedNetwork } = useConnect()
 
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
-        <StyledNavbarMobile
-          {...{
-            routes,
-            pathname,
-            open: isOpen,
-            onToggle: handleToggle,
-            Link: CustomLinkMemo,
-            height: '6.5rem',
-            breakpoint: 'lg',
-            mobileTopContent: <AccountButtonMemo {...accountProps} isMobile />,
-          }}
-        />
         <StyledNavbarDesktop $breakpoint={breakpoint}>
           <div>
             <AutoBreadcrumb names={breadcrumbNames} />
           </div>
           <div tw="relative flex items-center justify-center gap-7">
-            <StyledButton key="link" forwardedAs="button" disabled>
-              <Icon name="ethereum" size="xl" tw="w-6" prefix="custom" />
+            <StyledButton
+              key="evm"
+              forwardedAs="button"
+              onClick={() => switchNetwork(Chain.ETH)}
+              disabled={selectedNetwork === Chain.ETH}
+            >
+              <Icon
+                name="ethereum"
+                size="xl"
+                tw="w-6"
+                prefix="custom"
+                color={selectedNetwork === Chain.ETH ? 'main1' : 'main0'}
+              />
+            </StyledButton>
+            <StyledButton
+              key="avax"
+              forwardedAs="button"
+              onClick={() => switchNetwork(Chain.AVAX)}
+              disabled={selectedNetwork === Chain.AVAX}
+            >
+              <Icon
+                name="avalanche"
+                size="xl"
+                tw="w-6"
+                prefix="custom"
+                color={selectedNetwork === Chain.AVAX ? 'main1' : 'main0'}
+              />
             </StyledButton>
             <AccountButtonMemo {...accountProps} />
           </div>

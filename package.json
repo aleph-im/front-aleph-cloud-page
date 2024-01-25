@@ -11,8 +11,7 @@
     "lint:fix": "next lint --fix"
   },
   "dependencies": {
-    "@aleph-front/aleph-core": "^1.14.1",
-    "@aleph-front/core": "^1.15.28",
+    "@aleph-front/core": "^1.15.18",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
     "@helia/unixfs": "^1.4.1",
     "@hookform/resolvers": "^3.1.1",
@@ -24,7 +23,7 @@
     "@types/node": "18.14.1",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
-    "aleph-sdk-ts": "^3.6.3",
+    "aleph-sdk-ts": "^3.8.1",
     "eslint": "8.35.0",
     "eslint-config-next": "13.2.1",
     "ethers": "^5.7.2",

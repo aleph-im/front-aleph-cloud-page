@@ -40,7 +40,7 @@ export function useManageVolume(): ManageVolume {
         payload: { id: volume.id },
       })
 
-      router.replace('/')
+      await router.replace('/')
     } catch (e) {}
   }, [manager, volume, dispatch, router])
 

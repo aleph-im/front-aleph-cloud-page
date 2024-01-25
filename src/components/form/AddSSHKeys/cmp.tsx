@@ -89,8 +89,6 @@ export const AddSSHKeys = React.memo((props: AddSSHKeysProps) => {
     .map((field, index) => ({ ...field, index }))
     .filter((field) => !!field.isNew)
 
-  console.log(existingKeys, newKeys)
-
   return (
     <>
       {fields.length > 0 && (

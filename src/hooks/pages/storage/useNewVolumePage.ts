@@ -45,7 +45,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
         payload: { accountVolume },
       })
 
-      router.replace('/')
+      await router.replace('/')
     },
     [dispatch, manager, router],
   )

@@ -41,7 +41,7 @@ export function useManageFunction(): ManageFunction {
         payload: { id: func.id },
       })
 
-      router.replace('/')
+      await router.replace('/')
     } catch (e) {}
   }, [manager, func, dispatch, router])
 

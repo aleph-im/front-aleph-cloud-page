@@ -58,7 +58,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
         payload: { accountDomain },
       })
 
-      router.replace('/')
+      await router.replace('/')
     },
     [dispatch, manager, router],
   )

@@ -3,45 +3,24 @@ import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import {
-  NameAndTagsField,
-  defaultNameAndTags,
-} from '@/hooks/form/useAddNameAndTags'
-import {
-  SSHKeyField,
-  // defaultValues as sshKeyDefaultValues,
-} from '@/hooks/form/useAddSSHKeys'
+import { defaultNameAndTags, NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
+import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
 import { PersistentVolumeField, VolumeField } from '@/hooks/form/useAddVolume'
-import {
-  InstanceImageField,
-  defaultInstanceImage,
-} from '@/hooks/form/useSelectInstanceImage'
-import {
-  InstanceSpecsField,
-  getDefaultSpecsOptions,
-  validateMinNodeSpecs,
-} from '@/hooks/form/useSelectInstanceSpecs'
+import { defaultInstanceImage, InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
+import { getDefaultSpecsOptions, InstanceSpecsField, validateMinNodeSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { InstanceManager } from '@/domain/instance'
+import { AddInstance, InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  EntityType,
-  PaymentMethod,
-  VolumeType,
-  superToken,
-} from '@/helpers/constants'
+import { EntityType, PaymentMethod, VolumeType } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
-import { Framework } from '@superfluid-finance/sdk-core'
-import { Web3Provider } from '@ethersproject/providers'
-import {
-  StreamDurationField,
-  defaultStreamDuration,
-} from '@/hooks/form/useSelectStreamDuration'
+import { defaultStreamDuration, StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
+import { ActionTypes } from '@/helpers/store'
 
 export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -143,56 +122,31 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
   const onSubmit = useCallback(
     async (state: NewInstanceCRNFormState) => {
       if (!manager) throw new Error('Manager not ready')
-
-      console.log(state)
-
       if (!account) throw new Error('Invalid account')
-      if (!node) throw new Error('Invalid node')
+      if (!node || !node.reward) throw new Error('Invalid node')
       if (!state?.streamCost) throw new Error('Invalid stream cost')
+      if (window?.ethereum === undefined) throw new Error('No wallet found')
+      const accountInstance = await manager.add({
+        ...state,
+        payment: {
+          chain: Chain.AVAX,
+          type: PaymentMethod.Stream,
+          sender: account.address,
+          receiver: node.reward,
+          streamCost: state.streamCost,
+          streamDuration: state.streamDuration,
+        },
+        node,
+      } as AddInstance)
 
-      const web3Provider = new Web3Provider(window?.ethereum)
-
-      const sf = await Framework.create({
-        chainId: 43113,
-        provider: web3Provider,
+      dispatch({
+        type: ActionTypes.addAccountInstance,
+        payload: { accountInstance },
       })
-
-      const signer = sf.createSigner({ web3Provider })
-
-      const flowRate = String(
-        Math.round((state.streamCost * 10 ** 18) / (60 * 60)),
-      )
-
-      const paymentData = {
-        superToken,
-        flowRate,
-        sender: account.address,
-        receiver: node.reward,
-      }
-
-      console.log(paymentData)
-
-      const flow = sf.cfaV1.createFlow(paymentData)
-      const txnResponse = await flow.exec(signer)
-
-      console.log(txnResponse)
-
-      const txnReceipt = await txnResponse.wait()
-
-      console.log(txnReceipt)
-
-      return
-
-      // const accountInstance = await manager.add(state)
-
-      // dispatch({
-      //   type: ActionTypes.addAccountInstance,
-      //   payload: { accountInstance },
-      // })
 
       // @todo: Check new volumes and domains being created to add them to the store
 
-      // router.replace('/')
+      await router.replace('/')
     },
     [account, manager, node],
   )

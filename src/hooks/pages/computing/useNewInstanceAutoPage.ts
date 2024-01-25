@@ -88,7 +88,7 @@ export function useNewInstanceAutoPage(): UseNewInstanceAutoPage {
 
       // @todo: Check new volumes and domains being created to add them to the store
 
-      router.replace('/')
+      await router.replace('/')
     },
     [dispatch, manager, router],
   )

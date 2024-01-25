@@ -71,7 +71,7 @@ export function useManageInstance(): ManageInstance {
         payload: { id: instance.id },
       })
 
-      router.replace('/')
+      await router.replace('/')
     } catch (e) {}
   }, [instance, manager, dispatch, router])
 

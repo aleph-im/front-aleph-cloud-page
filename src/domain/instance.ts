@@ -1,19 +1,20 @@
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { forget, instance, any } from 'aleph-sdk-ts/dist/messages'
+import { any, forget, instance } from 'aleph-sdk-ts/dist/messages'
 import { InstancePublishConfiguration } from 'aleph-sdk-ts/dist/messages/instance/publish'
-import { InstanceContent } from 'aleph-sdk-ts/dist/messages/instance/types'
-import { MachineVolume, MessageType } from 'aleph-sdk-ts/dist/messages/types'
+import { InstanceContent, MachineVolume, MessageType, PaymentType } from 'aleph-sdk-ts/dist/messages/types'
 import E_ from '../helpers/errors'
-import {
-  EntityType,
-  apiServer,
-  defaultInstanceChannel,
-} from '../helpers/constants'
-import { getDate, getExplorerURL } from '../helpers/utils'
+import { apiServer, defaultInstanceChannel, EntityType, PaymentMethod } from '../helpers/constants'
+import { getDate, getExplorerURL, sleep } from '../helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
-import { Executable, ExecutableCost, ExecutableCostProps } from './executable'
+import {
+  Executable,
+  ExecutableCost,
+  ExecutableCostProps,
+  PaymentConfiguration,
+  StreamPaymentConfiguration,
+} from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
 import { FileManager } from './file'
@@ -22,15 +23,16 @@ import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
-import {
-  instanceSchema,
-  instanceStreamSchema,
-} from '@/helpers/schemas/instance'
+import { instanceSchema, instanceStreamSchema } from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
+import { Web3Provider } from '@ethersproject/providers'
+import { superfluid } from 'aleph-sdk-ts/dist/accounts'
+import { getHours } from '@/hooks/form/useSelectStreamDuration'
+import { CRN } from './node'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
-  'image' | 'account' | 'channel' | 'authorized_keys' | 'resources' | 'volumes'
+  'image' | 'account' | 'channel' | 'authorized_keys' | 'resources' | 'volumes' | 'payment'
 > &
   NameAndTagsField & {
     image: InstanceImageField
@@ -39,6 +41,8 @@ export type AddInstance = Omit<
     volumes?: VolumeField[]
     envVars?: EnvVarField[]
     domains?: Omit<DomainField, 'ref'>[]
+    payment?: PaymentConfiguration
+    node?: CRN
   }
 
 // @todo: Refactor
@@ -131,6 +135,27 @@ export class InstanceManager
     try {
       const instanceMessage = await this.parseInstance(newInstance)
 
+      if (newInstance.payment?.type === PaymentMethod.Stream) {
+        if (!newInstance.node || !newInstance.node.address) throw new Error('Invalid CRN')
+        const { streamCost, streamDuration, sender, receiver } = newInstance.payment
+        const web3Provider = new Web3Provider(window.ethereum)
+
+        // @note: setup ALEPHx flow
+        const superfluidAccount = new superfluid.SuperfluidAccount(
+          web3Provider,
+          sender,
+        )
+        await superfluidAccount.init()
+        const alephxBalance = await superfluidAccount.getALEPHxBalance()
+        const alephxFlow = await superfluidAccount.getALEPHxFlow(receiver)
+        const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
+        const totalRequiredAleph = usedAlephInDuration.add(streamCost)
+        if (alephxBalance.lt(totalRequiredAleph)) {
+          throw new Error(`Insufficient balance: ${totalRequiredAleph.sub(alephxBalance).toString()} ALEPH required. Try to lower the VM cost or the duration.`)
+        }
+        await superfluidAccount.increaseALEPHxFlow(receiver, streamCost / getHours(streamDuration))
+      }
+
       const response = await instance.publish({
         ...instanceMessage,
         APIServer: apiServer,
@@ -141,6 +166,11 @@ export class InstanceManager
       // @note: Add the domain link
       await this.parseDomains(entity.id, newInstance.domains)
 
+      // @note: Notify the CRN if it is a targeted stream
+      if (newInstance.payment?.type === PaymentMethod.Stream && newInstance.node) {
+        await this.notifyCRNExecution(newInstance.node, entity.id)
+      }
+
       return entity
     } catch (err) {
       throw E_.RequestFailed(err)
@@ -148,8 +178,37 @@ export class InstanceManager
   }
 
   async del(instanceOrId: string | Instance): Promise<void> {
-    instanceOrId =
-      typeof instanceOrId === 'string' ? instanceOrId : instanceOrId.id
+    let instance: Instance | undefined
+    if (typeof instanceOrId !== 'string') {
+      instance = instanceOrId
+      instanceOrId = instance.id
+    } else {
+      instance = await this.get(instanceOrId)
+    }
+
+    if (!instance) throw new Error('Invalid instance ID')
+
+    if (instance.payment?.type === PaymentType.superfluid) {
+      const { sender, receiver } = instance.payment as StreamPaymentConfiguration
+      const instanceCosts = await InstanceManager.getCost({
+        paymentMethod: PaymentMethod.Stream,
+        specs: {
+          cpu: instance.resources.vcpus,
+          memory: instance.resources.memory,
+          storage: instance.volumes.reduce((ac, cv) => ac + cv["size_mb"] ?? 0, 0),
+          ram: instance.resources.memory,
+        }
+      })
+      console.log("instanceCosts", instanceCosts)
+      const web3Provider = new Web3Provider(window.ethereum)
+
+      const superfluidAccount = new superfluid.SuperfluidAccount(
+        web3Provider,
+        sender,
+      )
+      await superfluidAccount.init()
+      await superfluidAccount.decreaseALEPHxFlow(receiver, instanceCosts.totalStreamCost)
+    }
 
     try {
       await forget.Publish({
@@ -188,6 +247,7 @@ export class InstanceManager
     const metadata = this.parseMetadata(name, tags)
     const authorized_keys = await this.parseSSHKeys(sshKeys)
     const volumes = await this.parseVolumes(newInstance.volumes)
+    const payment = this.parsePayment(newInstance.payment)
 
     return {
       account,
@@ -198,6 +258,7 @@ export class InstanceManager
       image,
       authorized_keys,
       volumes,
+      payment,
     }
   }
 
@@ -226,8 +287,6 @@ export class InstanceManager
     return sshKeys.filter((key) => key.isSelected).map(({ key }) => key)
   }
 
-  // @todo: Type not exported from SDK...
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected async parseMessages(messages: any[]): Promise<Instance[]> {
     const sizesMap = await this.fileManager.getSizesMap()
 
@@ -250,5 +309,30 @@ export class InstanceManager
           confirmed: !!message.confirmed,
         }
       })
+  }
+
+  protected async notifyCRNExecution(node: CRN, instanceId: string): Promise<void> {
+    let errorMsg = ''
+    for (let i = 0; i < 5; i++) {
+      try {
+        const req = await fetch(`${node.address}/control/allocation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            instance: instanceId
+          }),
+        })
+        const resp = await req.json()
+        if (resp.success) return
+        errorMsg = resp.errors[instanceId]
+        await sleep(1000)
+      } catch (e) {
+        errorMsg = e.message
+        await sleep(1000)
+      }
+    }
+    throw new Error(`Failed to start instance on CRN ${node.hash}: ${errorMsg}`)
   }
 }

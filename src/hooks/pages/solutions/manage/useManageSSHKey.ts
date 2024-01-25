@@ -44,7 +44,7 @@ export function useManageSSHKey(): ManageSSHKey {
         payload: { id: sshKey.id },
       })
 
-      router.replace('/')
+      await router.replace('/')
     } catch (e) {}
   }, [sshKey, manager, dispatch, router])
 

@@ -4,15 +4,18 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
+import { ExternalProvider } from '@ethersproject/providers'
 
 export type UseConnectReturn = {
-  connect: () => Promise<Account | undefined>
+  connect: (chain?: Chain, provider?: ExternalProvider) => Promise<Account | undefined>
   disconnect: () => Promise<void>
   isConnected: boolean
   account: Account | undefined
   tryReconnect: () => Promise<void>
+  switchNetwork: (chain: Chain) => Promise<void>
+  selectedNetwork: Chain
 }
 
 export function useConnect(): UseConnectReturn {
@@ -21,6 +24,10 @@ export function useConnect(): UseConnectReturn {
   const [keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
     'keepAccountAlive',
     false,
+  )
+  const [selectedNetwork, setSelectedNetwork] = useSessionStorage<Chain>(
+    'selectedNetwork',
+    Chain.ETH,
   )
 
   const onError = useCallback(
@@ -43,14 +50,38 @@ export function useConnect(): UseConnectReturn {
     [dispatch],
   )
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (chain?: Chain, provider?: ExternalProvider) => {
     let account
     try {
-      account = await web3Connect(Chain.ETH, window?.ethereum)
+      if (chain) {
+        setSelectedNetwork(chain)
+      } else {
+        chain = selectedNetwork
+      }
+      console.log("selectedNetwork2", selectedNetwork)
+      if (!provider && window.ethereum) {
+        provider = window.ethereum
+      } else if (!provider && window.web3) {
+        provider = window.web3.currentProvider
+      } else if (!provider && window.solana) {
+        provider = window.solana
+      }
+      account = await web3Connect(chain, provider)
     } catch (err) {
-      onError('You need an Ethereum wallet to use Aleph.im.')
+      onError(err.message)  // we assume because the user denied the connection
+      // @todo: remove ugly hack because of weird selectedNetwork behavior
+      try {
+        if (chain === Chain.ETH) {
+          account = await web3Connect(Chain.AVAX, provider)
+          setSelectedNetwork(Chain.AVAX)
+        } else {
+          account = await web3Connect(Chain.ETH, provider)
+          setSelectedNetwork(Chain.ETH)
+        }
+      } catch (err) {
+        onError(err.message)  // we got fucked
+      }
     }
-
     if (!account) return
     setKeepAccountAlive(true)
 
@@ -68,6 +99,10 @@ export function useConnect(): UseConnectReturn {
     dispatch({ type: ActionTypes.disconnect, payload: null })
   }, [dispatch, setKeepAccountAlive])
 
+  const switchNetwork = useCallback(async (chain: Chain) => {
+    await connect(chain)
+  }, [connect, setSelectedNetwork])
+
   const { account } = state
   const isConnected = !!account?.address
 
@@ -82,5 +117,7 @@ export function useConnect(): UseConnectReturn {
     isConnected,
     account,
     tryReconnect,
+    switchNetwork,
+    selectedNetwork,
   }
 }
