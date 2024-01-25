@@ -68,14 +68,18 @@ export function useConnect(): UseConnectReturn {
       }
       account = await web3Connect(chain, provider)
     } catch (err) {
-      onError(err.message)
-      // @todo: ugly hack because of weird selectedNetwork behavior
-      if (chain === Chain.ETH) {
-        setSelectedNetwork(Chain.AVAX)
-        account = await web3Connect(Chain.AVAX, provider)
-      } else {
-        setSelectedNetwork(Chain.ETH)
-        account = await web3Connect(Chain.ETH, provider)
+      onError(err.message)  // we assume because the user denied the connection
+      // @todo: remove ugly hack because of weird selectedNetwork behavior
+      try {
+        if (chain === Chain.ETH) {
+          account = await web3Connect(Chain.AVAX, provider)
+          setSelectedNetwork(Chain.AVAX)
+        } else {
+          account = await web3Connect(Chain.ETH, provider)
+          setSelectedNetwork(Chain.ETH)
+        }
+      } catch (err) {
+        onError(err.message)  // we got fucked
       }
     }
     if (!account) return
