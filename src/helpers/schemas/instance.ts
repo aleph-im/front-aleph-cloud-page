@@ -88,6 +88,8 @@ export const instanceSchema = z
     envVars: addEnvVarsSchema.optional(),
     domains: addDomainsSchema.optional(),
     metadata: metadataSchema.optional(),
+    payment: z.any().optional(),
+    node: z.any().optional(),
   })
   .merge(addNameAndTagsSchema)
 
