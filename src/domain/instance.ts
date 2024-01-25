@@ -361,7 +361,9 @@ export class InstanceManager
     let errorMsg = ''
     for (let i = 0; i < 5; i++) {
       try {
-        const req = await fetch(`${node.address}/control/allocation`, {
+        // strip trailing slash
+        const nodeUrl = node.address.replace(/\/$/, '')
+        const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
