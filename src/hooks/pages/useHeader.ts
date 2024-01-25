@@ -23,7 +23,7 @@ import {
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 
 export type UseAccountButtonProps = {
-  handleConnect: (wallet?: WalletProps, network?: NetworkProps) => void
+  handleConnect: (wallet?: WalletProps, network?: NetworkProps) => Promise<void>
   handleDisconnect: () => void
   provider: () => void
 }
@@ -111,8 +111,8 @@ export function useAccountButton({
   const walletPickerOpen = state === 'enter'
 
   const handleConnect = useCallback(
-    (wallet?: WalletProps, network?: NetworkProps) => {
-      handleConnectProp(wallet, network)
+    async (wallet?: WalletProps, network?: NetworkProps) => {
+      await handleConnectProp(wallet, network)
       setDisplayWalletPicker(false)
     },
     [handleConnectProp],
