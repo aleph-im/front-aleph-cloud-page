@@ -18,11 +18,9 @@ import E_ from './errors'
 export const web3Connect = (chain: Chain, provider: any): Promise<Account> => {
   switch (chain) {
     case Chain.ETH:
-      console.log('getETHAccount', provider)
       return getETHAccount(provider)
 
     case Chain.AVAX:
-      console.log('getAVAXAccount', provider)
       return getAVAXAccount(provider, RpcId.AVAX_TESTNET)
 
     case Chain.SOL:
