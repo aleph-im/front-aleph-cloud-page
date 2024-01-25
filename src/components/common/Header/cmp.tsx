@@ -137,8 +137,6 @@ export const Header = () => {
           <div>
             <AutoBreadcrumb names={breadcrumbNames} />
           </div>
-          {selectedNetwork}
-          {selectedNetwork === Chain.ETH ? 'true' : 'false'}
           <div tw="relative flex items-center justify-center gap-7">
             <StyledButton
               key="evm"

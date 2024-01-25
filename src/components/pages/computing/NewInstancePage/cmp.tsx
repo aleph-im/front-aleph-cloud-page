@@ -82,10 +82,10 @@ export const NewInstancePage = () => {
           </div>
           <div tw="mt-6 text-center">
             <Button
-              color="main0"
               kind="default"
-              variant="primary"
-              size="lg"
+              variant="secondary"
+              color="main0"
+              size="md"
               onClick={handleContinue}
             >
               Continue

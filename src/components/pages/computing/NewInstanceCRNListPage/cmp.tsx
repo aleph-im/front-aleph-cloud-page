@@ -2,10 +2,10 @@ import { useMemo } from 'react'
 import {
   Button,
   Icon,
-  Logo,
   NodeName,
   NodeScore,
   NodeVersion,
+  NoisyContainer,
   TableColumn,
 } from '@aleph-front/core'
 import { apiServer } from '@/helpers/constants'
@@ -20,7 +20,7 @@ import ButtonLink from '@/components/common/ButtonLink'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
-import { validateMinNodeSpecs } from '@/hooks/form/useSelectInstanceSpecs'
+import Price from '@/components/common/Price'
 
 export default function NewInstanceCRNListPage() {
   const { nodes, lastVersion, specs, minSpecs, ips } =
@@ -32,12 +32,14 @@ export default function NewInstanceCRNListPage() {
     return [
       {
         label: 'SCORE',
+        width: '10%',
         sortable: true,
         sortBy: (node) => node.score,
         render: (node) => <NodeScore score={node.score} />,
       },
       {
         label: 'NAME',
+        width: '20%',
         sortable: true,
         sortBy: (node) => node.name,
         render: (node) => (
@@ -52,6 +54,7 @@ export default function NewInstanceCRNListPage() {
       },
       {
         label: 'CPU',
+        width: '10%',
         sortable: true,
         sortBy: (node) => specs[node.hash]?.data?.cpu.count || 0,
         render: (node) => (
@@ -64,6 +67,7 @@ export default function NewInstanceCRNListPage() {
       },
       {
         label: 'RAM',
+        width: '10%',
         sortable: true,
         sortBy: (node) => specs[node.hash]?.data?.mem.available_kB || 0,
         render: (node) => (
@@ -74,6 +78,7 @@ export default function NewInstanceCRNListPage() {
       },
       {
         label: 'HDD',
+        width: '10%',
         sortable: true,
         sortBy: (node) => specs[node.hash]?.data?.disk.available_kB || 0,
         render: (node) => (
@@ -87,6 +92,7 @@ export default function NewInstanceCRNListPage() {
       },
       {
         label: 'VERSION',
+        width: '20%',
         sortable: true,
         sortBy: (node) => node.metricsData?.version,
         render: (node) => (
@@ -98,64 +104,47 @@ export default function NewInstanceCRNListPage() {
       },
       {
         label: 'PRICE',
+        width: '20%',
         sortable: true,
         sortBy: () => 0.11,
         render: () => (
           <div tw="flex items-center gap-1 whitespace-nowrap">
-            0.12 <Logo text={false} color="main0" /> / h
+            <Price value={0.11} /> per unit / h
           </div>
         ),
       },
       {
         label: '',
         align: 'right',
+        width: '100%',
         render: (node) => {
           const nodeSpecs = specs[node.hash]
           const nodeIps = ips[node.hash]
-          const isLoading = !nodeSpecs
-          const isValid =
-            nodeSpecs?.data &&
-            validateMinNodeSpecs(minSpecs, nodeSpecs.data) &&
-            !!nodeIps?.data?.result
+          const isLoading = !nodeSpecs || !nodeIps
 
           return (
             <div tw="flex gap-3 justify-end">
-              {isLoading ? (
+              {!isLoading ? (
                 <Button
-                  kind="default"
                   size="md"
-                  variant="secondary"
                   color="main2"
-                  disabled
                   tw="w-16!"
+                  className="check-button"
+                  disabled
                 >
-                  <RotatingLines strokeColor={theme.color.main2} width="1em" />
+                  <RotatingLines strokeColor={theme.color.main0} width="1em" />
                 </Button>
               ) : (
                 <>
-                  {!isValid ? (
-                    <Button
-                      kind="default"
-                      size="md"
-                      variant="secondary"
-                      color="error"
-                      disabled
-                      tw="w-16!"
-                    >
-                      <Icon name="exclamation" color="error" />
-                    </Button>
-                  ) : (
-                    <ButtonLink
-                      kind="default"
-                      size="md"
-                      variant="secondary"
-                      color="main0"
-                      href={`./crn/${node.hash}`}
-                      tw="w-16!"
-                    >
-                      <Icon name="angle-right" />
-                    </ButtonLink>
-                  )}
+                  <ButtonLink
+                    size="md"
+                    color="main0"
+                    tw="w-16!"
+                    className="check-button"
+                    href={`./crn/${node.hash}`}
+                  >
+                    <Icon name="angle-right" />
+                  </ButtonLink>
                 </>
               )}
             </div>
@@ -163,7 +152,7 @@ export default function NewInstanceCRNListPage() {
         },
       },
     ] as TableColumn<CRN>[]
-  }, [specs, lastVersion, minSpecs, theme])
+  }, [specs, lastVersion, ips, minSpecs, theme])
 
   return (
     <>
@@ -175,7 +164,9 @@ export default function NewInstanceCRNListPage() {
       <section tw="relative px-0 pt-20 pb-6 md:py-10">
         <SpinnerOverlay show={!nodes} />
         <Container $variant="xl">
-          <NodesTable columns={columns} data={nodes || []} />
+          <NoisyContainer>
+            <NodesTable columns={columns} data={nodes || []} />
+          </NoisyContainer>
         </Container>
       </section>
     </>

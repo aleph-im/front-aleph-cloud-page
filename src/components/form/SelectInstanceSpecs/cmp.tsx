@@ -79,7 +79,6 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
                   variant="tertiary"
                   kind="default"
                   size="md"
-                  forwardedAs="button"
                   type="button"
                   onClick={(e) => e.preventDefault()}
                   tabIndex={-1}
