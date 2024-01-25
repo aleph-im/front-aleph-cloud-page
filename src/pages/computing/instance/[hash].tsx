@@ -1,3 +1,1 @@
-import ManageInstance from '@/components/pages/solutions/ManageInstance'
-
-export default ManageInstance
+export { default } from '@/components/pages/dashboard/ManageInstance'

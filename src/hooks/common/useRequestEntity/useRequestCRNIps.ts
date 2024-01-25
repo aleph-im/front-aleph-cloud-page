@@ -1,27 +1,27 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CRN, CRNSpecs, NodeManager } from '@/domain/node'
+import { CRN, CRNIps, NodeManager } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
 import { RequestState } from '@aleph-front/core'
 
-export type UseRequestCRNSpecsProps = {
+export type UseRequestCRNIpsProps = {
   nodes?: CRN[]
 }
 
-export type UseRequestCRNSpecsReturn = {
-  specs: Record<string, RequestState<CRNSpecs>>
+export type UseRequestCRNIpsReturn = {
+  ips: Record<string, RequestState<CRNIps>>
   loading: boolean
 }
 
-export function useRequestCRNSpecs({
+export function useRequestCRNIps({
   nodes,
-}: UseRequestCRNSpecsProps): UseRequestCRNSpecsReturn {
+}: UseRequestCRNIpsProps): UseRequestCRNIpsReturn {
   const [state] = useAppState()
   const { account } = state
 
   // @todo: Refactor this (use singleton)
   const nodeManager = useMemo(() => new NodeManager(account), [account])
 
-  const [specs, setSpecs] = useState<Record<string, RequestState<CRNSpecs>>>({})
+  const [ips, setIps] = useState<Record<string, RequestState<CRNIps>>>({})
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
@@ -32,9 +32,9 @@ export function useRequestCRNSpecs({
         nodes
           .filter((node) => nodeManager.isStreamPaymentSupported(node))
           .map(async (node) => {
-            const nodeSpecs = await nodeManager.getCRNspecs(node)
+            const nodeSpecs = await nodeManager.getCRNips(node)
 
-            setSpecs((prev) => ({
+            setIps((prev) => ({
               ...prev,
               [node.hash]: {
                 data: nodeSpecs,
@@ -52,7 +52,7 @@ export function useRequestCRNSpecs({
   }, [nodeManager, nodes])
 
   // const { data: nodeSpecs } = useLocalRequest({
-  //   doRequest: () => nodeManager.getCRNSpecs(nodes || []),
+  //   doRequest: () => nodeManager.getCRNIps(nodes || []),
   //   onSuccess: () => null,
   //   flushData: false,
   //   triggerOnMount: true,
@@ -60,7 +60,7 @@ export function useRequestCRNSpecs({
   // })
 
   return {
-    specs,
+    ips,
     loading,
   }
 }

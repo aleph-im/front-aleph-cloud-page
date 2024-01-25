@@ -1,3 +1,1 @@
-import ManageDomain from '@/components/pages/solutions/ManageDomain'
-
-export default ManageDomain
+export { default } from '@/components/pages/dashboard/ManageDomain'

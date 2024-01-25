@@ -1,11 +1,8 @@
 import tw from 'twin.macro'
 import styled, { css } from 'styled-components'
 import { Table, addClasses } from '@aleph-front/core'
-import { SpecsDetail } from './types'
 
-export const StyledTable = styled(Table<SpecsDetail>).attrs(
-  addClasses('tp-body3'),
-)`
+export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
   ${({ theme }) => {
     const { duration, timing } = theme.transition
 
@@ -22,7 +19,7 @@ export const StyledTable = styled(Table<SpecsDetail>).attrs(
       tbody {
         tr {
           cursor: pointer;
-          transition: background ${timing} ${duration.fast}ms 0ms;
+          transition: all ${timing} ${duration.fast}ms 0ms;
 
           td {
             &:first-child {
@@ -60,7 +57,7 @@ export const StyledTable = styled(Table<SpecsDetail>).attrs(
       }
 
       && {
-        button {
+        .check-button {
           background: ${theme.color.purple0};
           color: ${theme.color.main0};
           width: 3.75rem;
@@ -75,3 +72,5 @@ export const StyledTable = styled(Table<SpecsDetail>).attrs(
     `
   }}
 `
+
+export default StyledTable

@@ -1,3 +1,1 @@
-import NewSSHKeyPage from '@/components/pages/configure/NewSSHKeyPage'
-
-export default NewSSHKeyPage
+export { default } from '@/components/pages/configure/NewSSHKeyPage'

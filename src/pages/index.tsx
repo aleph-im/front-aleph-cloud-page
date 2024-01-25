@@ -1,3 +1,3 @@
-import HomePage from '@/components/pages/HomePage'
+import DashboardPage from '@/components/pages/dashboard/DashboardPage'
 
-export default HomePage
+export default DashboardPage

@@ -43,7 +43,7 @@ import {
   defaultStreamDuration,
 } from '@/hooks/form/useSelectStreamDuration'
 
-export type NewInstanceStreamFormState = NameAndTagsField & {
+export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
   specs: InstanceSpecsField
   sshKeys: SSHKeyField[]
@@ -58,7 +58,7 @@ export type NewInstanceStreamFormState = NameAndTagsField & {
 
 const specs = { ...getDefaultSpecsOptions(true)[0] }
 
-export const defaultValues: Partial<NewInstanceStreamFormState> = {
+export const defaultValues: Partial<NewInstanceCRNFormState> = {
   ...defaultNameAndTags,
   image: defaultInstanceImage,
   specs,
@@ -77,20 +77,20 @@ export const defaultValues: Partial<NewInstanceStreamFormState> = {
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
-export type UseNewInstanceStreamPage = {
+export type UseNewInstanceCRNPage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
   values: any
   control: Control<any>
-  errors: FieldErrors<NewInstanceStreamFormState>
+  errors: FieldErrors<NewInstanceCRNFormState>
   node?: CRN
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
   handleSubmit: (e: FormEvent) => Promise<void>
 }
 
-export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
+export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
   const { account, accountBalance } = appState
@@ -141,7 +141,7 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
   const manager = useInstanceManager()
 
   const onSubmit = useCallback(
-    async (state: NewInstanceStreamFormState) => {
+    async (state: NewInstanceCRNFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
       console.log(state)
@@ -192,7 +192,7 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
 
       // @todo: Check new volumes and domains being created to add them to the store
 
-      // router.replace('/solutions/dashboard')
+      // router.replace('/')
     },
     [account, manager, node],
   )
@@ -208,7 +208,7 @@ export function useNewInstanceStreamPage(): UseNewInstanceStreamPage {
     resolver: zodResolver(InstanceManager.addStreamSchema),
     readyDeps: [],
   })
-  const values = useWatch({ control }) as NewInstanceStreamFormState
+  const values = useWatch({ control }) as NewInstanceCRNFormState
 
   const { storage } = values.specs
   const fakeVolume = values.volumes?.find((volume) => volume.isFake) as

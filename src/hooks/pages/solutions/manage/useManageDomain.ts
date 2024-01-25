@@ -55,7 +55,7 @@ export function useManageDomain(): ManageDomain {
         payload: { id: domain.id },
       })
 
-      router.replace('/solutions/dashboard')
+      router.replace('/')
     } catch (e) {}
   }, [domain, manager, dispatch, router])
 
@@ -66,7 +66,7 @@ export function useManageDomain(): ManageDomain {
     try {
       await manager.retry(domain)
 
-      router.replace('/solutions/dashboard')
+      router.replace('/')
     } catch (e) {}
   }, [domain, manager, router])
 

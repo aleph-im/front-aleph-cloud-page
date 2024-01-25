@@ -41,7 +41,7 @@ export function useManageFunction(): ManageFunction {
         payload: { id: func.id },
       })
 
-      router.replace('/solutions/dashboard')
+      router.replace('/')
     } catch (e) {}
   }, [manager, func, dispatch, router])
 

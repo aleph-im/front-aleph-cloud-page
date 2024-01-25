@@ -5,7 +5,6 @@ import {
   Button,
   FormError,
   Icon,
-  Logo,
   NoisyContainer,
   TableColumn,
   TextGradient,
@@ -13,10 +12,10 @@ import {
 import { useCallback, useMemo } from 'react'
 import { convertByteUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
-import { StyledTable } from './styles'
 import { Executable } from '@/domain/executable'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import Price from '@/components/common/Price'
+import Table from '@/components/common/Table'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { specsCtrl, options, type, isPersistent, paymentMethod } =
@@ -84,6 +83,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
                   type="button"
                   onClick={(e) => e.preventDefault()}
                   tabIndex={-1}
+                  className="check-button"
                   style={{
                     visibility: row.isActive ? 'visible' : 'hidden',
                     opacity: row.isActive ? '1' : '0',
@@ -194,7 +194,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         Available resources
       </TextGradient>
       <div tw="max-w-full overflow-y-hidden overflow-x-auto">
-        <StyledTable
+        <Table
           borderType="none"
           rowNoise
           rowKey={getRowKey}

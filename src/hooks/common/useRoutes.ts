@@ -15,11 +15,13 @@ export function useRoutes(): UseRoutesReturn {
         children: [
           {
             name: 'Solutions',
-            href: '/solutions',
+            href: '/',
+            exact: true,
             children: [
               {
                 name: 'Dashboard',
-                href: '/solutions/dashboard',
+                href: '/',
+                exact: true,
               },
             ],
           },

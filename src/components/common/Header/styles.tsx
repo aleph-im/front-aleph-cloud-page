@@ -13,9 +13,9 @@ export const StyledButton = styled(Button).attrs((props) => {
   return {
     ...props,
     color: 'main0',
-    kind: 'default',
+    kind: 'rounded',
+    variant: 'primary',
     size: 'md',
-    variant: 'tertiary',
   }
 })`
   display: block;
@@ -50,6 +50,7 @@ export const StyledNavbarDesktop = styled.div<StyledNavbarDesktopProps>`
   ${({ $breakpoint }) => css`
     ${tw`hidden relative flex-initial shrink-0 m-0 px-16 w-full top-0 z-10 items-center justify-between`}
     height: 6.5rem;
+    box-shadow: 0px 4px 24px 0px #5100cd0a;
     backdrop-filter: blur(50px);
 
     /* MOBILE LAYOUT */

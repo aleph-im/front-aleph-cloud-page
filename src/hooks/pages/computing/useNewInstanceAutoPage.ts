@@ -58,7 +58,7 @@ export const defaultValues: Partial<NewInstanceHoldFormState> = {
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
-export type UseNewInstanceHoldPage = {
+export type UseNewInstanceAutoPage = {
   address: string
   accountBalance: number
   isCreateButtonDisabled: boolean
@@ -68,7 +68,7 @@ export type UseNewInstanceHoldPage = {
   handleSubmit: (e: FormEvent) => Promise<void>
 }
 
-export function useNewInstanceHoldPage(): UseNewInstanceHoldPage {
+export function useNewInstanceAutoPage(): UseNewInstanceAutoPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
   const { account, accountBalance } = appState
@@ -88,7 +88,7 @@ export function useNewInstanceHoldPage(): UseNewInstanceHoldPage {
 
       // @todo: Check new volumes and domains being created to add them to the store
 
-      router.replace('/solutions/dashboard')
+      router.replace('/')
     },
     [dispatch, manager, router],
   )

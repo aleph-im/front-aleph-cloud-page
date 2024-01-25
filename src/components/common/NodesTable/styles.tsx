@@ -1,7 +1,8 @@
 import { AlephNode } from '@/domain/node'
-import { Table, TableProps } from '@aleph-front/core'
+import { TableProps } from '@aleph-front/core'
 import styled from 'styled-components'
 import tw from 'twin.macro'
+import Table from '../Table'
 
 export type StyledTableProps<T extends AlephNode> = Omit<
   TableProps<T>,

@@ -1,3 +1,1 @@
-import ManageVolume from '@/components/pages/solutions/ManageVolume'
-
-export default ManageVolume
+export { default } from '@/components/pages/dashboard/ManageVolume'

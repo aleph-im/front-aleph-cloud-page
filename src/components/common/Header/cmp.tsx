@@ -38,37 +38,19 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
 
   return (
     <>
-      {account ? (
-        <Button
-          ref={walletPickerTriggerRef}
-          as="button"
-          variant="secondary"
-          color="main1"
-          kind="default"
-          size="md"
-          onClick={handleDisplayWalletPicker}
-        >
-          <div tw="flex items-center gap-2.5">
-            {!isMobile && ellipseAddress(account.address)}
-            <Icon name="meteor" size="lg" color={theme.color.main1} />
-          </div>
-        </Button>
-      ) : (
-        <Button
-          ref={walletPickerTriggerRef}
-          as="button"
-          variant="tertiary"
-          color="main0"
-          kind="default"
-          size="md"
-          onClick={handleDisplayWalletPicker}
-        >
-          <div tw="flex items-center gap-2.5">
-            {!isMobile && 'Connect'}
-            <Icon name="meteor" size="lg" color={theme.color.main0} />
-          </div>
-        </Button>
-      )}
+      <Button
+        ref={walletPickerTriggerRef}
+        as="button"
+        kind="yellow"
+        variant="primary"
+        size="md"
+        onClick={handleDisplayWalletPicker}
+      >
+        <div tw="flex items-center gap-2.5">
+          {!isMobile && (account ? ellipseAddress(account.address) : 'Connect')}
+          <Icon name="meteor" size="lg" />
+        </div>
+      </Button>
       {displayWalletPicker &&
         createPortal(
           <StyledWalletPicker
@@ -77,6 +59,18 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
               {
                 icon: 'ethereum',
                 name: 'Ethereum',
+                wallets: [
+                  {
+                    color: 'orange',
+                    icon: 'metamask',
+                    name: 'Metamask',
+                    provider,
+                  },
+                ],
+              },
+              {
+                icon: 'avalanche',
+                name: 'Avalanche',
                 wallets: [
                   {
                     color: 'orange',
@@ -142,7 +136,7 @@ export const Header = () => {
           </div>
           <div tw="relative flex items-center justify-center gap-7">
             <StyledButton key="link" forwardedAs="button" disabled>
-              <Icon name="ethereum" />
+              <Icon name="ethereum" size="xl" tw="w-6" prefix="custom" />
             </StyledButton>
             <AccountButtonMemo {...accountProps} />
           </div>

@@ -1,3 +1,1 @@
-import NewFunctionPage from '@/components/pages/computing/NewFunctionPage'
-
-export default NewFunctionPage
+export { default } from '@/components/pages/computing/NewFunctionPage'

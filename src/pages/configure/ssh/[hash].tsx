@@ -1,3 +1,1 @@
-import ManageSSHKey from '@/components/pages/solutions/ManageSSHKey'
-
-export default ManageSSHKey
+export { default } from '@/components/pages/dashboard/ManageSSHKey'

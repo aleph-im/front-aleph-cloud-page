@@ -10,7 +10,7 @@ import {
 } from '@aleph-front/core'
 import { apiServer } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
-import { useNewInstanceStreamNodesPage } from '@/hooks/pages/computing/useNewInstanceStreamNodesPage'
+import { useNewInstanceCRNListPage } from '@/hooks/pages/computing/useNewInstanceCRNListPage'
 import NewEntityTab from '../NewEntityTab'
 import NodesTable from '@/components/common/NodesTable'
 import Image from 'next/image'
@@ -22,9 +22,9 @@ import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import { validateMinNodeSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 
-export default function NewInstanceStreamNodesPage() {
-  const { nodes, lastVersion, specs, minSpecs } =
-    useNewInstanceStreamNodesPage()
+export default function NewInstanceCRNListPage() {
+  const { nodes, lastVersion, specs, minSpecs, ips } =
+    useNewInstanceCRNListPage()
 
   const theme = useTheme()
 
@@ -111,9 +111,12 @@ export default function NewInstanceStreamNodesPage() {
         align: 'right',
         render: (node) => {
           const nodeSpecs = specs[node.hash]
+          const nodeIps = ips[node.hash]
           const isLoading = !nodeSpecs
           const isValid =
-            nodeSpecs?.data && validateMinNodeSpecs(minSpecs, nodeSpecs.data)
+            nodeSpecs?.data &&
+            validateMinNodeSpecs(minSpecs, nodeSpecs.data) &&
+            !!nodeIps?.data?.result
 
           return (
             <div tw="flex gap-3 justify-end">
@@ -147,7 +150,7 @@ export default function NewInstanceStreamNodesPage() {
                       size="md"
                       variant="secondary"
                       color="main0"
-                      href={`./stream/${node.hash}`}
+                      href={`./crn/${node.hash}`}
                       tw="w-16!"
                     >
                       <Icon name="angle-right" />

@@ -46,7 +46,7 @@ export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
         payload: { accountSSHKey },
       })
 
-      router.replace('/solutions/dashboard')
+      router.replace('/')
     },
     [dispatch, manager, router],
   )

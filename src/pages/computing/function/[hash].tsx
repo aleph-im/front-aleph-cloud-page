@@ -1,3 +1,1 @@
-import ManageFunction from '@/components/pages/solutions/ManageFunction'
-
-export default ManageFunction
+export { default } from '@/components/pages/dashboard/ManageFunction'

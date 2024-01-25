@@ -5,7 +5,12 @@ import {
 } from '@/helpers/constants'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { messages } from 'aleph-sdk-ts'
-import { fetchAndCache, getLatestReleases, sleep } from '@/helpers/utils'
+import {
+  fetchAndCache,
+  getLatestReleases,
+  getVersionNumber,
+  sleep,
+} from '@/helpers/utils'
 import { FileManager } from './file'
 import { urlSchema } from '@/helpers/schemas/base'
 
@@ -59,6 +64,7 @@ export type CCN = BaseNode & {
 
 export type CRN = BaseNode & {
   address?: string
+  stream_reward?: string
   status: BaseNodeStatus | 'linked'
 
   parent: string | null
@@ -211,6 +217,14 @@ export type CRNSpecs = {
   active: boolean
 }
 
+// ---------- @todo: refactor into npm package
+
+export type CRNIps = {
+  hash: string
+  name?: string
+  result: boolean
+}
+
 // @todo: Refactor (create a domain npm package and move this there)
 export class NodeManager {
   constructor(
@@ -284,8 +298,6 @@ export class NodeManager {
     const { success } = urlSchema.safeParse(url)
     if (!success) return
 
-    console.log(url)
-
     try {
       return await fetchAndCache(
         url,
@@ -305,6 +317,36 @@ export class NodeManager {
       if (!retries) return
       await sleep(100 * 2)
       return this.getCRNspecs(node, retries - 1)
+    }
+  }
+
+  async getCRNips(node: CRN, retries = 2): Promise<CRNIps | undefined> {
+    if (!node.address) return
+
+    const address = node.address.toLowerCase().replace(/\/$/, '')
+    const url = `${address}/vm/3fc0aa9569da840c43e7bd2033c3c580abb46b007527d6d20f2d4e98e867f7af/ip/6`
+    const { success } = urlSchema.safeParse(url)
+    if (!success) return
+
+    try {
+      return await fetchAndCache(
+        url,
+        `3crn_ips_${node.hash}`,
+        4_600,
+        (res: CRNIps) => {
+          if (res.result === undefined) throw new Error('invalid response')
+
+          return {
+            ...res,
+            hash: node.hash,
+            name: node.name,
+          }
+        },
+      )
+    } catch (e) {
+      if (!retries) return
+      await sleep(100 * 2)
+      return this.getCRNips(node, retries - 1)
     }
   }
 
@@ -386,6 +428,21 @@ export class NodeManager {
     )
   }
 
+  getNodeVersionNumber(node: CRN): number {
+    if (!node.metricsData?.version) return 0
+    return getVersionNumber(node.metricsData?.version)
+  }
+
+  isStreamPaymentSupported(node: CRN): boolean {
+    return (
+      true ||
+      node.hash ===
+        '4680d7473e914883839f3b9aa7bb3739cdba83d5f99a4b673b9abd8f8f6c1c97' ||
+      (!!node.stream_reward &&
+        this.getNodeVersionNumber(node) >= getVersionNumber('v0.4.0'))
+    )
+  }
+
   protected parseResourceNodes(crns: CRN[]): CRN[] {
     return crns.map((crn) => {
       // @note: some nodes has {locked: ""}
@@ -436,9 +493,9 @@ export class NodeManager {
 
   protected async parseScores<T extends AlephNode>(
     nodes: T[],
-    isCrn: boolean,
+    isCRN: boolean,
   ): Promise<T[]> {
-    const scores = isCrn ? await this.getCRNScores() : await this.getCCNScores()
+    const scores = isCRN ? await this.getCRNScores() : await this.getCCNScores()
     const scoresMap = new Map(scores.map((score) => [score.node_id, score]))
 
     return nodes.map((node) => {
@@ -458,9 +515,9 @@ export class NodeManager {
 
   protected async parseMetrics<T extends AlephNode>(
     nodes: T[],
-    isCrn: boolean,
+    isCRN: boolean,
   ): Promise<T[]> {
-    const metrics = isCrn
+    const metrics = isCRN
       ? await this.getCRNMetrics()
       : await this.getCCNMetrics()
 

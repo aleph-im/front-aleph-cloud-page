@@ -1,24 +1,24 @@
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/router'
-import { PaymentMethod } from '@/helpers/constants'
 
 export type UseNewInstancePageReturn = {
-  selected: PaymentMethod
-  handleClickHold: () => void
-  handleClickStream: () => void
+  selected: 'auto' | 'crn'
+  handleClickAuto: () => void
+  handleClickCRN: () => void
   handleContinue: () => void
 }
 
 export function useNewInstancePage(): UseNewInstancePageReturn {
-  const [selected, setSelected] = useState<PaymentMethod>(PaymentMethod.Hold)
+  const [selected, setSelected] =
+    useState<UseNewInstancePageReturn['selected']>('auto')
   const router = useRouter()
 
-  const handleClickHold = useCallback(() => {
-    setSelected(PaymentMethod.Hold)
+  const handleClickAuto = useCallback(() => {
+    setSelected('auto')
   }, [])
 
-  const handleClickStream = useCallback(() => {
-    setSelected(PaymentMethod.Stream)
+  const handleClickCRN = useCallback(() => {
+    setSelected('crn')
   }, [])
 
   const handleContinue = useCallback(() => {
@@ -27,8 +27,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   return {
     selected,
-    handleClickHold,
-    handleClickStream,
+    handleClickAuto,
+    handleClickCRN,
     handleContinue,
   }
 }

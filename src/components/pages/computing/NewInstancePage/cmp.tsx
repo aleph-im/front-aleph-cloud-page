@@ -5,13 +5,12 @@ import FlatCardButton, {
 } from '@/components/common/FlatCardButton'
 import Container from '@/components/common/CenteredContainer'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
-import { PaymentMethod } from '@/helpers/constants'
 import NewEntityTab from '../NewEntityTab'
 import { useNewInstancePage } from '@/hooks/pages/computing/useNewInstancePage'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 
 export const NewInstancePage = () => {
-  const { selected, handleClickHold, handleClickStream, handleContinue } =
+  const { selected, handleClickAuto, handleClickCRN, handleContinue } =
     useNewInstancePage()
 
   return (
@@ -32,8 +31,8 @@ export const NewInstancePage = () => {
           <div tw="px-0 mt-12 mb-6">
             <FlatCardButtonContainer tw="flex-wrap md:justify-center">
               <FlatCardButton
-                $selected={selected === PaymentMethod.Hold}
-                onClick={handleClickHold}
+                $selected={selected === 'auto'}
+                onClick={handleClickAuto}
                 tw="flex-auto lg:flex-1 h-40 p-6"
               >
                 <div className="tp-body1 fs-10">Select by specification</div>
@@ -43,8 +42,8 @@ export const NewInstancePage = () => {
                 </div>
               </FlatCardButton>
               <FlatCardButton
-                $selected={selected === PaymentMethod.Stream}
-                onClick={handleClickStream}
+                $selected={selected === 'crn'}
+                onClick={handleClickCRN}
                 tw="flex-auto lg:flex-1 h-40 p-6"
               >
                 <div className="tp-body1 fs-10">Select by node</div>

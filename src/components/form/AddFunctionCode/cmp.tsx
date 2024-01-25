@@ -60,23 +60,22 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                   {...langCtrl.fieldState}
                   required
                   direction={radioDirection}
+                  tw="mb-6"
                 >
                   <Radio label="Python 3.9" value={FunctionLangId.Python} />
                   <Radio label="Node.js 18" value={FunctionLangId.Node} />
                   <Radio label="Other" value={FunctionLangId.Other} />
                 </RadioGroup>
+                <CodeEditor
+                  {...textCtrl.field}
+                  {...textCtrl.fieldState}
+                  required
+                  defaultValue={defaultCodeText}
+                  defaultLanguage={langCtrl.field.value}
+                  language={langCtrl.field.value}
+                  tw="p-5 rounded-3xl min-h-[415px]"
+                />
               </NoisyContainer>
-            </div>
-            <div>
-              <CodeEditor
-                {...textCtrl.field}
-                {...textCtrl.fieldState}
-                required
-                defaultValue={defaultCodeText}
-                defaultLanguage={langCtrl.field.value}
-                language={langCtrl.field.value}
-                tw="p-5 rounded-3xl min-h-[415px]"
-              />
             </div>
           </>
         ) : (

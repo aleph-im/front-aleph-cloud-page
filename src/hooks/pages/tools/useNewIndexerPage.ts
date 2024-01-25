@@ -70,7 +70,7 @@ export function useNewIndexerPage(): UseNewIndexerPage {
 
       // @todo: Check new volumes and domains being created to add them to the store
 
-      router.replace('/solutions/dashboard')
+      router.replace('/')
     },
     [dispatch, manager, router],
   )

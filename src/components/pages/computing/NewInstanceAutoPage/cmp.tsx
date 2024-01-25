@@ -1,12 +1,4 @@
-import {
-  Button,
-  TextGradient,
-  NodeVersion,
-  NodeName,
-  NodeScore,
-  TableColumn,
-  NoisyContainer,
-} from '@aleph-front/core'
+import { Button, TextGradient } from '@aleph-front/core'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
@@ -15,20 +7,15 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import HoldingRequirements from '@/components/form/HoldingRequirements'
-import { EntityType, apiServer } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
-import { useNewInstanceStreamPage } from '@/hooks/pages/computing/useNewInstanceStreamPage'
+import { useNewInstanceAutoPage } from '@/hooks/pages/computing/useNewInstanceAutoPage'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import NewEntityTab from '../NewEntityTab'
-import NodesTable from '@/components/common/NodesTable'
-import { useMemo } from 'react'
-import ButtonLink from '@/components/common/ButtonLink'
-import { CRN } from '@/domain/node'
-import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 
-export default function NewInstancePage() {
+export default function NewInstanceHoldPage() {
   const {
     address,
     accountBalance,
@@ -36,58 +23,8 @@ export default function NewInstancePage() {
     values,
     control,
     errors,
-    node,
-    nodeSpecs,
-    lastVersion,
     handleSubmit,
-  } = useNewInstanceStreamPage()
-
-  const columns = useMemo(() => {
-    return [
-      {
-        label: 'NAME',
-        render: (node) => (
-          <NodeName
-            hash={node.hash}
-            name={node.name}
-            picture={node.picture}
-            ImageCmp={Image}
-            apiServer={apiServer}
-          />
-        ),
-      },
-      {
-        label: 'SCORE',
-        render: (node) => <NodeScore score={node.score} />,
-      },
-      {
-        label: 'VERSION',
-        render: (node) => (
-          <NodeVersion
-            version={node.metricsData?.version || ''}
-            lastVersion={lastVersion}
-          />
-        ),
-      },
-      {
-        label: '',
-        align: 'right',
-        render: () => (
-          <div tw="flex gap-3 justify-end">
-            <ButtonLink
-              kind="default"
-              size="md"
-              variant="secondary"
-              color="main2"
-              href={`.`}
-            >
-              Change
-            </ButtonLink>
-          </div>
-        ),
-      },
-    ] as TableColumn<CRN>[]
-  }, [lastVersion])
+  } = useNewInstanceAutoPage()
 
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
@@ -98,50 +35,37 @@ export default function NewInstancePage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <SectionTitle number="1">Selected instance</SectionTitle>
-          <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
-            <NoisyContainer>
-              <SpinnerOverlay show={!node} />
-              <NodesTable columns={columns} data={node ? [node] : []} />
-            </NoisyContainer>
-          </div>
-        </Container>
-      </section>
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
-          <SectionTitle number="2">Select an instance size</SectionTitle>
+          <SectionTitle number="1">Select your tier</SectionTitle>
           <p>
-            Please select one of the available instance size as a base for your
-            VM. You will be able to customize the volumes later.
+            Please select one of the available instance tiers as a base for your
+            VM. You will be able to customize the volumes further below in the
+            form.
           </p>
-          <div tw="px-0 my-6 relative">
-            <SpinnerOverlay show={!nodeSpecs} />
+          <div tw="px-0 my-6">
             <SelectInstanceSpecs
               name="specs"
               control={control}
               type={EntityType.Instance}
               isPersistent
-              paymentMethod={values.paymentMethod}
-              nodeSpecs={nodeSpecs}
             />
           </div>
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <SectionTitle number="3">Choose an image</SectionTitle>
+          <SectionTitle number="2">Choose an image</SectionTitle>
           <p>
             Chose a base image for your VM. It’s the base system that you will
             be able to customize.
           </p>
-          <div tw="px-0 mt-12 mb-6">
+          <div tw="px-0 my-6">
             <SelectInstanceImage name="image" control={control} />
           </div>
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <SectionTitle number="4">Configure SSH Key</SectionTitle>
+          <SectionTitle number="3">Configure SSH Key</SectionTitle>
           <p>
             Access your cloud instances securely. Give existing key’s below
             access to this instance or add new keys. Remember, storing private
@@ -155,7 +79,7 @@ export default function NewInstancePage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <SectionTitle number="5">Name and tags</SectionTitle>
+          <SectionTitle number="4">Name and tags</SectionTitle>
           <p tw="mb-6">
             Organize and identify your instances more effectively by assigning a
             unique name, obtaining a hash reference, and defining multiple tags.
@@ -167,11 +91,11 @@ export default function NewInstancePage() {
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <SectionTitle number="6">Advanced Configuration Options</SectionTitle>
+          <SectionTitle number="5">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
             Customize your instance with our Advanced Configuration Options. Add
-            volumes, SSH keys, environment variables, and custom domains to meet
-            your specific needs.
+            volumes, environment variables, and custom domains to meet your
+            specific needs.
           </p>
           <div tw="px-0 my-6">
             <div tw="mb-4">
@@ -219,26 +143,23 @@ export default function NewInstancePage() {
           </div>
         </Container>
       </section>
-
       <HoldingRequirements
-        control={control}
         address={address}
         type={EntityType.Instance}
         isPersistent={true}
         specs={values.specs}
         volumes={values.volumes}
         domains={values.domains}
-        receiverAddress={node?.reward}
         unlockedAmount={accountBalance}
-        paymentMethod={values.paymentMethod}
-        streamDuration={values.streamDuration}
+        paymentMethod={PaymentMethod.Hold}
         description={
           <>
             You can either leverage the traditional method of holding tokens in
             your wallet for resource access, or opt for the Pay-As-You-Go (PAYG)
             system, which allows you to pay precisely for what you use, for the
             duration you need. The PAYG option includes a token stream feature,
-            enabling real-time payment for resources as you use them.
+            enabling real-time payment for resources as you use them. PAYG is
+            only available for instances.
           </>
         }
         button={
