@@ -99,6 +99,7 @@ export class FileManager {
       const query = await fetch(
         `${apiServer}/api/v0/addresses/${address}/files`,
       )
+      if (!query.ok) return emptyPayload
       const response = ((await query.json()) ||
         emptyPayload) as AccountFilesResponse
 
