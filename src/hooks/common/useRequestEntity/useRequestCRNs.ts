@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { CRN, NodeLastVersions, NodeManager } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
 import { useLocalRequest } from '@aleph-front/core'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type UseRequestCRNsProps = {
   triggerDeps?: unknown[]
@@ -15,11 +16,7 @@ export type UseRequestCRNsReturn = {
 export function useRequestCRNs({
   triggerDeps,
 }: UseRequestCRNsProps): UseRequestCRNsReturn {
-  const [state] = useAppState()
-  const { account } = state
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const { nodeManager } = useNodeManager()
 
   const { data: nodes } = useLocalRequest({
     doRequest: () => nodeManager.getCRNNodes(),
