@@ -76,7 +76,7 @@ export const AddVolumes = React.memo((props: AddVolumesProps) => {
             </div>
           }
         >
-          Learn more
+          More info
         </InfoTooltipButton>
       </div>
     </>

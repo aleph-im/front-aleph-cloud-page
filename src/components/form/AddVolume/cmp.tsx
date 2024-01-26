@@ -14,7 +14,6 @@ import {
   useAddPersistentVolumeProps,
 } from '@/hooks/form/useAddVolume'
 import { VolumeType } from '@/domain/volume'
-import { NoisyContainer } from '@aleph-front/core'
 import HiddenFileInput from '@/components/common/HiddenFileInput'
 
 const RemoveVolume = React.memo(
@@ -23,11 +22,10 @@ const RemoveVolume = React.memo(
       <div tw="mt-4 pt-6 text-right">
         <Button
           type="button"
-          onClick={handleRemove}
-          color="main2"
-          variant="secondary"
-          kind="default"
+          kind="functional"
+          variant="warning"
           size="md"
+          onClick={handleRemove}
         >
           Remove
         </Button>

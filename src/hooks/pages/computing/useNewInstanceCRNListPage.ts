@@ -41,7 +41,7 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
       ?.filter((node) => nodeManager.isStreamPaymentSupported(node))
       ?.filter((node) => {
         const nodeSpecs = specs[node.hash]
-        // const nodeIps = ips[node.hash]
+        const nodeIps = ips[node.hash]
 
         if (nodeSpecs) {
           const validSpecs =
@@ -50,11 +50,11 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
           if (!validSpecs) return false
         }
 
-        // if (nodeIps) {
-        //   const validIp = !!nodeIps?.data?.result
+        if (nodeIps) {
+          const validIp = !!nodeIps?.data?.vm
 
-        //   if (!validIp) return false
-        // }
+          if (!validIp) return false
+        }
 
         return true
       })

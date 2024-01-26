@@ -183,7 +183,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
               </div>
             }
           >
-            Learn more
+            More info
           </InfoTooltipButton>
         </div>
       </div>

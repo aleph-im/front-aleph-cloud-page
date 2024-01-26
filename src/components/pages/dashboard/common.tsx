@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import tw from 'twin.macro'
 import CenteredContainer from '@/components/common/CenteredContainer'
+import { addClasses } from '@aleph-front/core'
 
 export const Separator = styled.hr`
   ${tw`my-5`}
@@ -10,7 +11,7 @@ export const Separator = styled.hr`
 `
 
 // @todo: Refactor adding new text color in core?
-export const GrayText = styled.span`
+export const GrayText = styled.span.attrs(addClasses('tp-body1'))`
   color: ${({ theme }) => theme.color.text}b3;
 `
 

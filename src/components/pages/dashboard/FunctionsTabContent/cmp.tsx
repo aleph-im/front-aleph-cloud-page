@@ -8,6 +8,7 @@ import {
   humanReadableSize,
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
+import { Icon, NoisyContainer } from '@aleph-front/core'
 
 export const FunctionsTabContent = React.memo(
   ({ data }: FunctionsTabContentProps) => {
@@ -15,71 +16,74 @@ export const FunctionsTabContent = React.memo(
       <>
         {data.length > 0 ? (
           <>
-            <div tw="overflow-auto max-w-full">
-              <EntityTable
-                borderType="none"
-                rowNoise
-                rowKey={(row) => row.id}
-                data={data}
-                rowProps={(row) => ({
-                  css: row.confirmed ? '' : tw`opacity-60`,
-                })}
-                columns={[
-                  {
-                    label: 'Name',
-                    width: '100%',
-                    sortable: true,
-                    render: (row) =>
-                      row?.metadata?.name || ellipseAddress(row.id),
-                  },
-                  {
-                    label: 'Cores',
-                    align: 'right',
-                    sortable: true,
-                    render: (row) => row?.resources?.vcpus || 0,
-                  },
-                  {
-                    label: 'Memory',
-                    align: 'right',
-                    sortable: true,
-                    render: (row) =>
-                      convertByteUnits(row?.resources?.memory || 0, {
-                        from: 'MiB',
-                        to: 'GiB',
-                        displayUnit: true,
+            <NoisyContainer>
+              <div tw="overflow-auto max-w-full">
+                <EntityTable
+                  borderType="none"
+                  rowNoise
+                  rowKey={(row) => row.id}
+                  data={data}
+                  rowProps={(row) => ({
+                    css: row.confirmed ? '' : tw`opacity-60`,
+                  })}
+                  columns={[
+                    {
+                      label: 'Name',
+                      width: '100%',
+                      sortable: true,
+                      render: (row) => (
+                        <>{row?.metadata?.name || ellipseAddress(row.id)}</>
+                      ),
+                    },
+                    {
+                      label: 'Cores',
+                      align: 'right',
+                      sortable: true,
+                      render: (row) => row?.resources?.vcpus || 0,
+                    },
+                    {
+                      label: 'Memory',
+                      align: 'right',
+                      sortable: true,
+                      render: (row) =>
+                        convertByteUnits(row?.resources?.memory || 0, {
+                          from: 'MiB',
+                          to: 'GiB',
+                          displayUnit: true,
+                        }),
+                    },
+                    {
+                      label: 'Size',
+                      align: 'right',
+                      sortable: true,
+                      render: (row) => humanReadableSize(row.size, 'MiB'),
+                    },
+                    {
+                      label: 'Date',
+                      align: 'right',
+                      sortable: true,
+                      render: (row) => row.date,
+                    },
+                    {
+                      label: '',
+                      align: 'right',
+                      render: (row) => (
+                        <ButtonLink
+                          kind="functional"
+                          variant="secondary"
+                          href={`/computing/function/${row.id}`}
+                        >
+                          <Icon name="angle-right" size="lg" />
+                        </ButtonLink>
+                      ),
+                      cellProps: () => ({
+                        css: tw`pl-3!`,
                       }),
-                  },
-                  {
-                    label: 'Size',
-                    align: 'right',
-                    sortable: true,
-                    render: (row) => humanReadableSize(row.size, 'MiB'),
-                  },
-                  {
-                    label: 'Date',
-                    align: 'right',
-                    sortable: true,
-                    render: (row) => row.date,
-                  },
-                  {
-                    label: '',
-                    align: 'right',
-                    render: (row) => (
-                      <ButtonLink
-                        color={row.confirmed ? 'main0' : 'main2'}
-                        variant="tertiary"
-                        href={`/computing/function/${row.id}`}
-                      >
-                        &gt;
-                      </ButtonLink>
-                    ),
-                    cellProps: () => ({
-                      css: tw`pl-3!`,
-                    }),
-                  },
-                ]}
-              />
-            </div>
+                    },
+                  ]}
+                />
+              </div>
+            </NoisyContainer>
             <div tw="mt-20 text-center">
               <ButtonLink variant="primary" href="/computing/function/new">
                 Create function

@@ -6,10 +6,10 @@ import {
 } from '@/helpers/utils'
 import { Label, StyledArrowIcon, StyledHoldingSummaryLine } from './styles'
 import {
-  HoldingRequirementsDomainLineProps,
-  HoldingRequirementsProps,
-  HoldingRequirementsSpecsLineProps,
-  HoldingRequirementsVolumeLineProps,
+  CheckoutSummaryDomainLineProps,
+  CheckoutSummaryProps,
+  CheckoutSummarySpecsLineProps,
+  CheckoutSummaryVolumeLineProps,
 } from './types'
 import { memo, useEffect, useMemo, useState } from 'react'
 import React from 'react'
@@ -23,12 +23,12 @@ import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import { SelectStreamDuration } from '../SelectInstanceDuration'
 import Price from '@/components/common/Price'
 
-const HoldingRequirementsSpecsLine = ({
+const CheckoutSummarySpecsLine = ({
   type,
   specs,
   cost,
   priceDuration,
-}: HoldingRequirementsSpecsLineProps) => {
+}: CheckoutSummarySpecsLineProps) => {
   const { cpu, ram, storage } = specs
 
   const cpuStr = useMemo(() => `${cpu}x86-64bit`, [cpu])
@@ -77,16 +77,16 @@ const HoldingRequirementsSpecsLine = ({
     </StyledHoldingSummaryLine>
   )
 }
-HoldingRequirementsSpecsLine.displayName = 'HoldingRequirementsSpecsLine'
+CheckoutSummarySpecsLine.displayName = 'CheckoutSummarySpecsLine'
 
 // ------------------------------------------
 
-const HoldingRequirementsVolumeLine = ({
+const CheckoutSummaryVolumeLine = ({
   volume,
   cost,
   specs,
   priceDuration,
-}: HoldingRequirementsVolumeLineProps) => {
+}: CheckoutSummaryVolumeLineProps) => {
   const [size, setSize] = useState<number>(0)
 
   useEffect(() => {
@@ -179,13 +179,13 @@ const HoldingRequirementsVolumeLine = ({
     </StyledHoldingSummaryLine>
   )
 }
-HoldingRequirementsVolumeLine.displayName = 'HoldingRequirementsVolumeLine'
+CheckoutSummaryVolumeLine.displayName = 'CheckoutSummaryVolumeLine'
 
 // ------------------------------------------
 
-const HoldingRequirementsDomainLine = ({
+const CheckoutSummaryDomainLine = ({
   domain,
-}: HoldingRequirementsDomainLineProps) => {
+}: CheckoutSummaryDomainLineProps) => {
   return (
     <StyledHoldingSummaryLine>
       <div>CUSTOM DOMAIN</div>
@@ -194,11 +194,11 @@ const HoldingRequirementsDomainLine = ({
     </StyledHoldingSummaryLine>
   )
 }
-HoldingRequirementsDomainLine.displayName = 'HoldingRequirementsDomainLine'
+CheckoutSummaryDomainLine.displayName = 'CheckoutSummaryDomainLine'
 
 // ------------------------------------------
 
-export const HoldingRequirements = ({
+export const CheckoutSummary = ({
   address,
   unlockedAmount,
   type,
@@ -209,10 +209,10 @@ export const HoldingRequirements = ({
   button: ButtonCmp,
   control,
   receiverAddress,
-  streamDuration,
   paymentMethod,
   isPersistent = type === EntityType.Instance,
-}: HoldingRequirementsProps) => {
+}: // streamDuration,
+CheckoutSummaryProps) => {
   volumes = useMemo(
     () => volumes?.filter((volume) => !volume.isFake),
     [volumes],
@@ -225,7 +225,7 @@ export const HoldingRequirements = ({
       volumes,
       isPersistent,
       paymentMethod,
-      streamDuration,
+      // streamDuration,
     },
   })
 
@@ -265,7 +265,7 @@ export const HoldingRequirements = ({
                     </div>
                   </div>
                 </div>
-                {paymentMethod === PaymentMethod.Stream && (
+                {/* {paymentMethod === PaymentMethod.Stream && (
                   <div className="bg-purple0" tw="p-6">
                     <TextGradient forwardedAs="h3" type="h7" tw="mb-3">
                       Instance Duration
@@ -275,7 +275,7 @@ export const HoldingRequirements = ({
                       control={control}
                     />
                   </div>
-                )}
+                )} */}
               </>
             )}
 
@@ -283,14 +283,14 @@ export const HoldingRequirements = ({
               <div tw="max-w-full overflow-auto">
                 <StyledHoldingSummaryLine $isHeader className="tp-body3 fs-12">
                   <div>UNLOCKED</div>
-                  <div>current wallet {ellipseAddress(address)}</div>
+                  <div>CURRENT WALLET {ellipseAddress(address)}</div>
                   <div>
                     <Price value={unlockedAmount} />
                   </div>
                 </StyledHoldingSummaryLine>
 
                 {specs && (
-                  <HoldingRequirementsSpecsLineMemo
+                  <CheckoutSummarySpecsLineMemo
                     {...{
                       type,
                       specs,
@@ -303,7 +303,7 @@ export const HoldingRequirements = ({
                 {volumes &&
                   volumes.map((volume, index) => {
                     return (
-                      <HoldingRequirementsVolumeLineMemo
+                      <CheckoutSummaryVolumeLineMemo
                         key={volume.volumeType + index}
                         {...{
                           volume,
@@ -326,7 +326,7 @@ export const HoldingRequirements = ({
                 {domains &&
                   domains.map((domain) => {
                     return (
-                      <HoldingRequirementsDomainLineMemo
+                      <CheckoutSummaryDomainLineMemo
                         key={domain.name}
                         domain={domain}
                       />
@@ -335,7 +335,7 @@ export const HoldingRequirements = ({
 
                 <StyledHoldingSummaryLine>
                   <div></div>
-                  <div className="tp-body2">
+                  <div className="text-main0 tp-body2">
                     {paymentMethod === PaymentMethod.Hold
                       ? 'Total'
                       : 'Total / h'}
@@ -351,10 +351,11 @@ export const HoldingRequirements = ({
                   cost?.totalStreamCost && (
                     <StyledHoldingSummaryLine>
                       <div></div>
-                      <div className="tp-body2">Total Streamed</div>
+                      <div className="text-main0 tp-body2">Min. required</div>
                       <div>
                         <span className="text-main0 tp-body3">
-                          <Price value={cost?.totalStreamCost} />
+                          {/* <Price value={cost?.totalStreamCost} /> */}
+                          <Price value={cost?.totalCost * 4} />
                         </span>
                       </div>
                     </StyledHoldingSummaryLine>
@@ -365,7 +366,7 @@ export const HoldingRequirements = ({
             {paymentMethod === PaymentMethod.Stream && receiverAddress && (
               <div className="bg-purple0" tw="p-6">
                 <TextGradient forwardedAs="h3" type="h7" tw="mb-6">
-                  Review the transaction stream
+                  Review the transaction
                 </TextGradient>
                 <div tw="w-full flex items-end gap-6">
                   <div tw="flex-1">
@@ -390,9 +391,11 @@ export const HoldingRequirements = ({
                     />
                   </div>
                 </div>
-                <div className="fs-12" tw="text-center mt-6">
-                  Balance:
-                  <Price value={cost?.totalCost} /> per hour
+                <div
+                  className="text-main0 tp-body2 fs-12"
+                  tw="text-center mt-6"
+                >
+                  Balance: <Price value={cost?.totalCost} /> per hour
                 </div>
               </div>
             )}
@@ -405,16 +408,16 @@ export const HoldingRequirements = ({
   )
 }
 
-const HoldingRequirementsSpecsLineMemo = memo(
-  HoldingRequirementsSpecsLine,
-) as typeof HoldingRequirementsSpecsLine
+const CheckoutSummarySpecsLineMemo = memo(
+  CheckoutSummarySpecsLine,
+) as typeof CheckoutSummarySpecsLine
 
-const HoldingRequirementsVolumeLineMemo = memo(
-  HoldingRequirementsVolumeLine,
-) as typeof HoldingRequirementsVolumeLine
+const CheckoutSummaryVolumeLineMemo = memo(
+  CheckoutSummaryVolumeLine,
+) as typeof CheckoutSummaryVolumeLine
 
-const HoldingRequirementsDomainLineMemo = memo(
-  HoldingRequirementsDomainLine,
-) as typeof HoldingRequirementsDomainLine
+const CheckoutSummaryDomainLineMemo = memo(
+  CheckoutSummaryDomainLine,
+) as typeof CheckoutSummaryDomainLine
 
-export default memo(HoldingRequirements) as typeof HoldingRequirements
+export default memo(CheckoutSummary) as typeof CheckoutSummary

@@ -1,13 +1,12 @@
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import { NoisyContainer } from '@aleph-front/core'
+import { Label, NoisyContainer } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageFunction } from '@/hooks/pages/solutions/manage/useManageFunction'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import VolumeList from '../VolumeList'
-import StatusLabel from '@/components/common/StatusLabel'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
@@ -37,9 +36,10 @@ export default function ManageFunction() {
         <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
-              <Icon name="alien-8bit" tw="mr-4" className="text-main1" />
+              <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
               <div className="tp-body2">{name}</div>
-              <StatusLabel
+              <Label
+                kind="secondary"
                 variant={func.confirmed ? 'success' : 'warning'}
                 tw="ml-4"
               >
@@ -54,7 +54,7 @@ export default function ManageFunction() {
                     />
                   </div>
                 )}
-              </StatusLabel>
+              </Label>
             </div>
             <div>
               {/* <Button
@@ -69,10 +69,9 @@ export default function ManageFunction() {
                 Download
               </Button> */}
               <Button
+                kind="functional"
+                variant="warning"
                 size="md"
-                variant="tertiary"
-                color="main2"
-                kind="default"
                 onClick={handleDelete}
               >
                 Delete
@@ -149,7 +148,7 @@ export default function ManageFunction() {
               <>
                 <Separator />
 
-                <TextGradient type="h6" color="main1">
+                <TextGradient type="body3" as="h7" color="main0">
                   Linked storage
                 </TextGradient>
 

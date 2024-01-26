@@ -1,5 +1,5 @@
 import React from 'react'
-import { Icon, TextInput, Button, NoisyContainer } from '@aleph-front/core'
+import { Icon, TextInput, Button } from '@aleph-front/core'
 import { useAddEnvVars, useEnvVarItem } from '@/hooks/form/useAddEnvVars'
 import { EnvVarItemProps, AddEnvVarsProps as AddEnvVarsProps } from './types'
 
@@ -26,11 +26,10 @@ const EnvVarItem = React.memo((props: EnvVarItemProps) => {
       </div>
       <div tw="flex items-end md:justify-center pb-2">
         <Button
-          color="main2"
-          variant="secondary"
-          kind="default"
-          size="md"
           type="button"
+          kind="functional"
+          variant="warning"
+          size="md"
           onClick={handleRemove}
         >
           <Icon name="trash" />

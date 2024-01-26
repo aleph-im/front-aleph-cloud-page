@@ -10,7 +10,7 @@ import {
 import { ReactNode } from 'react'
 import { Control } from 'react-hook-form'
 
-export type HoldingRequirementsProps = {
+export type CheckoutSummaryProps = {
   address: string
   unlockedAmount: number
   type: EntityType.Program | EntityType.Instance | EntityType.Volume
@@ -35,20 +35,20 @@ export type HoldingRequirementsProps = {
     }
 )
 
-export type HoldingRequirementsSpecsLineProps = {
+export type CheckoutSummarySpecsLineProps = {
   type: EntityType.Program | EntityType.Instance | EntityType.Volume
   specs: InstanceSpecsField
   cost: number
   priceDuration: StreamDurationUnit | undefined
 }
 
-export type HoldingRequirementsVolumeLineProps = {
+export type CheckoutSummaryVolumeLineProps = {
   volume: VolumeField
   specs?: InstanceSpecsField
   cost?: PerVolumeCostItem
   priceDuration: StreamDurationUnit | undefined
 }
 
-export type HoldingRequirementsDomainLineProps = {
+export type CheckoutSummaryDomainLineProps = {
   domain: DomainField
 }

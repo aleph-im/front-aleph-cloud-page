@@ -57,12 +57,11 @@ export const HiddenFileInput = forwardRef(
 
         {value ? (
           <Button
-            onClick={handleRemoveFile}
             type="button"
-            color="main2"
-            kind="default"
+            kind="functional"
+            variant="warning"
             size="md"
-            variant="tertiary"
+            onClick={handleRemoveFile}
           >
             {ellipseAddress(value.name)} <Icon name="trash" tw="ml-5" />
           </Button>

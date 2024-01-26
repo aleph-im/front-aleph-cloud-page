@@ -1,12 +1,11 @@
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import { NoisyContainer } from '@aleph-front/core'
+import { Label, NoisyContainer } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag } from '@aleph-front/core'
 import { useManageSSHKey } from '@/hooks/pages/solutions/manage/useManageSSHKey'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
-import StatusLabel from '@/components/common/StatusLabel'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
@@ -35,9 +34,9 @@ export default function ManageSSHKey() {
         <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
-              <Icon name="key" tw="mr-4" className="text-main1" />
+              <Icon name="key" tw="mr-4" className="text-main0" />
               <div className="tp-body2">{name}</div>
-              <StatusLabel
+              <Label
                 variant={sshKey.confirmed ? 'success' : 'warning'}
                 tw="ml-4"
               >
@@ -52,14 +51,13 @@ export default function ManageSSHKey() {
                     />
                   </div>
                 )}
-              </StatusLabel>
+              </Label>
             </div>
             <div>
               <Button
+                kind="functional"
+                variant="warning"
                 size="md"
-                variant="tertiary"
-                color="main2"
-                kind="default"
                 onClick={handleDelete}
               >
                 Delete

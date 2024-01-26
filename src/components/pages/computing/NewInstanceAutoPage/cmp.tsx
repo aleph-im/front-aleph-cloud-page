@@ -6,7 +6,7 @@ import AddEnvVars from '@/components/form/AddEnvVars'
 import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
-import HoldingRequirements from '@/components/form/HoldingRequirements'
+import CheckoutSummary from '@/components/form/CheckoutSummary'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstanceAutoPage } from '@/hooks/pages/computing/useNewInstanceAutoPage'
@@ -143,7 +143,7 @@ export default function NewInstanceHoldPage() {
           </div>
         </Container>
       </section>
-      <HoldingRequirements
+      <CheckoutSummary
         address={address}
         type={EntityType.Instance}
         isPersistent={true}

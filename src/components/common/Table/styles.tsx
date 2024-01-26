@@ -40,36 +40,32 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
       tbody {
         tr {
           cursor: pointer;
-          transition: all ${timing} ${duration.fast}ms 0ms;
 
           td {
-            background: ${theme.color.light1};
+            transition: all ${timing} ${duration.fast}ms 0ms;
+            background: ${theme.color.light0};
 
             &.fx-noise-light {
-              background: ${theme.color.light0};
-            }
-
-            &:first-child {
-              &:hover,
-              &._active {
-                border-top-left-radius: 3.75rem;
-                border-bottom-left-radius: 3.75rem;
-              }
-            }
-
-            &:last-child {
-              &:hover,
-              &._active {
-                border-top-right-radius: 3.75rem;
-                border-bottom-right-radius: 3.75rem;
-              }
+              background: ${theme.color.light1};
             }
           }
 
           &:hover,
           &._active {
-            color: ${theme.color.main0};
-            background: ${theme.color.purple4};
+            td {
+              color: ${theme.color.main0};
+              background: ${theme.color.purple4};
+
+              &:first-child {
+                border-top-left-radius: 3.75rem;
+                border-bottom-left-radius: 3.75rem;
+              }
+
+              &:last-child {
+                border-top-right-radius: 3.75rem;
+                border-bottom-right-radius: 3.75rem;
+              }
+            }
 
             .check-button {
               visibility: visible;
@@ -82,10 +78,12 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
           }
 
           &._disabled {
-            color: ${theme.color.disabled};
-            background: inherit;
-            opacity: 0.8;
-            cursor: not-allowed;
+            td {
+              color: ${theme.color.disabled};
+              background: inherit;
+              opacity: 0.8;
+              cursor: not-allowed;
+            }
           }
         }
       }

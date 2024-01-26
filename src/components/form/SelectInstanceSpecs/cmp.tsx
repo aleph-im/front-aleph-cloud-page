@@ -22,35 +22,9 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     useSelectInstanceSpecs(props)
 
   const columns = useMemo(() => {
-    const paymentCol =
-      paymentMethod === PaymentMethod.Hold
-        ? {
-            label: 'Hold',
-            align: 'right',
-            sortable: true,
-            sortBy: (row: SpecsDetail) => row.price,
-            render: (row: SpecsDetail) => (
-              <span tw="flex items-center justify-end gap-1">
-                <Price value={row.price} />
-              </span>
-            ),
-          }
-        : {
-            label: 'Price',
-            align: 'right',
-            sortable: true,
-            sortBy: (row: SpecsDetail) => row.price,
-            render: (row: SpecsDetail) => (
-              <span tw="flex items-center justify-end gap-1">
-                <Price value={row.price} duration="h" />
-              </span>
-            ),
-          }
-
     const cols = [
       {
         label: 'Cores',
-        width: '100%',
         sortable: true,
         sortBy: (row: SpecsDetail) => row.specs.cpu,
         render: (row: SpecsDetail) => `${row.specs.cpu} x86 64bit`,
@@ -62,15 +36,32 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         sortBy: (row: SpecsDetail) => row.ram,
         render: (row: SpecsDetail) => row.ram,
       },
-      paymentCol,
+      {
+        label: 'Price',
+        align: 'right',
+        sortable: true,
+        sortBy: (row: SpecsDetail) => row.price,
+        render: (row: SpecsDetail) => (
+          <span tw="flex items-center justify-end gap-1">
+            <Price
+              value={row.price}
+              duration={paymentMethod === PaymentMethod.Hold ? undefined : 'h'}
+            />
+          </span>
+        ),
+      },
       {
         label: '',
+        width: '25%',
         align: 'right',
         render: (row: SpecsDetail) => {
           return (
             <>
               {row.specs.disabled ? (
-                <div className="fs-12 tp-body2" tw="text-center py-2">
+                <div
+                  className="fs-12 tp-body2"
+                  tw="inline-block text-center py-2 px-4"
+                >
                   (Soon)
                 </div>
               ) : (
@@ -101,7 +92,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
 
     if (type === EntityType.Instance) {
       cols.splice(2, 0, {
-        label: 'Storage',
+        label: 'HDD',
         align: 'right',
         sortable: true,
         sortBy: (row: SpecsDetail) => row.storage,

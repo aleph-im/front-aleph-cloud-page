@@ -14,7 +14,7 @@ import AddEnvVars from '@/components/form/AddEnvVars'
 import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
-import HoldingRequirements from '@/components/form/HoldingRequirements'
+import CheckoutSummary from '@/components/form/CheckoutSummary'
 import { EntityType, apiServer } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstanceCRNPage } from '@/hooks/pages/computing/useNewInstanceCRNPage'
@@ -218,7 +218,7 @@ export default function NewInstancePage() {
         </Container>
       </section>
 
-      <HoldingRequirements
+      <CheckoutSummary
         control={control}
         address={address}
         type={EntityType.Instance}

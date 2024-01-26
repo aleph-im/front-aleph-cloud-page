@@ -3,6 +3,7 @@ import { SpinnerProps, useTransitionedEnterExit } from '@aleph-front/core'
 import { StyledSpinnerContainer } from './styles'
 import { createPortal } from 'react-dom'
 import { RotatingLines } from 'react-loader-spinner'
+import { useTheme } from 'styled-components'
 
 export type SpinnerOverlayProps = SpinnerProps & {
   show: boolean
@@ -21,6 +22,9 @@ export const SpinnerOverlay = ({
     onOff: show,
   })
 
+  const theme = useTheme()
+  color = theme.color[color] || color
+
   const cmp = (
     <>
       {shouldMount && (
@@ -31,7 +35,7 @@ export const SpinnerOverlay = ({
           $fullScreen={fullScreen}
         >
           {/* <Spinner {...{ color, ...rest }} /> */}
-          <RotatingLines strokeColor={color} width="1em" {...rest} />
+          <RotatingLines strokeColor={color} width="10em" {...rest} />
         </StyledSpinnerContainer>
       )}
     </>

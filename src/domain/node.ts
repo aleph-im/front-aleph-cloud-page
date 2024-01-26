@@ -72,8 +72,6 @@ export type CRN = BaseNode & {
   scoreData?: CRNScore
   metricsData?: CRNMetrics
   parentData?: CCN
-
-  stream_reward: string
 }
 
 export type AlephNode = CCN | CRN
@@ -224,7 +222,8 @@ export type CRNSpecs = {
 export type CRNIps = {
   hash: string
   name?: string
-  result: boolean
+  host: boolean
+  vm: boolean
 }
 
 // @todo: Refactor (create a domain npm package and move this there)
@@ -326,7 +325,7 @@ export class NodeManager {
     if (!node.address) return
 
     const address = node.address.toLowerCase().replace(/\/$/, '')
-    const url = `${address}/vm/3fc0aa9569da840c43e7bd2033c3c580abb46b007527d6d20f2d4e98e867f7af/ip/6`
+    const url = `${address}/status/check/ipv6`
     const { success } = urlSchema.safeParse(url)
     if (!success) return
 
@@ -336,7 +335,7 @@ export class NodeManager {
         `3crn_ips_${node.hash}`,
         4_600,
         (res: CRNIps) => {
-          if (res.result === undefined) throw new Error('invalid response')
+          if (res.vm === undefined) throw new Error('invalid response')
 
           return {
             ...res,

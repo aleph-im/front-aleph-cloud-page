@@ -9,74 +9,53 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
   const { entityName, nameCtrl, tagsCtrl } = useAddNameAndTags(props)
 
   return (
-    <NoisyContainer $type="grain-3">
-      <div>
-        <div tw="mb-2">
-          <InfoTooltipButton
-            plain
-            my="bottom-left"
-            at="bottom-right"
-            vAlign="top"
-            tooltipContent={
-              <div tw="text-left">
-                <div>
-                  <div className="tp-body2 fs-18">{entityName} name</div>
-                  <div className="tp-body1 fs-18">
-                    Assign a descriptive and unique name to your function,
-                    allowing you to quickly identify it among others in your
-                    application, understand the function&apos;s purpose and
-                    improve overall project organisation.
-                  </div>
-                </div>
-              </div>
-            }
-          >
-            <FormLabel
-              label={`${entityName} name`}
-              required
-              error={nameCtrl.fieldState.error}
-            />
-          </InfoTooltipButton>
+    <>
+      <NoisyContainer $type="grain-3">
+        <div>
+          <TextInput
+            {...nameCtrl.field}
+            {...nameCtrl.fieldState}
+            label={`${entityName} name`}
+            placeholder="Give it a name"
+            required
+          />
         </div>
-        <TextInput
-          {...nameCtrl.field}
-          {...nameCtrl.fieldState}
-          required
-          placeholder="Give it a name"
-        />
-      </div>
-      <div tw="mt-4">
-        <div tw="mb-2">
-          <InfoTooltipButton
-            plain
-            my="bottom-left"
-            at="bottom-right"
-            vAlign="top"
-            tooltipContent={
-              <div tw="text-left">
-                <div>
-                  <div className="tp-body2 fs-18">Tags</div>
-                  <div className="tp-body1 fs-18">
-                    Add relevant tags to categorize your functions based on
-                    their functionality, purpose, or any other criteria that
-                    provide personal context. Tags enable easy filtering and
-                    searching within your project, simplifying management and
-                    collaboration.
-                  </div>
-                </div>
-              </div>
-            }
-          >
-            <FormLabel label="Tags" error={tagsCtrl.fieldState.error} />
-          </InfoTooltipButton>
+        <div tw="mt-4">
+          <ChipInput
+            {...tagsCtrl.field}
+            {...tagsCtrl.fieldState}
+            label="Tags"
+            placeholder="Tags (press enter to add a new tag)"
+          />
         </div>
-        <ChipInput
-          {...tagsCtrl.field}
-          {...tagsCtrl.fieldState}
-          placeholder="Tags (press enter to add a new tag)"
-        />
+      </NoisyContainer>
+      <div tw="mt-6 text-right">
+        <InfoTooltipButton
+          my="bottom-right"
+          at="top-right"
+          tooltipContent={
+            <div className="tp-body1 fs-18">
+              <div tw="mb-8">
+                <div className="tp-body2 fs-18">{entityName} name</div>
+                Assign a descriptive and unique name to your {entityName},
+                allowing you to quickly identify it among others in your
+                application, understand the {entityName}&apos;s purpose and
+                improve overall project organisation.
+              </div>
+              <div>
+                <div className="tp-body2 fs-18">Tags</div>
+                Add relevant tags to categorize your {entityName}s based on its
+                functionality, purpose, or any other criteria that provide
+                personal context. Tags enable easy filtering and searching
+                within your project, simplifying management and collaboration.
+              </div>
+            </div>
+          }
+        >
+          More info
+        </InfoTooltipButton>
       </div>
-    </NoisyContainer>
+    </>
   )
 })
 AddNameAndTags.displayName = 'AddNameAndTags'

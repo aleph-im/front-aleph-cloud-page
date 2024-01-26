@@ -74,7 +74,10 @@ export abstract class Executable {
     type,
     isPersistent,
     specs,
-    streamDuration,
+    streamDuration = {
+      duration: 1,
+      unit: 'h',
+    },
     paymentMethod = PaymentMethod.Hold,
     capabilities = {},
     volumes = [],

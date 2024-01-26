@@ -10,6 +10,7 @@ import {
   EntityTypeUrlSection,
 } from '@/helpers/constants'
 import EntityTable from '@/components/common/EntityTable'
+import { Icon, NoisyContainer } from '@aleph-front/core'
 
 export function entityUrl(type: EntityType, id: string): string {
   const chunk1 = EntityTypeUrlSection[type]
@@ -24,58 +25,60 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
     <>
       {data.length > 0 ? (
         <>
-          <div tw="overflow-auto max-w-full">
-            <EntityTable
-              borderType="none"
-              rowNoise
-              rowKey={(row) => row.id}
-              data={data}
-              rowProps={(row) => ({
-                css: row.confirmed ? '' : tw`opacity-60`,
-              })}
-              columns={[
-                {
-                  label: 'Type',
-                  sortable: true,
-                  render: (row) => EntityTypeName[row.type],
-                },
-                {
-                  label: 'Name',
-                  width: '100%',
-                  sortable: true,
-                  render: (row) => row.name,
-                },
-                {
-                  label: 'Size',
-                  align: 'right',
-                  sortable: true,
-                  render: (row) => humanReadableSize(row.size, 'MiB'),
-                },
-                {
-                  label: 'Date',
-                  align: 'right',
-                  sortable: true,
-                  render: (row) => row.date,
-                },
-                {
-                  label: '',
-                  align: 'right',
-                  render: (row) => (
-                    <ButtonLink
-                      color={row.confirmed ? 'main0' : 'main2'}
-                      variant="tertiary"
-                      href={entityUrl(row.type, row.id)}
-                    >
-                      &gt;
-                    </ButtonLink>
-                  ),
-                  cellProps: () => ({
-                    css: tw`pl-3!`,
-                  }),
-                },
-              ]}
-            />
-          </div>
+          <NoisyContainer>
+            <div tw="overflow-auto max-w-full">
+              <EntityTable
+                borderType="none"
+                rowNoise
+                rowKey={(row) => row.id}
+                data={data}
+                rowProps={(row) => ({
+                  css: row.confirmed ? '' : tw`opacity-60`,
+                })}
+                columns={[
+                  {
+                    label: 'Type',
+                    sortable: true,
+                    render: (row) => EntityTypeName[row.type],
+                  },
+                  {
+                    label: 'Name',
+                    width: '100%',
+                    sortable: true,
+                    render: (row) => row.name,
+                  },
+                  {
+                    label: 'Size',
+                    align: 'right',
+                    sortable: true,
+                    render: (row) => humanReadableSize(row.size, 'MiB'),
+                  },
+                  {
+                    label: 'Date',
+                    align: 'right',
+                    sortable: true,
+                    render: (row) => row.date,
+                  },
+                  {
+                    label: '',
+                    align: 'right',
+                    render: (row) => (
+                      <ButtonLink
+                        kind="functional"
+                        variant="secondary"
+                        href={entityUrl(row.type, row.id)}
+                      >
+                        <Icon name="angle-right" size="lg" />
+                      </ButtonLink>
+                    ),
+                    cellProps: () => ({
+                      css: tw`pl-3!`,
+                    }),
+                  },
+                ]}
+              />
+            </div>
+          </NoisyContainer>
         </>
       ) : (
         <div tw="mt-10 text-center">

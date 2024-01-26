@@ -1,5 +1,5 @@
 import React from 'react'
-import { Icon, TextInput, Button, NoisyContainer } from '@aleph-front/core'
+import { Icon, TextInput, Button } from '@aleph-front/core'
 import { useAddDomains, useDomainItem } from '@/hooks/form/useAddDomains'
 import { DomainItemProps, AddDomainsProps as AddDomainsProps } from './types'
 
@@ -18,11 +18,10 @@ const DomainItem = React.memo((props: DomainItemProps) => {
       </div>
       <div tw="flex items-end md:justify-center pb-2">
         <Button
-          color="main2"
-          variant="secondary"
-          kind="default"
-          size="md"
           type="button"
+          kind="functional"
+          variant="warning"
+          size="md"
           onClick={handleRemove}
         >
           <Icon name="trash" />

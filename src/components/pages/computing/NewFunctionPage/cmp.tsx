@@ -1,7 +1,7 @@
 import { Button, TextGradient } from '@aleph-front/core'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useNewFunctionPage } from '@/hooks/pages/computing/useNewFunctionPage'
-import HoldingRequirements from '@/components/form/HoldingRequirements'
+import CheckoutSummary from '@/components/form/CheckoutSummary'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
 import AddEnvVars from '@/components/form/AddEnvVars'
@@ -157,7 +157,7 @@ export default function NewFunctionPage() {
         </Container>
       </section>
 
-      <HoldingRequirements
+      <CheckoutSummary
         address={address}
         type={EntityType.Program}
         isPersistent={values.isPersistent}

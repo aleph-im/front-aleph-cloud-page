@@ -35,7 +35,7 @@ export const StyledHoldingSummaryLine = styled.div<StyledHoldingSummaryLineProps
       ${$isHeader &&
       css`
         font-weight: 700;
-        font-size: ;
+        font-size: ${theme.font.size[12]}rem;
         border-bottom: none !important;
       `}
     }
@@ -70,6 +70,7 @@ export const StyledArrowIcon = styled(Icon).attrs((props) => {
     ...props,
     name: 'angle-double-right',
     size: '1.5',
+    color: 'main0',
   }
 })`
   ${tw`p-1 origin-center`}

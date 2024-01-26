@@ -1,7 +1,7 @@
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useNewIndexerPage } from '@/hooks/pages/tools/useNewIndexerPage'
 import { Button } from '@aleph-front/core'
-import HoldingRequirements from '@/components/form/HoldingRequirements'
+import CheckoutSummary from '@/components/form/CheckoutSummary'
 import Container from '@/components/common/CenteredContainer'
 import { AddIndexerBlockchainNetworks } from '@/components/form/AddIndexerBlockchainNetworks'
 import { Form } from '@/components/form/Form'
@@ -67,7 +67,7 @@ export default function NewIndexerPage() {
           <AddNameAndTags control={control} entityType={EntityType.Indexer} />
         </Container>
       </section>
-      <HoldingRequirements
+      <CheckoutSummary
         address={address}
         type={EntityType.Program}
         unlockedAmount={accountBalance}

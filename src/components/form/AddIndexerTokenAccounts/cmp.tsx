@@ -98,11 +98,10 @@ const IndexerTokenAccountItem = React.memo(
 
         <div tw="mt-4 pt-6 text-right">
           <Button
-            color="main2"
-            variant="secondary"
-            kind="default"
-            size="md"
             type="button"
+            kind="functional"
+            variant="warning"
+            size="md"
             onClick={handleRemove}
           >
             <Icon name="trash" tw="mr-4" /> Remove

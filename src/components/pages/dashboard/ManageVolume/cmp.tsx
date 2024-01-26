@@ -1,12 +1,11 @@
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import { NoisyContainer } from '@aleph-front/core'
+import { Label, NoisyContainer } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag } from '@aleph-front/core'
 import { useManageVolume } from '@/hooks/pages/solutions/manage/useManageVolume'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
-import StatusLabel from '@/components/common/StatusLabel'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
@@ -35,9 +34,10 @@ export default function ManageVolume() {
         <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
-              <Icon name="floppy-disk" tw="mr-4" className="text-main1" />
+              <Icon name="floppy-disk" tw="mr-4" className="text-main0" />
               <div className="tp-body2">{name}</div>
-              <StatusLabel
+              <Label
+                kind="secondary"
                 variant={volume.confirmed ? 'success' : 'warning'}
                 tw="ml-4"
               >
@@ -52,7 +52,7 @@ export default function ManageVolume() {
                     />
                   </div>
                 )}
-              </StatusLabel>
+              </Label>
             </div>
             <div>
               <Button
@@ -67,10 +67,9 @@ export default function ManageVolume() {
                 Download
               </Button>
               <Button
+                kind="functional"
+                variant="warning"
                 size="md"
-                variant="tertiary"
-                color="main2"
-                kind="default"
                 onClick={handleDelete}
               >
                 Delete

@@ -6,7 +6,7 @@ import { useForm } from '@/hooks/common/useForm'
 import { NewVolumeStandaloneField } from '@/hooks/form/useAddVolume'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { ActionTypes } from '@/helpers/store'
-import { Control, FieldErrors } from 'react-hook-form'
+import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { EntityType } from '@/helpers/constants'
@@ -51,7 +51,6 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
   )
 
   const {
-    watch,
     control,
     handleSubmit,
     formState: { errors },
@@ -60,7 +59,8 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     onSubmit,
     resolver: zodResolver(VolumeManager.addSchema),
   })
-  const values = watch()
+
+  const values = useWatch({ control }) as NewVolumeFormState
 
   const accountBalance = appState?.accountBalance || 0
 

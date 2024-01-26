@@ -1,11 +1,10 @@
 import IconText from '@/components/common/IconText'
-import { NoisyContainer } from '@aleph-front/core'
+import { Label, NoisyContainer } from '@aleph-front/core'
 import { EntityTypeName, AddDomainTarget } from '@/helpers/constants'
 import { BulletItem, Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageDomain } from '@/hooks/pages/solutions/manage/useManageDomain'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
-import StatusLabel from '@/components/common/StatusLabel'
 import ButtonLink from '@/components/common/ButtonLink'
 
 export default function ManageDomain() {
@@ -38,23 +37,23 @@ export default function ManageDomain() {
         <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
-              <Icon name="input-text" tw="mr-4" className="text-main1" />
+              <Icon name="input-text" tw="mr-4" className="text-main0" />
               <div className="tp-body2">{name}</div>
-              <StatusLabel
+              <Label
+                kind="secondary"
                 variant={status?.status ? 'success' : 'error'}
                 tw="ml-4"
               >
                 {status?.status
                   ? 'DOMAIN RECORDS CONFIGURED'
                   : 'DOMAIN RECORDS NOT CONFIGURED'}
-              </StatusLabel>
+              </Label>
             </div>
             <div>
               <Button
+                kind="functional"
+                variant="warning"
                 size="md"
-                variant="tertiary"
-                color="main2"
-                kind="default"
                 onClick={handleDelete}
               >
                 Delete
@@ -108,7 +107,7 @@ export default function ManageDomain() {
               <>
                 <Separator />
 
-                <TextGradient type="h6" color="main1">
+                <TextGradient type="body3" as="h7" color="main0">
                   Status
                 </TextGradient>
 
@@ -240,7 +239,7 @@ export default function ManageDomain() {
               <>
                 <Separator />
 
-                <TextGradient type="h6" color="main1">
+                <TextGradient type="body3" as="h7" color="main0">
                   Linked {domain.target}
                 </TextGradient>
 

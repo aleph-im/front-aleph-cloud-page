@@ -58,11 +58,10 @@ const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
             <div tw="w-14 flex items-end md:justify-center pb-2">
               {isNew && (
                 <Button
-                  color="main2"
-                  variant="secondary"
-                  kind="default"
-                  size="md"
                   type="button"
+                  kind="functional"
+                  variant="warning"
+                  size="md"
                   onClick={handleRemove}
                 >
                   <Icon name="trash" />
@@ -140,11 +139,10 @@ export const AddSSHKeys = React.memo((props: AddSSHKeysProps) => {
       <div tw="mt-6 mx-6">
         <Button
           type="button"
-          onClick={handleAdd}
-          color="main0"
           variant="secondary"
-          kind="default"
+          color="main0"
           size="md"
+          onClick={handleAdd}
         >
           Add SSH key
         </Button>

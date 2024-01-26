@@ -82,7 +82,7 @@ export const NewInstancePage = () => {
           </div>
           <div tw="mt-6 text-center">
             <Button
-              kind="default"
+              type="button"
               variant="secondary"
               color="main0"
               size="md"

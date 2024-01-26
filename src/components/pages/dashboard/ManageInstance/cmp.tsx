@@ -1,13 +1,12 @@
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import { NoisyContainer } from '@aleph-front/core'
+import { Label, NoisyContainer } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
 import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, GrayText, Separator } from '../common'
 import VolumeList from '../VolumeList'
-import StatusLabel from '@/components/common/StatusLabel'
 import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import Link from 'next/link'
@@ -47,9 +46,10 @@ export default function ManageInstance() {
         <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
-              <Icon name="alien-8bit" tw="mr-4" className="text-main1" />
+              <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
               <div className="tp-body2">{name}</div>
-              <StatusLabel
+              <Label
+                kind="secondary"
                 variant={
                   instance.confirmed && status?.vm_ipv6 ? 'success' : 'warning'
                 }
@@ -66,14 +66,13 @@ export default function ManageInstance() {
                     />
                   </div>
                 )}
-              </StatusLabel>
+              </Label>
             </div>
             <div>
               <Button
+                kind="functional"
+                variant="warning"
                 size="md"
-                variant="tertiary"
-                color="main2"
-                kind="default"
                 onClick={handleDelete}
               >
                 Delete
@@ -146,7 +145,7 @@ export default function ManageInstance() {
             <Separator />
 
             <div tw="my-5">
-              <TextGradient type="h7" color="main1">
+              <TextGradient type="body3" as="h7" color="main0">
                 Connection methods
               </TextGradient>
 
@@ -185,7 +184,7 @@ export default function ManageInstance() {
             </div>
 
             <div tw="my-5">
-              <TextGradient type="h7" color="main1">
+              <TextGradient type="body3" as="h7" color="main0">
                 Accessible for
               </TextGradient>
 
@@ -217,7 +216,7 @@ export default function ManageInstance() {
               <>
                 <Separator />
 
-                <TextGradient type="h6" color="main1">
+                <TextGradient type="h6" color="main0">
                   Current CRN
                 </TextGradient>
 
@@ -250,7 +249,7 @@ export default function ManageInstance() {
               <>
                 <Separator />
 
-                <TextGradient type="h6" color="main1">
+                <TextGradient type="h6" color="main0">
                   Linked storage
                 </TextGradient>
 
