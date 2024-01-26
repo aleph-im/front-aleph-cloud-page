@@ -232,7 +232,7 @@ export function useHeader(): UseHeaderReturn {
 
   const [isOpen, setIsOpen] = useState(false)
   const handleToggle = useCallback((open: boolean) => setIsOpen(open), [])
-  const handleDisconnect = useCallback(() => {}, [])
+  const handleDisconnect = useCallback(() => null, [])
 
   return {
     pathname,

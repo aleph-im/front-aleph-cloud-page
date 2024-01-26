@@ -1,7 +1,13 @@
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { GetAccountFromProvider as getETHAccount, ETHAccount } from 'aleph-sdk-ts/dist/accounts/ethereum'
-import { GetAccountFromProvider as getSOLAccount, SOLAccount } from 'aleph-sdk-ts/dist/accounts/solana'
+import {
+  GetAccountFromProvider as getETHAccount,
+  ETHAccount,
+} from 'aleph-sdk-ts/dist/accounts/ethereum'
+import {
+  GetAccountFromProvider as getSOLAccount,
+  SOLAccount,
+} from 'aleph-sdk-ts/dist/accounts/solana'
 import {
   GetAccountFromProvider as getAVAXAccount,
   SuperfluidAccount,
@@ -41,19 +47,19 @@ export const web3Connect = (chain: Chain, provider: any): Promise<Account> => {
  * @returns The Aleph balance of the account
  */
 export const getAccountBalance = async (account: Account): Promise<number> => {
-      if (account instanceof SuperfluidAccount) {
-        return (await account.getALEPHxBalance()).toNumber()
-      }
-      if (account instanceof AvalancheAccount) {
-        const superfluidAccount = await createFromAvalancheAccount(account)
-        return (await superfluidAccount.getALEPHxBalance()).toNumber()
-      }
-      if (account instanceof ETHAccount) {
-        return getERC20Balance(account.address)
-      }
-      if (account instanceof SOLAccount) {
-        return getSOLBalance(account.address)
-      }
+  if (account instanceof SuperfluidAccount) {
+    return (await account.getALEPHxBalance()).toNumber()
+  }
+  if (account instanceof AvalancheAccount) {
+    const superfluidAccount = await createFromAvalancheAccount(account)
+    return (await superfluidAccount.getALEPHxBalance()).toNumber()
+  }
+  if (account instanceof ETHAccount) {
+    return getERC20Balance(account.address)
+  }
+  if (account instanceof SOLAccount) {
+    return getSOLBalance(account.address)
+  }
 
-      throw E_.ChainNotYetSupported
+  throw E_.ChainNotYetSupported
 }
