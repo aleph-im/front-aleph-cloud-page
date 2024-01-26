@@ -1,6 +1,4 @@
-import { useMemo } from 'react'
-import { CRN, NodeLastVersions, NodeManager } from '@/domain/node'
-import { useAppState } from '@/contexts/appState'
+import { CRN, NodeLastVersions } from '@/domain/node'
 import { useLocalRequest } from '@aleph-front/core'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
@@ -16,7 +14,7 @@ export type UseRequestCRNsReturn = {
 export function useRequestCRNs({
   triggerDeps,
 }: UseRequestCRNsProps): UseRequestCRNsReturn {
-  const { nodeManager } = useNodeManager()
+  const nodeManager = useNodeManager()
 
   const { data: nodes } = useLocalRequest({
     doRequest: () => nodeManager.getCRNNodes(),

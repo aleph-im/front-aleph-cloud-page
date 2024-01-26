@@ -35,6 +35,7 @@ import {
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { ActionTypes } from '@/helpers/store'
 import { useConnect } from '@/hooks/common/useConnect'
+import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
 
 export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -144,9 +145,10 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
 
       let superfluidAccount
       if (selectedNetwork !== Chain.AVAX) {
-        superfluidAccount = await switchNetwork(Chain.AVAX)
+        const account = await switchNetwork(Chain.AVAX)
+        superfluidAccount = account as SuperfluidAccount
       } else {
-        superfluidAccount = account
+        superfluidAccount = account as SuperfluidAccount
       }
 
       const accountInstance = await manager.add(
@@ -174,7 +176,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
 
       await router.replace('/')
     },
-    [account, manager, node],
+    [account, dispatch, manager, node, router, selectedNetwork, switchNetwork],
   )
 
   const {

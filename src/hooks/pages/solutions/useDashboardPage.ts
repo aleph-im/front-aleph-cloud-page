@@ -57,7 +57,7 @@ export function useDashboardPage(): UseDashboardPageReturn {
           date,
           url,
           confirmed,
-        }
+        } as AnyEntityRow
       })
   }, [entities])
 

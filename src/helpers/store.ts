@@ -42,7 +42,7 @@ export type State = {
   accountSSHKeys?: SSHKey[]
   accountDomains?: Domain[]
 
-  fileManager?: FileManager
+  fileManager: FileManager
   messageManager?: MessageManager
   sshKeyManager?: SSHKeyManager
   domainManager?: DomainManager
@@ -50,7 +50,7 @@ export type State = {
   programManager?: ProgramManager
   instanceManager?: InstanceManager
   indexerManager?: IndexerManager
-  nodeManager?: NodeManager
+  nodeManager: NodeManager
 }
 
 export type Action = {
@@ -58,6 +58,23 @@ export type Action = {
   payload: any
   type: ActionTypes
 }
+
+function createDefaultManagers(account?: Account) {
+  const fileManager = new FileManager(account)
+
+  const nodeManager = new NodeManager(
+    account,
+    defaultAccountChannel,
+    fileManager,
+  )
+
+  return {
+    fileManager,
+    nodeManager,
+  }
+}
+
+const { fileManager, nodeManager } = createDefaultManagers()
 
 export const initialState: State = {
   account: undefined,
@@ -69,7 +86,7 @@ export const initialState: State = {
   accountSSHKeys: undefined,
   accountDomains: undefined,
 
-  fileManager: undefined,
+  fileManager,
   messageManager: undefined,
   sshKeyManager: undefined,
   domainManager: undefined,
@@ -77,7 +94,7 @@ export const initialState: State = {
   programManager: undefined,
   instanceManager: undefined,
   indexerManager: undefined,
-  nodeManager: undefined,
+  nodeManager,
 }
 
 function addEntitiesToCollection<E extends { id: string }>(
@@ -169,11 +186,13 @@ export const reducer = (
     }
 
     case ActionTypes.disconnect: {
+      const { fileManager, nodeManager } = createDefaultManagers()
+
       return {
         ...state,
         account: undefined,
 
-        fileManager: undefined,
+        fileManager,
         messageManager: undefined,
         sshKeyManager: undefined,
         domainManager: undefined,
@@ -181,7 +200,7 @@ export const reducer = (
         programManager: undefined,
         instanceManager: undefined,
         indexerManager: undefined,
-        nodeManager: undefined,
+        nodeManager,
       }
     }
 

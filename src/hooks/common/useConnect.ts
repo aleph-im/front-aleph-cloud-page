@@ -64,14 +64,17 @@ export function useConnect(): UseConnectReturn {
         }
         if (!provider && window.ethereum) {
           provider = window.ethereum
-        } else if (!provider && window.web3) {
-          provider = window.web3.currentProvider
-        } else if (!provider && window.solana) {
-          provider = window.solana
         }
+        // else if (!provider && window.web3) {
+        //   provider = window.web3.currentProvider
+        // } else if (!provider && window.solana) {
+        //   provider = window.solana
+        // }
         account = await web3Connect(chain, provider)
       } catch (err) {
-        onError(err.message) // we assume because the user denied the connection
+        const e = err as Error
+
+        onError(e.message) // we assume because the user denied the connection
         // @todo: remove ugly hack because of weird selectedNetwork behavior
         try {
           if (chain === Chain.ETH) {
@@ -82,7 +85,9 @@ export function useConnect(): UseConnectReturn {
             setSelectedNetwork(Chain.ETH)
           }
         } catch (err) {
-          onError(err.message) // we got fucked
+          const e = err as Error
+
+          onError(e.message) // we got fucked
         }
       }
       if (!account) return

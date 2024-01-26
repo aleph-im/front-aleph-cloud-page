@@ -62,7 +62,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     try {
       const response: Record<string, unknown> = await aggregate.Get({
         address: this.account.address,
-        keys: [this.key],
+        key: this.key,
         APIServer: apiServer,
       })
 

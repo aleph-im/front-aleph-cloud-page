@@ -237,20 +237,26 @@ export class InstanceManager
         throw new Error(
           'Invalid Superfluid/AVAX account. Please connect your wallet.',
         )
-      const { sender, receiver } =
-        instance.payment as StreamPaymentConfiguration
+
+      const { receiver } = instance.payment
+
+      if (!receiver)
+        throw new Error(
+          'Invalid Superfluid/AVAX receiver reward address. Please set it up in your CRN account profile.',
+        )
+
       const instanceCosts = await InstanceManager.getCost({
         paymentMethod: PaymentMethod.Stream,
         specs: {
           cpu: instance.resources.vcpus,
-          memory: instance.resources.memory,
+          ram: instance.resources.memory,
           storage: instance.volumes.reduce(
-            (ac, cv) => ac + cv['size_mb'] ?? 0,
+            (ac, cv) => ac + ('size_mib' in cv ? cv.size_mib : 0),
             0,
           ),
-          ram: instance.resources.memory,
         },
       })
+
       await account.decreaseALEPHxFlow(receiver, instanceCosts.totalCost)
     }
 
@@ -268,16 +274,29 @@ export class InstanceManager
 
   async checkStatus(instance: Instance): Promise<InstanceStatus | undefined> {
     if (instance.payment?.type === PaymentType.superfluid) {
+      const { receiver } = instance.payment
+
+      if (!receiver)
+        throw new Error(
+          'Invalid Superfluid/AVAX receiver reward address. Please set it up in your CRN account profile.',
+        )
+
       // @todo: refactor this mess
-      const node = await this.nodeManager.getCRNByStreamRewardAddress(
-        (instance.payment as StreamPaymentConfiguration).receiver,
-      )
+      const node = await this.nodeManager.getCRNByStreamRewardAddress(receiver)
       if (!node) return
-      const nodeUrl = node.address.replace(/\/$/, '')
+
+      const { address } = node
+      if (!address) throw new Error('Invalid CRN address')
+
+      const nodeUrl = address.replace(/\/$/, '')
       const query = await fetch(`${nodeUrl}/about/executions/list`)
-      const response: Record<string, InstanceCRNNetworking> = await query.json()
-      if (!response[instance.id]) return
-      const networking = response[instance.id]['networking']
+      const response = await query.json()
+
+      const status = response[instance.id]
+      if (!status) return
+
+      const networking = status['networking']
+
       return {
         node: {
           node_id: node.hash,
@@ -394,6 +413,8 @@ export class InstanceManager
     node: CRN,
     instanceId: string,
   ): Promise<void> {
+    if (!node.address) throw new Error('Invalid node address')
+
     let errorMsg = ''
     for (let i = 0; i < 5; i++) {
       try {
@@ -413,7 +434,7 @@ export class InstanceManager
         errorMsg = resp.errors[instanceId]
         await sleep(1000)
       } catch (e) {
-        errorMsg = e.message
+        errorMsg = (e as Error).message
         await sleep(1000)
       }
     }

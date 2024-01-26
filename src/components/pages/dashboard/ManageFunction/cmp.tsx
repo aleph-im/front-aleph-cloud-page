@@ -26,7 +26,7 @@ export default function ManageFunction() {
     )
   }
 
-  const name = func?.metadata?.name || ellipseAddress(func.id)
+  const name = (func?.metadata?.name as string) || ellipseAddress(func.id)
   const typeName = EntityTypeName[func.type]
   const volumes = func.volumes
 

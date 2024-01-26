@@ -11,6 +11,7 @@ import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
 import { useConnect } from '@/hooks/common/useConnect'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
+import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
 
 export type ManageInstance = {
   instance?: Instance
@@ -69,9 +70,10 @@ export function useManageInstance(): ManageInstance {
     try {
       let superfluidAccount
       if (selectedNetwork !== Chain.AVAX) {
-        superfluidAccount = await switchNetwork(Chain.AVAX)
+        const account = await switchNetwork(Chain.AVAX)
+        superfluidAccount = account as SuperfluidAccount
       } else {
-        superfluidAccount = account
+        superfluidAccount = account as SuperfluidAccount
       }
       await manager.del(instance, superfluidAccount)
 
@@ -82,7 +84,15 @@ export function useManageInstance(): ManageInstance {
 
       await router.replace('/')
     } catch (e) {}
-  }, [instance, manager, dispatch, router])
+  }, [
+    instance,
+    manager,
+    selectedNetwork,
+    dispatch,
+    router,
+    switchNetwork,
+    account,
+  ])
 
   return {
     instance,
