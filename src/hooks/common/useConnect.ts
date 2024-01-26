@@ -17,7 +17,7 @@ export type UseConnectReturn = {
   isConnected: boolean
   account: Account | undefined
   tryReconnect: () => Promise<void>
-  switchNetwork: (chain: Chain) => Promise<void>
+  switchNetwork: (chain: Chain) => Promise<Account | undefined>
   selectedNetwork: Chain
 }
 
@@ -62,7 +62,6 @@ export function useConnect(): UseConnectReturn {
         } else {
           chain = selectedNetwork
         }
-        console.log('selectedNetwork2', selectedNetwork)
         if (!provider && window.ethereum) {
           provider = window.ethereum
         } else if (!provider && window.web3) {
@@ -107,7 +106,7 @@ export function useConnect(): UseConnectReturn {
 
   const switchNetwork = useCallback(
     async (chain: Chain) => {
-      await connect(chain)
+      return await connect(chain)
     },
     [connect, setSelectedNetwork],
   )

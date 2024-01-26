@@ -9,6 +9,8 @@ import { ActionTypes } from '@/helpers/store'
 import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
+import { useConnect } from '@/hooks/common/useConnect'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 
 export type ManageInstance = {
   instance?: Instance
@@ -22,6 +24,7 @@ export type ManageInstance = {
 }
 
 export function useManageInstance(): ManageInstance {
+  const { account, switchNetwork, selectedNetwork } = useConnect();
   const router = useRouter()
   const { hash } = router.query
 
@@ -64,7 +67,13 @@ export function useManageInstance(): ManageInstance {
     if (!manager) throw new Error('Manager not ready')
 
     try {
-      await manager.del(instance)
+      let superfluidAccount
+      if (selectedNetwork !== Chain.AVAX) {
+        superfluidAccount = await switchNetwork(Chain.AVAX)
+      } else {
+        superfluidAccount = account
+      }
+      await manager.del(instance, superfluidAccount)
 
       dispatch({
         type: ActionTypes.delAccountInstance,
