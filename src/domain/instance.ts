@@ -263,7 +263,6 @@ export class InstanceManager
   }
 
   async checkStatus(instance: Instance): Promise<InstanceStatus | undefined> {
-    console.log(instance)
     if (instance.payment?.type === PaymentType.superfluid) {
       // @todo: Refactor this (use singleton)
       const nodeManager = new NodeManager()
