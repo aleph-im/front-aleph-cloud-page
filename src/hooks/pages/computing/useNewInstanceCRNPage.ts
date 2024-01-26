@@ -34,6 +34,7 @@ import {
 } from '@/hooks/form/useSelectStreamDuration'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { ActionTypes } from '@/helpers/store'
+import { useConnect } from '@/hooks/common/useConnect'
 
 export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -85,7 +86,8 @@ export type UseNewInstanceCRNPage = {
 export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
-  const { account, accountBalance } = appState
+  const { accountBalance } = appState
+  const { account, switchNetwork, selectedNetwork } = useConnect();
 
   // -------------------------
 
@@ -139,6 +141,14 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
       if (!node || !node.stream_reward) throw new Error('Invalid node')
       if (!state?.streamCost) throw new Error('Invalid stream cost')
       if (window?.ethereum === undefined) throw new Error('No wallet found')
+
+      let superfluidAccount
+      if (selectedNetwork !== Chain.AVAX) {
+        superfluidAccount = await switchNetwork(Chain.AVAX)
+      } else {
+        superfluidAccount = account
+      }
+
       const accountInstance = await manager.add({
         ...state,
         payment: {
@@ -150,7 +160,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
           streamDuration: state.streamDuration,
         },
         node,
-      } as AddInstance)
+      } as AddInstance, superfluidAccount)
 
       dispatch({
         type: ActionTypes.addAccountInstance,

@@ -38,10 +38,9 @@ import {
   instanceStreamSchema,
 } from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
-import { Web3Provider } from '@ethersproject/providers'
-import { superfluid } from 'aleph-sdk-ts/dist/accounts'
 import { getHours } from '@/hooks/form/useSelectStreamDuration'
 import { CRN } from './node'
+import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -150,25 +149,21 @@ export class InstanceManager
     return entity
   }
 
-  async add(newInstance: AddInstance): Promise<Instance> {
+  async add(newInstance: AddInstance, account?: SuperfluidAccount): Promise<Instance> {
     try {
       const instanceMessage = await this.parseInstance(newInstance)
 
       if (newInstance.payment?.type === PaymentMethod.Stream) {
+        if (!account)
+          throw new Error(
+            'Invalid Superfluid account. Please connect your wallet.',
+          )
         if (!newInstance.node || !newInstance.node.address)
           throw new Error('Invalid CRN')
         const { streamCost, streamDuration, sender, receiver } =
           newInstance.payment
-        const web3Provider = new Web3Provider(window.ethereum)
-
-        // @note: setup ALEPHx flow
-        const superfluidAccount = new superfluid.SuperfluidAccount(
-          web3Provider,
-          sender,
-        )
-        await superfluidAccount.init()
-        const alephxBalance = await superfluidAccount.getALEPHxBalance()
-        const alephxFlow = await superfluidAccount.getALEPHxFlow(receiver)
+        const alephxBalance = await account.getALEPHxBalance()
+        const alephxFlow = await account.getALEPHxFlow(receiver)
         const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
         if (totalFlow > 1)
           throw new Error(
@@ -183,7 +178,7 @@ export class InstanceManager
               .toString()} ALEPH required. Try to lower the VM cost or the duration.`,
           )
         }
-        await superfluidAccount.increaseALEPHxFlow(
+        await account.increaseALEPHxFlow(
           receiver,
           streamCost / getHours(streamDuration),
         )
@@ -213,7 +208,7 @@ export class InstanceManager
     }
   }
 
-  async del(instanceOrId: string | Instance): Promise<void> {
+  async del(instanceOrId: string | Instance, account?: SuperfluidAccount): Promise<void> {
     let instance: Instance | undefined
     if (typeof instanceOrId !== 'string') {
       instance = instanceOrId
@@ -225,6 +220,10 @@ export class InstanceManager
     if (!instance) throw new Error('Invalid instance ID')
 
     if (instance.payment?.type === PaymentType.superfluid) {
+      if (!account)
+        throw new Error(
+          'Invalid Superfluid/AVAX account. Please connect your wallet.',
+        )
       const { sender, receiver } =
         instance.payment as StreamPaymentConfiguration
       const instanceCosts = await InstanceManager.getCost({
@@ -239,17 +238,9 @@ export class InstanceManager
           ram: instance.resources.memory,
         },
       })
-      console.log('instanceCosts', instanceCosts)
-      const web3Provider = new Web3Provider(window.ethereum)
-
-      const superfluidAccount = new superfluid.SuperfluidAccount(
-        web3Provider,
-        sender,
-      )
-      await superfluidAccount.init()
-      await superfluidAccount.decreaseALEPHxFlow(
+      await account.decreaseALEPHxFlow(
         receiver,
-        instanceCosts.totalStreamCost,
+        instanceCosts.totalCost,
       )
     }
 
