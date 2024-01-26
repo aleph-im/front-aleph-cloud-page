@@ -148,6 +148,7 @@ export class InstanceManager
       hash: id,
       messageType: MessageType.instance,
       channel: this.channel,
+      APIServer: apiServer,
     })
 
     const [entity] = await this.parseMessages([message])
