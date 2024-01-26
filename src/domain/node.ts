@@ -442,8 +442,10 @@ export class NodeManager {
   }
 
   isStreamPaymentSupported(node: CRN): boolean {
-    return !!node.stream_reward
-    // && this.getNodeVersionNumber(node) >= getVersionNumber('v0.4.0')
+    return (
+      !!node.stream_reward &&
+      this.getNodeVersionNumber(node) >= getVersionNumber('v0.4.0')
+    )
   }
 
   protected parseResourceNodes(crns: CRN[]): CRN[] {
