@@ -13,15 +13,16 @@ export const Footer = () => {
         buttons: [
           {
             label: 'Work with us',
-            href: 'https://twentysix.cloud/contact',
+            href: `${websiteUrl}/contact`,
           },
           {
             label: 'Try our cloud',
-            href: 'https://twentysix.cloud',
+            href: `${websiteUrl}`,
           },
           {
             label: 'Start a project',
             href: 'https://docs.aleph.im/computing/',
+            target: '_blank',
           },
         ],
         media: [
@@ -30,6 +31,7 @@ export const Footer = () => {
             icon: 'x',
             label: 'Follow us',
             href: 'https://twitter.com/TwentySixCloud',
+            target: '_blank',
             small: true,
           },
           {
@@ -37,12 +39,14 @@ export const Footer = () => {
             icon: 'telegram',
             label: 'Telegram',
             href: 'https://t.me/alephim',
+            target: '_blank',
           },
           {
             name: 'medium',
             icon: 'medium',
             label: 'Medium',
             href: 'https://medium.com/aleph-im',
+            target: '_blank',
             small: true,
           },
         ],
@@ -50,10 +54,12 @@ export const Footer = () => {
           {
             label: 'Documentation',
             href: 'https://docs.aleph.im',
+            target: '_blank',
           },
           {
             label: 'Telegram Developers',
             href: 'https://t.me/alephim/119590',
+            target: '_blank',
           },
         ],
         links: [
@@ -62,19 +68,19 @@ export const Footer = () => {
             links: [
               {
                 label: 'Computing',
-                href: 'https://console.twentysix.cloud/computing/function/new/',
+                href: '/computing/function/new/',
               },
               {
                 label: 'Storage',
-                href: 'https://console.twentysix.cloud/storage/volume/new/',
+                href: '/storage/volume/new/',
               },
               {
                 label: 'Custom domains',
-                href: 'https://console.twentysix.cloud/configure/domain/new/',
+                href: '/configure/domain/new/',
               },
               {
                 label: 'SSH',
-                href: 'https://console.twentysix.cloud/configure/ssh/new/',
+                href: '/configure/ssh/new/',
               },
             ],
           },
@@ -84,18 +90,22 @@ export const Footer = () => {
               {
                 label: 'Documentation',
                 href: 'https://docs.aleph.im',
+                target: '_blank',
               },
               {
                 label: 'Developer telegram',
                 href: 'https://t.me/alephim/119590',
+                target: '_blank',
               },
               {
                 label: 'Github',
                 href: 'https://github.com/aleph-im',
+                target: '_blank',
               },
               {
                 label: 'SDK',
                 href: 'https://docs.aleph.im/libraries/Aleph.im-Python-SDK/',
+                target: '_blank',
               },
             ],
           },
@@ -104,19 +114,19 @@ export const Footer = () => {
             links: [
               {
                 label: 'What is twentysix cloud?',
-                href: 'https://twentysix.cloud/what-is-twentysix-cloud',
+                href: `${websiteUrl}/what-is-twentysix-cloud`,
               },
               {
                 label: 'Choosing twentysix cloud',
-                href: 'https://twentysix.cloud/choosing-twentysix-cloud',
+                href: `${websiteUrl}/choosing-twentysix-cloud`,
               },
               {
                 label: 'Decentralized cloud solution',
-                href: 'https://twentysix.cloud/decentralized-cloud-solution',
+                href: `${websiteUrl}/decentralized-cloud-solution`,
               },
               {
                 label: 'What is decentralized cloud computing?',
-                href: 'https://twentysix.cloud/what-is-decentralized-cloud-computing',
+                href: `${websiteUrl}/what-is-decentralized-cloud-computing`,
               },
             ],
           },
@@ -126,10 +136,12 @@ export const Footer = () => {
               {
                 label: 'Media kit',
                 href: 'https://ipfs.aleph.cloud/ipfs/QmaFMoSzV3tncoHsD4bDKKqLHWrAQjGM2hWeDXSwoD2DCs?filename=twentysix-media.zip',
+                target: '_blank',
               },
               {
                 label: 'Aleph.im technology',
                 href: 'https://aleph.im',
+                target: '_blank',
               },
             ],
           },

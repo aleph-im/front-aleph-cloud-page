@@ -17,7 +17,7 @@ export const senderAddress = '0x3a5CC6aBd06B601f4654035d125F9DD2FC992C25'
 export const erc20Address = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
 export const splTokenAddress = '3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x'
 
-export const websiteUrl = 'https://www.twentysix.cloud/'
+export const websiteUrl = 'https://www.twentysix.cloud'
 
 // ---------------------------------------------------------------------------------
 
