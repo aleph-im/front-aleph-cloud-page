@@ -87,7 +87,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
   const { accountBalance } = appState
-  const { account, switchNetwork, selectedNetwork } = useConnect();
+  const { account, switchNetwork, selectedNetwork } = useConnect()
 
   // -------------------------
 
@@ -149,18 +149,21 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
         superfluidAccount = account
       }
 
-      const accountInstance = await manager.add({
-        ...state,
-        payment: {
-          chain: Chain.AVAX,
-          type: PaymentMethod.Stream,
-          sender: account.address,
-          receiver: node.stream_reward,
-          streamCost: state.streamCost,
-          streamDuration: state.streamDuration,
-        },
-        node,
-      } as AddInstance, superfluidAccount)
+      const accountInstance = await manager.add(
+        {
+          ...state,
+          payment: {
+            chain: Chain.AVAX,
+            type: PaymentMethod.Stream,
+            sender: account.address,
+            receiver: node.stream_reward,
+            streamCost: state.streamCost,
+            streamDuration: state.streamDuration,
+          },
+          node,
+        } as AddInstance,
+        superfluidAccount,
+      )
 
       dispatch({
         type: ActionTypes.addAccountInstance,

@@ -51,7 +51,9 @@ export default function ManageInstance() {
               <Label
                 kind="secondary"
                 variant={
-                  instance.time < Date.now() - 1000 * 45 && status?.vm_ipv6 ? 'success' : 'warning'
+                  instance.time < Date.now() - 1000 * 45 && status?.vm_ipv6
+                    ? 'success'
+                    : 'warning'
                 }
                 tw="ml-4"
               >

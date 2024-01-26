@@ -375,7 +375,9 @@ export class NodeManager {
     )
   }
 
-  async getCRNByStreamRewardAddress(rewardAddress: string): Promise<CRN | undefined> {
+  async getCRNByStreamRewardAddress(
+    rewardAddress: string,
+  ): Promise<CRN | undefined> {
     const nodes = await this.getCRNNodes()
     return nodes.find((node) => node.stream_reward === rewardAddress)
   }

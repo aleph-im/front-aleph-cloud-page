@@ -24,7 +24,7 @@ export type ManageInstance = {
 }
 
 export function useManageInstance(): ManageInstance {
-  const { account, switchNetwork, selectedNetwork } = useConnect();
+  const { account, switchNetwork, selectedNetwork } = useConnect()
   const router = useRouter()
   const { hash } = router.query
 

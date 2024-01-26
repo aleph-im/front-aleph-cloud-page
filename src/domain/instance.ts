@@ -156,7 +156,10 @@ export class InstanceManager
     return entity
   }
 
-  async add(newInstance: AddInstance, account?: SuperfluidAccount): Promise<Instance> {
+  async add(
+    newInstance: AddInstance,
+    account?: SuperfluidAccount,
+  ): Promise<Instance> {
     try {
       const instanceMessage = await this.parseInstance(newInstance)
 
@@ -215,7 +218,10 @@ export class InstanceManager
     }
   }
 
-  async del(instanceOrId: string | Instance, account?: SuperfluidAccount): Promise<void> {
+  async del(
+    instanceOrId: string | Instance,
+    account?: SuperfluidAccount,
+  ): Promise<void> {
     let instance: Instance | undefined
     if (typeof instanceOrId !== 'string') {
       instance = instanceOrId
@@ -245,10 +251,7 @@ export class InstanceManager
           ram: instance.resources.memory,
         },
       })
-      await account.decreaseALEPHxFlow(
-        receiver,
-        instanceCosts.totalCost,
-      )
+      await account.decreaseALEPHxFlow(receiver, instanceCosts.totalCost)
     }
 
     try {
@@ -266,13 +269,15 @@ export class InstanceManager
   async checkStatus(instance: Instance): Promise<InstanceStatus | undefined> {
     if (instance.payment?.type === PaymentType.superfluid) {
       // @todo: refactor this mess
-      const node = await this.nodeManager.getCRNByStreamRewardAddress((instance.payment as StreamPaymentConfiguration).receiver)
+      const node = await this.nodeManager.getCRNByStreamRewardAddress(
+        (instance.payment as StreamPaymentConfiguration).receiver,
+      )
       if (!node) return
       const nodeUrl = node.address.replace(/\/$/, '')
       const query = await fetch(`${nodeUrl}/about/executions/list`)
       const response: Record<string, InstanceCRNNetworking> = await query.json()
       if (!response[instance.id]) return
-      const networking = response[instance.id]["networking"]
+      const networking = response[instance.id]['networking']
       return {
         node: {
           node_id: node.hash,
@@ -284,7 +289,7 @@ export class InstanceManager
         vm_type: EntityType.Instance,
         vm_ipv6: this.formatVMIPv6Address(networking.ipv6),
         period: {
-          start_timestamp: "",
+          start_timestamp: '',
           duration_seconds: 0,
         },
       } as InstanceStatus
@@ -301,11 +306,11 @@ export class InstanceManager
 
   protected formatVMIPv6Address(ipv6: string): string {
     // Replace the trailing slash and number
-    let newIpv6 = ipv6.replace(/\/\d+$/, '');
+    let newIpv6 = ipv6.replace(/\/\d+$/, '')
     // Replace the last '0' of the IPv6 address with '1'
-    newIpv6 = newIpv6.replace(/0(?!.*0)/, '1');
-    return newIpv6;
-}
+    newIpv6 = newIpv6.replace(/0(?!.*0)/, '1')
+    return newIpv6
+  }
 
   protected async parseInstance(
     newInstance: AddInstance,
