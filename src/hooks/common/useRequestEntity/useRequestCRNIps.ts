@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CRN, CRNIps, NodeManager } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
 import { RequestState } from '@aleph-front/core'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type UseRequestCRNIpsProps = {
   nodes?: CRN[]
@@ -15,11 +16,7 @@ export type UseRequestCRNIpsReturn = {
 export function useRequestCRNIps({
   nodes,
 }: UseRequestCRNIpsProps): UseRequestCRNIpsReturn {
-  const [state] = useAppState()
-  const { account } = state
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const { nodeManager } = useNodeManager()
 
   const [ips, setIps] = useState<Record<string, RequestState<CRNIps>>>({})
   const [loading, setLoading] = useState<boolean>(true)

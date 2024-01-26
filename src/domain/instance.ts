@@ -123,6 +123,7 @@ export class InstanceManager
     protected domainManager: DomainManager,
     protected sshKeyManager: SSHKeyManager,
     protected fileManager: FileManager,
+    protected nodeManager: NodeManager,
     protected channel = defaultInstanceChannel,
   ) {
     super(account, volumeManager, domainManager)
@@ -264,9 +265,8 @@ export class InstanceManager
 
   async checkStatus(instance: Instance): Promise<InstanceStatus | undefined> {
     if (instance.payment?.type === PaymentType.superfluid) {
-      // @todo: Refactor this (use singleton)
-      const nodeManager = new NodeManager()
-      const node = await nodeManager.getCRNByStreamRewardAddress((instance.payment as StreamPaymentConfiguration).receiver)
+      // @todo: refactor this mess
+      const node = await this.nodeManager.getCRNByStreamRewardAddress((instance.payment as StreamPaymentConfiguration).receiver)
       if (!node) return
       const nodeUrl = node.address.replace(/\/$/, '')
       const query = await fetch(`${nodeUrl}/about/executions/list`)

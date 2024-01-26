@@ -7,6 +7,8 @@ import { AccountFilesResponse, FileManager } from '@/domain/file'
 import { MessageManager } from '@/domain/message'
 import { Domain, DomainManager } from '@/domain/domain'
 import { IndexerManager } from '@/domain/indexer'
+import { NodeManager } from '@/domain/node'
+import { defaultAccountChannel } from '@/helpers/constants'
 
 export enum ActionTypes {
   connect,
@@ -48,6 +50,7 @@ export type State = {
   programManager?: ProgramManager
   instanceManager?: InstanceManager
   indexerManager?: IndexerManager
+  nodeManager?: NodeManager
 }
 
 export type Action = {
@@ -74,6 +77,7 @@ export const initialState: State = {
   programManager: undefined,
   instanceManager: undefined,
   indexerManager: undefined,
+  nodeManager: undefined,
 }
 
 function addEntitiesToCollection<E extends { id: string }>(
@@ -132,12 +136,14 @@ export const reducer = (
         messageManager,
         fileManager,
       )
+      const nodeManager = new NodeManager(account, defaultAccountChannel, fileManager)
       const instanceManager = new InstanceManager(
         account,
         volumeManager,
         domainManager,
         sshKeyManager,
         fileManager,
+        nodeManager,
       )
 
       const indexerManager = new IndexerManager(account, programManager)
@@ -154,6 +160,7 @@ export const reducer = (
         programManager,
         instanceManager,
         indexerManager,
+        nodeManager,
       }
     }
 
@@ -169,6 +176,8 @@ export const reducer = (
         volumeManager: undefined,
         programManager: undefined,
         instanceManager: undefined,
+        indexerManager: undefined,
+        nodeManager: undefined,
       }
     }
 

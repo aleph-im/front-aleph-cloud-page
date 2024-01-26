@@ -17,6 +17,7 @@ import {
   useRequestCRNIps,
 } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { NodeManager } from '@/domain/node'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type UseNewInstanceCRNListPage = UseRequestCRNsReturn &
   UseRequestCRNSpecsReturn &
@@ -28,8 +29,7 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
   const { nodes, lastVersion } = useRequestCRNs({})
   const { specs, loading: loading1 } = useRequestCRNSpecs({ nodes })
   const { ips, loading: loading2 } = useRequestCRNIps({ nodes })
-
-  const nodeManager = useMemo(() => new NodeManager(), [])
+  const { nodeManager } = useNodeManager()
 
   const minSpecs = useMemo(() => {
     const [min] = getDefaultSpecsOptions(true)

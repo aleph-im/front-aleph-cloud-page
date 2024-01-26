@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CRN, CRNSpecs, NodeManager } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
 import { RequestState } from '@aleph-front/core'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type UseRequestCRNSpecsProps = {
   nodes?: CRN[]
@@ -15,11 +16,7 @@ export type UseRequestCRNSpecsReturn = {
 export function useRequestCRNSpecs({
   nodes,
 }: UseRequestCRNSpecsProps): UseRequestCRNSpecsReturn {
-  const [state] = useAppState()
-  const { account } = state
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const { nodeManager } = useNodeManager()
 
   const [specs, setSpecs] = useState<Record<string, RequestState<CRNSpecs>>>({})
   const [loading, setLoading] = useState<boolean>(true)
