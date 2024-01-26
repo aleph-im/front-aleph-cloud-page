@@ -136,7 +136,11 @@ export const reducer = (
         messageManager,
         fileManager,
       )
-      const nodeManager = new NodeManager(account, defaultAccountChannel, fileManager)
+      const nodeManager = new NodeManager(
+        account,
+        defaultAccountChannel,
+        fileManager,
+      )
       const instanceManager = new InstanceManager(
         account,
         volumeManager,
