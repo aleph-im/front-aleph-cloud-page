@@ -1,10 +1,15 @@
-import { Footer as BaseFooter } from '@aleph-front/core'
+import { websiteUrl } from '@/helpers/constants'
+import { Footer as BaseFooter, LinkComponent } from '@aleph-front/core'
+import Link from 'next/link'
 
 export const Footer = () => {
   return (
     <BaseFooter
       {...{
         small: true,
+        Link: Link as LinkComponent,
+        logoHref: websiteUrl,
+        logoTarget: '_blank',
         buttons: [
           {
             label: 'Work with us',

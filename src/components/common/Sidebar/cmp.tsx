@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { IconName, LinkComponent, RouterSidebar } from '@aleph-front/core'
 import { useUserStoreAllowance } from '@/hooks/common/useUserStoreAllowance'
 import { useRoutes } from '@/hooks/common/useRoutes'
+import { websiteUrl } from '@/helpers/constants'
 
 export type SidebarLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   href: string
@@ -30,10 +31,12 @@ const Sidebar = memo(() => {
         breakpoint,
         routes,
         pathname,
-        Link: Link as LinkComponent,
         allowanceInfo,
         open,
         onToggle: undefined,
+        Link: Link as LinkComponent,
+        logoHref: websiteUrl,
+        logoTarget: '_blank',
       }}
     />
   )

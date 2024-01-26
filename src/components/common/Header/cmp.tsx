@@ -18,6 +18,7 @@ import {
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import { useConnect } from '@/hooks/common/useConnect'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
+import { websiteUrl } from '@/helpers/constants'
 
 export type AccountButtonProps = UseAccountButtonProps & {
   isMobile?: boolean
@@ -131,6 +132,8 @@ export const Header = () => {
             height: '6.5rem',
             breakpoint: 'lg',
             mobileTopContent: <AccountButtonMemo {...accountProps} isMobile />,
+            logoHref: websiteUrl,
+            logoTarget: '_blank',
           }}
         />
         <StyledNavbarDesktop $breakpoint={breakpoint}>
