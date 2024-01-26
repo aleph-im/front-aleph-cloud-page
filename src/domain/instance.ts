@@ -39,7 +39,7 @@ import {
 } from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { getHours } from '@/hooks/form/useSelectStreamDuration'
-import { CRN } from './node'
+import { CRN, NodeManager } from './node'
 import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
 
 export type AddInstance = Omit<
@@ -93,6 +93,11 @@ export type InstanceStatus = {
     duration_seconds: number
   }
   node: InstanceNode
+}
+
+export type InstanceCRNNetworking = {
+  ipv4: string
+  ipv6: string
 }
 
 export class InstanceManager
@@ -257,6 +262,33 @@ export class InstanceManager
   }
 
   async checkStatus(instance: Instance): Promise<InstanceStatus | undefined> {
+    console.log(instance)
+    if (instance.payment?.type === PaymentType.superfluid) {
+      // @todo: Refactor this (use singleton)
+      const nodeManager = new NodeManager()
+      const node = await nodeManager.getCRNByStreamRewardAddress((instance.payment as StreamPaymentConfiguration).receiver)
+      if (!node) return
+      const nodeUrl = node.address.replace(/\/$/, '')
+      const query = await fetch(`${nodeUrl}/about/executions/list`)
+      const response: Record<string, InstanceCRNNetworking> = await query.json()
+      if (!response[instance.id]) return
+      const networking = response[instance.id]["networking"]
+      return {
+        node: {
+          node_id: node.hash,
+          url: node.address,
+          ipv6: networking.ipv6,
+          supports_ipv6: true,
+        },
+        vm_hash: instance.id,
+        vm_type: EntityType.Instance,
+        vm_ipv6: this.formatVMIPv6Address(networking.ipv6),
+        period: {
+          start_timestamp: "",
+          duration_seconds: 0,
+        },
+      } as InstanceStatus
+    }
     const query = await fetch(
       `https://scheduler.api.aleph.sh/api/v0/allocation/${instance.id}`,
     )
@@ -266,6 +298,14 @@ export class InstanceManager
     const response = await query.json()
     return response
   }
+
+  protected formatVMIPv6Address(ipv6: string): string {
+    // Replace the trailing slash and number
+    let newIpv6 = ipv6.replace(/\/\d+$/, '');
+    // Replace the last '0' of the IPv6 address with '1'
+    newIpv6 = newIpv6.replace(/0(?!.*0)/, '1');
+    return newIpv6;
+}
 
   protected async parseInstance(
     newInstance: AddInstance,

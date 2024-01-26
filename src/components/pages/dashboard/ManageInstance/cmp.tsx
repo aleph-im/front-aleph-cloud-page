@@ -51,11 +51,11 @@ export default function ManageInstance() {
               <Label
                 kind="secondary"
                 variant={
-                  instance.confirmed && status?.vm_ipv6 ? 'success' : 'warning'
+                  instance.time < Date.now() - 1000 * 45 && status?.vm_ipv6 ? 'success' : 'warning'
                 }
                 tw="ml-4"
               >
-                {instance.confirmed && status?.vm_ipv6 ? (
+                {status?.vm_ipv6 ? (
                   'READY'
                 ) : (
                   <div tw="flex items-center">

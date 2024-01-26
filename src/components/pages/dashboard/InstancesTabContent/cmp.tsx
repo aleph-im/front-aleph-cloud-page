@@ -23,9 +23,6 @@ export const InstancesTabContent = React.memo(
                   rowNoise
                   rowKey={(row) => row.id}
                   data={data}
-                  rowProps={(row) => ({
-                    css: row.confirmed ? '' : tw`opacity-60`,
-                  })}
                   columns={[
                     {
                       label: 'Name',

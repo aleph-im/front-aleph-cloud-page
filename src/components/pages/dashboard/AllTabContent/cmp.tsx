@@ -32,9 +32,6 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                 rowNoise
                 rowKey={(row) => row.id}
                 data={data}
-                rowProps={(row) => ({
-                  css: row.confirmed ? '' : tw`opacity-60`,
-                })}
                 columns={[
                   {
                     label: 'Type',
