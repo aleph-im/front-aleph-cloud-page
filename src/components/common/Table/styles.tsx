@@ -7,9 +7,30 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
     const { duration, timing } = theme.transition
 
     return css`
+      .check-button {
+        transition: all ${timing} ${duration.fast}ms 0ms;
+
+        background: ${theme.color.purple0};
+        color: ${theme.color.main0};
+        width: 3.75rem;
+        height: 2rem;
+        min-height: 2rem;
+
+        visibility: hidden;
+        opacity: 0;
+
+        &::after {
+          display: none;
+        }
+
+        &:disabled {
+          background: ${theme.color.purple0};
+        }
+      }
+
       thead {
         color: ${theme.color.text};
-        background-color: ${theme.color.purple0};
+        background: ${({ theme }) => theme.color.light0};
         border-bottom: 0.125rem solid ${theme.color.white};
         th > div {
           opacity: 1 !important;
@@ -22,29 +43,47 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
           transition: all ${timing} ${duration.fast}ms 0ms;
 
           td {
+            background: ${theme.color.light1};
+
+            &.fx-noise-light {
+              background: ${theme.color.light0};
+            }
+
             &:first-child {
-              border-top-left-radius: 3.75rem;
-              border-bottom-left-radius: 3.75rem;
+              &:hover,
+              &._active {
+                border-top-left-radius: 3.75rem;
+                border-bottom-left-radius: 3.75rem;
+              }
             }
 
             &:last-child {
-              border-top-right-radius: 3.75rem;
-              border-bottom-right-radius: 3.75rem;
+              &:hover,
+              &._active {
+                border-top-right-radius: 3.75rem;
+                border-bottom-right-radius: 3.75rem;
+              }
             }
           }
 
-          &:hover {
+          &:hover,
+          &._active {
             color: ${theme.color.main0};
+            background: ${theme.color.purple4};
+
+            .check-button {
+              visibility: visible;
+              opacity: 1;
+            }
           }
 
           &._active {
-            color: ${theme.color.main0};
-            background-color: ${theme.color.purple4};
             cursor: not-allowed;
           }
 
           &._disabled {
             color: ${theme.color.disabled};
+            background: inherit;
             opacity: 0.8;
             cursor: not-allowed;
           }
@@ -54,20 +93,6 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
       td,
       th {
         ${tw`px-4 w-0 whitespace-nowrap text-ellipsis`}
-      }
-
-      && {
-        .check-button {
-          background: ${theme.color.purple0};
-          color: ${theme.color.main0};
-          width: 3.75rem;
-          height: 2rem;
-          min-height: 2rem;
-
-          &::after {
-            display: none;
-          }
-        }
       }
     `
   }}

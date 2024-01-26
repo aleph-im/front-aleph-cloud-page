@@ -6,14 +6,14 @@ import Table from '../Table'
 
 export type StyledTableProps<T extends AlephNode> = Omit<
   TableProps<T>,
-  'borderType' | 'oddRowNoise' | 'stickyHeader'
+  'borderType' | 'rowNoise' | 'stickyHeader'
 >
 
 export const StyledTable = styled(Table as any).attrs(
   (props: StyledTableProps<any>) => {
     return {
       borderType: 'solid',
-      oddRowNoise: true,
+      rowNoise: true,
       stickyHeader: false,
       ...props,
     }
@@ -22,6 +22,10 @@ export const StyledTable = styled(Table as any).attrs(
   thead th {
     font-size: 0.8125rem;
     ${tw`whitespace-nowrap`}
+  }
+
+  tbody tr {
+    cursor: default;
   }
 
   td,

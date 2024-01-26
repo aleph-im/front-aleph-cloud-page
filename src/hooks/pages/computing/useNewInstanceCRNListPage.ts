@@ -10,6 +10,7 @@ import {
 import {
   InstanceSpecsField,
   getDefaultSpecsOptions,
+  validateMinNodeSpecs,
 } from '@/hooks/form/useSelectInstanceSpecs'
 import {
   UseRequestCRNIpsReturn,
@@ -40,14 +41,24 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
       ?.filter((node) => nodeManager.isStreamPaymentSupported(node))
       ?.filter((node) => {
         const nodeSpecs = specs[node.hash]
-        if (!nodeSpecs) return true
+        // const nodeIps = ips[node.hash]
 
-        const nodeIps = ips[node.hash]
-        if (!nodeIps) return true
+        if (nodeSpecs) {
+          const validSpecs =
+            nodeSpecs?.data && validateMinNodeSpecs(minSpecs, nodeSpecs.data)
 
-        return nodeSpecs.data && nodeIps.data
+          if (!validSpecs) return false
+        }
+
+        // if (nodeIps) {
+        //   const validIp = !!nodeIps?.data?.result
+
+        //   if (!validIp) return false
+        // }
+
+        return true
       })
-  }, [nodeManager, nodes, specs, ips])
+  }, [nodes, nodeManager, specs, ips, minSpecs])
 
   const loading = loading1 || loading2
 

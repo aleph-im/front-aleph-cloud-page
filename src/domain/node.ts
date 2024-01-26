@@ -436,13 +436,8 @@ export class NodeManager {
   }
 
   isStreamPaymentSupported(node: CRN): boolean {
-    return (
-      true ||
-      node.hash ===
-        '4680d7473e914883839f3b9aa7bb3739cdba83d5f99a4b673b9abd8f8f6c1c97' ||
-      (!!node.stream_reward &&
-        this.getNodeVersionNumber(node) >= getVersionNumber('v0.4.0'))
-    )
+    return !!node.stream_reward
+    // && this.getNodeVersionNumber(node) >= getVersionNumber('v0.4.0')
   }
 
   protected parseResourceNodes(crns: CRN[]): CRN[] {
