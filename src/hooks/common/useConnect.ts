@@ -57,11 +57,10 @@ export function useConnect(): UseConnectReturn {
     async (chain?: Chain, provider?: ExternalProvider) => {
       let account
       try {
-        if (chain) {
-          setSelectedNetwork(chain)
-        } else {
-          chain = selectedNetwork
-        }
+        if (!chain) return;
+        
+        setSelectedNetwork(chain)
+
         if (!provider && window.ethereum) {
           provider = window.ethereum
         }
@@ -70,25 +69,12 @@ export function useConnect(): UseConnectReturn {
         // } else if (!provider && window.solana) {
         //   provider = window.solana
         // }
-        account = await web3Connect(chain, provider)
+        account = await web3Connect(selectedNetwork, provider)
       } catch (err) {
         const e = err as Error
-
+        //@ts-ignore | to-do: handle error: Request of type 'wallet_addEthereumChain' already pending for origin http://localhost:3000. Please wait.
+        //if (err.code === -32002) return;
         onError(e.message) // we assume because the user denied the connection
-        // @todo: remove ugly hack because of weird selectedNetwork behavior
-        try {
-          if (chain === Chain.ETH) {
-            account = await web3Connect(Chain.AVAX, provider)
-            setSelectedNetwork(Chain.AVAX)
-          } else {
-            account = await web3Connect(Chain.ETH, provider)
-            setSelectedNetwork(Chain.ETH)
-          }
-        } catch (err) {
-          const e = err as Error
-
-          onError(e.message) // we got fucked
-        }
       }
       if (!account) return
       setKeepAccountAlive(true)
@@ -111,7 +97,18 @@ export function useConnect(): UseConnectReturn {
 
   const switchNetwork = useCallback(
     async (chain: Chain) => {
-      return await connect(chain)
+      let account
+
+      try {
+        account = await web3Connect(chain, window.ethereum);
+        setSelectedNetwork(chain);
+        console.log('Account connected after switching network: ', account);
+      } catch (err) {
+        const e = err as Error;
+        console.error('Error during network switch: ', e.message);
+      }
+
+      return account
     },
     [connect, setSelectedNetwork],
   )
