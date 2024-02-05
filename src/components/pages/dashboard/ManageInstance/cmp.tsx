@@ -117,15 +117,6 @@ export default function ManageInstance() {
                   </GrayText>
                 </div>
               </div>
-
-              {status && (
-                <div tw="mr-5">
-                  <div className="tp-info text-main0">IPV6</div>
-                  <div>
-                    <GrayText>{status.vm_ipv6}</GrayText>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div tw="mr-5">
