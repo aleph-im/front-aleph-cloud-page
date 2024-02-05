@@ -66,8 +66,6 @@ export function useConnect(): UseConnectReturn {
         setSelectedNetwork(chain)
       } catch (err) {
         const e = err as Error
-        //@ts-ignore | to-do: handle error: Request of type 'wallet_addEthereumChain' already pending for origin http://localhost:3000. Please wait.
-        //if (err.code === -32002) return;
         onError(e.message) // we assume because the user denied the connection
       }
       if (!account) return
