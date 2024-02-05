@@ -50,7 +50,7 @@ const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
               {...labelCtrl.field}
               {...labelCtrl.fieldState}
               label={`Label`}
-              placeholder="cp@aleph.im"
+              placeholder="me@email.com"
               disabled={!isNew}
             />
           </div>
