@@ -16,7 +16,6 @@ export type UseConnectReturn = {
   disconnect: () => Promise<void>
   isConnected: boolean
   account: Account | undefined
-  tryReconnect: () => Promise<void>
   switchNetwork: (chain: Chain) => Promise<Account | undefined>
   selectedNetwork: Chain
 }
@@ -24,10 +23,6 @@ export type UseConnectReturn = {
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
   const noti = useNotification()
-  const [keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
-    'keepAccountAlive',
-    false,
-  )
   const [selectedNetwork, setSelectedNetwork] = useSessionStorage<Chain>(
     'selectedNetwork',
     Chain.ETH,
@@ -55,12 +50,10 @@ export function useConnect(): UseConnectReturn {
 
   const connect = useCallback(
     async (chain?: Chain, provider?: ExternalProvider) => {
+      if (!chain) return
+
       let account
       try {
-        if (!chain) return;
-        
-        setSelectedNetwork(chain)
-
         if (!provider && window.ethereum) {
           provider = window.ethereum
         }
@@ -69,7 +62,8 @@ export function useConnect(): UseConnectReturn {
         // } else if (!provider && window.solana) {
         //   provider = window.solana
         // }
-        account = await web3Connect(selectedNetwork, provider)
+        account = await web3Connect(chain, provider)
+        setSelectedNetwork(chain)
       } catch (err) {
         const e = err as Error
         //@ts-ignore | to-do: handle error: Request of type 'wallet_addEthereumChain' already pending for origin http://localhost:3000. Please wait.
@@ -77,7 +71,6 @@ export function useConnect(): UseConnectReturn {
         onError(e.message) // we assume because the user denied the connection
       }
       if (!account) return
-      setKeepAccountAlive(true)
 
       await Promise.all([getBalance(account)]).catch((err) => {
         onError(err.message)
@@ -87,25 +80,24 @@ export function useConnect(): UseConnectReturn {
 
       return account
     },
-    [setKeepAccountAlive, getBalance, dispatch, onError],
+    [getBalance, dispatch, onError],
   )
 
   const disconnect = useCallback(async () => {
-    setKeepAccountAlive(false)
     dispatch({ type: ActionTypes.disconnect, payload: null })
-  }, [dispatch, setKeepAccountAlive])
+  }, [dispatch])
 
   const switchNetwork = useCallback(
     async (chain: Chain) => {
       let account
 
       try {
-        account = await web3Connect(chain, window.ethereum);
-        setSelectedNetwork(chain);
-        console.log('Account connected after switching network: ', account);
+        account = await web3Connect(chain, window.ethereum)
+        setSelectedNetwork(chain)
+        console.log('Account connected after switching network: ', account)
       } catch (err) {
-        const e = err as Error;
-        console.error('Error during network switch: ', e.message);
+        const e = err as Error
+        console.error('Error during network switch: ', e.message)
       }
 
       return account
@@ -116,17 +108,11 @@ export function useConnect(): UseConnectReturn {
   const { account } = state
   const isConnected = !!account?.address
 
-  const tryReconnect = useCallback(async () => {
-    if (isConnected || !keepAccountAlive) return
-    await connect()
-  }, [isConnected, keepAccountAlive, connect])
-
   return {
     connect,
     disconnect,
     isConnected,
     account,
-    tryReconnect,
     switchNetwork,
     selectedNetwork,
   }
