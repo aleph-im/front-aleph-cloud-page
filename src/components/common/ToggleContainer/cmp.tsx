@@ -26,7 +26,7 @@ export const ToggleContainer = ({
         checked={open}
         className="tp-body3"
       />
-      <CoreToggleContainer open={open}>
+      <CoreToggleContainer open={open} shouldUnmount>
         <div tw="pt-10 pb-6">{children}</div>
       </CoreToggleContainer>
     </NoisyContainer>

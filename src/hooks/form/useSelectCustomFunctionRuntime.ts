@@ -21,6 +21,7 @@ export function useSelectCustomFunctionRuntime({
     control,
     name,
     defaultValue,
+    shouldUnregister: true,
   })
 
   return {

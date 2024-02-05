@@ -106,7 +106,7 @@ export default function NewFunctionPage() {
                   Add volumes
                 </TextGradient>
                 {values.specs && (
-                  <BorderBox $color="main2" tw="mt-4" className="tp-body1">
+                  <BorderBox $color="main2" tw="my-4" className="tp-body1">
                     Good news! Your selected package already includes{' '}
                     <span className="text-main0">
                       {convertByteUnits(values.specs.storage, {

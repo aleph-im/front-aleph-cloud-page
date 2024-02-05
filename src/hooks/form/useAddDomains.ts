@@ -82,6 +82,7 @@ export function useAddDomains({
   const domainsCtrl = useFieldArray({
     control,
     name,
+    shouldUnregister: true,
   })
 
   const { fields, remove: handleRemove, append } = domainsCtrl

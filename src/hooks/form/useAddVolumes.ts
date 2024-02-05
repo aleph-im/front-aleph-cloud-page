@@ -32,6 +32,7 @@ export function useAddVolumes({
   const volumesCtrl = useFieldArray({
     control,
     name,
+    shouldUnregister: true,
   })
 
   const { remove: handleRemove, append } = volumesCtrl

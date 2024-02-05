@@ -83,6 +83,7 @@ export function useAddEnvVars({
   const envVarsCtrl = useFieldArray({
     control,
     name,
+    shouldUnregister: true,
   })
 
   const { fields, remove: handleRemove, append } = envVarsCtrl
