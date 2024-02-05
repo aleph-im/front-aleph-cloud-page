@@ -121,10 +121,10 @@ export function useAddSSHKeys({
 
   const accountSSHKeyItems: SSHKeyField[] = useMemo(
     () =>
-      (accountSSHKeys || []).map(({ key, label = '' }) => ({
+      (accountSSHKeys || []).map(({ key, label = '' }, i) => ({
         key,
         label,
-        isSelected: false,
+        isSelected: i === 0,
         isNew: false,
       })),
     [accountSSHKeys],
