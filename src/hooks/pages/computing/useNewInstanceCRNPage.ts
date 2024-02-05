@@ -50,7 +50,7 @@ export type NewInstanceCRNFormState = NameAndTagsField & {
   streamCost: number
 }
 
-const specs = { ...getDefaultSpecsOptions(true)[0] }
+const specs = { ...getDefaultSpecsOptions(true, PaymentMethod.Stream)[0] }
 
 export const defaultValues: Partial<NewInstanceCRNFormState> = {
   ...defaultNameAndTags,

@@ -14,10 +14,12 @@ export type InstanceSpecsField = {
 export function updateSpecsStorage(
   specs: InstanceSpecsField,
   isPersistent = true,
+  paymentMethod: PaymentMethod = PaymentMethod.Hold,
 ): InstanceSpecsField {
   return {
     ...specs,
-    disabled: isPersistent && specs.cpu >= 6,
+    disabled:
+      paymentMethod !== PaymentMethod.Stream && isPersistent && specs.cpu >= 6,
     storage: convertByteUnits(specs.cpu * 2 * (isPersistent ? 10 : 1), {
       from: 'GiB',
       to: 'MiB',
@@ -28,6 +30,7 @@ export function updateSpecsStorage(
 // @note: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
 export function getDefaultSpecsOptions(
   isPersistent = true,
+  paymentMethod: PaymentMethod = PaymentMethod.Hold,
 ): InstanceSpecsField[] {
   return [1, 2, 4, 6, 8, 12].map((cpu) =>
     updateSpecsStorage(
@@ -37,6 +40,7 @@ export function getDefaultSpecsOptions(
         storage: 0,
       },
       isPersistent,
+      paymentMethod,
     ),
   )
 }
@@ -84,7 +88,8 @@ export function useSelectInstanceSpecs({
   ...rest
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
   const options = useMemo(() => {
-    const opts = optionsProp || getDefaultSpecsOptions(isPersistent)
+    const opts =
+      optionsProp || getDefaultSpecsOptions(isPersistent, paymentMethod)
     if (paymentMethod === PaymentMethod.Hold) return opts
     if (!nodeSpecs) return []
     return opts.filter((opt) => validateMinNodeSpecs(opt, nodeSpecs))
@@ -101,7 +106,7 @@ export function useSelectInstanceSpecs({
   useEffect(() => {
     if (!value) return
 
-    let updatedSpecs = updateSpecsStorage(value, isPersistent)
+    let updatedSpecs = updateSpecsStorage(value, isPersistent, paymentMethod)
     if (updatedSpecs.storage === value.storage) return
 
     if (updatedSpecs.disabled) {
@@ -109,7 +114,7 @@ export function useSelectInstanceSpecs({
     }
 
     onChange(updatedSpecs)
-  }, [isPersistent, value, onChange, options])
+  }, [isPersistent, value, onChange, options, paymentMethod])
 
   return {
     specsCtrl,

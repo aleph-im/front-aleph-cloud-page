@@ -17,6 +17,7 @@ import {
   useRequestCRNIps,
 } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
+import { PaymentMethod } from '@/helpers/constants'
 
 export type UseNewInstanceCRNListPage = UseRequestCRNsReturn &
   UseRequestCRNSpecsReturn &
@@ -31,7 +32,7 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
   const nodeManager = useNodeManager()
 
   const minSpecs = useMemo(() => {
-    const [min] = getDefaultSpecsOptions(true)
+    const [min] = getDefaultSpecsOptions(true, PaymentMethod.Stream)
     return min
   }, [])
 
