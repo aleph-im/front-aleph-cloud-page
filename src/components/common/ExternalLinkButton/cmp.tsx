@@ -6,19 +6,20 @@ import { Icon } from '@aleph-front/core'
 export const ExternalLinkButton = ({
   children,
   href,
-  size = 'lg',
   ...rest
 }: ExternalLinkButtonProps) => {
   return (
     <>
       <StyledExternalLinkButton
-        href={href}
-        size={size}
-        {...rest}
-        target="_blank"
+        {...{
+          href,
+          target: '_blank',
+          ...rest,
+        }}
+        tw="inline-flex items-center gap-2.5"
       >
         {children ? children : href}
-        <Icon name="square-up-right" tw="ml-2.5" />
+        <Icon name="square-up-right" />
       </StyledExternalLinkButton>
     </>
   )
