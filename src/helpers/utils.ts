@@ -1,5 +1,6 @@
 import E_ from './errors'
 import {
+  BaseMessage,
   EphemeralVolume,
   InstanceMessage,
   MessageType,
@@ -191,6 +192,8 @@ export const humanReadableCurrency = (value?: number, decimals = 2) => {
   else return (value / 10 ** 9).toFixed(decimals) + 'B'
 }
 
+const messageTypeWhitelist = new Set(...Object.values(MessageType))
+
 /**
  * Returns a link to the Aleph explorer for a given message
  */
@@ -199,8 +202,10 @@ export const getExplorerURL = ({
   chain,
   sender,
   type,
-}: ProgramMessage | StoreMessage) =>
-  `https://explorer.aleph.im/address/${chain}/${sender}/message/${type}/${item_hash}`
+}: BaseMessage) => {
+  type = messageTypeWhitelist.has(type) ? type : MessageType.post
+  return `https://explorer.aleph.im/address/${chain}/${sender}/message/${type}/${item_hash}`
+}
 
 export const getDate = (time: number): string => {
   const [date, hour] = new Date(time * 1000).toISOString().split('T')

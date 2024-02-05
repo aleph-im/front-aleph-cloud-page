@@ -23,7 +23,6 @@ import {
   ExecutableCost,
   ExecutableCostProps,
   PaymentConfiguration,
-  StreamPaymentConfiguration,
 } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'

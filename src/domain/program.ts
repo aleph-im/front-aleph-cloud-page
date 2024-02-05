@@ -13,7 +13,6 @@ import {
 } from '../helpers/constants'
 import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
 import {
-  ItemType,
   MachineVolume,
   MessageType,
   StoreMessage,
