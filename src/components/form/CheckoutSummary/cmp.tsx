@@ -20,7 +20,6 @@ import Container from '@/components/common/CenteredContainer'
 import { TextGradient, TextInput } from '@aleph-front/core'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
-import { SelectStreamDuration } from '../SelectInstanceDuration'
 import Price from '@/components/common/Price'
 
 const CheckoutSummarySpecsLine = ({
