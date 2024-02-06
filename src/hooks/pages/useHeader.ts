@@ -140,7 +140,6 @@ export type UseHeaderReturn = UseRoutesReturn & {
   breadcrumbNames: UseBreadcrumbNamesReturn['names']
   breakpoint: BreakpointId
   isOpen: boolean
-  hasBreadcrumb: boolean
   handleToggle: (isOpen: boolean) => void
   handleConnect: (wallet?: WalletProps, network?: NetworkProps) => Promise<void>
   handleDisconnect: () => void
@@ -222,7 +221,6 @@ export function useHeader(): UseHeaderReturn {
   // --------------------
 
   const { names: breadcrumbNames } = useBreadcrumbNames()
-  const hasBreadcrumb = router.pathname !== '/'
 
   // --------------------
 
@@ -240,7 +238,6 @@ export function useHeader(): UseHeaderReturn {
     breadcrumbNames,
     breakpoint,
     isOpen,
-    hasBreadcrumb,
     handleToggle,
     handleConnect,
     handleDisconnect,

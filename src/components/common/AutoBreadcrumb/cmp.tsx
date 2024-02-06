@@ -1,51 +1,39 @@
 import { memo, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { Breadcrumb } from '@aleph-front/core'
 import Link from 'next/link'
+import { Breadcrumb } from '@aleph-front/core'
 import { AutoBreacrumbProps } from './types'
 
-export const AutoBreadcrumb = ({
-  names = {},
-  includeHome = true,
-  ...rest
-}: AutoBreacrumbProps) => {
+export const AutoBreadcrumb = ({ names = {}, ...rest }: AutoBreacrumbProps) => {
   const router = useRouter()
-  const isHome = router.pathname === '/'
 
   const uppercase = (s: string) => s.toUpperCase()
 
   const navLinks = useMemo(() => {
-    if (isHome) return []
+    const parts = ['/', ...router.pathname.split('/')].filter((p) => !!p)
 
-    const parts = router.pathname.split('/')
-    const links = parts
+    return parts
       .map((item, index) => {
-        const href = parts.slice(0, index + 1).join('/')
-        let name = names[href] || names[item] || uppercase(item)
-        name = typeof name === 'function' ? name(router) : name
-        return { href, name }
+        const href = `/${parts.slice(1, index + 1).join('/')}`
+
+        const name = names[href] || names[item] || uppercase(item)
+        const node = typeof name === 'function' ? name(router) : name
+
+        return { href, node }
       })
-      .filter(({ name }) => name !== '' && name !== '-')
-      .map(({ name, href }) => {
-        return (
-          <Link key={name} href={href}>
-            {name}
+      .filter(({ node }) => !!node && node !== '-')
+      .map(({ node, href }, i, all) => {
+        return i < all.length - 1 ? (
+          <Link key={href} href={href}>
+            {node}
           </Link>
+        ) : (
+          node
         )
       })
+  }, [router, names])
 
-    if (includeHome) {
-      links.unshift(
-        <Link key={'home'} href={'/'}>
-          {(names['/'] as string) || 'HOME'}
-        </Link>,
-      )
-    }
-
-    return links
-  }, [router, names, isHome, includeHome])
-
-  return isHome ? null : <Breadcrumb navLinks={navLinks} {...rest} />
+  return <Breadcrumb navLinks={navLinks} {...rest} />
 }
 AutoBreadcrumb.displayName = 'AutoBreadcrumb'
 

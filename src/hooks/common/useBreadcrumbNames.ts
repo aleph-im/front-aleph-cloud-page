@@ -1,14 +1,30 @@
-import { NextRouter } from 'next/router'
+import { ellipseText } from '@/helpers/utils'
+import { NextRouter, useRouter } from 'next/router'
 import { useMemo } from 'react'
 
 const defaultNames = {
   '/': 'HOME',
-  '/computing/function': 'SETUP NEW FUNCTION',
+  '/storage': '-',
+  '/storage/volume': '-',
+  '/storage/volume/[hash]': '-',
+  '/storage/volume/new': 'SETUP NEW VOLUME',
+  '/configure': '-',
+  '/configure/ssh': '-',
+  '/configure/ssh/[hash]': '-',
+  '/configure/ssh/new': 'SETUP NEW SSH KEY',
+  '/configure/domain': '-',
+  '/configure/domain/[hash]': '-',
+  '/configure/domain/new': 'SETUP NEW DOMAIN',
+  '/computing': '-',
+  '/computing/instance': '-',
+  '/computing/instance/[hash]': '-',
   '/computing/instance/new': 'SETUP NEW INSTANCE',
-  '/storage/volume': 'SETUP NEW VOLUME',
-  '/configure/domain': 'SETUP NEW DOMAIN',
-  // @todo: Calculate entity name by hash (refactor routes)
-  '/dashboard/manage': 'ENTITY',
+  '/computing/instance/new/auto': 'AUTOMATIC NODE ALLOCATION',
+  '/computing/instance/new/crn': 'MANUAL NODE ALLOCATION',
+  '/computing/instance/new/crn/[hash]': '-',
+  '/computing/function': '-',
+  '/computing/function/[hash]': '-',
+  '/computing/function/new': 'SETUP NEW FUNCTION',
 }
 
 export type UseBreadcrumbNamesReturn = {
@@ -16,7 +32,24 @@ export type UseBreadcrumbNamesReturn = {
 }
 
 export function useBreadcrumbNames(): UseBreadcrumbNamesReturn {
-  const names = useMemo(() => ({ ...defaultNames }), [])
+  const router = useRouter()
+
+  let names = useMemo(() => ({ ...defaultNames }), [])
+
+  names = useMemo(() => {
+    const { hash: hashParam } = router.query
+    const hash = hashParam ? ellipseText(hashParam as string, 6, 6) : '-'
+
+    return {
+      ...names,
+      '/computing/instance/new/crn/[hash]': hash,
+      '/storage/volume/[hash]': `VOLUME / ${hash}`,
+      '/configure/ssh/[hash]': `SSH KEY / ${hash}`,
+      '/configure/domain/[hash]': `DOMAIN / ${hashParam}`,
+      '/computing/instance/[hash]': `INSTANCE / ${hash}`,
+      '/computing/function/[hash]': `FUNCTION / ${hash}`,
+    }
+  }, [router.query, names])
 
   return {
     names,
