@@ -72,7 +72,7 @@ export default function NewDomain() {
                   />
                 </NoisyContainer>
                 <div tw="mt-6 text-right">
-                  <ExternalLinkButton href="https://docs.aleph.im/computing/custom%20domain/Adding%20a%20Custom%20Domain/">
+                  <ExternalLinkButton href="https://docs.aleph.im/computing/custom_domain/setup/">
                     Learn more
                   </ExternalLinkButton>
                 </div>
