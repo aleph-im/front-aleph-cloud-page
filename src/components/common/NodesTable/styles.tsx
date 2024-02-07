@@ -24,9 +24,10 @@ export const StyledTable = styled(Table as any).attrs(
     ${tw`whitespace-nowrap`}
   }
 
+  /* 
   tbody tr {
     cursor: default;
-  }
+  } */
 
   td,
   th {

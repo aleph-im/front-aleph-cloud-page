@@ -12,9 +12,13 @@ import Sidebar from '@/components/common/Sidebar'
 import { useRouterLoadState } from '@/hooks/common/useRouterLoadState'
 import { AppStateProvider } from '@/contexts/appState'
 import Loading from './loading'
+import { useRef } from 'react'
 
 export default function App({ Component, pageProps }: AppProps) {
   const { loading } = useRouterLoadState()
+
+  const mainRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   return (
     <ThemeProvider theme={themes.twentysix}>
@@ -24,10 +28,16 @@ export default function App({ Component, pageProps }: AppProps) {
         <NotificationProvider>
           <Viewport>
             <Sidebar />
-            <Main>
+            <Main ref={mainRef}>
               <Header />
-              <Content>
-                <Component {...pageProps} />
+              <Content ref={contentRef}>
+                <Component
+                  {...{
+                    ...pageProps,
+                    mainRef,
+                    contentRef,
+                  }}
+                />
                 {loading && <Loading />}
               </Content>
               <Footer />

@@ -27,8 +27,9 @@ import ButtonLink from '@/components/common/ButtonLink'
 import { CRN } from '@/domain/node'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { SectionTitle } from '@/components/common/CompositeTitle'
+import { PageProps } from '@/types/types'
 
-export default function NewInstancePage() {
+export default function NewInstancePage({ mainRef }: PageProps) {
   const {
     address,
     accountBalance,
@@ -230,6 +231,7 @@ export default function NewInstancePage() {
         unlockedAmount={accountBalance}
         paymentMethod={values.paymentMethod}
         streamDuration={values.streamDuration}
+        mainRef={mainRef}
         description={
           <>
             You can either leverage the traditional method of holding tokens in
@@ -247,6 +249,8 @@ export default function NewInstancePage() {
             size="lg"
             variant="primary"
             disabled={isCreateButtonDisabled}
+            // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
+            onClick={handleSubmit}
           >
             Create instance
           </Button>

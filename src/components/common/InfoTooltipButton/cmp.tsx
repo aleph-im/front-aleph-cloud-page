@@ -31,7 +31,7 @@ export const InfoTooltipButton = ({
   const vAlignClass = vAlign === 'top' ? tw`mb-2` : ''
   const iconCss = [alignClass, vAlignClass]
 
-  const iconElm = <Icon name="info-circle" css={iconCss} />
+  const iconElm = <Icon name="info-circle" size="1em" css={iconCss} />
 
   return (
     <>

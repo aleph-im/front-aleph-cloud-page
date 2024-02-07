@@ -162,7 +162,7 @@ export const Header = () => {
         </StyledNavbarDesktop>
       </StyledHeader>
       <div tw="block flex-auto grow-0 shrink-0 h-[6.5rem] lg:hidden"></div>
-      <div tw="block lg:hidden my-6 px-5 md:px-16">
+      <div tw="block lg:hidden my-6 px-6 lg:px-16">
         <AutoBreadcrumb names={breadcrumbNames} />
       </div>
     </>

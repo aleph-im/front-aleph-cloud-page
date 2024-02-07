@@ -171,6 +171,8 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
       },
       onKeyDown: (e: KeyboardEvent) => {
         if (e.code !== 'Space' && e.code !== 'Enter') return
+        if (row.specs.disabled) return
+
         e.preventDefault()
         onChange(row.specs)
       },

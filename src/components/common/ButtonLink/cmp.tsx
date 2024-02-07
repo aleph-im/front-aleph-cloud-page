@@ -13,24 +13,32 @@ export const ButtonLink = ({
   color = 'main0',
   kind = 'default',
   size = 'md',
+  disabled,
   children,
   ...rest
 }: ButtonLinkProps) => {
-  return (
+  const buttonNode = (
+    <Button
+      {...{
+        as: disabled ? undefined : 'a',
+        variant,
+        color,
+        kind,
+        size,
+        disabled,
+        ...rest,
+      }}
+    >
+      {children}
+    </Button>
+  )
+
+  return !disabled ? (
     <Link href={href} passHref legacyBehavior>
-      <Button
-        {...{
-          as: 'a',
-          variant,
-          color,
-          kind,
-          size,
-          ...rest,
-        }}
-      >
-        {children}
-      </Button>
+      {buttonNode}
     </Link>
+  ) : (
+    buttonNode
   )
 }
 ButtonLink.displayName = 'ButtonLink'

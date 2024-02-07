@@ -11,6 +11,7 @@ export const Footer = () => {
         Link: Link as LinkComponent,
         logoHref: websiteUrl,
         logoTarget: '_blank',
+        breakpoint: 'lg',
         buttons: [
           {
             label: 'Work with us',

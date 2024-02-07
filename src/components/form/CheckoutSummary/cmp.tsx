@@ -4,7 +4,12 @@ import {
   humanReadableSize,
   ellipseText,
 } from '@/helpers/utils'
-import { Label, StyledArrowIcon, StyledHoldingSummaryLine } from './styles'
+import {
+  Label,
+  StyledArrowIcon,
+  StyledHoldingSummaryLine,
+  StyledSeparator,
+} from './styles'
 import {
   CheckoutSummaryDomainLineProps,
   CheckoutSummaryProps,
@@ -21,6 +26,7 @@ import { TextGradient, TextInput } from '@aleph-front/core'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import Price from '@/components/common/Price'
+import FloatingFooter from '../FloatingFooter'
 
 const CheckoutSummarySpecsLine = ({
   type,
@@ -210,6 +216,7 @@ export const CheckoutSummary = ({
   receiverAddress,
   paymentMethod,
   isPersistent = type === EntityType.Instance,
+  mainRef,
 }: // streamDuration,
 CheckoutSummaryProps) => {
   volumes = useMemo(
@@ -230,9 +237,34 @@ CheckoutSummaryProps) => {
 
   const priceDuration = paymentMethod === PaymentMethod.Stream ? 'h' : undefined
 
+  const paymentMethodNode = control && (
+    <SelectPaymentMethod name="paymentMethod" control={control} disabledHold />
+  )
+
   return (
     <>
       <div tw="md:mt-32" />
+      {mainRef && (
+        <FloatingFooter containerRef={mainRef} shouldHide thresholdOffset={600}>
+          <div tw="py-2 flex flex-col md:flex-row gap-6 items-center justify-between flex-wrap">
+            <div>{paymentMethodNode}</div>
+            <div tw="flex flex-col md:flex-row gap-4">
+              <div
+                className="tp-body2"
+                tw="flex items-center justify-center gap-4 whitespace-nowrap"
+              >
+                Total per hour
+                <Price
+                  value={cost?.totalCost}
+                  className="text-main0 fs-24 tp-body3"
+                />
+              </div>
+              <StyledSeparator />
+              {ButtonCmp}
+            </div>
+          </div>
+        </FloatingFooter>
+      )}
       <section
         className="fx-noise-light fx-grain-4"
         tw="px-0 pt-6 pb-24 md:pt-16 md:pb-32 md:mt-auto"
@@ -255,13 +287,7 @@ CheckoutSummaryProps) => {
                     <TextGradient forwardedAs="h3" type="h7" tw="mb-3">
                       Payment Method
                     </TextGradient>
-                    <div tw="my-4">
-                      <SelectPaymentMethod
-                        name="paymentMethod"
-                        control={control}
-                        disabledHold
-                      />
-                    </div>
+                    <div tw="my-4">{paymentMethodNode}</div>
                   </div>
                 </div>
                 {/* {paymentMethod === PaymentMethod.Stream && (
@@ -341,7 +367,7 @@ CheckoutSummaryProps) => {
                   </div>
                   <div>
                     <span className="text-main0 tp-body3">
-                      <Price value={cost?.totalCost} duration={priceDuration} />
+                      <Price value={cost?.totalCost} />
                     </span>
                   </div>
                 </StyledHoldingSummaryLine>
@@ -367,7 +393,7 @@ CheckoutSummaryProps) => {
                 <TextGradient forwardedAs="h3" type="h7" tw="mb-6">
                   Review the transaction
                 </TextGradient>
-                <div tw="w-full flex items-end gap-6">
+                <div tw="w-full flex flex-col md:flex-row items-stretch md:items-end gap-0 md:gap-6">
                   <div tw="flex-1">
                     <TextInput
                       tabIndex={-1}
@@ -377,7 +403,7 @@ CheckoutSummaryProps) => {
                       value={ellipseText(address, 12, 10)}
                     />
                   </div>
-                  <div>
+                  <div tw="self-center md:self-end rotate-90 md:rotate-0 pl-9 md:pl-0">
                     <StyledArrowIcon />
                   </div>
                   <div tw="flex-1">

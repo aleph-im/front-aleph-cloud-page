@@ -69,10 +69,16 @@ export const StyledArrowIcon = styled(Icon).attrs((props) => {
   return {
     ...props,
     name: 'angle-double-right',
-    size: '1.5',
+    size: '1.5rem',
     color: 'main0',
   }
 })`
   ${tw`p-1 origin-center`}
   animation: 1000ms linear 0ms infinite ${transfer1};
+`
+
+export const StyledSeparator = styled.div`
+  ${tw`hidden md:block`}
+  flex: 0 0 1px;
+  background-color: ${({ theme }) => theme.color.purple2};
 `

@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { KeyboardEvent, useCallback, useMemo, useState } from 'react'
+import Image from 'next/image'
 import {
   Button,
   Icon,
@@ -13,18 +14,18 @@ import Container from '@/components/common/CenteredContainer'
 import { useNewInstanceCRNListPage } from '@/hooks/pages/computing/useNewInstanceCRNListPage'
 import NewEntityTab from '../NewEntityTab'
 import NodesTable from '@/components/common/NodesTable'
-import Image from 'next/image'
-import { CRN } from '@/domain/node'
 import { humanReadableSize } from '@/helpers/utils'
 import ButtonLink from '@/components/common/ButtonLink'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import Price from '@/components/common/Price'
+import FloatingFooter from '@/components/form/FloatingFooter'
+import { PageProps } from '@/types/types'
+import { CRNItem } from './types'
 
-export default function NewInstanceCRNListPage() {
-  const { nodes, lastVersion, specs, minSpecs, ips } =
-    useNewInstanceCRNListPage()
+export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
+  const { nodes, lastVersion, specs, ips } = useNewInstanceCRNListPage()
 
   const theme = useTheme()
 
@@ -118,13 +119,9 @@ export default function NewInstanceCRNListPage() {
         align: 'right',
         width: '100%',
         render: (node) => {
-          const nodeSpecs = specs[node.hash]
-          const nodeIps = ips[node.hash]
-          const isLoading = !nodeSpecs || !nodeIps
-
           return (
             <div tw="flex gap-3 justify-end">
-              {isLoading ? (
+              {node.isLoading ? (
                 <Button
                   size="md"
                   color="main2"
@@ -136,23 +133,78 @@ export default function NewInstanceCRNListPage() {
                 </Button>
               ) : (
                 <>
-                  <ButtonLink
-                    size="md"
+                  <Button
                     color="main0"
-                    tw="w-16!"
+                    variant="tertiary"
+                    kind="default"
+                    size="md"
+                    type="button"
+                    onClick={(e) => e.preventDefault()}
+                    tabIndex={-1}
                     className="check-button"
-                    href={`./crn/${node.hash}`}
+                    style={{
+                      visibility: node.isActive ? 'visible' : 'hidden',
+                      opacity: node.isActive ? '1' : '0',
+                      transition: 'all ease-in-out 500ms 0ms',
+                      transitionProperty: 'opacity visibility',
+                    }}
                   >
-                    <Icon name="angle-right" />
-                  </ButtonLink>
+                    <Icon name="check" size="lg" />
+                  </Button>
                 </>
               )}
             </div>
           )
         },
       },
-    ] as TableColumn<CRN>[]
-  }, [specs, lastVersion, ips, minSpecs, theme])
+    ] as TableColumn<CRNItem>[]
+  }, [specs, lastVersion, theme])
+
+  const [selected, setSelected] = useState<string>()
+
+  const data: CRNItem[] = useMemo(() => {
+    if (!nodes) return []
+
+    return nodes.map((node) => {
+      const { hash } = node
+
+      const isActive = hash === selected
+
+      const nodeSpecs = specs[hash]
+      const nodeIps = ips[hash]
+      const isLoading = !nodeSpecs || !nodeIps
+
+      return {
+        ...node,
+        isActive,
+        isLoading,
+      }
+    })
+  }, [ips, nodes, selected, specs])
+
+  const handleRowProps = useCallback(
+    (row: CRNItem) => ({
+      tabIndex: row.disabled ? -1 : 0,
+      className: `${row.disabled ? '_disabled' : ''} ${
+        row.isActive ? '_active' : ''
+      } ${row.isLoading ? '_loading' : ''}`,
+      onClick: () => {
+        if (row.disabled) return
+        if (row.isLoading) return
+
+        setSelected(row.hash)
+      },
+      onKeyDown: (e: KeyboardEvent) => {
+        if (e.code !== 'Space' && e.code !== 'Enter') return
+        if (row.disabled) return
+        if (row.isLoading) return
+
+        e.preventDefault()
+        setSelected(row.hash)
+      },
+    }),
+    [],
+  )
 
   return (
     <>
@@ -165,10 +217,29 @@ export default function NewInstanceCRNListPage() {
         <SpinnerOverlay show={!nodes} />
         <Container $variant="xl">
           <NoisyContainer>
-            <NodesTable columns={columns} data={nodes || []} />
+            <NodesTable
+              columns={columns}
+              data={data}
+              rowProps={handleRowProps}
+            />
           </NoisyContainer>
         </Container>
       </section>
+      <FloatingFooter containerRef={mainRef} shouldHide={false}>
+        <div tw="py-6 text-center">
+          <ButtonLink
+            type="button"
+            color="main0"
+            kind="default"
+            size="md"
+            variant="primary"
+            href={`./crn/${selected}`}
+            disabled={!selected}
+          >
+            Proceed to configuration
+          </ButtonLink>
+        </div>
+      </FloatingFooter>
     </>
   )
 }

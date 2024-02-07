@@ -7,7 +7,7 @@ import {
   StreamDurationField,
   StreamDurationUnit,
 } from '@/hooks/form/useSelectStreamDuration'
-import { ReactNode } from 'react'
+import { ReactNode, RefObject } from 'react'
 import { Control } from 'react-hook-form'
 
 export type CheckoutSummaryProps = {
@@ -20,6 +20,7 @@ export type CheckoutSummaryProps = {
   domains?: DomainField[]
   button?: ReactNode
   description?: ReactNode
+  mainRef?: RefObject<HTMLElement>
 } & (
   | {
       paymentMethod: PaymentMethod.Stream
