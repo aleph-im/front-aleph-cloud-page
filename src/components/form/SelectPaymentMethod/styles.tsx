@@ -5,7 +5,9 @@ export type StyledLabelProps = { $disabled?: boolean }
 
 export const StyledLabel = styled.label<StyledLabelProps>`
   ${({ $disabled = false }) => css`
-    ${tw`cursor-pointer`}
+    /* ${tw`cursor-pointer`} */
+    /* @todo: fix it after supporting stream payment with automatic allocation or hold payment with manual allocation */
+    ${tw`cursor-not-allowed`}
 
     ${$disabled &&
     css`
