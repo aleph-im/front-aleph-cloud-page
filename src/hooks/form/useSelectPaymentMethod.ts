@@ -7,10 +7,12 @@ export type UseSelectPaymentMethodProps = {
   control: Control
   defaultValue?: PaymentMethod
   disabledHold?: boolean
+  disabledStream?: boolean
 }
 
 export type UseSelectPaymentMethodReturn = {
   disabledHold?: boolean
+  disabledStream?: boolean
   paymentMethodCtrl: UseControllerReturn<any, any>
   handleClickStream: () => void
   handleClickHold: () => void

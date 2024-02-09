@@ -14,8 +14,9 @@ import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import NewEntityTab from '../NewEntityTab'
 import { SectionTitle } from '@/components/common/CompositeTitle'
+import { PageProps } from '@/types/types'
 
-export default function NewInstanceHoldPage() {
+export default function NewInstanceHoldPage({ mainRef }: PageProps) {
   const {
     address,
     accountBalance,
@@ -103,7 +104,11 @@ export default function NewInstanceHoldPage() {
                 <TextGradient forwardedAs="h2" type="h6" color="main0">
                   Add volumes
                 </TextGradient>
-                <AddVolumes name="volumes" control={control} />
+                <AddVolumes
+                  name="volumes"
+                  control={control}
+                  systemVolumeSize={values.systemVolumeSize}
+                />
               </ToggleContainer>
             </div>
             <div tw="mb-4">
@@ -144,6 +149,7 @@ export default function NewInstanceHoldPage() {
         </Container>
       </section>
       <CheckoutSummary
+        control={control}
         address={address}
         type={EntityType.Instance}
         isPersistent={true}
@@ -151,7 +157,8 @@ export default function NewInstanceHoldPage() {
         volumes={values.volumes}
         domains={values.domains}
         unlockedAmount={accountBalance}
-        paymentMethod={PaymentMethod.Hold}
+        paymentMethod={values.paymentMethod}
+        mainRef={mainRef}
         description={
           <>
             You can either leverage the traditional method of holding tokens in
@@ -170,6 +177,8 @@ export default function NewInstanceHoldPage() {
             size="lg"
             variant="primary"
             disabled={isCreateButtonDisabled}
+            // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
+            onClick={handleSubmit}
           >
             Create instance
           </Button>

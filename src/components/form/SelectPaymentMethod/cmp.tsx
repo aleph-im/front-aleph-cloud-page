@@ -7,6 +7,7 @@ import { StyledLabel } from './styles'
 export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
   const {
     disabledHold,
+    disabledStream,
     paymentMethodCtrl,
     handleClickHold,
     handleClickStream,
@@ -26,12 +27,13 @@ export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
         {...{
           ...paymentMethodCtrl.field,
           ...paymentMethodCtrl.fieldState,
-          disabled: disabledHold,
+          disabled: disabledHold || disabledStream,
         }}
       />
       <StyledLabel
         {...{
           onClick: handleClickStream,
+          $disabled: disabledStream,
         }}
       >
         Pay-as-you-go

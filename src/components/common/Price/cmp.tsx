@@ -4,11 +4,16 @@ import { PriceProps } from './types'
 import { Logo } from '@aleph-front/core'
 import { humanReadableCurrency } from '@/helpers/utils'
 
-export const Price = ({ value, duration, ...rest }: PriceProps) => {
+export const Price = ({
+  value,
+  duration,
+  iconSize = '0.75em',
+  ...rest
+}: PriceProps) => {
   return (
     <StyledPrice {...rest}>
       {humanReadableCurrency(value)}
-      <Logo color="currentColor" img="aleph" />
+      <Logo color="currentColor" img="aleph" size={iconSize} />
       {duration && <span>/ {duration}</span>}
     </StyledPrice>
   )

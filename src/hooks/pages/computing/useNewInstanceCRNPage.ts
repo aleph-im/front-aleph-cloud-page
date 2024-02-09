@@ -8,7 +8,7 @@ import {
   NameAndTagsField,
 } from '@/hooks/form/useAddNameAndTags'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
-import { PersistentVolumeField, VolumeField } from '@/hooks/form/useAddVolume'
+import { VolumeField } from '@/hooks/form/useAddVolume'
 import {
   defaultInstanceImage,
   InstanceImageField,
@@ -23,7 +23,7 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { AddInstance, InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { EntityType, PaymentMethod, VolumeType } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
@@ -44,6 +44,7 @@ export type NewInstanceCRNFormState = NameAndTagsField & {
   volumes?: VolumeField[]
   envVars?: EnvVarField[]
   domains?: DomainField[]
+  systemVolumeSize: number
   nodeSpecs?: CRNSpecs
   paymentMethod: PaymentMethod
   streamDuration: StreamDurationField
@@ -56,15 +57,7 @@ export const defaultValues: Partial<NewInstanceCRNFormState> = {
   ...defaultNameAndTags,
   image: defaultInstanceImage,
   specs,
-  volumes: [
-    {
-      volumeType: VolumeType.Persistent,
-      name: 'System Volume',
-      mountPath: '/',
-      size: specs.storage,
-      isFake: true,
-    },
-  ],
+  systemVolumeSize: specs.storage,
   paymentMethod: PaymentMethod.Stream,
   streamDuration: defaultStreamDuration,
   streamCost: Number.POSITIVE_INFINITY,
@@ -193,18 +186,15 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
   const values = useWatch({ control }) as NewInstanceCRNFormState
 
   const { storage } = values.specs
-  const fakeVolume = values.volumes?.find((volume) => volume.isFake) as
-    | PersistentVolumeField
-    | undefined
+  const { systemVolumeSize } = values
 
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
     if (!storage) return
-    if (!fakeVolume) return
-    if (fakeVolume.size === storage) return
+    if (systemVolumeSize === storage) return
 
-    setValue('volumes.0.size', storage)
-  }, [storage, fakeVolume, setValue])
+    setValue('systemVolumeSize', storage)
+  }, [storage, setValue, systemVolumeSize])
 
   // @note: Set nodeSpecs
   useEffect(() => {

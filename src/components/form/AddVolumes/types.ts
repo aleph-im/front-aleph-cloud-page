@@ -7,4 +7,5 @@ export type RemoveVolumeProps = {
 export type AddVolumesProps = {
   name?: string
   control: Control
+  systemVolumeSize?: number
 } & Partial<RemoveVolumeProps>

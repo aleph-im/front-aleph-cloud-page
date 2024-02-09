@@ -366,9 +366,6 @@ export class InstanceManager
 
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
-    // @note: Remove the fake volumes from the instance volume list configuration
-    volumes = volumes.filter((volume) => !volume.isFake)
-
     return super.parseVolumes(volumes)
   }
 

@@ -4,14 +4,22 @@ import { useAddVolumes } from '@/hooks/form/useAddVolumes'
 import { AddVolumesProps } from './types'
 import AddVolume from '../AddVolume'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
+import { InstanceSystemVolume } from '../AddVolume/cmp'
 
 export const AddVolumes = React.memo((props: AddVolumesProps) => {
-  const { name, control, fields, handleAdd, handleRemove } =
+  const { name, control, fields, systemVolumeSize, handleAdd, handleRemove } =
     useAddVolumes(props)
 
   return (
     <>
       <div tw="flex flex-col gap-6">
+        {systemVolumeSize && (
+          <div className="bg-base1" tw="p-6">
+            <div tw="px-0 pb-3">
+              <InstanceSystemVolume size={systemVolumeSize} />
+            </div>
+          </div>
+        )}
         {fields.map((field, index) => (
           <AddVolume
             key={field.id}

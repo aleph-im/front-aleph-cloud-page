@@ -6,4 +6,5 @@ export type LabelVariant = 'success' | 'warning' | 'error'
 export type PriceProps = HTMLAttributes<HTMLSpanElement> & {
   value: number | undefined
   duration?: StreamDurationUnit
+  iconSize?: string
 }

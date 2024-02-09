@@ -5,8 +5,9 @@ import {
   AddExistingVolumeProps,
   AddNewVolumeProps,
   AddPersistentVolumeProps,
+  InstanceSystemVolumeProps,
 } from './types'
-import React, { useMemo } from 'react'
+import React, { memo, useMemo } from 'react'
 import {
   useAddVolume,
   useAddExistingVolumeProps,
@@ -16,28 +17,26 @@ import {
 import { VolumeType } from '@/domain/volume'
 import HiddenFileInput from '@/components/common/HiddenFileInput'
 
-const RemoveVolume = React.memo(
-  ({ onRemove: handleRemove }: RemoveVolumeProps) => {
-    return (
-      <div tw="mt-4 pt-6 text-right">
-        <Button
-          type="button"
-          kind="functional"
-          variant="warning"
-          size="md"
-          onClick={handleRemove}
-        >
-          Remove
-        </Button>
-      </div>
-    )
-  },
-)
+const RemoveVolume = memo(({ onRemove: handleRemove }: RemoveVolumeProps) => {
+  return (
+    <div tw="mt-4 pt-6 text-right">
+      <Button
+        type="button"
+        kind="functional"
+        variant="warning"
+        size="md"
+        onClick={handleRemove}
+      >
+        Remove
+      </Button>
+    </div>
+  )
+})
 RemoveVolume.displayName = 'RemoveVolume'
 
 // -------------------------------------------------
 
-export const AddNewVolume = React.memo((props: AddNewVolumeProps) => {
+export const AddNewVolume = memo((props: AddNewVolumeProps) => {
   const {
     isStandAlone,
     fileCtrl,
@@ -97,7 +96,7 @@ AddNewVolume.displayName = 'AddNewVolume'
 
 // -------------------------------------------------
 
-const AddExistingVolume = React.memo((props: AddExistingVolumeProps) => {
+const AddExistingVolume = memo((props: AddExistingVolumeProps) => {
   const {
     refHashCtrl,
     mountPathCtrl,
@@ -154,13 +153,12 @@ AddExistingVolume.displayName = 'AddExistingVolume'
 
 // -------------------------------------------------
 
-const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
+const AddPersistentVolume = memo((props: AddPersistentVolumeProps) => {
   const {
     nameCtrl,
     mountPathCtrl,
     sizeCtrl,
     sizeValue,
-    isFake,
     sizeHandleChange,
     handleRemove,
   } = useAddPersistentVolumeProps(props)
@@ -168,27 +166,16 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
   return (
     <>
       <p tw="mb-6">
-        {isFake ? (
-          <>
-            This system volume is included with your setup. You can easily
-            expand your storage capacity to meet your application&apos;s
-            requirements by adding additional volumes below.
-          </>
-        ) : (
-          <>
-            Create and configure persistent storage for your web3 functions,
-            enabling your application to maintain data across multiple
-            invocations or sessions. You can set up a customized storage
-            solution tailored to your application&apos;s requirements.
-          </>
-        )}
+        Create and configure persistent storage for your web3 functions,
+        enabling your application to maintain data across multiple invocations
+        or sessions. You can set up a customized storage solution tailored to
+        your application&apos;s requirements.
       </p>
       <div>
         <div>
           <TextInput
             {...nameCtrl.field}
             {...nameCtrl.fieldState}
-            disabled={isFake}
             required
             label="Volume name"
             placeholder="Redis volume"
@@ -198,7 +185,6 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           <TextInput
             {...mountPathCtrl.field}
             {...mountPathCtrl.fieldState}
-            disabled={isFake}
             required
             label="Mount"
             placeholder="/mount/opt"
@@ -208,7 +194,6 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
           <TextInput
             {...sizeCtrl.field}
             {...sizeCtrl.fieldState}
-            disabled={isFake}
             value={sizeValue}
             onChange={sizeHandleChange}
             required
@@ -217,12 +202,62 @@ const AddPersistentVolume = React.memo((props: AddPersistentVolumeProps) => {
             placeholder="0"
           />
         </div>
-        {!isFake && handleRemove && <RemoveVolume onRemove={handleRemove} />}
+        {handleRemove && <RemoveVolume onRemove={handleRemove} />}
       </div>
     </>
   )
 })
 AddPersistentVolume.displayName = 'AddPersistentVolume'
+
+// -------------------------------------------------
+
+export const InstanceSystemVolume = memo(
+  ({ size }: InstanceSystemVolumeProps) => {
+    return (
+      <>
+        <p tw="mb-6">
+          This system volume is included with your setup. You can easily expand
+          your storage capacity to meet your application&apos;s requirements by
+          adding additional volumes below.
+        </p>
+        <div>
+          <div>
+            <TextInput
+              name="system_volume_name"
+              required
+              disabled
+              label="Volume name"
+              placeholder="Redis volume"
+              value="System Volume"
+            />
+          </div>
+          <div tw="mt-4">
+            <TextInput
+              name="system_volume_mount"
+              required
+              disabled
+              label="Mount"
+              placeholder="/mount/opt"
+              value="/"
+            />
+          </div>
+          <div tw="mt-4">
+            <TextInput
+              name="system_volume_size"
+              required
+              disabled
+              type="number"
+              label="Size (GB)"
+              placeholder="0"
+              value={size}
+            />
+          </div>
+        </div>
+      </>
+    )
+  },
+)
+InstanceSystemVolume.displayName = 'InstanceSystemVolume'
 
 // -------------------------------------------------
 
@@ -232,8 +267,8 @@ const CmpMap = {
   [VolumeType.Persistent]: AddPersistentVolume,
 }
 
-export const AddVolume = React.memo((props: AddVolumeProps) => {
-  const { volumeTypeCtrl, isFake, defaultValue, ...rest } = useAddVolume(props)
+export const AddVolume = memo((props: AddVolumeProps) => {
+  const { volumeTypeCtrl, defaultValue, ...rest } = useAddVolume(props)
   const volumeType = volumeTypeCtrl.field.value as VolumeType
 
   const Cmp = useMemo(() => CmpMap[volumeType], [volumeType])
@@ -258,16 +293,14 @@ export const AddVolume = React.memo((props: AddVolumeProps) => {
 
   return (
     <div className="bg-base1" tw="p-6">
-      {!isFake && (
-        <div tw="px-0 pb-3">
-          <Tabs
-            selected={volumeType}
-            align="left"
-            onTabChange={volumeTypeCtrl.field.onChange}
-            tabs={tabs}
-          />
-        </div>
-      )}
+      <div tw="px-0 pb-3">
+        <Tabs
+          selected={volumeType}
+          align="left"
+          onTabChange={volumeTypeCtrl.field.onChange}
+          tabs={tabs}
+        />
+      </div>
 
       <div role="tabpanel">
         {<Cmp {...rest} defaultValue={defaultValue as any} />}

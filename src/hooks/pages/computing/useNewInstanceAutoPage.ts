@@ -11,7 +11,7 @@ import {
   SSHKeyField,
   // defaultValues as sshKeyDefaultValues,
 } from '@/hooks/form/useAddSSHKeys'
-import { PersistentVolumeField, VolumeField } from '@/hooks/form/useAddVolume'
+import { VolumeField } from '@/hooks/form/useAddVolume'
 import {
   InstanceImageField,
   defaultInstanceImage,
@@ -26,7 +26,7 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { EntityType, PaymentMethod, VolumeType } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 
 export type NewInstanceHoldFormState = NameAndTagsField & {
@@ -36,6 +36,7 @@ export type NewInstanceHoldFormState = NameAndTagsField & {
   volumes?: VolumeField[]
   envVars?: EnvVarField[]
   domains?: DomainField[]
+  systemVolumeSize: number
   paymentMethod: PaymentMethod
 }
 
@@ -45,15 +46,7 @@ export const defaultValues: Partial<NewInstanceHoldFormState> = {
   ...defaultNameAndTags,
   image: defaultInstanceImage,
   specs,
-  volumes: [
-    {
-      volumeType: VolumeType.Persistent,
-      name: 'System Volume',
-      mountPath: '/',
-      size: specs.storage,
-      isFake: true,
-    },
-  ],
+  systemVolumeSize: specs.storage,
   paymentMethod: PaymentMethod.Hold,
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
@@ -106,18 +99,15 @@ export function useNewInstanceAutoPage(): UseNewInstanceAutoPage {
   const values = useWatch({ control }) as NewInstanceHoldFormState
 
   const { storage } = values.specs
-  const fakeVolume = values.volumes?.find((volume) => volume.isFake) as
-    | PersistentVolumeField
-    | undefined
+  const { systemVolumeSize } = values
 
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
     if (!storage) return
-    if (!fakeVolume) return
-    if (fakeVolume.size === storage) return
+    if (systemVolumeSize === storage) return
 
-    setValue('volumes.0.size', storage)
-  }, [storage, fakeVolume, setValue])
+    setValue('systemVolumeSize', storage)
+  }, [storage, setValue, systemVolumeSize])
 
   const { cost } = useEntityCost({
     entityType: EntityType.Instance,

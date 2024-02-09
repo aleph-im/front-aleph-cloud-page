@@ -16,17 +16,25 @@ import {
   CheckoutSummarySpecsLineProps,
   CheckoutSummaryVolumeLineProps,
 } from './types'
-import { memo, useEffect, useMemo, useState } from 'react'
+import {
+  cloneElement,
+  isValidElement,
+  memo,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import React from 'react'
 import { EntityType, EntityTypeName, PaymentMethod } from '@/helpers/constants'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import InfoTooltipButton from '../../common/InfoTooltipButton'
 import Container from '@/components/common/CenteredContainer'
-import { TextGradient, TextInput } from '@aleph-front/core'
+import { Button, ButtonProps, TextGradient, TextInput } from '@aleph-front/core'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import Price from '@/components/common/Price'
 import FloatingFooter from '../FloatingFooter'
+import CheckoutSummaryFooter from '../CheckoutSummaryFooter'
 
 const CheckoutSummarySpecsLine = ({
   type,
@@ -211,7 +219,7 @@ export const CheckoutSummary = ({
   volumes,
   domains,
   description,
-  button: ButtonCmp,
+  button: buttonNode,
   control,
   receiverAddress,
   paymentMethod,
@@ -219,11 +227,6 @@ export const CheckoutSummary = ({
   mainRef,
 }: // streamDuration,
 CheckoutSummaryProps) => {
-  volumes = useMemo(
-    () => volumes?.filter((volume) => !volume.isFake),
-    [volumes],
-  )
-
   const { cost } = useEntityCost({
     entityType: type,
     props: {
@@ -236,35 +239,30 @@ CheckoutSummaryProps) => {
   })
 
   const priceDuration = paymentMethod === PaymentMethod.Stream ? 'h' : undefined
+  const disabledHold = paymentMethod !== PaymentMethod.Hold
+  const disabledStream = paymentMethod !== PaymentMethod.Stream
 
-  const paymentMethodNode = control && (
-    <SelectPaymentMethod name="paymentMethod" control={control} disabledHold />
+  const paymentMethodSwitchNode = control && (
+    <SelectPaymentMethod
+      name="paymentMethod"
+      control={control}
+      disabledHold={disabledHold}
+      disabledStream={disabledStream}
+    />
   )
 
   return (
     <>
       <div tw="md:mt-32" />
-      {mainRef && (
-        <FloatingFooter containerRef={mainRef} shouldHide thresholdOffset={600}>
-          <div tw="py-2 flex flex-col md:flex-row gap-6 items-center justify-between flex-wrap">
-            <div>{paymentMethodNode}</div>
-            <div tw="flex flex-col md:flex-row gap-4">
-              <div
-                className="tp-body2"
-                tw="flex items-center justify-center gap-4 whitespace-nowrap"
-              >
-                Total per hour
-                <Price
-                  value={cost?.totalCost}
-                  className="text-main0 fs-24 tp-body3"
-                />
-              </div>
-              <StyledSeparator />
-              {ButtonCmp}
-            </div>
-          </div>
-        </FloatingFooter>
-      )}
+      <CheckoutSummaryFooter
+        {...{
+          paymentMethod,
+          submitButton: buttonNode,
+          paymentMethodSwitch: paymentMethodSwitchNode,
+          mainRef,
+          totalCost: cost?.totalCost,
+        }}
+      />
       <section
         className="fx-noise-light fx-grain-4"
         tw="px-0 pt-6 pb-24 md:pt-16 md:pb-32 md:mt-auto"
@@ -287,7 +285,7 @@ CheckoutSummaryProps) => {
                     <TextGradient forwardedAs="h3" type="h7" tw="mb-3">
                       Payment Method
                     </TextGradient>
-                    <div tw="my-4">{paymentMethodNode}</div>
+                    <div tw="my-4">{paymentMethodSwitchNode}</div>
                   </div>
                 </div>
                 {/* {paymentMethod === PaymentMethod.Stream && (
@@ -425,7 +423,7 @@ CheckoutSummaryProps) => {
               </div>
             )}
 
-            {ButtonCmp && <div tw="mt-16 text-center">{ButtonCmp}</div>}
+            {buttonNode && <div tw="mt-16 text-center">{buttonNode}</div>}
           </div>
         </Container>
       </section>

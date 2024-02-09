@@ -6,6 +6,7 @@ import {
   requiredStringSchema,
   messageHashSchema,
   optionalString,
+  paymentMethodSchema,
 } from './base'
 import {
   addSpecsSchema,
@@ -52,6 +53,7 @@ export const addRuntimeSchema = optionalString(messageHashSchema)
 
 export const functionSchema = z
   .object({
+    paymentMethod: paymentMethodSchema,
     code: addCodeSchema,
     isPersistent: isPersistentSchema,
     specs: addSpecsSchema,

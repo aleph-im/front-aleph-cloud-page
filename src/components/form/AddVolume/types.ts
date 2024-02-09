@@ -32,6 +32,10 @@ export type AddPersistentVolumeProps = AddVolumeCommonProps & {
   defaultValue?: PersistentVolumeField
 }
 
+export type InstanceSystemVolumeProps = {
+  size: number
+}
+
 // ---------
 
 export type RemoveVolumeProps = {

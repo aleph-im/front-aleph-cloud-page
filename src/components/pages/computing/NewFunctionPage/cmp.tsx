@@ -17,8 +17,9 @@ import ToggleContainer from '@/components/common/ToggleContainer'
 import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime'
 import NewEntityTab from '../NewEntityTab'
 import { SectionTitle } from '@/components/common/CompositeTitle'
+import { PageProps } from '@/types/types'
 
-export default function NewFunctionPage() {
+export default function NewFunctionPage({ mainRef }: PageProps) {
   const {
     address,
     accountBalance,
@@ -158,6 +159,7 @@ export default function NewFunctionPage() {
       </section>
 
       <CheckoutSummary
+        control={control}
         address={address}
         type={EntityType.Program}
         isPersistent={values.isPersistent}
@@ -165,7 +167,8 @@ export default function NewFunctionPage() {
         volumes={values.volumes}
         domains={values.domains}
         unlockedAmount={accountBalance}
-        paymentMethod={PaymentMethod.Hold}
+        paymentMethod={values.paymentMethod}
+        mainRef={mainRef}
         description={
           <>
             This amount needs to be present in your wallet until the function is
@@ -181,6 +184,8 @@ export default function NewFunctionPage() {
             size="lg"
             variant="primary"
             disabled={isCreateButtonDisabled}
+            // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
+            onClick={handleSubmit}
           >
             Create function
           </Button>

@@ -29,7 +29,7 @@ export const FloatingFooter = ({
   const windowSize = useWindowSize()
   const { scrollY } = useScroll({
     ref: containerRef,
-    debounceDelay: shouldHide ? 0 : Number.MAX_SAFE_INTEGER,
+    debounceDelay: 0,
   })
 
   const deps = [windowSize, scrollY]
@@ -43,7 +43,7 @@ export const FloatingFooter = ({
   const sticked = thresholdBot > containerBot
 
   const { shouldMount, state } = useTransitionedEnterExit({
-    onOff: shouldHide && sticked,
+    onOff: sticked,
     ref: contentRef,
   })
 
@@ -59,6 +59,7 @@ export const FloatingFooter = ({
   const contentNode = (
     <StyledContainer
       ref={contentRef}
+      $sticked={show}
       style={{ position, bottom, left, width, opacity }}
     >
       {children}

@@ -6,7 +6,6 @@ import { Control, UseControllerReturn, useController } from 'react-hook-form'
 export type NewVolumeStandaloneField = {
   volumeType: VolumeType.New
   file?: File
-  isFake?: boolean
 }
 
 export type NewVolumeField = NewVolumeStandaloneField & {
@@ -19,7 +18,6 @@ export type ExistingVolumeField = {
   mountPath: string
   refHash: string
   useLatest: boolean
-  isFake?: boolean
 }
 
 export type PersistentVolumeField = {
@@ -27,7 +25,6 @@ export type PersistentVolumeField = {
   name: string
   mountPath: string
   size: number
-  isFake?: boolean
 }
 
 export const defaultVolume: NewVolumeStandaloneField = {
@@ -188,7 +185,6 @@ export type UseAddPersistentVolumeReturn = {
   mountPathCtrl: UseControllerReturn<any, any>
   sizeCtrl: UseControllerReturn<any, any>
   sizeValue: number | undefined
-  isFake: boolean
   sizeHandleChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleRemove?: () => void
 }
@@ -218,8 +214,6 @@ export function useAddPersistentVolumeProps({
     defaultValue: defaultValue?.size,
   })
 
-  const isFake = defaultValue?.isFake || false
-
   const sizeHandleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const val = Number(e.target.value)
@@ -248,7 +242,6 @@ export function useAddPersistentVolumeProps({
     mountPathCtrl,
     sizeCtrl,
     sizeValue,
-    isFake,
     sizeHandleChange,
     handleRemove,
   }
@@ -271,7 +264,6 @@ export type UseAddVolumeReturn = {
   control: Control
   volumeTypeCtrl: UseControllerReturn<any, any>
   defaultValue?: VolumeField
-  isFake?: boolean
   onRemove?: () => void
 }
 
@@ -291,8 +283,6 @@ export function useAddVolume({
     defaultValue: VolumeType.New,
   })
 
-  const isFake = defaultValue?.isFake || false
-
   const handleRemove = useCallback(() => {
     onRemove && onRemove(index)
   }, [index, onRemove])
@@ -303,7 +293,6 @@ export function useAddVolume({
     control,
     volumeTypeCtrl,
     defaultValue,
-    isFake,
     onRemove: handleRemove,
   }
 }

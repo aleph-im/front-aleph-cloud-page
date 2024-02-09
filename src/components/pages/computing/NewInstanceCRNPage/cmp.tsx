@@ -178,7 +178,11 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 <TextGradient forwardedAs="h2" type="h6" color="main0">
                   Add volumes
                 </TextGradient>
-                <AddVolumes name="volumes" control={control} />
+                <AddVolumes
+                  name="volumes"
+                  control={control}
+                  systemVolumeSize={values.systemVolumeSize}
+                />
               </ToggleContainer>
             </div>
             <div tw="mb-4">

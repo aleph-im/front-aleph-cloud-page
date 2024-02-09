@@ -21,7 +21,7 @@ import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CustomFunctionRuntimeField } from '@/domain/runtime'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
-import { EntityType } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -31,6 +31,7 @@ export type NewFunctionFormState = NameAndTagsField & {
   volumes?: VolumeField[]
   envVars?: EnvVarField[]
   domains?: DomainField[]
+  paymentMethod: PaymentMethod
 }
 
 const defaultValues: Partial<NewFunctionFormState> = {
@@ -38,6 +39,7 @@ const defaultValues: Partial<NewFunctionFormState> = {
   code: { ...defaultCode } as FunctionCodeField,
   specs: { ...getDefaultSpecsOptions(false)[0] },
   isPersistent: false,
+  paymentMethod: PaymentMethod.Hold,
 }
 
 // @todo: Split this into reusable hooks by composition

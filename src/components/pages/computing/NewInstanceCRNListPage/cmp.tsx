@@ -9,7 +9,7 @@ import {
   NoisyContainer,
   TableColumn,
 } from '@aleph-front/core'
-import { apiServer } from '@/helpers/constants'
+import { PaymentMethod, apiServer } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstanceCRNListPage } from '@/hooks/pages/computing/useNewInstanceCRNListPage'
 import NewEntityTab from '../NewEntityTab'
@@ -20,9 +20,9 @@ import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import Price from '@/components/common/Price'
-import FloatingFooter from '@/components/form/FloatingFooter'
 import { PageProps } from '@/types/types'
 import { CRNItem } from './types'
+import CheckoutSummaryFooter from '@/components/form/CheckoutSummaryFooter'
 
 export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
   const { nodes, lastVersion, specs, ips } = useNewInstanceCRNListPage()
@@ -225,21 +225,28 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
           </NoisyContainer>
         </Container>
       </section>
-      <FloatingFooter containerRef={mainRef} shouldHide={false}>
-        <div tw="py-6 text-center">
-          <ButtonLink
-            type="button"
-            color="main0"
-            kind="default"
-            size="md"
-            variant="primary"
-            href={`./crn/${selected}`}
-            disabled={!selected}
-          >
-            Proceed to configuration
-          </ButtonLink>
-        </div>
-      </FloatingFooter>
+      <CheckoutSummaryFooter
+        {...{
+          paymentMethod: PaymentMethod.Stream,
+          submitButton: (
+            <ButtonLink
+              type="button"
+              color="main0"
+              kind="default"
+              size="md"
+              variant="primary"
+              href={`./crn/${selected}`}
+              disabled={!selected}
+            >
+              Continue
+            </ButtonLink>
+          ),
+          mainRef,
+          totalCost: 0.11,
+          shouldHide: false,
+          thresholdOffset: 0,
+        }}
+      />
     </>
   )
 }

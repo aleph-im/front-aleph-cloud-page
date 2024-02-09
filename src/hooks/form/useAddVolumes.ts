@@ -9,12 +9,14 @@ import { Control, useFieldArray } from 'react-hook-form'
 export type UseAddVolumesProps = {
   name?: string
   control: Control
+  systemVolumeSize?: number
 }
 
 export type UseAddVolumesReturn = {
   name: string
   control: Control
   fields: (VolumeField & { id: string })[]
+  systemVolumeSize?: number
   handleAdd: () => void
   handleRemove: (index?: number) => void
 }
@@ -28,6 +30,7 @@ export const defaultVolume: NewVolumeField = {
 export function useAddVolumes({
   name = 'volumes',
   control,
+  ...rest
 }: UseAddVolumesProps): UseAddVolumesReturn {
   const volumesCtrl = useFieldArray({
     control,
@@ -46,6 +49,7 @@ export function useAddVolumes({
     name,
     control,
     fields,
+    ...rest,
     handleAdd,
     handleRemove,
   }

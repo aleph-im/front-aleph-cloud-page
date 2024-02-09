@@ -208,13 +208,6 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   static async getCost(props: VolumeCostProps): Promise<VolumeCost> {
-    props = {
-      ...props,
-      volumes: props.volumes?.filter(
-        (volume) => !(volume as VolumeField).isFake,
-      ),
-    }
-
     const perVolumeCost = await this.getPerVolumeCost(props)
 
     const totalCost = Object.values(perVolumeCost).reduce(
