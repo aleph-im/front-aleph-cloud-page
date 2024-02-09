@@ -16,6 +16,7 @@ import {
 } from '@/hooks/form/useAddVolume'
 import { VolumeType } from '@/domain/volume'
 import HiddenFileInput from '@/components/common/HiddenFileInput'
+import { convertByteUnits } from '@/helpers/utils'
 
 const RemoveVolume = memo(({ onRemove: handleRemove }: RemoveVolumeProps) => {
   return (
@@ -213,6 +214,12 @@ AddPersistentVolume.displayName = 'AddPersistentVolume'
 
 export const InstanceSystemVolume = memo(
   ({ size }: InstanceSystemVolumeProps) => {
+    const sizeValue = convertByteUnits(size, {
+      from: 'MiB',
+      to: 'GiB',
+      displayUnit: false,
+    })
+
     return (
       <>
         <p tw="mb-6">
@@ -249,7 +256,7 @@ export const InstanceSystemVolume = memo(
               type="number"
               label="Size (GB)"
               placeholder="0"
-              value={size}
+              value={sizeValue}
             />
           </div>
         </div>
