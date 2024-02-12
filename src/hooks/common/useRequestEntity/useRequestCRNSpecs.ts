@@ -26,7 +26,7 @@ export function useRequestCRNSpecs({
 
       await Promise.allSettled(
         nodes
-          .filter((node) => nodeManager.isStreamPaymentSupported(node))
+          .filter((node) => !nodeManager.isStreamPaymentNotSupported(node))
           .map(async (node) => {
             const nodeSpecs = await nodeManager.getCRNspecs(node)
 

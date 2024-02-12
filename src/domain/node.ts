@@ -226,6 +226,14 @@ export type CRNIps = {
   vm: boolean
 }
 
+export enum StreamNotSupportedIssue {
+  Valid = 0,
+  IPV6 = 1,
+  MinSpecs = 2,
+  Version = 3,
+  RewardAddress = 4,
+}
+
 // @todo: Refactor (create a domain npm package and move this there)
 export class NodeManager {
   constructor(
@@ -441,11 +449,13 @@ export class NodeManager {
     return getVersionNumber(node.metricsData?.version)
   }
 
-  isStreamPaymentSupported(node: CRN): boolean {
-    return (
-      !!node.stream_reward &&
-      this.getNodeVersionNumber(node) >= getVersionNumber('v0.4.0')
-    )
+  isStreamPaymentNotSupported(node: CRN): StreamNotSupportedIssue {
+    if (!node.stream_reward) return StreamNotSupportedIssue.RewardAddress
+
+    if (this.getNodeVersionNumber(node) < getVersionNumber('v0.4.0'))
+      return StreamNotSupportedIssue.Version
+
+    return StreamNotSupportedIssue.Valid
   }
 
   protected parseResourceNodes(crns: CRN[]): CRN[] {

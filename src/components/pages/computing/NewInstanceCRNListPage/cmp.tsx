@@ -8,6 +8,7 @@ import {
   NodeVersion,
   NoisyContainer,
   TableColumn,
+  Tooltip,
 } from '@aleph-front/core'
 import { PaymentMethod, apiServer } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
@@ -23,9 +24,10 @@ import Price from '@/components/common/Price'
 import { PageProps } from '@/types/types'
 import { CRNItem } from './types'
 import CheckoutSummaryFooter from '@/components/form/CheckoutSummaryFooter'
+import { StreamNotSupportedIssue } from '@/domain/node'
 
 export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
-  const { nodes, lastVersion, specs, ips } = useNewInstanceCRNListPage()
+  const { nodes, lastVersion, specs, nodesIssues } = useNewInstanceCRNListPage()
 
   const theme = useTheme()
 
@@ -118,10 +120,68 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
         label: '',
         align: 'right',
         width: '100%',
+        cellProps: () => ({ css: { opacity: '1 !important' } }),
         render: (node) => {
           return (
             <div tw="flex gap-3 justify-end">
-              {node.isLoading ? (
+              {node.issue ? (
+                <Tooltip
+                  my="bottom-right"
+                  at="top-left"
+                  content={
+                    <div className="tp-body1 fs-12">
+                      <div className="tp-body3 fs-16">
+                        Why are some nodes unavailable?
+                      </div>
+                      <div>
+                        A node may be grayed out and not selectable for the
+                        following reasons:
+                      </div>
+                      <ul tw="my-4 pl-6 list-disc">
+                        {node.issue === StreamNotSupportedIssue.IPV6 && (
+                          <li>
+                            <strong>IPv6 Egress Issue:</strong> The node&apos;s
+                            compute resource (CRN) is unable to establish an
+                            IPv6 egress connection.
+                          </li>
+                        )}
+                        {node.issue === StreamNotSupportedIssue.MinSpecs && (
+                          <li>
+                            <strong>Minimum Specifications:</strong> The node
+                            does not meet the required minimum hardware or
+                            software specifications.
+                          </li>
+                        )}
+                        {node.issue === StreamNotSupportedIssue.Version && (
+                          <li>
+                            <strong>Version Compatibility:</strong> Only nodes
+                            with version 0.4.0 or higher are eligible for
+                            selection.
+                          </li>
+                        )}
+                        {node.issue ===
+                          StreamNotSupportedIssue.RewardAddress && (
+                          <li>
+                            <strong>Stream Reward Configuration:</strong> The
+                            node lacks a configured stream reward address, which
+                            is necessary for operation.
+                          </li>
+                        )}
+                      </ul>
+                      <div>
+                        Please select from the available nodes that meet all the
+                        necessary criteria for a smooth and efficient setup.
+                      </div>
+                    </div>
+                  }
+                >
+                  <Icon
+                    name="exclamation-circle"
+                    color={theme.color.text}
+                    tw="px-5 cursor-help"
+                  />
+                </Tooltip>
+              ) : node.isLoading ? (
                 <Button
                   size="md"
                   color="main2"
@@ -169,18 +229,19 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
       const { hash } = node
 
       const isActive = hash === selected
-
-      const nodeSpecs = specs[hash]
-      const nodeIps = ips[hash]
-      const isLoading = !nodeSpecs || !nodeIps
+      const issue = nodesIssues?.[hash]
+      const isLoading = issue === undefined
+      const disabled = !isLoading && !!issue
 
       return {
         ...node,
         isActive,
         isLoading,
+        disabled,
+        issue,
       }
     })
-  }, [ips, nodes, selected, specs])
+  }, [nodes, nodesIssues, selected])
 
   const handleRowProps = useCallback(
     (row: CRNItem) => ({

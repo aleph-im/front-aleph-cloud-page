@@ -8,21 +8,19 @@ import {
   useRequestCRNSpecs,
 } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import {
-  InstanceSpecsField,
   getDefaultSpecsOptions,
   validateMinNodeSpecs,
 } from '@/hooks/form/useSelectInstanceSpecs'
-import {
-  UseRequestCRNIpsReturn,
-  useRequestCRNIps,
-} from '@/hooks/common/useRequestEntity/useRequestCRNIps'
+import { useRequestCRNIps } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { PaymentMethod } from '@/helpers/constants'
+import { StreamNotSupportedIssue } from '@/domain/node'
+
+export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
 export type UseNewInstanceCRNListPage = UseRequestCRNsReturn &
-  UseRequestCRNSpecsReturn &
-  UseRequestCRNIpsReturn & {
-    minSpecs: InstanceSpecsField
+  UseRequestCRNSpecsReturn & {
+    nodesIssues?: StreamSupportedIssues
   }
 
 export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
@@ -36,38 +34,64 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
     return min
   }, [])
 
-  const filteredNodes = useMemo(() => {
-    return nodes
-      ?.filter((node) => nodeManager.isStreamPaymentSupported(node))
-      ?.filter((node) => {
-        const nodeSpecs = specs[node.hash]
-        const nodeIps = ips[node.hash]
+  const nodesIssues = useMemo(() => {
+    if (!nodes) return
 
-        if (nodeSpecs) {
-          const validSpecs =
-            nodeSpecs?.data && validateMinNodeSpecs(minSpecs, nodeSpecs.data)
+    return nodes.reduce((ac, node) => {
+      const issue = nodeManager.isStreamPaymentNotSupported(node)
 
-          if (!validSpecs) return false
+      if (issue) {
+        ac[node.hash] = issue
+        return ac
+      }
+
+      const nodeSpecs = specs[node.hash]?.data
+
+      if (nodeSpecs) {
+        const validSpecs = validateMinNodeSpecs(minSpecs, nodeSpecs)
+
+        if (!validSpecs) {
+          ac[node.hash] = StreamNotSupportedIssue.MinSpecs
+          return ac
         }
+      }
 
-        if (nodeIps) {
-          const validIp = !!nodeIps?.data?.vm
+      const nodeIps = ips[node.hash]?.data
 
-          if (!validIp) return false
+      if (nodeIps) {
+        const validIp = !!nodeIps.vm
+
+        if (!validIp) {
+          ac[node.hash] = StreamNotSupportedIssue.IPV6
+          return ac
         }
+      }
 
-        return true
-      })
+      ac[node.hash] = StreamNotSupportedIssue.Valid
+      return ac
+    }, {} as StreamSupportedIssues)
   }, [nodes, nodeManager, specs, ips, minSpecs])
+
+  const sortedNodes = useMemo(() => {
+    if (!nodes) return
+
+    return nodes.sort((a, b) => {
+      const issueA = nodesIssues?.[a.hash]
+      const issueB = nodesIssues?.[b.hash]
+
+      if (issueA && issueB) return 0
+      if (issueA) return 1
+      return -1
+    })
+  }, [nodes, nodesIssues])
 
   const loading = loading1 || loading2
 
   return {
-    nodes: filteredNodes,
+    nodes: sortedNodes,
     lastVersion,
     specs,
     loading,
-    minSpecs,
-    ips,
+    nodesIssues,
   }
 }
