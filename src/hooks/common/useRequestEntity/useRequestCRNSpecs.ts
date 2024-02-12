@@ -28,6 +28,8 @@ export function useRequestCRNSpecs({
         nodes
           .filter((node) => !nodeManager.isStreamPaymentNotSupported(node))
           .map(async (node) => {
+            if (specs[node.hash]) return
+
             const nodeSpecs = await nodeManager.getCRNspecs(node)
 
             setSpecs((prev) => ({
@@ -45,7 +47,7 @@ export function useRequestCRNSpecs({
     }
 
     load()
-  }, [nodeManager, nodes])
+  }, [nodeManager, nodes, specs])
 
   // const { data: nodeSpecs } = useLocalRequest({
   //   doRequest: () => nodeManager.getCRNSpecs(nodes || []),

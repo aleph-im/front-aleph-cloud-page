@@ -2,12 +2,14 @@ import { KeyboardEvent, useCallback, useMemo, useState } from 'react'
 import Image from 'next/image'
 import {
   Button,
+  Checkbox,
   Icon,
   NodeName,
   NodeScore,
   NodeVersion,
   NoisyContainer,
   TableColumn,
+  TextInput,
   Tooltip,
 } from '@aleph-front/core'
 import { PaymentMethod, apiServer } from '@/helpers/constants'
@@ -27,7 +29,16 @@ import CheckoutSummaryFooter from '@/components/form/CheckoutSummaryFooter'
 import { StreamNotSupportedIssue } from '@/domain/node'
 
 export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
-  const { nodes, lastVersion, specs, nodesIssues } = useNewInstanceCRNListPage()
+  const {
+    lastVersion,
+    specs,
+    nodesIssues,
+    filter,
+    filteredNodes,
+    validPAYGNodesOnly,
+    handleFilterChange,
+    handleValidPAYGNodesOnlyChange,
+  } = useNewInstanceCRNListPage()
 
   const theme = useTheme()
 
@@ -223,9 +234,9 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
   const [selected, setSelected] = useState<string>()
 
   const data: CRNItem[] = useMemo(() => {
-    if (!nodes) return []
+    if (!filteredNodes) return []
 
-    return nodes.map((node) => {
+    return filteredNodes.map((node) => {
       const { hash } = node
 
       const isActive = hash === selected
@@ -241,7 +252,7 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
         issue,
       }
     })
-  }, [nodes, nodesIssues, selected])
+  }, [filteredNodes, nodesIssues, selected])
 
   const handleRowProps = useCallback(
     (row: CRNItem) => ({
@@ -275,9 +286,28 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="relative px-0 pt-20 pb-6 md:py-10">
-        <SpinnerOverlay show={!nodes} />
+        <SpinnerOverlay show={!filteredNodes} />
         <Container $variant="xl">
           <NoisyContainer>
+            <div tw="flex mb-8 gap-10 justify-between flex-wrap flex-col md:flex-row items-stretch md:items-center">
+              <div tw="flex-1">
+                <TextInput
+                  value={filter}
+                  name="filter-crn"
+                  placeholder="Search CRN"
+                  onChange={handleFilterChange}
+                  icon={<Icon name="search" />}
+                />
+              </div>
+              <div>
+                <Checkbox
+                  label="Ready for PAYG"
+                  checked={validPAYGNodesOnly}
+                  onChange={handleValidPAYGNodesOnlyChange}
+                  size="xs"
+                />
+              </div>
+            </div>
             <NodesTable
               columns={columns}
               data={data}
@@ -306,6 +336,7 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
           totalCost: 0.11,
           shouldHide: false,
           thresholdOffset: 0,
+          deps: [data],
         }}
       />
     </>

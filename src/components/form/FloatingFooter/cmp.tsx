@@ -14,6 +14,7 @@ export type FloatingFooterProps = {
   shouldHide?: boolean
   offset?: number
   thresholdOffset?: number
+  deps?: any[]
 }
 
 export const FloatingFooter = ({
@@ -22,6 +23,7 @@ export const FloatingFooter = ({
   offset = 0,
   thresholdOffset = offset,
   shouldHide = true,
+  deps: depsProp = [],
 }: FloatingFooterProps) => {
   const contentRef = useRef<HTMLDivElement>(null)
   const thresholdRef = useRef<HTMLDivElement>(null)
@@ -32,7 +34,7 @@ export const FloatingFooter = ({
     debounceDelay: 0,
   })
 
-  const deps = [windowSize, scrollY]
+  const deps = [windowSize, scrollY, ...depsProp]
 
   const { bounds: thresholdBounds } = useBounds({ ref: thresholdRef, deps })
   const { bounds: containerBounds } = useBounds({ ref: containerRef, deps })

@@ -4,7 +4,7 @@ import { FloatingFooterProps } from '../FloatingFooter/cmp'
 
 export type CheckoutSummaryFooterProps = Pick<
   FloatingFooterProps,
-  'shouldHide' | 'thresholdOffset'
+  'shouldHide' | 'thresholdOffset' | 'deps'
 > & {
   paymentMethod: PaymentMethod
   submitButton?: ReactNode

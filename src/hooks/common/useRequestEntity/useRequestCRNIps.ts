@@ -28,6 +28,8 @@ export function useRequestCRNIps({
         nodes
           .filter((node) => !nodeManager.isStreamPaymentNotSupported(node))
           .map(async (node) => {
+            if (ips[node.hash]) return
+
             const nodeSpecs = await nodeManager.getCRNips(node)
 
             setIps((prev) => ({
@@ -45,7 +47,7 @@ export function useRequestCRNIps({
     }
 
     load()
-  }, [nodeManager, nodes])
+  }, [ips, nodeManager, nodes])
 
   // const { data: nodeSpecs } = useLocalRequest({
   //   doRequest: () => nodeManager.getCRNIps(nodes || []),

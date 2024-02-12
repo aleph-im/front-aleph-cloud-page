@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import {
   UseRequestCRNsReturn,
   useRequestCRNs,
@@ -14,20 +14,65 @@ import {
 import { useRequestCRNIps } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { PaymentMethod } from '@/helpers/constants'
-import { StreamNotSupportedIssue } from '@/domain/node'
+import { CRN, StreamNotSupportedIssue } from '@/domain/node'
+import { useDebounceState } from '@aleph-front/core'
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
 export type UseNewInstanceCRNListPage = UseRequestCRNsReturn &
   UseRequestCRNSpecsReturn & {
     nodesIssues?: StreamSupportedIssues
+    filteredNodes?: CRN[]
+    filter: string
+    validPAYGNodesOnly: boolean
+    handleFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
+    handleValidPAYGNodesOnlyChange: (e: ChangeEvent<HTMLInputElement>) => void
   }
 
 export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
   const { nodes, lastVersion } = useRequestCRNs({})
-  const { specs, loading: loading1 } = useRequestCRNSpecs({ nodes })
-  const { ips, loading: loading2 } = useRequestCRNIps({ nodes })
   const nodeManager = useNodeManager()
+
+  // -----------------------------
+
+  const [filter, setFilter] = useState('')
+
+  const debouncedFilter = useDebounceState(filter, 200)
+
+  const handleFilterChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const filter = e.target.value
+    setFilter(filter)
+  }, [])
+
+  // -----------------------------
+
+  const filterNodes = useCallback(
+    (query: string, nodes?: CRN[]): CRN[] | undefined => {
+      if (!nodes) return
+      if (!query) return nodes
+
+      return nodes.filter((node) =>
+        node.name?.toLowerCase().includes(query.toLowerCase()),
+      )
+    },
+    [],
+  )
+
+  const baseFilteredNodes = useMemo(
+    () => filterNodes(debouncedFilter, nodes),
+    [filterNodes, debouncedFilter, nodes],
+  )
+
+  // -----------------------------
+
+  const { specs, loading: loading1 } = useRequestCRNSpecs({
+    nodes: baseFilteredNodes,
+  })
+  const { ips, loading: loading2 } = useRequestCRNIps({
+    nodes: baseFilteredNodes,
+  })
+
+  // -----------------------------
 
   const minSpecs = useMemo(() => {
     const [min] = getDefaultSpecsOptions(true, PaymentMethod.Stream)
@@ -35,9 +80,9 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
   }, [])
 
   const nodesIssues = useMemo(() => {
-    if (!nodes) return
+    if (!baseFilteredNodes) return
 
-    return nodes.reduce((ac, node) => {
+    return baseFilteredNodes.reduce((ac, node) => {
       const issue = nodeManager.isStreamPaymentNotSupported(node)
 
       if (issue) {
@@ -70,12 +115,36 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
       ac[node.hash] = StreamNotSupportedIssue.Valid
       return ac
     }, {} as StreamSupportedIssues)
-  }, [nodes, nodeManager, specs, ips, minSpecs])
+  }, [baseFilteredNodes, nodeManager, specs, ips, minSpecs])
+
+  // -----------------------------
+
+  const [validPAYGNodesOnly, setValidPAYGNodesOnly] = useState<boolean>(true)
+
+  const handleValidPAYGNodesOnlyChange = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const show = e.target.checked
+      setValidPAYGNodesOnly(show)
+    },
+    [],
+  )
+
+  const validPAYGNodes = useMemo(() => {
+    if (!baseFilteredNodes) return baseFilteredNodes
+    if (!nodesIssues) return baseFilteredNodes
+
+    return baseFilteredNodes.filter((node) => !nodesIssues[node.hash])
+  }, [baseFilteredNodes, nodesIssues])
+
+  const filteredNodes = useMemo(() => {
+    if (!validPAYGNodesOnly) return baseFilteredNodes
+    return validPAYGNodes
+  }, [validPAYGNodesOnly, baseFilteredNodes, validPAYGNodes])
 
   const sortedNodes = useMemo(() => {
-    if (!nodes) return
+    if (!filteredNodes) return
 
-    return nodes.sort((a, b) => {
+    return filteredNodes.sort((a, b) => {
       const issueA = nodesIssues?.[a.hash]
       const issueB = nodesIssues?.[b.hash]
 
@@ -83,15 +152,20 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
       if (issueA) return 1
       return -1
     })
-  }, [nodes, nodesIssues])
+  }, [filteredNodes, nodesIssues])
 
   const loading = loading1 || loading2
 
   return {
-    nodes: sortedNodes,
+    nodes,
     lastVersion,
     specs,
     loading,
     nodesIssues,
+    filteredNodes: sortedNodes,
+    filter,
+    validPAYGNodesOnly,
+    handleFilterChange,
+    handleValidPAYGNodesOnlyChange,
   }
 }
