@@ -188,15 +188,6 @@ export function useHeader(): UseHeaderReturn {
     [connect, disconnect, isConnected, router, setkeepAccountAlive],
   )
 
-  useEffect(() => {
-    ;(async () => {
-      if (!account && keepAccountAlive) {
-        enableConnection()
-      }
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, keepAccountAlive])
-
   // --------------------
 
   const provider = () => {
