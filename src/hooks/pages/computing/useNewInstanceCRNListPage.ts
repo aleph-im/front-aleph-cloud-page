@@ -130,7 +130,7 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
   )
 
   const validPAYGNodes = useMemo(() => {
-    if (!baseFilteredNodes) return baseFilteredNodes
+    if (!baseFilteredNodes) return
     if (!nodesIssues) return baseFilteredNodes
 
     return baseFilteredNodes.filter((node) => !nodesIssues[node.hash])
