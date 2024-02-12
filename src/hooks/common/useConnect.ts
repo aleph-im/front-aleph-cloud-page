@@ -92,6 +92,7 @@ export function useConnect(): UseConnectReturn {
       try {
         account = await web3Connect(chain, window.ethereum)
         setSelectedNetwork(chain)
+        getBalance(account)
         console.log('Account connected after switching network: ', account)
       } catch (err) {
         const e = err as Error
