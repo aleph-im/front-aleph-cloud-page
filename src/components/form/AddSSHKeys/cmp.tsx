@@ -42,7 +42,7 @@ const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
               required
               label={`Key`}
               placeholder="AAAAB3NzaC1yc2EAAAAB ... B3NzaaC1=="
-              disabled={!isNew}
+              dataView={!isNew}
             />
           </div>
           <div tw="md:w-4/12">
@@ -51,7 +51,7 @@ const SSHKeyItem = React.memo((props: SSHKeyItemProps) => {
               {...labelCtrl.fieldState}
               label={`Label`}
               placeholder="me@email.com"
-              disabled={!isNew}
+              dataView={!isNew}
             />
           </div>
           {allowRemove && (
