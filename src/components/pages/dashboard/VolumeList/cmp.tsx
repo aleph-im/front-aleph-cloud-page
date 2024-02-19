@@ -6,7 +6,7 @@ import {
 } from '@/helpers/utils'
 import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
 import React from 'react'
-import { GrayText } from '../common'
+import { Text } from '../common'
 import IconText from '@/components/common/IconText'
 
 export type VolumeListProps = {
@@ -24,18 +24,18 @@ export const VolumeList = React.memo(
               <div tw="my-5">
                 <div className="tp-info text-main0">PERSISTENT VOLUME</div>
                 <div>
-                  <GrayText className="fs-10 tp-body1">
+                  <Text className="fs-10 tp-body1">
                     {humanReadableSize(volume.size_mib, 'MiB')}
-                  </GrayText>
+                  </Text>
                 </div>
               </div>
             ) : isVolumeEphemeral(volume) ? (
               <div tw="my-5">
                 <div className="tp-info text-main0">EPHEMERAL VOLUME</div>
                 <div>
-                  <GrayText className="fs-10 tp-body1">
+                  <Text className="fs-10 tp-body1">
                     {humanReadableSize(volume.size_mib, 'MiB')}
-                  </GrayText>
+                  </Text>
                 </div>
               </div>
             ) : (

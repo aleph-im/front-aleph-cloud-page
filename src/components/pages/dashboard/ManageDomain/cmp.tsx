@@ -4,7 +4,7 @@ import { EntityTypeName, AddDomainTarget } from '@/helpers/constants'
 import { BulletItem, Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageDomain } from '@/hooks/pages/solutions/manage/useManageDomain'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
-import { Container, GrayText, Separator } from '../common'
+import { Container, Text, Separator } from '../common'
 import ButtonLink from '@/components/common/ButtonLink'
 
 export default function ManageDomain() {
@@ -63,7 +63,7 @@ export default function ManageDomain() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
+              <Tag variant="accent" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -76,7 +76,7 @@ export default function ManageDomain() {
                     referrerPolicy="no-referrer"
                   >
                     <IconText iconName="square-up-right">
-                      <GrayText>{domain.name}</GrayText>
+                      <Text>{domain.name}</Text>
                     </IconText>
                   </a>
                 </div>
@@ -89,7 +89,7 @@ export default function ManageDomain() {
               <div tw="my-5">
                 <div className="tp-info text-main0">TARGET</div>
                 <div>
-                  <GrayText>{domain.target}</GrayText>
+                  <Text>{domain.target}</Text>
                 </div>
               </div>
             )}
@@ -98,7 +98,7 @@ export default function ManageDomain() {
               <div className="tp-info text-main0">REF</div>
               <div>
                 <IconText iconName="copy" onClick={handleCopyRef}>
-                  <GrayText>{domain.ref}</GrayText>
+                  <Text>{domain.ref}</Text>
                 </IconText>
               </div>
             </div>
@@ -107,13 +107,13 @@ export default function ManageDomain() {
               <>
                 <Separator />
 
-                <TextGradient type="body3" as="h7" color="main0">
+                <TextGradient type="h7" as="h2" color="main0">
                   Status
                 </TextGradient>
 
                 <div tw="my-5">
                   <div className="tp-info text-main0">STATUS</div>
-                  <GrayText>
+                  <Text>
                     <div tw="flex mt-2">
                       <BulletItem
                         kind={status.status ? 'success' : 'warning'}
@@ -123,7 +123,7 @@ export default function ManageDomain() {
                         ? 'Properly configured'
                         : 'Manual configuration is required'}
                     </div>
-                  </GrayText>
+                  </Text>
                 </div>
 
                 {(!status.tasks_status.cname ||
@@ -131,7 +131,7 @@ export default function ManageDomain() {
                   <>
                     <div tw="my-5">
                       <div className="tp-info text-main0">PENDING STEPS</div>
-                      <GrayText>
+                      <Text>
                         <div tw="flex mt-2">
                           <BulletItem
                             kind={
@@ -162,9 +162,9 @@ export default function ManageDomain() {
                             )}
                           </div>
                         </div>
-                      </GrayText>
+                      </Text>
                       {domain.target == AddDomainTarget.IPFS && (
-                        <GrayText>
+                        <Text>
                           <div tw="flex mt-2">
                             <BulletItem
                               kind={
@@ -185,9 +185,9 @@ export default function ManageDomain() {
                               </span>
                             </div>
                           </div>
-                        </GrayText>
+                        </Text>
                       )}
-                      <GrayText>
+                      <Text>
                         <div tw="flex mt-2">
                           <BulletItem
                             kind={
@@ -208,15 +208,15 @@ export default function ManageDomain() {
                             </span>
                           </div>
                         </div>
-                      </GrayText>
+                      </Text>
                     </div>
 
                     <div tw="my-5">
                       <div className="tp-info text-main0">FINAL STEP</div>
-                      <GrayText>
+                      <Text>
                         After configuring the domain records you can retry to
                         link them again here
-                      </GrayText>
+                      </Text>
                     </div>
 
                     <div tw="my-5">
@@ -239,24 +239,24 @@ export default function ManageDomain() {
               <>
                 <Separator />
 
-                <TextGradient type="body3" as="h7" color="main0">
+                <TextGradient type="h7" as="h2" color="main0">
                   Linked {domain.target}
                 </TextGradient>
 
                 <div tw="my-5">
                   <div className="tp-info text-main0">Type</div>
                   <div>
-                    <GrayText>{EntityTypeName[refEntity.type]}</GrayText>
+                    <Text>{EntityTypeName[refEntity.type]}</Text>
                   </div>
                 </div>
 
                 <div tw="my-5">
                   <div className="tp-info text-main0">NAME</div>
                   <div>
-                    <GrayText>
+                    <Text>
                       {(refEntity?.metadata?.name as string) ||
                         ellipseAddress(refEntity.id)}
-                    </GrayText>
+                    </Text>
                   </div>
                 </div>
 
@@ -270,7 +270,7 @@ export default function ManageDomain() {
                       referrerPolicy="no-referrer"
                     >
                       <IconText iconName="square-up-right">
-                        <GrayText>{ellipseText(refEntity.url, 80)}</GrayText>
+                        <Text>{ellipseText(refEntity.url, 80)}</Text>
                       </IconText>
                     </a>
                   </div>

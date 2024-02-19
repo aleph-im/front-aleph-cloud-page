@@ -5,7 +5,7 @@ import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag } from '@aleph-front/core'
 import { useManageVolume } from '@/hooks/pages/solutions/manage/useManageVolume'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
-import { Container, GrayText, Separator } from '../common'
+import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
@@ -79,7 +79,7 @@ export default function ManageVolume() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
+              <Tag variant="accent" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -102,7 +102,7 @@ export default function ManageVolume() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <GrayText>{ellipseText(volume.url, 80)}</GrayText>
+                    <Text>{ellipseText(volume.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -112,16 +112,16 @@ export default function ManageVolume() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
-                  <GrayText className="fs-10 tp-body1">
+                  <Text className="fs-10 tp-body1">
                     {humanReadableSize(volume.size, 'MiB')}
-                  </GrayText>
+                  </Text>
                 </div>
               </div>
 
               <div tw="mr-5">
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <GrayText className="fs-10 tp-body1">{volume.date}</GrayText>
+                  <Text className="fs-10 tp-body1">{volume.date}</Text>
                 </div>
               </div>
             </div>
