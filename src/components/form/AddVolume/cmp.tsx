@@ -232,31 +232,31 @@ export const InstanceSystemVolume = memo(
             <TextInput
               name="system_volume_name"
               required
-              disabled
               label="Volume name"
               placeholder="Redis volume"
               value="System Volume"
+              dataView
             />
           </div>
           <div tw="mt-4">
             <TextInput
               name="system_volume_mount"
               required
-              disabled
               label="Mount"
               placeholder="/mount/opt"
               value="/"
+              dataView
             />
           </div>
           <div tw="mt-4">
             <TextInput
               name="system_volume_size"
               required
-              disabled
               type="number"
               label="Size (GB)"
               placeholder="0"
               value={sizeValue}
+              dataView
             />
           </div>
         </div>

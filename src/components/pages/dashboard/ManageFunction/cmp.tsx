@@ -5,7 +5,7 @@ import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageFunction } from '@/hooks/pages/solutions/manage/useManageFunction'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
-import { Container, GrayText, Separator } from '../common'
+import { Container, Text, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
@@ -81,7 +81,7 @@ export default function ManageFunction() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
+              <Tag variant="accent" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -104,7 +104,7 @@ export default function ManageFunction() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <GrayText>{ellipseText(func.url, 80)}</GrayText>
+                    <Text>{ellipseText(func.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -120,7 +120,7 @@ export default function ManageFunction() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <GrayText>{ellipseText(func.urlVM, 80)}</GrayText>
+                    <Text>{ellipseText(func.urlVM, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -130,16 +130,16 @@ export default function ManageFunction() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
-                  <GrayText className="fs-10 tp-body1">
+                  <Text className="fs-10 tp-body1">
                     {humanReadableSize(func.size, 'MiB')}
-                  </GrayText>
+                  </Text>
                 </div>
               </div>
 
               <div tw="mr-5">
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <GrayText className="fs-10 tp-body1">{func.date}</GrayText>
+                  <Text className="fs-10 tp-body1">{func.date}</Text>
                 </div>
               </div>
             </div>
@@ -148,7 +148,7 @@ export default function ManageFunction() {
               <>
                 <Separator />
 
-                <TextGradient type="body3" as="h7" color="main0">
+                <TextGradient type="h7" as="h2" color="main0">
                   Linked storage
                 </TextGradient>
 

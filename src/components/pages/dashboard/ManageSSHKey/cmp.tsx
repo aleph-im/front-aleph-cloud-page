@@ -5,7 +5,7 @@ import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag } from '@aleph-front/core'
 import { useManageSSHKey } from '@/hooks/pages/solutions/manage/useManageSSHKey'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
-import { Container, GrayText, Separator } from '../common'
+import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
@@ -67,7 +67,7 @@ export default function ManageSSHKey() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
+              <Tag variant="accent" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -85,7 +85,7 @@ export default function ManageSSHKey() {
                 <div className="tp-info text-main0">LABEL</div>
                 <div>
                   <IconText iconName="copy" onClick={handleCopyLabel}>
-                    <GrayText>{sshKey.label}</GrayText>
+                    <Text>{sshKey.label}</Text>
                   </IconText>
                 </div>
               </div>
@@ -101,7 +101,7 @@ export default function ManageSSHKey() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <GrayText>{ellipseText(sshKey.url, 80)}</GrayText>
+                    <Text>{ellipseText(sshKey.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -110,7 +110,7 @@ export default function ManageSSHKey() {
             <div tw="my-5">
               <div className="tp-info text-main0">CREATED ON</div>
               <div>
-                <GrayText className="fs-10 tp-body1">{sshKey.date}</GrayText>
+                <Text className="fs-10 tp-body1">{sshKey.date}</Text>
               </div>
             </div>
           </NoisyContainer>

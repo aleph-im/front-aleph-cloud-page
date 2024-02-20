@@ -5,7 +5,7 @@ import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
 import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
-import { Container, GrayText, Separator } from '../common'
+import { Container, Text, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
@@ -84,7 +84,7 @@ export default function ManageInstance() {
 
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
-              <Tag className="tp-body2 fs-16" tw="mr-4 whitespace-nowrap">
+              <Tag variant="accent" tw="mr-4 whitespace-nowrap">
                 {typeName}
               </Tag>
               <div tw="flex-auto">
@@ -101,20 +101,20 @@ export default function ManageInstance() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">CORES</div>
                 <div>
-                  <GrayText>{instance.resources.vcpus} x86 64bit</GrayText>
+                  <Text>{instance.resources.vcpus} x86 64bit</Text>
                 </div>
               </div>
 
               <div tw="mr-5">
                 <div className="tp-info text-main0">RAM</div>
                 <div>
-                  <GrayText>
+                  <Text>
                     {convertByteUnits(instance.resources.memory, {
                       from: 'MiB',
                       to: 'GiB',
                       displayUnit: true,
                     })}
-                  </GrayText>
+                  </Text>
                 </div>
               </div>
             </div>
@@ -129,7 +129,7 @@ export default function ManageInstance() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <GrayText>{ellipseText(instance.url, 80)}</GrayText>
+                    <Text>{ellipseText(instance.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -138,7 +138,7 @@ export default function ManageInstance() {
             <Separator />
 
             <div tw="my-5">
-              <TextGradient type="body3" as="h7" color="main0">
+              <TextGradient type="h7" as="h2" color="main0">
                 Connection methods
               </TextGradient>
 
@@ -147,7 +147,7 @@ export default function ManageInstance() {
                 <div>
                   {status ? (
                     <IconText iconName="copy" onClick={handleCopyConnect}>
-                      <GrayText>&gt;_ ssh root@{status.vm_ipv6}</GrayText>
+                      <Text>&gt;_ ssh root@{status.vm_ipv6}</Text>
                     </IconText>
                   ) : (
                     <div tw="flex items-end">
@@ -169,7 +169,7 @@ export default function ManageInstance() {
                 <div>
                   {status && (
                     <IconText iconName="copy" onClick={handleCopyIpv6}>
-                      <GrayText>{status.vm_ipv6}</GrayText>
+                      <Text>{status.vm_ipv6}</Text>
                     </IconText>
                   )}
                 </div>
@@ -177,7 +177,7 @@ export default function ManageInstance() {
             </div>
 
             <div tw="my-5">
-              <TextGradient type="body3" as="h7" color="main0">
+              <TextGradient type="h7" as="h2" color="main0">
                 Accessible for
               </TextGradient>
 
@@ -196,7 +196,7 @@ export default function ManageInstance() {
                           referrerPolicy="no-referrer"
                         >
                           <IconText iconName="square-up-right">
-                            <GrayText>{key.label}</GrayText>
+                            <Text>{key.label}</Text>
                           </IconText>
                         </Link>
                       </div>
@@ -209,14 +209,14 @@ export default function ManageInstance() {
               <>
                 <Separator />
 
-                <TextGradient type="h6" color="main0">
+                <TextGradient type="h7" as="h2" color="main0">
                   Current CRN
                 </TextGradient>
 
                 <div tw="my-5">
                   <div className="tp-info text-main0">NAME</div>
                   <div>
-                    <GrayText>{status.node.node_id}</GrayText>
+                    <Text>{status.node.node_id}</Text>
                   </div>
                 </div>
 
@@ -230,7 +230,7 @@ export default function ManageInstance() {
                       referrerPolicy="no-referrer"
                     >
                       <IconText iconName="square-up-right">
-                        <GrayText>{ellipseText(status.node.url, 80)}</GrayText>
+                        <Text>{ellipseText(status.node.url, 80)}</Text>
                       </IconText>
                     </a>
                   </div>
@@ -242,7 +242,7 @@ export default function ManageInstance() {
               <>
                 <Separator />
 
-                <TextGradient type="h6" color="main0">
+                <TextGradient type="h7" as="h2" color="main0">
                   Linked storage
                 </TextGradient>
 

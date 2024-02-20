@@ -4,36 +4,23 @@ import {
   humanReadableSize,
   ellipseText,
 } from '@/helpers/utils'
-import {
-  Label,
-  StyledArrowIcon,
-  StyledHoldingSummaryLine,
-  StyledSeparator,
-} from './styles'
+import { Label, StyledArrowIcon, StyledHoldingSummaryLine } from './styles'
 import {
   CheckoutSummaryDomainLineProps,
   CheckoutSummaryProps,
   CheckoutSummarySpecsLineProps,
   CheckoutSummaryVolumeLineProps,
 } from './types'
-import {
-  cloneElement,
-  isValidElement,
-  memo,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import React from 'react'
 import { EntityType, EntityTypeName, PaymentMethod } from '@/helpers/constants'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import InfoTooltipButton from '../../common/InfoTooltipButton'
 import Container from '@/components/common/CenteredContainer'
-import { Button, ButtonProps, TextGradient, TextInput } from '@aleph-front/core'
+import { TextGradient, TextInput } from '@aleph-front/core'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import Price from '@/components/common/Price'
-import FloatingFooter from '../FloatingFooter'
 import CheckoutSummaryFooter from '../CheckoutSummaryFooter'
 
 const CheckoutSummarySpecsLine = ({
@@ -395,10 +382,10 @@ CheckoutSummaryProps) => {
                   <div tw="flex-1">
                     <TextInput
                       tabIndex={-1}
-                      tw="pointer-events-none"
                       name="sender"
                       label="Sender"
                       value={ellipseText(address, 12, 10)}
+                      dataView
                     />
                   </div>
                   <div tw="self-center md:self-end rotate-90 md:rotate-0 pl-9 md:pl-0">
@@ -407,10 +394,10 @@ CheckoutSummaryProps) => {
                   <div tw="flex-1">
                     <TextInput
                       tabIndex={-1}
-                      tw="pointer-events-none"
                       name="receiver"
                       label="Receiver"
                       value={ellipseText(receiverAddress, 12, 10)}
+                      dataView
                     />
                   </div>
                 </div>
