@@ -7,17 +7,17 @@ import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { useCallback } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
 import Provider from '@walletconnect/ethereum-provider'
+import { Providers } from '../pages/useHeader'
 
 export type UseConnectReturn = {
-  connect: (chain?: Chain, provider?: any) => Promise<Account | undefined>
-  disconnect: () => Promise<void>
+  connect: (chain?: Chain, provider?: Providers) => Promise<Account | undefined>
+  disconnect: (provider: Providers) => Promise<void>
   isConnected: boolean
   account: Account | undefined
   tryReconnect: () => Promise<void>
   switchNetwork: (chain: Chain) => Promise<Account | undefined>
   selectedNetwork: Chain
 }
-
 type NotificationCardVariant = 'error' | 'success' | 'warning'
 
 export function useConnect(): UseConnectReturn {
@@ -53,7 +53,7 @@ export function useConnect(): UseConnectReturn {
   )
 
   const connect = useCallback(
-    async (chain?: Chain, provider?: any) => {
+    async (chain?: Chain, provider?: Providers) => {
       if (!chain) return
       let account
 
@@ -61,8 +61,8 @@ export function useConnect(): UseConnectReturn {
         if (!provider && window.ethereum) {
           provider = window.ethereum
         }
-        if (provider.isWalletConnect) {
-          await handleWalletConnect(provider, chain)
+        if (provider && (provider as any).isWalletConnect) {
+          await handleWalletConnect(provider as Provider, chain)
         }
         // else if (!provider && window.web3) {
         //   provider = window.web3.currentProvider
@@ -89,16 +89,17 @@ export function useConnect(): UseConnectReturn {
   )
 
   const handleWalletConnect = async (provider: Provider, chain: Chain) => {
-    if (provider.connected) {
-      await provider.disconnect()
-      window.localStorage.clear()
+    if (provider.signer.client.session.getAll().length === 0) {
+      await provider.connect({
+        chains: [chainToId(chain)],
+      })
     }
-    await provider.connect({
-      chains: [chainToId(chain)],
-    })
   }
 
-  const disconnect = useCallback(async () => {
+  const disconnect = useCallback(async (provider: Providers) => {
+    if (provider && (provider as any).isWalletConnect) {
+      await (provider as Provider).disconnect()
+    }
     setKeepAccountAlive(false)
     dispatch({ type: ActionTypes.disconnect, payload: null })
   }, [dispatch, setKeepAccountAlive])

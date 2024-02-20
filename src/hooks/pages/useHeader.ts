@@ -22,12 +22,13 @@ import {
 } from '../common/useBreadcrumbNames'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import Provider, { EthereumProvider } from '@walletconnect/ethereum-provider'
+import { ethers } from 'ethers'
 
 export type UseAccountButtonProps = {
   handleConnect: (wallet?: WalletProps, network?: NetworkProps) => Promise<void>
   handleDisconnect: () => void
   provider: () => void
-  walletConnectProvider: Provider | null
+  walletConnectProvider: () => Promise<Provider>
 }
 
 export type UseAccountButtonReturn = UseAccountButtonProps & {
@@ -41,6 +42,8 @@ export type UseAccountButtonReturn = UseAccountButtonProps & {
   walletPosition: { x: number; y: number }
   handleDisplayWalletPicker: () => void
 }
+
+export type Providers = ethers.providers.ExternalProvider | Provider
 
 export function chainNameToEnum(chainName?: string): Chain {
   switch (chainName) {
@@ -68,12 +71,14 @@ export function chainEnumToName(chain: Chain): string {
   }
 }
 
-function getProvider(provider: any) {
-  if (typeof provider === 'function') {
+async function resolveProvider(provider: (() => any) | undefined): Promise<Providers> {
+  if (provider) {
+    if (typeof (provider as any).then === 'function') {
+      return await provider()
+    }
     return provider()
-  } else {
-    return provider
   }
+  return window.ethereum
 }
 
 function idToChain(id: number): Chain | null {
@@ -165,7 +170,7 @@ export type UseHeaderReturn = UseRoutesReturn & {
   handleConnect: (wallet?: WalletProps, network?: NetworkProps) => Promise<void>
   handleDisconnect: () => void
   provider: () => void
-  walletConnectProvider: Provider | null
+  walletConnectProvider: () => Promise<Provider>
 }
 
 export function useHeader(): UseHeaderReturn {
@@ -185,65 +190,80 @@ export function useHeader(): UseHeaderReturn {
       const acc = await connect()
       if (!acc) return
     } else {
-      await disconnect()
+      const provider = await resolveProvider(walletConnectProvider)
+      await disconnect(provider)
     }
-  }, [connect, disconnect, isConnected])
+  }, [connect, disconnect, isConnected, ])
 
-  const [walletConnectProvider, setWalletConnectProvider] =
-    useState<Provider | null>(null)
-  useEffect(() => {
-    let provider: Provider
+  const walletConnectProvider = async () => {
+    const provider = await EthereumProvider.init({
+      projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID!,
+      showQrModal: true,
+      chains: [1],
+      optionalChains: [43114],
+      /*metadata: {
+        name: '',
+        description: '',
+        url: '',
+        icons: ['']
+      },
+      rpcMap
+      qrModalOptions*/
+    })
 
-    const initializeProvider = async () => {
-      provider = await EthereumProvider.init({
-        projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID!,
-        showQrModal: true,
-        chains: [1],
-        optionalChains: [1, 43114],
-        /*metadata: {
-          name: '',
-          description: '',
-          url: '',
-          icons: ['']
-        },
-        rpcMap
-        qrModalOptions*/
-      })
-
-      provider.on('session_event', (event) => {
-        // if discrepancy between mobile network and app selected network
-        // https://github.com/wevm/viem/discussions/753#discussioncomment-6245812
-        console.log(event)
-        if (chainToId(selectedNetwork) !== parseInt(event.params.chainId, 16)) {
-          //onNoti('Match mobile and app selected network', 'warning')
-        }
-      })
-
-      provider.on('chainChanged', (chainId: string) => {
-        // manage change network on the mobile, also if wallet is not supported notify it
-        console.log(chainId)
-        const network = idToChain(Number(chainId))
-        if (network) {
-          //switchNetwork(network)
-        } else {
-          //onNoti('Use supported networks', 'warning')
-        }
-      })
-
-      provider.on('disconnect', async () => {
-        console.log('disconnected')
-        window.localStorage.clear()
-      })
-
-      setWalletConnectProvider(provider)
-    }
-    initializeProvider()
-
-    return () => {
-      if (provider) {
-        provider.disconnect()
+    provider.on('session_event', (event) => {
+      // if discrepancy between mobile network and app selected network
+      // https://github.com/wevm/viem/discussions/753#discussioncomment-6245812
+      console.log(event)
+      if (chainToId(selectedNetwork) !== parseInt(event.params.chainId, 16)) {
+        //onNoti('Match mobile and app selected network', 'warning')
       }
+    })
+
+    provider.on('chainChanged', (chainId) => {
+      // manage change network on the mobile, also if wallet is not supported notify it
+      console.log(chainId)
+      const network = idToChain(Number(chainId))
+      if (network) {
+        
+      } else {
+        //onNoti('Use supported networks', 'warning')
+      }
+    })
+
+    provider.on('disconnect', async () => {
+      console.log('disconnected')
       window.localStorage.clear()
+    })
+    
+    provider.signer.on('display_uri', (uri: string) => {
+      console.log('display_uri', uri)
+    })
+    
+    provider.signer.on('session_ping', (session: any) => {
+      console.log('session_ping', session.id, session.topic)
+    })
+    
+    provider.signer.on('session_event', (session: any) => {
+      console.log('session_event', session.event, session.chainId)
+    })
+    
+    provider.signer.on('session_update', (session: any) => {
+      console.log('session_update', session.topic, session.params)
+    })
+    
+    provider.signer.on('session_delete', (session: any) => {
+      console.log('session_delete', session.id, session.opic)
+    })
+
+    return provider
+  }
+
+  useEffect(() => {
+    const provider = walletConnectProvider()
+    return () => {
+      provider.then((provider) => provider.disconnect().then())
+      //window.localStorage.clear()
     }
   }, [])
 
@@ -251,21 +271,19 @@ export function useHeader(): UseHeaderReturn {
   const handleConnect = useCallback(
     async (wallet?: WalletProps, network?: NetworkProps) => {
       console.log('handleConnect', wallet, network)
+      const provider = await resolveProvider(walletConnectProvider)
+
       if (!isConnected && (wallet || network)) {
         setkeepAccountAlive(true)
         const acc = await connect(
           chainNameToEnum(network?.name),
-          getProvider(wallet?.provider),
+          provider,
         )
         if (!acc) return
         // router.push('/')
       } else {
         setkeepAccountAlive(false)
-        if (walletConnectProvider?.connected) {
-          walletConnectProvider.disconnect()
-          window.localStorage.clear()
-        }
-        await disconnect()
+        await disconnect(provider)
         router.push('/')
       }
     },
