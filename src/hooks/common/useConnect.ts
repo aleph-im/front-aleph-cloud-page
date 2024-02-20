@@ -4,36 +4,40 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
-import { ExternalProvider } from '@ethersproject/providers'
+import Provider from '@walletconnect/ethereum-provider'
 
 export type UseConnectReturn = {
-  connect: (
-    chain?: Chain,
-    provider?: ExternalProvider,
-  ) => Promise<Account | undefined>
+  connect: (chain?: Chain, provider?: any) => Promise<Account | undefined>
   disconnect: () => Promise<void>
   isConnected: boolean
   account: Account | undefined
+  tryReconnect: () => Promise<void>
   switchNetwork: (chain: Chain) => Promise<Account | undefined>
   selectedNetwork: Chain
 }
 
+type NotificationCardVariant = 'error' | 'success' | 'warning'
+
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
   const noti = useNotification()
+  const [keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
+    'keepAccountAlive',
+    false,
+  )
   const [selectedNetwork, setSelectedNetwork] = useSessionStorage<Chain>(
     'selectedNetwork',
     Chain.ETH,
   )
 
-  const onError = useCallback(
-    (error: string) => {
+  const onNoti = useCallback(
+    (error: string, variant: NotificationCardVariant) => {
       noti &&
         noti.add({
-          variant: 'error',
-          title: 'Error',
+          variant,
+          title: variant.charAt(0).toUpperCase() + variant.slice(1),
           text: error,
         })
     },
@@ -49,13 +53,16 @@ export function useConnect(): UseConnectReturn {
   )
 
   const connect = useCallback(
-    async (chain?: Chain, provider?: ExternalProvider) => {
+    async (chain?: Chain, provider?: any) => {
       if (!chain) return
-
       let account
+
       try {
         if (!provider && window.ethereum) {
           provider = window.ethereum
+        }
+        if (provider.isWalletConnect) {
+          await handleWalletConnect(provider, chain)
         }
         // else if (!provider && window.web3) {
         //   provider = window.web3.currentProvider
@@ -63,27 +70,38 @@ export function useConnect(): UseConnectReturn {
         //   provider = window.solana
         // }
         account = await web3Connect(chain, provider)
-        setSelectedNetwork(chain)
-      } catch (err) {
-        const e = err as Error
-        onError(e.message) // we assume because the user denied the connection
-      }
-      if (!account) return
+        if (!account) return
 
-      await Promise.all([getBalance(account)]).catch((err) => {
-        onError(err.message)
-      })
+        setKeepAccountAlive(true)
+        setSelectedNetwork(chain)
+        await Promise.all([getBalance(account)])
+      } catch (err) {
+        console.log(err)
+        const e = err as Error
+        onNoti(e.message, 'error') // we assume because the user denied the connection
+      }
 
       dispatch({ type: ActionTypes.connect, payload: { account } })
 
       return account
     },
-    [getBalance, dispatch, onError],
+    [setKeepAccountAlive, getBalance, dispatch, onNoti],
   )
 
+  const handleWalletConnect = async (provider: Provider, chain: Chain) => {
+    if (provider.connected) {
+      await provider.disconnect()
+      window.localStorage.clear()
+    }
+    await provider.connect({
+      chains: [chainToId(chain)],
+    })
+  }
+
   const disconnect = useCallback(async () => {
+    setKeepAccountAlive(false)
     dispatch({ type: ActionTypes.disconnect, payload: null })
-  }, [dispatch])
+  }, [dispatch, setKeepAccountAlive])
 
   const switchNetwork = useCallback(
     async (chain: Chain) => {
@@ -92,14 +110,10 @@ export function useConnect(): UseConnectReturn {
       try {
         account = await web3Connect(chain, window.ethereum)
         setSelectedNetwork(chain)
-        await Promise.all([getBalance(account)]).catch((err) => {
-          onError(err.message)
-        })
-
-        console.log('Account connected after switching network: ', account)
+        await Promise.all([getBalance(account)])
       } catch (err) {
         const e = err as Error
-        console.error('Error during network switch: ', e.message)
+        onNoti(`Error during network switch: ${e.message}`, 'error')
       }
 
       return account
@@ -110,12 +124,30 @@ export function useConnect(): UseConnectReturn {
   const { account } = state
   const isConnected = !!account?.address
 
+  const tryReconnect = useCallback(async () => {
+    if (isConnected || !keepAccountAlive) return
+    await connect()
+  }, [isConnected, keepAccountAlive, connect])
+
   return {
     connect,
     disconnect,
     isConnected,
     account,
+    tryReconnect,
     switchNetwork,
     selectedNetwork,
+  }
+}
+
+// todo: get useHeader helpers and improve this also
+export function chainToId(chain: Chain): number {
+  switch (chain) {
+    case Chain.ETH:
+      return 1
+    case Chain.AVAX:
+      return 43114
+    default:
+      return 1
   }
 }

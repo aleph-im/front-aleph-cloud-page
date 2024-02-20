@@ -23,6 +23,8 @@
     "@types/node": "18.14.1",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
+    "@walletconnect/ethereum-provider": "^2.11.1",
+    "@walletconnect/modal": "^2.6.2",
     "aleph-sdk-ts": "^3.9.2",
     "eslint": "8.35.0",
     "eslint-config-next": "13.2.1",

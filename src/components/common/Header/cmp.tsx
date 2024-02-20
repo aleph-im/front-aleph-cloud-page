@@ -34,6 +34,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
     walletPickerTriggerRef,
     walletPosition,
     provider,
+    walletConnectProvider,
     handleConnect,
     handleDisplayWalletPicker,
   } = useAccountButton(rest)
@@ -68,6 +69,12 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
                     name: 'Metamask',
                     provider,
                   },
+                  {
+                    color: 'orange',
+                    icon: 'walletConnect',
+                    name: 'Wallet Connect',
+                    provider: walletConnectProvider,
+                  },
                 ],
               },
               {
@@ -79,6 +86,12 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
                     icon: 'metamask',
                     name: 'Metamask',
                     provider,
+                  },
+                  {
+                    color: 'orange',
+                    icon: 'walletConnect',
+                    name: 'Wallet Connect',
+                    provider: walletConnectProvider,
                   },
                 ],
               },

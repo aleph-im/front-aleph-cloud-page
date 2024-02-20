@@ -3,7 +3,7 @@ import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { DefaultTheme, useTheme } from 'styled-components'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { useAppState } from '@/contexts/appState'
-import { useConnect } from '../common/useConnect'
+import { chainToId, useConnect } from '../common/useConnect'
 import { useSessionStorage } from 'usehooks-ts'
 import {
   BreakpointId,
@@ -21,11 +21,13 @@ import {
   UseBreadcrumbNamesReturn,
 } from '../common/useBreadcrumbNames'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
+import Provider, { EthereumProvider } from '@walletconnect/ethereum-provider'
 
 export type UseAccountButtonProps = {
   handleConnect: (wallet?: WalletProps, network?: NetworkProps) => Promise<void>
   handleDisconnect: () => void
   provider: () => void
+  walletConnectProvider: Provider | null
 }
 
 export type UseAccountButtonReturn = UseAccountButtonProps & {
@@ -63,6 +65,25 @@ export function chainEnumToName(chain: Chain): string {
       return 'Solana'
     default:
       return 'Ethereum'
+  }
+}
+
+function getProvider(provider: any) {
+  if (typeof provider === 'function') {
+    return provider()
+  } else {
+    return provider
+  }
+}
+
+function idToChain(id: number): Chain | null {
+  switch (id) {
+    case 1:
+      return Chain.ETH
+    case 43114:
+      return Chain.AVAX
+    default:
+      return null
   }
 }
 
@@ -144,13 +165,14 @@ export type UseHeaderReturn = UseRoutesReturn & {
   handleConnect: (wallet?: WalletProps, network?: NetworkProps) => Promise<void>
   handleDisconnect: () => void
   provider: () => void
+  walletConnectProvider: Provider | null
 }
 
 export function useHeader(): UseHeaderReturn {
-  const { connect, disconnect, isConnected, account } = useConnect()
+  const { connect, disconnect, isConnected, account, selectedNetwork } =
+    useConnect()
   const { routes } = useRoutes()
   const router = useRouter()
-
   const { pathname } = router
 
   const [keepAccountAlive, setkeepAccountAlive] = useSessionStorage(
@@ -167,6 +189,64 @@ export function useHeader(): UseHeaderReturn {
     }
   }, [connect, disconnect, isConnected])
 
+  const [walletConnectProvider, setWalletConnectProvider] =
+    useState<Provider | null>(null)
+  useEffect(() => {
+    let provider: Provider
+
+    const initializeProvider = async () => {
+      provider = await EthereumProvider.init({
+        projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID!,
+        showQrModal: true,
+        chains: [1],
+        optionalChains: [1, 43114],
+        /*metadata: {
+          name: '',
+          description: '',
+          url: '',
+          icons: ['']
+        },
+        rpcMap
+        qrModalOptions*/
+      })
+
+      provider.on('session_event', (event) => {
+        // if discrepancy between mobile network and app selected network
+        // https://github.com/wevm/viem/discussions/753#discussioncomment-6245812
+        console.log(event)
+        if (chainToId(selectedNetwork) !== parseInt(event.params.chainId, 16)) {
+          //onNoti('Match mobile and app selected network', 'warning')
+        }
+      })
+
+      provider.on('chainChanged', (chainId: string) => {
+        // manage change network on the mobile, also if wallet is not supported notify it
+        console.log(chainId)
+        const network = idToChain(Number(chainId))
+        if (network) {
+          //switchNetwork(network)
+        } else {
+          //onNoti('Use supported networks', 'warning')
+        }
+      })
+
+      provider.on('disconnect', async () => {
+        console.log('disconnected')
+        window.localStorage.clear()
+      })
+
+      setWalletConnectProvider(provider)
+    }
+    initializeProvider()
+
+    return () => {
+      if (provider) {
+        provider.disconnect()
+      }
+      window.localStorage.clear()
+    }
+  }, [])
+
   // @note: wait till account is connected and redirect
   const handleConnect = useCallback(
     async (wallet?: WalletProps, network?: NetworkProps) => {
@@ -175,18 +255,38 @@ export function useHeader(): UseHeaderReturn {
         setkeepAccountAlive(true)
         const acc = await connect(
           chainNameToEnum(network?.name),
-          wallet?.provider(),
+          getProvider(wallet?.provider),
         )
         if (!acc) return
         // router.push('/')
       } else {
         setkeepAccountAlive(false)
+        if (walletConnectProvider?.connected) {
+          walletConnectProvider.disconnect()
+          window.localStorage.clear()
+        }
         await disconnect()
         router.push('/')
       }
     },
-    [connect, disconnect, isConnected, router, setkeepAccountAlive],
+    [
+      connect,
+      disconnect,
+      isConnected,
+      router,
+      setkeepAccountAlive,
+      walletConnectProvider,
+    ],
   )
+
+  useEffect(() => {
+    ;(async () => {
+      if (!account && keepAccountAlive) {
+        enableConnection()
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account, keepAccountAlive])
 
   // --------------------
 
@@ -198,8 +298,6 @@ export function useHeader(): UseHeaderReturn {
     return window.ethereum
   }
 
-  // @todo: handle this on the provider method of the WalletConnect component
-  // the provider function should initialize the provider and return a dispose function
   useEffect(() => {
     provider()
     return () => {
@@ -233,5 +331,6 @@ export function useHeader(): UseHeaderReturn {
     handleConnect,
     handleDisconnect,
     provider,
+    walletConnectProvider,
   }
 }
