@@ -116,6 +116,8 @@ export function useConnect(): UseConnectReturn {
         const e = err as Error
         onNoti(`Error during network switch: ${e.message}`, 'error')
       }
+      
+      dispatch({ type: ActionTypes.connect, payload: { account } })
 
       return account
     },
