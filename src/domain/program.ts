@@ -30,13 +30,14 @@ import { FileManager } from './file'
 import { MessageManager } from './message'
 import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { DomainManager } from './domain'
+import { AddDomain, DomainManager } from './domain'
 import { EntityManager } from './types'
 import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { functionSchema } from '@/helpers/schemas/program'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { FunctionLangId, FunctionLanguage } from './lang'
+import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -148,9 +149,19 @@ export class ProgramManager
   }
 
   async add(newProgram: AddProgram): Promise<Program> {
-    try {
-      const programMessage = await this.parseProgram(newProgram)
+    const steps = this.addSteps(newProgram)
 
+    while (true) {
+      const { value, done } = await steps.next()
+      if (done) return value
+    }
+  }
+
+  async *addSteps(newProgram: AddProgram): AsyncGenerator<void, Program, void> {
+    try {
+      const programMessage = yield* this.parseProgramSteps(newProgram)
+
+      yield
       const response = await program.publish({
         ...programMessage,
         APIServer: apiServer,
@@ -159,7 +170,7 @@ export class ProgramManager
       const [entity] = await this.parseMessages([response])
 
       // @note: Add the domain link
-      await this.parseDomains(entity.id, newProgram.domains)
+      yield* this.parseDomainsSteps(entity.id, newProgram.domains)
 
       return entity
     } catch (err) {
@@ -191,6 +202,23 @@ export class ProgramManager
     const blob = await req.blob()
 
     return downloadBlob(blob, `VM_${program.id.slice(-12)}.zip`)
+  }
+
+  async getSteps(newInstance: AddProgram): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    const { volumes = [], domains = [] } = newInstance
+
+    const volumeSteps = await this.volumeManager.getSteps(volumes)
+    for (const step of volumeSteps) steps.push(step)
+
+    steps.push('program')
+
+    const domainSteps = await this.domainManager.getSteps(
+      domains as AddDomain[],
+    )
+    for (const step of domainSteps) steps.push(step)
+
+    return steps
   }
 
   protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {
@@ -233,9 +261,9 @@ export class ProgramManager
     } else throw new Error('Invalid function code type')
   }
 
-  protected async parseProgram(
+  protected async *parseProgramSteps(
     newProgram: AddProgram,
-  ): Promise<ProgramPublishConfiguration> {
+  ): AsyncGenerator<void, ProgramPublishConfiguration, void> {
     newProgram = await ProgramManager.addSchema.parseAsync(newProgram)
 
     const { account, channel } = this
@@ -246,9 +274,9 @@ export class ProgramManager
     const { memory, vcpus } = this.parseSpecs(specs)
     const metadata = this.parseMetadata(name, tags, newProgram.metadata)
     const runtime = this.parseRuntime(newProgram)
-    const volumes = await this.parseVolumes(newProgram.volumes)
-    const code = await this.parseCode(newProgram.code)
     const payment = this.parsePayment(newProgram.payment)
+    const volumes = yield* this.parseVolumesSteps(newProgram.volumes)
+    const code = await this.parseCode(newProgram.code)
 
     return {
       account,

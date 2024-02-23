@@ -17,5 +17,5 @@ export const StyledSpinnerContainer = styled.div<StyledSpinnerContainerProps>`
   opacity: ${({ $show }) => ($show ? '1' : '0')};
   align-items: ${({ $center }) => ($center ? 'center' : 'flex-start')};
   z-index: 99;
-  transition: all ease-in-out 0.5s 0.5s;
+  transition: all ease-in-out 500ms 500ms;
 `

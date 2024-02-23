@@ -4,7 +4,7 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
 import { ExternalProvider } from '@ethersproject/providers'
 
@@ -78,7 +78,7 @@ export function useConnect(): UseConnectReturn {
 
       return account
     },
-    [getBalance, dispatch, onError],
+    [getBalance, dispatch, setSelectedNetwork, onError],
   )
 
   const disconnect = useCallback(async () => {
@@ -102,9 +102,11 @@ export function useConnect(): UseConnectReturn {
         console.error('Error during network switch: ', e.message)
       }
 
+      dispatch({ type: ActionTypes.connect, payload: { account } })
+
       return account
     },
-    [connect, setSelectedNetwork],
+    [dispatch, getBalance, onError, setSelectedNetwork],
   )
 
   const { account } = state

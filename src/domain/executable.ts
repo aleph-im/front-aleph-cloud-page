@@ -144,10 +144,10 @@ export abstract class Executable {
     return Object.fromEntries(envVars.map(({ name, value }) => [name, value]))
   }
 
-  protected async parseDomains(
+  protected async *parseDomainsSteps(
     ref: string,
     domains?: Omit<DomainField, 'ref'>[],
-  ): Promise<Domain[]> {
+  ): AsyncGenerator<void, Domain[], void> {
     if (!domains || domains.length === 0) return []
 
     const parsedDomains = domains.map((domain) => ({
@@ -155,21 +155,19 @@ export abstract class Executable {
       ref,
     }))
 
-    return this.domainManager.add(parsedDomains, false)
+    return yield* this.domainManager.addSteps(parsedDomains, false)
   }
 
-  protected async parseVolumes(
+  protected async *parseVolumesSteps(
     volumes?: VolumeField | VolumeField[],
-  ): Promise<MachineVolume[] | undefined> {
+  ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
     if (!volumes) return
 
     volumes = Array.isArray(volumes) ? volumes : [volumes]
-
     if (volumes.length === 0) return
 
     // @note: Create new volumes before and cast them to ExistingVolume type
-
-    const messages = await this.volumeManager.add(volumes)
+    const messages = yield* this.volumeManager.addSteps(volumes)
 
     const parsedVolumes: (AddExistingVolume | AddPersistentVolume)[] =
       volumes.map((volume, i) => {

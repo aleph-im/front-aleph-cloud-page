@@ -10,6 +10,8 @@ import {
 } from '../helpers/constants'
 import { EntityManager } from './types'
 import { domainSchema, domainsSchema } from '@/helpers/schemas/domain'
+import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
+import { FunctionRuntimeId } from './runtime'
 
 export { AddDomainTarget }
 
@@ -102,13 +104,24 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     domains: AddDomain | AddDomain[],
     throwOnCollision?: boolean,
   ): Promise<Domain[]> {
+    const steps = this.addSteps(domains, throwOnCollision)
+
+    while (true) {
+      const { value, done } = await steps.next()
+      if (done) return value
+    }
+  }
+
+  async *addSteps(
+    domains: AddDomain | AddDomain[],
+    throwOnCollision?: boolean,
+  ): AsyncGenerator<void, Domain[], void> {
     domains = Array.isArray(domains) ? domains : [domains]
 
     domains = await this.parseDomains(domains, throwOnCollision)
+    if (!domains.length) return []
 
     try {
-      if (!domains.length) return []
-
       const content: DomainAggregate = domains.reduce((ac, cv) => {
         const { name, ref, target, programType } = cv
 
@@ -129,6 +142,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
         return ac
       }, {} as DomainAggregate)
 
+      yield
       const response = await aggregate.Publish({
         account: this.account,
         key: this.key,
@@ -175,6 +189,25 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     })
     const response = await query.json()
     return response
+  }
+
+  async getSteps(
+    domains: AddDomain | AddDomain[],
+    throwOnCollision?: boolean,
+  ): Promise<CheckoutStepType[]> {
+    domains = Array.isArray(domains) ? domains : [domains]
+
+    // @note: mock ref to bypass schema validation
+    domains = domains.map((domain) => ({
+      ...domain,
+      ref: FunctionRuntimeId.Runtime1,
+    }))
+
+    domains = await this.parseDomains(domains, throwOnCollision)
+
+    // @note: Aggregate all signatures in 1 step
+    // return domains.map(() => 'domain')
+    return domains.length ? ['domain'] : []
   }
 
   protected async parseDomains(

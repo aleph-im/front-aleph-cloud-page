@@ -12,6 +12,10 @@ import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
 import { SSHKeyManager } from '@/domain/ssh'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export type NewSSHKeyFormState = {
   key: string
@@ -32,23 +36,45 @@ export type UseNewSSHKeyPageReturn = {
 
 export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
   const router = useRouter()
-  const manager = useSSHKeyManager()
   const [, dispatch] = useAppState()
+
+  const manager = useSSHKeyManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewSSHKeyFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const [accountSSHKey] = await manager.add(state)
+      const iSteps = await manager.getSteps(state)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      dispatch({
-        type: ActionTypes.addAccountSSHKey,
-        payload: { accountSSHKey },
-      })
+      const steps = manager.addSteps(state)
 
-      await router.replace('/')
+      try {
+        let accountSSHKey
+
+        while (!accountSSHKey) {
+          const { value, done } = await steps.next()
+
+          if (done) {
+            accountSSHKey = value[0]
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        dispatch({
+          type: ActionTypes.addAccountSSHKey,
+          payload: { accountSSHKey },
+        })
+
+        await router.replace('/')
+      } finally {
+        await stop()
+      }
     },
-    [dispatch, manager, router],
+    [dispatch, manager, next, router, stop],
   )
 
   const {

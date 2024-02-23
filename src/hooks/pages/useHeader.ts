@@ -9,7 +9,7 @@ import {
   BreakpointId,
   useClickOutside,
   useFloatPosition,
-  useTransitionedEnterExit,
+  useTransition,
   useWindowScroll,
   useWindowSize,
   WalletProps,
@@ -95,10 +95,7 @@ export function useAccountButton({
   const windowSize = useWindowSize(0)
   const windowScroll = useWindowScroll(0)
 
-  const { shouldMount, state } = useTransitionedEnterExit({
-    onOff: displayWalletPicker,
-    ref: walletPickerRef,
-  })
+  const { shouldMount, stage } = useTransition(displayWalletPicker, 250)
 
   const { myRef, atRef, position } = useFloatPosition({
     my: 'top-right',
@@ -108,7 +105,7 @@ export function useAccountButton({
     deps: [account, windowSize, windowScroll, shouldMount],
   })
 
-  const walletPickerOpen = state === 'enter'
+  const walletPickerOpen = stage === 'enter'
 
   const handleConnect = useCallback(
     async (wallet?: WalletProps, network?: NetworkProps) => {

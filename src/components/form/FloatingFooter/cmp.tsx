@@ -4,9 +4,10 @@ import { StyledContainer } from './styles'
 import {
   useBounds,
   useScroll,
-  useTransitionedEnterExit,
+  useTransition,
   useWindowSize,
 } from '@aleph-front/core'
+import { useTheme } from 'styled-components'
 
 export type FloatingFooterProps = {
   children: ReactNode
@@ -25,7 +26,6 @@ export const FloatingFooter = ({
   shouldHide = true,
   deps: depsProp = [],
 }: FloatingFooterProps) => {
-  const contentRef = useRef<HTMLDivElement>(null)
   const thresholdRef = useRef<HTMLDivElement>(null)
 
   const windowSize = useWindowSize()
@@ -44,12 +44,16 @@ export const FloatingFooter = ({
 
   const sticked = thresholdBot > containerBot
 
-  const { shouldMount, state } = useTransitionedEnterExit({
-    onOff: sticked,
-    ref: contentRef,
-  })
+  const theme = useTheme()
 
-  const show = state === 'enter'
+  const { shouldMount, stage } = useTransition(
+    sticked,
+    theme.transition.duration.fast,
+  )
+
+  const show = stage === 'enter'
+
+  if (!containerBounds) return null
 
   const position = !shouldHide ? 'sticky' : 'fixed'
   const opacity = !shouldHide ? 1 : show ? 1 : 0
@@ -60,7 +64,6 @@ export const FloatingFooter = ({
 
   const contentNode = (
     <StyledContainer
-      ref={contentRef}
       $sticked={show}
       style={{ position, bottom, left, width, opacity }}
     >

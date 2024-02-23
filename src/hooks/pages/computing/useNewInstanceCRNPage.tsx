@@ -33,9 +33,13 @@ import {
   StreamDurationField,
 } from '@/hooks/form/useSelectStreamDuration'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { ActionTypes } from '@/helpers/store'
 import { useConnect } from '@/hooks/common/useConnect'
 import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
+import { ActionTypes } from '@/helpers/store'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -127,6 +131,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
   // -------------------------
 
   const manager = useInstanceManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewInstanceCRNFormState) => {
@@ -144,7 +149,10 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
         superfluidAccount = account as SuperfluidAccount
       }
 
-      const accountInstance = await manager.add(
+      const iSteps = await manager.getSteps(state)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
+
+      const steps = manager.addSteps(
         {
           ...state,
           payment: {
@@ -160,16 +168,42 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
         superfluidAccount,
       )
 
-      dispatch({
-        type: ActionTypes.addAccountInstance,
-        payload: { accountInstance },
-      })
+      try {
+        let accountInstance
 
-      // @todo: Check new volumes and domains being created to add them to the store
+        while (!accountInstance) {
+          const { value, done } = await steps.next()
 
-      await router.replace('/')
+          if (done) {
+            accountInstance = value
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        // @todo: Check new volumes and domains being created to add them to the store
+        dispatch({
+          type: ActionTypes.addAccountInstance,
+          payload: { accountInstance },
+        })
+
+        await router.replace('/')
+      } finally {
+        await stop()
+      }
     },
-    [account, dispatch, manager, node, router, selectedNetwork, switchNetwork],
+    [
+      account,
+      dispatch,
+      manager,
+      next,
+      node,
+      router,
+      selectedNetwork,
+      stop,
+      switchNetwork,
+    ],
   )
 
   const {
