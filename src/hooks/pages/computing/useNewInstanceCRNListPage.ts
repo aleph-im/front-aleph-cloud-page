@@ -112,7 +112,10 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
         }
       }
 
-      ac[node.hash] = StreamNotSupportedIssue.Valid
+      if (nodeSpecs && nodeIps) {
+        ac[node.hash] = StreamNotSupportedIssue.Valid
+      }
+
       return ac
     }, {} as StreamSupportedIssues)
   }, [baseFilteredNodes, nodeManager, specs, ips, minSpecs])
