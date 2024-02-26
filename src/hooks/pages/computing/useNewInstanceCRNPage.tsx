@@ -16,7 +16,6 @@ import {
 import {
   getDefaultSpecsOptions,
   InstanceSpecsField,
-  validateMinNodeSpecs,
 } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { DomainField } from '@/hooks/form/useAddDomains'
@@ -27,7 +26,7 @@ import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
+import { CRN, CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
 import {
   defaultStreamDuration,
   StreamDurationField,
@@ -40,6 +39,7 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -119,14 +119,16 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
     return min
   }, [])
 
+  const nodeManager = useNodeManager()
+
   useEffect(() => {
     if (!nodeSpecs) return
 
-    const isValid = validateMinNodeSpecs(minSpecs, nodeSpecs)
+    const isValid = nodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
     if (isValid) return
 
     router.replace('.')
-  }, [minSpecs, nodeSpecs, router])
+  }, [nodeManager, minSpecs, nodeSpecs, router])
 
   // -------------------------
 

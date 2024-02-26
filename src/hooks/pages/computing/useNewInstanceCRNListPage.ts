@@ -7,10 +7,7 @@ import {
   UseRequestCRNSpecsReturn,
   useRequestCRNSpecs,
 } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import {
-  getDefaultSpecsOptions,
-  validateMinNodeSpecs,
-} from '@/hooks/form/useSelectInstanceSpecs'
+import { getDefaultSpecsOptions } from '@/hooks/form/useSelectInstanceSpecs'
 import { useRequestCRNIps } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { PaymentMethod } from '@/helpers/constants'
@@ -93,7 +90,7 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
       const nodeSpecs = specs[node.hash]?.data
 
       if (nodeSpecs) {
-        const validSpecs = validateMinNodeSpecs(minSpecs, nodeSpecs)
+        const validSpecs = nodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
 
         if (!validSpecs) {
           ac[node.hash] = StreamNotSupportedIssue.MinSpecs
