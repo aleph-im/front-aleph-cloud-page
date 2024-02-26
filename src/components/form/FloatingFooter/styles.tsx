@@ -16,7 +16,6 @@ export const StyledContainer = styled.div<StyledContainerProps>`
       background: ${theme.color.base1};
       box-shadow: ${$sticked ? shadow : 'none'};
       transition: all ${timing} ${duration.fast}ms 0s;
-      transition-property: opacity, box-shadow;
     `
   }}
 `
