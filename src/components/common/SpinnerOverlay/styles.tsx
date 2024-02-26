@@ -1,5 +1,5 @@
 import tw from 'twin.macro'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 export type StyledSpinnerContainerProps = {
   $show: boolean
@@ -8,14 +8,16 @@ export type StyledSpinnerContainerProps = {
 }
 
 export const StyledSpinnerContainer = styled.div<StyledSpinnerContainerProps>`
-  ${tw`inset-0 flex justify-center py-10 h-full min-h-[11rem]`}
-  /* background-color: #00000020; */
-  /* box-shadow: 0px 0px 20px 10px #00000020; */
-  position: ${({ $fullScreen }) => ($fullScreen ? 'fixed' : 'absolute')};
-  backdrop-filter: blur(3px);
-  border-radius: inherit;
-  opacity: ${({ $show }) => ($show ? '1' : '0')};
-  align-items: ${({ $center }) => ($center ? 'center' : 'flex-start')};
-  z-index: 99;
-  transition: all ease-in-out 500ms 500ms;
+  ${({ theme, $fullScreen, $show, $center }) => css`
+    ${tw`inset-0 flex justify-center py-10 h-full min-h-[11rem]`}
+    position: ${$fullScreen ? 'fixed' : 'absolute'};
+    backdrop-filter: blur(3px);
+    border-radius: inherit;
+    opacity: ${$show ? '1' : '0'};
+    align-items: ${$center ? 'center' : 'flex-start'};
+    padding-top: ${$center ? '2.5rem' : '6rem'};
+    z-index: 99;
+    transition: all ease-in-out 500ms 500ms;
+    background-color: ${theme.color.contentBackground}0C;
+  `}
 `

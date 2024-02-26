@@ -32,7 +32,7 @@ export const SpinnerOverlay = ({
           $fullScreen={fullScreen}
         >
           {/* <Spinner {...{ color, ...rest }} /> */}
-          <RotatingLines strokeColor={color} width="10em" {...rest} />
+          <RotatingLines strokeColor={color} width="4rem" {...rest} />
         </StyledSpinnerContainer>
       )}
     </>
