@@ -10,6 +10,7 @@ import VolumesTabContent from '../VolumesTabContent'
 import AllTabContent from '../AllTabContent'
 import { useDashboardPage } from '@/hooks/pages/solutions/useDashboardPage'
 import DomainsTabContent from '../DomainsTabContent'
+import { useSPARedirect } from '@/hooks/common/useSPARedirect'
 
 const Container = styled(CenteredContainer).attrs((props) => ({
   ...props,
@@ -23,6 +24,8 @@ function getLabel(entities: unknown[], beta = false): string {
 }
 
 export default function DashboardPage() {
+  useSPARedirect()
+
   const { all, functions, instances, volumes, sshKeys, domains } =
     useDashboardPage()
 
