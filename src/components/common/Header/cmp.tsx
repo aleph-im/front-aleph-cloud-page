@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Button, Icon, RenderLinkProps } from '@aleph-front/core'
 import {
-  StyledButton,
   StyledHeader,
   StyledNavbarDesktop,
   StyledNavbarMobile,
@@ -16,8 +15,6 @@ import {
   useHeader,
 } from '@/hooks/pages/useHeader'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
-import { useConnect } from '@/hooks/common/useConnect'
-import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { websiteUrl } from '@/helpers/constants'
 
 export type AccountButtonProps = UseAccountButtonProps & {
@@ -33,7 +30,9 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
     walletPickerRef,
     walletPickerTriggerRef,
     walletPosition,
-    provider,
+    selectedNetwork,
+    networks,
+    handleSwitchNetwork,
     handleConnect,
     handleDisplayWalletPicker,
   } = useAccountButton(rest)
@@ -57,34 +56,11 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
         createPortal(
           <StyledWalletPicker
             ref={walletPickerRef}
-            networks={[
-              {
-                icon: 'ethereum',
-                name: 'Ethereum',
-                wallets: [
-                  {
-                    color: 'orange',
-                    icon: 'metamask',
-                    name: 'Metamask',
-                    provider,
-                  },
-                ],
-              },
-              {
-                icon: 'avalanche',
-                name: 'Avalanche',
-                wallets: [
-                  {
-                    color: 'orange',
-                    icon: 'metamask',
-                    name: 'Metamask',
-                    provider,
-                  },
-                ],
-              },
-            ]}
+            networks={networks}
             onConnect={handleConnect}
-            onDisconnect={() => handleConnect()}
+            onDisconnect={handleConnect}
+            selectedNetwork={selectedNetwork}
+            onSwitchNetwork={handleSwitchNetwork}
             address={account?.address}
             addressHref={`https://etherscan.io/address/${account?.address}`}
             balance={accountBalance}
@@ -117,8 +93,6 @@ export const Header = () => {
     ...accountProps
   } = useHeader()
 
-  const { switchNetwork, selectedNetwork } = useConnect()
-
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
@@ -137,28 +111,8 @@ export const Header = () => {
           }}
         />
         <StyledNavbarDesktop $breakpoint={breakpoint}>
-          <div>
-            <AutoBreadcrumb names={breadcrumbNames} />
-          </div>
-          <div tw="relative flex items-center justify-center gap-7">
-            <StyledButton
-              key="evm"
-              kind="rounded"
-              color={selectedNetwork === Chain.ETH ? 'main1' : 'transparent'}
-              onClick={() => switchNetwork(Chain.ETH)}
-            >
-              <Icon name="ethereum" size="xl" tw="w-6" prefix="custom" />
-            </StyledButton>
-            <StyledButton
-              key="avax"
-              kind="rounded"
-              color={selectedNetwork === Chain.AVAX ? 'main1' : 'transparent'}
-              onClick={() => switchNetwork(Chain.AVAX)}
-            >
-              <Icon name="avalanche" size="xl" tw="w-6" prefix="custom" />
-            </StyledButton>
-            <AccountButtonMemo {...accountProps} />
-          </div>
+          <AutoBreadcrumb names={breadcrumbNames} />
+          <AccountButtonMemo {...accountProps} />
         </StyledNavbarDesktop>
       </StyledHeader>
       <div tw="block flex-auto grow-0 shrink-0 h-[6.5rem] lg:hidden"></div>

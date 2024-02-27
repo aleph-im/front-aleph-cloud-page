@@ -1,5 +1,12 @@
 import { useRouter } from 'next/router'
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
+import {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { DefaultTheme, useTheme } from 'styled-components'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { useAppState } from '@/contexts/appState'
@@ -14,6 +21,7 @@ import {
   useWindowSize,
   WalletProps,
   NetworkProps,
+  WalletPickerProps,
 } from '@aleph-front/core'
 import { useRoutes, UseRoutesReturn } from '../common/useRoutes'
 import {
@@ -23,9 +31,14 @@ import {
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 
 export type UseAccountButtonProps = {
-  handleConnect: (wallet?: WalletProps, network?: NetworkProps) => Promise<void>
+  networks: NetworkProps['network'][]
+  selectedNetwork: WalletPickerProps['selectedNetwork']
+  handleSwitchNetwork: WalletPickerProps['onSwitchNetwork']
+  handleConnect: (
+    wallet?: WalletProps,
+    network?: NetworkProps['network'],
+  ) => Promise<void>
   handleDisconnect: () => void
-  provider: () => void
 }
 
 export type UseAccountButtonReturn = UseAccountButtonProps & {
@@ -108,7 +121,7 @@ export function useAccountButton({
   const walletPickerOpen = stage === 'enter'
 
   const handleConnect = useCallback(
-    async (wallet?: WalletProps, network?: NetworkProps) => {
+    async (wallet?: WalletProps, network?: NetworkProps['network']) => {
       await handleConnectProp(wallet, network)
       setDisplayWalletPicker(false)
     },
@@ -133,18 +146,30 @@ export function useAccountButton({
 // -----------------------------
 
 export type UseHeaderReturn = UseRoutesReturn & {
+  networks: NetworkProps['network'][]
   pathname: string
   breadcrumbNames: UseBreadcrumbNamesReturn['names']
   breakpoint: BreakpointId
   isOpen: boolean
+  selectedNetwork: WalletPickerProps['selectedNetwork']
+  handleSwitchNetwork: WalletPickerProps['onSwitchNetwork']
   handleToggle: (isOpen: boolean) => void
-  handleConnect: (wallet?: WalletProps, network?: NetworkProps) => Promise<void>
+  handleConnect: (
+    wallet?: WalletProps,
+    network?: NetworkProps['network'],
+  ) => Promise<void>
   handleDisconnect: () => void
   provider: () => void
 }
 
 export function useHeader(): UseHeaderReturn {
-  const { connect, disconnect, isConnected, account } = useConnect()
+  const {
+    connect,
+    disconnect,
+    isConnected,
+    selectedNetwork: selectedNetworkChain,
+    switchNetwork: switchNetworkChain,
+  } = useConnect()
   const { routes } = useRoutes()
   const router = useRouter()
 
@@ -166,7 +191,7 @@ export function useHeader(): UseHeaderReturn {
 
   // @note: wait till account is connected and redirect
   const handleConnect = useCallback(
-    async (wallet?: WalletProps, network?: NetworkProps) => {
+    async (wallet?: WalletProps, network?: NetworkProps['network']) => {
       console.log('handleConnect', wallet, network)
       if (!isConnected && (wallet || network)) {
         setkeepAccountAlive(true)
@@ -187,13 +212,13 @@ export function useHeader(): UseHeaderReturn {
 
   // --------------------
 
-  const provider = () => {
+  const provider = useCallback(() => {
     ;(window.ethereum as any)?.on('accountsChanged', function () {
       connect()
     })
 
     return window.ethereum
-  }
+  }, [connect])
 
   // @todo: handle this on the provider method of the WalletConnect component
   // the provider function should initialize the provider and return a dispose function
@@ -220,12 +245,60 @@ export function useHeader(): UseHeaderReturn {
   const handleToggle = useCallback((open: boolean) => setIsOpen(open), [])
   const handleDisconnect = useCallback(() => null, [])
 
+  // --------------------
+
+  const networks: NetworkProps['network'][] = useMemo(
+    () => [
+      {
+        icon: 'ethereum',
+        name: 'Ethereum',
+        wallets: [
+          {
+            color: 'orange',
+            icon: 'metamask',
+            name: 'Metamask',
+            provider,
+          },
+        ],
+      },
+      {
+        icon: 'avalanche',
+        name: 'Avalanche',
+        wallets: [
+          {
+            color: 'orange',
+            icon: 'metamask',
+            name: 'Metamask',
+            provider,
+          },
+        ],
+      },
+    ],
+    [provider],
+  )
+
+  const handleSwitchNetwork = useCallback(
+    (network: NetworkProps['network']) => {
+      const chain = chainNameToEnum(network.name)
+      switchNetworkChain(chain)
+    },
+    [switchNetworkChain],
+  )
+
+  const selectedNetwork = useMemo(() => {
+    const name = chainEnumToName(selectedNetworkChain)
+    return networks.find((network) => network.name === name)
+  }, [networks, selectedNetworkChain])
+
   return {
+    networks,
     pathname,
     routes,
     breadcrumbNames,
     breakpoint,
     isOpen,
+    selectedNetwork,
+    handleSwitchNetwork,
     handleToggle,
     handleConnect,
     handleDisconnect,

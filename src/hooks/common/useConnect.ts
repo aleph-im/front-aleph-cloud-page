@@ -14,9 +14,9 @@ export type UseConnectReturn = {
     provider?: ExternalProvider,
   ) => Promise<Account | undefined>
   disconnect: () => Promise<void>
+  switchNetwork: (chain: Chain) => Promise<Account | undefined>
   isConnected: boolean
   account: Account | undefined
-  switchNetwork: (chain: Chain) => Promise<Account | undefined>
   selectedNetwork: Chain
 }
 
@@ -115,9 +115,9 @@ export function useConnect(): UseConnectReturn {
   return {
     connect,
     disconnect,
+    switchNetwork,
     isConnected,
     account,
-    switchNetwork,
     selectedNetwork,
   }
 }
