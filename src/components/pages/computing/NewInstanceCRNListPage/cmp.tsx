@@ -36,6 +36,8 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
     filter,
     filteredNodes,
     validPAYGNodesOnly,
+    loadItemsDisabled,
+    handleLoadItems,
     handleFilterChange,
     handleValidPAYGNodesOnlyChange,
   } = useNewInstanceCRNListPage()
@@ -278,6 +280,15 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
     [],
   )
 
+  const loadingPlaceholder = useMemo(
+    () => (
+      <div tw="flex justify-center">
+        <RotatingLines strokeColor={theme.color.main0} width="4rem" />
+      </div>
+    ),
+    [theme],
+  )
+
   return (
     <>
       <section tw="px-0 py-0 md:py-8">
@@ -309,9 +320,14 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
               </div>
             </div>
             <NodesTable
-              columns={columns}
-              data={data}
-              rowProps={handleRowProps}
+              {...{
+                columns,
+                data,
+                infiniteScroll: !loadItemsDisabled,
+                onLoadMore: handleLoadItems,
+                rowProps: handleRowProps,
+                loadingPlaceholder,
+              }}
             />
           </NoisyContainer>
         </Container>
