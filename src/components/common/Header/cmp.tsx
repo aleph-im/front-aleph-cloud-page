@@ -19,6 +19,7 @@ import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import { useConnect } from '@/hooks/common/useConnect'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { websiteUrl } from '@/helpers/constants'
+import { useWalletConnect } from '@/hooks/common/useWalletConnect'
 
 export type AccountButtonProps = UseAccountButtonProps & {
   isMobile?: boolean
@@ -34,10 +35,10 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
     walletPickerTriggerRef,
     walletPosition,
     provider,
-    walletConnectProvider,
     handleConnect,
     handleDisplayWalletPicker,
   } = useAccountButton(rest)
+  const walletConnect = useWalletConnect()
 
   return (
     <>
@@ -73,7 +74,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
                     color: 'orange',
                     icon: 'walletConnect',
                     name: 'Wallet Connect',
-                    provider: walletConnectProvider,
+                    provider: () => walletConnect,
                   },
                 ],
               },
@@ -91,7 +92,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
                     color: 'orange',
                     icon: 'walletConnect',
                     name: 'Wallet Connect',
-                    provider: walletConnectProvider,
+                    provider: () => walletConnect,
                   },
                 ],
               },
