@@ -164,6 +164,8 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
     handleLoadItems,
   } = usePaginatedList({
     list: sortedNodes,
+    itemsPerPage: 20,
+    resetDeps: [baseFilteredNodes],
   })
 
   const loading = loading1 || loading2
