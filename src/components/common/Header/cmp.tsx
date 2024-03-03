@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useContext, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Button, Icon, RenderLinkProps } from '@aleph-front/core'
@@ -19,7 +19,7 @@ import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import { useConnect } from '@/hooks/common/useConnect'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { websiteUrl } from '@/helpers/constants'
-import { useWalletConnect } from '@/hooks/common/useWalletConnect'
+import { WalletConnectContext } from '@/contexts/walletConnect'
 
 export type AccountButtonProps = UseAccountButtonProps & {
   isMobile?: boolean
@@ -38,7 +38,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
     handleConnect,
     handleDisplayWalletPicker,
   } = useAccountButton(rest)
-  const walletConnect = useWalletConnect()
+  const walletConnect = useContext(WalletConnectContext)
 
   return (
     <>

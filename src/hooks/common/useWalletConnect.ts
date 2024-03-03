@@ -18,7 +18,7 @@ export type WalletConnectReturn = {
       topic: string
     },
   ) => Promise<void>
-  ethereumProvider: UniversalProvider
+  ethereumProvider?: UniversalProvider
 }
 
 export const useWalletConnect = () => {

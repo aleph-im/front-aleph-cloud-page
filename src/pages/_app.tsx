@@ -13,6 +13,7 @@ import { useRouterLoadState } from '@/hooks/common/useRouterLoadState'
 import { AppStateProvider } from '@/contexts/appState'
 import Loading from './loading'
 import { useRef } from 'react'
+import { WalletConnectProvider } from '@/contexts/walletConnect'
 
 export default function App({ Component, pageProps }: AppProps) {
   const { loading } = useRouterLoadState()
@@ -24,27 +25,29 @@ export default function App({ Component, pageProps }: AppProps) {
     <ThemeProvider theme={themes.twentysix}>
       <GlobalStyles />
       <GlobalStylesOverride />
-      <AppStateProvider>
-        <NotificationProvider>
-          <Viewport>
-            <Sidebar />
-            <Main ref={mainRef}>
-              <Header />
-              <Content ref={contentRef}>
-                <Component
-                  {...{
-                    ...pageProps,
-                    mainRef,
-                    contentRef,
-                  }}
-                />
-                {loading && <Loading />}
-              </Content>
-              <Footer />
-            </Main>
-          </Viewport>
-        </NotificationProvider>
-      </AppStateProvider>
+      <WalletConnectProvider>
+        <AppStateProvider>
+          <NotificationProvider>
+            <Viewport>
+              <Sidebar />
+              <Main ref={mainRef}>
+                <Header />
+                <Content ref={contentRef}>
+                  <Component
+                    {...{
+                      ...pageProps,
+                      mainRef,
+                      contentRef,
+                    }}
+                  />
+                  {loading && <Loading />}
+                </Content>
+                <Footer />
+              </Main>
+            </Viewport>
+          </NotificationProvider>
+        </AppStateProvider>
+      </WalletConnectProvider>
     </ThemeProvider>
   )
 }
