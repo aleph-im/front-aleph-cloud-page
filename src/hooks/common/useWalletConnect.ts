@@ -1,52 +1,35 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Web3Modal } from '@web3modal/standalone'
 import UniversalProvider from '@walletconnect/universal-provider'
-import { PairingTypes, SessionTypes } from '@walletconnect/types'
+import { SessionTypes } from '@walletconnect/types'
 import Client from '@walletconnect/sign-client'
-import { providers } from 'ethers'
 import { web3Connect } from '@/helpers/aleph'
 import { chainNameToEnum } from '../pages/useHeader'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
-import { useConnect } from './useConnect'
+import { idToChain, useConnect } from './useConnect'
 
 export type WalletConnectReturn = {
   isWalletConnect: boolean
   disconnect: () => Promise<void>
-  chain: string
-  connect: (caipChainId: string, pairing?: {
-    topic: string;
-  }) => Promise<void>
+  connect: (
+    caipChainId: string,
+    pairing?: {
+      topic: string
+    },
+  ) => Promise<void>
   ethereumProvider: UniversalProvider
 }
 
 export const useWalletConnect = () => {
-  const [state, dispatch] = useAppState()
-  const { keepAccountAlive, getBalance } = useConnect()
+  const [_, dispatch] = useAppState()
+  const { keepAccountAlive, getBalance, setSelectedNetwork } = useConnect()
   const [client, setClient] = useState<Client>()
-  const [pairings, setPairings] = useState<PairingTypes.Struct[]>([])
   const [session, setSession] = useState<SessionTypes.Struct>()
-
   const [ethereumProvider, setEthereumProvider] = useState<UniversalProvider>()
-  const [web3Provider, setWeb3Provider] = useState<providers.Web3Provider>()
-
+  const [web3Modal, setWeb3Modal] = useState<Web3Modal>()
   const [hasCheckedPersistedSession, setHasCheckedPersistedSession] =
     useState(false)
-
-  const [accounts, setAccounts] = useState<string[]>([])
-  const [chain, setChain] = useState<string>('')
-  const [web3Modal, setWeb3Modal] = useState<Web3Modal>()
-
-  const resetApp = () => {
-    setPairings([])
-    setSession(undefined)
-    setAccounts([])
-    setChain('')
-  }
 
   const disconnect = useCallback(async () => {
     if (typeof ethereumProvider === 'undefined') {
@@ -54,8 +37,31 @@ export const useWalletConnect = () => {
     }
     await ethereumProvider.disconnect()
 
-    resetApp()
+    setSession(undefined)
   }, [ethereumProvider])
+
+  const displayUriListener = async (uri: string) => {
+    console.log('EVENT', 'QR Code Modal open')
+    web3Modal?.openModal({ uri })
+  }
+
+  const sessionPingListener = (event: any) => {
+    console.log('session_ping', event)
+  }
+
+  const sessionEventListener = (event: any) => {
+    console.log('session_event', event)
+  }
+
+  const sessionUpdateListener = async (event: any) => {
+    console.log('session_update', event)
+    setSession(event.session)
+  }
+
+  const sessionDeleteListener = (event: any) => {
+    console.log('session_delete', event)
+    setSession(undefined)
+  }
 
   const _subscribeToProviderEvents = useCallback(
     async (_client: UniversalProvider) => {
@@ -63,53 +69,11 @@ export const useWalletConnect = () => {
         throw new Error('WalletConnect is not initialized')
       }
 
-      _client.on('display_uri', async (uri: string) => {
-        console.log('EVENT', 'QR Code Modal open')
-        web3Modal?.openModal({ uri })
-      })
-
-      // Subscribe to session ping
-      _client.on(
-        'session_ping',
-        ({ id, topic }: { id: number; topic: string }) => {
-          console.log('EVENT', 'session_ping')
-          console.log(id, topic)
-        },
-      )
-
-      // Subscribe to session event
-      _client.on(
-        'session_event',
-        ({ event, chainId }: { event: any; chainId: string }) => {
-          console.log('EVENT', 'session_event')
-          console.log(event, chainId)
-        },
-      )
-
-      // Subscribe to session update
-      _client.on(
-        'session_update',
-        ({
-          topic,
-          session,
-        }: {
-          topic: string
-          session: SessionTypes.Struct
-        }) => {
-          console.log('EVENT', 'session_updated')
-          setSession(session)
-        },
-      )
-
-      // Subscribe to session delete
-      _client.on(
-        'session_delete',
-        ({ id, topic }: { id: number; topic: string }) => {
-          console.log('EVENT', 'session_deleted')
-          console.log(id, topic)
-          resetApp()
-        },
-      )
+      _client.on('display_uri', displayUriListener)
+      _client.on('session_ping', sessionPingListener)
+      _client.on('session_event', sessionEventListener)
+      _client.on('session_update', sessionUpdateListener)
+      _client.on('session_delete', sessionDeleteListener)
     },
     [web3Modal],
   )
@@ -137,24 +101,12 @@ export const useWalletConnect = () => {
     }
   }, [])
 
-  const createWeb3Provider = useCallback(
-    (ethereumProvider: UniversalProvider) => {
-      const web3Provider = new providers.Web3Provider(ethereumProvider)
-      setWeb3Provider(web3Provider)
-    },
-    [],
-  )
-
   const connect = useCallback(
     async (caipChainId: string, pairing?: { topic: string }) => {
       if (!ethereumProvider) {
         throw new ReferenceError('WalletConnect Client is not initialized.')
       }
-
       const chainId = caipChainId.split(':').pop()
-
-      console.log('Enabling EthereumProvider for chainId: ', chainId)
-
       const session = await ethereumProvider.connect({
         namespaces: {
           eip155: {
@@ -164,7 +116,7 @@ export const useWalletConnect = () => {
               'eth_sign',
               'personal_sign',
               'eth_signTypedData',
-              'wallet_addEthereumChain'
+              'wallet_addEthereumChain',
             ],
             chains: [`eip155:${chainId}`],
             events: ['chainChanged', 'accountsChanged'],
@@ -177,15 +129,12 @@ export const useWalletConnect = () => {
         pairingTopic: pairing?.topic,
       })
 
-      createWeb3Provider(ethereumProvider)
-      const _accounts = await ethereumProvider.enable()
-      setAccounts(_accounts)
+      await ethereumProvider.enable()
       setSession(session)
-      setChain(caipChainId)
 
       web3Modal?.closeModal()
     },
-    [ethereumProvider, createWeb3Provider, web3Modal],
+    [ethereumProvider, web3Modal],
   )
 
   const onSessionConnected = useCallback(
@@ -196,23 +145,19 @@ export const useWalletConnect = () => {
       const allNamespaceAccounts = Object.values(_session.namespaces)
         .map((namespace) => namespace.accounts)
         .flat()
-      const allNamespaceChains = Object.keys(_session.namespaces)
-
       const chainData = allNamespaceAccounts[0].split(':')
-      const caipChainId = `${chainData[0]}:${chainData[1]}`
-      console.log('restored caipChainId', caipChainId)
-      setChain(caipChainId)
+      setSelectedNetwork(idToChain(Number(chainData[1])))
       setSession(_session)
-      setAccounts(allNamespaceAccounts.map((account) => account.split(':')[2]))
-      console.log('RESTORED', allNamespaceChains, allNamespaceAccounts)
-      createWeb3Provider(ethereumProvider)
 
-      const account = await web3Connect(chainNameToEnum(chainData[1]), ethereumProvider)
+      const account = await web3Connect(
+        chainNameToEnum(chainData[1]),
+        ethereumProvider,
+      )
       dispatch({ type: ActionTypes.connect, payload: { account } })
 
       await Promise.all([getBalance(account)])
     },
-    [ethereumProvider, createWeb3Provider],
+    [ethereumProvider],
   )
 
   const _checkForPersistedSession = useCallback(
@@ -220,15 +165,9 @@ export const useWalletConnect = () => {
       if (typeof provider === 'undefined') {
         throw new Error('WalletConnect is not initialized')
       }
-      const pairings = provider.client.pairing.getAll({ active: true })
-      // populates existing pairings to state
-      setPairings(pairings)
-      console.log('RESTORED PAIRINGS: ', pairings)
       if (typeof session !== 'undefined') return
-      // populates (the last) existing session to state
       if (ethereumProvider?.session) {
         const _session = ethereumProvider?.session
-        console.log('RESTORED SESSION:', _session)
         await onSessionConnected(_session)
         return _session
       }
@@ -240,11 +179,20 @@ export const useWalletConnect = () => {
     if (!client) {
       createClient()
     }
-  }, [client, createClient])
+  }, [client])
 
   useEffect(() => {
-    if (ethereumProvider && web3Modal)
+    if (ethereumProvider && web3Modal) {
       _subscribeToProviderEvents(ethereumProvider)
+
+      return () => {
+        ethereumProvider.off('display_uri', displayUriListener)
+        ethereumProvider.off('session_ping', sessionPingListener)
+        ethereumProvider.off('session_event', sessionEventListener)
+        ethereumProvider.off('session_update', sessionUpdateListener)
+        ethereumProvider.off('session_delete', sessionDeleteListener)
+      }
+    }
   }, [_subscribeToProviderEvents, ethereumProvider, web3Modal])
 
   useEffect(() => {
@@ -266,8 +214,7 @@ export const useWalletConnect = () => {
   return {
     isWalletConnect: true,
     disconnect,
-    chain,
     connect,
-    ethereumProvider
+    ethereumProvider,
   }
 }

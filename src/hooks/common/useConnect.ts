@@ -4,7 +4,7 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { useCallback, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
 import { Providers } from '../pages/useHeader'
 import { WalletConnectReturn } from './useWalletConnect'
@@ -20,6 +20,7 @@ export type UseConnectReturn = {
     provider?: Providers,
   ) => Promise<Account | undefined>
   getBalance: (account: Account) => Promise<void>
+  setSelectedNetwork: Dispatch<SetStateAction<Chain>>
   selectedNetwork: Chain
   keepAccountAlive: boolean
 }
@@ -37,9 +38,8 @@ export function useConnect(): UseConnectReturn {
     'selectedNetwork',
     Chain.ETH,
   )
-  const [currentProvider, setCurrentProvider] = useState<null | WalletConnectReturn>(
-    null,
-  )
+  const [currentProvider, setCurrentProvider] =
+    useState<null | WalletConnectReturn>(null)
 
   const onNoti = useCallback(
     (error: string, variant: NotificationCardVariant) => {
@@ -144,8 +144,9 @@ export function useConnect(): UseConnectReturn {
     tryReconnect,
     switchNetwork,
     selectedNetwork,
+    setSelectedNetwork,
     keepAccountAlive,
-    getBalance
+    getBalance,
   }
 }
 
@@ -158,5 +159,16 @@ export function chainToId(chain: Chain): number {
       return 43114
     default:
       return 1
+  }
+}
+
+export function idToChain(chain: number): Chain {
+  switch (chain) {
+    case 1:
+      return Chain.ETH
+    case 43114:
+      return Chain.AVAX
+    default:
+      return Chain.ETH
   }
 }

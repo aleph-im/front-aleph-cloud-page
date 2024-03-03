@@ -71,7 +71,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
                     provider,
                   },
                   {
-                    color: 'orange',
+                    color: 'blue',
                     icon: 'walletConnect',
                     name: 'Wallet Connect',
                     provider: () => walletConnect,
@@ -89,7 +89,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
                     provider,
                   },
                   {
-                    color: 'orange',
+                    color: 'blue',
                     icon: 'walletConnect',
                     name: 'Wallet Connect',
                     provider: () => walletConnect,

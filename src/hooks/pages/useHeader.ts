@@ -4,7 +4,6 @@ import { DefaultTheme, useTheme } from 'styled-components'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { useAppState } from '@/contexts/appState'
 import { useConnect } from '../common/useConnect'
-import { useSessionStorage } from 'usehooks-ts'
 import {
   BreakpointId,
   useClickOutside,
@@ -151,7 +150,8 @@ export type UseHeaderReturn = UseRoutesReturn & {
 }
 
 export function useHeader(): UseHeaderReturn {
-  const { connect, disconnect, isConnected, account, keepAccountAlive } = useConnect()
+  const { connect, disconnect, isConnected, account, keepAccountAlive } =
+    useConnect()
   const { routes } = useRoutes()
   const router = useRouter()
   const { pathname } = router
@@ -170,9 +170,8 @@ export function useHeader(): UseHeaderReturn {
     async (wallet?: WalletProps, network?: NetworkProps) => {
       console.log('handleConnect', wallet, network)
       if (!isConnected && (wallet || network)) {
-        const provider = wallet
-          ? wallet.provider()
-          : window.ethereum
+        const provider =
+          wallet && wallet.provider ? wallet.provider() : window.ethereum
         const acc = await connect(chainNameToEnum(network?.name), provider)
         if (!acc) return
         // router.push('/')
