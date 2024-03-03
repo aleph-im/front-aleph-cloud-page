@@ -22,8 +22,8 @@ export default function App({ Component, pageProps }: AppProps) {
     <ThemeProvider theme={themes.twentysix}>
       <GlobalStyles />
       <GlobalStylesOverride />
-      <WalletConnectProvider>
-        <AppStateProvider>
+      <AppStateProvider>
+        <WalletConnectProvider>
           <NotificationProvider>
             <Viewport>
               <Sidebar />
@@ -43,8 +43,8 @@ export default function App({ Component, pageProps }: AppProps) {
               </Main>
             </Viewport>
           </NotificationProvider>
-        </AppStateProvider>
-      </WalletConnectProvider>
+        </WalletConnectProvider>
+      </AppStateProvider>
     </ThemeProvider>
   )
 }

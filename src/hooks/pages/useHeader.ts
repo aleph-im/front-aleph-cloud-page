@@ -290,7 +290,7 @@ export function useHeader(): UseHeaderReturn {
         ],
       },
     ],
-    [provider],
+    [provider, walletConnect],
   )
 
   const handleSwitchNetwork = useCallback(

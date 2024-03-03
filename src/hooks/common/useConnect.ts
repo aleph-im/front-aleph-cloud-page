@@ -4,21 +4,26 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { useCallback, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
-import { Providers } from '../pages/useHeader'
 import { WalletConnectReturn } from './useWalletConnect'
+import { ethers } from 'ethers'
+import Provider from '@walletconnect/universal-provider'
+
+export type Providers = ethers.providers.ExternalProvider | Provider
 
 export type UseConnectReturn = {
   connect: (
     chain?: Chain,
-    provider?: ExternalProvider,
+    provider?: Providers,
   ) => Promise<Account | undefined>
   disconnect: () => Promise<void>
   switchNetwork: (chain: Chain) => Promise<Account | undefined>
+  getBalance: (account: Account) => Promise<void>
   isConnected: boolean
   account: Account | undefined
   selectedNetwork: Chain
+  setSelectedNetwork: Dispatch<SetStateAction<Chain>>
   keepAccountAlive: boolean
 }
 
@@ -92,7 +97,7 @@ export function useConnect(): UseConnectReturn {
 
       return account
     },
-    [getBalance, dispatch, setSelectedNetwork, onNoti],
+    [setKeepAccountAlive, getBalance, dispatch, onNoti],
   )
 
   const disconnect = useCallback(async () => {
@@ -127,11 +132,6 @@ export function useConnect(): UseConnectReturn {
 
   const { account } = state
   const isConnected = !!account?.address
-
-  const tryReconnect = useCallback(async () => {
-    if (isConnected || !keepAccountAlive) return
-    await connect()
-  }, [isConnected, keepAccountAlive, connect])
 
   return {
     connect,
