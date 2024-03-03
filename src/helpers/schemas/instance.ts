@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { VolumeManager, VolumeType } from '@/domain/volume'
-import { validateMinNodeSpecs } from '@/hooks/form/useSelectInstanceSpecs'
 import { messageHashSchema, paymentMethodSchema } from './base'
 import {
   addSpecsSchema,
@@ -12,6 +11,7 @@ import {
 } from './execution'
 import { sshKeySchema } from './ssh'
 import { humanReadableSize } from '../utils'
+import { NodeManager } from '@/domain/node'
 
 // CRN STREAM
 
@@ -102,10 +102,14 @@ export const instanceStreamSchema = instanceSchema
       streamCost: z.number(),
     }),
   )
-  .refine(({ nodeSpecs, specs }) => validateMinNodeSpecs(specs, nodeSpecs), {
-    message: 'Insufficient node specs',
-    path: ['specs'],
-  })
+  .refine(
+    ({ nodeSpecs, specs }) =>
+      new NodeManager().validateMinNodeSpecs(specs, nodeSpecs),
+    {
+      message: 'Insufficient node specs',
+      path: ['specs'],
+    },
+  )
   .superRefine(async ({ nodeSpecs, specs, volumes = [] }, ctx) => {
     let available = nodeSpecs.disk.available_kB / 1024
 

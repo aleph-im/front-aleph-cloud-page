@@ -30,7 +30,7 @@ import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
 import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { DomainManager } from './domain'
+import { AddDomain, DomainManager } from './domain'
 import { EntityManager } from './types'
 import {
   instanceSchema,
@@ -40,6 +40,7 @@ import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { getHours } from '@/hooks/form/useSelectStreamDuration'
 import { CRN, NodeManager } from './node'
 import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
+import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -159,40 +160,24 @@ export class InstanceManager
     newInstance: AddInstance,
     account?: SuperfluidAccount,
   ): Promise<Instance> {
+    const steps = this.addSteps(newInstance, account)
+
+    while (true) {
+      const { value, done } = await steps.next()
+      if (done) return value
+    }
+  }
+
+  async *addSteps(
+    newInstance: AddInstance,
+    account?: SuperfluidAccount,
+  ): AsyncGenerator<void, Instance, void> {
     try {
-      const instanceMessage = await this.parseInstance(newInstance)
+      yield* this.addPAYGStreamSteps(newInstance, account)
 
-      if (newInstance.payment?.type === PaymentMethod.Stream) {
-        if (!account)
-          throw new Error(
-            'Invalid Superfluid account. Please connect your wallet.',
-          )
-        if (!newInstance.node || !newInstance.node.address)
-          throw new Error('Invalid CRN')
-        const { streamCost, streamDuration, sender, receiver } =
-          newInstance.payment
-        const alephxBalance = await account.getALEPHxBalance()
-        const alephxFlow = await account.getALEPHxFlow(receiver)
-        const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
-        if (totalFlow.greaterThan(1))
-          throw new Error(
-            `Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost.`,
-          )
-        const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
-        const totalRequiredAleph = usedAlephInDuration.add(streamCost)
-        if (alephxBalance.lt(totalRequiredAleph)) {
-          throw new Error(
-            `Insufficient balance: ${totalRequiredAleph
-              .sub(alephxBalance)
-              .toString()} ALEPH required. Try to lower the VM cost or the duration.`,
-          )
-        }
-        await account.increaseALEPHxFlow(
-          receiver,
-          streamCost / getHours(streamDuration),
-        )
-      }
+      const instanceMessage = yield* this.parseInstanceSteps(newInstance)
 
+      yield
       const response = await instance.publish({
         ...instanceMessage,
         APIServer: apiServer,
@@ -201,13 +186,14 @@ export class InstanceManager
       const [entity] = await this.parseMessages([response])
 
       // @note: Add the domain link
-      await this.parseDomains(entity.id, newInstance.domains)
+      yield* this.parseDomainsSteps(entity.id, newInstance.domains)
 
       // @note: Notify the CRN if it is a targeted stream
       if (
         newInstance.payment?.type === PaymentMethod.Stream &&
         newInstance.node
       ) {
+        yield
         await this.notifyCRNExecution(newInstance.node, entity.id)
       }
 
@@ -322,6 +308,69 @@ export class InstanceManager
     return response
   }
 
+  async getSteps(newInstance: AddInstance): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    const { sshKeys, volumes = [], domains = [] } = newInstance
+
+    if (newInstance.payment?.type === PaymentMethod.Stream) steps.push('stream')
+
+    const newKeys = this.parseNewSSHKeys(sshKeys)
+    const sshKeysSteps = await this.sshKeyManager.getSteps(newKeys)
+    for (const step of sshKeysSteps) steps.push(step)
+
+    const volumeSteps = await this.volumeManager.getSteps(volumes)
+    for (const step of volumeSteps) steps.push(step)
+
+    steps.push('instance')
+
+    const domainSteps = await this.domainManager.getSteps(
+      domains as AddDomain[],
+    )
+    for (const step of domainSteps) steps.push(step)
+
+    return steps
+  }
+
+  protected async *addPAYGStreamSteps(
+    newInstance: AddInstance,
+    account?: SuperfluidAccount,
+  ): AsyncGenerator<void, void, void> {
+    if (newInstance.payment?.type !== PaymentMethod.Stream) return
+
+    if (!account)
+      throw new Error('Invalid Superfluid account. Please connect your wallet.')
+
+    if (!newInstance.node || !newInstance.node.address)
+      throw new Error('Invalid CRN')
+
+    const { streamCost, streamDuration, receiver } = newInstance.payment
+    const alephxBalance = await account.getALEPHxBalance()
+    const alephxFlow = await account.getALEPHxFlow(receiver)
+    const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
+
+    if (totalFlow.greaterThan(1))
+      throw new Error(
+        `Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost.`,
+      )
+
+    const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
+    const totalRequiredAleph = usedAlephInDuration.add(streamCost)
+
+    if (alephxBalance.lt(totalRequiredAleph)) {
+      throw new Error(
+        `Insufficient balance: ${totalRequiredAleph
+          .sub(alephxBalance)
+          .toString()} ALEPH required. Try to lower the VM cost or the duration.`,
+      )
+    }
+
+    yield
+    await account.increaseALEPHxFlow(
+      receiver,
+      streamCost / getHours(streamDuration),
+    )
+  }
+
   protected formatVMIPv6Address(ipv6: string): string {
     // Replace the trailing slash and number
     let newIpv6 = ipv6.replace(/\/\d+$/, '')
@@ -330,9 +379,9 @@ export class InstanceManager
     return newIpv6
   }
 
-  protected async parseInstance(
+  protected async *parseInstanceSteps(
     newInstance: AddInstance,
-  ): Promise<InstancePublishConfiguration> {
+  ): AsyncGenerator<void, InstancePublishConfiguration, void> {
     newInstance = await InstanceManager.addSchema.parseAsync(newInstance)
 
     const { account, channel } = this
@@ -342,9 +391,9 @@ export class InstanceManager
     const variables = this.parseEnvVars(envVars)
     const resources = this.parseSpecs(specs)
     const metadata = this.parseMetadata(name, tags)
-    const authorized_keys = await this.parseSSHKeys(sshKeys)
-    const volumes = await this.parseVolumes(newInstance.volumes)
     const payment = this.parsePayment(newInstance.payment)
+    const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
+    const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
 
     return {
       account,
@@ -359,26 +408,27 @@ export class InstanceManager
     }
   }
 
-  protected async parseVolumes(
+  protected async *parseVolumesSteps(
     volumes?: VolumeField | VolumeField[],
-  ): Promise<MachineVolume[] | undefined> {
+  ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
     if (!volumes) return
-
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
-    return super.parseVolumes(volumes)
+    return yield* super.parseVolumesSteps(volumes)
   }
 
-  protected async parseSSHKeys(
+  protected async *parseSSHKeysSteps(
     sshKeys?: SSHKeyField[],
-  ): Promise<string[] | undefined> {
-    if (!sshKeys || sshKeys.length === 0) return
-
+  ): AsyncGenerator<void, string[] | undefined, void> {
     // @note: Create new keys before instance
-    const newKeys = sshKeys.filter((key) => key.isNew && key.isSelected)
-    await this.sshKeyManager.add(newKeys, false)
+    const newKeys = this.parseNewSSHKeys(sshKeys)
+    yield* this.sshKeyManager.addSteps(newKeys, false)
 
-    return sshKeys.filter((key) => key.isSelected).map(({ key }) => key)
+    return sshKeys?.filter((key) => key.isSelected).map(({ key }) => key)
+  }
+
+  protected parseNewSSHKeys(sshKeys?: SSHKeyField[]): SSHKeyField[] {
+    return sshKeys?.filter((key) => key.isNew && key.isSelected) || []
   }
 
   protected async parseMessages(messages: any[]): Promise<Instance[]> {

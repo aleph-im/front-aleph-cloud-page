@@ -10,6 +10,10 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { EntityType } from '@/helpers/constants'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export type NewVolumeFormState = NewVolumeStandaloneField
 
@@ -33,21 +37,42 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
   const { account } = appState
 
   const manager = useVolumeManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewVolumeFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const [accountVolume] = await manager.add(state)
+      const iSteps = await manager.getSteps(state)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      dispatch({
-        type: ActionTypes.addAccountVolume,
-        payload: { accountVolume },
-      })
+      const steps = manager.addSteps(state)
 
-      await router.replace('/')
+      try {
+        let accountVolume
+
+        while (!accountVolume) {
+          const { value, done } = await steps.next()
+
+          if (done) {
+            accountVolume = value[0]
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        dispatch({
+          type: ActionTypes.addAccountVolume,
+          payload: { accountVolume },
+        })
+
+        await router.replace('/')
+      } finally {
+        await stop()
+      }
     },
-    [dispatch, manager, router],
+    [dispatch, manager, next, router, stop],
   )
 
   const {

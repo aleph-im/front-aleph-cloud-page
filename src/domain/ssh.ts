@@ -10,6 +10,7 @@ import {
 import { getDate, getExplorerURL } from '../helpers/utils'
 import { EntityManager } from './types'
 import { sshKeySchema, sshKeysSchema } from '@/helpers/schemas/ssh'
+import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 
 export type AddSSHKey = {
   key: string
@@ -71,11 +72,26 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     sshKeys: AddSSHKey | AddSSHKey[],
     throwOnCollision?: boolean,
   ): Promise<SSHKey[]> {
+    const steps = this.addSteps(sshKeys, throwOnCollision)
+
+    while (true) {
+      const { value, done } = await steps.next()
+      if (done) return value
+    }
+  }
+
+  async *addSteps(
+    sshKeys: AddSSHKey | AddSSHKey[],
+    throwOnCollision?: boolean,
+  ): AsyncGenerator<void, SSHKey[], void> {
     sshKeys = Array.isArray(sshKeys) ? sshKeys : [sshKeys]
 
     sshKeys = await this.parseSSHKeys(sshKeys, throwOnCollision)
+    if (sshKeys.length === 0) return []
 
     try {
+      // @note: Aggregate all signatures in 1 step
+      yield
       const response = await Promise.all(
         sshKeys.map(({ key, label }) =>
           post.Publish({
@@ -107,6 +123,18 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     } catch (err) {
       throw E_.RequestFailed(err)
     }
+  }
+
+  async getSteps(
+    sshKeys: AddSSHKey | AddSSHKey[],
+    throwOnCollision?: boolean,
+  ): Promise<CheckoutStepType[]> {
+    sshKeys = Array.isArray(sshKeys) ? sshKeys : [sshKeys]
+    sshKeys = await this.parseSSHKeys(sshKeys, throwOnCollision)
+
+    // @note: Aggregate all signatures in 1 step
+    // return sshKeys.map(() => 'ssh')
+    return sshKeys.length ? ['ssh'] : []
   }
 
   protected async parseSSHKeys(

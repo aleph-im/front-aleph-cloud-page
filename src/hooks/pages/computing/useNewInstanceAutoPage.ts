@@ -28,6 +28,10 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export type NewInstanceHoldFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -67,23 +71,43 @@ export function useNewInstanceAutoPage(): UseNewInstanceAutoPage {
   const { account, accountBalance } = appState
 
   const manager = useInstanceManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewInstanceHoldFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const accountInstance = await manager.add(state)
+      const iSteps = await manager.getSteps(state)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      dispatch({
-        type: ActionTypes.addAccountInstance,
-        payload: { accountInstance },
-      })
+      const steps = manager.addSteps(state)
 
-      // @todo: Check new volumes and domains being created to add them to the store
+      try {
+        let accountInstance
 
-      await router.replace('/')
+        while (!accountInstance) {
+          const { value, done } = await steps.next()
+
+          if (done) {
+            accountInstance = value
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        // @todo: Check new volumes and domains being created to add them to the store
+        dispatch({
+          type: ActionTypes.addAccountInstance,
+          payload: { accountInstance },
+        })
+
+        await router.replace('/')
+      } finally {
+        await stop()
+      }
     },
-    [dispatch, manager, router],
+    [dispatch, manager, next, router, stop],
   )
 
   const {

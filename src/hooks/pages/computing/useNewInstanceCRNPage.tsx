@@ -16,7 +16,6 @@ import {
 import {
   getDefaultSpecsOptions,
   InstanceSpecsField,
-  validateMinNodeSpecs,
 } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { DomainField } from '@/hooks/form/useAddDomains'
@@ -27,15 +26,20 @@ import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
+import { CRN, CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
 import {
   defaultStreamDuration,
   StreamDurationField,
 } from '@/hooks/form/useSelectStreamDuration'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { ActionTypes } from '@/helpers/store'
 import { useConnect } from '@/hooks/common/useConnect'
 import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
+import { ActionTypes } from '@/helpers/store'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -115,18 +119,21 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
     return min
   }, [])
 
+  const nodeManager = useNodeManager()
+
   useEffect(() => {
     if (!nodeSpecs) return
 
-    const isValid = validateMinNodeSpecs(minSpecs, nodeSpecs)
+    const isValid = nodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
     if (isValid) return
 
     router.replace('.')
-  }, [minSpecs, nodeSpecs, router])
+  }, [nodeManager, minSpecs, nodeSpecs, router])
 
   // -------------------------
 
   const manager = useInstanceManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewInstanceCRNFormState) => {
@@ -144,7 +151,10 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
         superfluidAccount = account as SuperfluidAccount
       }
 
-      const accountInstance = await manager.add(
+      const iSteps = await manager.getSteps(state)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
+
+      const steps = manager.addSteps(
         {
           ...state,
           payment: {
@@ -160,16 +170,42 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
         superfluidAccount,
       )
 
-      dispatch({
-        type: ActionTypes.addAccountInstance,
-        payload: { accountInstance },
-      })
+      try {
+        let accountInstance
 
-      // @todo: Check new volumes and domains being created to add them to the store
+        while (!accountInstance) {
+          const { value, done } = await steps.next()
 
-      await router.replace('/')
+          if (done) {
+            accountInstance = value
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        // @todo: Check new volumes and domains being created to add them to the store
+        dispatch({
+          type: ActionTypes.addAccountInstance,
+          payload: { accountInstance },
+        })
+
+        await router.replace('/')
+      } finally {
+        await stop()
+      }
     },
-    [account, dispatch, manager, node, router, selectedNetwork, switchNetwork],
+    [
+      account,
+      dispatch,
+      manager,
+      next,
+      node,
+      router,
+      selectedNetwork,
+      stop,
+      switchNetwork,
+    ],
   )
 
   const {

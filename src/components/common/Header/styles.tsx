@@ -34,7 +34,7 @@ export const StyledWalletPicker = styled(WalletPicker)<{
       transform: ${`translate3d(${x}px, ${y}px, 0)`};
       opacity: ${$isOpen ? 1 : 0};
       will-change: opacity transform;
-      transition: opacity ease-in-out 0.25s 0s;
+      transition: opacity ease-in-out 250ms 0s;
     `
   }}
 `

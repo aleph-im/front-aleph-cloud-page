@@ -4,23 +4,20 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { Dispatch, SetStateAction, useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
 import { Providers } from '../pages/useHeader'
 import { WalletConnectReturn } from './useWalletConnect'
 
 export type UseConnectReturn = {
-  connect: (chain?: Chain, provider?: Providers) => Promise<Account | undefined>
-  disconnect: (provider?: Providers) => Promise<void>
+  connect: (
+    chain?: Chain,
+    provider?: ExternalProvider,
+  ) => Promise<Account | undefined>
+  disconnect: () => Promise<void>
+  switchNetwork: (chain: Chain) => Promise<Account | undefined>
   isConnected: boolean
   account: Account | undefined
-  tryReconnect: () => Promise<void>
-  switchNetwork: (
-    chain: Chain,
-    provider?: Providers,
-  ) => Promise<Account | undefined>
-  getBalance: (account: Account) => Promise<void>
-  setSelectedNetwork: Dispatch<SetStateAction<Chain>>
   selectedNetwork: Chain
   keepAccountAlive: boolean
 }
@@ -95,7 +92,7 @@ export function useConnect(): UseConnectReturn {
 
       return account
     },
-    [setKeepAccountAlive, getBalance, dispatch, onNoti],
+    [getBalance, dispatch, setSelectedNetwork, onNoti],
   )
 
   const disconnect = useCallback(async () => {
@@ -125,7 +122,7 @@ export function useConnect(): UseConnectReturn {
 
       return account
     },
-    [connect, setSelectedNetwork],
+    [dispatch, getBalance, onNoti, setSelectedNetwork],
   )
 
   const { account } = state
@@ -139,10 +136,9 @@ export function useConnect(): UseConnectReturn {
   return {
     connect,
     disconnect,
+    switchNetwork,
     isConnected,
     account,
-    tryReconnect,
-    switchNetwork,
     selectedNetwork,
     setSelectedNetwork,
     keepAccountAlive,

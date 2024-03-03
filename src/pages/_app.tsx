@@ -9,15 +9,12 @@ import Main from '@/components/common/Main'
 import Content from '@/components/common/Content'
 import Viewport from '@/components/common/Viewport'
 import Sidebar from '@/components/common/Sidebar'
-import { useRouterLoadState } from '@/hooks/common/useRouterLoadState'
 import { AppStateProvider } from '@/contexts/appState'
 import Loading from './loading'
 import { useRef } from 'react'
 import { WalletConnectProvider } from '@/contexts/walletConnect'
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { loading } = useRouterLoadState()
-
   const mainRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -40,7 +37,7 @@ export default function App({ Component, pageProps }: AppProps) {
                       contentRef,
                     }}
                   />
-                  {loading && <Loading />}
+                  <Loading />
                 </Content>
                 <Footer />
               </Main>

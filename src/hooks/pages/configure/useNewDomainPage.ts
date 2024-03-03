@@ -16,6 +16,10 @@ import {
   DomainField,
   defaultValues as defaultDomain,
 } from '@/hooks/form/useAddDomains'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export type NewDomainFormState = DomainField
 
@@ -44,23 +48,45 @@ export type UseNewDomainPageReturn = {
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
   const router = useRouter()
-  const manager = useDomainManager()
   const [{ accountInstances, accountFunctions }, dispatch] = useAppState()
+
+  const manager = useDomainManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewDomainFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const [accountDomain] = await manager.add(state)
+      const iSteps = await manager.getSteps(state)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      dispatch({
-        type: ActionTypes.addAccountDomain,
-        payload: { accountDomain },
-      })
+      const steps = manager.addSteps(state)
 
-      await router.replace('/')
+      try {
+        let accountDomain
+
+        while (!accountDomain) {
+          const { value, done } = await steps.next()
+
+          if (done) {
+            accountDomain = value[0]
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        dispatch({
+          type: ActionTypes.addAccountDomain,
+          payload: { accountDomain },
+        })
+
+        await router.replace('/')
+      } finally {
+        await stop()
+      }
     },
-    [dispatch, manager, router],
+    [dispatch, manager, next, router, stop],
   )
 
   const {

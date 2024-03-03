@@ -7,15 +7,12 @@ import {
   UseRequestCRNSpecsReturn,
   useRequestCRNSpecs,
 } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import {
-  getDefaultSpecsOptions,
-  validateMinNodeSpecs,
-} from '@/hooks/form/useSelectInstanceSpecs'
+import { getDefaultSpecsOptions } from '@/hooks/form/useSelectInstanceSpecs'
 import { useRequestCRNIps } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { PaymentMethod } from '@/helpers/constants'
 import { CRN, StreamNotSupportedIssue } from '@/domain/node'
-import { useDebounceState } from '@aleph-front/core'
+import { useDebounceState, usePaginatedList } from '@aleph-front/core'
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
@@ -25,6 +22,8 @@ export type UseNewInstanceCRNListPage = UseRequestCRNsReturn &
     filteredNodes?: CRN[]
     filter: string
     validPAYGNodesOnly: boolean
+    loadItemsDisabled: boolean
+    handleLoadItems: () => Promise<void>
     handleFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
     handleValidPAYGNodesOnlyChange: (e: ChangeEvent<HTMLInputElement>) => void
   }
@@ -93,7 +92,7 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
       const nodeSpecs = specs[node.hash]?.data
 
       if (nodeSpecs) {
-        const validSpecs = validateMinNodeSpecs(minSpecs, nodeSpecs)
+        const validSpecs = nodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
 
         if (!validSpecs) {
           ac[node.hash] = StreamNotSupportedIssue.MinSpecs
@@ -112,7 +111,10 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
         }
       }
 
-      ac[node.hash] = StreamNotSupportedIssue.Valid
+      if (nodeSpecs && nodeIps) {
+        ac[node.hash] = StreamNotSupportedIssue.Valid
+      }
+
       return ac
     }, {} as StreamSupportedIssues)
   }, [baseFilteredNodes, nodeManager, specs, ips, minSpecs])
@@ -154,6 +156,18 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
     })
   }, [filteredNodes, nodesIssues])
 
+  // -----------------------------
+
+  const {
+    list: paginatedFilteredNodes,
+    loadItemsDisabled,
+    handleLoadItems,
+  } = usePaginatedList({
+    list: sortedNodes,
+    itemsPerPage: 20,
+    resetDeps: [baseFilteredNodes],
+  })
+
   const loading = loading1 || loading2
 
   return {
@@ -162,9 +176,11 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
     specs,
     loading,
     nodesIssues,
-    filteredNodes: sortedNodes,
+    filteredNodes: paginatedFilteredNodes,
     filter,
     validPAYGNodesOnly,
+    loadItemsDisabled,
+    handleLoadItems,
     handleFilterChange,
     handleValidPAYGNodesOnlyChange,
   }

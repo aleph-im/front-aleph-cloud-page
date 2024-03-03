@@ -234,6 +234,12 @@ export enum StreamNotSupportedIssue {
   RewardAddress = 4,
 }
 
+export type ReducedCRNSpecs = {
+  cpu: number
+  ram: number
+  storage: number
+}
+
 // @todo: Refactor (create a domain npm package and move this there)
 export class NodeManager {
   constructor(
@@ -456,6 +462,17 @@ export class NodeManager {
       return StreamNotSupportedIssue.Version
 
     return StreamNotSupportedIssue.Valid
+  }
+
+  validateMinNodeSpecs(
+    minSpecs: ReducedCRNSpecs,
+    nodeSpecs: CRNSpecs,
+  ): boolean {
+    return (
+      minSpecs.cpu <= nodeSpecs.cpu.count &&
+      minSpecs.ram <= (nodeSpecs.mem.available_kB || 0) / 1024 &&
+      minSpecs.storage <= (nodeSpecs.disk.available_kB || 0) / 1024
+    )
   }
 
   protected parseResourceNodes(crns: CRN[]): CRN[] {

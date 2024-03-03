@@ -19,6 +19,7 @@ import {
   newIsolatedVolumesSchema,
 } from '@/helpers/schemas/volume'
 import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
+import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 
 export { VolumeType }
 
@@ -259,6 +260,17 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   async add(volumes: AddVolume | AddVolume[]): Promise<Volume[]> {
+    const steps = this.addSteps(volumes)
+
+    while (true) {
+      const { value, done } = await steps.next()
+      if (done) return value
+    }
+  }
+
+  async *addSteps(
+    volumes: AddVolume | AddVolume[],
+  ): AsyncGenerator<void, Volume[], void> {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
     const newVolumes = await this.parseNewVolumes(volumes)
@@ -267,6 +279,8 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     try {
       const { account, channel } = this
 
+      // @note: Aggregate all signatures in 1 step
+      yield
       const response = await Promise.all(
         newVolumes.map(async ({ file: fileObject }) =>
           store.Publish({
@@ -308,6 +322,17 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     const blob = await req.blob()
 
     return downloadBlob(blob, `Volume_${volumeOrId.slice(-12)}.sqsh`)
+  }
+
+  async getSteps(
+    volumes: AddVolume | AddVolume[],
+  ): Promise<CheckoutStepType[]> {
+    volumes = Array.isArray(volumes) ? volumes : [volumes]
+    const newVolumes = await this.parseNewVolumes(volumes)
+
+    // @note: Aggregate all signatures in 1 step
+    // return newVolumes.map(() => 'volume')
+    return newVolumes.length ? ['volume'] : []
   }
 
   protected async parseNewVolumes(

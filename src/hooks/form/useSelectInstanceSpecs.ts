@@ -1,13 +1,11 @@
-import { CRNSpecs } from '@/domain/node'
+import { CRNSpecs, ReducedCRNSpecs } from '@/domain/node'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { convertByteUnits } from '@/helpers/utils'
 import { useEffect, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
+import { useNodeManager } from '../common/useManager/useNodeManager'
 
-export type InstanceSpecsField = {
-  cpu: number
-  ram: number
-  storage: number
+export type InstanceSpecsField = ReducedCRNSpecs & {
   disabled?: boolean
 }
 
@@ -65,17 +63,6 @@ export type UseSelectInstanceSpecsReturn = {
   nodeSpecs?: CRNSpecs
 }
 
-export function validateMinNodeSpecs(
-  minSpecs: InstanceSpecsField,
-  nodeSpecs: CRNSpecs,
-): boolean {
-  return (
-    minSpecs.cpu <= nodeSpecs.cpu.count &&
-    minSpecs.ram <= (nodeSpecs.mem.available_kB || 0) / 1024 &&
-    minSpecs.storage <= (nodeSpecs.disk.available_kB || 0) / 1024
-  )
-}
-
 export function useSelectInstanceSpecs({
   name = 'specs',
   control,
@@ -87,13 +74,15 @@ export function useSelectInstanceSpecs({
   nodeSpecs,
   ...rest
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
+  const manager = useNodeManager()
+
   const options = useMemo(() => {
     const opts =
       optionsProp || getDefaultSpecsOptions(isPersistent, paymentMethod)
     if (paymentMethod === PaymentMethod.Hold) return opts
     if (!nodeSpecs) return []
-    return opts.filter((opt) => validateMinNodeSpecs(opt, nodeSpecs))
-  }, [optionsProp, isPersistent, paymentMethod, nodeSpecs])
+    return opts.filter((opt) => manager.validateMinNodeSpecs(opt, nodeSpecs))
+  }, [manager, optionsProp, isPersistent, paymentMethod, nodeSpecs])
 
   const specsCtrl = useController({
     control,

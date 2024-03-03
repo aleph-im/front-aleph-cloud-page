@@ -22,6 +22,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { CustomFunctionRuntimeField } from '@/domain/runtime'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -60,23 +64,43 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const { account, accountBalance } = appState
 
   const manager = useProgramManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewFunctionFormState) => {
       if (!manager) throw new Error('Manager not ready')
 
-      const accountFunction = await manager.add(state)
+      const iSteps = await manager.getSteps(state)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      dispatch({
-        type: ActionTypes.addAccountFunction,
-        payload: { accountFunction },
-      })
+      const steps = manager.addSteps(state)
 
-      // @todo: Check new volumes and domains being created to add them to the store
+      try {
+        let accountFunction
 
-      await router.replace('/')
+        while (!accountFunction) {
+          const { value, done } = await steps.next()
+
+          if (done) {
+            accountFunction = value
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        // @todo: Check new volumes and domains being created to add them to the store
+        dispatch({
+          type: ActionTypes.addAccountFunction,
+          payload: { accountFunction },
+        })
+
+        await router.replace('/')
+      } finally {
+        await stop()
+      }
     },
-    [dispatch, manager, router],
+    [dispatch, manager, next, router, stop],
   )
 
   const {
