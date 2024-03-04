@@ -11,7 +11,7 @@ import {
 import { DefaultTheme, useTheme } from 'styled-components'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { useAppState } from '@/contexts/appState'
-import { useConnect } from '../common/useConnect'
+import { ProviderEnum, useConnect } from '../common/useConnect'
 import {
   BreakpointId,
   useClickOutside,
@@ -171,7 +171,7 @@ export function useHeader(): UseHeaderReturn {
     isConnected,
     selectedNetwork: selectedNetworkChain,
     switchNetwork: switchNetworkChain,
-    keepAccountAlive
+    currentProvider
   } = useConnect()
   const walletConnect = useContext(WalletConnectContext)
 
@@ -179,15 +179,6 @@ export function useHeader(): UseHeaderReturn {
   const router = useRouter()
 
   const { pathname } = router
-
-  const enableConnection = useCallback(async () => {
-    if (!isConnected) {
-      const acc = await connect()
-      if (!acc) return
-    } else {
-      await disconnect()
-    }
-  }, [connect, disconnect, isConnected])
 
   // @note: wait till account is connected and redirect
   const handleConnect = useCallback(
@@ -211,29 +202,34 @@ export function useHeader(): UseHeaderReturn {
 
   const provider = useCallback(() => {
     ;(window.ethereum as any)?.on('accountsChanged', function () {
-      connect()
+      connect(selectedNetworkChain, window.ethereum)
     })
 
     return window.ethereum
-  }, [connect])
-
-  useEffect(() => {
-    ;(async () => {
-      if (!account && keepAccountAlive) {
-        enableConnection()
-      }
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, keepAccountAlive])
+  }, [])
 
   useEffect(() => {
     provider()
     return () => {
       ;(window.ethereum as any)?.removeListener('accountsChanged', () => {
-        connect()
+        disconnect()
       })
     }
   }, [])
+
+  const enableConnection = useCallback(async () => {
+    if (!isConnected) {
+      await connect(selectedNetworkChain, window.ethereum)
+    }
+  }, [selectedNetworkChain, currentProvider, isConnected])
+
+  useEffect(() => {
+    ;(async () => {
+      if (!account && currentProvider === ProviderEnum.Ethereum) {
+        enableConnection()
+      }
+    })()
+  }, [account, currentProvider, enableConnection])
 
   // --------------------
 

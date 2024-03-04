@@ -6,43 +6,45 @@ import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { Dispatch, SetStateAction, useCallback, useContext, useState } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
-import { WalletConnectReturn } from './useWalletConnect'
 import { ethers } from 'ethers'
-import Provider from '@walletconnect/universal-provider'
 import { WalletConnectContext } from '@/contexts/walletConnect'
+import { WalletConnectReturn } from './useWalletConnect'
 
-export type Providers = ethers.providers.ExternalProvider | Provider
+export type Providers = ethers.providers.ExternalProvider | WalletConnectReturn
 
 export type UseConnectReturn = {
-  connect: (
-    chain?: Chain,
-    provider?: Providers,
-  ) => Promise<Account | undefined>
+  connect: (chain?: Chain, provider?: Providers) => Promise<Account | undefined>
   disconnect: () => Promise<void>
-  switchNetwork: (chain: Chain) => Promise<Account | undefined>
+  switchNetwork: (chain?: Chain, provider?: Providers) => Promise<Account | undefined>
   getBalance: (account: Account) => Promise<void>
   isConnected: boolean
   account: Account | undefined
   selectedNetwork: Chain
   setSelectedNetwork: Dispatch<SetStateAction<Chain>>
-  keepAccountAlive: boolean
+  currentProvider: ProviderEnum
 }
 
 type NotificationCardVariant = 'error' | 'success' | 'warning'
+
+export enum ProviderEnum {
+  Ethereum = "Ethereum",
+  WalletConnect = "WalletConnect",
+  Disconnected = "DisconnectState",
+}
 
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
   const walletConnect = useContext(WalletConnectContext)
   const noti = useNotification()
-  const [keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
-    'keepAccountAlive',
-    false,
-  )
   const [selectedNetwork, setSelectedNetwork] = useSessionStorage<Chain>(
     'selectedNetwork',
     Chain.ETH,
   )
-
+  const [currentProvider, setCurrentProvider] = useSessionStorage<ProviderEnum>(
+    'currentProvider',
+    ProviderEnum.Disconnected
+  )
+    
   const onNoti = useCallback(
     (error: string, variant: NotificationCardVariant) => {
       noti &&
@@ -65,29 +67,27 @@ export function useConnect(): UseConnectReturn {
 
   const connect = useCallback(
     async (chain?: Chain, provider?: any) => {
-      if (!chain) return
-      let account
+      if (!chain) chain = selectedNetwork
+      if (!provider) {
+        provider = currentProvider === ProviderEnum.WalletConnect ?
+          walletConnect : window.ethereum 
+      } 
 
+      let account
       try {
-        if (provider && provider.isWalletConnect) {
-          await provider.connect()
+        if (provider.isWalletConnect) {
+          setCurrentProvider(ProviderEnum.WalletConnect)
+          await provider.connect(chainToId(chain).toString())
           account = await web3Connect(chain, provider.ethereumProvider)
         } else {
+          setCurrentProvider(ProviderEnum.Ethereum)
           account = await web3Connect(chain, provider)
         }
-        // else if (!provider && window.web3) {
-        //   provider = window.web3.currentProvider
-        // } else if (!provider && window.solana) {
-        //   provider = window.solana
-        // }
         if (!account) return
 
-        setKeepAccountAlive(true)
         setSelectedNetwork(chain)
-
         dispatch({ type: ActionTypes.connect, payload: { account } })
-
-        await Promise.all([getBalance(account)])
+        getBalance(account)
       } catch (err) {
         console.log(err)
         const e = err as Error
@@ -96,31 +96,45 @@ export function useConnect(): UseConnectReturn {
 
       return account
     },
-    [setKeepAccountAlive, getBalance, dispatch, onNoti],
+    [currentProvider, selectedNetwork, dispatch, setCurrentProvider, getBalance, onNoti]
   )
 
   const disconnect = useCallback(async () => {
-    setKeepAccountAlive(false)
-    walletConnect?.disconnect()
+    if (currentProvider === ProviderEnum.WalletConnect) {
+      walletConnect?.disconnect()
+    }
+    
+    setCurrentProvider(ProviderEnum.Disconnected)
 
     dispatch({ type: ActionTypes.disconnect, payload: null })
-  }, [dispatch, setKeepAccountAlive])
+  }, [dispatch, currentProvider, walletConnect])
 
   const switchNetwork = useCallback(
-    async (chain: Chain, provider?: Providers) => {
+    async (chain?: Chain, provider?: any) => {
+      if (!chain) chain = selectedNetwork
+      if (!provider) {
+        provider = currentProvider === ProviderEnum.WalletConnect ?
+          walletConnect?.ethereumProvider : window.ethereum 
+      } 
+
       let account
-
-      if (!provider) provider = window.ethereum
       try {
-        account = await web3Connect(chain, provider)
-        setSelectedNetwork(chain)
-        await Promise.all([getBalance(account)])
-      } catch (err) {
-        const e = err as Error
-        onNoti(`Error during network switch: ${e.message}`, 'error')
-      }
+        if (provider.isWalletConnect) {
+          await provider.switchNetwork(chainToId(chain).toString())
+          account = await web3Connect(chain, provider.ethereumProvider)
+        } else {
+          account = await web3Connect(chain, provider)
+        }
+        if (!account) return
 
-      dispatch({ type: ActionTypes.connect, payload: { account } })
+        setSelectedNetwork(chain)
+        dispatch({ type: ActionTypes.connect, payload: { account } })
+        getBalance(account)
+      } catch (err) {
+        console.log(err)
+        const e = err as Error
+        onNoti(e.message, 'error') // we assume because the user denied the connection
+      }
 
       return account
     },
@@ -138,8 +152,8 @@ export function useConnect(): UseConnectReturn {
     account,
     selectedNetwork,
     setSelectedNetwork,
-    keepAccountAlive,
     getBalance,
+    currentProvider
   }
 }
 

@@ -4,22 +4,33 @@ import UniversalProvider from '@walletconnect/universal-provider'
 import { web3Connect } from '@/helpers/aleph'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
-import { idToChain, useConnect } from './useConnect'
+import { ProviderEnum, idToChain, useConnect } from './useConnect'
+import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 
 export type WalletConnectReturn = {
   isWalletConnect: boolean
   disconnect: () => Promise<void>
-  connect: () => Promise<void>
+  connect: (chain: string) => Promise<void>
+  switchNetwork: (chain: string) => Promise<void>
   ethereumProvider?: UniversalProvider
 }
 
 export const useWalletConnect = () => {
   const [_, dispatch] = useAppState()
-  const { keepAccountAlive, getBalance, selectedNetwork, setSelectedNetwork } = useConnect()
+  const { account, isConnected, currentProvider, getBalance, selectedNetwork, setSelectedNetwork } = useConnect()
   const [ethereumProvider, setEthereumProvider] = useState<UniversalProvider>()
   const [web3Modal, setWeb3Modal] = useState<Web3Modal>()
-  const [hasCheckedPersistedSession, setHasCheckedPersistedSession] =
-    useState(false)
+
+  const switchNetwork = useCallback(async (chain: Chain) => {
+    if (!ethereumProvider) {
+      throw new Error('ethereumProvider is not initialized')
+    }
+    ethereumProvider.setDefaultChain(`eip155:${{chain}}`)
+    const account = await web3Connect(chain, ethereumProvider)
+    setSelectedNetwork(chain)
+    dispatch({ type: ActionTypes.connect, payload: { account } })
+    await getBalance(account)
+  }, [ethereumProvider])
 
   const disconnect = useCallback(async () => {
     if (!ethereumProvider) {
@@ -31,7 +42,7 @@ export const useWalletConnect = () => {
   }, [ethereumProvider])
 
   const connect = useCallback(
-    async () => {
+    async (chain: string) => {
       if (!ethereumProvider) {
         throw new Error('ethereumProvider is not initialized')
       }
@@ -67,7 +78,7 @@ export const useWalletConnect = () => {
           },
         },
       })
-
+      ethereumProvider.setDefaultChain(`eip155:${{chain}}`)
       await ethereumProvider.enable()
 
       web3Modal?.closeModal()
@@ -113,36 +124,27 @@ export const useWalletConnect = () => {
 
   // setup - clean-up listeners
 
-  const displayUriListener = async (uri: string) => {
+  const displayUriListener = useCallback(async (uri: string) => {
     web3Modal?.openModal({ uri })
-  }
-
-  const sessionEventListener = async (event: any) => {
-    // in case the user has a different network in the mobile
-    // the state is updated in the initialization also
+  }, [web3Modal])
+  
+  const sessionEventListener = useCallback(async (event: any) => {
     if (event.params?.event?.name === 'chainChanged') {
-      const chain = idToChain(event.params?.event?.data)
-      const account = await web3Connect(chain, ethereumProvider)
-      setSelectedNetwork(chain)
-      dispatch({ type: ActionTypes.connect, payload: { account } })
-      await Promise.all([getBalance(account)])
+      await switchNetwork(idToChain(event.params?.event?.data))
     }
-  }
+  }, [ethereumProvider, setSelectedNetwork, dispatch]); 
 
-  const subscribeToEvents = useCallback(
-    async () => {
-      if (!ethereumProvider) {
-        throw new Error('ethereumProvider is not initialized')
-      }
-
-      ethereumProvider.on('display_uri', displayUriListener)
-      ethereumProvider.on('session_event', sessionEventListener)
-    },
-    [web3Modal, selectedNetwork],
-  )
+  const subscribeToEvents = useCallback(async () => {
+    if (!ethereumProvider) {
+      throw new Error('ethereumProvider is not initialized')
+    }
+  
+    ethereumProvider.on('display_uri', displayUriListener)
+    ethereumProvider.on('session_event', sessionEventListener)
+  }, [ethereumProvider, displayUriListener, sessionEventListener])  
   
   useEffect(() => {
-    if (ethereumProvider && web3Modal) {
+    if (ethereumProvider) {
       subscribeToEvents()
 
       return () => {
@@ -150,35 +152,32 @@ export const useWalletConnect = () => {
         ethereumProvider.off('session_event', sessionEventListener)
       }
     }
-  }, [subscribeToEvents, ethereumProvider, web3Modal, selectedNetwork])
+  }, [subscribeToEvents, ethereumProvider])
 
   // session management
 
-  const checkPersistedSession = async () => {
-    if (!ethereumProvider) return
-    const account = await web3Connect(
-      selectedNetwork,
-      ethereumProvider,
-    )
-    dispatch({ type: ActionTypes.connect, payload: { account } })
-    await Promise.all([getBalance(account)])
-    setHasCheckedPersistedSession(true)
-  }
+  const enableConnection = useCallback(async () => {
+    if (!ethereumProvider || isConnected) return
+    if (ethereumProvider.session) {
+      const account = await web3Connect(selectedNetwork, ethereumProvider)
+      dispatch({ type: ActionTypes.connect, payload: { account } })
+      await Promise.all([getBalance(account)])
+    }
+  }, [ethereumProvider, isConnected, selectedNetwork, dispatch])  
 
   useEffect(() => {
-    if (ethereumProvider && !hasCheckedPersistedSession && keepAccountAlive) {
-      checkPersistedSession()
-    }
-  }, [
-    ethereumProvider,
-    hasCheckedPersistedSession,
-    keepAccountAlive,
-  ])
+    ;(async () => {
+      if (!account && currentProvider === ProviderEnum.WalletConnect) {
+        enableConnection()
+      }
+    })()
+  }, [account, currentProvider, enableConnection])
 
   return {
     isWalletConnect: true,
     disconnect,
     connect,
+    switchNetwork,
     ethereumProvider,
   }
 }
