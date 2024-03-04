@@ -4,11 +4,12 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { Dispatch, SetStateAction, useCallback, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useContext, useState } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
 import { WalletConnectReturn } from './useWalletConnect'
 import { ethers } from 'ethers'
 import Provider from '@walletconnect/universal-provider'
+import { WalletConnectContext } from '@/contexts/walletConnect'
 
 export type Providers = ethers.providers.ExternalProvider | Provider
 
@@ -31,6 +32,7 @@ type NotificationCardVariant = 'error' | 'success' | 'warning'
 
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
+  const walletConnect = useContext(WalletConnectContext)
   const noti = useNotification()
   const [keepAccountAlive, setKeepAccountAlive] = useSessionStorage(
     'keepAccountAlive',
@@ -40,8 +42,6 @@ export function useConnect(): UseConnectReturn {
     'selectedNetwork',
     Chain.ETH,
   )
-  const [currentProvider, setCurrentProvider] =
-    useState<null | WalletConnectReturn>(null)
 
   const onNoti = useCallback(
     (error: string, variant: NotificationCardVariant) => {
@@ -70,8 +70,7 @@ export function useConnect(): UseConnectReturn {
 
       try {
         if (provider && provider.isWalletConnect) {
-          await provider.connect(`eip155:${chainToId(chain)}`)
-          setCurrentProvider(provider)
+          await provider.connect()
           account = await web3Connect(chain, provider.ethereumProvider)
         } else {
           account = await web3Connect(chain, provider)
@@ -102,10 +101,8 @@ export function useConnect(): UseConnectReturn {
 
   const disconnect = useCallback(async () => {
     setKeepAccountAlive(false)
-    if (currentProvider) {
-      await currentProvider.disconnect()
-      setCurrentProvider(null)
-    }
+    walletConnect?.disconnect()
+
     dispatch({ type: ActionTypes.disconnect, payload: null })
   }, [dispatch, setKeepAccountAlive])
 

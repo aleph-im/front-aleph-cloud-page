@@ -9,12 +9,7 @@ import { idToChain, useConnect } from './useConnect'
 export type WalletConnectReturn = {
   isWalletConnect: boolean
   disconnect: () => Promise<void>
-  connect: (
-    caipChainId: string,
-    pairing?: {
-      topic: string
-    },
-  ) => Promise<void>
+  connect: () => Promise<void>
   ethereumProvider?: UniversalProvider
 }
 
@@ -30,31 +25,44 @@ export const useWalletConnect = () => {
     if (!ethereumProvider) {
       throw new Error('ethereumProvider is not initialized')
     }
-    await ethereumProvider.disconnect()
+    if (ethereumProvider.session) {
+      await ethereumProvider.disconnect()
+    }
   }, [ethereumProvider])
 
   const connect = useCallback(
-    async (chain: string) => {
+    async () => {
       if (!ethereumProvider) {
         throw new Error('ethereumProvider is not initialized')
       }
 
+      const methods = [
+        'eth_sendTransaction',
+        'eth_signTransaction',
+        'eth_sign',
+        'personal_sign',
+        'eth_signTypedData',
+        'wallet_addEthereumChain',
+      ]
+      const events = ['chainChanged', 'accountsChanged']
       await ethereumProvider.connect({
         namespaces: {
           eip155: {
-            methods: [
-              'eth_sendTransaction',
-              'eth_signTransaction',
-              'eth_sign',
-              'personal_sign',
-              'eth_signTypedData',
-              'wallet_addEthereumChain',
-            ],
-            chains: [chain],
-            events: ['chainChanged', 'accountsChanged'],
+            methods,
+            events,
+            chains: ['eip155:1'],
             rpcMap: {
-              chainId: `https://rpc.walletconnect.com?chainId=${chain}&projectId=${!process
-                .env.NEXT_PUBLIC_WALLET_CONNECT_ID}`,
+              ['eip155:1']: `https://rpc.walletconnect.com?chainId=eip155:1&projectId=${!process.env.NEXT_PUBLIC_WALLET_CONNECT_ID}`,
+            },
+          },
+        },
+        optionalNamespaces: {
+          eip155: {
+            methods,
+            events,
+            chains: ['eip155:43114'],
+            rpcMap: {
+              ['eip155:43114']: `https://rpc.walletconnect.com?chainId=eip155:43114&projectId=${!process.env.NEXT_PUBLIC_WALLET_CONNECT_ID}`,
             },
           },
         },
@@ -76,12 +84,18 @@ export const useWalletConnect = () => {
       const provider = await UniversalProvider.init({
         projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID!,
         logger: 'debug',
-        //relayUrl: DEFAULT_RELAY_URL,
+        metadata: {
+          name: 'Aleph.im',
+          description: 'Aleph.im: Web3 cloud solution',
+          url: 'https://aleph.im/',
+          icons: []
+        }
       })
 
       const web3Modal = new Web3Modal({
         projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID!,
         walletConnectVersion: 2,
+        //mobileWallets: []
       })
 
       setEthereumProvider(provider)
@@ -103,10 +117,15 @@ export const useWalletConnect = () => {
     web3Modal?.openModal({ uri })
   }
 
-  const sessionEventListener = (event: any) => {
-    if (event.params?.event?.name === 'accountsChanged') {
-      const chain = idToChain(event.params.chainId.split(':')[1])
+  const sessionEventListener = async (event: any) => {
+    // in case the user has a different network in the mobile
+    // the state is updated in the initialization also
+    if (event.params?.event?.name === 'chainChanged') {
+      const chain = idToChain(event.params?.event?.data)
+      const account = await web3Connect(chain, ethereumProvider)
       setSelectedNetwork(chain)
+      dispatch({ type: ActionTypes.connect, payload: { account } })
+      await Promise.all([getBalance(account)])
     }
   }
 
@@ -119,7 +138,7 @@ export const useWalletConnect = () => {
       ethereumProvider.on('display_uri', displayUriListener)
       ethereumProvider.on('session_event', sessionEventListener)
     },
-    [web3Modal],
+    [web3Modal, selectedNetwork],
   )
   
   useEffect(() => {
@@ -131,7 +150,7 @@ export const useWalletConnect = () => {
         ethereumProvider.off('session_event', sessionEventListener)
       }
     }
-  }, [subscribeToEvents, ethereumProvider, web3Modal])
+  }, [subscribeToEvents, ethereumProvider, web3Modal, selectedNetwork])
 
   // session management
 
