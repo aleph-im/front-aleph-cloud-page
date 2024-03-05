@@ -38,6 +38,7 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
     validPAYGNodesOnly,
     loadItemsDisabled,
     handleLoadItems,
+    handleSortItems,
     handleFilterChange,
     handleValidPAYGNodesOnlyChange,
   } = useNewInstanceCRNListPage()
@@ -325,6 +326,7 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
                 data,
                 infiniteScroll: !loadItemsDisabled,
                 onLoadMore: handleLoadItems,
+                onSort: handleSortItems,
                 rowProps: handleRowProps,
                 loadingPlaceholder,
               }}

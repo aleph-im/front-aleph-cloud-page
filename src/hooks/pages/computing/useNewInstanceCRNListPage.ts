@@ -13,6 +13,10 @@ import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { PaymentMethod } from '@/helpers/constants'
 import { CRN, StreamNotSupportedIssue } from '@/domain/node'
 import { useDebounceState, usePaginatedList } from '@aleph-front/core'
+import {
+  UseSortedListReturn,
+  useSortedList,
+} from '@/hooks/common/useSortedList'
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
@@ -24,6 +28,7 @@ export type UseNewInstanceCRNListPage = UseRequestCRNsReturn &
     validPAYGNodesOnly: boolean
     loadItemsDisabled: boolean
     handleLoadItems: () => Promise<void>
+    handleSortItems: UseSortedListReturn<any>['handleSortItems']
     handleFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
     handleValidPAYGNodesOnlyChange: (e: ChangeEvent<HTMLInputElement>) => void
   }
@@ -158,12 +163,16 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
 
   // -----------------------------
 
+  const { list: sortedFilteredNodes, handleSortItems } = useSortedList({
+    list: sortedNodes,
+  })
+
   const {
-    list: paginatedFilteredNodes,
+    list: paginatedSortedFilteredNodes,
     loadItemsDisabled,
     handleLoadItems,
   } = usePaginatedList({
-    list: sortedNodes,
+    list: sortedFilteredNodes,
     itemsPerPage: 20,
     resetDeps: [baseFilteredNodes],
   })
@@ -176,11 +185,12 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
     specs,
     loading,
     nodesIssues,
-    filteredNodes: paginatedFilteredNodes,
+    filteredNodes: paginatedSortedFilteredNodes,
     filter,
     validPAYGNodesOnly,
     loadItemsDisabled,
     handleLoadItems,
+    handleSortItems,
     handleFilterChange,
     handleValidPAYGNodesOnlyChange,
   }
