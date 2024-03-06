@@ -4,18 +4,15 @@ import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
 import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { Dispatch, SetStateAction, useCallback, useContext, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
-import { ethers } from 'ethers'
-import { WalletConnectContext } from '@/contexts/walletConnect'
-import { WalletConnectReturn } from './useWalletConnect'
-
-export type Providers = ethers.providers.ExternalProvider | WalletConnectReturn
+import { useWalletConnect } from '@/contexts/walletConnect'
 
 export type UseConnectReturn = {
-  connect: (chain?: Chain, provider?: Providers) => Promise<Account | undefined>
+  connect: (chain?: Chain, provider?: any) => Promise<Account | undefined>
+  onSessionConnect: (chain: Chain, provider: any) => Promise<Account | undefined>
   disconnect: () => Promise<void>
-  switchNetwork: (chain?: Chain, provider?: Providers) => Promise<Account | undefined>
+  switchNetwork: (chain?: Chain, provider?: any) => Promise<Account | undefined>
   getBalance: (account: Account) => Promise<void>
   isConnected: boolean
   account: Account | undefined
@@ -27,14 +24,14 @@ export type UseConnectReturn = {
 type NotificationCardVariant = 'error' | 'success' | 'warning'
 
 export enum ProviderEnum {
-  Ethereum = "Ethereum",
+  Metamask = "Metamask",
   WalletConnect = "WalletConnect",
   Disconnected = "DisconnectState",
 }
 
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
-  const walletConnect = useContext(WalletConnectContext)
+  const walletConnect = useWalletConnect()
   const noti = useNotification()
   const [selectedNetwork, setSelectedNetwork] = useSessionStorage<Chain>(
     'selectedNetwork',
@@ -65,80 +62,78 @@ export function useConnect(): UseConnectReturn {
     [dispatch],
   )
 
-  const connect = useCallback(
-    async (chain?: Chain, provider?: any) => {
-      if (!chain) chain = selectedNetwork
-      if (!provider) {
-        provider = currentProvider === ProviderEnum.WalletConnect ?
-          walletConnect : window.ethereum 
-      } 
-
-      let account
-      try {
-        if (provider.isWalletConnect) {
-          setCurrentProvider(ProviderEnum.WalletConnect)
-          await provider.connect(chainToId(chain).toString())
-          account = await web3Connect(chain, provider.ethereumProvider)
-        } else {
-          setCurrentProvider(ProviderEnum.Ethereum)
-          account = await web3Connect(chain, provider)
-        }
-        if (!account) return
-
-        setSelectedNetwork(chain)
-        dispatch({ type: ActionTypes.connect, payload: { account } })
-        getBalance(account)
-      } catch (err) {
-        console.log(err)
-        const e = err as Error
-        onNoti(e.message, 'error') // we assume because the user denied the connection
-      }
+  const onSessionConnect = useCallback(
+    async (chain: Chain, provider: any) => {
+      const account = await web3Connect(chain, provider)
+      if (!account) return
+      
+      dispatch({ type: ActionTypes.connect, payload: { account } })
+      getBalance(account)
+      setSelectedNetwork(chain)
+      setCurrentProvider(provider.isWalletConnect ? 
+        ProviderEnum.WalletConnect : ProviderEnum.Metamask)
 
       return account
     },
-    [currentProvider, selectedNetwork, dispatch, setCurrentProvider, getBalance, onNoti]
+    [dispatch, getBalance, setSelectedNetwork, setCurrentProvider]
+  )
+
+  const connect = useCallback(
+    async (chain?: Chain, provider?: any) => {
+      if (!chain) return
+      if (!provider) provider = window.ethereum
+
+      let account
+
+      try {
+        if (provider?.isWalletConnect) {
+          account = await provider.connect(chain)
+
+          if (!account) return
+        } else {
+          account = onSessionConnect(chain, provider)
+        }
+        if (!account) return
+      } catch (err) {
+        const e = err as Error
+        onNoti(e.message, 'error') // we assume because the user denied the connection
+      }
+  
+      return account
+    },
+    [onSessionConnect, onNoti],
   )
 
   const disconnect = useCallback(async () => {
     if (currentProvider === ProviderEnum.WalletConnect) {
       walletConnect?.disconnect()
     }
-    
     setCurrentProvider(ProviderEnum.Disconnected)
-
     dispatch({ type: ActionTypes.disconnect, payload: null })
   }, [dispatch, currentProvider, walletConnect])
 
   const switchNetwork = useCallback(
     async (chain?: Chain, provider?: any) => {
-      if (!chain) chain = selectedNetwork
-      if (!provider) {
-        provider = currentProvider === ProviderEnum.WalletConnect ?
-          walletConnect?.ethereumProvider : window.ethereum 
-      } 
+      if (!chain) return
+      if (!provider) provider = currentProvider === ProviderEnum.Metamask ? 
+        window.ethereum : walletConnect
 
       let account
       try {
-        if (provider.isWalletConnect) {
-          await provider.switchNetwork(chainToId(chain).toString())
-          account = await web3Connect(chain, provider.ethereumProvider)
+        if (provider?.isWalletConnect) {
+          account = await provider.switchNetwork(chain)
         } else {
-          account = await web3Connect(chain, provider)
+          account = await onSessionConnect(chain, provider)
         }
         if (!account) return
-
-        setSelectedNetwork(chain)
-        dispatch({ type: ActionTypes.connect, payload: { account } })
-        getBalance(account)
       } catch (err) {
         console.log(err)
         const e = err as Error
-        onNoti(e.message, 'error') // we assume because the user denied the connection
+        onNoti(e.message, 'error')
       }
-
       return account
     },
-    [dispatch, getBalance, onNoti, setSelectedNetwork],
+    [onSessionConnect, walletConnect, currentProvider, setSelectedNetwork, setCurrentProvider, onNoti],
   )
 
   const { account } = state
@@ -146,6 +141,7 @@ export function useConnect(): UseConnectReturn {
 
   return {
     connect,
+    onSessionConnect,
     disconnect,
     switchNetwork,
     isConnected,

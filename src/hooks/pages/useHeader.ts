@@ -29,7 +29,7 @@ import {
   UseBreadcrumbNamesReturn,
 } from '../common/useBreadcrumbNames'
 import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { WalletConnectContext } from '@/contexts/walletConnect'
+import { useWalletConnect } from '@/contexts/walletConnect'
 
 export type UseAccountButtonProps = {
   networks: NetworkProps['network'][]
@@ -166,6 +166,7 @@ export type UseHeaderReturn = UseRoutesReturn & {
 export function useHeader(): UseHeaderReturn {
   const {
     connect,
+    onSessionConnect,
     account,
     disconnect,
     isConnected,
@@ -173,7 +174,7 @@ export function useHeader(): UseHeaderReturn {
     switchNetwork: switchNetworkChain,
     currentProvider
   } = useConnect()
-  const walletConnect = useContext(WalletConnectContext)
+  const walletConnect = useWalletConnect()
 
   const { routes } = useRoutes()
   const router = useRouter()
@@ -202,34 +203,29 @@ export function useHeader(): UseHeaderReturn {
 
   const provider = useCallback(() => {
     ;(window.ethereum as any)?.on('accountsChanged', function () {
-      connect(selectedNetworkChain, window.ethereum)
+      connect()
     })
 
     return window.ethereum
   }, [])
 
+  // auto-login metamask
+
+  const enableConnection = useCallback(async () => {
+    if (currentProvider === ProviderEnum.Metamask && !account && !isConnected) {
+      await onSessionConnect(selectedNetworkChain, window.ethereum)
+    }
+  }, [currentProvider, onSessionConnect, isConnected, account])
+
   useEffect(() => {
     provider()
+    enableConnection()
     return () => {
       ;(window.ethereum as any)?.removeListener('accountsChanged', () => {
         disconnect()
       })
     }
   }, [])
-
-  const enableConnection = useCallback(async () => {
-    if (!isConnected) {
-      await connect(selectedNetworkChain, window.ethereum)
-    }
-  }, [selectedNetworkChain, currentProvider, isConnected])
-
-  useEffect(() => {
-    ;(async () => {
-      if (!account && currentProvider === ProviderEnum.Ethereum) {
-        enableConnection()
-      }
-    })()
-  }, [account, currentProvider, enableConnection])
 
   // --------------------
 
