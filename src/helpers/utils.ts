@@ -192,7 +192,7 @@ export const humanReadableCurrency = (value?: number, decimals = 2) => {
   else return (value / 10 ** 9).toFixed(decimals) + 'B'
 }
 
-const messageTypeWhitelist = new Set(...Object.values(MessageType))
+const messageTypeWhitelist = new Set(Object.values(MessageType))
 
 /**
  * Returns a link to the Aleph explorer for a given message
