@@ -17,6 +17,7 @@ import {
   useAddFunctionCode,
 } from '@/hooks/form/useAddFunctionCode'
 import { FunctionLangId } from '@/domain/lang'
+import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 
 export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
   const {
@@ -160,31 +161,9 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
           </>
         )}
         <div tw="mt-6 text-right">
-          <InfoTooltipButton
-            my="bottom-right"
-            at="top-right"
-            tooltipContent={
-              <div tw="text-left">
-                <div>
-                  <div className="tp-body2 fs-18">Write code</div>
-                  <div className="tp-body1 fs-18">
-                    Your code should have an app function that will serve as an
-                    entrypoint to the program.
-                  </div>
-                </div>
-                <div tw="mt-6">
-                  <div className="tp-body2 fs-18">Upload code</div>
-                  <div className="tp-body1 fs-18">
-                    Your zip file should contain a main file (ex: main.py) at
-                    its root that exposes an app function. This will serve as an
-                    entrypoint to the program.
-                  </div>
-                </div>
-              </div>
-            }
-          >
-            More info
-          </InfoTooltipButton>
+          <ExternalLinkButton href="https://docs.aleph.im/webconsole/">
+            Learn more
+          </ExternalLinkButton>
         </div>
       </div>
     </>
