@@ -161,7 +161,7 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
           </>
         )}
         <div tw="mt-6 text-right">
-          <ExternalLinkButton href="https://docs.aleph.im/webconsole/">
+          <ExternalLinkButton href="https://docs.aleph.im/tools/webconsole/">
             Learn more
           </ExternalLinkButton>
         </div>
