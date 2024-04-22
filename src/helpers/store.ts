@@ -9,6 +9,7 @@ import { Domain, DomainManager } from '@/domain/domain'
 import { IndexerManager } from '@/domain/indexer'
 import { NodeManager } from '@/domain/node'
 import { defaultAccountChannel } from '@/helpers/constants'
+import { Website, WebsiteManager } from '@/domain/website'
 
 export enum ActionTypes {
   connect,
@@ -24,6 +25,9 @@ export enum ActionTypes {
   setAccountVolumes,
   addAccountVolume,
   delAccountVolume,
+  setAccountWebsites,
+  addAccountWebsite,
+  delAccountWebsite,
   setAccountInstances,
   addAccountInstance,
   delAccountInstance,
@@ -41,12 +45,14 @@ export type State = {
   accountFiles?: AccountFilesResponse
   accountSSHKeys?: SSHKey[]
   accountDomains?: Domain[]
+  accountWebsites?: Website[]
 
   fileManager: FileManager
   messageManager?: MessageManager
   sshKeyManager?: SSHKeyManager
   domainManager?: DomainManager
   volumeManager?: VolumeManager
+  websiteManager?: WebsiteManager
   programManager?: ProgramManager
   instanceManager?: InstanceManager
   indexerManager?: IndexerManager
@@ -71,10 +77,16 @@ function createDefaultManagers(account?: Account) {
   return {
     fileManager,
     nodeManager,
+    messageManager: undefined,
+    sshKeyManager: undefined,
+    domainManager: undefined,
+    volumeManager: undefined,
+    websiteManager: undefined,
+    programManager: undefined,
+    instanceManager: undefined,
+    indexerManager: undefined,
   }
 }
-
-const { fileManager, nodeManager } = createDefaultManagers()
 
 export const initialState: State = {
   account: undefined,
@@ -86,15 +98,7 @@ export const initialState: State = {
   accountSSHKeys: undefined,
   accountDomains: undefined,
 
-  fileManager,
-  messageManager: undefined,
-  sshKeyManager: undefined,
-  domainManager: undefined,
-  volumeManager: undefined,
-  programManager: undefined,
-  instanceManager: undefined,
-  indexerManager: undefined,
-  nodeManager,
+  ...createDefaultManagers(),
 }
 
 function addEntitiesToCollection<E extends { id: string }>(
@@ -146,6 +150,7 @@ export const reducer = (
       const sshKeyManager = new SSHKeyManager(account)
       const domainManager = new DomainManager(account)
       const volumeManager = new VolumeManager(account, fileManager)
+      const websiteManager = new WebsiteManager(account, volumeManager)
       const programManager = new ProgramManager(
         account,
         volumeManager,
@@ -178,6 +183,7 @@ export const reducer = (
         sshKeyManager,
         domainManager,
         volumeManager,
+        websiteManager,
         programManager,
         instanceManager,
         indexerManager,
@@ -186,21 +192,10 @@ export const reducer = (
     }
 
     case ActionTypes.disconnect: {
-      const { fileManager, nodeManager } = createDefaultManagers()
-
       return {
         ...state,
         account: undefined,
-
-        fileManager,
-        messageManager: undefined,
-        sshKeyManager: undefined,
-        domainManager: undefined,
-        volumeManager: undefined,
-        programManager: undefined,
-        instanceManager: undefined,
-        indexerManager: undefined,
-        nodeManager,
+        ...createDefaultManagers(),
       }
     }
 
@@ -329,6 +324,44 @@ export const reducer = (
       return {
         ...state,
         accountVolumes,
+      }
+    }
+
+    // ------ Websites --------
+
+    case ActionTypes.setAccountWebsites: {
+      const accountWebsites = replaceCollection(
+        payload.accountWebsites,
+        state.accountWebsites,
+      )
+
+      return {
+        ...state,
+        accountWebsites,
+      }
+    }
+
+    case ActionTypes.addAccountWebsite: {
+      const accountWebsites = addEntityToCollection(
+        payload.accountWebsite,
+        state.accountWebsites,
+      )
+
+      return {
+        ...state,
+        accountWebsites,
+      }
+    }
+
+    case ActionTypes.delAccountWebsite: {
+      const accountWebsites = delEntityFromCollection(
+        payload.id,
+        state.accountWebsites,
+      )
+
+      return {
+        ...state,
+        accountWebsites,
       }
     }
 

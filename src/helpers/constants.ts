@@ -61,7 +61,16 @@ export enum EntityType {
   SSHKey = 'sshKey',
   Domain = 'domain',
   Indexer = 'indexer',
+  Website = 'website',
 }
+
+export type CheckoutStepType =
+  | 'ssh'
+  | 'volume'
+  | 'domain'
+  | 'stream'
+  | 'instance'
+  | 'program'
 
 export enum AddDomainTarget {
   IPFS = 'ipfs',
@@ -82,6 +91,7 @@ export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.SSHKey]: 'SSH Key',
   [EntityType.Domain]: 'Domain',
   [EntityType.Indexer]: 'Indexer',
+  [EntityType.Website]: 'Website',
 }
 
 export const EntityTypeUrlSection: Record<EntityType, string> = {
@@ -91,6 +101,7 @@ export const EntityTypeUrlSection: Record<EntityType, string> = {
   [EntityType.SSHKey]: 'configure',
   [EntityType.Domain]: 'configure',
   [EntityType.Indexer]: 'tools',
+  [EntityType.Website]: 'hosting',
 }
 
 export const EntityTypeSlug: Record<EntityType, string> = {
@@ -100,6 +111,7 @@ export const EntityTypeSlug: Record<EntityType, string> = {
   [EntityType.SSHKey]: 'ssh',
   [EntityType.Domain]: 'domain',
   [EntityType.Indexer]: 'indexer',
+  [EntityType.Website]: 'website',
 }
 
 export enum IndexerBlockchain {
@@ -122,3 +134,14 @@ export enum PaymentMethod {
 }
 
 export const superToken = '0x1290248E01ED2F9f863A9752A8aAD396ef3a1B00'
+
+export enum WebsiteFrameworkId {
+  none = 'none',
+  react = 'react',
+  nextjs = 'nextjs',
+  gatsby = 'gatsby',
+  svelte = 'svelte',
+  vue = 'vue',
+  nuxt = 'nuxt',
+  angular = 'angular',
+}

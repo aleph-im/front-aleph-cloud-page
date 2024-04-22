@@ -26,6 +26,16 @@ export function useRoutes(): UseRoutesReturn {
             ],
           },
           {
+            name: 'Web3 Hosting',
+            href: '/hosting',
+            children: [
+              {
+                name: 'Manage Your Website',
+                href: '/hosting/website/new',
+              },
+            ],
+          },
+          {
             name: 'Computing',
             href: '/computing',
             children: [

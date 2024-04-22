@@ -69,10 +69,9 @@ export const HiddenFileInput = forwardRef(
           <Button
             onClick={handleClick}
             type="button"
-            color="main0"
-            kind="default"
+            kind="functional"
             size="md"
-            variant="primary"
+            variant="warning"
           >
             {children}
           </Button>

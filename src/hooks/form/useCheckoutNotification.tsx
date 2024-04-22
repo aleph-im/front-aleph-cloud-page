@@ -2,17 +2,12 @@ import CheckoutNotification, {
   CheckoutNotificationProps,
 } from '@/components/form/CheckoutNotification'
 import { CheckoutNotificationStep } from '@/components/form/CheckoutNotification/types'
+import { CheckoutStepType } from '@/helpers/constants'
 import { sleep } from '@/helpers/utils'
 import { useNotification } from '@aleph-front/core'
 import { useCallback, useRef } from 'react'
 
-export type CheckoutStepType =
-  | 'ssh'
-  | 'volume'
-  | 'domain'
-  | 'stream'
-  | 'instance'
-  | 'program'
+export type { CheckoutStepType }
 
 export type UseCheckoutNotificationSteps = CheckoutNotificationProps['steps']
 

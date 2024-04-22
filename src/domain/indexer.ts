@@ -18,7 +18,7 @@ import { VolumeField } from '@/hooks/form/useAddVolume'
 import { VolumeType } from './volume'
 import { IndexerBlockchainNetworkField } from '@/hooks/form/useAddIndexerBlockchainNetworks'
 import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccounts'
-import { BlockchainDefaultABIUrl } from '@/helpers/constants'
+import { BlockchainDefaultABIUrl, CheckoutStepType } from '@/helpers/constants'
 import { FunctionLangId, FunctionLanguage } from './lang'
 
 export type AddIndexer = NameAndTagsField & {
@@ -80,6 +80,16 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
     protected account: Account,
     protected programManager: ProgramManager,
   ) {}
+
+  getSteps(entity: AddIndexer | AddIndexer[]): Promise<CheckoutStepType[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  addSteps(
+    entity: AddIndexer | AddIndexer[],
+  ): AsyncGenerator<void, Program | Program[], void> {
+    throw new Error('Method not implemented.')
+  }
 
   async getAll(): Promise<Indexer[]> {
     try {
