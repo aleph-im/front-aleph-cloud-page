@@ -159,7 +159,6 @@ export type UseHeaderReturn = UseRoutesReturn & {
     network?: NetworkProps['network'],
   ) => Promise<void>
   handleDisconnect: () => void
-  provider: () => void
 }
 
 export function useHeader(): UseHeaderReturn {
@@ -174,6 +173,16 @@ export function useHeader(): UseHeaderReturn {
   const router = useRouter()
 
   const { pathname } = router
+
+  // --------------------
+
+  const provider = useCallback(() => {
+    ;(window.ethereum as any)?.on('accountsChanged', function () {
+      connect()
+    })
+
+    return window.ethereum
+  }, [connect])
 
   const [keepAccountAlive, setkeepAccountAlive] = useSessionStorage(
     'keepAccountAlive',
@@ -195,10 +204,8 @@ export function useHeader(): UseHeaderReturn {
       console.log('handleConnect', wallet, network)
       if (!isConnected && (wallet || network)) {
         setkeepAccountAlive(true)
-        const acc = await connect(
-          chainNameToEnum(network?.name),
-          wallet?.provider(),
-        )
+        const prov = provider()
+        const acc = await connect(chainNameToEnum(network?.name), prov)
         if (!acc) return
         // router.push('/')
       } else {
@@ -207,18 +214,8 @@ export function useHeader(): UseHeaderReturn {
         router.push('/')
       }
     },
-    [connect, disconnect, isConnected, router, setkeepAccountAlive],
+    [connect, disconnect, provider, isConnected, router, setkeepAccountAlive],
   )
-
-  // --------------------
-
-  const provider = useCallback(() => {
-    ;(window.ethereum as any)?.on('accountsChanged', function () {
-      connect()
-    })
-
-    return window.ethereum
-  }, [connect])
 
   // @todo: handle this on the provider method of the WalletConnect component
   // the provider function should initialize the provider and return a dispose function
@@ -257,7 +254,6 @@ export function useHeader(): UseHeaderReturn {
             color: 'orange',
             icon: 'metamask',
             name: 'Metamask',
-            provider,
           },
         ],
       },
@@ -269,12 +265,11 @@ export function useHeader(): UseHeaderReturn {
             color: 'orange',
             icon: 'metamask',
             name: 'Metamask',
-            provider,
           },
         ],
       },
     ],
-    [provider],
+    [],
   )
 
   const handleSwitchNetwork = useCallback(
@@ -302,6 +297,5 @@ export function useHeader(): UseHeaderReturn {
     handleToggle,
     handleConnect,
     handleDisconnect,
-    provider,
   }
 }
