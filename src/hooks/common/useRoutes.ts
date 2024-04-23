@@ -49,7 +49,7 @@ export function useRoutes(): UseRoutesReturn {
             href: '/storage',
             children: [
               {
-                name: 'Inmutable volumes',
+                name: 'Immutable volumes',
                 href: '/storage/volume/new',
               },
             ],
