@@ -30,6 +30,15 @@ export function useRequestCRNSpecs({
           .map(async (node) => {
             if (specs[node.hash]) return
 
+            setSpecs((prev) => ({
+              ...prev,
+              [node.hash]: {
+                loading: true,
+                data: undefined,
+                error: undefined,
+              },
+            }))
+
             const nodeSpecs = await nodeManager.getCRNspecs(node)
 
             setSpecs((prev) => ({

@@ -30,6 +30,15 @@ export function useRequestCRNIps({
           .map(async (node) => {
             if (ips[node.hash]) return
 
+            setIps((prev) => ({
+              ...prev,
+              [node.hash]: {
+                loading: true,
+                data: undefined,
+                error: undefined,
+              },
+            }))
+
             const nodeSpecs = await nodeManager.getCRNips(node)
 
             setIps((prev) => ({
