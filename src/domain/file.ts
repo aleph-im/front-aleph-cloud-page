@@ -79,6 +79,17 @@ export class FileManager {
     return Number.POSITIVE_INFINITY
   }
 
+  static async getFolderSize(folder?: FileList): Promise<number> {
+    if (!folder) return Number.POSITIVE_INFINITY
+    let totalSize = 0
+    Array.from(folder).forEach((file) => {
+      const size = file?.size
+      if (size === undefined) return Number.POSITIVE_INFINITY
+      totalSize += convertByteUnits(file.size, { from: 'B', to: 'MiB' })
+    })
+    return totalSize
+  }
+
   constructor(
     protected account?: Account,
     protected channel = defaultConsoleChannel,

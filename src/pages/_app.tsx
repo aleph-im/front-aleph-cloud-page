@@ -10,6 +10,7 @@ import Content from '@/components/common/Content'
 import Viewport from '@/components/common/Viewport'
 import Sidebar from '@/components/common/Sidebar'
 import { AppStateProvider } from '@/contexts/appState'
+import { HeliaProvider } from '@/contexts/helia'
 import Loading from './loading'
 import { useRef } from 'react'
 
@@ -23,23 +24,25 @@ export default function App({ Component, pageProps }: AppProps) {
       <GlobalStylesOverride />
       <AppStateProvider>
         <NotificationProvider>
-          <Viewport>
-            <Sidebar />
-            <Main ref={mainRef}>
-              <Header />
-              <Content ref={contentRef}>
-                <Component
-                  {...{
-                    ...pageProps,
-                    mainRef,
-                    contentRef,
-                  }}
-                />
-                <Loading />
-              </Content>
-              <Footer />
-            </Main>
-          </Viewport>
+          <HeliaProvider>
+            <Viewport>
+              <Sidebar />
+              <Main ref={mainRef}>
+                <Header />
+                <Content ref={contentRef}>
+                  <Component
+                    {...{
+                      ...pageProps,
+                      mainRef,
+                      contentRef,
+                    }}
+                  />
+                  <Loading />
+                </Content>
+                <Footer />
+              </Main>
+            </Viewport>
+          </HeliaProvider>
         </NotificationProvider>
       </AppStateProvider>
     </ThemeProvider>

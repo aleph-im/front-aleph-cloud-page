@@ -21,10 +21,12 @@ export const HiddenFileInput = forwardRef(
       error,
       label,
       required,
+      isFolder,
     }: HiddenFileInputProps,
     ref: ForwardedRef<HTMLDivElement>,
   ) => {
     const inputRef = useRef<HTMLInputElement>(null)
+    isFolder && inputRef.current?.setAttribute('webkitdirectory', '')
 
     const handleClick = useCallback(() => {
       if (!inputRef.current) return
@@ -39,16 +41,10 @@ export const HiddenFileInput = forwardRef(
 
     const handleChange = useCallback(
       (e: ChangeEvent<HTMLInputElement>) => {
-        // This is verbose to avoid a type error on e.target.files[0] being undefined
-        const target = e.target as HTMLInputElement
-        const { files } = target
-
-        if (files) {
-          const fileUploaded = files[0]
-          onChange(fileUploaded)
-        }
+        const { files } = e.target as HTMLInputElement
+        if (files) onChange(!isFolder ? files[0] : files)
       },
-      [onChange],
+      [onChange, isFolder],
     )
 
     return (
@@ -63,7 +59,10 @@ export const HiddenFileInput = forwardRef(
             size="md"
             onClick={handleRemoveFile}
           >
-            {ellipseAddress(value.name)} <Icon name="trash" tw="ml-5" />
+            {!isFolder
+              ? ellipseAddress((value as File).name)
+              : (value as FileList)[0].webkitRelativePath.split('/')[0]}
+            <Icon name="trash" tw="ml-5" />
           </Button>
         ) : (
           <Button

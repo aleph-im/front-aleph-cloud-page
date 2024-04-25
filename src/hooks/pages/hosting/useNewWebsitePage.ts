@@ -13,7 +13,7 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
-import { WebsiteFileField } from '@/hooks/form/useAddWebsiteFile'
+import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
 import {
   NameAndTagsField,
   defaultNameAndTags,
@@ -23,7 +23,7 @@ import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField &
-  WebsiteFileField & {
+  WebsiteFolderField & {
     domains?: DomainField[]
     paymentMethod: PaymentMethod
   }

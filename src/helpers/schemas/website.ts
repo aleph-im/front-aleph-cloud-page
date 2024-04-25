@@ -4,16 +4,16 @@ import { WebsiteFrameworkId } from '@/domain/website'
 
 export const websiteFrameworkSchema = z.enum([
   WebsiteFrameworkId.none,
-  WebsiteFrameworkId.react,
+  //WebsiteFrameworkId.react,
   WebsiteFrameworkId.nextjs,
-  WebsiteFrameworkId.gatsby,
+  /* WebsiteFrameworkId.gatsby,
   WebsiteFrameworkId.svelte,
   WebsiteFrameworkId.vue,
   WebsiteFrameworkId.nuxt,
-  WebsiteFrameworkId.angular,
+  WebsiteFrameworkId.angular, */
 ])
 
-export const websiteFileSchema = z
+export const websiteFolderSchema = z
   .custom<File>((val) => val instanceof File, 'Required file')
   .refine(
     (file) => {
@@ -31,7 +31,7 @@ export const websiteSchema = z
   .object({
     // paymentMethod: paymentMethodSchema,
     framework: websiteFrameworkSchema,
-    file: websiteFileSchema,
+    file: websiteFolderSchema,
     domains: addDomainsSchema.optional(),
   })
   .merge(addNameAndTagsSchema)

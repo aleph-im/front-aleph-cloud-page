@@ -137,11 +137,11 @@ export const superToken = '0x1290248E01ED2F9f863A9752A8aAD396ef3a1B00'
 
 export enum WebsiteFrameworkId {
   none = 'none',
-  react = 'react',
+  //react = 'react',
   nextjs = 'nextjs',
-  gatsby = 'gatsby',
+  /* gatsby = 'gatsby',
   svelte = 'svelte',
   vue = 'vue',
   nuxt = 'nuxt',
-  angular = 'angular',
+  angular = 'angular', */
 }

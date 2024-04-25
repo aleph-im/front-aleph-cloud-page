@@ -3,7 +3,7 @@ import { useNewWebsitePage } from '@/hooks/pages/hosting/useNewWebsitePage'
 import { Button, TextGradient } from '@aleph-front/core'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import Container from '@/components/common/CenteredContainer'
-import { AddWebsiteFile } from '@/components/form/AddWebsiteFile'
+import { AddWebsiteFolder } from '@/components/form/AddWebsiteFolder'
 import { Form } from '@/components/form/Form'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
@@ -47,7 +47,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
             making it accessible online. Our platform ensures a straightforward
             process for you to launch and manage your website on a global scale.
           </p>
-          <AddWebsiteFile control={control} />
+          <AddWebsiteFolder control={control} />
         </Container>
       </section>
       <section tw="px-0 py-6 md:py-10">

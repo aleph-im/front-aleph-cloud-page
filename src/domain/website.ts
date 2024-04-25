@@ -7,7 +7,7 @@ import {
   VolumeType,
   WebsiteFrameworkId,
 } from '@/helpers/constants'
-import { WebsiteFileField } from '@/hooks/form/useAddWebsiteFile'
+import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
 import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
 import { websiteSchema } from '@/helpers/schemas/website'
 import { DomainField } from '@/hooks/form/useAddDomains'
@@ -31,7 +31,7 @@ export const WebsiteFrameworks: Record<WebsiteFrameworkId, WebsiteFramework> = {
       { type: 'code', value: `zip -r website.zip .` },
     ],
   },
-  [WebsiteFrameworkId.react]: {
+  /* [WebsiteFrameworkId.react]: {
     id: WebsiteFrameworkId.react,
     name: 'React + CRA',
     docs: [
@@ -51,7 +51,7 @@ cd my-app`,
 (cd build; zip -r ../website.zip .)`,
       },
     ],
-  },
+  }, */
   [WebsiteFrameworkId.nextjs]: {
     id: WebsiteFrameworkId.nextjs,
     name: 'React + Next.js',
@@ -67,19 +67,19 @@ cd my-app`,
       },
       {
         type: 'text',
-        value: 'Edit the config file next.config.mjs to build static files',
+        value: 'Edit the config file next.config.js to build static files',
       },
       {
         type: 'code',
         height: '15rem',
-        value: `// next.config.mjs
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'export' 
-};
-
-export default nextConfig;`,
+        value: `/** @type {import('next').NextConfig} */
+module.exports = {
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
+}`,
       },
       { type: 'text', value: 'Build the static files and zip them' },
       {
@@ -89,7 +89,7 @@ export default nextConfig;`,
       },
     ],
   },
-  [WebsiteFrameworkId.gatsby]: {
+  /* [WebsiteFrameworkId.gatsby]: {
     id: WebsiteFrameworkId.gatsby,
     name: 'React + Gatsby',
     docs: [
@@ -245,7 +245,7 @@ cd my-app`,
 (cd dist/my-app/browser; zip -r ../../../website.zip .)`,
       },
     ],
-  },
+  }, */
 }
 
 export type CustomWebsiteFrameworkField = string
@@ -255,7 +255,7 @@ export type WebsiteCost = {
   totalStreamCost: number
 }
 
-export type WebsiteCostProps = WebsiteFileField & {
+export type WebsiteCostProps = WebsiteFolderField & {
   paymentMethod?: PaymentMethod
   streamDuration?: StreamDurationField
 }
@@ -264,7 +264,7 @@ export type Website = Omit<NewVolume, 'mountPath' | 'useLatest'>
 
 export type AddWebsite = NameAndTagsField &
   WebsiteFrameworkField &
-  WebsiteFileField & {
+  WebsiteFolderField & {
     domains?: DomainField[]
     paymentMethod: PaymentMethod
   }

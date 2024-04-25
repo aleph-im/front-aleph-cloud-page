@@ -2,7 +2,7 @@ import { PerVolumeCostItem } from '@/domain/volume'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { VolumeField } from '@/hooks/form/useAddVolume'
-import { WebsiteFileField } from '@/hooks/form/useAddWebsiteFile'
+import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import {
   StreamDurationField,
@@ -11,7 +11,7 @@ import {
 import { ReactNode, RefObject } from 'react'
 import { Control } from 'react-hook-form'
 
-export type CheckoutSummaryProps = Partial<WebsiteFileField> & {
+export type CheckoutSummaryProps = Partial<WebsiteFolderField> & {
   address: string
   unlockedAmount: number
   type:
@@ -55,7 +55,7 @@ export type CheckoutSummaryVolumeLineProps = {
   priceDuration: StreamDurationUnit | undefined
 }
 
-export type CheckoutSummaryWebsiteLineProps = WebsiteFileField & {
+export type CheckoutSummaryWebsiteLineProps = WebsiteFolderField & {
   cost?: number
 }
 
