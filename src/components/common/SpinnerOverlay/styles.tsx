@@ -17,7 +17,7 @@ export const StyledSpinnerContainer = styled.div<StyledSpinnerContainerProps>`
     align-items: ${$center ? 'center' : 'flex-start'};
     padding-top: ${$center ? '2.5rem' : '6rem'};
     z-index: 99;
-    transition: all ease-in-out 500ms 500ms;
+    transition: all ease-in-out 250ms 250ms;
     background-color: ${theme.color.contentBackground}0C;
   `}
 `
