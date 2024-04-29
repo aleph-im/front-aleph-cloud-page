@@ -116,6 +116,7 @@ export const HeliaProvider = ({ children }: PropsWithChildren<object>) => {
         console.info('Helia: Starting')
         const libp2p = await getP2PNode()
         const helia = await createHelia({ libp2p })
+        window.helia = helia
         const fs = unixfs(helia)
         setCore({ helia, unixfs: fs, addFolder: buildAddFolder(helia, fs) })
       } catch (e) {

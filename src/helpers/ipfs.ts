@@ -8,7 +8,6 @@ import { ping } from '@libp2p/ping'
 import { multiaddr } from '@multiformats/multiaddr'
 
 const peers = [
-  '/ip4/45.77.7.115/tcp/4001/p2p/12D3KooWGtMjP2gwWPrkdx41Aq1Dh1vuFr8ACWXNWxmXdE9NCJ3M/p2p-circuit/p2p/12D3KooWFp6ec9rwkwsofymrfk7L5ALFqVLyJfeKzWdUfgyeJkgF',
   '/ip4/127.0.0.1/tcp/4001/p2p/12D3KooWD7h5SJ6YKGtnUm1L78cFVJfRamUiD4X7jxzePXYJAffQ',
   '/dns/api1.aleph.im/tcp/4025/p2p/Qmaxufiqdyt5uVWcy1Xh2nh3Rs3382ArnSP2umjCiNG2Vs',
   '/dns/api2.aleph.im/tcp/4025/p2p/QmZkurbY2G2hWay59yiTgQNaQxHSNzKZFt2jbnwJhQcKgV',
@@ -40,27 +39,18 @@ export const getP2PNode = async () => {
       }),
     ],
   })
-  /* node.afterStart = async () => {
-    node.getConnections().forEach((conn) => {
-      console.info(`Connected to ${conn.remotePeer.toString()}`)
-    })
-    for (let i = 0; i < peerIds.length; i++)
-      try {
-        console.info(
-          `Peer ${i}: ${await node.services.ping.ping(multiaddr(peerIds[i]))}`,
-        )
-      } catch (err) {
-        console.error(`Peer ${i}: ${err}`)
-      }
-  } */
-  node.addEventListener('peer:discovery', async (evt) => {
-    const peer = evt.detail
-    console.log('found peer: ', peer.id.toString())
-    try {
-      console.info(await node.services.ping.ping(peer.multiaddrs))
-    } catch (err) {
-      console.error(err)
-    }
+  node.addEventListener('peer:discovery', (evt) => {
+    console.log('found peer: ', evt.detail.id.toString())
   })
+  node.addEventListener('peer:connect', (evt) => {
+    console.log(`Connected to ${evt.detail.toString()}`)
+  })
+  node.addEventListener('peer:disconnect', (evt) => {
+    console.log(`Disconnected from ${evt.detail.toString()}`)
+  })
+  node.afterStart = async () => {
+    console.log(node.peerId.toString())
+    node.getMultiaddrs().forEach((ma) => console.log(ma.toString()))
+  }
   return node
 }
