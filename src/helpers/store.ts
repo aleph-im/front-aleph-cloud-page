@@ -97,6 +97,7 @@ export const initialState: State = {
   accountFiles: undefined,
   accountSSHKeys: undefined,
   accountDomains: undefined,
+  accountWebsites: undefined,
 
   ...createDefaultManagers(),
 }
@@ -150,7 +151,7 @@ export const reducer = (
       const sshKeyManager = new SSHKeyManager(account)
       const domainManager = new DomainManager(account)
       const volumeManager = new VolumeManager(account, fileManager)
-      const websiteManager = new WebsiteManager(account, volumeManager)
+      const websiteManager = new WebsiteManager(account)
       const programManager = new ProgramManager(
         account,
         volumeManager,

@@ -1,8 +1,9 @@
 import { Account } from '@superfluid-finance/sdk-core'
 import { EntityManager } from './types'
-import { NewVolume, VolumeManager } from './volume'
+import { BaseVolume } from './volume'
 import {
   CheckoutStepType,
+  EntityType,
   PaymentMethod,
   VolumeType,
   WebsiteFrameworkId,
@@ -13,23 +14,20 @@ import { websiteSchema } from '@/helpers/schemas/website'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
+import { FileManager } from './file'
 
 export { WebsiteFrameworkId }
 
 export type WebsiteFramework = {
   id: WebsiteFrameworkId
   name: string
-  docs: Array<{ type: 'text' | 'code'; value: string; height?: string }>
+  docs?: Array<{ type: 'text' | 'code'; value: string; height?: string }>
 }
 
 export const WebsiteFrameworks: Record<WebsiteFrameworkId, WebsiteFramework> = {
   [WebsiteFrameworkId.none]: {
     id: WebsiteFrameworkId.none,
     name: 'No framework',
-    docs: [
-      { type: 'text', value: 'Zip the folder that includes the static files' },
-      { type: 'code', value: `zip -r website.zip .` },
-    ],
   },
   /* [WebsiteFrameworkId.react]: {
     id: WebsiteFrameworkId.react,
@@ -54,11 +52,11 @@ cd my-app`,
   }, */
   [WebsiteFrameworkId.nextjs]: {
     id: WebsiteFrameworkId.nextjs,
-    name: 'React + Next.js',
+    name: 'Next.js',
     docs: [
       {
         type: 'text',
-        value: 'Install Next.js and create the project',
+        value: 'Create a Next.js project',
       },
       {
         type: 'code',
@@ -67,25 +65,20 @@ cd my-app`,
       },
       {
         type: 'text',
-        value: 'Edit the config file next.config.js to build static files',
+        value: 'Add the following parameters to nextConfig in next.config.js',
       },
       {
         type: 'code',
-        height: '15rem',
-        value: `/** @type {import('next').NextConfig} */
-module.exports = {
-  output: 'export',
-  trailingSlash: true,
-  images: {
-    unoptimized: true,
-  },
-}`,
+        height: '8rem',
+        value: `output: "export",
+trailingSlash: true,
+images: { unoptimized: true },`,
       },
-      { type: 'text', value: 'Build the static files and zip them' },
+      { type: 'text', value: 'Build the static website' },
       {
         type: 'code',
-        value: `npm run build
-(cd out; zip -r ../website.zip .)`,
+        value: `npm install
+npm run build`,
       },
     ],
   },
@@ -260,7 +253,16 @@ export type WebsiteCostProps = WebsiteFolderField & {
   streamDuration?: StreamDurationField
 }
 
-export type Website = Omit<NewVolume, 'mountPath' | 'useLatest'>
+export type NewWebsite = BaseVolume & {
+  type: EntityType.Website
+  volumeType: VolumeType.New
+  fileHash?: string
+  mountPath: string
+  useLatest: boolean
+  size?: number
+}
+
+export type Website = Omit<NewWebsite, 'mountPath' | 'useLatest'>
 
 export type AddWebsite = NameAndTagsField &
   WebsiteFrameworkField &
@@ -272,40 +274,41 @@ export type AddWebsite = NameAndTagsField &
 export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   static addSchema = websiteSchema
 
-  static async getWebsiteSize(website: Website | AddWebsite): Promise<number> {
-    return VolumeManager.getVolumeSize({
-      volumeType: VolumeType.New,
-      ...website,
-    })
+  static async getWebsiteSize(
+    website: AddWebsite | WebsiteCostProps,
+  ): Promise<number> {
+    return FileManager.getFolderSize(website.folder)
+  }
+
+  static getStorageWebsiteMiBPrice(
+    website: AddWebsite | WebsiteCostProps,
+  ): number {
+    return 0
+  }
+
+  static getExecutionWebsiteMiBPrice(
+    website: AddWebsite | WebsiteCostProps,
+  ): number {
+    return website.paymentMethod === PaymentMethod.Hold ? 1 / 20 : 0.001 / 1024
   }
 
   static async getCost(props: WebsiteCostProps): Promise<WebsiteCost> {
-    const { file } = props
-
-    const { totalCost, totalStreamCost } = await VolumeManager.getCost({
-      ...props,
-      sizeDiscount: 0,
-      volumes: [
-        {
-          volumeType: VolumeType.New,
-          file,
-        },
-      ],
-    })
-
-    return { totalCost, totalStreamCost }
+    const size = await this.getWebsiteSize(props)
+    const fixedCost = 50
+    const mibStoragePrice = this.getStorageWebsiteMiBPrice(props)
+    const mibExecutionPrice = this.getExecutionWebsiteMiBPrice(props)
+    return {
+      totalCost: props.folder
+        ? fixedCost + size * mibStoragePrice + size * mibExecutionPrice
+        : 0,
+      totalStreamCost: 0,
+    }
   }
 
-  constructor(
-    protected account: Account,
-    protected volumeManager: VolumeManager,
-  ) {}
+  constructor(protected account: Account) {}
 
-  getSteps(website: AddWebsite | AddWebsite[]): Promise<CheckoutStepType[]> {
-    return this.volumeManager.getSteps({
-      volumeType: VolumeType.New,
-      ...website,
-    })
+  getSteps(website: AddWebsite): Promise<CheckoutStepType[]> {
+    throw new Error('Method not implemented.')
   }
 
   getAll(): Promise<Website[]> {
@@ -317,21 +320,11 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   async add(website: AddWebsite): Promise<Website[]> {
-    const volumes = await this.volumeManager.add({
-      volumeType: VolumeType.New,
-      ...website,
-    })
-
-    return volumes as Website[]
+    throw new Error('Method not implemented.')
   }
 
   async *addSteps(website: AddWebsite): AsyncGenerator<void, Website[], void> {
-    const gen = this.volumeManager.addSteps({
-      volumeType: VolumeType.New,
-      ...website,
-    })
-
-    return yield* gen as AsyncGenerator<void, Website[], void>
+    throw new Error('Method not implemented.')
   }
 
   del(entityOrId: string | Website): Promise<void> {

@@ -186,19 +186,21 @@ CheckoutSummaryVolumeLine.displayName = 'CheckoutSummaryVolumeLine'
 // ------------------------------------------
 
 const CheckoutSummaryWebsiteLine = ({
-  file,
+  folder,
   cost,
 }: CheckoutSummaryWebsiteLineProps) => {
   const [size, setSize] = useState<number>(0)
 
   useEffect(() => {
     async function load() {
-      const size = await WebsiteManager.getWebsiteSize({ file } as AddWebsite)
+      const size = await WebsiteManager.getWebsiteSize({
+        folder,
+      } as AddWebsite)
       setSize(size)
     }
 
     load()
-  }, [file])
+  }, [folder])
 
   if (!cost) return <></>
 

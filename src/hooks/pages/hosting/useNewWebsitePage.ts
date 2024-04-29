@@ -79,7 +79,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
           payload: { accountWebsite },
         })
 
-        await router.replace('/')
+        //await router.replace('/')
       } finally {
         await stop()
       }
@@ -104,7 +104,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   const { cost } = useEntityCost({
     entityType: EntityType.Website,
     props: {
-      file: values.file,
+      folder: values.folder,
     },
   })
 

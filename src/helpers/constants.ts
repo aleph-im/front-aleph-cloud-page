@@ -71,6 +71,7 @@ export type CheckoutStepType =
   | 'stream'
   | 'instance'
   | 'program'
+  | 'website'
 
 export enum AddDomainTarget {
   IPFS = 'ipfs',

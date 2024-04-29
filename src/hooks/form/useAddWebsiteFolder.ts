@@ -54,7 +54,7 @@ export function useAddWebsiteFolderProps({
       }
     }
     load()
-  }, [addFolder, folder])
+  }, [folder])
 
   return {
     folderCtrl,

@@ -37,6 +37,7 @@ export const SelectWebsiteFramework = React.memo(
                       variant="code"
                       value={doc.value}
                       style={{ height: doc.height }}
+                      disabled
                     />
                   ) : (
                     <>{doc.value}</>

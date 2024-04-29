@@ -14,24 +14,16 @@ export const websiteFrameworkSchema = z.enum([
 ])
 
 export const websiteFolderSchema = z
-  .custom<File>((val) => val instanceof File, 'Required file')
-  .refine(
-    (file) => {
-      return file.type === 'application/zip' && file.name.endsWith('.zip')
-    },
-    { message: 'only .zip formats are valid' },
-  )
-  .refine((file) => file.size > 0, {
-    message: 'File size should be greater than 0',
+  .custom<FileList>((val) => val instanceof FileList, 'Required folder')
+  .refine((folder) => folder && folder.length > 0, {
+    message: 'Folder must contain at least one file',
   })
-
-// WEBSITE
 
 export const websiteSchema = z
   .object({
     // paymentMethod: paymentMethodSchema,
     framework: websiteFrameworkSchema,
-    file: websiteFolderSchema,
+    folder: websiteFolderSchema,
     domains: addDomainsSchema.optional(),
   })
   .merge(addNameAndTagsSchema)

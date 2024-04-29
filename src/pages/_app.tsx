@@ -23,8 +23,8 @@ export default function App({ Component, pageProps }: AppProps) {
       <GlobalStyles />
       <GlobalStylesOverride />
       <AppStateProvider>
-        <NotificationProvider>
-          <HeliaProvider>
+        <HeliaProvider>
+          <NotificationProvider>
             <Viewport>
               <Sidebar />
               <Main ref={mainRef}>
@@ -42,8 +42,8 @@ export default function App({ Component, pageProps }: AppProps) {
                 <Footer />
               </Main>
             </Viewport>
-          </HeliaProvider>
-        </NotificationProvider>
+          </NotificationProvider>
+        </HeliaProvider>
       </AppStateProvider>
     </ThemeProvider>
   )

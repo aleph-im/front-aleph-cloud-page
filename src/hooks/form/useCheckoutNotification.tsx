@@ -105,4 +105,9 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content:
         'This final step confirms your custom domain settings and integrates it with your instance.',
     },
+    website: {
+      title: 'Sign website creation',
+      content:
+        'By signing this, you confirm the deployment of your new website on Twentysix.cloud.',
+    },
   }

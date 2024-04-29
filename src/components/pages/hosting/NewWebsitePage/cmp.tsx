@@ -25,14 +25,12 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
 
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
-      <pre>{JSON.stringify(values, null, 2)}</pre>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <SectionTitle number="1">Choose your framework</SectionTitle>
           <p tw="mb-6">
-            Select your web development framework and package manager from our
-            dropdown menus. This step establishes the core structure for your
-            website, guiding you towards the next phase of building your project
+            Select your web development framework. This step provides guidance
+            to properly configure your dapp, before building your project
             locally.
           </p>
           <SelectWebsiteFramework control={control} />
@@ -59,7 +57,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
             This helps streamline your development process and makes it easier
             to manage your web3 functions.
           </p>
-          <AddNameAndTags control={control} entityType={EntityType.Program} />
+          <AddNameAndTags control={control} entityType={EntityType.Website} />
         </Container>
       </section>
 
@@ -97,10 +95,11 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
                 >
                   ENS domain
                 </TextGradient>
-                <p tw="mb-6">
+                <p tw="mb-6">Available soon.</p>
+                {/* <p tw="mb-6">
                   No need to do anything at this stage. Link your ENS domain
                   after the upload.
-                </p>
+                </p> */}
               </ToggleContainer>
             </div>
           </div>

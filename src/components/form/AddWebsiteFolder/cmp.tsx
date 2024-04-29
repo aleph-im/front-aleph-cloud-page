@@ -30,13 +30,7 @@ export const AddWebsiteFolder = memo((props: AddWebsiteFolderProps) => {
   const { folderCtrl, folderSize } = useAddWebsiteFolderProps(props)
 
   return (
-    <NoisyContainer
-      css={`
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-      `}
-    >
+    <NoisyContainer tw="flex flex-col justify-between sm:flex-row sm:items-center">
       <HiddenFileInput
         {...folderCtrl.field}
         {...folderCtrl.fieldState}
@@ -47,7 +41,15 @@ export const AddWebsiteFolder = memo((props: AddWebsiteFolderProps) => {
         Select folder <Icon name="arrow-up" tw="ml-4" />
       </HiddenFileInput>
       {folderCtrl.field.value && (
-        <TextInput label="Size" name="size" value={folderSize} disabled />
+        <div tw="mt-4 sm:mt-0">
+          {' '}
+          <TextInput
+            label="Size"
+            name="size"
+            value={folderSize}
+            disabled
+          />{' '}
+        </div>
       )}
     </NoisyContainer>
   )

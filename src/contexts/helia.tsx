@@ -10,7 +10,6 @@ import {
   PropsWithChildren,
 } from 'react'
 import { getP2PNode } from '@/helpers/ipfs'
-import type { CID } from 'multiformats/cid'
 
 type CoreType = {
   helia: null | Helia
@@ -68,7 +67,7 @@ const buildAddFolder = function (helia: Helia, fs: UnixFS) {
     folder: FileList,
   ): Promise<{ v0: string; v1: string }> {
     const fileTree = createFileTree(folder)
-    const addDir = async function (tree: FileNode): Promise<CID> {
+    const addDir = async function (tree: FileNode) {
       let rootCid = await fs.addDirectory()
       await Promise.all(
         tree.children.map(async (item) => {
@@ -89,8 +88,8 @@ const buildAddFolder = function (helia: Helia, fs: UnixFS) {
     }
     const folderCid = await addDir(fileTree)
     try {
-      await helia.pins.add(folderCid)
-      console.log('isPinned? ', await helia.pins.isPinned(folderCid))
+      const test = await helia.pins.add(folderCid)
+      console.log('isPinned? ', await helia.pins.isPinned(folderCid), test)
     } catch (e) {
       console.log('isPinned? Already pinned')
     }
@@ -114,8 +113,8 @@ export const HeliaProvider = ({ children }: PropsWithChildren<object>) => {
       setCore({ helia, unixfs: fs, addFolder: buildAddFolder(helia, fs) })
     } else {
       try {
-        const libp2p = await getP2PNode()
         console.info('Helia: Starting')
+        const libp2p = await getP2PNode()
         const helia = await createHelia({ libp2p })
         const fs = unixfs(helia)
         setCore({ helia, unixfs: fs, addFolder: buildAddFolder(helia, fs) })
