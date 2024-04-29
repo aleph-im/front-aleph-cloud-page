@@ -11,7 +11,7 @@ import Viewport from '@/components/common/Viewport'
 import Sidebar from '@/components/common/Sidebar'
 import { AppStateProvider } from '@/contexts/appState'
 import { HeliaProvider } from '@/contexts/helia'
-import Loading from './loading'
+import Loading from './_loading'
 import { useRef } from 'react'
 
 export default function App({ Component, pageProps }: AppProps) {

@@ -69,10 +69,11 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
 
   // -----------------------------
 
-  const { specs, loading: loading1 } = useRequestCRNSpecs({
+  const { specs, loading: loadingSpecs } = useRequestCRNSpecs({
     nodes: baseFilteredNodes,
   })
-  const { ips, loading: loading2 } = useRequestCRNIps({
+
+  const { ips, loading: loadingIps } = useRequestCRNIps({
     nodes: baseFilteredNodes,
   })
 
@@ -94,10 +95,14 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
         return ac
       }
 
-      const nodeSpecs = specs[node.hash]?.data
+      if (loadingSpecs || loadingIps) return ac
 
-      if (nodeSpecs) {
-        const validSpecs = nodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
+      const nodeSpecs = specs[node.hash]?.data
+      const nodeIps = ips[node.hash]?.data
+
+      if (!loadingSpecs) {
+        const validSpecs =
+          nodeSpecs && nodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
 
         if (!validSpecs) {
           ac[node.hash] = StreamNotSupportedIssue.MinSpecs
@@ -105,10 +110,8 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
         }
       }
 
-      const nodeIps = ips[node.hash]?.data
-
-      if (nodeIps) {
-        const validIp = !!nodeIps.vm
+      if (!loadingIps) {
+        const validIp = nodeIps && !!nodeIps.vm
 
         if (!validIp) {
           ac[node.hash] = StreamNotSupportedIssue.IPV6
@@ -122,7 +125,15 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
 
       return ac
     }, {} as StreamSupportedIssues)
-  }, [baseFilteredNodes, nodeManager, specs, ips, minSpecs])
+  }, [
+    baseFilteredNodes,
+    nodeManager,
+    loadingSpecs,
+    loadingIps,
+    specs,
+    ips,
+    minSpecs,
+  ])
 
   // -----------------------------
 
@@ -177,7 +188,7 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
     resetDeps: [baseFilteredNodes],
   })
 
-  const loading = loading1 || loading2
+  const loading = loadingSpecs || loadingIps
 
   return {
     nodes,
