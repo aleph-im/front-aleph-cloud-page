@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { humanReadableSize } from '@/helpers/utils'
 import { FileManager } from '@/domain/file'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
-import { useIPFS } from '@/contexts/helia'
+//import { useIPFS } from '@/contexts/helia'
 
 export type WebsiteFolderField = {
   folder?: FileList
@@ -34,7 +34,7 @@ export function useAddWebsiteFolderProps({
 }: UseAddWebsiteFolderProps): UseAddWebsiteFolderReturn {
   const isStandAlone = index === undefined
   const n = isStandAlone ? name : `${name}.${index}`
-  const { addFolder } = useIPFS()
+  //const { addFolder } =  useIPFS()
   const folderCtrl = useController({
     control,
     name: `${n}.folder`,
@@ -50,7 +50,7 @@ export function useAddWebsiteFolderProps({
         const size = await FileManager.getFolderSize(folder)
         const hSize = humanReadableSize(size, 'MiB')
         setFolderSize(hSize)
-        console.log(await addFolder?.(folder))
+        //console.log(await addFolder?.(folder))
       }
     }
     load()

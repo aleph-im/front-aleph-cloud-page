@@ -3,12 +3,12 @@ import { webSockets } from '@libp2p/websockets'
 import { all as allFilters } from '@libp2p/websockets/filters'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { noise } from '@chainsafe/libp2p-noise'
+import { kadDHT } from '@libp2p/kad-dht'
 import { bootstrap } from '@libp2p/bootstrap'
-import { ping } from '@libp2p/ping'
-import { multiaddr } from '@multiformats/multiaddr'
+
+// Requires: npm i libp2p @libp2p/websockets @chainsafe/libp2p-yamux @chainsafe/libp2p-noise @libp2p/kad-dht @libp2p/bootstrap
 
 const peers = [
-  '/ip4/127.0.0.1/tcp/4001/p2p/12D3KooWD7h5SJ6YKGtnUm1L78cFVJfRamUiD4X7jxzePXYJAffQ',
   '/dns/api1.aleph.im/tcp/4025/p2p/Qmaxufiqdyt5uVWcy1Xh2nh3Rs3382ArnSP2umjCiNG2Vs',
   '/dns/api2.aleph.im/tcp/4025/p2p/QmZkurbY2G2hWay59yiTgQNaQxHSNzKZFt2jbnwJhQcKgV',
   '/dnsaddr/api1.aleph.im/ipfs/12D3KooWNgogVS6o8fVsPdzh2FJpCdJJLVSgJT38XGE1BJoCerHx',
@@ -21,36 +21,23 @@ const peers = [
  */
 export const getP2PNode = async () => {
   const node = await createLibp2p({
-    start: true,
-    transports: [
-      webSockets({
-        // connect to all sockets, even insecure ones
-        filter: allFilters,
-      }),
-    ],
+    transports: [webSockets({ filter: allFilters })],
     streamMuxers: [yamux()],
     connectionEncryption: [noise()],
-    services: {
-      ping: ping(),
-    },
-    peerDiscovery: [
-      bootstrap({
-        list: peers,
-      }),
-    ],
+    services: { dht: kadDHT({ clientMode: false }) },
+    peerDiscovery: [bootstrap({ list: peers })],
   })
+  node.services.dht.setMode('server')
+  /* console.log(node.peerId.toString())
+  node.getMultiaddrs().forEach((ma) => console.log(ma.toString()))
   node.addEventListener('peer:discovery', (evt) => {
-    console.log('found peer: ', evt.detail.id.toString())
+    console.log('Found peer: ', evt.detail.id.toString())
   })
   node.addEventListener('peer:connect', (evt) => {
     console.log(`Connected to ${evt.detail.toString()}`)
   })
   node.addEventListener('peer:disconnect', (evt) => {
     console.log(`Disconnected from ${evt.detail.toString()}`)
-  })
-  node.afterStart = async () => {
-    console.log(node.peerId.toString())
-    node.getMultiaddrs().forEach((ma) => console.log(ma.toString()))
-  }
+  }) */
   return node
 }

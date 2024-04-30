@@ -11,6 +11,8 @@ import {
 } from 'react'
 import { getP2PNode } from '@/helpers/ipfs'
 
+// Requires: npm i helia @helia/unixfs
+
 type CoreType = {
   helia: null | Helia
   unixfs: null | UnixFS
@@ -88,8 +90,8 @@ const buildAddFolder = function (helia: Helia, fs: UnixFS) {
     }
     const folderCid = await addDir(fileTree)
     try {
-      const test = await helia.pins.add(folderCid)
-      console.log('isPinned? ', await helia.pins.isPinned(folderCid), test)
+      await helia.pins.add(folderCid)
+      console.log('isPinned? ', await helia.pins.isPinned(folderCid))
     } catch (e) {
       console.log('isPinned? Already pinned')
     }
