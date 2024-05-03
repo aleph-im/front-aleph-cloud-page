@@ -22,8 +22,8 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 
 export type NewWebsiteFormState = NameAndTagsField &
-  WebsiteFrameworkField &
-  WebsiteFolderField & {
+  WebsiteFrameworkField & {
+    website: WebsiteFolderField
     domains?: DomainField[]
     paymentMethod: PaymentMethod
   }
@@ -67,7 +67,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
           const { value, done } = await steps.next()
 
           if (done) {
-            accountWebsite = value[0]
+            accountWebsite = value
             break
           }
 
@@ -104,7 +104,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   const { cost } = useEntityCost({
     entityType: EntityType.Website,
     props: {
-      folder: values.folder,
+      website: values.website,
     },
   })
 

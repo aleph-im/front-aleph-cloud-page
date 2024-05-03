@@ -1,20 +1,30 @@
-import { Account } from '@superfluid-finance/sdk-core'
+import { Account } from 'aleph-sdk-ts/dist/accounts/account'
 import { EntityManager } from './types'
-import { BaseVolume } from './volume'
 import {
   CheckoutStepType,
   EntityType,
   PaymentMethod,
-  VolumeType,
   WebsiteFrameworkId,
+  apiServer,
+  defaultWebsiteChannel,
 } from '@/helpers/constants'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
 import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
-import { websiteSchema } from '@/helpers/schemas/website'
+import { websiteDataSchema, websiteSchema } from '@/helpers/schemas/website'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
+import { store, forget, any } from 'aleph-sdk-ts/dist/messages'
+import { getDate, getExplorerURL } from '@/helpers/utils'
+import E_ from '../helpers/errors'
+import {
+  ItemType,
+  MessageType,
+  StoreContent,
+} from 'aleph-sdk-ts/dist/messages/types'
+import { AddDomain, DomainManager } from './domain'
+import { ipfsCIDSchema } from '@/helpers/schemas/base'
 
 export { WebsiteFrameworkId }
 
@@ -29,27 +39,6 @@ export const WebsiteFrameworks: Record<WebsiteFrameworkId, WebsiteFramework> = {
     id: WebsiteFrameworkId.none,
     name: 'No framework',
   },
-  /* [WebsiteFrameworkId.react]: {
-    id: WebsiteFrameworkId.react,
-    name: 'React + CRA',
-    docs: [
-      {
-        type: 'text',
-        value: 'Install create-react-app and create the project',
-      },
-      {
-        type: 'code',
-        value: `npx create-react-app my-app
-cd my-app`,
-      },
-      { type: 'text', value: 'Build the static files and zip them' },
-      {
-        type: 'code',
-        value: `npm run build
-(cd build; zip -r ../website.zip .)`,
-      },
-    ],
-  }, */
   [WebsiteFrameworkId.nextjs]: {
     id: WebsiteFrameworkId.nextjs,
     name: 'Next.js',
@@ -82,7 +71,28 @@ npm run build`,
       },
     ],
   },
-  /* [WebsiteFrameworkId.gatsby]: {
+  /* [WebsiteFrameworkId.react]: {
+    id: WebsiteFrameworkId.react,
+    name: 'React + CRA',
+    docs: [
+      {
+        type: 'text',
+        value: 'Install create-react-app and create the project',
+      },
+      {
+        type: 'code',
+        value: `npx create-react-app my-app
+cd my-app`,
+      },
+      { type: 'text', value: 'Build the static files and zip them' },
+      {
+        type: 'code',
+        value: `npm run build
+(cd build; zip -r ../website.zip .)`,
+      },
+    ],
+  },
+  [WebsiteFrameworkId.gatsby]: {
     id: WebsiteFrameworkId.gatsby,
     name: 'React + Gatsby',
     docs: [
@@ -238,7 +248,7 @@ cd my-app`,
 (cd dist/my-app/browser; zip -r ../../../website.zip .)`,
       },
     ],
-  }, */
+  } */
 }
 
 export type CustomWebsiteFrameworkField = string
@@ -248,48 +258,51 @@ export type WebsiteCost = {
   totalStreamCost: number
 }
 
-export type WebsiteCostProps = WebsiteFolderField & {
+export type WebsiteCostProps = {
+  website?: WebsiteFolderField
   paymentMethod?: PaymentMethod
   streamDuration?: StreamDurationField
 }
 
-export type NewWebsite = BaseVolume & {
-  type: EntityType.Website
-  volumeType: VolumeType.New
-  fileHash?: string
-  mountPath: string
-  useLatest: boolean
-  size?: number
+export type NewWebsite = StoreContent &
+  NameAndTagsField & {
+    type: EntityType.Website
+    fileHash: string
+    useLatest: boolean
+  }
+
+export type Website = Omit<NewWebsite, 'useLatest'> & {
+  id: string // hash
 }
 
-export type Website = Omit<NewWebsite, 'mountPath' | 'useLatest'>
-
 export type AddWebsite = NameAndTagsField &
-  WebsiteFrameworkField &
-  WebsiteFolderField & {
-    domains?: DomainField[]
+  WebsiteFrameworkField & {
+    website: WebsiteFolderField
+    domains?: Omit<DomainField, 'ref'>[]
     paymentMethod: PaymentMethod
   }
 
 export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   static addSchema = websiteSchema
+  static addIPFSCIDSchema = ipfsCIDSchema
+  static addWebsiteDataSchema = websiteDataSchema
 
   static async getWebsiteSize(
-    website: AddWebsite | WebsiteCostProps,
+    props: AddWebsite | WebsiteCostProps,
   ): Promise<number> {
-    return FileManager.getFolderSize(website.folder)
+    return FileManager.getFolderSize(props.website?.folder)
   }
 
   static getStorageWebsiteMiBPrice(
-    website: AddWebsite | WebsiteCostProps,
+    props: AddWebsite | WebsiteCostProps,
   ): number {
     return 0
   }
 
   static getExecutionWebsiteMiBPrice(
-    website: AddWebsite | WebsiteCostProps,
+    props: AddWebsite | WebsiteCostProps,
   ): number {
-    return website.paymentMethod === PaymentMethod.Hold ? 1 / 20 : 0.001 / 1024
+    return props.paymentMethod === PaymentMethod.Hold ? 1 / 20 : 0.001 / 1024
   }
 
   static async getCost(props: WebsiteCostProps): Promise<WebsiteCost> {
@@ -298,36 +311,167 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     const mibStoragePrice = this.getStorageWebsiteMiBPrice(props)
     const mibExecutionPrice = this.getExecutionWebsiteMiBPrice(props)
     return {
-      totalCost: props.folder
+      totalCost: props.website?.folder
         ? fixedCost + size * mibStoragePrice + size * mibExecutionPrice
         : 0,
       totalStreamCost: 0,
     }
   }
 
-  constructor(protected account: Account) {}
+  constructor(
+    protected account: Account,
+    protected domainManager: DomainManager,
+    protected channel = defaultWebsiteChannel,
+  ) {}
 
-  getSteps(website: AddWebsite): Promise<CheckoutStepType[]> {
-    throw new Error('Method not implemented.')
+  async getAll(): Promise<Website[]> {
+    try {
+      const response = await any.GetMessages({
+        addresses: [this.account.address],
+        messageType: MessageType.store,
+        channels: [this.channel],
+        APIServer: apiServer,
+      })
+
+      return await this.parseMessages(response.messages)
+    } catch (err) {
+      return []
+    }
   }
 
-  getAll(): Promise<Website[]> {
-    throw new Error('Method not implemented.')
+  async get(id: string): Promise<Website | undefined> {
+    const message = await any.GetMessage({
+      hash: id,
+      messageType: MessageType.store,
+      channel: this.channel,
+      APIServer: apiServer,
+    })
+
+    const [entity] = await this.parseMessages([message])
+    return entity
   }
 
-  get(id: string): Promise<Website | undefined> {
-    throw new Error('Method not implemented.')
+  async add(website: AddWebsite): Promise<Website> {
+    const steps = this.addSteps(website)
+
+    while (true) {
+      const { value, done } = await steps.next()
+      if (done) return value
+    }
   }
 
-  async add(website: AddWebsite): Promise<Website[]> {
-    throw new Error('Method not implemented.')
+  async *addSteps(website: AddWebsite): AsyncGenerator<void, Website, void> {
+    const {
+      website: data,
+      domains,
+      name,
+      tags,
+      framework,
+      paymentMethod,
+    } = await this.parseNewWebsite(website)
+    const metadata = this.parseMetadata(name, tags, {
+      framework,
+      paymentMethod,
+    })
+    try {
+      yield
+      const response = await store.Publish({
+        account: this.account,
+        channel: this.channel,
+        APIServer: apiServer,
+        fileHash: data.cid!,
+        storageEngine: ItemType.ipfs,
+        ...metadata,
+      })
+
+      const entity = await this.parseMessage(response, response.content)
+      return entity
+    } catch (err) {
+      throw E_.RequestFailed(err)
+    }
   }
 
-  async *addSteps(website: AddWebsite): AsyncGenerator<void, Website[], void> {
-    throw new Error('Method not implemented.')
+  async del(websiteOrCid: string | Website): Promise<void> {
+    websiteOrCid =
+      typeof websiteOrCid === 'string' ? websiteOrCid : websiteOrCid.fileHash
+
+    try {
+      await forget.Publish({
+        account: this.account,
+        channel: this.channel,
+        hashes: [websiteOrCid],
+        APIServer: apiServer,
+      })
+    } catch (err) {
+      throw E_.RequestFailed(err)
+    }
   }
 
-  del(entityOrId: string | Website): Promise<void> {
-    throw new Error('Method not implemented.')
+  protected async parseNewWebsite(website: AddWebsite): Promise<AddWebsite> {
+    const { name, tags, framework, paymentMethod } = website
+    const websiteData = await WebsiteManager.addWebsiteDataSchema.parseAsync(
+      website.website,
+    )
+    const domains = await this.parseDomains(website.domains)
+    return {
+      website: websiteData,
+      domains,
+      name,
+      tags,
+      framework,
+      paymentMethod,
+    }
+  }
+
+  protected async parseDomains(
+    domains?: Omit<DomainField, 'ref'>[],
+  ): Promise<Omit<DomainField, 'ref'>[]> {
+    if (!domains || domains.length === 0) return []
+    return await DomainManager.addManySchema.parseAsync(domains)
+  }
+
+  protected parseMetadata(
+    name = 'Untitled',
+    tags?: string[],
+    metadata?: Record<string, unknown>,
+  ): Record<string, unknown> {
+    const out: Record<string, unknown> = { name }
+    if (tags && tags.length > 0) {
+      out.tags = tags
+    }
+    return {
+      ...metadata,
+      ...out,
+    }
+  }
+
+  async getSteps(newWebsite: AddWebsite): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    const valid = await this.parseNewWebsite(newWebsite)
+    if (valid) steps.push('website')
+
+    const domainSteps = await this.domainManager.getSteps(
+      valid.domains as AddDomain[],
+    )
+    for (const step of domainSteps) steps.push(step)
+
+    return steps
+  }
+
+  protected async parseMessages(messages: any[]): Promise<Website[]> {
+    return messages
+      .filter(({ content }) => content !== undefined)
+      .map((message) => this.parseMessage(message, message.content))
+  }
+
+  protected parseMessage(message: any, content: any): Website {
+    return {
+      id: message.item_hash,
+      ...content,
+      type: EntityType.Website,
+      url: getExplorerURL(message),
+      date: getDate(message.time),
+      confirmed: !!message.confirmed,
+    }
   }
 }

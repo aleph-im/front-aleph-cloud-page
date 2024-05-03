@@ -151,7 +151,7 @@ export const reducer = (
       const sshKeyManager = new SSHKeyManager(account)
       const domainManager = new DomainManager(account)
       const volumeManager = new VolumeManager(account, fileManager)
-      const websiteManager = new WebsiteManager(account)
+      const websiteManager = new WebsiteManager(account, domainManager)
       const programManager = new ProgramManager(
         account,
         volumeManager,

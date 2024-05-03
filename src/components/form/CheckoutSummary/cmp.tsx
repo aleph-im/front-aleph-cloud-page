@@ -186,7 +186,7 @@ CheckoutSummaryVolumeLine.displayName = 'CheckoutSummaryVolumeLine'
 // ------------------------------------------
 
 const CheckoutSummaryWebsiteLine = ({
-  folder,
+  website,
   cost,
 }: CheckoutSummaryWebsiteLineProps) => {
   const [size, setSize] = useState<number>(0)
@@ -194,13 +194,13 @@ const CheckoutSummaryWebsiteLine = ({
   useEffect(() => {
     async function load() {
       const size = await WebsiteManager.getWebsiteSize({
-        folder,
+        website,
       } as AddWebsite)
       setSize(size)
     }
 
     load()
-  }, [folder])
+  }, [website])
 
   if (!cost) return <></>
 
@@ -245,22 +245,22 @@ export const CheckoutSummary = ({
   specs,
   volumes,
   domains,
-  file,
   description,
   button: buttonNode,
   control,
   receiverAddress,
   paymentMethod,
   isPersistent = type === EntityType.Instance,
+  website,
   mainRef,
 }: // streamDuration,
 CheckoutSummaryProps) => {
   const { cost } = useEntityCost({
     entityType: type,
     props: {
+      website,
       specs,
       volumes,
-      file,
       isPersistent,
       paymentMethod,
       // streamDuration,
@@ -366,10 +366,10 @@ CheckoutSummaryProps) => {
                       />
                     )
                   })}
-                {type === EntityType.Website && file && (
+                {type === EntityType.Website && website && (
                   <CheckoutSummaryWebsiteLineMemo
                     {...{
-                      file,
+                      website,
                       cost: (cost as WebsiteCost).totalCost,
                     }}
                   />

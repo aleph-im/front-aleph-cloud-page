@@ -53,6 +53,7 @@ export const defaultSSHChannel = defaultConsoleChannel
 export const defaultInstanceChannel = defaultConsoleChannel
 export const defaultProgramChannel = defaultConsoleChannel
 export const defaultDomainChannel = defaultConsoleChannel
+export const defaultWebsiteChannel = defaultConsoleChannel
 
 export enum EntityType {
   Volume = 'volume',
@@ -138,11 +139,11 @@ export const superToken = '0x1290248E01ED2F9f863A9752A8aAD396ef3a1B00'
 
 export enum WebsiteFrameworkId {
   none = 'none',
-  //react = 'react',
   nextjs = 'nextjs',
-  /* gatsby = 'gatsby',
+  /* react = 'react',
+  gatsby = 'gatsby',
   svelte = 'svelte',
   vue = 'vue',
   nuxt = 'nuxt',
-  angular = 'angular', */
+  angular = 'angular' */
 }

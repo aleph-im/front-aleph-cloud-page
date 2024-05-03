@@ -24,6 +24,8 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
   } = useNewWebsitePage()
 
   return (
+    //<>
+    //  <pre>{JSON.stringify(values, null, 2)}</pre>
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
@@ -31,7 +33,9 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
           <p tw="mb-6">
             Select your web development framework. This step provides guidance
             to properly configure your dapp, before building your project
-            locally.
+            locally. At the moment, if you have a backend, you need to deploy it
+            as a function or inside an instance, and then to integrate it in
+            your website beforehand.
           </p>
           <SelectWebsiteFramework control={control} />
         </Container>
@@ -40,7 +44,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         <Container>
           <SectionTitle number="2">Upload your app</SectionTitle>
           <p tw="mb-6">
-            Once your website is ready, upload it here using a zip file. This
+            Once your website is ready, upload your static folder here. This
             step transitions your local project to our decentralized cloud,
             making it accessible online. Our platform ensures a straightforward
             process for you to launch and manage your website on a global scale.
@@ -52,7 +56,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         <Container>
           <SectionTitle number="3">Name and tags</SectionTitle>
           <p tw="mb-6">
-            Organize and identify your functions more effectively by assigning a
+            Organize and identify your websites more effectively by assigning a
             unique name, obtaining a hash reference, and defining multiple tags.
             This helps streamline your development process and makes it easier
             to manage your web3 functions.
@@ -85,7 +89,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
                 <AddDomains
                   name="domains"
                   control={control}
-                  entityType={EntityType.Program}
+                  entityType={EntityType.Website}
                 />
                 <TextGradient
                   forwardedAs="h2"
@@ -110,7 +114,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         control={control}
         address={address}
         type={EntityType.Website}
-        file={values.file}
+        website={values.website}
         domains={values.domains}
         unlockedAmount={accountBalance}
         paymentMethod={values.paymentMethod}
@@ -118,7 +122,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         description={
           <>
             This amount needs to be present in your wallet until the website is
-            removed. Tokens won &#39;t be locked nor consumed. The website will
+            removed. Tokens won&#39;t be locked nor consumed. The website will
             be garbage collected once funds are removed from the wallet.
           </>
         }
@@ -138,5 +142,6 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         }
       />
     </Form>
+    //</>
   )
 }

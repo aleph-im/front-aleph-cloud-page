@@ -11,7 +11,7 @@ import {
 import { ReactNode, RefObject } from 'react'
 import { Control } from 'react-hook-form'
 
-export type CheckoutSummaryProps = Partial<WebsiteFolderField> & {
+export type CheckoutSummaryProps = {
   address: string
   unlockedAmount: number
   type:
@@ -19,6 +19,7 @@ export type CheckoutSummaryProps = Partial<WebsiteFolderField> & {
     | EntityType.Instance
     | EntityType.Volume
     | EntityType.Website
+  website?: WebsiteFolderField
   isPersistent?: boolean
   specs?: InstanceSpecsField
   volumes?: VolumeField[]
@@ -27,19 +28,19 @@ export type CheckoutSummaryProps = Partial<WebsiteFolderField> & {
   description?: ReactNode
   mainRef?: RefObject<HTMLElement>
 } & (
-    | {
-        paymentMethod: PaymentMethod.Stream
-        control: Control
-        receiverAddress?: string
-        streamDuration?: StreamDurationField
-      }
-    | {
-        paymentMethod: PaymentMethod.Hold
-        control?: undefined
-        receiverAddress?: undefined
-        streamDuration?: undefined
-      }
-  )
+  | {
+      paymentMethod: PaymentMethod.Stream
+      control: Control
+      receiverAddress?: string
+      streamDuration?: StreamDurationField
+    }
+  | {
+      paymentMethod: PaymentMethod.Hold
+      control?: undefined
+      receiverAddress?: undefined
+      streamDuration?: undefined
+    }
+)
 
 export type CheckoutSummarySpecsLineProps = {
   type: EntityType.Program | EntityType.Instance
@@ -55,7 +56,8 @@ export type CheckoutSummaryVolumeLineProps = {
   priceDuration: StreamDurationUnit | undefined
 }
 
-export type CheckoutSummaryWebsiteLineProps = WebsiteFolderField & {
+export type CheckoutSummaryWebsiteLineProps = {
+  website: WebsiteFolderField
   cost?: number
 }
 

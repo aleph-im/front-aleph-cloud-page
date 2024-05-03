@@ -79,13 +79,14 @@ export const codeFileSchema = z
   })
 
 export const ipfsCIDSchema = requiredStringSchema.regex(
-  /^Qm[1-9A-Za-z]{44}[^OIl]$/,
+  /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/,
   { message: 'Invalid IPFS CID hash' },
 )
 
 export const programTypeSchema = z.enum([
   EntityType.Instance,
   EntityType.Program,
+  EntityType.Website,
 ])
 
 export const paymentMethodSchema = z.enum([

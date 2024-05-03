@@ -18,7 +18,7 @@ export { AddDomainTarget }
 export type DomainAggregateItem = {
   type: AddDomainTarget
   message_id: string
-  programType?: EntityType.Instance | EntityType.Program
+  programType?: EntityType.Instance | EntityType.Program | EntityType.Website
   updated_at: string
 }
 
@@ -27,7 +27,7 @@ export type DomainAggregate = Record<string, DomainAggregateItem | null>
 export type AddDomain = {
   name: string
   target: AddDomainTarget
-  programType?: EntityType.Instance | EntityType.Program
+  programType?: EntityType.Instance | EntityType.Program | EntityType.Website
   ref: string
 }
 
@@ -35,7 +35,7 @@ export type Domain = Omit<AddDomain, 'programType'> & {
   type: EntityType.Domain
   id: string
   confirmed?: boolean
-  programType?: EntityType.Instance | EntityType.Program
+  programType?: EntityType.Instance | EntityType.Program | EntityType.Website
   updated_at: string
 }
 

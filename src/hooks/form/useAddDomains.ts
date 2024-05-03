@@ -12,7 +12,7 @@ export type DomainField = {
   name: string
   ref: string
   target: AddDomainTarget
-  programType: EntityType.Instance | EntityType.Program
+  programType: EntityType.Instance | EntityType.Program | EntityType.Website
 }
 
 export const defaultValues: DomainField = {
@@ -63,7 +63,7 @@ export function useDomainItem({
 export type UseDomainsProps = {
   name?: string
   control: Control
-  entityType: EntityType.Program | EntityType.Instance
+  entityType: EntityType.Program | EntityType.Instance | EntityType.Website
 }
 
 export type UseDomainsReturn = {

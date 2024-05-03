@@ -61,7 +61,8 @@ export const HiddenFileInput = forwardRef(
           >
             {!isFolder
               ? ellipseAddress((value as File).name)
-              : (value as FileList)[0].webkitRelativePath.split('/')[0]}
+              : value &&
+                (value as FileList)[0]?.webkitRelativePath.split('/')[0]}
             <Icon name="trash" tw="ml-5" />
           </Button>
         ) : (
