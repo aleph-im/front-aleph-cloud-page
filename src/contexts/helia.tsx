@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { Helia, createHelia } from 'helia'
+/* import { Helia, createHelia } from 'helia'
 import { unixfs, UnixFS } from '@helia/unixfs'
 import {
   useEffect,
@@ -148,4 +147,4 @@ export const HeliaProvider = ({ children }: PropsWithChildren<object>) => {
 
 export function useIPFS(): HeliaContextType {
   return useContext(HeliaContext)
-}
+} */
