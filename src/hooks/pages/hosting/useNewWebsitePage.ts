@@ -79,7 +79,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
           payload: { accountWebsite },
         })
 
-        //await router.replace('/')
+        await router.replace('/')
       } finally {
         await stop()
       }
