@@ -1,6 +1,5 @@
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { forget, post } from 'aleph-sdk-ts/dist/messages'
-import E_ from '../helpers/errors'
+import { Account } from '@aleph-sdk/account'
+import Err from '../helpers/errors'
 import {
   EntityType,
   apiServer,
@@ -11,6 +10,10 @@ import { getDate, getExplorerURL } from '../helpers/utils'
 import { EntityManager } from './types'
 import { sshKeySchema, sshKeysSchema } from '@/helpers/schemas/ssh'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
 
 export type AddSSHKey = {
   key: string
@@ -31,17 +34,17 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
 
   constructor(
     protected account: Account,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected type = defaultSSHPostType,
     protected channel = defaultSSHChannel,
   ) {}
 
   async getAll(): Promise<SSHKey[]> {
     try {
-      const response = await post.Get({
+      const response = await this.sdkClient.getPosts({
         addresses: [this.account.address],
         types: [this.type],
         channels: [this.channel],
-        APIServer: apiServer,
       })
 
       return this.parsePosts(response.posts)
@@ -51,12 +54,11 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
   }
 
   async get(id: string): Promise<SSHKey | undefined> {
-    const response = await post.Get({
+    const response = await this.sdkClient.getPosts({
       addresses: [this.account.address],
       types: [this.type],
       channels: [this.channel],
       hashes: [id],
-      APIServer: apiServer,
     })
 
     const [entity] = this.parsePosts(response.posts)
@@ -84,6 +86,9 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     sshKeys: AddSSHKey | AddSSHKey[],
     throwOnCollision?: boolean,
   ): AsyncGenerator<void, SSHKey[], void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     sshKeys = Array.isArray(sshKeys) ? sshKeys : [sshKeys]
 
     sshKeys = await this.parseSSHKeys(sshKeys, throwOnCollision)
@@ -94,34 +99,33 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
       yield
       const response = await Promise.all(
         sshKeys.map(({ key, label }) =>
-          post.Publish({
-            account: this.account,
+          (this.sdkClient as AuthenticatedAlephHttpClient).createPost({
             postType: this.type,
             channel: this.channel,
             content: { key, label },
-            APIServer: apiServer,
           }),
         ),
       )
 
       return this.parseNewPosts(response)
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 
   async del(sshKeyOrId: string | SSHKey): Promise<void> {
     sshKeyOrId = typeof sshKeyOrId === 'string' ? sshKeyOrId : sshKeyOrId.id
 
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     try {
-      await forget.Publish({
-        account: this.account,
+      await this.sdkClient.forget({
         channel: this.channel,
         hashes: [sshKeyOrId],
-        APIServer: apiServer,
       })
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 

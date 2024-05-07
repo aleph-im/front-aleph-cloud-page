@@ -1,15 +1,13 @@
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { any, forget, instance } from 'aleph-sdk-ts/dist/messages'
-import { InstancePublishConfiguration } from 'aleph-sdk-ts/dist/messages/instance/publish'
+import { Account } from '@aleph-sdk/account'
+import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import {
   InstanceContent,
+  InstancePublishConfiguration,
   MachineVolume,
   MessageType,
   PaymentType,
-} from 'aleph-sdk-ts/dist/messages/types'
-import E_ from '../helpers/errors'
+} from '@aleph-sdk/message'
 import {
-  apiServer,
   defaultInstanceChannel,
   EntityType,
   PaymentMethod,
@@ -39,8 +37,12 @@ import {
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { getHours } from '@/hooks/form/useSelectStreamDuration'
 import { CRN, NodeManager } from './node'
-import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
+import Err from '../helpers/errors'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -119,6 +121,7 @@ export class InstanceManager
 
   constructor(
     protected account: Account,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
     protected sshKeyManager: SSHKeyManager,
@@ -126,16 +129,15 @@ export class InstanceManager
     protected nodeManager: NodeManager,
     protected channel = defaultInstanceChannel,
   ) {
-    super(account, volumeManager, domainManager)
+    super(account, volumeManager, domainManager, sdkClient)
   }
 
   async getAll(): Promise<Instance[]> {
     try {
-      const response = await any.GetMessages({
+      const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
-        messageType: MessageType.instance,
+        messageTypes: [MessageType.instance],
         channels: [this.channel],
-        APIServer: apiServer,
       })
 
       return await this.parseMessages(response.messages)
@@ -145,12 +147,7 @@ export class InstanceManager
   }
 
   async get(id: string): Promise<Instance | undefined> {
-    const message = await any.GetMessage({
-      hash: id,
-      messageType: MessageType.instance,
-      channel: this.channel,
-      APIServer: apiServer,
-    })
+    const message = await this.sdkClient.getMessage(id)
 
     const [entity] = await this.parseMessages([message])
     return entity
@@ -172,15 +169,18 @@ export class InstanceManager
     newInstance: AddInstance,
     account?: SuperfluidAccount,
   ): AsyncGenerator<void, Instance, void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     try {
       yield* this.addPAYGStreamSteps(newInstance, account)
 
       const instanceMessage = yield* this.parseInstanceSteps(newInstance)
 
       yield
-      const response = await instance.publish({
+
+      const response = await this.sdkClient.createInstance({
         ...instanceMessage,
-        APIServer: apiServer,
       })
 
       const [entity] = await this.parseMessages([response])
@@ -199,7 +199,7 @@ export class InstanceManager
 
       return entity
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 
@@ -242,18 +242,19 @@ export class InstanceManager
         },
       })
 
-      await account.decreaseALEPHxFlow(receiver, instanceCosts.totalCost)
+      await account.decreaseALEPHFlow(receiver, instanceCosts.totalCost)
     }
 
     try {
-      await forget.Publish({
-        account: this.account,
+      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+        throw Err.InvalidAccount
+
+      await this.sdkClient.forget({
         channel: this.channel,
         hashes: [instanceOrId],
-        APIServer: apiServer,
       })
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 
@@ -344,8 +345,8 @@ export class InstanceManager
       throw new Error('Invalid CRN')
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
-    const alephxBalance = await account.getALEPHxBalance()
-    const alephxFlow = await account.getALEPHxFlow(receiver)
+    const alephxBalance = await account.getALEPHBalance()
+    const alephxFlow = await account.getALEPHFlow(receiver)
     const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
 
     if (totalFlow.greaterThan(1))
@@ -365,7 +366,7 @@ export class InstanceManager
     }
 
     yield
-    await account.increaseALEPHxFlow(
+    await account.increaseALEPHFlow(
       receiver,
       streamCost / getHours(streamDuration),
     )

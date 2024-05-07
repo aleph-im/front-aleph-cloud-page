@@ -1,16 +1,14 @@
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { forget, store, any } from 'aleph-sdk-ts/dist/messages'
-import E_ from '../helpers/errors'
+import { Account } from '@aleph-sdk/account'
+import { MessageType, StoreContent } from '@aleph-sdk/message'
+import Err from '../helpers/errors'
 import {
   EntityType,
   PaymentMethod,
   VolumeType,
-  apiServer,
   defaultVolumeChannel,
   programStorageURL,
 } from '../helpers/constants'
 import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
-import { MessageType, StoreContent } from 'aleph-sdk-ts/dist/messages/types'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
 import { EntityManager } from './types'
@@ -20,6 +18,10 @@ import {
 } from '@/helpers/schemas/volume'
 import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
 
 export { VolumeType }
 
@@ -228,17 +230,17 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
   constructor(
     protected account: Account,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected fileManager: FileManager,
     protected channel = defaultVolumeChannel,
   ) {}
 
   async getAll(): Promise<Volume[]> {
     try {
-      const response = await any.GetMessages({
+      const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
-        messageType: MessageType.store,
+        messageTypes: [MessageType.store],
         channels: [this.channel],
-        APIServer: apiServer,
       })
 
       return await this.parseMessages(response.messages)
@@ -248,12 +250,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   async get(id: string): Promise<Volume | undefined> {
-    const message = await any.GetMessage({
-      hash: id,
-      messageType: MessageType.store,
-      channel: this.channel,
-      APIServer: apiServer,
-    })
+    const message = await this.sdkClient.getMessage(id)
 
     const [entity] = await this.parseMessages([message])
     return entity
@@ -271,23 +268,24 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   async *addSteps(
     volumes: AddVolume | AddVolume[],
   ): AsyncGenerator<void, Volume[], void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
     const newVolumes = await this.parseNewVolumes(volumes)
     if (newVolumes.length === 0) return []
 
     try {
-      const { account, channel } = this
+      const { channel } = this
 
       // @note: Aggregate all signatures in 1 step
       yield
       const response = await Promise.all(
         newVolumes.map(async ({ file: fileObject }) =>
-          store.Publish({
-            account,
+          (this.sdkClient as AuthenticatedAlephHttpClient).createStore({
             channel,
             fileObject,
-            APIServer: apiServer,
             // fileHash: 'IPFS_HASH',
             // storageEngine: ItemType.ipfs,
           }),
@@ -296,22 +294,23 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
       return await this.parseMessages(response)
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 
   async del(volumeOrId: string | Volume): Promise<void> {
     volumeOrId = typeof volumeOrId === 'string' ? volumeOrId : volumeOrId.id
 
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     try {
-      await forget.Publish({
-        account: this.account,
+      await this.sdkClient.forget({
         channel: this.channel,
         hashes: [volumeOrId],
-        APIServer: apiServer,
       })
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 

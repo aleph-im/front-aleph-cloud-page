@@ -104,7 +104,7 @@ export const instanceStreamSchema = instanceSchema
   )
   .refine(
     ({ nodeSpecs, specs }) =>
-      new NodeManager().validateMinNodeSpecs(specs, nodeSpecs),
+      NodeManager.validateMinNodeSpecs(specs, nodeSpecs),
     {
       message: 'Insufficient node specs',
       path: ['specs'],

@@ -1,21 +1,21 @@
-import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { Blockchain } from '@aleph-sdk/core'
+import { Account } from '@aleph-sdk/account'
 import {
-  GetAccountFromProvider as getETHAccount,
+  getAccountFromProvider as getETHAccount,
   ETHAccount,
-} from 'aleph-sdk-ts/dist/accounts/ethereum'
+} from '@aleph-sdk/ethereum'
 import {
-  GetAccountFromProvider as getSOLAccount,
+  getAccountFromProvider as getSOLAccount,
   SOLAccount,
-} from 'aleph-sdk-ts/dist/accounts/solana'
+} from '@aleph-sdk/solana'
 import {
-  GetAccountFromProvider as getAVAXAccount,
+  getAccountFromProvider as getAVAXAccount,
   SuperfluidAccount,
   createFromAvalancheAccount,
-} from 'aleph-sdk-ts/dist/accounts/superfluid'
-import { AvalancheAccount } from 'aleph-sdk-ts/dist/accounts/avalanche'
+} from '@aleph-sdk/superfluid'
+import { AvalancheAccount } from '@aleph-sdk/avalanche'
 import { getERC20Balance, getSOLBalance } from './utils'
-import E_ from './errors'
+import Err from './errors'
 
 /**
  * Connects to a web3 provider and returns an Aleph account object
@@ -24,19 +24,22 @@ import E_ from './errors'
  * @param provider A web3 provider (ex: window.ethereum)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const web3Connect = (chain: Chain, provider: any): Promise<Account> => {
+export const web3Connect = (
+  chain: Blockchain,
+  provider: any,
+): Promise<Account> => {
   switch (chain) {
-    case Chain.ETH:
+    case Blockchain.ETH:
       return getETHAccount(provider)
 
-    case Chain.AVAX:
+    case Blockchain.AVAX:
       return getAVAXAccount(provider)
 
-    case Chain.SOL:
+    case Blockchain.SOL:
       return getSOLAccount(provider)
 
     default:
-      throw E_.ChainNotYetSupported
+      throw Err.ChainNotYetSupported
   }
 }
 
@@ -48,11 +51,11 @@ export const web3Connect = (chain: Chain, provider: any): Promise<Account> => {
  */
 export const getAccountBalance = async (account: Account): Promise<number> => {
   if (account instanceof SuperfluidAccount) {
-    return (await account.getALEPHxBalance()).toNumber()
+    return (await account.getALEPHBalance()).toNumber()
   }
   if (account instanceof AvalancheAccount) {
-    const superfluidAccount = await createFromAvalancheAccount(account)
-    return (await superfluidAccount.getALEPHxBalance()).toNumber()
+    const superfluidAccount = createFromAvalancheAccount(account)
+    return (await superfluidAccount.getALEPHBalance()).toNumber()
   }
   if (account instanceof ETHAccount) {
     return getERC20Balance(account.address)
@@ -61,5 +64,5 @@ export const getAccountBalance = async (account: Account): Promise<number> => {
     return getSOLBalance(account.address)
   }
 
-  throw E_.ChainNotYetSupported
+  throw Err.ChainNotYetSupported
 }

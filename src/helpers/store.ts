@@ -1,4 +1,4 @@
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { Account } from '@aleph-sdk/account'
 import { SSHKey, SSHKeyManager } from '../domain/ssh'
 import { Volume, VolumeManager } from '@/domain/volume'
 import { Instance, InstanceManager } from '@/domain/instance'
@@ -8,7 +8,11 @@ import { MessageManager } from '@/domain/message'
 import { Domain, DomainManager } from '@/domain/domain'
 import { IndexerManager } from '@/domain/indexer'
 import { NodeManager } from '@/domain/node'
-import { defaultAccountChannel } from '@/helpers/constants'
+import { apiServer } from '@/helpers/constants'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
 
 export enum ActionTypes {
   connect,
@@ -60,15 +64,16 @@ export type Action = {
 }
 
 function createDefaultManagers(account?: Account) {
-  const fileManager = new FileManager(account)
+  const sdkClient = !account
+    ? new AlephHttpClient(apiServer)
+    : new AuthenticatedAlephHttpClient(account, apiServer)
 
-  const nodeManager = new NodeManager(
-    account,
-    defaultAccountChannel,
-    fileManager,
-  )
+  const fileManager = new FileManager(sdkClient, account)
+
+  const nodeManager = new NodeManager(fileManager, sdkClient, account)
 
   return {
+    sdkClient,
     fileManager,
     nodeManager,
   }
@@ -141,33 +146,35 @@ export const reducer = (
     case ActionTypes.connect: {
       const { account } = payload
 
-      const fileManager = new FileManager(account)
-      const messageManager = new MessageManager(account)
-      const sshKeyManager = new SSHKeyManager(account)
-      const domainManager = new DomainManager(account)
-      const volumeManager = new VolumeManager(account, fileManager)
+      const { fileManager, nodeManager, sdkClient } =
+        createDefaultManagers(account)
+
+      const messageManager = new MessageManager(account, sdkClient)
+      const sshKeyManager = new SSHKeyManager(account, sdkClient)
+      const domainManager = new DomainManager(account, sdkClient)
+      const volumeManager = new VolumeManager(account, sdkClient, fileManager)
       const programManager = new ProgramManager(
         account,
+        sdkClient,
         volumeManager,
         domainManager,
         messageManager,
         fileManager,
       )
-      const nodeManager = new NodeManager(
-        account,
-        defaultAccountChannel,
-        fileManager,
-      )
       const instanceManager = new InstanceManager(
         account,
+        sdkClient,
         volumeManager,
         domainManager,
         sshKeyManager,
         fileManager,
         nodeManager,
       )
-
-      const indexerManager = new IndexerManager(account, programManager)
+      const indexerManager = new IndexerManager(
+        account,
+        sdkClient,
+        programManager,
+      )
 
       return {
         ...state,

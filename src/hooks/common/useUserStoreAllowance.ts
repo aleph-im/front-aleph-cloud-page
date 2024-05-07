@@ -1,8 +1,8 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { useAppState } from '@/contexts/appState'
-import { FileManager } from '@/domain/file'
 import { mbPerAleph } from '@/helpers/constants'
 import { useLocalRequest } from '@aleph-front/core'
+import { useFileManager } from './useManager/useFileManager'
 
 export type UseUserStoreAllowanceReturn = {
   consumedSize?: number
@@ -11,14 +11,13 @@ export type UseUserStoreAllowanceReturn = {
 
 export function useUserStoreAllowance(): UseUserStoreAllowanceReturn {
   const [state] = useAppState()
-  const { account, accountBalance = 0 } = state
+  const { accountBalance = 0 } = state
 
-  // @todo: Refactor this (use singleton)
-  const manager = useMemo(() => new FileManager(account), [account])
+  const manager = useFileManager()
 
   // -----------------------------
 
-  const doRequest = useCallback(() => manager.getFiles(), [manager])
+  const doRequest = useCallback(() => manager?.getFiles(), [manager])
 
   const { data: fileInfo } = useLocalRequest({
     doRequest,

@@ -10,7 +10,7 @@ import { useHashToEntity } from './useHashToEntity'
 import { Instance } from '@/domain/instance'
 import { Program } from '@/domain/program'
 import { useDomainStatus } from '@/hooks/common/useDomainStatus'
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { Account } from '@aleph-sdk/account'
 
 export type ManageDomain = {
   domain?: Domain

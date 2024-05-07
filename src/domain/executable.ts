@@ -1,11 +1,11 @@
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
+import { Blockchain } from '@aleph-sdk/core'
 import {
-  Chain,
   MachineResources,
   MachineVolume,
   Payment,
   PaymentType as SDKPaymentType,
-} from 'aleph-sdk-ts/dist/messages/types'
+} from '@aleph-sdk/message'
 import {
   AddExistingVolume,
   AddPersistentVolume,
@@ -14,7 +14,7 @@ import {
   VolumeManager,
   VolumeType,
 } from './volume'
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { Account } from '@aleph-sdk/account'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
@@ -24,6 +24,10 @@ import {
   getHours,
   StreamDurationField,
 } from '@/hooks/form/useSelectStreamDuration'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -48,12 +52,12 @@ export type ExecutableCost = Omit<VolumeCost, 'totalCost'> & {
 }
 
 export type HoldPaymentConfiguration = {
-  chain: Chain
+  chain: Blockchain
   type: PaymentMethod.Hold
 }
 
 export type StreamPaymentConfiguration = {
-  chain: Chain
+  chain: Blockchain
   type: PaymentMethod.Stream
   sender: string
   receiver: string
@@ -135,6 +139,7 @@ export abstract class Executable {
     protected account: Account,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
   ) {}
 
   protected parseEnvVars(
@@ -234,15 +239,15 @@ export abstract class Executable {
   protected parsePayment(payment?: PaymentConfiguration): Payment {
     if (!payment)
       return {
-        chain: Chain.ETH,
+        chain: Blockchain.ETH,
         type: SDKPaymentType.hold,
       }
     if (payment.type === PaymentMethod.Stream) {
       if (!payment.receiver)
         throw new Error('Payment receiver is required for stream payments')
-      if (payment.chain === Chain.AVAX)
+      if (payment.chain === Blockchain.AVAX)
         return {
-          chain: Chain.AVAX,
+          chain: Blockchain.AVAX,
           type: SDKPaymentType.superfluid,
           receiver: payment.receiver,
         }

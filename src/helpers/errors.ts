@@ -3,4 +3,5 @@ export default {
   ChainNotYetSupported: new Error('Chain is not yet supported'),
   RequestTimeout: new Error('Request timed out'),
   RequestFailed: (cause: unknown) => new Error('Request failed', { cause }),
+  InvalidAccount: new Error('Account needed to perform this action'),
 }

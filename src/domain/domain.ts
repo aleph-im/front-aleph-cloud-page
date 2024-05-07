@@ -1,10 +1,11 @@
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { aggregate } from 'aleph-sdk-ts/dist/messages'
-import E_ from '../helpers/errors'
+import { Account } from '@aleph-sdk/account'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
 import {
   AddDomainTarget,
   EntityType,
-  apiServer,
   defaultDomainAggregateKey,
   defaultDomainChannel,
 } from '../helpers/constants'
@@ -12,6 +13,7 @@ import { EntityManager } from './types'
 import { domainSchema, domainsSchema } from '@/helpers/schemas/domain'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { FunctionRuntimeId } from './runtime'
+import Err from '../helpers/errors'
 
 export { AddDomainTarget }
 
@@ -56,17 +58,15 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
   constructor(
     protected account: Account,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected key = defaultDomainAggregateKey,
     protected channel = defaultDomainChannel,
   ) {}
 
   async getAll(): Promise<Domain[]> {
     try {
-      const response: Record<string, unknown> = await aggregate.Get({
-        address: this.account.address,
-        key: this.key,
-        APIServer: apiServer,
-      })
+      const response: Record<string, unknown> =
+        await this.sdkClient.fetchAggregates(this.account.address, [this.key])
 
       return this.parseAggregate(response)
     } catch (err) {
@@ -88,15 +88,16 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     }
 
     try {
-      await aggregate.Publish({
-        account: this.account,
+      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+        throw Err.InvalidAccount
+
+      await this.sdkClient.createAggregate({
         key: this.key,
         channel: this.channel,
         content,
-        APIServer: apiServer,
       })
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 
@@ -143,8 +144,11 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       }, {} as DomainAggregate)
 
       yield
-      const response = await aggregate.Publish({
-        account: this.account,
+
+      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+        throw Err.InvalidAccount
+
+      const response = await this.sdkClient.createAggregate({
         key: this.key,
         channel: this.channel,
         content,
@@ -152,7 +156,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
       return this.parseNewAggregate(response)
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 
@@ -164,14 +168,16 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     }
 
     try {
-      await aggregate.Publish({
-        account: this.account,
+      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+        throw Err.InvalidAccount
+
+      await this.sdkClient.createAggregate({
         key: this.key,
         channel: this.channel,
         content,
       })
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 

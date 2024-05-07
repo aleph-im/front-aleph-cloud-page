@@ -1,4 +1,4 @@
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { Account } from '@aleph-sdk/account'
 import { EntityManager } from './types'
 import {
   AddProgram,
@@ -10,7 +10,7 @@ import {
 import { indexerSchema } from '@/helpers/schemas/indexer'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { getDefaultSpecsOptions } from '@/hooks/form/useSelectInstanceSpecs'
-import { Encoding } from 'aleph-sdk-ts/dist/messages/types'
+import { Encoding } from '@aleph-sdk/message'
 import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { toKebabCase, toSnakeCase } from '@/helpers/utils'
@@ -20,6 +20,10 @@ import { IndexerBlockchainNetworkField } from '@/hooks/form/useAddIndexerBlockch
 import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccounts'
 import { BlockchainDefaultABIUrl } from '@/helpers/constants'
 import { FunctionLangId, FunctionLanguage } from './lang'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
 
 export type AddIndexer = NameAndTagsField & {
   networks: IndexerBlockchainNetworkField[]
@@ -78,6 +82,7 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
 
   constructor(
     protected account: Account,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected programManager: ProgramManager,
   ) {}
 

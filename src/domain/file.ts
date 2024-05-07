@@ -1,12 +1,12 @@
 import { apiServer, channel, defaultConsoleChannel } from '@/helpers/constants'
 import { Mutex, convertByteUnits } from '@/helpers/utils'
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { any, store } from 'aleph-sdk-ts/dist/messages'
+import { Account } from '@aleph-sdk/account'
 import {
-  ItemType,
-  MessageType,
-  StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/types'
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
+import { ItemType, MessageType, StoreMessage } from '@aleph-sdk/message'
+import Err from '../helpers/errors'
 
 export type FileObject = {
   created: string
@@ -53,10 +53,9 @@ export class FileManager {
     }
 
     try {
-      const message = await any.GetMessage({
-        hash: hashOrFile,
-        APIServer: apiServer,
-      })
+      // @todo: refactor
+      const client = new AlephHttpClient(apiServer)
+      const message = await client.getMessage(hashOrFile)
 
       const { item_type, item_hash } = message.content as any
 
@@ -80,6 +79,7 @@ export class FileManager {
   }
 
   constructor(
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected account?: Account,
     protected channel = defaultConsoleChannel,
   ) {}
@@ -132,11 +132,12 @@ export class FileManager {
     // @note: Quick temporal fix to upload files
     const buffer = Buffer.from(await fileObject.arrayBuffer())
 
-    const message = await store.Publish({
-      account: this.account,
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    const message = await this.sdkClient.createStore({
       channel,
       fileObject: buffer,
-      APIServer: apiServer,
     })
 
     return message.content.item_hash
@@ -176,7 +177,7 @@ export class FileManager {
       const newFile = { ...file }
       newFile.content.size = objsMap.get(file.item_hash)?.size || 0
       return newFile
-    })
+    }) as StoreMessage[]
 
     totalSize =
       files.reduce((ac, cv) => ac + (cv?.content?.size || 0), 0) / 1024 ** 2
@@ -194,11 +195,10 @@ export class FileManager {
 
     const { address } = this.account
 
-    const items = await any.GetMessages({
-      messageType: MessageType.store,
+    const items = await this.sdkClient.getMessages({
+      messageTypes: [MessageType.store],
       addresses: [address],
-      pagination: 1000,
-      APIServer: apiServer,
+      pageSize: 1000,
     })
 
     const files = (items?.messages || []) as StoreMessage[]
