@@ -1,11 +1,10 @@
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
+import { Account } from '@aleph-sdk/account'
 import { EntityManager } from './types'
 import {
   CheckoutStepType,
   EntityType,
   PaymentMethod,
   WebsiteFrameworkId,
-  apiServer,
   defaultWebsiteChannel,
 } from '@/helpers/constants'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
@@ -16,12 +15,15 @@ import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
 import { BaseVolume } from './volume'
-import { store, forget, any } from 'aleph-sdk-ts/dist/messages'
 import { getDate, getExplorerURL } from '@/helpers/utils'
-import E_ from '../helpers/errors'
-import { ItemType, MessageType } from 'aleph-sdk-ts/dist/messages/types'
+import Err from '../helpers/errors'
+import { ItemType, MessageType } from '@aleph-sdk/message'
 import { AddDomain, DomainManager } from './domain'
 import { ipfsCIDSchema } from '@/helpers/schemas/base'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
 
 export { WebsiteFrameworkId }
 
@@ -315,17 +317,17 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
 
   constructor(
     protected account: Account,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected domainManager: DomainManager,
     protected channel = defaultWebsiteChannel,
   ) {}
 
   async getAll(): Promise<Website[]> {
     try {
-      const response = await any.GetMessages({
+      const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
-        messageType: MessageType.store,
+        messageTypes: [MessageType.store],
         channels: [this.channel],
-        APIServer: apiServer,
       })
 
       return await this.parseMessages(response.messages)
@@ -335,12 +337,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   async get(id: string): Promise<Website | undefined> {
-    const message = await any.GetMessage({
-      hash: id,
-      messageType: MessageType.store,
-      channel: this.channel,
-      APIServer: apiServer,
-    })
+    const message = await this.sdkClient.getMessage(id)
 
     const [entity] = await this.parseMessages([message])
     return entity
@@ -370,19 +367,19 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     })
     try {
       yield
-      const response = await store.Publish({
-        account: this.account,
+      const response = await (
+        this.sdkClient as AuthenticatedAlephHttpClient
+      ).createStore({
         channel: this.channel,
-        APIServer: apiServer,
         fileHash: data.cid!,
         storageEngine: ItemType.ipfs,
-        ...metadata,
+        extraFields: metadata,
       })
 
       const entity = (await this.parseMessages([response]))[0]
       return entity
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 
@@ -390,15 +387,16 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     websiteOrCid =
       typeof websiteOrCid === 'string' ? websiteOrCid : websiteOrCid.fileHash
 
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     try {
-      await forget.Publish({
-        account: this.account,
+      await this.sdkClient.forget({
         channel: this.channel,
         hashes: [websiteOrCid],
-        APIServer: apiServer,
       })
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 

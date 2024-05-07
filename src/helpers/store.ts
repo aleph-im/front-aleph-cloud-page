@@ -7,6 +7,7 @@ import { AccountFilesResponse, FileManager } from '@/domain/file'
 import { MessageManager } from '@/domain/message'
 import { Domain, DomainManager } from '@/domain/domain'
 import { IndexerManager } from '@/domain/indexer'
+import { Website, WebsiteManager } from '@/domain/website'
 import { NodeManager } from '@/domain/node'
 import { apiServer } from '@/helpers/constants'
 import {
@@ -157,7 +158,11 @@ export const reducer = (
       const sshKeyManager = new SSHKeyManager(account, sdkClient)
       const domainManager = new DomainManager(account, sdkClient)
       const volumeManager = new VolumeManager(account, sdkClient, fileManager)
-      const websiteManager = new WebsiteManager(account, domainManager)
+      const websiteManager = new WebsiteManager(
+        account,
+        sdkClient,
+        domainManager,
+      )
       const programManager = new ProgramManager(
         account,
         sdkClient,
