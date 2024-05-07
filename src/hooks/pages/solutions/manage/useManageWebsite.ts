@@ -1,60 +1,60 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { Volume } from '@/domain/volume'
-import { useAccountVolume } from '@/hooks/common/useAccountEntity/useAccountVolume'
+import { Website } from '@/domain/website'
+import { useAccountWebsite } from '@/hooks/common/useAccountEntity/useAccountWebsite'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
-import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
+import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { ActionTypes } from '@/helpers/store'
 import { useAppState } from '@/contexts/appState'
 
 export type ManageWebsite = {
-  volume?: Volume
+  website?: Website
   handleCopyHash: () => void
   handleDelete: () => void
-  handleDownload: () => void
+  //handleDownload: () => void
 }
 
 export function useManageWebsite(): ManageWebsite {
   const router = useRouter()
   const { hash } = router.query
 
-  const [volume] = useAccountVolume({ id: hash as string })
+  const [website] = useAccountWebsite({ id: hash as string })
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [, dispatch] = useAppState()
 
-  const manager = useVolumeManager()
+  const manager = useWebsiteManager()
 
   const handleCopyHash = useCallback(() => {
-    copyAndNotify(volume?.id || '')
-  }, [copyAndNotify, volume])
+    copyAndNotify(website?.id || '')
+  }, [copyAndNotify, website])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')
-    if (!volume) throw new Error('Invalid volume')
+    if (!website) throw new Error('Invalid website')
 
     try {
-      await manager.del(volume)
+      await manager.del(website)
 
       dispatch({
-        type: ActionTypes.delAccountVolume,
-        payload: { id: volume.id },
+        type: ActionTypes.delAccountWebsite,
+        payload: { id: website.id },
       })
 
       await router.replace('/')
     } catch (e) {}
-  }, [manager, volume, dispatch, router])
+  }, [manager, website, dispatch, router])
 
-  const handleDownload = useCallback(async () => {
+  /* const handleDownload = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')
-    if (!volume) throw new Error('Invalid volume')
+    if (!website) throw new Error('Invalid website')
 
-    await manager.download(volume)
-  }, [manager, volume])
+    //TODO: Implement download for websites
+    await manager.download(website)
+  }, [manager, website]) */
 
   return {
-    volume,
+    website,
     handleCopyHash,
     handleDelete,
-    handleDownload,
   }
 }

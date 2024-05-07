@@ -1,4 +1,10 @@
-import { AnchorHTMLAttributes, ReactNode, memo, useState } from 'react'
+import {
+  AnchorHTMLAttributes,
+  ReactNode,
+  memo,
+  useEffect,
+  useState,
+} from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { IconName, LinkComponent, RouterSidebar } from '@aleph-front/core'
@@ -25,6 +31,13 @@ const Sidebar = memo(() => {
   const allowanceInfo: any = useUserStoreAllowance()
   const breakpoint = 'lg'
 
+  // Hack to extend the sidebar inner list
+  /* useEffect(() => {
+    document
+      ?.querySelectorAll('[class^="styles__StyledNav2-"]')?.[0]
+      ?.querySelectorAll('[class^="cmp___StyledDiv3-"]')?.[0]
+      ?.setAttribute('style', 'padding-top: 2rem; height: auto;')
+  }, []) */
   return (
     <RouterSidebar
       {...{

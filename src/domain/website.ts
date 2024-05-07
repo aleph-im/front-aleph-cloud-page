@@ -15,14 +15,11 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
+import { BaseVolume } from './volume'
 import { store, forget, any } from 'aleph-sdk-ts/dist/messages'
 import { getDate, getExplorerURL } from '@/helpers/utils'
 import E_ from '../helpers/errors'
-import {
-  ItemType,
-  MessageType,
-  StoreContent,
-} from 'aleph-sdk-ts/dist/messages/types'
+import { ItemType, MessageType } from 'aleph-sdk-ts/dist/messages/types'
 import { AddDomain, DomainManager } from './domain'
 import { ipfsCIDSchema } from '@/helpers/schemas/base'
 
@@ -264,16 +261,14 @@ export type WebsiteCostProps = {
   streamDuration?: StreamDurationField
 }
 
-export type NewWebsite = StoreContent &
+export type NewWebsite = BaseVolume &
   NameAndTagsField & {
     type: EntityType.Website
     fileHash: string
     useLatest: boolean
   }
 
-export type Website = Omit<NewWebsite, 'useLatest'> & {
-  id: string // hash
-}
+export type Website = NewWebsite
 
 export type AddWebsite = NameAndTagsField &
   WebsiteFrameworkField & {
@@ -384,7 +379,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         ...metadata,
       })
 
-      const entity = await this.parseMessage(response, response.content)
+      const entity = (await this.parseMessages([response]))[0]
       return entity
     } catch (err) {
       throw E_.RequestFailed(err)
@@ -405,6 +400,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     } catch (err) {
       throw E_.RequestFailed(err)
     }
+  }
+
+  async download(websiteOrId: string | Website): Promise<void> {
+    throw new Error('Method not implemented.')
   }
 
   protected async parseNewWebsite(website: AddWebsite): Promise<AddWebsite> {
@@ -459,9 +458,15 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   protected async parseMessages(messages: any[]): Promise<Website[]> {
-    return messages
-      .filter(({ content }) => content !== undefined)
-      .map((message) => this.parseMessage(message, message.content))
+    const tooOld = Date.now() - 3600 // 1h ago
+
+    return (
+      messages
+        .filter(({ content }) => content !== undefined)
+        // Fix: When forgetting/deleting a website, it still appears in the list
+        .filter((message) => !!message.confirmed || tooOld < message.time)
+        .map((message) => this.parseMessage(message, message.content))
+    )
   }
 
   protected parseMessage(message: any, content: any): Website {
@@ -471,6 +476,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       type: EntityType.Website,
       url: getExplorerURL(message),
       date: getDate(message.time),
+      size: FileManager.getFileSize(message.item_hash),
       confirmed: !!message.confirmed,
     }
   }

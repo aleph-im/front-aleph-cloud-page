@@ -80,11 +80,9 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
                   Custom domain
                 </TextGradient>
                 <p tw="mb-6">
-                  You have the ability to configure a domain name to access your
-                  cloud instances. By setting up a user-friendly custom domain,
-                  accessing your instances becomes easier and more intuitive.
-                  It&s another way we&re making web3 cloud management as
-                  straightforward as possible.
+                  Configure an user-friendly domain name for your website,
+                  providing a more accessible and professional way for users to
+                  interact with your dapp.
                 </p>
                 <AddDomains
                   name="domains"

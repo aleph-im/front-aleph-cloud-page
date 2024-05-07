@@ -143,7 +143,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
                   Custom domain
                 </TextGradient>
                 <p tw="mb-6">
-                  Configure a user-friendly domain name for your web3 function,
+                  Configure an user-friendly domain name for your web3 function,
                   providing a more accessible and professional way for users to
                   interact with your application.
                 </p>

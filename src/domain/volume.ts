@@ -352,10 +352,15 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected async parseMessages(messages: any[]): Promise<Volume[]> {
     const sizesMap = await this.fileManager.getSizesMap()
+    const tooOld = Date.now() - 3600 // 1h ago
 
-    return messages
-      .filter(({ content }) => content !== undefined)
-      .map((message) => this.parseMessage(message, message.content, sizesMap))
+    return (
+      messages
+        .filter(({ content }) => content !== undefined)
+        // Fix: When forgetting/deleting a volume, it still appears in the list
+        .filter((message) => !!message.confirmed || tooOld < message.time)
+        .map((message) => this.parseMessage(message, message.content, sizesMap))
+    )
   }
 
   protected parseMessage(

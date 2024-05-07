@@ -7,6 +7,7 @@ import SSHKeysTabContent from '../SSHKeysTabContent'
 import FunctionsTabContent from '../FunctionsTabContent'
 import InstancesTabContent from '../InstancesTabContent'
 import VolumesTabContent from '../VolumesTabContent'
+import WebsitesTabContent from '../WebsitesTabContent'
 import AllTabContent from '../AllTabContent'
 import { useDashboardPage } from '@/hooks/pages/solutions/useDashboardPage'
 import DomainsTabContent from '../DomainsTabContent'
@@ -26,7 +27,7 @@ function getLabel(entities: unknown[], beta = false): string {
 export default function DashboardPage() {
   useSPARedirect()
 
-  const { all, functions, instances, volumes, sshKeys, domains } =
+  const { all, functions, instances, volumes, sshKeys, domains, websites } =
     useDashboardPage()
 
   const [tabId, setTabId] = useState('all')
@@ -54,8 +55,13 @@ export default function DashboardPage() {
                 label: { label: getLabel(instances, true), position: 'top' },
               },
               {
+                id: 'website',
+                name: 'Websites',
+                label: { label: getLabel(websites, true), position: 'top' },
+              },
+              {
                 id: 'volume',
-                name: 'Immutable Volumes',
+                name: 'Volumes',
                 label: { label: getLabel(volumes), position: 'bottom' },
               },
               {
@@ -79,6 +85,8 @@ export default function DashboardPage() {
             <FunctionsTabContent data={functions} />
           ) : tabId === 'instance' ? (
             <InstancesTabContent data={instances} />
+          ) : tabId === 'website' ? (
+            <WebsitesTabContent data={websites} />
           ) : tabId === 'volume' ? (
             <VolumesTabContent data={volumes} />
           ) : tabId === 'ssh' ? (

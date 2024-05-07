@@ -10,12 +10,11 @@ import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
 export default function ManageWebsite() {
-  const { volume, handleCopyHash, handleDelete, handleDownload } =
-    useManageWebsite()
+  const { website, handleCopyHash, handleDelete } = useManageWebsite()
 
   const theme = useTheme()
 
-  if (!volume) {
+  if (!website) {
     return (
       <>
         <Container>
@@ -25,8 +24,8 @@ export default function ManageWebsite() {
     )
   }
 
-  const name = ellipseAddress(volume.id)
-  const typeName = EntityTypeName[volume.type]
+  const name = ellipseAddress(website.id)
+  const typeName = EntityTypeName[website.type]
 
   return (
     <>
@@ -38,10 +37,10 @@ export default function ManageWebsite() {
               <div className="tp-body2">{name}</div>
               <Label
                 kind="secondary"
-                variant={volume.confirmed ? 'success' : 'warning'}
+                variant={website.confirmed ? 'success' : 'warning'}
                 tw="ml-4"
               >
-                {volume.confirmed ? (
+                {website.confirmed ? (
                   'READY'
                 ) : (
                   <div tw="flex items-center">
@@ -55,7 +54,7 @@ export default function ManageWebsite() {
               </Label>
             </div>
             <div>
-              <Button
+              {/* <Button
                 size="md"
                 variant="tertiary"
                 color="main0"
@@ -65,7 +64,7 @@ export default function ManageWebsite() {
                 onClick={handleDownload}
               >
                 Download
-              </Button>
+              </Button> */}
               <Button
                 kind="functional"
                 variant="warning"
@@ -85,7 +84,7 @@ export default function ManageWebsite() {
               <div tw="flex-auto">
                 <div className="tp-info text-main0">ITEM HASH</div>
                 <IconText iconName="copy" onClick={handleCopyHash}>
-                  {volume.id}
+                  {website.id}
                 </IconText>
               </div>
             </div>
@@ -97,12 +96,12 @@ export default function ManageWebsite() {
               <div>
                 <a
                   className="tp-body1 fs-16"
-                  href={volume.url}
+                  href={website.url}
                   target="_blank"
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{ellipseText(volume.url, 80)}</Text>
+                    <Text>{ellipseText(website.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -113,7 +112,7 @@ export default function ManageWebsite() {
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
                   <Text className="fs-10 tp-body1">
-                    {humanReadableSize(volume.size, 'MiB')}
+                    {humanReadableSize(website.size, 'MiB')}
                   </Text>
                 </div>
               </div>
@@ -121,15 +120,15 @@ export default function ManageWebsite() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <Text className="fs-10 tp-body1">{volume.date}</Text>
+                  <Text className="fs-10 tp-body1">{website.date}</Text>
                 </div>
               </div>
             </div>
           </NoisyContainer>
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/storage/volume/new">
-              Create new volume
+            <ButtonLink variant="primary" href="/hosting/website/new">
+              Create new website
             </ButtonLink>
           </div>
         </Container>

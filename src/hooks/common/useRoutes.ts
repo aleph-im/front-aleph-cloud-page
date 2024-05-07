@@ -26,16 +26,6 @@ export function useRoutes(): UseRoutesReturn {
             ],
           },
           {
-            name: 'Web3 Hosting',
-            href: '/hosting',
-            children: [
-              {
-                name: 'Manage Your Website',
-                href: '/hosting/website/new',
-              },
-            ],
-          },
-          {
             name: 'Computing',
             href: '/computing',
             children: [
@@ -51,6 +41,16 @@ export function useRoutes(): UseRoutesReturn {
                 name: 'Confidential',
                 href: '/computing/confidential/new',
                 disabled: true,
+              },
+            ],
+          },
+          {
+            name: 'Web3 Hosting',
+            href: '/hosting',
+            children: [
+              {
+                name: 'Websites',
+                href: '/hosting/website/new',
               },
             ],
           },

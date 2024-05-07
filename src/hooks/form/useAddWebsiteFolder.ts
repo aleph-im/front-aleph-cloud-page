@@ -27,17 +27,6 @@ export type UseAddWebsiteFolderReturn = {
   handleRemove?: () => void
 }
 
-const addFolder = async (folder: FileList): Promise<string | undefined> => {
-  const data = new FormData()
-  Array.from(folder).forEach((f) => data.append('file', f))
-  const query = await fetch('https://ipfs.aleph.cloud/api/v0/add?to-files=1', {
-    method: 'POST',
-    body: data,
-  })
-  if (query.status === 200)
-    return JSON.parse((await query.text()).split('\n').at(-2)!)?.['Hash']
-}
-
 export function useAddWebsiteFolderProps({
   name = 'website',
   index,
@@ -68,9 +57,8 @@ export function useAddWebsiteFolderProps({
         const size = await FileManager.getFolderSize(folder)
         const hSize = humanReadableSize(size, 'MiB')
         setFolderSize(hSize)
-        const cid = await addFolder(folder)
-        console.log('CID:', cid)
-        cidCtrl.field.onChange(cid)
+        const cid = await FileManager.uploadFolder(folder)
+        if (cid) cidCtrl.field.onChange(cid)
       } else if (folderSize) {
         setFolderSize('')
         cidCtrl.field.onChange('')

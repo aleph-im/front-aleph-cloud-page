@@ -16,6 +16,7 @@ import { Instance } from '../domain/instance'
 import { Volume } from '@/domain/volume'
 import { Program } from '@/domain/program'
 import { Domain } from '@/domain/domain'
+import { Website } from '@/domain/website'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -253,7 +254,7 @@ export const unixToISODateTimeString = (timeStamp?: number, noDate = 'n/a') => {
   }).format(date)
 }
 
-export type AnyEntity = Program | Instance | Volume | SSHKey | Domain
+export type AnyEntity = Program | Instance | Volume | SSHKey | Domain | Website
 
 export type AnyMessage =
   | ProgramMessage
@@ -261,12 +262,14 @@ export type AnyMessage =
   | StoreMessage
   | PostMessage<SSHKey>
 
+//export const isWebsite = (msg: AnyMessage) => msg.type === MessageType.store && true
 export const isVolume = (msg: AnyMessage) => msg.type === MessageType.store
 export const isProgram = (msg: AnyMessage) => msg.type === MessageType.program
 export const isInstance = (msg: AnyMessage) => msg.type === MessageType.instance
 export const isSSHKey = (msg: AnyMessage) => msg.type === MessageType.post
 
 export function getEntityTypeFromMessage(msg: AnyMessage): EntityType {
+  //if (isWebsite(msg)) return EntityType.Website
   if (isVolume(msg)) return EntityType.Volume
   if (isProgram(msg)) return EntityType.Program
   if (isInstance(msg)) return EntityType.Instance
