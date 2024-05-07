@@ -1,6 +1,8 @@
 import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
+import { Blockchain } from '@aleph-sdk/core'
+import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
@@ -26,14 +28,12 @@ import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { CRN, CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
+import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
 import {
   defaultStreamDuration,
   StreamDurationField,
 } from '@/hooks/form/useSelectStreamDuration'
-import { Chain } from 'aleph-sdk-ts/dist/messages/types'
 import { useConnect } from '@/hooks/common/useConnect'
-import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
 import { ActionTypes } from '@/helpers/store'
 import {
   stepsCatalog,
@@ -144,8 +144,8 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
       if (window?.ethereum === undefined) throw new Error('No wallet found')
 
       let superfluidAccount
-      if (selectedNetwork !== Chain.AVAX) {
-        const account = await switchNetwork(Chain.AVAX)
+      if (selectedNetwork !== Blockchain.AVAX) {
+        const account = await switchNetwork(Blockchain.AVAX)
         superfluidAccount = account as SuperfluidAccount
       } else {
         superfluidAccount = account as SuperfluidAccount
@@ -158,7 +158,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
         {
           ...state,
           payment: {
-            chain: Chain.AVAX,
+            chain: Blockchain.AVAX,
             type: PaymentMethod.Stream,
             sender: account.address,
             receiver: node.stream_reward,

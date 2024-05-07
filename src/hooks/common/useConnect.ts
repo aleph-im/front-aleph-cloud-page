@@ -2,30 +2,30 @@ import { useAppState } from '@/contexts/appState'
 import { getAccountBalance, web3Connect } from '@/helpers/aleph'
 import { ActionTypes } from '@/helpers/store'
 import { useNotification } from '@aleph-front/core'
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { Chain } from 'aleph-sdk-ts/dist/messages/types'
+import { Blockchain } from '@aleph-sdk/core'
+import { Account } from '@aleph-sdk/account'
 import { useCallback } from 'react'
 import { useSessionStorage } from 'usehooks-ts'
 import { ExternalProvider } from '@ethersproject/providers'
 
 export type UseConnectReturn = {
   connect: (
-    chain?: Chain,
+    chain?: Blockchain,
     provider?: ExternalProvider,
   ) => Promise<Account | undefined>
   disconnect: () => Promise<void>
-  switchNetwork: (chain: Chain) => Promise<Account | undefined>
+  switchNetwork: (chain: Blockchain) => Promise<Account | undefined>
   isConnected: boolean
   account: Account | undefined
-  selectedNetwork: Chain
+  selectedNetwork: Blockchain
 }
 
 export function useConnect(): UseConnectReturn {
   const [state, dispatch] = useAppState()
   const noti = useNotification()
-  const [selectedNetwork, setSelectedNetwork] = useSessionStorage<Chain>(
+  const [selectedNetwork, setSelectedNetwork] = useSessionStorage<Blockchain>(
     'selectedNetwork',
-    Chain.ETH,
+    Blockchain.ETH,
   )
 
   const onError = useCallback(
@@ -49,7 +49,7 @@ export function useConnect(): UseConnectReturn {
   )
 
   const connect = useCallback(
-    async (chain?: Chain, provider?: ExternalProvider) => {
+    async (chain?: Blockchain, provider?: ExternalProvider) => {
       if (!chain) return
 
       let account
@@ -86,7 +86,7 @@ export function useConnect(): UseConnectReturn {
   }, [dispatch])
 
   const switchNetwork = useCallback(
-    async (chain: Chain) => {
+    async (chain: Blockchain) => {
       let account
 
       try {

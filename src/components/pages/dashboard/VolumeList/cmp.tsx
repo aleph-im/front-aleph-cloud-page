@@ -4,7 +4,7 @@ import {
   isVolumeEphemeral,
   isVolumePersistent,
 } from '@/helpers/utils'
-import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
+import { MachineVolume } from '@aleph-sdk/message'
 import React from 'react'
 import { Text } from '../common'
 import IconText from '@/components/common/IconText'

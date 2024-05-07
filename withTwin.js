@@ -41,6 +41,8 @@ module.exports = function withTwin(nextConfig) {
       if (!isServer) {
         config.resolve.fallback = {
           ...(config.resolve.fallback || {}),
+          net: false,
+          tls: false,
           fs: false,
           module: false,
           path: false,

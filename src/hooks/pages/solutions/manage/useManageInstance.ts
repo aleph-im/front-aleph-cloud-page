@@ -10,8 +10,8 @@ import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
 import { useConnect } from '@/hooks/common/useConnect'
-import { Chain } from 'aleph-sdk-ts/dist/messages/types'
-import { SuperfluidAccount } from 'aleph-sdk-ts/dist/accounts/superfluid'
+import { Blockchain } from '@aleph-sdk/core'
+import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 
 export type ManageInstance = {
   instance?: Instance
@@ -69,8 +69,8 @@ export function useManageInstance(): ManageInstance {
 
     try {
       let superfluidAccount
-      if (selectedNetwork !== Chain.AVAX) {
-        const account = await switchNetwork(Chain.AVAX)
+      if (selectedNetwork !== Blockchain.AVAX) {
+        const account = await switchNetwork(Blockchain.AVAX)
         superfluidAccount = account as SuperfluidAccount
       } else {
         superfluidAccount = account as SuperfluidAccount

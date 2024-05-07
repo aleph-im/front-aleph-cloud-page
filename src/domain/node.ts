@@ -3,8 +3,11 @@ import {
   defaultAccountChannel,
   scoringAddress,
 } from '@/helpers/constants'
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { messages } from 'aleph-sdk-ts'
+import { Account } from '@aleph-sdk/account'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
 import {
   fetchAndCache,
   getLatestReleases,
@@ -13,8 +16,6 @@ import {
 } from '@/helpers/utils'
 import { FileManager } from './file'
 import { urlSchema } from '@/helpers/schemas/base'
-
-const { post } = messages
 
 export type NodeType = 'ccn' | 'crn'
 
@@ -242,10 +243,22 @@ export type ReducedCRNSpecs = {
 
 // @todo: Refactor (create a domain npm package and move this there)
 export class NodeManager {
+  static validateMinNodeSpecs(
+    minSpecs: ReducedCRNSpecs,
+    nodeSpecs: CRNSpecs,
+  ): boolean {
+    return (
+      minSpecs.cpu <= nodeSpecs.cpu.count &&
+      minSpecs.ram <= (nodeSpecs.mem.available_kB || 0) / 1024 &&
+      minSpecs.storage <= (nodeSpecs.disk.available_kB || 0) / 1024
+    )
+  }
+
   constructor(
+    protected fileManager: FileManager,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected account?: Account,
     protected channel = defaultAccountChannel,
-    protected fileManager: FileManager = new FileManager(account, channel),
   ) {}
 
   async getCCNNodes(): Promise<CCN[]> {
@@ -468,11 +481,7 @@ export class NodeManager {
     minSpecs: ReducedCRNSpecs,
     nodeSpecs: CRNSpecs,
   ): boolean {
-    return (
-      minSpecs.cpu <= nodeSpecs.cpu.count &&
-      minSpecs.ram <= (nodeSpecs.mem.available_kB || 0) / 1024 &&
-      minSpecs.storage <= (nodeSpecs.disk.available_kB || 0) / 1024
-    )
+    return NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
   }
 
   protected parseResourceNodes(crns: CRN[]): CRN[] {
@@ -572,12 +581,11 @@ export class NodeManager {
     ccn: CCNScore[]
     crn: CRNScore[]
   }> {
-    const res = await post.Get({
+    const res = await this.sdkClient.getPosts({
       types: 'aleph-scoring-scores',
       addresses: [scoringAddress],
-      pagination: 1,
+      pageSize: 1,
       page: 1,
-      APIServer: apiServer,
     })
 
     return (res.posts[0]?.content as any)?.scores
@@ -587,12 +595,11 @@ export class NodeManager {
     ccn: CCNMetrics[]
     crn: CRNMetrics[]
   }> {
-    const res = await post.Get({
+    const res = await this.sdkClient.getPosts({
       types: 'aleph-network-metrics',
       addresses: [scoringAddress],
-      pagination: 1,
+      pageSize: 1,
       page: 1,
-      APIServer: apiServer,
     })
 
     return (res.posts[0]?.content as any)?.metrics

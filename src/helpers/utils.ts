@@ -1,6 +1,5 @@
-import E_ from './errors'
 import {
-  BaseMessage,
+  Message,
   EphemeralVolume,
   InstanceMessage,
   MessageType,
@@ -8,8 +7,8 @@ import {
   PostMessage,
   ProgramMessage,
   StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/types'
-import { MachineVolume } from 'aleph-sdk-ts/dist/messages/types'
+} from '@aleph-sdk/message'
+import { MachineVolume } from '@aleph-sdk/message'
 import { EntityType, apiServer } from './constants'
 import { SSHKey } from '../domain/ssh'
 import { Instance } from '../domain/instance'
@@ -17,6 +16,7 @@ import { Volume } from '@/domain/volume'
 import { Program } from '@/domain/program'
 import { Domain } from '@/domain/domain'
 import { Website } from '@/domain/website'
+import Err from './errors'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -60,7 +60,7 @@ export const getERC20Balance = async (address: string) => {
     const { balance } = await query.json()
     return balance
   } catch (error) {
-    throw E_.RequestFailed(error)
+    throw Err.RequestFailed(error)
   }
 }
 
@@ -80,7 +80,7 @@ export const getSOLBalance = async (address: string) => {
     const { balance } = await query.json()
     return balance
   } catch (error) {
-    throw E_.RequestFailed(error)
+    throw Err.RequestFailed(error)
   }
 }
 
@@ -198,18 +198,15 @@ const messageTypeWhitelist = new Set(Object.values(MessageType))
 /**
  * Returns a link to the Aleph explorer for a given message
  */
-export const getExplorerURL = ({
-  item_hash,
-  chain,
-  sender,
-  type,
-}: BaseMessage) => {
-  type = messageTypeWhitelist.has(type) ? type : MessageType.post
+export const getExplorerURL = ({ item_hash, chain, sender, type }: Message) => {
+  type = messageTypeWhitelist.has(type as MessageType) ? type : MessageType.post
   return `https://explorer.aleph.im/address/${chain}/${sender}/message/${type}/${item_hash}`
 }
 
-export const getDate = (time: number): string => {
-  const [date, hour] = new Date(time * 1000).toISOString().split('T')
+export const getDate = (time: number | string): string => {
+  const dateTime =
+    typeof time === 'string' ? time : new Date(time * 1000).toISOString()
+  const [date, hour] = dateTime.split('T')
   const [hours] = hour.split('.')
 
   return `${date} ${hours}`

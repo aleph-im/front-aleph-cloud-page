@@ -1,22 +1,22 @@
 import JSZip from 'jszip'
-import { Account } from 'aleph-sdk-ts/dist/accounts/account'
-import { forget, program, any } from 'aleph-sdk-ts/dist/messages'
-import { ProgramPublishConfiguration } from 'aleph-sdk-ts/dist/messages/program/publish'
-import { Encoding, ProgramContent } from 'aleph-sdk-ts/dist/messages/types'
-import E_ from '../helpers/errors'
+import { Account } from '@aleph-sdk/account'
+import {
+  Encoding,
+  ProgramContent,
+  ProgramPublishConfiguration,
+} from '@aleph-sdk/message'
+import {
+  AlephHttpClient,
+  AuthenticatedAlephHttpClient,
+} from '@aleph-sdk/client'
 import {
   EntityType,
-  apiServer,
   defaultProgramChannel,
   defaultVMURL,
   programStorageURL,
 } from '../helpers/constants'
 import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
-import {
-  MachineVolume,
-  MessageType,
-  StoreMessage,
-} from 'aleph-sdk-ts/dist/messages/types'
+import { MachineVolume, MessageType, StoreMessage } from '@aleph-sdk/message'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   Executable,
@@ -38,6 +38,7 @@ import { functionSchema } from '@/helpers/schemas/program'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { FunctionLangId, FunctionLanguage } from './lang'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
+import Err from '../helpers/errors'
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -112,22 +113,22 @@ export class ProgramManager
 
   constructor(
     protected account: Account,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
     protected messageManager: MessageManager,
     protected fileManager: FileManager,
     protected channel = defaultProgramChannel,
   ) {
-    super(account, volumeManager, domainManager)
+    super(account, volumeManager, domainManager, sdkClient)
   }
 
   async getAll(): Promise<Program[]> {
     try {
-      const response = await any.GetMessages({
+      const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
-        messageType: MessageType.program,
+        messageTypes: [MessageType.program],
         channels: [this.channel],
-        APIServer: apiServer,
       })
 
       return await this.parseMessages(response.messages)
@@ -137,12 +138,7 @@ export class ProgramManager
   }
 
   async get(id: string): Promise<Program | undefined> {
-    const message = await any.GetMessage({
-      hash: id,
-      messageType: MessageType.program,
-      channel: this.channel,
-      APIServer: apiServer,
-    })
+    const message = await this.sdkClient.getMessage(id)
 
     const [entity] = await this.parseMessages([message])
     return entity
@@ -158,13 +154,15 @@ export class ProgramManager
   }
 
   async *addSteps(newProgram: AddProgram): AsyncGenerator<void, Program, void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     try {
       const programMessage = yield* this.parseProgramSteps(newProgram)
 
       yield
-      const response = await program.publish({
+      const response = await this.sdkClient.createProgram({
         ...programMessage,
-        APIServer: apiServer,
       })
 
       const [entity] = await this.parseMessages([response])
@@ -174,22 +172,23 @@ export class ProgramManager
 
       return entity
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 
   async del(programOrId: string | Program): Promise<void> {
     programOrId = typeof programOrId === 'string' ? programOrId : programOrId.id
 
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     try {
-      await forget.Publish({
-        account: this.account,
+      await this.sdkClient.forget({
         channel: this.channel,
         hashes: [programOrId],
-        APIServer: apiServer,
       })
     } catch (err) {
-      throw E_.RequestFailed(err)
+      throw Err.RequestFailed(err)
     }
   }
 

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { FunctionLangId } from '@/domain/lang'
-import { Encoding } from 'aleph-sdk-ts/dist/messages/types'
+import { Encoding } from '@aleph-sdk/message'
 import {
   codeFileSchema,
   requiredStringSchema,
