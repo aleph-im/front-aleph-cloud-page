@@ -78,15 +78,46 @@ export class FileManager {
     return Number.POSITIVE_INFINITY
   }
 
-  static async getFolderSize(folder?: FileList): Promise<number> {
-    if (!folder) return Number.POSITIVE_INFINITY
-    let totalSize = 0
-    Array.from(folder).forEach((file) => {
-      const size = file?.size
-      if (size === undefined) return Number.POSITIVE_INFINITY
-      totalSize += convertByteUnits(file.size, { from: 'B', to: 'MiB' })
-    })
-    return totalSize
+  static async getFolderSize(hash?: string): Promise<number>
+  static async getFolderSize(folder?: FileList): Promise<number>
+  static async getFolderSize(
+    folderOrFile?: string | FileList,
+  ): Promise<number> {
+    if (!folderOrFile) return Number.POSITIVE_INFINITY
+
+    if (folderOrFile instanceof FileList) {
+      let totalSize = 0
+      Array.from(folderOrFile).forEach((file) => {
+        const size = file?.size
+        if (size === undefined) return Number.POSITIVE_INFINITY
+        totalSize += convertByteUnits(file.size, { from: 'B', to: 'MiB' })
+      })
+      return totalSize
+    }
+
+    try {
+      const client = new AlephHttpClient(apiServer)
+      const message = await client.getMessage(folderOrFile)
+
+      const { item_type, item_hash } = message.content as any
+
+      if (item_type === ItemType.ipfs || item_type === ItemType.storage) {
+        const query = await fetch(
+          `${apiServer}/api/v0/storage/raw/${item_hash}`,
+          { method: 'HEAD' },
+        )
+
+        const contentLength = query.headers.get('Content-Length')
+        if (!contentLength) return Number.POSITIVE_INFINITY
+
+        return convertByteUnits(Number(contentLength), {
+          from: 'B',
+          to: 'MiB',
+        })
+      }
+    } catch {}
+
+    return Number.POSITIVE_INFINITY
   }
 
   constructor(
@@ -170,11 +201,14 @@ export class FileManager {
 
   protected parseSizesMap(files: AccountFileObject[]): void {
     this.lastFetch = Date.now()
-    this.sizesMapCache = files.reduce((ac, cv) => {
-      // @note: Cast from bytes to MiB
-      ac[cv.item_hash] = convertByteUnits(cv.size, { from: 'B', to: 'MiB' })
-      return ac
-    }, {} as Record<string, number>)
+    this.sizesMapCache = files.reduce(
+      (ac, cv) => {
+        // @note: Cast from bytes to MiB
+        ac[cv.item_hash] = convertByteUnits(cv.size, { from: 'B', to: 'MiB' })
+        return ac
+      },
+      {} as Record<string, number>,
+    )
   }
 
   // -------------------------------------------------

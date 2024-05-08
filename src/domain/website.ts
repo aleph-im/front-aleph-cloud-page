@@ -263,14 +263,12 @@ export type WebsiteCostProps = {
   streamDuration?: StreamDurationField
 }
 
-export type NewWebsite = BaseVolume &
+export type Website = BaseVolume &
   NameAndTagsField & {
     type: EntityType.Website
     fileHash: string
     useLatest: boolean
   }
-
-export type Website = NewWebsite
 
 export type AddWebsite = NameAndTagsField &
   WebsiteFrameworkField & {
@@ -318,6 +316,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   constructor(
     protected account: Account,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
+    protected fileManager: FileManager,
     protected domainManager: DomainManager,
     protected channel = defaultWebsiteChannel,
   ) {}
@@ -385,7 +384,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
 
   async del(websiteOrCid: string | Website): Promise<void> {
     websiteOrCid =
-      typeof websiteOrCid === 'string' ? websiteOrCid : websiteOrCid.fileHash
+      typeof websiteOrCid === 'string' ? websiteOrCid : websiteOrCid.id
 
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
@@ -456,25 +455,24 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   protected async parseMessages(messages: any[]): Promise<Website[]> {
-    const tooOld = Date.now() - 3600 // 1h ago
-
-    return (
-      messages
-        .filter(({ content }) => content !== undefined)
-        // Fix: When forgetting/deleting a website, it still appears in the list
-        .filter((message) => !!message.confirmed || tooOld < message.time)
-        .map((message) => this.parseMessage(message, message.content))
-    )
+    const sizesMap = await this.fileManager.getSizesMap()
+    return messages
+      .filter(({ content }) => content !== undefined)
+      .map((message) => this.parseMessage(message, message.content, sizesMap))
   }
 
-  protected parseMessage(message: any, content: any): Website {
+  protected parseMessage(
+    message: any,
+    content: any,
+    sizesMap: Record<string, number>,
+  ): Website {
     return {
       id: message.item_hash,
       ...content,
       type: EntityType.Website,
       url: getExplorerURL(message),
       date: getDate(message.time),
-      size: FileManager.getFileSize(message.item_hash),
+      size: sizesMap[message.item_hash],
       confirmed: !!message.confirmed,
     }
   }

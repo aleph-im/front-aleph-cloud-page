@@ -161,6 +161,7 @@ export const reducer = (
       const websiteManager = new WebsiteManager(
         account,
         sdkClient,
+        fileManager,
         domainManager,
       )
       const programManager = new ProgramManager(
