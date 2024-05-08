@@ -370,6 +370,10 @@ export function toSnakeCase(input: string): string {
   return toKebabCase(input).replace(/-/g, '_')
 }
 
+export function toPascalCase(input: string): string {
+  return input[0].toUpperCase() + input.slice(1).toLowerCase()
+}
+
 // -------------------------- @todo: Refactor in domain package -------------------
 
 /**
@@ -480,10 +484,10 @@ export const humanReadableDurationUnit = (
     unit === 'h'
       ? `hour${s}`
       : unit === 'd'
-      ? `day${s}`
-      : unit === 'm'
-      ? `month${s}`
-      : `year${s}`
+        ? `day${s}`
+        : unit === 'm'
+          ? `month${s}`
+          : `year${s}`
 
   return `${duration} ${subfix}`
 }

@@ -66,7 +66,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   async getAll(): Promise<Domain[]> {
     try {
       const response: Record<string, unknown> =
-        await this.sdkClient.fetchAggregates(this.account.address, [this.key])
+        await this.sdkClient.fetchAggregate(this.account.address, this.key)
 
       return this.parseAggregate(response)
     } catch (err) {
@@ -240,8 +240,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   // @todo: Type not exported from SDK...
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregate(response: any): Domain[] {
-    const domains = response[this.key] as DomainAggregate
-    return this.parseAggregateItems(domains)
+    return this.parseAggregateItems(response as DomainAggregate)
   }
 
   // @todo: Type not exported from SDK...
@@ -251,7 +250,6 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     return this.parseAggregateItems(domains)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregateItems(aggregate: DomainAggregate): Domain[] {
     return Object.entries(aggregate)
       .filter(([, value]) => value !== null)
@@ -260,29 +258,21 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       )
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregateItem(
     name: string,
     content: DomainAggregateItem,
   ): Domain {
     const { message_id, type } = content
-    // @note: legacy domains don't have updated_at property
-    // Cast to string to avoid type errors
-    const updated_at = content?.updated_at || 'unknown'
 
     const domain: Domain = {
       type: EntityType.Domain,
       id: name,
       name,
+      programType: content?.programType || EntityType.Instance,
       target: type,
       ref: message_id,
       confirmed: true,
-      updated_at: updated_at,
-    }
-
-    // @note: legacy domains don't include programType (default to Instance)
-    if (type === AddDomainTarget.Program) {
-      domain.programType = content.programType || EntityType.Instance
+      updated_at: content?.updated_at || 'unknown',
     }
 
     return domain

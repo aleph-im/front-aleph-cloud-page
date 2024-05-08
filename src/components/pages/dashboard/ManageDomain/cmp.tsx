@@ -3,7 +3,7 @@ import { Label, NoisyContainer } from '@aleph-front/core'
 import { EntityTypeName, AddDomainTarget } from '@/helpers/constants'
 import { BulletItem, Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageDomain } from '@/hooks/pages/solutions/manage/useManageDomain'
-import { ellipseAddress, ellipseText } from '@/helpers/utils'
+import { ellipseAddress, ellipseText, toPascalCase } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import ButtonLink from '@/components/common/ButtonLink'
 
@@ -89,7 +89,7 @@ export default function ManageDomain() {
               <div tw="my-5">
                 <div className="tp-info text-main0">TARGET</div>
                 <div>
-                  <Text>{domain.target}</Text>
+                  <Text>{toPascalCase(domain.target)}</Text>
                 </div>
               </div>
             )}
@@ -254,8 +254,7 @@ export default function ManageDomain() {
                   <div className="tp-info text-main0">NAME</div>
                   <div>
                     <Text>
-                      {(refEntity?.metadata?.name as string) ||
-                        ellipseAddress(refEntity.id)}
+                      {(refEntity?.metadata?.name as string) || refEntity.id}
                     </Text>
                   </div>
                 </div>

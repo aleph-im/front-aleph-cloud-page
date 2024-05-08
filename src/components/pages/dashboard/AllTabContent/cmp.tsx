@@ -30,7 +30,7 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
               <EntityTable
                 borderType="none"
                 rowNoise
-                rowKey={(row) => row.id}
+                rowKey={(row) => `${row.type}-${row.id}`}
                 data={data}
                 columns={[
                   {

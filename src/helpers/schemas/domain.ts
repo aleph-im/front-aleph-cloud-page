@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import { domainNameSchema, messageHashSchema, programTypeSchema } from './base'
+import {
+  domainNameSchema,
+  ipfsCIDSchema,
+  messageHashSchema,
+  programTypeSchema,
+} from './base'
 import { AddDomainTarget } from '../constants'
 
 // DOMAINS
@@ -12,7 +17,7 @@ export const domainSchema = z.object({
     AddDomainTarget.Instance,
   ]),
   programType: programTypeSchema,
-  ref: messageHashSchema,
+  ref: messageHashSchema.or(ipfsCIDSchema),
 })
 
 export const domainsSchema = z.array(domainSchema)

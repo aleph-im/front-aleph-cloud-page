@@ -33,8 +33,10 @@ export function useDashboardPage(): UseDashboardPageReturn {
           (type === EntityType.SSHKey
             ? entity.label
             : type === EntityType.Instance || type === EntityType.Program
-            ? entity.metadata?.name
-            : ellipseAddress(entity.id || '')) || `Unknown ${type}`
+              ? entity.metadata?.name
+              : type === EntityType.Domain
+                ? entity.name
+                : ellipseAddress(entity.id || '')) || `Unknown ${type}`
 
         const size =
           (type === EntityType.SSHKey
@@ -43,10 +45,13 @@ export function useDashboardPage(): UseDashboardPageReturn {
                 to: 'MiB',
               })
             : type === EntityType.Domain
-            ? 0
-            : entity.size) || 0
+              ? 0
+              : entity.size) || 0
 
-        const date = entity.type === EntityType.Domain ? '' : entity.date
+        const date =
+          entity.type === EntityType.Domain
+            ? entity.updated_at.slice(0, 19).replace('T', ' ')
+            : entity.date
         const url = entity.type === EntityType.Domain ? '' : entity.url
 
         return {
@@ -59,7 +64,7 @@ export function useDashboardPage(): UseDashboardPageReturn {
           confirmed,
         } as AnyEntityRow
       })
-  }, [entities])
+  }, [entities]).sort((a, b) => b.date!.localeCompare(a.date!))
 
   return {
     ...entities,
