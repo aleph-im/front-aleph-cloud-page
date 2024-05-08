@@ -56,7 +56,7 @@ export const FunctionsTabContent = React.memo(
                       label: 'Size',
                       align: 'right',
                       sortable: true,
-                      render: (row) => humanReadableSize(row.size, 'MiB'),
+                      render: (row) => humanReadableSize(0, 'MiB'),
                     },
                     {
                       label: 'Date',

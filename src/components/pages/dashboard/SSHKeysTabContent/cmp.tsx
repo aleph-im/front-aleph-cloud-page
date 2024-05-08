@@ -4,6 +4,7 @@ import { SSHKeysTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
+import { ellipseText } from '@/helpers/utils'
 
 export const SSHKeysTabContent = React.memo(
   ({ data }: SSHKeysTabContentProps) => {
@@ -23,20 +24,17 @@ export const SSHKeysTabContent = React.memo(
                   })}
                   columns={[
                     {
+                      label: 'Label',
+                      sortable: true,
+                      render: (row) => row.label || '-',
+                    },
+                    {
                       label: 'SSH Key',
                       sortable: true,
                       width: '100%',
-                      render: (row) => row.key,
+                      render: (row) => ellipseText(row.key, 32, 32),
                       cellProps: () => ({
                         css: tw`max-w-0 whitespace-nowrap overflow-hidden text-ellipsis pr-3!`,
-                      }),
-                    },
-                    {
-                      label: 'Label',
-                      sortable: true,
-                      render: (row) => row.label || '',
-                      cellProps: () => ({
-                        css: tw`max-w-0 whitespace-nowrap overflow-hidden text-ellipsis px-3!`,
                       }),
                     },
                     {
