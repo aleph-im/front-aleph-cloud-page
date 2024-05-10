@@ -6,6 +6,7 @@ import { Instance } from '@/domain/instance'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useInstanceManager } from '../useManager/useInstanceManager'
 import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
+import Err from '@/helpers/errors'
 
 export type UseAccountInstancesProps = {
   triggerOnMount?: boolean
@@ -23,7 +24,7 @@ export function useAccountInstances({
   const manager = useInstanceManager()
 
   const doRequest = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ManagerNotReady
 
     return await manager.getAll()
   }, [manager])

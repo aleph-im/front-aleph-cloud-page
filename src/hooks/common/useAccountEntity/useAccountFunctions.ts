@@ -5,6 +5,7 @@ import { Program } from '@/domain/program'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useProgramManager } from '../useManager/useProgramManager'
 import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
+import Err from '@/helpers/errors'
 
 export type UseAccountFunctionsProps = {
   triggerOnMount?: boolean
@@ -22,7 +23,7 @@ export function useAccountFunctions({
   const manager = useProgramManager()
 
   const doRequest = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ManagerNotReady
 
     return await manager.getAll()
   }, [manager])

@@ -6,7 +6,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import { ItemType, MessageType, StoreMessage } from '@aleph-sdk/message'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 
 export type FileObject = {
   created: string
@@ -127,7 +127,7 @@ export class FileManager {
   ) {}
 
   async getAll(): Promise<AccountFilesResponse> {
-    if (!this.account) throw new Error('Invalid account')
+    if (!this.account) throw Err.InvalidAccount
 
     const { address } = this.account
 
@@ -169,7 +169,7 @@ export class FileManager {
   }
 
   async uploadFile(fileObject: File): Promise<string> {
-    if (!this.account) throw new Error('Invalid account')
+    if (!this.account) throw Err.InvalidAccount
 
     // @note: Quick temporal fix to upload files
     const buffer = Buffer.from(await fileObject.arrayBuffer())

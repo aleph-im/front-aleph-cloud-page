@@ -5,6 +5,7 @@ import { Website } from '@/domain/website'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useWebsiteManager } from '../useManager/useWebsiteManager'
 import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
+import Err from '@/helpers/errors'
 
 export type UseAccountWebsitesProps = {
   triggerOnMount?: boolean
@@ -22,7 +23,7 @@ export function useAccountWebsites({
   const manager = useWebsiteManager()
 
   const doRequest = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ManagerNotReady
 
     return await manager.getAll()
   }, [manager])

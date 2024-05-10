@@ -38,7 +38,7 @@ import { functionSchema } from '@/helpers/schemas/program'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { FunctionLangId, FunctionLanguage } from './lang'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -233,7 +233,7 @@ export class ProgramManager
         encoding: Encoding.zip,
       }
     } else if (code.type === 'file') {
-      if (!code.file) throw new Error('Invalid function code file')
+      if (!code.file) throw Err.InvalidCodeFile
       const fileName = code.file.name
 
       let encoding: Encoding
@@ -243,7 +243,7 @@ export class ProgramManager
       } else if (fileName.endsWith('.sqsh')) {
         encoding = Encoding.squashfs
       } else {
-        throw new Error('Invalid function code file')
+        throw Err.InvalidCodeFile
       }
 
       return {
@@ -257,7 +257,7 @@ export class ProgramManager
         encoding: code.encoding,
         programRef: code.programRef,
       }
-    } else throw new Error('Invalid function code type')
+    } else throw Err.InvalidCodeType
   }
 
   protected async *parseProgramSteps(
@@ -294,10 +294,7 @@ export class ProgramManager
 
   protected parseRuntime({ code, runtime }: AddProgram): string {
     if (runtime) return runtime
-
-    if (code.lang === FunctionLangId.Other)
-      throw new Error('Custom runtime should be added')
-
+    if (code.lang === FunctionLangId.Other) throw Err.CustomRuntimeNeeded
     return FunctionLanguage[code.lang].runtime
   }
 

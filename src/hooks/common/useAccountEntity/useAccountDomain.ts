@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useDomainManager } from '../useManager/useDomainManager'
 import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
+import Err from '@/helpers/errors'
 
 export type UseAccountDomainProps = {
   id: string
@@ -24,7 +25,7 @@ export function useAccountDomain({
   const manager = useDomainManager()
 
   const doRequest = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ManagerNotReady
 
     return await manager.get(id)
   }, [id, manager])

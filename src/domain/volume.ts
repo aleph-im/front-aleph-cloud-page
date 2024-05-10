@@ -1,6 +1,6 @@
 import { Account } from '@aleph-sdk/account'
 import { MessageType, StoreContent } from '@aleph-sdk/message'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 import {
   EntityType,
   PaymentMethod,

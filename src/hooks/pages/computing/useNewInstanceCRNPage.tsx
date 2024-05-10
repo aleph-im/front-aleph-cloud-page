@@ -40,6 +40,7 @@ import {
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
+import Err from '@/helpers/errors'
 
 export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -137,11 +138,11 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
 
   const onSubmit = useCallback(
     async (state: NewInstanceCRNFormState) => {
-      if (!manager) throw new Error('Manager not ready')
-      if (!account) throw new Error('Invalid account')
-      if (!node || !node.stream_reward) throw new Error('Invalid node')
-      if (!state?.streamCost) throw new Error('Invalid stream cost')
-      if (window?.ethereum === undefined) throw new Error('No wallet found')
+      if (!manager) throw Err.ConnectYourWallet
+      if (!account) throw Err.InvalidAccount
+      if (!node || !node.stream_reward) throw Err.InvalidNode
+      if (!state?.streamCost) throw Err.InvalidStreamCost
+      if (window?.ethereum === undefined) throw Err.NoWalletDetected
 
       let superfluidAccount
       if (selectedNetwork !== Blockchain.AVAX) {

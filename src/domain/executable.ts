@@ -28,6 +28,7 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+import Err from '@/helpers/errors'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -243,15 +244,14 @@ export abstract class Executable {
         type: SDKPaymentType.hold,
       }
     if (payment.type === PaymentMethod.Stream) {
-      if (!payment.receiver)
-        throw new Error('Payment receiver is required for stream payments')
+      if (!payment.receiver) throw Err.ReceivedRequired
       if (payment.chain === Blockchain.AVAX)
         return {
           chain: Blockchain.AVAX,
           type: SDKPaymentType.superfluid,
           receiver: payment.receiver,
         }
-      throw new Error('Stream payments are only supported on Avalanche')
+      throw Err.StreamNotSupported
     }
     return {
       chain: payment.chain,

@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useSSHKeyManager } from '../useManager/useSSHKeyManager'
 import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
+import Err from '@/helpers/errors'
 
 export type UseAccountSSHKeyProps = {
   id: string
@@ -24,7 +25,7 @@ export function useAccountSSHKey({
   const manager = useSSHKeyManager()
 
   const doRequest = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ManagerNotReady
 
     return await manager.get(id)
   }, [id, manager])

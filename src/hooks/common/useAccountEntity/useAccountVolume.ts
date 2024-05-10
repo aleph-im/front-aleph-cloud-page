@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useVolumeManager } from '../useManager/useVolumeManager'
 import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
+import Err from '@/helpers/errors'
 
 export type UseAccountVolumeProps = {
   id: string
@@ -24,7 +25,7 @@ export function useAccountVolume({
   const manager = useVolumeManager()
 
   const doRequest = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ManagerNotReady
 
     return await manager.get(id)
   }, [manager, id])

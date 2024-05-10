@@ -24,6 +24,7 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+import Err from '@/helpers/errors'
 
 export type AddIndexer = NameAndTagsField & {
   networks: IndexerBlockchainNetworkField[]
@@ -87,13 +88,13 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
   ) {}
 
   getSteps(entity: AddIndexer | AddIndexer[]): Promise<CheckoutStepType[]> {
-    throw new Error('Method not implemented.')
+    throw Err.MethodNotImplemented
   }
 
   addSteps(
     entity: AddIndexer | AddIndexer[],
   ): AsyncGenerator<void, Program | Program[], void> {
-    throw new Error('Method not implemented.')
+    throw Err.MethodNotImplemented
   }
 
   async getAll(): Promise<Indexer[]> {
@@ -130,16 +131,19 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
 
     const INDEXER_NAMESPACE = toKebabCase(newIndexer.name)
 
-    const NETWORKS_CONFIG = newIndexer.networks.reduce((ac, cu) => {
-      ac[this.getBlockchainEnvName(cu.id, 'INDEX_LOGS')] = 'true'
-      ac[this.getBlockchainEnvName(cu.id, 'INDEX_BLOCKS')] = 'false'
-      ac[this.getBlockchainEnvName(cu.id, 'INDEX_TRANSACTIONS')] = 'false'
-      ac[this.getBlockchainEnvName(cu.id, 'RPC')] = cu.rpcUrl
-      ac[this.getBlockchainEnvName(cu.id, 'EXPLORER_URL')] = cu.abiUrl
-        ? cu.abiUrl
-        : BlockchainDefaultABIUrl[cu.blockchain]
-      return ac
-    }, {} as Record<string, string>)
+    const NETWORKS_CONFIG = newIndexer.networks.reduce(
+      (ac, cu) => {
+        ac[this.getBlockchainEnvName(cu.id, 'INDEX_LOGS')] = 'true'
+        ac[this.getBlockchainEnvName(cu.id, 'INDEX_BLOCKS')] = 'false'
+        ac[this.getBlockchainEnvName(cu.id, 'INDEX_TRANSACTIONS')] = 'false'
+        ac[this.getBlockchainEnvName(cu.id, 'RPC')] = cu.rpcUrl
+        ac[this.getBlockchainEnvName(cu.id, 'EXPLORER_URL')] = cu.abiUrl
+          ? cu.abiUrl
+          : BlockchainDefaultABIUrl[cu.blockchain]
+        return ac
+      },
+      {} as Record<string, string>,
+    )
 
     const INDEXER_ACCOUNTS = newIndexer.accounts
       .map(

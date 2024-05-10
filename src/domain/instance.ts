@@ -42,7 +42,7 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -215,7 +215,7 @@ export class InstanceManager
       instance = await this.get(instanceOrId)
     }
 
-    if (!instance) throw new Error('Invalid instance ID')
+    if (!instance) throw Err.InstanceNotFound
 
     if (instance.payment?.type === PaymentType.superfluid) {
       if (!account)
@@ -272,7 +272,7 @@ export class InstanceManager
       if (!node) return
 
       const { address } = node
-      if (!address) throw new Error('Invalid CRN address')
+      if (!address) throw Err.InvalidCRNAddress
 
       const nodeUrl = address.replace(/\/$/, '')
       const query = await fetch(`${nodeUrl}/about/executions/list`)
@@ -337,12 +337,8 @@ export class InstanceManager
     account?: SuperfluidAccount,
   ): AsyncGenerator<void, void, void> {
     if (newInstance.payment?.type !== PaymentMethod.Stream) return
-
-    if (!account)
-      throw new Error('Invalid Superfluid account. Please connect your wallet.')
-
-    if (!newInstance.node || !newInstance.node.address)
-      throw new Error('Invalid CRN')
+    if (!account) throw Err.ConnectYourWallet
+    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
     const alephxBalance = await account.getALEPHBalance()
@@ -460,7 +456,7 @@ export class InstanceManager
     node: CRN,
     instanceId: string,
   ): Promise<void> {
-    if (!node.address) throw new Error('Invalid node address')
+    if (!node.address) throw Err.InvalidCRNAddress
 
     let errorMsg = ''
     for (let i = 0; i < 5; i++) {

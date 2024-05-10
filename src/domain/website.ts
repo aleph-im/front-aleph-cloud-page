@@ -18,7 +18,7 @@ import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
 import { BaseVolume } from './volume'
 import { getDate, getExplorerURL } from '@/helpers/utils'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 import { ItemType, MessageType } from '@aleph-sdk/message'
 import { AddDomain, DomainAggregate, DomainManager } from './domain'
 import { ipfsCIDSchema } from '@/helpers/schemas/base'
@@ -419,7 +419,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   async download(websiteOrId: string | Website): Promise<void> {
-    throw new Error('Method not implemented.')
+    throw Err.MethodNotImplemented
   }
 
   protected async parseNewWebsite(website: AddWebsite): Promise<AddWebsite> {

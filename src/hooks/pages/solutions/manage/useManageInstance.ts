@@ -12,6 +12,7 @@ import { SSHKey } from '@/domain/ssh'
 import { useConnect } from '@/hooks/common/useConnect'
 import { Blockchain } from '@aleph-sdk/core'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
+import Err from '@/helpers/errors'
 
 export type ManageInstance = {
   instance?: Instance
@@ -64,8 +65,8 @@ export function useManageInstance(): ManageInstance {
   }, [copyAndNotify, status])
 
   const handleDelete = useCallback(async () => {
-    if (!instance) throw new Error('Invalid function')
-    if (!manager) throw new Error('Manager not ready')
+    if (!instance) throw Err.InstanceNotFound
+    if (!manager) throw Err.ConnectYourWallet
 
     try {
       let superfluidAccount

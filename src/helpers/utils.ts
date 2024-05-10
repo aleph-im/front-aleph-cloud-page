@@ -271,7 +271,7 @@ export function getEntityTypeFromMessage(msg: AnyMessage): EntityType {
   if (isProgram(msg)) return EntityType.Program
   if (isInstance(msg)) return EntityType.Instance
   if (isSSHKey(msg)) return EntityType.SSHKey
-  throw new Error('Unknown type')
+  throw Err.UnknownType
 }
 
 export function isVolumePersistent(

@@ -6,6 +6,7 @@ import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { ActionTypes } from '@/helpers/store'
 import { useAppState } from '@/contexts/appState'
+import Err from '@/helpers/errors'
 
 export type ManageVolume = {
   volume?: Volume
@@ -29,8 +30,8 @@ export function useManageVolume(): ManageVolume {
   }, [copyAndNotify, volume])
 
   const handleDelete = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
-    if (!volume) throw new Error('Invalid volume')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!volume) throw Err.WebsiteNotFound
 
     try {
       await manager.del(volume)
@@ -45,8 +46,8 @@ export function useManageVolume(): ManageVolume {
   }, [manager, volume, dispatch, router])
 
   const handleDownload = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
-    if (!volume) throw new Error('Invalid volume')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!volume) throw Err.WebsiteNotFound
 
     await manager.download(volume)
   }, [manager, volume])

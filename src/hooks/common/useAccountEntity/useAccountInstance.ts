@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useInstanceManager } from '../useManager/useInstanceManager'
 import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
+import Err from '@/helpers/errors'
 
 export type UseAccountInstanceProps = {
   id: string
@@ -24,7 +25,7 @@ export function useAccountInstance({
   const manager = useInstanceManager()
 
   const doRequest = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ManagerNotReady
 
     return await manager.get(id)
   }, [id, manager])

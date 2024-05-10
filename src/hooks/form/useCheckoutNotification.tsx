@@ -6,6 +6,7 @@ import { CheckoutStepType } from '@/helpers/constants'
 import { sleep } from '@/helpers/utils'
 import { useNotification } from '@aleph-front/core'
 import { useCallback, useRef } from 'react'
+import Err from '@/helpers/errors'
 
 export type { CheckoutStepType }
 
@@ -30,7 +31,7 @@ export function useCheckoutNotification({
 
   const handleNext = useCallback(
     async (newSteps?: UseCheckoutNotificationSteps) => {
-      if (!noti) throw new Error('Notifications not ready')
+      if (!noti) throw Err.NotificationsNotReady
       const steps = newSteps || stepsProp || []
 
       console.log('steps', steps)
@@ -59,7 +60,7 @@ export function useCheckoutNotification({
   )
 
   const handleStop = useCallback(async () => {
-    if (!noti) throw new Error('Notifications not ready')
+    if (!noti) throw Err.NotificationsNotReady
 
     step.current = 0
     noti.del(stepsNotiId)

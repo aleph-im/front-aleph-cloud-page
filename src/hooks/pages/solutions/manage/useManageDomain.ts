@@ -12,6 +12,7 @@ import { Program } from '@/domain/program'
 import { Website } from '@/domain/website'
 import { useDomainStatus } from '@/hooks/common/useDomainStatus'
 import { Account } from '@aleph-sdk/account'
+import Err from '@/helpers/errors'
 
 export type ManageDomain = {
   domain?: Domain
@@ -42,8 +43,8 @@ export function useManageDomain(): ManageDomain {
   }, [copyAndNotify, domain])
 
   const handleDelete = useCallback(async () => {
-    if (!domain) throw new Error('Invalid key')
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!domain) throw Err.DomainNotFound
 
     try {
       await manager.del(domain)
@@ -58,8 +59,8 @@ export function useManageDomain(): ManageDomain {
   }, [domain, manager, dispatch, router])
 
   const handleRetry = useCallback(async () => {
-    if (!domain) throw new Error('Invalid key')
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!domain) throw Err.DomainNotFound
 
     try {
       await manager.retry(domain)

@@ -26,6 +26,7 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
+import Err from '@/helpers/errors'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -68,7 +69,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
   const onSubmit = useCallback(
     async (state: NewFunctionFormState) => {
-      if (!manager) throw new Error('Manager not ready')
+      if (!manager) throw Err.ConnectYourWallet
 
       const iSteps = await manager.getSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])

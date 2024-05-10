@@ -6,6 +6,7 @@ import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
+import Err from '@/helpers/errors'
 
 export type ManageSSHKey = {
   sshKey?: SSHKey
@@ -33,8 +34,8 @@ export function useManageSSHKey(): ManageSSHKey {
   }, [copyAndNotify, sshKey])
 
   const handleDelete = useCallback(async () => {
-    if (!sshKey) throw new Error('Invalid key')
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!sshKey) throw Err.SSHKeyNotFound
 
     try {
       await manager.del(sshKey)

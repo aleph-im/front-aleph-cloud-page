@@ -6,6 +6,7 @@ import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { ActionTypes } from '@/helpers/store'
 import { useAppState } from '@/contexts/appState'
+import Err from '@/helpers/errors'
 
 export type ManageWebsite = {
   website?: Website
@@ -29,8 +30,8 @@ export function useManageWebsite(): ManageWebsite {
   }, [copyAndNotify, website])
 
   const handleDelete = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
-    if (!website) throw new Error('Invalid website')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!website) throw Err.WebsiteNotFound
 
     try {
       await manager.del(website)
@@ -45,8 +46,8 @@ export function useManageWebsite(): ManageWebsite {
   }, [manager, website, dispatch, router])
 
   /* const handleDownload = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
-    if (!website) throw new Error('Invalid website')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!website) throw Err.WebsiteNotFound
 
     //TODO: Implement download for websites
     await manager.download(website)

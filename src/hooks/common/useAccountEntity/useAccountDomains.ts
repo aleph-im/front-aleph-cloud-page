@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useDomainManager } from '../useManager/useDomainManager'
 import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
+import Err from '@/helpers/errors'
 
 export type UseAccountDomainsProps = {
   triggerOnMount?: boolean
@@ -22,7 +23,7 @@ export function useAccountDomains({
   const manager = useDomainManager()
 
   const doRequest = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ManagerNotReady
 
     return await manager.getAll()
   }, [manager])

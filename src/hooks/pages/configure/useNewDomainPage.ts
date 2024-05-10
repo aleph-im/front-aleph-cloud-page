@@ -16,6 +16,7 @@ import {
   DomainField,
   defaultValues as defaultDomain,
 } from '@/hooks/form/useAddDomains'
+import Err from '@/helpers/errors'
 
 export type NewDomainFormState = DomainField
 
@@ -50,7 +51,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
 
   const onSubmit = useCallback(
     async (state: NewDomainFormState) => {
-      if (!manager) throw new Error('Manager not ready')
+      if (!manager) throw Err.ConnectYourWallet
 
       const [accountDomain] = await manager.add(state)
 
@@ -59,7 +60,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
         payload: { accountDomain },
       })
 
-      router.replace('/dashboard')
+      router.replace('/')
     },
     [dispatch, manager, router],
   )

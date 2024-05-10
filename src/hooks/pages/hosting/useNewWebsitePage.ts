@@ -20,6 +20,7 @@ import {
 } from '@/hooks/form/useAddNameAndTags'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
+import Err from '@/helpers/errors'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {
@@ -53,7 +54,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
 
   const onSubmit = useCallback(
     async (state: NewWebsiteFormState) => {
-      if (!manager) throw new Error('Manager not ready')
+      if (!manager) throw Err.ConnectYourWallet
 
       const iSteps = await manager.getSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])

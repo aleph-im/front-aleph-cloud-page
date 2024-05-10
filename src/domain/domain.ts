@@ -13,7 +13,7 @@ import { EntityManager } from './types'
 import { domainSchema, domainsSchema } from '@/helpers/schemas/domain'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { FunctionRuntimeId } from './runtime'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 
 export { EntityDomainType }
 

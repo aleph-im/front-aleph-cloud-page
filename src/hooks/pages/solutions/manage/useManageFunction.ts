@@ -6,6 +6,7 @@ import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { useAppState } from '@/contexts/appState'
 import { ActionTypes } from '@/helpers/store'
+import Err from '@/helpers/errors'
 
 export type ManageFunction = {
   func?: Program
@@ -30,8 +31,8 @@ export function useManageFunction(): ManageFunction {
   }, [copyAndNotify, func])
 
   const handleDelete = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
-    if (!func) throw new Error('Invalid function')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!func) throw Err.FunctionNotFound
 
     try {
       await manager.del(func)
@@ -46,8 +47,8 @@ export function useManageFunction(): ManageFunction {
   }, [manager, func, dispatch, router])
 
   const handleDownload = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
-    if (!func) throw new Error('Invalid function')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!func) throw Err.FunctionNotFound
 
     await manager.download(func)
   }, [manager, func])

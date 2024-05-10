@@ -5,6 +5,7 @@ import { Volume } from '@/domain/volume'
 import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
 import { useVolumeManager } from '../useManager/useVolumeManager'
 import { UseRequestReturn, useLocalRequest } from '@aleph-front/core'
+import Err from '@/helpers/errors'
 
 export type UseAccountVolumesProps = {
   triggerOnMount?: boolean
@@ -22,7 +23,7 @@ export function useAccountVolumes({
   const manager = useVolumeManager()
 
   const doRequest = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ManagerNotReady
 
     return await manager.getAll()
   }, [manager])

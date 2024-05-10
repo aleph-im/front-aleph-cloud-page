@@ -1,5 +1,5 @@
 import { Account } from '@aleph-sdk/account'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 import {
   EntityType,
   apiServer,

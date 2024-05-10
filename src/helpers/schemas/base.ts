@@ -50,7 +50,7 @@ export const volumeFileSchema = z
   .refine(
     (file) => {
       return (
-        (file.type === 'application/zip' && file.name.endsWith('.zip')) ||
+        file.name.endsWith('.zip') ||
         file.name.endsWith('.sqsh') ||
         file.name.endsWith('.squashfs')
       )

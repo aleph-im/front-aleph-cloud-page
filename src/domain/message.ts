@@ -5,7 +5,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import { defaultConsoleChannel } from '@/helpers/constants'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 
 export class MessageManager {
   constructor(
