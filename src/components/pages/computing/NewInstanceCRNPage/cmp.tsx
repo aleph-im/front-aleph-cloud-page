@@ -15,7 +15,7 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import { EntityType, apiServer } from '@/helpers/constants'
+import { EntityType, apiServer, EntityDomainType } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstanceCRNPage } from '@/hooks/pages/computing/useNewInstanceCRNPage'
 import Form from '@/components/form/Form'
@@ -215,7 +215,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 <AddDomains
                   name="domains"
                   control={control}
-                  entityType={EntityType.Instance}
+                  entityType={EntityDomainType.Instance}
                 />
               </ToggleContainer>
             </div>

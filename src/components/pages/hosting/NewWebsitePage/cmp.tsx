@@ -1,4 +1,4 @@
-import { EntityType } from '@/helpers/constants'
+import { EntityType, EntityDomainType } from '@/helpers/constants'
 import { useNewWebsitePage } from '@/hooks/pages/hosting/useNewWebsitePage'
 import { Button, TextGradient } from '@aleph-front/core'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
@@ -24,8 +24,6 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
   } = useNewWebsitePage()
 
   return (
-    //<>
-    //  <pre>{JSON.stringify(values, null, 2)}</pre>
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
@@ -87,7 +85,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
                 <AddDomains
                   name="domains"
                   control={control}
-                  entityType={EntityType.Website}
+                  entityType={EntityDomainType.IPFS}
                 />
                 <TextGradient
                   forwardedAs="h2"
@@ -140,6 +138,5 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         }
       />
     </Form>
-    //</>
   )
 }

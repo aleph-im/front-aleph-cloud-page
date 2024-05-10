@@ -1,4 +1,4 @@
-import { EntityType } from '@/helpers/constants'
+import { EntityDomainType } from '@/helpers/constants'
 import { Control } from 'react-hook-form'
 
 export type DomainItemProps = {
@@ -11,5 +11,5 @@ export type DomainItemProps = {
 export type AddDomainsProps = {
   control: Control
   name: string
-  entityType: EntityType.Program | EntityType.Instance | EntityType.Website
+  entityType: EntityDomainType
 }

@@ -1,10 +1,12 @@
 import { Account } from '@aleph-sdk/account'
 import { EntityManager } from './types'
 import {
+  AddDomainTarget,
   CheckoutStepType,
   EntityType,
   PaymentMethod,
   WebsiteFrameworkId,
+  defaultWebsiteAggregateKey,
   defaultWebsiteChannel,
 } from '@/helpers/constants'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
@@ -18,7 +20,7 @@ import { BaseVolume } from './volume'
 import { getDate, getExplorerURL } from '@/helpers/utils'
 import Err from '../helpers/errors'
 import { ItemType, MessageType } from '@aleph-sdk/message'
-import { AddDomain, DomainManager } from './domain'
+import { AddDomain, DomainAggregate, DomainManager } from './domain'
 import { ipfsCIDSchema } from '@/helpers/schemas/base'
 import {
   AlephHttpClient,
@@ -318,6 +320,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected fileManager: FileManager,
     protected domainManager: DomainManager,
+    protected key = defaultWebsiteAggregateKey,
     protected channel = defaultWebsiteChannel,
   ) {}
 
@@ -365,17 +368,33 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       paymentMethod,
     })
     try {
+      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+        throw Err.InvalidAccount
+
       yield
-      const response = await (
+      const volume = await (
         this.sdkClient as AuthenticatedAlephHttpClient
       ).createStore({
         channel: this.channel,
         fileHash: data.cid!,
         storageEngine: ItemType.ipfs,
-        extraFields: metadata,
       })
 
-      const entity = (await this.parseMessages([response]))[0]
+      const content: Record<string, any> = {}
+      const site = {
+        metadata,
+        type: AddDomainTarget.IPFS,
+        message_id: volume.item_hash,
+        updated_at: new Date().toISOString(),
+      }
+      content[name] = site
+      const websiteKey = await this.sdkClient.createAggregate({
+        key: this.key,
+        channel: this.channel,
+        content,
+      })
+
+      const entity = (await this.parseMessages([volume]))[0]
       return entity
     } catch (err) {
       throw Err.RequestFailed(err)

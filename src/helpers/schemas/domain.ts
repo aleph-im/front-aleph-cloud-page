@@ -3,20 +3,13 @@ import {
   domainNameSchema,
   ipfsCIDSchema,
   messageHashSchema,
-  programTypeSchema,
+  targetSchema,
 } from './base'
-import { AddDomainTarget } from '../constants'
 
 // DOMAINS
-
 export const domainSchema = z.object({
   name: domainNameSchema,
-  target: z.enum([
-    AddDomainTarget.IPFS,
-    AddDomainTarget.Program,
-    AddDomainTarget.Instance,
-  ]),
-  programType: programTypeSchema,
+  target: targetSchema,
   ref: messageHashSchema.or(ipfsCIDSchema),
 })
 

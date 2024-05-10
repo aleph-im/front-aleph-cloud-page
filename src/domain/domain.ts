@@ -4,7 +4,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import {
-  AddDomainTarget,
+  EntityDomainType,
   EntityType,
   defaultDomainAggregateKey,
   defaultDomainChannel,
@@ -15,12 +15,11 @@ import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { FunctionRuntimeId } from './runtime'
 import Err from '../helpers/errors'
 
-export { AddDomainTarget }
+export { EntityDomainType }
 
 export type DomainAggregateItem = {
-  type: AddDomainTarget
+  type: EntityDomainType
   message_id: string
-  programType?: EntityType.Instance | EntityType.Program | EntityType.Website
   updated_at: string
 }
 
@@ -28,16 +27,14 @@ export type DomainAggregate = Record<string, DomainAggregateItem | null>
 
 export type AddDomain = {
   name: string
-  target: AddDomainTarget
-  programType?: EntityType.Instance | EntityType.Program | EntityType.Website
+  target: EntityDomainType
   ref: string
 }
 
-export type Domain = Omit<AddDomain, 'programType'> & {
+export type Domain = AddDomain & {
   type: EntityType.Domain
   id: string
   confirmed?: boolean
-  programType?: EntityType.Instance | EntityType.Program | EntityType.Website
   updated_at: string
 }
 
@@ -83,7 +80,6 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     const content = {
       message_id: domain.ref,
       type: domain.target,
-      programType: domain.programType,
       updated_at: new Date().toISOString(),
     }
 
@@ -124,18 +120,12 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
     try {
       const content: DomainAggregate = domains.reduce((ac, cv) => {
-        const { name, ref, target, programType } = cv
+        const { name, ref, target } = cv
 
         const domain = {
           message_id: ref,
-          programType,
           type: target,
           updated_at: new Date().toISOString(),
-        }
-
-        // @note: legacy domains don't include programType (default to Instance)
-        if (target === AddDomainTarget.Program) {
-          domain.programType = cv.programType || EntityType.Instance
         }
 
         ac[name] = domain
@@ -263,12 +253,10 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     content: DomainAggregateItem,
   ): Domain {
     const { message_id, type } = content
-
     const domain: Domain = {
       type: EntityType.Domain,
       id: name,
       name,
-      programType: content?.programType || EntityType.Instance,
       target: type,
       ref: message_id,
       confirmed: true,

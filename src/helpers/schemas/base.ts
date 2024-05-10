@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { EntityType, PaymentMethod } from '../constants'
+import { EntityDomainType, PaymentMethod } from '../constants'
 
 export const requiredStringSchema = z
   .string()
@@ -83,10 +83,10 @@ export const ipfsCIDSchema = requiredStringSchema.regex(
   { message: 'Invalid IPFS CID hash' },
 )
 
-export const programTypeSchema = z.enum([
-  EntityType.Instance,
-  EntityType.Program,
-  EntityType.Website,
+export const targetSchema = z.enum([
+  EntityDomainType.Instance,
+  EntityDomainType.Program,
+  EntityDomainType.IPFS,
 ])
 
 export const paymentMethodSchema = z.enum([

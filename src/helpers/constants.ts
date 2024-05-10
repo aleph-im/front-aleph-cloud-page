@@ -44,6 +44,7 @@ export const defaultFileExtension: Record<LanguageType, string> = {
 }
 
 export const defaultDomainAggregateKey = 'domains'
+export const defaultWebsiteAggregateKey = 'websites'
 export const defaultSSHPostType = 'ALEPH-SSH'
 
 export const defaultConsoleChannel = 'ALEPH-CLOUDSOLUTIONS'
@@ -74,10 +75,16 @@ export type CheckoutStepType =
   | 'program'
   | 'website'
 
-export enum AddDomainTarget {
+export enum EntityDomainType {
   IPFS = 'ipfs',
   Program = 'program',
   Instance = 'instance',
+}
+
+export const EntityDomainTypeName: Record<EntityDomainType, string> = {
+  [EntityDomainType.IPFS]: 'Ipfs',
+  [EntityDomainType.Program]: 'Function',
+  [EntityDomainType.Instance]: 'Instance',
 }
 
 export enum VolumeType {

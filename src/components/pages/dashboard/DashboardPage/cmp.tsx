@@ -45,6 +45,11 @@ export default function DashboardPage() {
                 label: { label: getLabel(all), position: 'bottom' },
               },
               {
+                id: 'website',
+                name: 'Websites',
+                label: { label: getLabel(websites, true), position: 'top' },
+              },
+              {
                 id: 'function',
                 name: 'Functions',
                 label: { label: getLabel(functions), position: 'bottom' },
@@ -55,24 +60,19 @@ export default function DashboardPage() {
                 label: { label: getLabel(instances, true), position: 'top' },
               },
               {
-                id: 'website',
-                name: 'Websites',
-                label: { label: getLabel(websites, true), position: 'top' },
-              },
-              {
                 id: 'volume',
                 name: 'Volumes',
                 label: { label: getLabel(volumes), position: 'bottom' },
               },
               {
-                id: 'ssh',
-                name: 'SSH Keys',
-                label: { label: getLabel(sshKeys, true), position: 'top' },
-              },
-              {
                 id: 'domain',
                 name: 'Domains',
                 label: { label: getLabel(domains, true), position: 'top' },
+              },
+              {
+                id: 'ssh',
+                name: 'SSH Keys',
+                label: { label: getLabel(sshKeys, true), position: 'top' },
               },
             ]}
             onTabChange={setTabId}
