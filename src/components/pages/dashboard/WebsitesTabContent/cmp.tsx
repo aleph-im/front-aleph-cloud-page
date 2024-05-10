@@ -33,13 +33,14 @@ export const WebsitesTabContent = React.memo(
                       label: 'Size',
                       align: 'right',
                       sortable: true,
-                      render: (row) => humanReadableSize(row.size || 0, 'MiB'),
+                      render: (row) =>
+                        humanReadableSize(row.volume?.size || 0, 'MiB'),
                     },
                     {
                       label: 'Date',
                       align: 'right',
                       sortable: true,
-                      render: (row) => row.date,
+                      render: (row) => row.updated_at,
                     },
                     {
                       label: '',

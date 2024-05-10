@@ -1,7 +1,6 @@
 import { Account } from '@aleph-sdk/account'
 import { EntityManager } from './types'
 import {
-  AddDomainTarget,
   CheckoutStepType,
   EntityType,
   PaymentMethod,
@@ -11,17 +10,16 @@ import {
 } from '@/helpers/constants'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
 import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
-import { websiteDataSchema, websiteSchema } from '@/helpers/schemas/website'
+import { websiteSchema } from '@/helpers/schemas/website'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
-import { BaseVolume } from './volume'
+import { Volume, VolumeManager } from './volume'
+import { AddDomain, Domain, DomainManager } from './domain'
 import { getDate, getExplorerURL } from '@/helpers/utils'
 import Err from '@/helpers/errors'
-import { ItemType, MessageType } from '@aleph-sdk/message'
-import { AddDomain, DomainAggregate, DomainManager } from './domain'
-import { ipfsCIDSchema } from '@/helpers/schemas/base'
+import { ItemType } from '@aleph-sdk/message'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
@@ -265,13 +263,6 @@ export type WebsiteCostProps = {
   streamDuration?: StreamDurationField
 }
 
-export type Website = BaseVolume &
-  NameAndTagsField & {
-    type: EntityType.Website
-    fileHash: string
-    useLatest: boolean
-  }
-
 export type AddWebsite = NameAndTagsField &
   WebsiteFrameworkField & {
     website: WebsiteFolderField
@@ -279,10 +270,25 @@ export type AddWebsite = NameAndTagsField &
     paymentMethod: PaymentMethod
   }
 
+export type WebsiteAggregateItem = NameAndTagsField &
+  WebsiteFrameworkField & {
+    volume_id: string
+    version: number
+    paymentMethod: PaymentMethod
+    updated_at: string
+  }
+
+export type WebsiteAggregate = Record<string, WebsiteAggregateItem | null>
+
+export type Website = WebsiteAggregateItem & {
+  id: string
+  type: EntityType.Website
+  volume: Volume | undefined
+  confirmed: boolean
+}
+
 export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   static addSchema = websiteSchema
-  static addIPFSCIDSchema = ipfsCIDSchema
-  static addWebsiteDataSchema = websiteDataSchema
 
   static async getWebsiteSize(
     props: AddWebsite | WebsiteCostProps,
@@ -318,7 +324,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   constructor(
     protected account: Account,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
-    protected fileManager: FileManager,
+    protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
     protected key = defaultWebsiteAggregateKey,
     protected channel = defaultWebsiteChannel,
@@ -326,23 +332,18 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
 
   async getAll(): Promise<Website[]> {
     try {
-      const response = await this.sdkClient.getMessages({
-        addresses: [this.account.address],
-        messageTypes: [MessageType.store],
-        channels: [this.channel],
-      })
+      const response: Record<string, unknown> =
+        await this.sdkClient.fetchAggregate(this.account.address, this.key)
 
-      return await this.parseMessages(response.messages)
+      return this.parseAggregate(response)
     } catch (err) {
       return []
     }
   }
 
   async get(id: string): Promise<Website | undefined> {
-    const message = await this.sdkClient.getMessage(id)
-
-    const [entity] = await this.parseMessages([message])
-    return entity
+    const entities = await this.getAll()
+    return entities.find((entity) => entity.id === id)
   }
 
   async add(website: AddWebsite): Promise<Website> {
@@ -357,20 +358,17 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   async *addSteps(website: AddWebsite): AsyncGenerator<void, Website, void> {
     const {
       website: data,
-      domains,
       name,
       tags,
       framework,
       paymentMethod,
+      domains,
     } = await this.parseNewWebsite(website)
-    const metadata = this.parseMetadata(name, tags, {
-      framework,
-      paymentMethod,
-    })
     try {
       if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
         throw Err.InvalidAccount
 
+      // Publish volume
       yield
       const volume = await (
         this.sdkClient as AuthenticatedAlephHttpClient
@@ -379,22 +377,30 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         fileHash: data.cid!,
         storageEngine: ItemType.ipfs,
       })
+      const volumeEntity = (await this.volumeManager.parseMessages([volume]))[0]
 
+      // Publish website
       const content: Record<string, any> = {}
       const site = {
-        metadata,
-        type: AddDomainTarget.IPFS,
-        message_id: volume.item_hash,
-        updated_at: new Date().toISOString(),
+        volume_id: volume.item_hash,
+        version: 1,
+        framework,
+        paymentMethod,
+        tags,
+        updated_at: new Date().getTime() / 1000,
       }
       content[name] = site
-      const websiteKey = await this.sdkClient.createAggregate({
+      yield
+      const websiteEntity = await this.sdkClient.createAggregate({
         key: this.key,
         channel: this.channel,
         content,
       })
+      const entity = (await this.parseNewAggregate(websiteEntity))[0]
 
-      const entity = (await this.parseMessages([volume]))[0]
+      // Publish domains
+      yield* this.parseDomainsSteps(volumeEntity.id, domains)
+
       return entity
     } catch (err) {
       throw Err.RequestFailed(err)
@@ -408,11 +414,18 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 
+    const { volume_id } = (await this.get(websiteOrCid)) || {}
+    const content: WebsiteAggregate = {
+      [websiteOrCid]: null,
+    }
+
     try {
-      await this.sdkClient.forget({
+      await this.sdkClient.createAggregate({
+        key: this.key,
         channel: this.channel,
-        hashes: [websiteOrCid],
+        content,
       })
+      if (volume_id) await this.volumeManager.del(volume_id)
     } catch (err) {
       throw Err.RequestFailed(err)
     }
@@ -423,41 +436,19 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   protected async parseNewWebsite(website: AddWebsite): Promise<AddWebsite> {
-    const { name, tags, framework, paymentMethod } = website
-    const websiteData = await WebsiteManager.addWebsiteDataSchema.parseAsync(
-      website.website,
-    )
-    const domains = await this.parseDomains(website.domains)
-    return {
-      website: websiteData,
-      domains,
-      name,
-      tags,
-      framework,
-      paymentMethod,
-    }
+    return await WebsiteManager.addSchema.parseAsync(website)
   }
 
-  protected async parseDomains(
+  protected async *parseDomainsSteps(
+    ref: string,
     domains?: Omit<DomainField, 'ref'>[],
-  ): Promise<Omit<DomainField, 'ref'>[]> {
+  ): AsyncGenerator<void, Domain[], void> {
     if (!domains || domains.length === 0) return []
-    return await DomainManager.addManySchema.parseAsync(domains)
-  }
-
-  protected parseMetadata(
-    name = 'Untitled',
-    tags?: string[],
-    metadata?: Record<string, unknown>,
-  ): Record<string, unknown> {
-    const out: Record<string, unknown> = { name }
-    if (tags && tags.length > 0) {
-      out.tags = tags
-    }
-    return {
-      ...metadata,
-      ...out,
-    }
+    const parsedDomains = domains.map((domain) => ({
+      ...domain,
+      ref,
+    }))
+    return yield* this.domainManager.addSteps(parsedDomains, false)
   }
 
   async getSteps(newWebsite: AddWebsite): Promise<CheckoutStepType[]> {
@@ -473,26 +464,49 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     return steps
   }
 
-  protected async parseMessages(messages: any[]): Promise<Website[]> {
-    const sizesMap = await this.fileManager.getSizesMap()
-    return messages
-      .filter(({ content }) => content !== undefined)
-      .map((message) => this.parseMessage(message, message.content, sizesMap))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected async parseAggregate(response: any): Promise<Website[]> {
+    return await this.parseAggregateItems(response as WebsiteAggregate)
   }
 
-  protected parseMessage(
-    message: any,
-    content: any,
-    sizesMap: Record<string, number>,
-  ): Website {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected async parseNewAggregate(response: any): Promise<Website[]> {
+    const websites = response.content.content as WebsiteAggregate
+    return await this.parseAggregateItems(websites)
+  }
+
+  protected async parseAggregateItems(
+    aggregate: WebsiteAggregate,
+  ): Promise<Website[]> {
+    return Promise.all(
+      Object.entries(aggregate)
+        .filter(([, value]) => value !== null)
+        .map(
+          async ([key, value]) =>
+            await this.parseAggregateItem(key, value as WebsiteAggregateItem),
+        ),
+    )
+  }
+
+  protected async parseAggregateItem(
+    name: string,
+    content: WebsiteAggregateItem,
+  ): Promise<Website> {
+    const { volume_id, version, framework, paymentMethod, tags, updated_at } =
+      content
+    const volume = await this.volumeManager.get(volume_id)
     return {
-      id: message.item_hash,
-      ...content,
+      id: name,
       type: EntityType.Website,
-      url: getExplorerURL(message),
-      date: getDate(message.time),
-      size: sizesMap[message.item_hash],
-      confirmed: !!message.confirmed,
+      name,
+      tags,
+      volume_id,
+      volume,
+      version,
+      framework,
+      paymentMethod,
+      updated_at,
+      confirmed: true,
     }
   }
 }

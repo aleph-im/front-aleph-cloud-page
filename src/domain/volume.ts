@@ -349,7 +349,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
   // @todo: Type not exported from SDK...
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected async parseMessages(messages: any[]): Promise<Volume[]> {
+  async parseMessages(messages: any[]): Promise<Volume[]> {
     const sizesMap = await this.fileManager.getSizesMap()
     return messages
       .filter(({ content }) => content !== undefined)

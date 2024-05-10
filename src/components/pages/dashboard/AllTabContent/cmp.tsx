@@ -48,7 +48,8 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                     label: 'Size',
                     align: 'right',
                     sortable: true,
-                    render: (row) => humanReadableSize(row.size, 'MiB'),
+                    render: (row) =>
+                      humanReadableSize(row.size || row.volume?.size, 'MiB'),
                   },
                   {
                     label: 'Date',

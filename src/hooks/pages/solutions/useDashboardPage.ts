@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { AnyEntity, convertByteUnits, ellipseAddress } from '@/helpers/utils'
 import { EntityType } from '@/helpers/constants'
+import { Volume } from '@/domain/volume'
 import {
   UseAccountEntitiesReturn,
   useAccountEntities,
@@ -11,6 +12,7 @@ export type AnyEntityRow = {
   type: EntityType
   name: string
   size: number
+  volume?: Volume
   date?: string
   url?: string
   confirmed?: boolean

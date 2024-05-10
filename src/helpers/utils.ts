@@ -259,14 +259,12 @@ export type AnyMessage =
   | StoreMessage
   | PostMessage<SSHKey>
 
-//export const isWebsite = (msg: AnyMessage) => msg.type === MessageType.store && true
 export const isVolume = (msg: AnyMessage) => msg.type === MessageType.store
 export const isProgram = (msg: AnyMessage) => msg.type === MessageType.program
 export const isInstance = (msg: AnyMessage) => msg.type === MessageType.instance
 export const isSSHKey = (msg: AnyMessage) => msg.type === MessageType.post
 
 export function getEntityTypeFromMessage(msg: AnyMessage): EntityType {
-  //if (isWebsite(msg)) return EntityType.Website
   if (isVolume(msg)) return EntityType.Volume
   if (isProgram(msg)) return EntityType.Program
   if (isInstance(msg)) return EntityType.Instance
