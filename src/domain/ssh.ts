@@ -155,11 +155,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     } else {
       return sshKeys.map((sshKey: AddSSHKey) => {
         if (!currentSSHKeySet.has(sshKey.key)) return sshKey
-        throw new Error(
-          `SSH key already exists on your collection: ${
-            sshKey.label || sshKey.key
-          }`,
-        )
+        throw Err.SSHKeysUsed(sshKey.label || sshKey.key)
       })
     }
   }

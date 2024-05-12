@@ -218,17 +218,9 @@ export class InstanceManager
     if (!instance) throw Err.InstanceNotFound
 
     if (instance.payment?.type === PaymentType.superfluid) {
-      if (!account)
-        throw new Error(
-          'Invalid Superfluid/AVAX account. Please connect your wallet.',
-        )
-
+      if (!account) throw Err.ConnectYourPaymentWallet
       const { receiver } = instance.payment
-
-      if (!receiver)
-        throw new Error(
-          'Invalid Superfluid/AVAX receiver reward address. Please set it up in your CRN account profile.',
-        )
+      if (!receiver) throw Err.ReceiverReward
 
       const instanceCosts = await InstanceManager.getCost({
         paymentMethod: PaymentMethod.Stream,
@@ -261,11 +253,7 @@ export class InstanceManager
   async checkStatus(instance: Instance): Promise<InstanceStatus | undefined> {
     if (instance.payment?.type === PaymentType.superfluid) {
       const { receiver } = instance.payment
-
-      if (!receiver)
-        throw new Error(
-          'Invalid Superfluid/AVAX receiver reward address. Please set it up in your CRN account profile.',
-        )
+      if (!receiver) throw Err.ReceiverReward
 
       // @todo: refactor this mess
       const node = await this.nodeManager.getCRNByStreamRewardAddress(receiver)
@@ -345,21 +333,13 @@ export class InstanceManager
     const alephxFlow = await account.getALEPHFlow(receiver)
     const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
 
-    if (totalFlow.greaterThan(1))
-      throw new Error(
-        `Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost.`,
-      )
+    if (totalFlow.greaterThan(1)) throw Err.MaxFlowRate
 
     const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
     const totalRequiredAleph = usedAlephInDuration.add(streamCost)
 
-    if (alephxBalance.lt(totalRequiredAleph)) {
-      throw new Error(
-        `Insufficient balance: ${totalRequiredAleph
-          .sub(alephxBalance)
-          .toString()} ALEPH required. Try to lower the VM cost or the duration.`,
-      )
-    }
+    if (alephxBalance.lt(totalRequiredAleph))
+      throw Err.InsufficientBalance(totalRequiredAleph.sub(alephxBalance))
 
     yield
     await account.increaseALEPHFlow(
@@ -481,6 +461,6 @@ export class InstanceManager
         await sleep(1000)
       }
     }
-    throw new Error(`Failed to start instance on CRN ${node.hash}: ${errorMsg}`)
+    throw Err.InstanceStartupFailed(node.hash, errorMsg)
   }
 }

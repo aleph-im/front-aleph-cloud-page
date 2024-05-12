@@ -220,9 +220,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     } else {
       return domains.map((domain: AddDomain) => {
         if (!currentDomainSet.has(domain.name)) return domain
-        throw new Error(
-          `Domain name already used by another resource: ${domain.name}`,
-        )
+        throw Err.DomainUsed(domain.name)
       })
     }
   }

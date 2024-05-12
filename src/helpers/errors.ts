@@ -8,7 +8,10 @@ export default {
   ManagerNotReady: new Error('Manager not ready'),
   MethodNotImplemented: new Error('Method not implemented'),
   NoWalletDetected: new Error('No wallet detected'),
-  ConnectYourWallet: new Error('Connect your wallet'),
+  ConnectYourWallet: new Error('Please connect your wallet'),
+  ConnectYourPaymentWallet: new Error(
+    'Please connect your Superfluid/AVAX wallet',
+  ),
   InstanceNotFound: new Error('Instance not found'),
   FunctionNotFound: new Error('Function not found'),
   WebsiteNotFound: new Error('Website not found'),
@@ -29,7 +32,23 @@ export default {
   ReceivedRequired: new Error(
     'Payment receiver is required for stream payments',
   ),
+  ReceiverReward: new Error(
+    'Invalid Superfluid/AVAX receiver reward address. Please set it up in your CRN account profile',
+  ),
   StreamNotSupported: new Error(
     'Stream payments are only supported on Avalanche',
   ),
+  MaxFlowRate: new Error(
+    `Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost`,
+  ),
+  InsufficientBalance: (needed_balance: number) =>
+    new Error(
+      `Insufficient balance: ${needed_balance.toString()} ALEPH required. Try to lower the VM cost or the duration`,
+    ),
+  DomainUsed: (domain: string) =>
+    new Error(`Domain name already used by another resource: ${domain}`),
+  SSHKeysUsed: (sshKey: string) =>
+    new Error(`SSH key already used by another resource: ${sshKey}`),
+  InstanceStartupFailed: (id: string, error: string) =>
+    new Error(`Failed to start instance on CRN ${id}: ${error}`),
 }
