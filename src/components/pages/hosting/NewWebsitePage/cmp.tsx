@@ -44,7 +44,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
       </section>
       <section tw="px-0 py-6 md:py-10">
         <Container as={'div'}>
-          <SectionTitle number="2">Upload your app</SectionTitle>
+          <SectionTitle number="2">Upload your website</SectionTitle>
           <p tw="mb-6">
             Once your website is ready, upload your static folder here. This
             step transitions your local project to our decentralized cloud,
@@ -71,7 +71,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         <Container as={'div'}>
           <SectionTitle number="4">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
-            Customize your instance with our Advanced Configuration Options. Add
+            Customize your website with our Advanced Configuration Options. Add
             environment variables, and custom domains to meet your specific
             needs.
           </p>

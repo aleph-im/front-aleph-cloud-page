@@ -89,7 +89,7 @@ export function useRoutes(): UseRoutesReturn {
                 target: '_blank',
               },
               {
-                name: 'Indexing framework',
+                name: 'Indexer',
                 href: 'https://docs.aleph.im/tools/indexer/',
                 external: true,
                 target: '_blank',
