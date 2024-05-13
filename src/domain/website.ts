@@ -375,26 +375,27 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         this.sdkClient as AuthenticatedAlephHttpClient
       ).createStore({
         channel: this.channel,
-        fileHash: website.cid!,
+        fileHash: website.cid as string,
         storageEngine: ItemType.ipfs,
       })
       const volumeEntity = (await this.volumeManager.parseMessages([volume]))[0]
 
       // Publish website
       const date = new Date().getTime() / 1000
-      const content: Record<string, any> = {}
-      content[name] = {
-        metadata: {
-          name,
-          tags,
-          framework,
+      const content: Record<string, any> = {
+        [name]: {
+          metadata: {
+            name,
+            tags,
+            framework,
+          },
+          ens,
+          payment,
+          volume_id: volume.item_hash,
+          version: 1,
+          created_at: date,
+          updated_at: date,
         },
-        ens,
-        payment,
-        volume_id: volume.item_hash,
-        version: 1,
-        created_at: date,
-        updated_at: date,
       }
       yield
       const websiteEntity = await this.sdkClient.createAggregate({

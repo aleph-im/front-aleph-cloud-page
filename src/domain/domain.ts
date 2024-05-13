@@ -77,10 +77,12 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   }
 
   async retry(domain: Domain) {
-    const content = {
-      message_id: domain.ref,
-      type: domain.target,
-      updated_at: new Date().toISOString(),
+    const content: DomainAggregate = {
+      [domain.name]: {
+        message_id: domain.ref,
+        type: domain.target,
+        updated_at: new Date().toISOString(),
+      },
     }
 
     try {
