@@ -1,17 +1,36 @@
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import { Label, NoisyContainer } from '@aleph-front/core'
+import {
+  Label,
+  NoisyContainer,
+  Button,
+  Icon,
+  Tag,
+  TextGradient,
+} from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
-import { Button, Icon, Tag } from '@aleph-front/core'
 import { useManageWebsite } from '@/hooks/pages/solutions/manage/useManageWebsite'
-import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
+import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
+import { ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
+import { WebsiteFrameworks } from '@/domain/website'
+import { cidV0Tov1 } from '@/helpers/utils'
+
+const getLimoUrl = (ens: string) => {
+  return `https://${ens}.limo`
+}
 
 export default function ManageWebsite() {
   const { website, handleCopyHash, handleDelete } = useManageWebsite()
-
+  const [, copyAndNotify] = useCopyToClipboardAndNotify()
+  const cidV1 =
+    website?.volume?.item_hash && cidV0Tov1(website.volume.item_hash)
+  const default_url = `https://${cidV1}.ipfs.aleph.cloud`
+  const alt_url = `https://${cidV1}.ipfs.storry.tv`
+  const alt_url_2 = `https://${cidV1}.ipfs.cf-ipfs.com`
+  const alt_url_3 = `https://${cidV1}.ipfs.dweb.link`
   const theme = useTheme()
 
   if (!website) {
@@ -24,9 +43,6 @@ export default function ManageWebsite() {
     )
   }
 
-  const name = ellipseAddress(website.id)
-  const typeName = EntityTypeName[website.type]
-
   return (
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
@@ -34,7 +50,7 @@ export default function ManageWebsite() {
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="floppy-disk" tw="mr-4" className="text-main0" />
-              <div className="tp-body2">{name}</div>
+              <div className="tp-body2">{website.metadata.name}</div>
               <Label
                 kind="secondary"
                 variant={website.confirmed ? 'success' : 'warning'}
@@ -54,17 +70,18 @@ export default function ManageWebsite() {
               </Label>
             </div>
             <div>
-              {/* <Button
+              <Button
                 size="md"
                 variant="tertiary"
                 color="main0"
                 kind="default"
                 tw="!mr-4"
                 forwardedAs="a"
-                onClick={handleDownload}
+                //onClick={handleUpdate}
+                disabled
               >
-                Download
-              </Button> */}
+                Update
+              </Button>
               <Button
                 kind="functional"
                 variant="warning"
@@ -79,10 +96,10 @@ export default function ManageWebsite() {
           <NoisyContainer>
             <div tw="flex items-center justify-start overflow-hidden">
               <Tag variant="accent" tw="mr-4 whitespace-nowrap">
-                {typeName}
+                {EntityTypeName[website.type]}
               </Tag>
               <div tw="flex-auto">
-                <div className="tp-info text-main0">ITEM HASH</div>
+                <div className="tp-info text-main0">NAME</div>
                 <IconText iconName="copy" onClick={handleCopyHash}>
                   {website.id}
                 </IconText>
@@ -90,39 +107,184 @@ export default function ManageWebsite() {
             </div>
 
             <Separator />
-
-            <div tw="my-5">
-              <div className="tp-info text-main0">EXPLORER</div>
+            <div tw="flex flex-row justify-between">
               <div>
+                <div className="tp-info text-main0">FRAMEWORK</div>
+                <div>
+                  <Text>
+                    {WebsiteFrameworks[website.metadata.framework].name}
+                  </Text>
+                </div>
+              </div>
+              <div>
+                <div className="tp-info text-main0">VERSION</div>
+                <div>
+                  <Text>{website.version}</Text>
+                </div>
+              </div>
+              <div>
+                <div className="tp-info text-main0">SIZE</div>
+                <div>
+                  <Text className="fs-10 tp-body1">
+                    {humanReadableSize(website.volume?.size, 'MiB')}
+                  </Text>
+                </div>
+              </div>
+              <div>
+                <div className="tp-info text-main0">CREATED ON</div>
+                <div>
+                  <Text className="fs-10 tp-body1">{website.created_at}</Text>
+                </div>
+              </div>
+              <div>
+                <div className="tp-info text-main0">UPDATED ON</div>
+                <div>
+                  <Text className="fs-10 tp-body1">{website.updated_at}</Text>
+                </div>
+              </div>
+            </div>
+            <Separator />
+            <div className="tp-info text-main0">DEFAULT GATEWAY</div>
+            <div tw="flex flex-row mb-5">
+              <a
+                className="tp-body1 fs-16"
+                //href={default_url}
+                //target="_blank"
+                //referrerPolicy="no-referrer"
+              >
+                <IconText iconName="square-up-right">
+                  <Text tw="text-gray-500">{default_url}</Text>
+                </IconText>
+              </a>
+              <IconText
+                iconName="copy"
+                onClick={() => copyAndNotify(default_url)}
+              />
+            </div>
+            <div className="tp-info text-main0">ALTERNATIVE GATEWAYS</div>
+            <div tw="mb-5">
+              <div tw="flex flex-row">
                 <a
                   className="tp-body1 fs-16"
-                  href={website.url}
+                  href={alt_url}
                   target="_blank"
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{ellipseText(website.url, 80)}</Text>
+                    <Text>{alt_url}</Text>
                   </IconText>
                 </a>
+                <IconText
+                  iconName="copy"
+                  onClick={() => copyAndNotify(alt_url)}
+                />
+              </div>
+              <div tw="flex flex-row">
+                <a
+                  className="tp-body1 fs-16"
+                  href={alt_url_2}
+                  target="_blank"
+                  referrerPolicy="no-referrer"
+                >
+                  <IconText iconName="square-up-right">
+                    <Text>{alt_url_2}</Text>
+                  </IconText>
+                </a>
+                <IconText
+                  iconName="copy"
+                  onClick={() => copyAndNotify(alt_url_2)}
+                />
+              </div>
+              <div tw="flex flex-row">
+                <a
+                  className="tp-body1 fs-16"
+                  href={alt_url_3}
+                  target="_blank"
+                  referrerPolicy="no-referrer"
+                >
+                  <IconText iconName="square-up-right">
+                    <Text>{alt_url_3}</Text>
+                  </IconText>
+                </a>
+                <IconText
+                  iconName="copy"
+                  onClick={() => copyAndNotify(alt_url_3)}
+                />
               </div>
             </div>
-
-            <div tw="flex my-5">
-              <div tw="mr-5">
-                <div className="tp-info text-main0">SIZE</div>
-                <div>
-                  <Text className="fs-10 tp-body1">
-                    {humanReadableSize(website.size, 'MiB')}
-                  </Text>
-                </div>
-              </div>
-
-              <div tw="mr-5">
-                <div className="tp-info text-main0">CREATED ON</div>
-                <div>
-                  <Text className="fs-10 tp-body1">{website.date}</Text>
-                </div>
-              </div>
+            <div className="tp-info text-main0">ENS GATEWAY</div>
+            {website.ens?.length > 0 ? (
+              Array.from(website.ens).map((ens) => {
+                const limo = getLimoUrl(ens)
+                return (
+                  <div tw="flex flex-row">
+                    <a
+                      className="tp-body1 fs-16"
+                      href={limo}
+                      target="_blank"
+                      referrerPolicy="no-referrer"
+                    >
+                      <IconText iconName="square-up-right">
+                        <Text>{limo}</Text>
+                      </IconText>
+                    </a>
+                    <IconText
+                      iconName="copy"
+                      onClick={() => copyAndNotify(limo)}
+                    />
+                  </div>
+                )
+              })
+            ) : (
+              <span tw="my-5">{'-'}</span>
+            )}
+            <Separator />
+            <TextGradient type="h7" as="h2" color="main0">
+              Linked IPFS Storage
+            </TextGradient>
+            <div tw="my-5">
+              <div className="tp-info text-main0">ITEM HASH</div>
+              <IconText
+                iconName="copy"
+                onClick={() => copyAndNotify(website.volume?.id ?? '')}
+              >
+                {website.volume?.id}
+              </IconText>
+            </div>
+            <div className="tp-info text-main0">EXPLORER</div>
+            <div tw="flex flex-row mb-5">
+              <a
+                className="tp-body1 fs-16"
+                href={website.volume?.url}
+                target="_blank"
+                referrerPolicy="no-referrer"
+              >
+                <IconText iconName="square-up-right">
+                  <Text>{ellipseText(website.volume?.url ?? '', 80)}</Text>
+                </IconText>
+              </a>
+              '
+              <IconText
+                iconName="copy"
+                onClick={() => copyAndNotify(website.volume?.id ?? '')}
+              ></IconText>
+              '
+            </div>
+            <div className="tp-info text-main0">CONTENT ID V0</div>
+            <div tw="flex flex-row mb-5">
+              <Text>{website.volume?.item_hash}</Text>
+              <IconText
+                iconName="copy"
+                onClick={() => copyAndNotify(website.volume?.id ?? '')}
+              ></IconText>
+            </div>
+            <div className="tp-info text-main0">CONTENT ID V1</div>
+            <div tw="flex flex-row mb-5">
+              <Text>{cidV1}</Text>
+              <IconText
+                iconName="copy"
+                onClick={() => copyAndNotify(website.volume?.id ?? '')}
+              ></IconText>
             </div>
           </NoisyContainer>
 

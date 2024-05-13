@@ -5,6 +5,7 @@ import {
   messageHashSchema,
   optionalStringSchema,
   requiredStringSchema,
+  requiredRestrictedStringSchema,
 } from './base'
 import { convertByteUnits } from '../utils'
 import { domainSchema } from './domain'
@@ -57,6 +58,11 @@ export const addEnvVarsSchema = z.array(addEnvVarSchema)
 
 export const addNameAndTagsSchema = z.object({
   name: requiredStringSchema,
+  tags: z.array(z.string().trim()).optional(),
+})
+
+export const addRestrictedNameAndTagsSchema = z.object({
+  name: requiredRestrictedStringSchema,
   tags: z.array(z.string().trim()).optional(),
 })
 

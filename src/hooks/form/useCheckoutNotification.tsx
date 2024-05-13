@@ -33,9 +33,6 @@ export function useCheckoutNotification({
     async (newSteps?: UseCheckoutNotificationSteps) => {
       if (!noti) throw Err.NotificationsNotReady
       const steps = newSteps || stepsProp || []
-
-      console.log('steps', steps)
-
       noti.del(stepsNotiId)
 
       await sleep(200)
@@ -84,30 +81,30 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
     volume: {
       title: 'Sign Volume',
       content:
-        "This step involves signing the volume configuration and is required if you've set up additional storage volume for your instance or function.",
+        'By signing this, you confirm the creation of a new volume. This is required if you are deploying a new website or if you have set up additional storage volume(s) for your instance or function.',
     },
     ssh: {
       title: 'Sign SSH',
       content:
-        'This step is crucial for securing remote access to your instance. By signing this, you confirm the SSH keys configuration, enabling encrypted communication with your server.',
+        'By signing this, you confirm the SSH keys configuration, enabling encrypted communication with your instance. This is crucial for securing remote access.',
     },
     instance: {
-      title: 'Sign instance creation',
+      title: 'Sign Instance Creation',
       content:
         "By signing this, you confirm the creation of your new instance on Twentysix.cloud. This step finalises the setup options you've chosen, including resources, configurations, and any additional features.",
     },
     program: {
-      title: 'Sign function creation',
+      title: 'Sign Function Creation',
       content:
-        "By signing this, you confirm the creation of your new function (and the volume containing the code if it were necessary) on Twentysix.cloud. This step finalises the setup options you've chosen, including resources, configurations, and any additional features.",
+        "By signing this, you confirm the creation of your new function on Twentysix.cloud. This step finalises the setup options you've chosen, including the codebase volume, resources, configurations, and any additional features.",
     },
     domain: {
-      title: 'Sign custom domain',
+      title: 'Sign Custom Domain',
       content:
-        'This final step confirms your custom domain settings and integrates it with your instance.',
+        'By signing this, you confirm the custom domain settings for your website, instance or function.',
     },
     website: {
-      title: 'Sign website creation',
+      title: 'Sign Website Creation',
       content:
         'By signing this, you confirm the deployment of your new website on Twentysix.cloud.',
     },

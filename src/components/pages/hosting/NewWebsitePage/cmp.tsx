@@ -1,4 +1,8 @@
-import { EntityType, EntityDomainType } from '@/helpers/constants'
+import {
+  EntityType,
+  EntityDomainType,
+  PaymentMethod,
+} from '@/helpers/constants'
 import { useNewWebsitePage } from '@/hooks/pages/hosting/useNewWebsitePage'
 import { Button, TextGradient } from '@aleph-front/core'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
@@ -113,7 +117,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         website={values.website}
         domains={values.domains}
         unlockedAmount={accountBalance}
-        paymentMethod={values.paymentMethod}
+        paymentMethod={PaymentMethod.Hold}
         mainRef={mainRef}
         description={
           <>

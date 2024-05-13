@@ -13,11 +13,12 @@ import { Website } from '@/domain/website'
 import { useDomainStatus } from '@/hooks/common/useDomainStatus'
 import { Account } from '@aleph-sdk/account'
 import Err from '@/helpers/errors'
+import { Volume } from '@/domain/volume'
 
 export type ManageDomain = {
   domain?: Domain
   status?: DomainStatus
-  refEntity?: Program | Instance | Website
+  refEntity?: Program | Instance | Website | Volume
   account?: Account
   handleCopyRef: () => void
   handleDelete: () => void
@@ -32,7 +33,16 @@ export function useManageDomain(): ManageDomain {
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [{ account }, dispatch] = useAppState()
 
-  const refEntity = useHashToEntity(domain?.ref) as Program | Instance | Website
+  let refEntity
+  try {
+    refEntity = useHashToEntity(domain?.ref) as
+      | Program
+      | Instance
+      | Website
+      | Volume
+  } catch (e) {
+    console.error(e)
+  }
 
   const status = useDomainStatus(domain)
 

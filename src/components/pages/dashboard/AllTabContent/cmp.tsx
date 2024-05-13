@@ -42,14 +42,25 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                     label: 'Name',
                     width: '100%',
                     sortable: true,
-                    render: (row) => row.name,
+                    render: (row) => row.name || row.id,
                   },
                   {
                     label: 'Size',
                     align: 'right',
                     sortable: true,
                     render: (row) =>
-                      humanReadableSize(row.size || row.volume?.size, 'MiB'),
+                      row.type !== EntityType.Website ? (
+                        humanReadableSize(row.size, 'MiB')
+                      ) : (
+                        <ButtonLink
+                          kind="functional"
+                          variant="none"
+                          size="sm"
+                          href={row.url ?? ''}
+                        >
+                          <Icon name="square-up-right" size="lg" />
+                        </ButtonLink>
+                      ),
                   },
                   {
                     label: 'Date',

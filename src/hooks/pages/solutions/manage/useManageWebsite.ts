@@ -13,6 +13,7 @@ export type ManageWebsite = {
   handleCopyHash: () => void
   handleDelete: () => void
   //handleDownload: () => void
+  copyAndNotify: (text: string) => void
 }
 
 export function useManageWebsite(): ManageWebsite {
@@ -57,5 +58,6 @@ export function useManageWebsite(): ManageWebsite {
     website,
     handleCopyHash,
     handleDelete,
+    copyAndNotify,
   }
 }

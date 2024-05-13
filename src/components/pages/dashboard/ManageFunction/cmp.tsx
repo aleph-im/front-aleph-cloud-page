@@ -11,7 +11,7 @@ import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
 export default function ManageFunction() {
-  const { func, handleCopyHash, handleDelete, copyAndNotify } =
+  const { func, handleCopyHash, handleDelete, handleDownload, copyAndNotify } =
     useManageFunction()
 
   const theme = useTheme()
@@ -57,7 +57,7 @@ export default function ManageFunction() {
               </Label>
             </div>
             <div>
-              {/* <Button
+              <Button
                 size="md"
                 variant="tertiary"
                 color="main0"
@@ -67,7 +67,7 @@ export default function ManageFunction() {
                 onClick={handleDownload}
               >
                 Download
-              </Button> */}
+              </Button>
               <Button
                 kind="functional"
                 variant="warning"

@@ -2,7 +2,6 @@ import React from 'react'
 import tw from 'twin.macro'
 import { WebsitesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
-import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
 
@@ -27,14 +26,23 @@ export const WebsitesTabContent = React.memo(
                       label: 'Name',
                       width: '100%',
                       sortable: true,
-                      render: (row) => ellipseAddress(row.id || ''),
+                      render: (row) => row.id,
                     },
                     {
                       label: 'Size',
                       align: 'right',
                       sortable: true,
-                      render: (row) =>
-                        humanReadableSize(row.volume?.size || 0, 'MiB'),
+                      render: (row) => (
+                        <ButtonLink
+                          kind="functional"
+                          variant="none"
+                          size="sm"
+                          href={`/storage/volume/${row.volume_id}`}
+                        >
+                          <Icon name="square-up-right" size="lg" />
+                        </ButtonLink>
+                      ),
+                      //humanReadableSize(row.volume?.size ?? 0, 'MiB'),
                     },
                     {
                       label: 'Date',

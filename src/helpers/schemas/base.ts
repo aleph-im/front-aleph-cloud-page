@@ -1,10 +1,18 @@
 import { z } from 'zod'
 import { EntityDomainType, PaymentMethod } from '../constants'
+import { Blockchain } from '@aleph-sdk/core'
 
 export const requiredStringSchema = z
   .string()
   .trim()
   .min(1, { message: 'Required field' })
+
+export const requiredRestrictedStringSchema = requiredStringSchema.regex(
+  /^[a-zA-Z0-9_-]+$/,
+  {
+    message: 'Invalid name format (only a-zA-Z0-9_- are allowed)',
+  },
+)
 
 export function optionalString(schema: z.ZodString) {
   return schema.optional().or(z.literal(''))
@@ -65,9 +73,8 @@ export const codeFileSchema = z
   .custom<File>((val) => val instanceof File, 'Required file')
   .refine(
     (file) => {
-      console.log(file)
       return (
-        (file.type === 'application/zip' && file.name.endsWith('.zip')) ||
+        file.name.endsWith('.zip') ||
         file.name.endsWith('.sqsh') ||
         file.name.endsWith('.squashfs')
       )
@@ -93,3 +100,5 @@ export const paymentMethodSchema = z.enum([
   PaymentMethod.Hold,
   PaymentMethod.Stream,
 ])
+
+export const blockchainSchema = z.enum([Blockchain.ETH, Blockchain.AVAX])

@@ -32,15 +32,13 @@ export type DomainRefOptions = {
 
 export type UseNewDomainPageReturn = {
   entities: DomainRefOptions[]
-  hasInstances: boolean
-  hasFunctions: boolean
-  hasEntities: boolean
   nameCtrl: UseControllerReturn<NewDomainFormState, 'name'>
   targetCtrl: UseControllerReturn<NewDomainFormState, 'target'>
   refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
   errors: FieldErrors<NewDomainFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
   setTarget: (target: EntityDomainType) => void
+  setRef: (ref: string) => void
 }
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
@@ -99,19 +97,25 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   const entityType = targetCtrl.field.value
 
   const entities = useMemo(() => {
-    const entities = !entityType
-      ? []
-      : entityType === EntityDomainType.Instance
-        ? accountInstances
-        : entityType === EntityDomainType.Program
-          ? accountFunctions
-          : accountWebsites
-
-    return (entities || []).map(({ id, metadata, type }) => {
+    if (!entityType) return []
+    if (entityType !== EntityDomainType.IPFS) {
+      const entities =
+        entityType === EntityDomainType.Instance
+          ? accountInstances
+          : accountFunctions
+      return (entities || []).map(({ id, metadata, type }) => {
+        return {
+          label: (metadata?.name as string | undefined) || id,
+          value: id,
+          type: type,
+        }
+      })
+    }
+    return (accountWebsites || []).map(({ id, volume_id, type }) => {
       return {
-        label: (metadata?.name as string | undefined) || id,
-        value: id,
-        type,
+        label: id,
+        value: volume_id,
+        type: type,
       }
     })
   }, [entityType, accountInstances, accountFunctions, accountWebsites])
@@ -139,6 +143,9 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   const setTarget = (target: EntityDomainType) => {
     setValue('target', target)
   }
+  const setRef = (ref: string) => {
+    setValue('ref', ref)
+  }
 
   return {
     entities,
@@ -148,5 +155,6 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     errors,
     handleSubmit,
     setTarget,
+    setRef,
   }
 }

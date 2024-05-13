@@ -16,6 +16,7 @@ import { Volume } from '@/domain/volume'
 import { Program } from '@/domain/program'
 import { Domain } from '@/domain/domain'
 import { Website } from '@/domain/website'
+import { CID } from 'multiformats'
 import Err from './errors'
 
 /**
@@ -249,6 +250,10 @@ export const unixToISODateTimeString = (timeStamp?: number, noDate = 'n/a') => {
     timeStyle: 'short',
     timeZone: 'UTC',
   }).format(date)
+}
+
+export const cidV0Tov1 = function (cid: string): string {
+  return CID.parse(cid).toV1().toString()!
 }
 
 export type AnyEntity = Program | Instance | Volume | SSHKey | Domain | Website

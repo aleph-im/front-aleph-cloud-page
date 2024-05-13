@@ -1,6 +1,11 @@
 import IconText from '@/components/common/IconText'
 import { Label, NoisyContainer } from '@aleph-front/core'
-import { EntityTypeName, EntityDomainType } from '@/helpers/constants'
+import {
+  EntityType,
+  EntityTypeName,
+  EntityDomainType,
+  EntityDomainTypeName,
+} from '@/helpers/constants'
 import { BulletItem, Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageDomain } from '@/hooks/pages/solutions/manage/useManageDomain'
 import { ellipseAddress, ellipseText, toPascalCase } from '@/helpers/utils'
@@ -235,12 +240,11 @@ export default function ManageDomain() {
               </>
             )}
 
-            {refEntity && (
+            {refEntity ? (
               <>
                 <Separator />
-
                 <TextGradient type="h7" as="h2" color="main0">
-                  Linked {domain.target}
+                  Linked {EntityDomainTypeName[domain.target]}
                 </TextGradient>
 
                 <div tw="my-5">
@@ -253,27 +257,45 @@ export default function ManageDomain() {
                 <div tw="my-5">
                   <div className="tp-info text-main0">NAME</div>
                   <div>
-                    <Text>
-                      {(refEntity?.metadata?.name as string) || refEntity.id}
-                    </Text>
+                    <Text>{refEntity.id}</Text>
                   </div>
                 </div>
-
                 <div tw="my-5">
                   <div className="tp-info text-main0">EXPLORER</div>
                   <div>
                     <a
                       className="tp-body1 fs-16"
-                      href={refEntity.url}
+                      href={
+                        refEntity.type !== EntityType.Website
+                          ? refEntity.url
+                          : refEntity.volume?.url
+                      }
                       target="_blank"
                       referrerPolicy="no-referrer"
                     >
                       <IconText iconName="square-up-right">
-                        <Text>{ellipseText(refEntity.url, 80)}</Text>
+                        <Text>
+                          {ellipseText(
+                            refEntity.type !== EntityType.Website
+                              ? refEntity.url
+                              : refEntity.volume?.url || '',
+                            80,
+                          )}
+                        </Text>
                       </IconText>
                     </a>
                   </div>
                 </div>
+              </>
+            ) : (
+              <>
+                <Separator />
+                <TextGradient type="h7" as="h2" color="main0">
+                  Linked Resource
+                </TextGradient>
+                <Text>
+                  The target resource is missing or has been deleted.{' '}
+                </Text>
               </>
             )}
           </NoisyContainer>

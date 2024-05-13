@@ -13,7 +13,9 @@ export type AnyEntityRow = {
   name: string
   size: number
   volume?: Volume
+  volume_id?: string
   date?: string
+  updated_at?: string
   url?: string
   confirmed?: boolean
 }
@@ -34,7 +36,9 @@ export function useDashboardPage(): UseDashboardPageReturn {
         const name =
           (type === EntityType.SSHKey
             ? entity.label
-            : type === EntityType.Instance || type === EntityType.Program
+            : type === EntityType.Instance ||
+                type === EntityType.Program ||
+                type === EntityType.Website
               ? entity.metadata?.name
               : type === EntityType.Domain
                 ? entity.name
@@ -48,13 +52,22 @@ export function useDashboardPage(): UseDashboardPageReturn {
               })
             : type === EntityType.Domain
               ? 0
-              : entity.size) || 0
+              : type === EntityType.Website
+                ? entity.volume?.size
+                : entity.size) || 0
 
         const date =
           entity.type === EntityType.Domain
             ? entity.updated_at.slice(0, 19).replace('T', ' ')
-            : entity.date
-        const url = entity.type === EntityType.Domain ? '' : entity.url
+            : entity.type === EntityType.Website
+              ? entity.updated_at
+              : entity.date
+        const url =
+          entity.type === EntityType.Domain
+            ? ''
+            : entity.type === EntityType.Website
+              ? `/storage/volume/${entity.volume_id}`
+              : entity.url
 
         return {
           id,

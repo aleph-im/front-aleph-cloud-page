@@ -201,7 +201,6 @@ export function useHeader(): UseHeaderReturn {
   // @note: wait till account is connected and redirect
   const handleConnect = useCallback(
     async (wallet?: WalletProps, network?: NetworkProps['network']) => {
-      console.log('handleConnect', wallet, network)
       if (!isConnected && (wallet || network)) {
         setkeepAccountAlive(true)
         const prov = provider()

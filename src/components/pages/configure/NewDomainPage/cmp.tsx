@@ -26,6 +26,7 @@ export default function NewDomain() {
     errors,
     handleSubmit,
     setTarget,
+    setRef,
   } = useNewDomainPage()
 
   const [tabId, setTabId] = useState('website')
@@ -35,6 +36,7 @@ export default function NewDomain() {
       : 'function'
 
   const onTabChange = (tabId: string) => {
+    setRef('')
     setTabId(tabId)
     if (['website', 'ipfs'].includes(tabId)) {
       setTarget(EntityDomainType.IPFS)

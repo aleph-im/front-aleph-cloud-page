@@ -1,6 +1,6 @@
 import { FormEvent, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { WebsiteManager } from '@/domain/website'
+import { WebsiteManager, WebsitePayment } from '@/domain/website'
 import { useAppState } from '@/contexts/appState'
 import { useForm } from '@/hooks/common/useForm'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
@@ -21,17 +21,19 @@ import {
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import Err from '@/helpers/errors'
+import { Blockchain } from '@aleph-sdk/core'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {
     website: WebsiteFolderField
-    domains?: DomainField[]
-    paymentMethod: PaymentMethod
+    payment: WebsitePayment
+    domains?: Omit<DomainField, 'ref'>[]
+    ens?: string[]
   }
 
 export const defaultValues: Partial<NewWebsiteFormState> = {
   ...defaultNameAndTags,
-  paymentMethod: PaymentMethod.Hold,
+  payment: { chain: Blockchain.ETH, type: PaymentMethod.Hold },
 }
 
 export type UseNewWebsitePagePageReturn = {
@@ -106,12 +108,13 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     entityType: EntityType.Website,
     props: {
       website: values.website,
+      payment: values.payment,
     },
   })
 
   const canAfford =
     accountBalance > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
-  let isCreateButtonDisabled = !canAfford
+  let isCreateButtonDisabled = !canAfford || !values.framework || !values.name
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
   }

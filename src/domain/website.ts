@@ -9,7 +9,6 @@ import {
   defaultWebsiteChannel,
 } from '@/helpers/constants'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
-import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
 import { websiteSchema } from '@/helpers/schemas/website'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
@@ -17,9 +16,10 @@ import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
 import { Volume, VolumeManager } from './volume'
 import { AddDomain, Domain, DomainManager } from './domain'
-import { getDate, getExplorerURL } from '@/helpers/utils'
+import { getDate } from '@/helpers/utils'
 import Err from '@/helpers/errors'
 import { ItemType } from '@aleph-sdk/message'
+import { Blockchain } from '@aleph-sdk/core'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
@@ -36,7 +36,7 @@ export type WebsiteFramework = {
 export const WebsiteFrameworks: Record<WebsiteFrameworkId, WebsiteFramework> = {
   [WebsiteFrameworkId.none]: {
     id: WebsiteFrameworkId.none,
-    name: 'No framework',
+    name: 'n/a',
   },
   [WebsiteFrameworkId.nextjs]: {
     id: WebsiteFrameworkId.nextjs,
@@ -250,33 +250,40 @@ cd my-app`,
   } */
 }
 
-export type CustomWebsiteFrameworkField = string
+export type WebsitePayment = {
+  chain: Blockchain
+  type: PaymentMethod
+}
+
+export type WebsiteCostProps = {
+  website?: WebsiteFolderField
+  payment: WebsitePayment
+}
 
 export type WebsiteCost = {
   totalCost: number
   totalStreamCost: number
 }
 
-export type WebsiteCostProps = {
-  website?: WebsiteFolderField
-  paymentMethod?: PaymentMethod
-  streamDuration?: StreamDurationField
-}
-
 export type AddWebsite = NameAndTagsField &
   WebsiteFrameworkField & {
     website: WebsiteFolderField
+    payment: WebsitePayment
     domains?: Omit<DomainField, 'ref'>[]
-    paymentMethod: PaymentMethod
+    ens?: string[]
   }
 
-export type WebsiteAggregateItem = NameAndTagsField &
-  WebsiteFrameworkField & {
-    volume_id: string
-    version: number
-    paymentMethod: PaymentMethod
-    updated_at: string
-  }
+export type WebsiteMetadata = NameAndTagsField & WebsiteFrameworkField
+
+export type WebsiteAggregateItem = {
+  metadata: WebsiteMetadata
+  payment: WebsitePayment
+  ens: string[]
+  volume_id: string
+  version: number
+  created_at: string
+  updated_at: string
+}
 
 export type WebsiteAggregate = Record<string, WebsiteAggregateItem | null>
 
@@ -299,13 +306,13 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   static getStorageWebsiteMiBPrice(
     props: AddWebsite | WebsiteCostProps,
   ): number {
-    return 0
+    return 1 / 20
   }
 
   static getExecutionWebsiteMiBPrice(
     props: AddWebsite | WebsiteCostProps,
   ): number {
-    return props.paymentMethod === PaymentMethod.Hold ? 1 / 20 : 0.001 / 1024
+    return 0
   }
 
   static async getCost(props: WebsiteCostProps): Promise<WebsiteCost> {
@@ -355,15 +362,9 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     }
   }
 
-  async *addSteps(website: AddWebsite): AsyncGenerator<void, Website, void> {
-    const {
-      website: data,
-      name,
-      tags,
-      framework,
-      paymentMethod,
-      domains,
-    } = await this.parseNewWebsite(website)
+  async *addSteps(newWebsite: AddWebsite): AsyncGenerator<void, Website, void> {
+    const { website, name, tags, framework, payment, domains, ens } =
+      await this.parseNewWebsite(newWebsite)
     try {
       if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
         throw Err.InvalidAccount
@@ -374,22 +375,27 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         this.sdkClient as AuthenticatedAlephHttpClient
       ).createStore({
         channel: this.channel,
-        fileHash: data.cid!,
+        fileHash: website.cid!,
         storageEngine: ItemType.ipfs,
       })
       const volumeEntity = (await this.volumeManager.parseMessages([volume]))[0]
 
       // Publish website
+      const date = new Date().getTime() / 1000
       const content: Record<string, any> = {}
-      const site = {
+      content[name] = {
+        metadata: {
+          name,
+          tags,
+          framework,
+        },
+        ens,
+        payment,
         volume_id: volume.item_hash,
         version: 1,
-        framework,
-        paymentMethod,
-        tags,
-        updated_at: new Date().getTime() / 1000,
+        created_at: date,
+        updated_at: date,
       }
-      content[name] = site
       yield
       const websiteEntity = await this.sdkClient.createAggregate({
         key: this.key,
@@ -399,7 +405,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       const entity = (await this.parseNewAggregate(websiteEntity))[0]
 
       // Publish domains
-      yield* this.parseDomainsSteps(volumeEntity.id, domains)
+      if (domains) yield* this.parseDomainsSteps(volumeEntity.id, domains)
 
       return entity
     } catch (err) {
@@ -454,13 +460,16 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   async getSteps(newWebsite: AddWebsite): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
     const valid = await this.parseNewWebsite(newWebsite)
-    if (valid) steps.push('website')
-
-    const domainSteps = await this.domainManager.getSteps(
-      valid.domains as AddDomain[],
-    )
-    for (const step of domainSteps) steps.push(step)
-
+    if (valid) {
+      steps.push('volume')
+      steps.push('website')
+      if (!valid.domains || valid.domains.length === 0) return steps
+      const domainSteps = await this.domainManager.getSteps(
+        valid.domains as AddDomain[],
+        false,
+      )
+      for (const step of domainSteps) steps.push(step)
+    }
     return steps
   }
 
@@ -492,20 +501,27 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     name: string,
     content: WebsiteAggregateItem,
   ): Promise<Website> {
-    const { volume_id, version, framework, paymentMethod, tags, updated_at } =
-      content
+    const {
+      metadata,
+      payment,
+      ens,
+      volume_id,
+      version,
+      created_at,
+      updated_at,
+    } = content
     const volume = await this.volumeManager.get(volume_id)
     return {
       id: name,
       type: EntityType.Website,
-      name,
-      tags,
+      metadata,
+      payment,
+      ens,
       volume_id,
       volume,
       version,
-      framework,
-      paymentMethod,
-      updated_at,
+      created_at: getDate(created_at),
+      updated_at: getDate(updated_at),
       confirmed: true,
     }
   }
