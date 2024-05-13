@@ -82,17 +82,33 @@ export default function DashboardPage() {
           {tabId === 'all' ? (
             <AllTabContent data={all} />
           ) : tabId === 'function' ? (
-            <FunctionsTabContent data={functions} />
+            <FunctionsTabContent
+              data={functions.sort((a, b) => b.date.localeCompare(a.date))}
+            />
           ) : tabId === 'instance' ? (
-            <InstancesTabContent data={instances} />
+            <InstancesTabContent
+              data={instances.sort((a, b) => b.date.localeCompare(a.date))}
+            />
           ) : tabId === 'website' ? (
-            <WebsitesTabContent data={websites} />
+            <WebsitesTabContent
+              data={websites.sort((a, b) =>
+                b.updated_at.localeCompare(a.updated_at),
+              )}
+            />
           ) : tabId === 'volume' ? (
-            <VolumesTabContent data={volumes} />
+            <VolumesTabContent
+              data={volumes.sort((a, b) => b.date.localeCompare(a.date))}
+            />
           ) : tabId === 'ssh' ? (
-            <SSHKeysTabContent data={sshKeys} />
+            <SSHKeysTabContent
+              data={sshKeys.sort((a, b) => b.date.localeCompare(a.date))}
+            />
           ) : tabId === 'domain' ? (
-            <DomainsTabContent data={domains} />
+            <DomainsTabContent
+              data={domains.sort((a, b) =>
+                b.updated_at.localeCompare(a.updated_at),
+              )}
+            />
           ) : (
             <></>
           )}

@@ -79,7 +79,10 @@ export function useDashboardPage(): UseDashboardPageReturn {
           confirmed,
         } as AnyEntityRow
       })
-  }, [entities]).sort((a, b) => b.date!.localeCompare(a.date!))
+  }, [entities]).sort((a, b) =>
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    (b.date ?? b.updated_at!).localeCompare(a.date ?? a.updated_at!),
+  )
 
   return {
     ...entities,
