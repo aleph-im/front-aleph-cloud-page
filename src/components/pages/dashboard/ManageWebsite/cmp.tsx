@@ -36,7 +36,7 @@ export default function ManageWebsite() {
   if (!website) {
     return (
       <>
-        <Container>
+        <Container as={'div'}>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
@@ -46,7 +46,7 @@ export default function ManageWebsite() {
   return (
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="floppy-disk" tw="mr-4" className="text-main0" />
@@ -111,7 +111,7 @@ export default function ManageWebsite() {
               <div>
                 <div className="tp-info text-main0">FRAMEWORK</div>
                 <div>
-                  <Text>
+                  <Text as={'span'}>
                     {WebsiteFrameworks[website.metadata.framework].name}
                   </Text>
                 </div>
@@ -119,13 +119,13 @@ export default function ManageWebsite() {
               <div>
                 <div className="tp-info text-main0">VERSION</div>
                 <div>
-                  <Text>{website.version}</Text>
+                  <Text as={'span'}>{website.version}</Text>
                 </div>
               </div>
               <div>
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
-                  <Text className="fs-10 tp-body1">
+                  <Text className="fs-10 tp-body1" as={'span'}>
                     {humanReadableSize(website.volume?.size, 'MiB')}
                   </Text>
                 </div>
@@ -133,13 +133,17 @@ export default function ManageWebsite() {
               <div>
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <Text className="fs-10 tp-body1">{website.created_at}</Text>
+                  <Text className="fs-10 tp-body1" as={'span'}>
+                    {website.created_at}
+                  </Text>
                 </div>
               </div>
               <div>
                 <div className="tp-info text-main0">UPDATED ON</div>
                 <div>
-                  <Text className="fs-10 tp-body1">{website.updated_at}</Text>
+                  <Text className="fs-10 tp-body1" as={'span'}>
+                    {website.updated_at}
+                  </Text>
                 </div>
               </div>
             </div>
@@ -153,7 +157,9 @@ export default function ManageWebsite() {
                 //referrerPolicy="no-referrer"
               >
                 <IconText iconName="square-up-right">
-                  <Text tw="text-gray-500">{default_url}</Text>
+                  <Text tw="text-gray-500" as={'span'}>
+                    {default_url}
+                  </Text>
                 </IconText>
               </a>
               <IconText
@@ -171,7 +177,7 @@ export default function ManageWebsite() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{alt_url}</Text>
+                    <Text as={'span'}>{alt_url}</Text>
                   </IconText>
                 </a>
                 <IconText
@@ -187,7 +193,7 @@ export default function ManageWebsite() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{alt_url_2}</Text>
+                    <Text as={'span'}>{alt_url_2}</Text>
                   </IconText>
                 </a>
                 <IconText
@@ -203,7 +209,7 @@ export default function ManageWebsite() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{alt_url_3}</Text>
+                    <Text as={'span'}>{alt_url_3}</Text>
                   </IconText>
                 </a>
                 <IconText
@@ -214,10 +220,10 @@ export default function ManageWebsite() {
             </div>
             <div className="tp-info text-main0">ENS GATEWAY</div>
             {website.ens?.length > 0 ? (
-              Array.from(website.ens).map((ens) => {
+              Array.from(website.ens).map((ens, key) => {
                 const limo = getLimoUrl(ens)
                 return (
-                  <div tw="flex flex-row">
+                  <div tw="flex flex-row" key={key}>
                     <a
                       className="tp-body1 fs-16"
                       href={limo}
@@ -225,7 +231,7 @@ export default function ManageWebsite() {
                       referrerPolicy="no-referrer"
                     >
                       <IconText iconName="square-up-right">
-                        <Text>{limo}</Text>
+                        <Text as={'span'}>{limo}</Text>
                       </IconText>
                     </a>
                     <IconText
@@ -260,19 +266,19 @@ export default function ManageWebsite() {
                 referrerPolicy="no-referrer"
               >
                 <IconText iconName="square-up-right">
-                  <Text>{ellipseText(website.volume?.url ?? '', 80)}</Text>
+                  <Text as={'span'}>
+                    {ellipseText(website.volume?.url ?? '', 80)}
+                  </Text>
                 </IconText>
               </a>
-              '
               <IconText
                 iconName="copy"
                 onClick={() => copyAndNotify(website.volume?.id ?? '')}
               ></IconText>
-              '
             </div>
             <div className="tp-info text-main0">CONTENT ID V0</div>
             <div tw="flex flex-row mb-5">
-              <Text>{website.volume?.item_hash}</Text>
+              <Text as={'span'}>{website.volume?.item_hash}</Text>
               <IconText
                 iconName="copy"
                 onClick={() => copyAndNotify(website.volume?.id ?? '')}
@@ -280,7 +286,7 @@ export default function ManageWebsite() {
             </div>
             <div className="tp-info text-main0">CONTENT ID V1</div>
             <div tw="flex flex-row mb-5">
-              <Text>{cidV1}</Text>
+              <Text as={'span'}>{cidV1}</Text>
               <IconText
                 iconName="copy"
                 onClick={() => copyAndNotify(website.volume?.id ?? '')}

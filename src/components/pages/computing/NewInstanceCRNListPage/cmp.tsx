@@ -293,13 +293,13 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
   return (
     <>
       <section tw="px-0 py-0 md:py-8">
-        <Container>
+        <Container as={'div'}>
           <NewEntityTab selected="instance" />
         </Container>
       </section>
       <section tw="relative px-0 pt-20 pb-6 md:py-10">
         <SpinnerOverlay show={!filteredNodes} />
-        <Container $variant="xl">
+        <Container $variant="xl" as={'div'}>
           <NoisyContainer>
             <div tw="flex mb-8 gap-10 justify-between flex-wrap flex-col md:flex-row items-stretch md:items-center">
               <div tw="flex-1">

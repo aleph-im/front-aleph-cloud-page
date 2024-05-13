@@ -27,20 +27,11 @@ export type CheckoutSummaryProps = {
   button?: ReactNode
   description?: ReactNode
   mainRef?: RefObject<HTMLElement>
-} & (
-  | {
-      paymentMethod: PaymentMethod.Stream
-      control: Control
-      receiverAddress?: string
-      streamDuration?: StreamDurationField
-    }
-  | {
-      paymentMethod: PaymentMethod.Hold
-      control?: undefined
-      receiverAddress?: undefined
-      streamDuration?: undefined
-    }
-)
+  paymentMethod: PaymentMethod
+  control?: Control
+  receiverAddress?: string
+  streamDuration?: StreamDurationField
+}
 
 export type CheckoutSummarySpecsLineProps = {
   type: EntityType.Program | EntityType.Instance

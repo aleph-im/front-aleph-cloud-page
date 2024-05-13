@@ -49,16 +49,16 @@ export const StyledCard = styled(Card).attrs<StyledCardProps, CardProps>(
           }
         `
       : beta
-      ? css`
-          & header:after {
-            position: absolute;
-            content: '(BETA)';
-            left: 100%;
-            top: -0.5em;
-            margin-left: 0.40625rem;
-            ${getTypoCss('info')}
-            color: ${theme.color.main0}
-          }
-        `
-      : ''}
+        ? css`
+            & header:after {
+              position: absolute;
+              content: '(BETA)';
+              left: 100%;
+              top: -0.5em;
+              margin-left: 0.40625rem;
+              ${getTypoCss('info')}
+              color: ${theme.color.main0}
+            }
+          `
+        : ''}
 `

@@ -18,7 +18,7 @@ export default function ManageVolume() {
   if (!volume) {
     return (
       <>
-        <Container>
+        <Container as={'div'}>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
@@ -31,7 +31,7 @@ export default function ManageVolume() {
   return (
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="floppy-disk" tw="mr-4" className="text-main0" />
@@ -102,7 +102,7 @@ export default function ManageVolume() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{ellipseText(volume.url, 80)}</Text>
+                    <Text as={'span'}>{ellipseText(volume.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -112,7 +112,7 @@ export default function ManageVolume() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
-                  <Text className="fs-10 tp-body1">
+                  <Text className="fs-10 tp-body1" as={'span'}>
                     {humanReadableSize(volume.size, 'MiB')}
                   </Text>
                 </div>
@@ -121,7 +121,9 @@ export default function ManageVolume() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <Text className="fs-10 tp-body1">{volume.date}</Text>
+                  <Text className="fs-10 tp-body1" as={'span'}>
+                    {volume.date}
+                  </Text>
                 </div>
               </div>
             </div>

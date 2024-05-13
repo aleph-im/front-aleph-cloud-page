@@ -26,7 +26,7 @@ export default function ManageDomain() {
   if (!domain) {
     return (
       <>
-        <Container>
+        <Container as={'div'}>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
@@ -39,7 +39,7 @@ export default function ManageDomain() {
   return (
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="input-text" tw="mr-4" className="text-main0" />
@@ -81,7 +81,7 @@ export default function ManageDomain() {
                     referrerPolicy="no-referrer"
                   >
                     <IconText iconName="square-up-right">
-                      <Text>{domain.name}</Text>
+                      <Text as={'span'}>{domain.name}</Text>
                     </IconText>
                   </a>
                 </div>
@@ -94,7 +94,7 @@ export default function ManageDomain() {
               <div tw="my-5">
                 <div className="tp-info text-main0">TARGET</div>
                 <div>
-                  <Text>{toPascalCase(domain.target)}</Text>
+                  <Text as={'span'}>{toPascalCase(domain.target)}</Text>
                 </div>
               </div>
             )}
@@ -103,7 +103,7 @@ export default function ManageDomain() {
               <div className="tp-info text-main0">REF</div>
               <div>
                 <IconText iconName="copy" onClick={handleCopyRef}>
-                  <Text>{domain.ref}</Text>
+                  <Text as={'span'}>{domain.ref}</Text>
                 </IconText>
               </div>
             </div>
@@ -118,7 +118,7 @@ export default function ManageDomain() {
 
                 <div tw="my-5">
                   <div className="tp-info text-main0">STATUS</div>
-                  <Text>
+                  <Text as={'span'}>
                     <div tw="flex mt-2">
                       <BulletItem
                         kind={status.status ? 'success' : 'warning'}
@@ -136,7 +136,7 @@ export default function ManageDomain() {
                   <>
                     <div tw="my-5">
                       <div className="tp-info text-main0">PENDING STEPS</div>
-                      <Text>
+                      <Text as={'span'}>
                         <div tw="flex mt-2">
                           <BulletItem
                             kind={
@@ -169,7 +169,7 @@ export default function ManageDomain() {
                         </div>
                       </Text>
                       {domain.target == EntityDomainType.IPFS && (
-                        <Text>
+                        <Text as={'span'}>
                           <div tw="flex mt-2">
                             <BulletItem
                               kind={
@@ -192,7 +192,7 @@ export default function ManageDomain() {
                           </div>
                         </Text>
                       )}
-                      <Text>
+                      <Text as={'span'}>
                         <div tw="flex mt-2">
                           <BulletItem
                             kind={
@@ -218,7 +218,7 @@ export default function ManageDomain() {
 
                     <div tw="my-5">
                       <div className="tp-info text-main0">FINAL STEP</div>
-                      <Text>
+                      <Text as={'span'}>
                         After configuring the domain records you can retry to
                         link them again here
                       </Text>
@@ -250,14 +250,14 @@ export default function ManageDomain() {
                 <div tw="my-5">
                   <div className="tp-info text-main0">Type</div>
                   <div>
-                    <Text>{EntityTypeName[refEntity.type]}</Text>
+                    <Text as={'span'}>{EntityTypeName[refEntity.type]}</Text>
                   </div>
                 </div>
 
                 <div tw="my-5">
                   <div className="tp-info text-main0">NAME</div>
                   <div>
-                    <Text>{refEntity.id}</Text>
+                    <Text as={'span'}>{refEntity.id}</Text>
                   </div>
                 </div>
                 <div tw="my-5">
@@ -274,7 +274,7 @@ export default function ManageDomain() {
                       referrerPolicy="no-referrer"
                     >
                       <IconText iconName="square-up-right">
-                        <Text>
+                        <Text as={'span'}>
                           {ellipseText(
                             refEntity.type !== EntityType.Website
                               ? refEntity.url
@@ -293,7 +293,7 @@ export default function ManageDomain() {
                 <TextGradient type="h7" as="h2" color="main0">
                   Linked Resource
                 </TextGradient>
-                <Text>
+                <Text as={'span'}>
                   The target resource is missing or has been deleted.{' '}
                 </Text>
               </>

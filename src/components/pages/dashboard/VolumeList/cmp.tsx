@@ -24,7 +24,7 @@ export const VolumeList = React.memo(
               <div tw="my-5">
                 <div className="tp-info text-main0">PERSISTENT VOLUME</div>
                 <div>
-                  <Text className="fs-10 tp-body1">
+                  <Text className="fs-10 tp-body1" as={'span'}>
                     {humanReadableSize(volume.size_mib, 'MiB')}
                   </Text>
                 </div>
@@ -33,7 +33,7 @@ export const VolumeList = React.memo(
               <div tw="my-5">
                 <div className="tp-info text-main0">EPHEMERAL VOLUME</div>
                 <div>
-                  <Text className="fs-10 tp-body1">
+                  <Text className="fs-10 tp-body1" as={'span'}>
                     {humanReadableSize(volume.size_mib, 'MiB')}
                   </Text>
                 </div>

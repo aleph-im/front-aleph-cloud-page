@@ -24,7 +24,7 @@ export default function OldHomePage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <section tw="p-0">
-        <Container>
+        <Container as={'div'}>
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
               <div tw="flex flex-col md:block">
@@ -61,7 +61,7 @@ export default function OldHomePage() {
         </Container>
       </section>
       <section tw="px-0 py-6 md:pb-0 md:pt-20" ref={scroll.function.ref}>
-        <Container>
+        <Container as={'div'}>
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
               <H2 label="Solutions">Computing</H2>
@@ -75,7 +75,7 @@ export default function OldHomePage() {
         </Container>
       </section>
       <section className={featureSectionBg} tw="px-0 py-12 md:py-20">
-        <Container>
+        <Container as={'div'}>
           <Row xs={1} md={4} gap="1.5rem">
             <Col>
               <FeatureCard
@@ -109,7 +109,7 @@ export default function OldHomePage() {
         </Container>
       </section>
       <section className="fx-noise-light" tw="px-0 pt-20 pb-10 md:pb-20">
-        <Container>
+        <Container as={'div'}>
           <Row xs={1} md={2} gap="1.5rem">
             <Col>
               <Image
@@ -160,7 +160,7 @@ export default function OldHomePage() {
         </Container>
       </section>
       <section tw="px-0 pt-12 pb-6 md:pt-20 md:pb-0" ref={scroll.volume.ref}>
-        <Container>
+        <Container as={'div'}>
           <Row xs={1} md={4} gap="1.5rem">
             <Col xs={1} md={3}>
               <H2 label="Solutions">Storage</H2>
@@ -175,7 +175,7 @@ export default function OldHomePage() {
         </Container>
       </section>
       <section className={featureSectionBg} tw="px-0 py-12 md:py-20">
-        <Container>
+        <Container as={'div'}>
           <Row xs={1} md={4} gap="1.5rem">
             <Col>
               <FeatureCard
@@ -217,7 +217,7 @@ export default function OldHomePage() {
         </Container>
       </section>
       <section tw="px-0 py-20">
-        <Container>
+        <Container as={'div'}>
           <h1 className="tp-h3" tw="mb-6 md:mb-16">
             Put your code to work
           </h1>
@@ -227,7 +227,7 @@ export default function OldHomePage() {
                 How-to’s
               </TextGradient>
               <ul>
-                <StyledLinkItem>
+                <StyledLinkItem as={'li'}>
                   <StyledLink
                     href="https://docs.aleph.im/guides/update_a_program"
                     target="_blank"
@@ -235,7 +235,7 @@ export default function OldHomePage() {
                     Update a program
                   </StyledLink>
                 </StyledLinkItem>
-                <StyledLinkItem>
+                <StyledLinkItem as={'li'}>
                   <StyledLink
                     href="https://docs.aleph.im/guides/python/dependency_volume"
                     target="_blank"
@@ -243,7 +243,7 @@ export default function OldHomePage() {
                     Add dependencies to a program
                   </StyledLink>
                 </StyledLinkItem>
-                <StyledLinkItem>
+                <StyledLinkItem as={'li'}>
                   <StyledLink
                     href="https://docs.aleph.im/guides/testing_microvms"
                     target="_blank"
@@ -251,7 +251,7 @@ export default function OldHomePage() {
                     Local VM&apos;s for testing
                   </StyledLink>
                 </StyledLinkItem>
-                <StyledLinkItem last>
+                <StyledLinkItem last as={'li'}>
                   <StyledLink
                     href="https://github.com/aleph-im/aleph-indexer-library#aleph-indexer-library"
                     target="_blank"
@@ -266,7 +266,7 @@ export default function OldHomePage() {
                 Learn best practice
               </TextGradient>
               <ul>
-                <StyledLinkItem>
+                <StyledLinkItem as={'li'}>
                   <StyledLink
                     href="https://docs.aleph.im/guides/python/getting_started"
                     target="_blank"
@@ -274,7 +274,7 @@ export default function OldHomePage() {
                     Build a Python VM
                   </StyledLink>
                 </StyledLinkItem>
-                <StyledLinkItem>
+                <StyledLinkItem as={'li'}>
                   <StyledLink
                     href="https://aleph-im.gitbook.io/aleph-docs/virtual-machines-vm/help-articles/how-to-create-a-vm-with-nodejs-and-node_modules"
                     target="_blank"
@@ -282,7 +282,7 @@ export default function OldHomePage() {
                     Build a NodeJS VM
                   </StyledLink>
                 </StyledLinkItem>
-                <StyledLinkItem>
+                <StyledLinkItem as={'li'}>
                   <StyledLink
                     href="https://docs.aleph.im/guides/rust/rust_microvm"
                     target="_blank"
@@ -290,7 +290,7 @@ export default function OldHomePage() {
                     Build a Rust VM
                   </StyledLink>
                 </StyledLinkItem>
-                <StyledLinkItem>
+                <StyledLinkItem as={'li'}>
                   <StyledLink
                     href="https://docs.aleph.im/computing/runtimes/custom"
                     target="_blank"
@@ -298,7 +298,7 @@ export default function OldHomePage() {
                     Build a custom runtime
                   </StyledLink>
                 </StyledLinkItem>
-                <StyledLinkItem last>
+                <StyledLinkItem last as={'li'}>
                   <StyledLink
                     href="https://docs.aleph.im/guides/python/advanced"
                     target="_blank"

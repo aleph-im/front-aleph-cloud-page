@@ -87,12 +87,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 py-0 md:py-8">
-        <Container>
+        <Container as={'div'}>
           <NewEntityTab selected="instance" />
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="1">Selected instance</SectionTitle>
           <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
             <NoisyContainer>
@@ -107,7 +107,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="2">Select an instance size</SectionTitle>
           <p>
             Please select one of the available instance size as a base for your
@@ -127,7 +127,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="3">Choose an image</SectionTitle>
           <p>
             Chose a base image for your VM. It’s the base system that you will
@@ -139,7 +139,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="4">Configure SSH Key</SectionTitle>
           <p>
             Access your cloud instances securely. Give existing key’s below
@@ -153,7 +153,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="5">Name and tags</SectionTitle>
           <p tw="mb-6">
             Organize and identify your instances more effectively by assigning a
@@ -165,7 +165,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="6">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
             Customize your instance with our Advanced Configuration Options. Add

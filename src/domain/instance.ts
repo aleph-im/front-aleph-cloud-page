@@ -339,7 +339,9 @@ export class InstanceManager
     const totalRequiredAleph = usedAlephInDuration.add(streamCost)
 
     if (alephxBalance.lt(totalRequiredAleph))
-      throw Err.InsufficientBalance(totalRequiredAleph.sub(alephxBalance))
+      throw Err.InsufficientBalance(
+        totalRequiredAleph.sub(alephxBalance).toNumber(),
+      )
 
     yield
     await account.increaseALEPHFlow(

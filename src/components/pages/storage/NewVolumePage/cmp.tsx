@@ -24,7 +24,7 @@ export default function NewVolumePage() {
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="1">Add volume</SectionTitle>
           <AddNewVolume control={control} />
         </Container>

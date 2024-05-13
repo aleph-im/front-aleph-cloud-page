@@ -30,6 +30,7 @@ export const SpinnerOverlay = ({
           $show={stage === 'enter'}
           $center={center}
           $fullScreen={fullScreen}
+          as={'div'}
         >
           {/* <Spinner {...{ color, ...rest }} /> */}
           <RotatingLines strokeColor={color} width="4rem" {...rest} />

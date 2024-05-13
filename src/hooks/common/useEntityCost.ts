@@ -32,14 +32,14 @@ export function useEntityCost({ entityType, props }: UseEntityCostProps) {
       const result = await (entityType === EntityType.Volume
         ? VolumeManager.getCost(props as VolumeCostProps)
         : entityType === EntityType.Instance
-        ? InstanceManager.getCost(props as InstanceCostProps)
-        : entityType === EntityType.Program
-        ? ProgramManager.getCost(props as ProgramCostProps)
-        : entityType === EntityType.Indexer
-        ? IndexerManager.getCost(props as IndexerCostProps)
-        : entityType === EntityType.Website
-        ? WebsiteManager.getCost(props as WebsiteCostProps)
-        : undefined)
+          ? InstanceManager.getCost(props as InstanceCostProps)
+          : entityType === EntityType.Program
+            ? ProgramManager.getCost(props as ProgramCostProps)
+            : entityType === EntityType.Indexer
+              ? IndexerManager.getCost(props as IndexerCostProps)
+              : entityType === EntityType.Website
+                ? WebsiteManager.getCost(props as WebsiteCostProps)
+                : undefined)
 
       setCost(result)
     }

@@ -66,6 +66,7 @@ export const FloatingFooter = ({
     <StyledContainer
       $sticked={show}
       style={{ position, bottom, left, width, opacity }}
+      as={'div'}
     >
       {children}
     </StyledContainer>

@@ -24,7 +24,7 @@ export default function NewIndexerPage() {
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="1">Define Your Blockchain Network</SectionTitle>
           <p tw="mb-6">
             Specify the blockchain network where you aim to attach accounts. You
@@ -38,7 +38,7 @@ export default function NewIndexerPage() {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="2">Configure Your Token Account</SectionTitle>
           <p tw="mb-6">
             Define the core parameters associated with the token, like the
@@ -56,7 +56,7 @@ export default function NewIndexerPage() {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="3">Name and tags</SectionTitle>
           <p tw="mb-6">
             Organize and identify your indexers more effectively by assigning a

@@ -5,10 +5,10 @@ import Container from '@/components/common/CenteredContainer'
 
 export const Form = ({ children, onSubmit, errors }: FormProps) => {
   return (
-    <StyledForm onSubmit={onSubmit} noValidate>
+    <StyledForm onSubmit={onSubmit} noValidate as={'form'}>
       {children}
       {errors?.root && (
-        <Container>
+        <Container as={'div'}>
           {Object.values<FormErrorProps['error']>(errors.root).map((error) => (
             <FormError key={error + ''} error={error} tw="break-all" />
           ))}

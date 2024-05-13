@@ -16,12 +16,12 @@ export const NewInstancePage = () => {
   return (
     <>
       <section tw="px-0 py-0 md:py-8">
-        <Container>
+        <Container as={'div'}>
           <NewEntityTab selected="instance" />
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <SectionTitle number="1">Configure instance setup</SectionTitle>
           <p className="text-text">
             Start by choosing your instance setup approach. Select based on your
@@ -29,11 +29,15 @@ export const NewInstancePage = () => {
             your virtual machine (VM).
           </p>
           <div tw="px-0 mt-12 mb-6">
-            <FlatCardButtonContainer tw="flex-wrap md:justify-center">
+            <FlatCardButtonContainer
+              tw="flex-wrap md:justify-center"
+              as={'div'}
+            >
               <FlatCardButton
                 $selected={selected === 'auto'}
                 onClick={handleClickAuto}
                 tw="flex-auto lg:flex-1 h-40 p-6"
+                as={'div'}
               >
                 <div className="tp-body1 fs-10">Select by specification</div>
                 <div className="tp-h7" tw="text-center mt-4">
@@ -45,6 +49,7 @@ export const NewInstancePage = () => {
                 $selected={selected === 'crn'}
                 onClick={handleClickCRN}
                 tw="flex-auto lg:flex-1 h-40 p-6"
+                as={'div'}
               >
                 <div className="tp-body1 fs-10">Select by node</div>
                 <div className="tp-h7" tw="text-center mt-4">

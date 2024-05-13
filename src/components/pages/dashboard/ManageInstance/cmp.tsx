@@ -28,7 +28,7 @@ export default function ManageInstance() {
   if (!instance) {
     return (
       <>
-        <Container>
+        <Container as={'div'}>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
@@ -43,7 +43,7 @@ export default function ManageInstance() {
   return (
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <Container as={'div'}>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
@@ -101,14 +101,14 @@ export default function ManageInstance() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">CORES</div>
                 <div>
-                  <Text>{instance.resources.vcpus} x86 64bit</Text>
+                  <Text as={'span'}>{instance.resources.vcpus} x86 64bit</Text>
                 </div>
               </div>
 
               <div tw="mr-5">
                 <div className="tp-info text-main0">RAM</div>
                 <div>
-                  <Text>
+                  <Text as={'span'}>
                     {convertByteUnits(instance.resources.memory, {
                       from: 'MiB',
                       to: 'GiB',
@@ -129,7 +129,7 @@ export default function ManageInstance() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{ellipseText(instance.url, 80)}</Text>
+                    <Text as={'span'}>{ellipseText(instance.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -147,7 +147,7 @@ export default function ManageInstance() {
                 <div>
                   {status ? (
                     <IconText iconName="copy" onClick={handleCopyConnect}>
-                      <Text>&gt;_ ssh root@{status.vm_ipv6}</Text>
+                      <Text as={'span'}>&gt;_ ssh root@{status.vm_ipv6}</Text>
                     </IconText>
                   ) : (
                     <div tw="flex items-end">
@@ -169,7 +169,7 @@ export default function ManageInstance() {
                 <div>
                   {status && (
                     <IconText iconName="copy" onClick={handleCopyIpv6}>
-                      <Text>{status.vm_ipv6}</Text>
+                      <Text as={'span'}>{status.vm_ipv6}</Text>
                     </IconText>
                   )}
                 </div>
@@ -196,7 +196,7 @@ export default function ManageInstance() {
                           referrerPolicy="no-referrer"
                         >
                           <IconText iconName="square-up-right">
-                            <Text>{key.label}</Text>
+                            <Text as={'span'}>{key.label}</Text>
                           </IconText>
                         </Link>
                       </div>
@@ -216,7 +216,7 @@ export default function ManageInstance() {
                 <div tw="my-5">
                   <div className="tp-info text-main0">NAME</div>
                   <div>
-                    <Text>{status.node.node_id}</Text>
+                    <Text as={'span'}>{status.node.node_id}</Text>
                   </div>
                 </div>
 
@@ -230,7 +230,9 @@ export default function ManageInstance() {
                       referrerPolicy="no-referrer"
                     >
                       <IconText iconName="square-up-right">
-                        <Text>{ellipseText(status.node.url, 80)}</Text>
+                        <Text as={'span'}>
+                          {ellipseText(status.node.url, 80)}
+                        </Text>
                       </IconText>
                     </a>
                   </div>

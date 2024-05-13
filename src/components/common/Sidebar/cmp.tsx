@@ -1,10 +1,4 @@
-import {
-  AnchorHTMLAttributes,
-  ReactNode,
-  memo,
-  useEffect,
-  useState,
-} from 'react'
+import { AnchorHTMLAttributes, ReactNode, memo, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { IconName, LinkComponent, RouterSidebar } from '@aleph-front/core'

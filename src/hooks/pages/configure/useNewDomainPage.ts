@@ -107,15 +107,16 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
         return {
           label: (metadata?.name as string | undefined) || id,
           value: id,
-          type: type,
+          type: entityType,
         }
       })
     }
-    return (accountWebsites || []).map(({ id, volume_id, type }) => {
+    const entities = accountWebsites
+    return (entities || []).map(({ id, volume_id, type }) => {
       return {
         label: id,
         value: volume_id,
-        type: type,
+        type: entityType,
       }
     })
   }, [entityType, accountInstances, accountFunctions, accountWebsites])

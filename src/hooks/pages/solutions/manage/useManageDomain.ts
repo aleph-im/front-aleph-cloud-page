@@ -32,17 +32,11 @@ export function useManageDomain(): ManageDomain {
   const [domain] = useAccountDomain({ id: hash as string })
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [{ account }, dispatch] = useAppState()
-
-  let refEntity
-  try {
-    refEntity = useHashToEntity(domain?.ref) as
-      | Program
-      | Instance
-      | Website
-      | Volume
-  } catch (e) {
-    console.error(e)
-  }
+  const refEntity = useHashToEntity(domain?.ref) as
+    | Program
+    | Instance
+    | Website
+    | Volume
 
   const status = useDomainStatus(domain)
 
