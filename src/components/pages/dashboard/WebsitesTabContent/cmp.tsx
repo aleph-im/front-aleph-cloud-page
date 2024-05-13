@@ -39,7 +39,7 @@ export const WebsitesTabContent = React.memo(
                           size="sm"
                           href={`/storage/volume/${row.volume_id}`}
                         >
-                          <Icon name="square-up-right" size="lg" />
+                          <Icon name="chain" size="lg" />
                         </ButtonLink>
                       ),
                       //humanReadableSize(row.volume?.size ?? 0, 'MiB'),

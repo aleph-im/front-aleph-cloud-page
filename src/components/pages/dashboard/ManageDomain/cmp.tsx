@@ -73,18 +73,16 @@ export default function ManageDomain() {
               </Tag>
               <div tw="flex-auto">
                 <div className="tp-info text-main0">NAME</div>
-                <div>
-                  <a
-                    className="tp-body1 fs-16"
-                    href={`https://${domain.name}`}
-                    target="_blank"
-                    referrerPolicy="no-referrer"
-                  >
-                    <IconText iconName="square-up-right">
-                      <Text as={'span'}>{domain.name}</Text>
-                    </IconText>
-                  </a>
-                </div>
+                <a
+                  className="tp-body1 fs-16"
+                  href={`https://${domain.name}`}
+                  target="_blank"
+                  referrerPolicy="no-referrer"
+                >
+                  <IconText iconName="square-up-right">
+                    <Text as={'span'}>{domain.name}</Text>
+                  </IconText>
+                </a>
               </div>
             </div>
 

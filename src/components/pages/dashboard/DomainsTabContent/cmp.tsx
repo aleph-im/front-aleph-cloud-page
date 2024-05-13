@@ -5,6 +5,8 @@ import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
 import { toPascalCase } from '@/helpers/utils'
+import IconText from '@/components/common/IconText'
+import { Text } from '../common'
 
 export const DomainsTabContent = React.memo(
   ({ data }: DomainsTabContentProps) => {
@@ -27,7 +29,19 @@ export const DomainsTabContent = React.memo(
                       label: 'Name',
                       width: '50%',
                       sortable: true,
-                      render: (row) => row.name,
+                      render: (row) => (
+                        <a
+                          href={`https://${row.name}`}
+                          target="_blank"
+                          referrerPolicy="no-referrer"
+                        >
+                          <IconText iconName="square-up-right">
+                            <Text tw="not-italic font-bold" as={'span'}>
+                              {row.name}
+                            </Text>
+                          </IconText>
+                        </a>
+                      ),
                     },
                     {
                       label: 'Target',

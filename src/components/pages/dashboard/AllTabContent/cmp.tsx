@@ -11,6 +11,8 @@ import {
 } from '@/helpers/constants'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
+import IconText from '@/components/common/IconText'
+import { Text } from '../common'
 
 export function entityUrl(type: EntityType, id: string): string {
   const chunk1 = EntityTypeUrlSection[type]
@@ -42,7 +44,22 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                     label: 'Name',
                     width: '100%',
                     sortable: true,
-                    render: (row) => row.name || row.id,
+                    render: (row) =>
+                      row.type !== EntityType.Domain ? (
+                        row.name || row.id
+                      ) : (
+                        <a
+                          href={`https://${row.name}`}
+                          target="_blank"
+                          referrerPolicy="no-referrer"
+                        >
+                          <IconText iconName="square-up-right">
+                            <Text tw="not-italic font-bold" as={'span'}>
+                              {row.name}
+                            </Text>
+                          </IconText>
+                        </a>
+                      ),
                   },
                   {
                     label: 'Size',
@@ -58,7 +75,7 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                           size="sm"
                           href={row.url ?? ''}
                         >
-                          <Icon name="square-up-right" size="lg" />
+                          <Icon name="chain" size="lg" />
                         </ButtonLink>
                       ),
                   },
