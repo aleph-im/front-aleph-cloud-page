@@ -130,7 +130,13 @@ export default function NewDomain() {
                         If you want to link a domain to a website, you need to
                         deploy one first *
                       </p>
-                      <ButtonLink variant="primary" href="/hosting/website/new">
+                      <ButtonLink
+                        type="button"
+                        kind="functional"
+                        size="md"
+                        variant="warning"
+                        href="/hosting/website/new"
+                      >
                         Create your first website
                       </ButtonLink>
                     </div>
@@ -176,7 +182,10 @@ export default function NewDomain() {
                         you need to deploy one first *
                       </p>
                       <ButtonLink
-                        variant="primary"
+                        type="button"
+                        kind="functional"
+                        size="md"
+                        variant="warning"
                         href={`/computing/${labelResourceType}/new`}
                       >
                         {`Create your first ${labelResourceType}` as string}

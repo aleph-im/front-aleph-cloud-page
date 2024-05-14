@@ -82,7 +82,7 @@ export enum EntityDomainType {
 }
 
 export const EntityDomainTypeName: Record<EntityDomainType, string> = {
-  [EntityDomainType.IPFS]: 'Ipfs',
+  [EntityDomainType.IPFS]: 'IPFS',
   [EntityDomainType.Program]: 'Function',
   [EntityDomainType.Instance]: 'Instance',
 }

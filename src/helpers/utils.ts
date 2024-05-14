@@ -253,7 +253,7 @@ export const unixToISODateTimeString = (timeStamp?: number, noDate = 'n/a') => {
 }
 
 export const cidV0Tov1 = function (cid: string): string {
-  return CID.parse(cid).toV1().toString()!
+  return CID.parse(cid).toV1().toString()
 }
 
 export type AnyEntity = Program | Instance | Volume | SSHKey | Domain | Website
@@ -371,10 +371,6 @@ export function toKebabCase(input: string): string {
 
 export function toSnakeCase(input: string): string {
   return toKebabCase(input).replace(/-/g, '_')
-}
-
-export function toPascalCase(input: string): string {
-  return input[0].toUpperCase() + input.slice(1).toLowerCase()
 }
 
 // -------------------------- @todo: Refactor in domain package -------------------

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
 import {
@@ -11,7 +12,7 @@ import {
 import { EntityTypeName } from '@/helpers/constants'
 import { useManageWebsite } from '@/hooks/pages/solutions/manage/useManageWebsite'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
-import { ellipseText, humanReadableSize } from '@/helpers/utils'
+import { humanReadableSize } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
@@ -23,10 +24,10 @@ const getLimoUrl = (ens: string) => {
 }
 
 export default function ManageWebsite() {
-  const { website, handleCopyHash, handleDelete } = useManageWebsite()
+  const { website, refVolume, handleCopyHash, handleDelete } =
+    useManageWebsite()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
-  const cidV1 =
-    website?.volume?.item_hash && cidV0Tov1(website.volume.item_hash)
+  const cidV1 = refVolume?.item_hash && cidV0Tov1(refVolume.item_hash)
   const default_url = `https://${cidV1}.ipfs.aleph.cloud`
   const alt_url = `https://${cidV1}.ipfs.storry.tv`
   const alt_url_2 = `https://${cidV1}.ipfs.cf-ipfs.com`
@@ -126,7 +127,7 @@ export default function ManageWebsite() {
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
                   <Text className="fs-10 tp-body1" as={'span'}>
-                    {humanReadableSize(website.volume?.size, 'MiB')}
+                    {humanReadableSize(refVolume?.size, 'MiB')}
                   </Text>
                 </div>
               </div>
@@ -167,7 +168,16 @@ export default function ManageWebsite() {
                 onClick={() => copyAndNotify(default_url)}
               />
             </div>
-            <div className="tp-info text-main0">ALTERNATIVE GATEWAYS</div>
+            <a
+              className="tp-body1 fs-16"
+              href={'https://ipfs.github.io/public-gateway-checker/'}
+              target="_blank"
+              referrerPolicy="no-referrer"
+            >
+              <IconText iconName="square-up-right">
+                <div className="tp-info text-main0">ALTERNATIVE GATEWAYS</div>
+              </IconText>
+            </a>
             <div tw="mb-5">
               <div tw="flex flex-row">
                 <a
@@ -218,7 +228,7 @@ export default function ManageWebsite() {
                 />
               </div>
             </div>
-            <div className="tp-info text-main0">ENS GATEWAY</div>
+            <div className="tp-info text-main0">ENS GATEWAYS</div>
             {website.ens?.length > 0 ? (
               Array.from(website.ens).map((ens, key) => {
                 const limo = getLimoUrl(ens)
@@ -249,47 +259,37 @@ export default function ManageWebsite() {
               Linked IPFS Storage
             </TextGradient>
             <div tw="my-5">
+              <div className="tp-info text-main0">IMMUTABLE VOLUME</div>
+              <Link
+                className="tp-body1 fs-16"
+                href={`/storage/volume/${refVolume?.id}`}
+              >
+                <IconText iconName="square-up-right">Volume details</IconText>
+              </Link>
+            </div>
+            <div tw="mb-5">
               <div className="tp-info text-main0">ITEM HASH</div>
               <IconText
                 iconName="copy"
-                onClick={() => copyAndNotify(website.volume?.id ?? '')}
+                onClick={() => copyAndNotify(refVolume?.id ?? '')}
               >
-                {website.volume?.id}
+                {refVolume?.id}
               </IconText>
             </div>
-            <div className="tp-info text-main0">EXPLORER</div>
+            <div className="tp-info text-main0">V0 CONTENT ID</div>
             <div tw="flex flex-row mb-5">
-              <a
-                className="tp-body1 fs-16"
-                href={website.volume?.url}
-                target="_blank"
-                referrerPolicy="no-referrer"
-              >
-                <IconText iconName="square-up-right">
-                  <Text as={'span'}>
-                    {ellipseText(website.volume?.url ?? '', 80)}
-                  </Text>
-                </IconText>
-              </a>
+              <Text as={'span'}>{refVolume?.item_hash}</Text>
               <IconText
                 iconName="copy"
-                onClick={() => copyAndNotify(website.volume?.id ?? '')}
+                onClick={() => copyAndNotify(refVolume?.item_hash ?? '')}
               ></IconText>
             </div>
-            <div className="tp-info text-main0">CONTENT ID V0</div>
-            <div tw="flex flex-row mb-5">
-              <Text as={'span'}>{website.volume?.item_hash}</Text>
-              <IconText
-                iconName="copy"
-                onClick={() => copyAndNotify(website.volume?.id ?? '')}
-              ></IconText>
-            </div>
-            <div className="tp-info text-main0">CONTENT ID V1</div>
+            <div className="tp-info text-main0">V1 CONTENT ID</div>
             <div tw="flex flex-row mb-5">
               <Text as={'span'}>{cidV1}</Text>
               <IconText
                 iconName="copy"
-                onClick={() => copyAndNotify(website.volume?.id ?? '')}
+                onClick={() => copyAndNotify(cidV1 ?? '')}
               ></IconText>
             </div>
           </NoisyContainer>

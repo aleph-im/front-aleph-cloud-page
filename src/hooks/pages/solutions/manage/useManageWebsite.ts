@@ -7,9 +7,12 @@ import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { ActionTypes } from '@/helpers/store'
 import { useAppState } from '@/contexts/appState'
 import Err from '@/helpers/errors'
+import { useHashToEntity } from './useHashToEntity'
+import { Volume } from '@/domain/volume'
 
 export type ManageWebsite = {
   website?: Website
+  refVolume?: Volume
   handleCopyHash: () => void
   handleDelete: () => void
   //handleDownload: () => void
@@ -23,6 +26,7 @@ export function useManageWebsite(): ManageWebsite {
   const [website] = useAccountWebsite({ id: hash as string })
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const [, dispatch] = useAppState()
+  const refVolume = useHashToEntity(website?.volume_id) as Volume
 
   const manager = useWebsiteManager()
 
@@ -56,6 +60,7 @@ export function useManageWebsite(): ManageWebsite {
 
   return {
     website,
+    refVolume,
     handleCopyHash,
     handleDelete,
     copyAndNotify,

@@ -151,7 +151,7 @@ export default function ManageFunction() {
                 <Separator />
 
                 <TextGradient type="h7" as="h2" color="main0">
-                  Linked storage
+                  Linked Storage
                 </TextGradient>
 
                 <VolumeList

@@ -42,7 +42,6 @@ export const WebsitesTabContent = React.memo(
                           <Icon name="chain" size="lg" />
                         </ButtonLink>
                       ),
-                      //humanReadableSize(row.volume?.size ?? 0, 'MiB'),
                     },
                     {
                       label: 'Date',

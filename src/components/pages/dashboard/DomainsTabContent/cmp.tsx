@@ -4,9 +4,9 @@ import { DomainsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
-import { toPascalCase } from '@/helpers/utils'
 import IconText from '@/components/common/IconText'
 import { Text } from '../common'
+import { EntityDomainTypeName } from '@/helpers/constants'
 
 export const DomainsTabContent = React.memo(
   ({ data }: DomainsTabContentProps) => {
@@ -46,7 +46,7 @@ export const DomainsTabContent = React.memo(
                     {
                       label: 'Target',
                       sortable: true,
-                      render: (row) => toPascalCase(row.target),
+                      render: (row) => EntityDomainTypeName[row.target],
                     },
                     {
                       label: 'Ref',

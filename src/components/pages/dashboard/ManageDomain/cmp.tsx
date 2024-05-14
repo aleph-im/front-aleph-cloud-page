@@ -1,16 +1,17 @@
 import IconText from '@/components/common/IconText'
 import { Label, NoisyContainer } from '@aleph-front/core'
+import Link from 'next/link'
 import {
-  EntityType,
   EntityTypeName,
   EntityDomainType,
   EntityDomainTypeName,
 } from '@/helpers/constants'
 import { BulletItem, Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageDomain } from '@/hooks/pages/solutions/manage/useManageDomain'
-import { ellipseAddress, ellipseText, toPascalCase } from '@/helpers/utils'
+import { ellipseAddress } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import ButtonLink from '@/components/common/ButtonLink'
+import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 
 export default function ManageDomain() {
   const {
@@ -22,6 +23,7 @@ export default function ManageDomain() {
     handleCopyRef,
     handleRetry,
   } = useManageDomain()
+  const [, copyAndNotify] = useCopyToClipboardAndNotify()
 
   if (!domain) {
     return (
@@ -92,7 +94,7 @@ export default function ManageDomain() {
               <div tw="my-5">
                 <div className="tp-info text-main0">TARGET</div>
                 <div>
-                  <Text as={'span'}>{toPascalCase(domain.target)}</Text>
+                  <Text as={'span'}>{EntityDomainTypeName[domain.target]}</Text>
                 </div>
               </div>
             )}
@@ -244,45 +246,29 @@ export default function ManageDomain() {
                 <TextGradient type="h7" as="h2" color="main0">
                   Linked {EntityDomainTypeName[domain.target]}
                 </TextGradient>
-
                 <div tw="my-5">
-                  <div className="tp-info text-main0">Type</div>
-                  <div>
-                    <Text as={'span'}>{EntityTypeName[refEntity.type]}</Text>
-                  </div>
+                  <div className="tp-info text-main0">Target Resource</div>
+                  <Link
+                    className="tp-body1 fs-16"
+                    href={
+                      (domain.target === 'instance'
+                        ? '/computing/instance/'
+                        : domain.target === 'program'
+                          ? '/computing/function/'
+                          : '/storage/volume/') + refEntity.id
+                    }
+                  >
+                    <IconText iconName="square-up-right">Details</IconText>
+                  </Link>
                 </div>
-
                 <div tw="my-5">
-                  <div className="tp-info text-main0">NAME</div>
-                  <div>
-                    <Text as={'span'}>{refEntity.id}</Text>
-                  </div>
-                </div>
-                <div tw="my-5">
-                  <div className="tp-info text-main0">EXPLORER</div>
-                  <div>
-                    <a
-                      className="tp-body1 fs-16"
-                      href={
-                        refEntity.type !== EntityType.Website
-                          ? refEntity.url
-                          : refEntity.volume?.url
-                      }
-                      target="_blank"
-                      referrerPolicy="no-referrer"
-                    >
-                      <IconText iconName="square-up-right">
-                        <Text as={'span'}>
-                          {ellipseText(
-                            refEntity.type !== EntityType.Website
-                              ? refEntity.url
-                              : refEntity.volume?.url || '',
-                            80,
-                          )}
-                        </Text>
-                      </IconText>
-                    </a>
-                  </div>
+                  <div className="tp-info text-main0">ITEM HASH</div>
+                  <IconText
+                    iconName="copy"
+                    onClick={() => copyAndNotify(refEntity.id)}
+                  >
+                    {refEntity.id}
+                  </IconText>
                 </div>
               </>
             ) : (

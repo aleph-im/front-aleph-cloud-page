@@ -23,25 +23,21 @@ export const VolumeList = React.memo(
             {isVolumePersistent(volume) ? (
               <div tw="my-5">
                 <div className="tp-info text-main0">PERSISTENT VOLUME</div>
-                <div>
-                  <Text className="fs-10 tp-body1" as={'span'}>
-                    {humanReadableSize(volume.size_mib, 'MiB')}
-                  </Text>
-                </div>
+                <Text className="fs-10 tp-body1" as={'span'}>
+                  {humanReadableSize(volume.size_mib, 'MiB')}
+                </Text>
               </div>
             ) : isVolumeEphemeral(volume) ? (
               <div tw="my-5">
                 <div className="tp-info text-main0">EPHEMERAL VOLUME</div>
-                <div>
-                  <Text className="fs-10 tp-body1" as={'span'}>
-                    {humanReadableSize(volume.size_mib, 'MiB')}
-                  </Text>
-                </div>
+                <Text className="fs-10 tp-body1" as={'span'}>
+                  {humanReadableSize(volume.size_mib, 'MiB')}
+                </Text>
               </div>
             ) : (
-              <div>
-                <div className="tp-info text-main0">IMMUTABLE VOLUME</div>
-                <div>
+              <div tw="my-5">
+                <div tw="mb-5">
+                  <div className="tp-info text-main0">IMMUTABLE VOLUME</div>
                   <Link
                     className="tp-body1 fs-16"
                     href={`/storage/volume/${volume.ref}`}
@@ -51,6 +47,7 @@ export const VolumeList = React.memo(
                     </IconText>
                   </Link>
                 </div>
+                <div className="tp-info text-main0">ITEM HASH</div>
                 <IconText
                   iconName="copy"
                   onClick={() => copyAndNotify(volume.ref)}

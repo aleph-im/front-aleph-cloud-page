@@ -245,7 +245,7 @@ export default function ManageInstance() {
                 <Separator />
 
                 <TextGradient type="h7" as="h2" color="main0">
-                  Linked storage
+                  Linked Storage
                 </TextGradient>
 
                 <VolumeList

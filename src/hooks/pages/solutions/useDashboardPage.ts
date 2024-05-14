@@ -50,11 +50,9 @@ export function useDashboardPage(): UseDashboardPageReturn {
                 from: 'B',
                 to: 'MiB',
               })
-            : type === EntityType.Domain
+            : type === EntityType.Domain || type === EntityType.Website
               ? 0
-              : type === EntityType.Website
-                ? entity.volume?.size
-                : entity.size) || 0
+              : entity.size) || 0
 
         const date =
           entity.type === EntityType.Domain

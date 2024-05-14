@@ -14,7 +14,7 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
-import { Volume, VolumeManager } from './volume'
+import { VolumeManager } from './volume'
 import { AddDomain, Domain, DomainManager } from './domain'
 import { getDate } from '@/helpers/utils'
 import Err from '@/helpers/errors'
@@ -290,7 +290,6 @@ export type WebsiteAggregate = Record<string, WebsiteAggregateItem | null>
 export type Website = WebsiteAggregateItem & {
   id: string
   type: EntityType.Website
-  volume: Volume | undefined
   confirmed: boolean
 }
 
@@ -304,12 +303,14 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   static getStorageWebsiteMiBPrice(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     props: AddWebsite | WebsiteCostProps,
   ): number {
     return 1 / 20
   }
 
   static getExecutionWebsiteMiBPrice(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     props: AddWebsite | WebsiteCostProps,
   ): number {
     return 0
@@ -438,6 +439,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async download(websiteOrId: string | Website): Promise<void> {
     throw Err.MethodNotImplemented
   }
@@ -474,12 +476,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     return steps
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected async parseAggregate(response: any): Promise<Website[]> {
     return await this.parseAggregateItems(response as WebsiteAggregate)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected async parseNewAggregate(response: any): Promise<Website[]> {
     const websites = response.content.content as WebsiteAggregate
     return await this.parseAggregateItems(websites)
@@ -511,7 +511,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       created_at,
       updated_at,
     } = content
-    const volume = await this.volumeManager.get(volume_id)
     return {
       id: name,
       type: EntityType.Website,
@@ -519,7 +518,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       payment,
       ens,
       volume_id,
-      volume,
       version,
       created_at: getDate(created_at),
       updated_at: getDate(updated_at),

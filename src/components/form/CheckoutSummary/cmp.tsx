@@ -207,7 +207,7 @@ const CheckoutSummaryWebsiteLine = ({
   return (
     <StyledHoldingSummaryLine as={'div'}>
       <div>
-        <div>WEBSITE SIZE</div>
+        <div>WEBSITE</div>
       </div>
       <div>
         <div>{humanReadableSize(size, 'MiB')}</div>
