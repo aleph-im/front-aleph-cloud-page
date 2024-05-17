@@ -1,11 +1,11 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { Program } from '@/domain/program'
-import { useAccountFunction } from '@/hooks/common/useAccountEntity/useAccountFunction'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { useAppState } from '@/contexts/appState'
-import { ActionTypes } from '@/helpers/store'
+import { useRequestPrograms } from '@/hooks/common/useRequestEntity/useRequestPrograms'
+import { EntityDelAction } from '@/store/entity'
 
 export type ManageFunction = {
   func?: Program
@@ -16,44 +16,44 @@ export type ManageFunction = {
 }
 
 export function useManageFunction(): ManageFunction {
+  const [, dispatch] = useAppState()
+
   const router = useRouter()
   const { hash } = router.query
 
-  const [func] = useAccountFunction({ id: hash as string })
+  const { entities } = useRequestPrograms({ id: hash as string })
+  const [program] = entities || []
+
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
-  const [, dispatch] = useAppState()
 
   const manager = useProgramManager()
 
   const handleCopyHash = useCallback(() => {
-    copyAndNotify(func?.id || '')
-  }, [copyAndNotify, func])
+    copyAndNotify(program?.id || '')
+  }, [copyAndNotify, program])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')
-    if (!func) throw new Error('Invalid function')
+    if (!program) throw new Error('Invalid function')
 
     try {
-      await manager.del(func)
+      await manager.del(program)
 
-      dispatch({
-        type: ActionTypes.delAccountFunction,
-        payload: { id: func.id },
-      })
+      dispatch(new EntityDelAction({ name: 'program', keys: [program.id] }))
 
       await router.replace('/')
     } catch (e) {}
-  }, [manager, func, dispatch, router])
+  }, [manager, program, dispatch, router])
 
   const handleDownload = useCallback(async () => {
     if (!manager) throw new Error('Manager not ready')
-    if (!func) throw new Error('Invalid function')
+    if (!program) throw new Error('Invalid function')
 
-    await manager.download(func)
-  }, [manager, func])
+    await manager.download(program)
+  }, [manager, program])
 
   return {
-    func,
+    func: program,
     handleCopyHash,
     handleDelete,
     handleDownload,

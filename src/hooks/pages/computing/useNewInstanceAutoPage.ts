@@ -21,7 +21,6 @@ import {
   getDefaultSpecsOptions,
 } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
-import { ActionTypes } from '@/helpers/store'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
@@ -32,6 +31,7 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
+import { EntityAddAction } from '@/store/entity'
 
 export type NewInstanceHoldFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -68,7 +68,7 @@ export type UseNewInstanceAutoPage = {
 export function useNewInstanceAutoPage(): UseNewInstanceAutoPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
-  const { account, accountBalance } = appState
+  const { account, balance: accountBalance = 0 } = appState.connection
 
   const manager = useInstanceManager()
   const { next, stop } = useCheckoutNotification({})
@@ -97,10 +97,9 @@ export function useNewInstanceAutoPage(): UseNewInstanceAutoPage {
         }
 
         // @todo: Check new volumes and domains being created to add them to the store
-        dispatch({
-          type: ActionTypes.addAccountInstance,
-          payload: { accountInstance },
-        })
+        dispatch(
+          new EntityAddAction({ name: 'instance', entities: accountInstance }),
+        )
 
         await router.replace('/')
       } finally {
@@ -142,7 +141,7 @@ export function useNewInstanceAutoPage(): UseNewInstanceAutoPage {
   })
 
   const canAfford =
-    (accountBalance || 0) > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+    accountBalance > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
@@ -150,7 +149,7 @@ export function useNewInstanceAutoPage(): UseNewInstanceAutoPage {
 
   return {
     address: account?.address || '',
-    accountBalance: accountBalance || 0,
+    accountBalance,
     isCreateButtonDisabled,
     values,
     control,

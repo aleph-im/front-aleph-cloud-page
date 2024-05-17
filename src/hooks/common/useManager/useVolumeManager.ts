@@ -3,7 +3,7 @@ import { VolumeManager } from '@/domain/volume'
 
 export function useVolumeManager(): VolumeManager | undefined {
   const [appState] = useAppState()
-  const { volumeManager } = appState
+  const { volumeManager } = appState.manager
 
   return volumeManager
 }

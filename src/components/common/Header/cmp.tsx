@@ -1,9 +1,10 @@
 import { memo } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
-import { Button, Icon, RenderLinkProps } from '@aleph-front/core'
+import { Button, RenderLinkProps } from '@aleph-front/core'
 import {
   StyledHeader,
+  StyledIcon,
   StyledNavbarDesktop,
   StyledNavbarMobile,
   StyledWalletPicker,
@@ -30,10 +31,12 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
     walletPickerRef,
     walletPickerTriggerRef,
     walletPosition,
+    rewards,
     selectedNetwork,
     networks,
     handleSwitchNetwork,
     handleConnect,
+    handleDisconnect,
     handleDisplayWalletPicker,
   } = useAccountButton(rest)
 
@@ -42,14 +45,21 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
       <Button
         ref={walletPickerTriggerRef}
         as="button"
-        kind="yellow"
         variant="primary"
+        color={account ? 'main1' : 'main0'}
+        kind="yellow"
         size="md"
         onClick={handleDisplayWalletPicker}
       >
-        <div tw="flex items-center gap-2.5">
+        <div tw="flex items-center gap-3">
           {!isMobile && (account ? ellipseAddress(account.address) : 'Connect')}
-          <Icon name="meteor" size="lg" />
+          {(isMobile || account) && (
+            <StyledIcon
+              $network={selectedNetwork}
+              $isConnected={!!account}
+              $isMobile={isMobile}
+            />
+          )}
         </div>
       </Button>
       {displayWalletPicker &&
@@ -57,10 +67,11 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
           <StyledWalletPicker
             ref={walletPickerRef}
             networks={networks}
-            onConnect={handleConnect}
-            onDisconnect={handleConnect}
+            rewards={rewards}
             selectedNetwork={selectedNetwork}
             onSwitchNetwork={handleSwitchNetwork}
+            onConnect={handleConnect}
+            onDisconnect={handleDisconnect}
             address={account?.address}
             addressHref={`https://etherscan.io/address/${account?.address}`}
             balance={accountBalance}

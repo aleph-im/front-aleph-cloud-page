@@ -11,7 +11,7 @@ export type UseUserStoreAllowanceReturn = {
 
 export function useUserStoreAllowance(): UseUserStoreAllowanceReturn {
   const [state] = useAppState()
-  const { accountBalance = 0 } = state
+  const { balance = 0 } = state.connection
 
   const manager = useFileManager()
 
@@ -28,7 +28,7 @@ export function useUserStoreAllowance(): UseUserStoreAllowanceReturn {
   })
 
   const consumedSize = fileInfo?.totalSize
-  const allowedSize = accountBalance ? accountBalance * mbPerAleph : undefined
+  const allowedSize = balance ? balance * mbPerAleph : undefined
 
   // -----------------------------
 

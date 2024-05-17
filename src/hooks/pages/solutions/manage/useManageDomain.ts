@@ -1,16 +1,16 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { Domain, DomainStatus } from '@/domain/domain'
-import { useAccountDomain } from '@/hooks/common/useAccountEntity/useAccountDomain'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
-import { ActionTypes } from '@/helpers/store'
 import { useHashToEntity } from './useHashToEntity'
 import { Instance } from '@/domain/instance'
 import { Program } from '@/domain/program'
 import { useDomainStatus } from '@/hooks/common/useDomainStatus'
 import { Account } from '@aleph-sdk/account'
+import { useRequestDomains } from '@/hooks/common/useRequestEntity/useRequestDomains'
+import { EntityDelAction } from '@/store/entity'
 
 export type ManageDomain = {
   domain?: Domain
@@ -23,12 +23,16 @@ export type ManageDomain = {
 }
 
 export function useManageDomain(): ManageDomain {
+  const [state, dispatch] = useAppState()
+  const { account } = state.connection
+
   const router = useRouter()
   const { hash } = router.query
 
-  const [domain] = useAccountDomain({ id: hash as string })
+  const { entities } = useRequestDomains({ id: hash as string })
+  const [domain] = entities || []
+
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
-  const [{ account }, dispatch] = useAppState()
 
   const refEntity = useHashToEntity(domain?.ref) as
     | Program
@@ -50,10 +54,7 @@ export function useManageDomain(): ManageDomain {
     try {
       await manager.del(domain)
 
-      dispatch({
-        type: ActionTypes.delAccountDomain,
-        payload: { id: domain.id },
-      })
+      dispatch(new EntityDelAction({ name: 'domain', keys: [domain.id] }))
 
       await router.replace('/')
     } catch (e) {}

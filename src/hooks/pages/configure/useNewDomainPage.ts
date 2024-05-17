@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
-import { ActionTypes } from '@/helpers/store'
 import { DomainManager } from '@/domain/domain'
 import { EntityType, AddDomainTarget } from '@/helpers/constants'
 import {
@@ -20,6 +19,7 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
+import { EntityAddAction } from '@/store/entity'
 
 export type NewDomainFormState = DomainField
 
@@ -48,7 +48,9 @@ export type UseNewDomainPageReturn = {
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
   const router = useRouter()
-  const [{ accountInstances, accountFunctions }, dispatch] = useAppState()
+  const [appState, dispatch] = useAppState()
+  const { entities: instances } = appState.instance
+  const { entities: programs } = appState.program
 
   const manager = useDomainManager()
   const { next, stop } = useCheckoutNotification({})
@@ -76,10 +78,9 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
           await next(nSteps)
         }
 
-        dispatch({
-          type: ActionTypes.addAccountDomain,
-          payload: { accountDomain },
-        })
+        dispatch(
+          new EntityAddAction({ name: 'domain', entities: accountDomain }),
+        )
 
         await router.replace('/')
       } finally {
@@ -142,8 +143,8 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     const entities = !entityType
       ? []
       : entityType === EntityType.Instance
-      ? accountInstances
-      : accountFunctions
+      ? instances
+      : programs
 
     return (entities || []).map(({ id, metadata, type }) => {
       return {
@@ -152,17 +153,10 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
         type,
       }
     })
-  }, [entityType, accountInstances, accountFunctions])
+  }, [entityType, instances, programs])
 
-  const hasInstances = useMemo(
-    () => !!accountInstances?.length,
-    [accountInstances],
-  )
-
-  const hasFunctions = useMemo(
-    () => !!accountFunctions?.length,
-    [accountFunctions],
-  )
+  const hasInstances = useMemo(() => !!instances?.length, [instances])
+  const hasFunctions = useMemo(() => !!programs?.length, [programs])
 
   const hasEntities = useMemo(
     () => hasInstances || hasFunctions,

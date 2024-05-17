@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import { useAccountSSHKeys } from '../common/useAccountEntity/useAccountSSHKeys'
 import {
   Control,
   UseControllerReturn,
   useController,
   useFieldArray,
 } from 'react-hook-form'
+import { useRequestSSHKeys } from '../common/useRequestEntity/useRequestSSHKeys'
 
 export type SSHKeyField = {
   key: string
@@ -117,7 +117,7 @@ export function useAddSSHKeys({
   const { remove: handleRemove, append, replace, prepend } = sshKeysCtrl
   const fields = sshKeysCtrl.fields as (SSHKeyField & { id: string })[]
 
-  const [accountSSHKeys] = useAccountSSHKeys()
+  const { entities: accountSSHKeys } = useRequestSSHKeys()
 
   const accountSSHKeyItems: SSHKeyField[] = useMemo(
     () =>

@@ -1,11 +1,11 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { Volume } from '@/domain/volume'
-import { useAccountVolume } from '@/hooks/common/useAccountEntity/useAccountVolume'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
-import { ActionTypes } from '@/helpers/store'
 import { useAppState } from '@/contexts/appState'
+import { useRequestVolumes } from '@/hooks/common/useRequestEntity/useRequestVolumes'
+import { EntityDelAction } from '@/store/entity'
 
 export type ManageVolume = {
   volume?: Volume
@@ -15,12 +15,15 @@ export type ManageVolume = {
 }
 
 export function useManageVolume(): ManageVolume {
+  const [, dispatch] = useAppState()
+
   const router = useRouter()
   const { hash } = router.query
 
-  const [volume] = useAccountVolume({ id: hash as string })
+  const { entities } = useRequestVolumes({ id: hash as string })
+  const [volume] = entities || []
+
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
-  const [, dispatch] = useAppState()
 
   const manager = useVolumeManager()
 
@@ -35,10 +38,7 @@ export function useManageVolume(): ManageVolume {
     try {
       await manager.del(volume)
 
-      dispatch({
-        type: ActionTypes.delAccountVolume,
-        payload: { id: volume.id },
-      })
+      dispatch(new EntityDelAction({ name: 'volume', keys: [volume.id] }))
 
       await router.replace('/')
     } catch (e) {}

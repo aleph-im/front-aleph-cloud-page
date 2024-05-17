@@ -14,7 +14,7 @@ export function useEntityManager(
     programManager,
     instanceManager,
     indexerManager,
-  } = appState
+  } = appState.manager
 
   const entityMap: Record<
     EntityType,

@@ -2,7 +2,7 @@ import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { Blockchain } from '@aleph-sdk/core'
-import { SuperfluidAccount } from '@aleph-sdk/superfluid'
+import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
@@ -33,13 +33,14 @@ import {
   defaultStreamDuration,
   StreamDurationField,
 } from '@/hooks/form/useSelectStreamDuration'
-import { useConnect } from '@/hooks/common/useConnect'
-import { ActionTypes } from '@/helpers/store'
 import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
+import { EntityAddAction } from '@/store/entity'
+import { useConnection } from '@/hooks/common/useConnection'
+import { AvalancheAccount } from '@aleph-sdk/avalanche'
 
 export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -84,8 +85,15 @@ export type UseNewInstanceCRNPage = {
 export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
-  const { accountBalance } = appState
-  const { account, switchNetwork, selectedNetwork } = useConnect()
+  const {
+    blockchain,
+    account,
+    balance: accountBalance = 0,
+  } = appState.connection
+
+  const { handleConnect } = useConnection({
+    triggerOnMount: false,
+  })
 
   // -------------------------
 
@@ -143,13 +151,16 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
       if (!state?.streamCost) throw new Error('Invalid stream cost')
       if (window?.ethereum === undefined) throw new Error('No wallet found')
 
-      let superfluidAccount
-      if (selectedNetwork !== Blockchain.AVAX) {
-        const account = await switchNetwork(Blockchain.AVAX)
-        superfluidAccount = account as SuperfluidAccount
-      } else {
-        superfluidAccount = account as SuperfluidAccount
+      if (
+        blockchain !== Blockchain.AVAX ||
+        !(account instanceof AvalancheAccount)
+      ) {
+        handleConnect({ blockchain: Blockchain.AVAX })
+        throw new Error('Invalid network')
       }
+
+      // @todo: Refactor this
+      const superfluidAccount = createFromAvalancheAccount(account)
 
       const iSteps = await manager.getSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
@@ -185,10 +196,9 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
         }
 
         // @todo: Check new volumes and domains being created to add them to the store
-        dispatch({
-          type: ActionTypes.addAccountInstance,
-          payload: { accountInstance },
-        })
+        dispatch(
+          new EntityAddAction({ name: 'instance', entities: accountInstance }),
+        )
 
         await router.replace('/')
       } finally {
@@ -196,15 +206,15 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
       }
     },
     [
-      account,
-      dispatch,
       manager,
-      next,
+      account,
       node,
+      blockchain,
+      handleConnect,
+      dispatch,
       router,
-      selectedNetwork,
+      next,
       stop,
-      switchNetwork,
     ],
   )
 
@@ -258,7 +268,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
   }, [cost, setValue, values])
 
   const canAfford =
-    (accountBalance || 0) > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+    accountBalance > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
@@ -268,7 +278,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
 
   return {
     address: account?.address || '',
-    accountBalance: accountBalance || 0,
+    accountBalance,
     isCreateButtonDisabled,
     values,
     control,

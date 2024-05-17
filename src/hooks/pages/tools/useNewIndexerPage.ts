@@ -4,7 +4,6 @@ import { useRouter } from 'next/router'
 import { NameAndTagsField } from '../../form/useAddNameAndTags'
 import { useForm } from '@/hooks/common/useForm'
 import { useIndexerManager } from '@/hooks/common/useManager/useIndexerManager'
-import { ActionTypes } from '@/helpers/store'
 import { IndexerManager } from '@/domain/indexer'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,6 +11,7 @@ import { IndexerBlockchainNetworkField } from '@/hooks/form/useAddIndexerBlockch
 import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccounts'
 import { EntityType, IndexerBlockchain } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
+import { EntityAddAction } from '@/store/entity'
 
 export type NewIndexerFormState = NameAndTagsField & {
   networks: IndexerBlockchainNetworkField[]
@@ -52,7 +52,7 @@ export type UseNewIndexerPage = {
 export function useNewIndexerPage(): UseNewIndexerPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
-  const { account, accountBalance } = appState
+  const { account, balance: accountBalance = 0 } = appState.connection
 
   const manager = useIndexerManager()
 
@@ -63,10 +63,9 @@ export function useNewIndexerPage(): UseNewIndexerPage {
       const accountIndexer = await manager.add(state)
 
       // @todo: Change this
-      dispatch({
-        type: ActionTypes.addAccountFunction,
-        payload: { accountFunction: accountIndexer },
-      })
+      dispatch(
+        new EntityAddAction({ name: 'indexer', entities: accountIndexer }),
+      )
 
       // @todo: Check new volumes and domains being created to add them to the store
 
@@ -100,7 +99,7 @@ export function useNewIndexerPage(): UseNewIndexerPage {
   })
 
   const canAfford =
-    (accountBalance || 0) > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+    accountBalance > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
@@ -108,7 +107,7 @@ export function useNewIndexerPage(): UseNewIndexerPage {
 
   return {
     address: account?.address || '',
-    accountBalance: accountBalance || 0,
+    accountBalance,
     isCreateButtonDisabled,
     values,
     control,

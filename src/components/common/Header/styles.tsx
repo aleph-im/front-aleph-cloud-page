@@ -2,6 +2,9 @@ import {
   BreakpointId,
   Button,
   FloatPosition,
+  Icon,
+  IconName,
+  IconProps,
   RouterNavbar,
   WalletPicker,
   getResponsiveCss,
@@ -103,5 +106,34 @@ export const StyledHeader = styled.header<StyledHeaderProps>`
         ${tw`sticky`}
       `,
     )};
+  `}
+`
+
+export type StyledIconProps = {
+  $isConnected: boolean
+  $network?: { icon: IconName }
+  $isMobile?: boolean
+}
+
+export const StyledIcon = styled(Icon).attrs<StyledIconProps, IconProps>(
+  (props) => {
+    return {
+      ...props,
+      size: props.$isMobile ? 'lg' : 'md',
+      name: props.$network?.icon || 'link',
+    }
+  },
+)<StyledIconProps>`
+  ${({ theme, $isConnected, $isMobile }) => css`
+    height: 1em !important;
+    width: 1em !important;
+
+    ${!$isMobile &&
+    css`
+      padding: 0.35rem;
+      border-radius: 50%;
+      background-color: ${theme.color.background};
+      border: 1px solid black;
+    `}
   `}
 `

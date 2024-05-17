@@ -66,7 +66,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   async getAll(): Promise<Domain[]> {
     try {
       const response: Record<string, unknown> =
-        await this.sdkClient.fetchAggregates(this.account.address, [this.key])
+        await this.sdkClient.fetchAggregate(this.account.address, this.key)
 
       return this.parseAggregate(response)
     } catch (err) {
@@ -240,7 +240,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   // @todo: Type not exported from SDK...
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregate(response: any): Domain[] {
-    const domains = response[this.key] as DomainAggregate
+    const domains = response as DomainAggregate
     return this.parseAggregateItems(domains)
   }
 

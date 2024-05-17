@@ -3,7 +3,7 @@ import { SSHKeyManager } from '@/domain/ssh'
 
 export function useSSHKeyManager(): SSHKeyManager | undefined {
   const [appState] = useAppState()
-  const { sshKeyManager } = appState
+  const { sshKeyManager } = appState.manager
 
   return sshKeyManager
 }

@@ -6,16 +6,15 @@ import {
   useController,
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-
 import { useForm } from '@/hooks/common/useForm'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
-import { ActionTypes } from '@/helpers/store'
 import { SSHKeyManager } from '@/domain/ssh'
 import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
+import { EntityAddAction } from '@/store/entity'
 
 export type NewSSHKeyFormState = {
   key: string
@@ -64,10 +63,7 @@ export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
           await next(nSteps)
         }
 
-        dispatch({
-          type: ActionTypes.addAccountSSHKey,
-          payload: { accountSSHKey },
-        })
+        dispatch(new EntityAddAction({ name: 'ssh', entities: accountSSHKey }))
 
         await router.replace('/')
       } finally {

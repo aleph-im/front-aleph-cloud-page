@@ -1,11 +1,11 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { SSHKey } from '@/domain/ssh'
-import { useAccountSSHKey } from '@/hooks/common/useAccountEntity/useAccountSSHKey'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
-import { ActionTypes } from '@/helpers/store'
+import { useRequestSSHKeys } from '@/hooks/common/useRequestEntity/useRequestSSHKeys'
+import { EntityDelAction } from '@/store/entity'
 
 export type ManageSSHKey = {
   sshKey?: SSHKey
@@ -15,12 +15,15 @@ export type ManageSSHKey = {
 }
 
 export function useManageSSHKey(): ManageSSHKey {
+  const [, dispatch] = useAppState()
+
   const router = useRouter()
   const { hash } = router.query
 
-  const [sshKey] = useAccountSSHKey({ id: hash as string })
+  const { entities } = useRequestSSHKeys({ id: hash as string })
+  const [sshKey] = entities || []
+
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
-  const [, dispatch] = useAppState()
 
   const manager = useSSHKeyManager()
 
@@ -39,10 +42,7 @@ export function useManageSSHKey(): ManageSSHKey {
     try {
       await manager.del(sshKey)
 
-      dispatch({
-        type: ActionTypes.delAccountSSHKey,
-        payload: { id: sshKey.id },
-      })
+      dispatch(new EntityDelAction({ name: 'ssh', keys: [sshKey.id] }))
 
       await router.replace('/')
     } catch (e) {}

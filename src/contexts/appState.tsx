@@ -5,29 +5,34 @@ import {
   ReactNode,
   useContext,
 } from 'react'
-import { Action, initialState, reducer, State } from '@/helpers/store'
+import {
+  StoreAction,
+  storeInitialState,
+  storeReducer,
+  StoreState,
+} from '@/store/store'
 
-export type AppState = [state: State, dispatch: Dispatch<Action>]
+export type AppContextValue = [StoreState, Dispatch<StoreAction>]
 
 export type AppStateProviderProps = {
   children: ReactNode
 }
 
-export const AppStateContext = createContext<AppState>([
-  initialState,
+export const AppStateContext = createContext<AppContextValue>([
+  storeInitialState,
   () => null,
 ])
 
 export function AppStateProvider({ children }: AppStateProviderProps) {
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const value = useReducer(storeReducer, storeInitialState)
 
   return (
-    <AppStateContext.Provider value={[state, dispatch]}>
+    <AppStateContext.Provider value={value}>
       {children}
     </AppStateContext.Provider>
   )
 }
 
-export function useAppState(): AppState {
+export function useAppState(): AppContextValue {
   return useContext(AppStateContext)
 }

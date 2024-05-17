@@ -3,7 +3,7 @@ import { ProgramManager } from '@/domain/program'
 
 export function useProgramManager(): ProgramManager | undefined {
   const [appState] = useAppState()
-  const { programManager } = appState
+  const { programManager } = appState.manager
 
   return programManager
 }

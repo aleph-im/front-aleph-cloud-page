@@ -3,7 +3,7 @@ import { DomainManager } from '@/domain/domain'
 
 export function useDomainManager(): DomainManager | undefined {
   const [appState] = useAppState()
-  const { domainManager } = appState
+  const { domainManager } = appState.manager
 
   return domainManager
 }

@@ -13,7 +13,6 @@ import {
 } from '../../form/useAddNameAndTags'
 import { useForm } from '@/hooks/common/useForm'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
-import { ActionTypes } from '@/helpers/store'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { ProgramManager } from '@/domain/program'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
@@ -26,6 +25,7 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
+import { EntityAddAction } from '@/store/entity'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -61,7 +61,7 @@ export type UseNewFunctionPage = {
 export function useNewFunctionPage(): UseNewFunctionPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
-  const { account, accountBalance } = appState
+  const { account, balance: accountBalance = 0 } = appState.connection
 
   const manager = useProgramManager()
   const { next, stop } = useCheckoutNotification({})
@@ -90,10 +90,9 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         }
 
         // @todo: Check new volumes and domains being created to add them to the store
-        dispatch({
-          type: ActionTypes.addAccountFunction,
-          payload: { accountFunction },
-        })
+        dispatch(
+          new EntityAddAction({ name: 'program', entities: accountFunction }),
+        )
 
         await router.replace('/')
       } finally {
@@ -125,7 +124,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   })
 
   const canAfford =
-    (accountBalance || 0) > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+    accountBalance > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
@@ -133,7 +132,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
   return {
     address: account?.address || '',
-    accountBalance: accountBalance || 0,
+    accountBalance,
     isCreateButtonDisabled,
     values,
     control,
