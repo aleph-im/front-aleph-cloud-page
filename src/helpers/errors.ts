@@ -1,6 +1,8 @@
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
   ChainNotYetSupported: new Error('Chain is not yet supported'),
+  BlockchainNotSupported: (chainId: number | string) =>
+    new Error(`Blockchain "${chainId}" not supported`),
   RequestTimeout: new Error('Request timed out'),
   RequestFailed: (cause: unknown) => new Error('Request failed', { cause }),
   InvalidResponse: new Error('Invalid response'),
@@ -8,10 +10,14 @@ export default {
   ManagerNotReady: new Error('Manager not ready'),
   MethodNotImplemented: new Error('Method not implemented'),
   NoWalletDetected: new Error('No wallet detected'),
+  MetamaskNotInstalled: new Error('WalletConnect not installed'),
+  WalletConnectNotInitialized: new Error('WalletConnect not initialized'),
   ConnectYourWallet: new Error('Please connect your wallet'),
   ConnectYourPaymentWallet: new Error(
     'Please connect your Superfluid/AVAX wallet',
   ),
+  UserCancelled: new Error('User cancelled the action'),
+  InvalidNetwork: new Error('Invalid network'),
   InstanceNotFound: new Error('Instance not found'),
   FunctionNotFound: new Error('Function not found'),
   WebsiteNotFound: new Error('Website not found'),

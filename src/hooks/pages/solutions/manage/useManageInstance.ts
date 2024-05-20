@@ -1,17 +1,18 @@
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { Instance, InstanceStatus } from '@/domain/instance'
-import { useAccountInstance } from '@/hooks/common/useAccountEntity/useAccountInstance'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useAppState } from '@/contexts/appState'
-import { ActionTypes } from '@/helpers/store'
 import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
-import { useConnect } from '@/hooks/common/useConnect'
 import { Blockchain } from '@aleph-sdk/core'
-import { SuperfluidAccount } from '@aleph-sdk/superfluid'
+import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
+import { useConnection } from '@/hooks/common/useConnection'
+import { AvalancheAccount } from '@aleph-sdk/avalanche'
+import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
+import { EntityDelAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 
 export type ManageInstance = {
@@ -26,14 +27,21 @@ export type ManageInstance = {
 }
 
 export function useManageInstance(): ManageInstance {
-  const { account, switchNetwork, selectedNetwork } = useConnect()
+  const [state, dispatch] = useAppState()
+  const { account, blockchain } = state.connection
+
+  const { handleConnect } = useConnection({
+    triggerOnMount: false,
+  })
+
   const router = useRouter()
   const { hash } = router.query
 
+  const { entities } = useRequestInstances({ id: hash as string })
+  const [instance] = entities || []
+
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
-  const [instance] = useAccountInstance({ id: hash as string })
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
-  const [, dispatch] = useAppState()
 
   const status = useInstanceStatus(instance)
 
@@ -68,32 +76,25 @@ export function useManageInstance(): ManageInstance {
     if (!instance) throw Err.InstanceNotFound
     if (!manager) throw Err.ConnectYourWallet
 
+    // @todo: We are assuming always that the instance is of type PAYG
+
     try {
-      let superfluidAccount
-      if (selectedNetwork !== Blockchain.AVAX) {
-        const account = await switchNetwork(Blockchain.AVAX)
-        superfluidAccount = account as SuperfluidAccount
-      } else {
-        superfluidAccount = account as SuperfluidAccount
+      if (
+        blockchain !== Blockchain.AVAX ||
+        !(account instanceof AvalancheAccount)
+      ) {
+        handleConnect({ blockchain: Blockchain.AVAX })
+        throw Err.ConnectYourPaymentWallet
       }
+
+      const superfluidAccount = createFromAvalancheAccount(account)
       await manager.del(instance, superfluidAccount)
 
-      dispatch({
-        type: ActionTypes.delAccountInstance,
-        payload: { id: instance.id },
-      })
+      dispatch(new EntityDelAction({ name: 'instance', keys: [instance.id] }))
 
       await router.replace('/')
     } catch (e) {}
-  }, [
-    instance,
-    manager,
-    selectedNetwork,
-    dispatch,
-    router,
-    switchNetwork,
-    account,
-  ])
+  }, [instance, manager, blockchain, account, dispatch, router, handleConnect])
 
   return {
     instance,

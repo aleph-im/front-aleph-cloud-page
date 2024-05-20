@@ -27,7 +27,7 @@ function getLabel(entities: unknown[], beta = false): string {
 export default function DashboardPage() {
   useSPARedirect()
 
-  const { all, functions, instances, volumes, sshKeys, domains, websites } =
+  const { all, programs, instances, volumes, sshKeys, domains, websites } =
     useDashboardPage()
 
   const [tabId, setTabId] = useState('all')
@@ -52,7 +52,7 @@ export default function DashboardPage() {
               {
                 id: 'function',
                 name: 'Functions',
-                label: { label: getLabel(functions), position: 'bottom' },
+                label: { label: getLabel(programs), position: 'bottom' },
               },
               {
                 id: 'instance',
@@ -83,7 +83,7 @@ export default function DashboardPage() {
             <AllTabContent data={all} />
           ) : tabId === 'function' ? (
             <FunctionsTabContent
-              data={functions.sort((a, b) => b.date.localeCompare(a.date))}
+              data={programs.sort((a, b) => b.date.localeCompare(a.date))}
             />
           ) : tabId === 'instance' ? (
             <InstancesTabContent

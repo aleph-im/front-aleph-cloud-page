@@ -5,7 +5,7 @@ import { Volume } from '@/domain/volume'
 import {
   UseAccountEntitiesReturn,
   useAccountEntities,
-} from '@/hooks/common/useAccountEntity/useAccountEntities'
+} from '@/hooks/common/useAccountEntities'
 
 export type AnyEntityRow = {
   id: string

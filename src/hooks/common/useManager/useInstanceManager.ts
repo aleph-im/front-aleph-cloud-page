@@ -3,7 +3,7 @@ import { InstanceManager } from '@/domain/instance'
 
 export function useInstanceManager(): InstanceManager | undefined {
   const [appState] = useAppState()
-  const { instanceManager } = appState
+  const { instanceManager } = appState.manager
 
   return instanceManager
 }

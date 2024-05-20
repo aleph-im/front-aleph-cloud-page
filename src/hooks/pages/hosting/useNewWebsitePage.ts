@@ -1,27 +1,27 @@
 import { FormEvent, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { WebsiteManager, WebsitePayment } from '@/domain/website'
-import { useAppState } from '@/contexts/appState'
 import { useForm } from '@/hooks/common/useForm'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
-import { ActionTypes } from '@/helpers/store'
+import { useAppState } from '@/contexts/appState'
+import { WebsiteManager, WebsitePayment } from '@/domain/website'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEntityCost } from '@/hooks/common/useEntityCost'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
-import {
-  stepsCatalog,
-  useCheckoutNotification,
-} from '@/hooks/form/useCheckoutNotification'
+import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
+import { useEntityCost } from '@/hooks/common/useEntityCost'
 import {
   NameAndTagsField,
   defaultNameAndTags,
 } from '@/hooks/form/useAddNameAndTags'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
-import Err from '@/helpers/errors'
 import { Blockchain } from '@aleph-sdk/core'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
+import { EntityAddAction } from '@/store/entity'
+import Err from '@/helpers/errors'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {
@@ -49,7 +49,7 @@ export type UseNewWebsitePagePageReturn = {
 export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
-  const { account } = appState
+  const { account, balance: accountBalance = 0 } = appState.connection
 
   const manager = useWebsiteManager()
   const { next, stop } = useCheckoutNotification({})
@@ -77,10 +77,9 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
           await next(nSteps)
         }
 
-        dispatch({
-          type: ActionTypes.addAccountWebsite,
-          payload: { accountWebsite },
-        })
+        dispatch(
+          new EntityAddAction({ name: 'website', entities: accountWebsite }),
+        )
 
         await router.replace('/')
       } finally {
@@ -102,8 +101,6 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
 
   const values = useWatch({ control }) as NewWebsiteFormState
 
-  const accountBalance = appState?.accountBalance || 0
-
   const { cost } = useEntityCost({
     entityType: EntityType.Website,
     props: {
@@ -121,7 +118,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
 
   return {
     address: account?.address || '',
-    accountBalance: appState.accountBalance || 0,
+    accountBalance,
     isCreateButtonDisabled,
     values,
     control,

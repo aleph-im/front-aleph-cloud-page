@@ -3,7 +3,7 @@ import { NodeManager } from '@/domain/node'
 
 export function useNodeManager(): NodeManager {
   const [appState] = useAppState()
-  const { nodeManager } = appState
+  const { nodeManager } = appState.manager
 
   return nodeManager
 }

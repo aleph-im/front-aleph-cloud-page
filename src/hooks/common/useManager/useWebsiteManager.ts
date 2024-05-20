@@ -3,7 +3,7 @@ import { WebsiteManager } from '@/domain/website'
 
 export function useWebsiteManager(): WebsiteManager | undefined {
   const [appState] = useAppState()
-  const { websiteManager } = appState
+  const { websiteManager } = appState.manager
 
   return websiteManager
 }

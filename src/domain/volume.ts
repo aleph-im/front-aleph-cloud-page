@@ -132,6 +132,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   /**
    * Returns the size of a volume in mb
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static getStorageVolumeMiBPrice(volume: Volume | AddVolume): number {
     // @todo: Right now we are not taking into account storage costs of the additional
     // volumes (they are considered included as part of the free storage tiers)

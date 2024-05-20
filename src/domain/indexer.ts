@@ -87,11 +87,13 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
     protected programManager: ProgramManager,
   ) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getSteps(entity: AddIndexer | AddIndexer[]): Promise<CheckoutStepType[]> {
     throw Err.MethodNotImplemented
   }
 
   addSteps(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     entity: AddIndexer | AddIndexer[],
   ): AsyncGenerator<void, Program | Program[], void> {
     throw Err.MethodNotImplemented

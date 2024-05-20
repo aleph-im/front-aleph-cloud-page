@@ -5,7 +5,6 @@ import { useAppState } from '@/contexts/appState'
 import { useForm } from '@/hooks/common/useForm'
 import { NewVolumeStandaloneField } from '@/hooks/form/useAddVolume'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
-import { ActionTypes } from '@/helpers/store'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
@@ -14,6 +13,7 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
+import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 
 export type NewVolumeFormState = NewVolumeStandaloneField
@@ -35,7 +35,7 @@ export type UseNewVolumePageReturn = {
 export function useNewVolumePage(): UseNewVolumePageReturn {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
-  const { account } = appState
+  const { account, balance: accountBalance = 0 } = appState.connection
 
   const manager = useVolumeManager()
   const { next, stop } = useCheckoutNotification({})
@@ -63,10 +63,9 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
           await next(nSteps)
         }
 
-        dispatch({
-          type: ActionTypes.addAccountVolume,
-          payload: { accountVolume },
-        })
+        dispatch(
+          new EntityAddAction({ name: 'volume', entities: accountVolume }),
+        )
 
         await router.replace('/')
       } finally {
@@ -88,8 +87,6 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
 
   const values = useWatch({ control }) as NewVolumeFormState
 
-  const accountBalance = appState?.accountBalance || 0
-
   const volumes = useMemo(() => [values], [values])
 
   const { cost } = useEntityCost({
@@ -108,7 +105,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
 
   return {
     address: account?.address || '',
-    accountBalance: appState.accountBalance || 0,
+    accountBalance,
     isCreateButtonDisabled,
     values,
     control,

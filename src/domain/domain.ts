@@ -230,7 +230,8 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   // @todo: Type not exported from SDK...
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregate(response: any): Domain[] {
-    return this.parseAggregateItems(response as DomainAggregate)
+    const domains = response as DomainAggregate
+    return this.parseAggregateItems(domains)
   }
 
   // @todo: Type not exported from SDK...

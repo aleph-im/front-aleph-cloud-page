@@ -12,6 +12,7 @@ export type InstanceSpecsField = ReducedCRNSpecs & {
 export function updateSpecsStorage(
   specs: InstanceSpecsField,
   isPersistent = true,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   paymentMethod: PaymentMethod = PaymentMethod.Hold,
 ): InstanceSpecsField {
   return {

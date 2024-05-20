@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
-import { ActionTypes } from '@/helpers/store'
 import { DomainManager } from '@/domain/domain'
 import { EntityDomainType } from '@/helpers/constants'
 import {
@@ -16,6 +15,11 @@ import {
   DomainField,
   defaultValues as defaultDomain,
 } from '@/hooks/form/useAddDomains'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
+import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 
 export type NewDomainFormState = DomainField
@@ -43,24 +47,51 @@ export type UseNewDomainPageReturn = {
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
   const router = useRouter()
+  const [
+    {
+      instance: { entities: instances },
+      program: { entities: programs },
+      website: { entities: websites },
+    },
+    dispatch,
+  ] = useAppState()
+
   const manager = useDomainManager()
-  const [{ accountInstances, accountFunctions, accountWebsites }, dispatch] =
-    useAppState()
+  const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewDomainFormState) => {
       if (!manager) throw Err.ConnectYourWallet
 
-      const [accountDomain] = await manager.add(state)
+      const iSteps = await manager.getSteps(state)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      dispatch({
-        type: ActionTypes.addAccountDomain,
-        payload: { accountDomain },
-      })
+      const steps = manager.addSteps(state)
 
-      router.replace('/')
+      try {
+        let accountDomain
+
+        while (!accountDomain) {
+          const { value, done } = await steps.next()
+
+          if (done) {
+            accountDomain = value[0]
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        dispatch(
+          new EntityAddAction({ name: 'domain', entities: accountDomain }),
+        )
+
+        await router.replace('/')
+      } finally {
+        await stop()
+      }
     },
-    [dispatch, manager, router],
+    [dispatch, manager, next, router, stop],
   )
 
   const {
@@ -83,6 +114,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     control,
     name: 'target',
     rules: {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onChange(state) {
         setValue('ref', '')
       },
@@ -100,10 +132,8 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     if (!entityType) return []
     if (entityType !== EntityDomainType.IPFS) {
       const entities =
-        entityType === EntityDomainType.Instance
-          ? accountInstances
-          : accountFunctions
-      return (entities || []).map(({ id, metadata, type }) => {
+        entityType === EntityDomainType.Instance ? instances : programs
+      return (entities || []).map(({ id, metadata }) => {
         return {
           label: (metadata?.name as string | undefined) || id,
           value: id,
@@ -111,25 +141,22 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
         }
       })
     }
-    const entities = accountWebsites
-    return (entities || []).map(({ id, volume_id, type }) => {
+    return (websites || []).map(({ id, volume_id }) => {
       return {
         label: id,
         value: volume_id,
         type: entityType,
       }
     })
-  }, [entityType, accountInstances, accountFunctions, accountWebsites])
+  }, [entityType, instances, programs, websites])
 
-  const hasInstances = useMemo(
-    () => !!accountInstances?.length,
-    [accountInstances],
-  )
-
-  const hasFunctions = useMemo(
-    () => !!accountFunctions?.length,
-    [accountFunctions],
-  )
+  const hasInstances = useMemo(() => !!instances?.length, [instances])
+  const hasFunctions = useMemo(() => !!programs?.length, [programs])
+  const hasWebsites = useMemo(() => !!websites?.length, [websites])
+  /* const hasEntities = useMemo(
+    () => hasInstances || hasFunctions || hasWebsites,
+    [hasFunctions, hasInstances, hasWebsites],
+  ) */
 
   useEffect(() => {
     if (entityType === EntityDomainType.Instance && hasInstances) {
@@ -139,7 +166,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     } else if (entityType === EntityDomainType.IPFS) {
       setValue('target', EntityDomainType.IPFS)
     }
-  }, [entityType, hasFunctions, hasInstances, setValue])
+  }, [entityType, hasFunctions, hasInstances, hasWebsites, setValue])
 
   const setTarget = (target: EntityDomainType) => {
     setValue('target', target)

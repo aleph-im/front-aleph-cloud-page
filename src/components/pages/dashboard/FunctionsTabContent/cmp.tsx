@@ -56,6 +56,7 @@ export const FunctionsTabContent = React.memo(
                       label: 'Size',
                       align: 'right',
                       sortable: true,
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
                       render: (row) => humanReadableSize(0, 'MiB'),
                     },
                     {

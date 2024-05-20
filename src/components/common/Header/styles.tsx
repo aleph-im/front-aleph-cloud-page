@@ -2,6 +2,9 @@ import {
   BreakpointId,
   Button,
   FloatPosition,
+  Icon,
+  IconName,
+  IconProps,
   RouterNavbar,
   WalletPicker,
   getResponsiveCss,
@@ -30,7 +33,7 @@ export const StyledWalletPicker = styled(WalletPicker)<{
 }>`
   ${({ $position: { x, y }, $isOpen }) => {
     return css`
-      ${tw`fixed z-20 mt-4 top-0 left-0`}
+      ${tw`fixed top-0 left-0 z-20 mt-4`}
       transform: ${`translate3d(${x}px, ${y}px, 0)`};
       opacity: ${$isOpen ? 1 : 0};
       will-change: opacity transform;
@@ -47,7 +50,7 @@ export type StyledNavbarDesktopProps = {
 
 export const StyledNavbarDesktop = styled.div<StyledNavbarDesktopProps>`
   ${({ $breakpoint }) => css`
-    ${tw`hidden relative flex-initial shrink-0 m-0 px-16 w-full top-0 z-10 items-center justify-between`}
+    ${tw`relative top-0 z-10 items-center justify-between flex-initial hidden w-full px-16 m-0 shrink-0`}
     height: 6.5rem;
     box-shadow: 0px 4px 24px 0px #5100cd0a;
     backdrop-filter: blur(50px);
@@ -70,7 +73,7 @@ export type StyledNavbarMobileProps = {
 
 export const StyledNavbarMobile = styled(RouterNavbar)<StyledNavbarMobileProps>`
   ${({ breakpoint }) => css`
-    ${tw`relative block z-10`}
+    ${tw`relative z-10 block`}
 
     /* MOBILE LAYOUT */
     ${getResponsiveCss(
@@ -90,7 +93,7 @@ export type StyledHeaderProps = {
 
 export const StyledHeader = styled.header<StyledHeaderProps>`
   ${({ $breakpoint }) => css`
-    ${tw`fixed top-0 left-0 m-0 z-10 w-full`}
+    ${tw`fixed top-0 left-0 z-10 w-full m-0`}
     font-size: inherit;
     line-height: inherit;
     box-sizing: border-box;
@@ -103,5 +106,35 @@ export const StyledHeader = styled.header<StyledHeaderProps>`
         ${tw`sticky`}
       `,
     )};
+  `}
+`
+
+export type StyledIconProps = {
+  $isConnected: boolean
+  $network?: { icon: IconName }
+  $isMobile?: boolean
+}
+
+export const StyledIcon = styled(Icon).attrs<StyledIconProps, IconProps>(
+  (props) => {
+    return {
+      ...props,
+      size: props.$isMobile ? 'lg' : 'md',
+      name: props.$network?.icon || 'link',
+    }
+  },
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+)<StyledIconProps>`
+  ${({ theme, $isConnected, $isMobile }) => css`
+    height: 1em !important;
+    width: 1em !important;
+
+    ${!$isMobile &&
+    css`
+      padding: 0.35rem;
+      border-radius: 50%;
+      background-color: ${theme.color.background};
+      border: 1px solid black;
+    `}
   `}
 `
