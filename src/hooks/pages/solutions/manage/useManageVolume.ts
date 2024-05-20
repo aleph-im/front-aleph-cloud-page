@@ -7,6 +7,10 @@ import { useAppState } from '@/contexts/appState'
 import { useRequestVolumes } from '@/hooks/common/useRequestEntity/useRequestVolumes'
 import { EntityDelAction } from '@/store/entity'
 import Err from '@/helpers/errors'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export type ManageVolume = {
   volume?: Volume
@@ -27,6 +31,7 @@ export function useManageVolume(): ManageVolume {
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
 
   const manager = useVolumeManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const handleCopyHash = useCallback(() => {
     copyAndNotify(volume?.id || '')
@@ -36,14 +41,29 @@ export function useManageVolume(): ManageVolume {
     if (!manager) throw Err.ConnectYourWallet
     if (!volume) throw Err.WebsiteNotFound
 
+    const iSteps = await manager.getDelSteps(volume)
+    const nSteps = iSteps.map((i) => stepsCatalog[i])
+    const steps = manager.addDelSteps(volume)
+
     try {
-      await manager.del(volume)
+      let accountVolume
+
+      while (!accountVolume) {
+        const { done } = await steps.next()
+        if (done) {
+          break
+        }
+        await next(nSteps)
+      }
 
       dispatch(new EntityDelAction({ name: 'volume', keys: [volume.id] }))
 
       await router.replace('/')
-    } catch (e) {}
-  }, [manager, volume, dispatch, router])
+    } catch (e) {
+    } finally {
+      await stop()
+    }
+  }, [dispatch, manager, volume, next, router, stop])
 
   const handleDownload = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet

@@ -422,7 +422,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 
-    const { volume_id } = (await this.get(websiteOrCid)) || {}
     const content: WebsiteAggregate = {
       [websiteOrCid]: null,
     }
@@ -433,7 +432,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         channel: this.channel,
         content,
       })
-      if (volume_id) await this.volumeManager.del(volume_id)
     } catch (err) {
       throw Err.RequestFailed(err)
     }
@@ -522,6 +520,39 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       created_at: getDate(created_at),
       updated_at: getDate(updated_at),
       confirmed: true,
+    }
+  }
+
+  async getDelSteps(
+    websites: Website | Website[],
+  ): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    websites = Array.isArray(websites) ? websites : [websites]
+    websites.forEach(() => {
+      steps.push('volumeDel')
+      steps.push('websiteDel')
+    })
+    return steps
+  }
+
+  async *addDelSteps(
+    websites: Website | Website[],
+  ): AsyncGenerator<void, void, void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    websites = Array.isArray(websites) ? websites : [websites]
+    if (websites.length === 0) return
+
+    try {
+      for (const website of websites) {
+        yield
+        await this.volumeManager.del(website.volume_id)
+        yield
+        await this.del(website)
+      }
+    } catch (err) {
+      throw Err.RequestFailed(err)
     }
   }
 }

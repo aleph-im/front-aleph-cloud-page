@@ -74,6 +74,19 @@ export type CheckoutStepType =
   | 'instance'
   | 'program'
   | 'website'
+  | 'sshDel'
+  | 'volumeDel'
+  | 'domainDel'
+  | 'streamDel'
+  | 'instanceDel'
+  | 'programDel'
+  | 'websiteDel'
+  | 'sshUp'
+  | 'volumeUp'
+  | 'domainUp'
+  | 'instanceUp'
+  | 'programUp'
+  | 'websiteUp'
 
 export enum EntityDomainType {
   IPFS = 'ipfs',

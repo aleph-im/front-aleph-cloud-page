@@ -266,4 +266,31 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
     return domain
   }
+
+  async getDelSteps(
+    domainsOrIds: string | Domain | (string | Domain)[],
+  ): Promise<CheckoutStepType[]> {
+    domainsOrIds = Array.isArray(domainsOrIds) ? domainsOrIds : [domainsOrIds]
+    return domainsOrIds.map(() => 'domainDel')
+  }
+
+  async *addDelSteps(
+    domainsOrIds: string | Domain | (string | Domain)[],
+  ): AsyncGenerator<void, void, void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    domainsOrIds = Array.isArray(domainsOrIds) ? domainsOrIds : [domainsOrIds]
+    if (domainsOrIds.length === 0) return
+
+    try {
+      // @note: Aggregate all signatures in 1 step
+      yield
+      await Promise.all(
+        domainsOrIds.map(async (domainOrId) => await this.del(domainOrId)),
+      )
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
+  }
 }

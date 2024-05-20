@@ -12,6 +12,10 @@ import { useDomainStatus } from '@/hooks/common/useDomainStatus'
 import { Account } from '@aleph-sdk/account'
 import { useRequestDomains } from '@/hooks/common/useRequestEntity/useRequestDomains'
 import { EntityDelAction } from '@/store/entity'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
 
 export type ManageDomain = {
@@ -49,6 +53,7 @@ export function useManageDomain(): ManageDomain {
   const status = useDomainStatus(domain)
 
   const manager = useDomainManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const handleCopyRef = useCallback(() => {
     copyAndNotify(domain?.ref || '')
@@ -58,14 +63,29 @@ export function useManageDomain(): ManageDomain {
     if (!manager) throw Err.ConnectYourWallet
     if (!domain) throw Err.DomainNotFound
 
+    const iSteps = await manager.getDelSteps(domain)
+    const nSteps = iSteps.map((i) => stepsCatalog[i])
+    const steps = manager.addDelSteps(domain)
+
     try {
-      await manager.del(domain)
+      let accountDomain
+
+      while (!accountDomain) {
+        const { done } = await steps.next()
+        if (done) {
+          break
+        }
+        await next(nSteps)
+      }
 
       dispatch(new EntityDelAction({ name: 'domain', keys: [domain.id] }))
 
       await router.replace('/')
-    } catch (e) {}
-  }, [domain, manager, dispatch, router])
+    } catch (e) {
+    } finally {
+      await stop()
+    }
+  }, [dispatch, manager, domain, next, router, stop])
 
   const handleRetry = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet

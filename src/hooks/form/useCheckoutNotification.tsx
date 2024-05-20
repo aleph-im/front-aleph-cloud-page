@@ -78,34 +78,87 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content:
         'By signing this, you authorise the initiation of a token stream for billing, ensuring a seamless and efficient payment process aligning costs directly with your usage.',
     },
+    streamDel: {
+      title: 'Sign PAYG Cancellation',
+      content: 'By signing this, you confirm the cancellation of your stream.',
+    },
     volume: {
       title: 'Sign Volume',
       content:
         'By signing this, you confirm the creation of a new volume. This is required if you are deploying a new website or if you have set up additional storage volume(s) for your instance or function.',
     },
+    volumeDel: {
+      title: 'Sign Volume Deletion',
+      content: 'By signing this, you confirm the deletion of your volume.',
+    },
+    volumeUp: {
+      title: 'Sign Volume Update',
+      content: 'By signing this, you confirm the update of your volume.',
+    },
     ssh: {
-      title: 'Sign SSH',
+      title: 'Sign SSH Key',
       content:
         'By signing this, you confirm the SSH keys configuration, enabling encrypted communication with your instance. This is crucial for securing remote access.',
     },
+    sshDel: {
+      title: 'Sign SSH Key Deletion',
+      content: 'By signing this, you confirm the deletion of your SSH Key.',
+    },
+    sshUp: {
+      title: 'Sign SSH Key Update',
+      content: 'By signing this, you confirm the update of your SSH Key.',
+    },
     instance: {
-      title: 'Sign Instance Creation',
+      title: 'Sign Instance',
       content:
         "By signing this, you confirm the creation of your new instance on Twentysix.cloud. This step finalises the setup options you've chosen, including resources, configurations, and any additional features.",
     },
+    instanceDel: {
+      title: 'Sign Instance Deletion',
+      content: 'By signing this, you confirm the deletion of your instance.',
+    },
+    instanceUp: {
+      title: 'Sign Instance Update',
+      content: 'By signing this, you confirm the update of your instance.',
+    },
     program: {
-      title: 'Sign Function Creation',
+      title: 'Sign Function',
       content:
         "By signing this, you confirm the creation of your new function on Twentysix.cloud. This step finalises the setup options you've chosen, including the codebase volume, resources, configurations, and any additional features.",
+    },
+    programDel: {
+      title: 'Sign Function Deletion',
+      content: 'By signing this, you confirm the deletion of your function.',
+    },
+    programUp: {
+      title: 'Sign Function Update',
+      content: 'By signing this, you confirm the update of your function.',
     },
     domain: {
       title: 'Sign Custom Domain',
       content:
         'By signing this, you confirm the custom domain settings for your website, instance or function.',
     },
+    domainDel: {
+      title: 'Sign Custom Domain Deletion',
+      content:
+        'By signing this, you confirm the deletion of your custom domain.',
+    },
+    domainUp: {
+      title: 'Sign Custom Domain Update',
+      content: 'By signing this, you confirm the update of your custom domain.',
+    },
     website: {
-      title: 'Sign Website Creation',
+      title: 'Sign Website',
       content:
         'By signing this, you confirm the deployment of your new website on Twentysix.cloud.',
+    },
+    websiteDel: {
+      title: 'Sign Website Deletion',
+      content: 'By signing this, you confirm the deletion of your website.',
+    },
+    websiteUp: {
+      title: 'Sign Website Update',
+      content: 'By signing this, you confirm the deletion of your website.',
     },
   }

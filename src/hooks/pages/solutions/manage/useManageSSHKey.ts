@@ -7,6 +7,10 @@ import { useAppState } from '@/contexts/appState'
 import { useRequestSSHKeys } from '@/hooks/common/useRequestEntity/useRequestSSHKeys'
 import { EntityDelAction } from '@/store/entity'
 import Err from '@/helpers/errors'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export type ManageSSHKey = {
   sshKey?: SSHKey
@@ -27,6 +31,7 @@ export function useManageSSHKey(): ManageSSHKey {
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
 
   const manager = useSSHKeyManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const handleCopyLabel = useCallback(() => {
     copyAndNotify(sshKey?.label || '')
@@ -40,14 +45,29 @@ export function useManageSSHKey(): ManageSSHKey {
     if (!manager) throw Err.ConnectYourWallet
     if (!sshKey) throw Err.SSHKeyNotFound
 
+    const iSteps = await manager.getDelSteps(sshKey)
+    const nSteps = iSteps.map((i) => stepsCatalog[i])
+    const steps = manager.addDelSteps(sshKey)
+
     try {
-      await manager.del(sshKey)
+      let accountSSHKey
+
+      while (!accountSSHKey) {
+        const { done } = await steps.next()
+        if (done) {
+          break
+        }
+        await next(nSteps)
+      }
 
       dispatch(new EntityDelAction({ name: 'ssh', keys: [sshKey.id] }))
 
       await router.replace('/')
-    } catch (e) {}
-  }, [sshKey, manager, dispatch, router])
+    } catch (e) {
+    } finally {
+      await stop()
+    }
+  }, [dispatch, manager, sshKey, next, router, stop])
 
   return {
     sshKey,

@@ -188,4 +188,31 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
       confirmed: !!post.confirmed,
     }
   }
+
+  async getDelSteps(
+    sshKeysOrIds: string | SSHKey | (string | SSHKey)[],
+  ): Promise<CheckoutStepType[]> {
+    sshKeysOrIds = Array.isArray(sshKeysOrIds) ? sshKeysOrIds : [sshKeysOrIds]
+    return sshKeysOrIds.map(() => 'sshDel')
+  }
+
+  async *addDelSteps(
+    sshKeysOrIds: string | SSHKey | (string | SSHKey)[],
+  ): AsyncGenerator<void, void, void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    sshKeysOrIds = Array.isArray(sshKeysOrIds) ? sshKeysOrIds : [sshKeysOrIds]
+    if (sshKeysOrIds.length === 0) return
+
+    try {
+      // @note: Aggregate all signatures in 1 step
+      yield
+      await Promise.all(
+        sshKeysOrIds.map(async (sshKeyOrId) => await this.del(sshKeyOrId)),
+      )
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
+  }
 }

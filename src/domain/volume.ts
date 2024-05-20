@@ -373,4 +373,31 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       confirmed: !!message.confirmed,
     }
   }
+
+  async getDelSteps(
+    volumesOrIds: string | Volume | (string | Volume)[],
+  ): Promise<CheckoutStepType[]> {
+    volumesOrIds = Array.isArray(volumesOrIds) ? volumesOrIds : [volumesOrIds]
+    return volumesOrIds.map(() => 'volumeDel')
+  }
+
+  async *addDelSteps(
+    volumesOrIds: string | Volume | (string | Volume)[],
+  ): AsyncGenerator<void, void, void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    volumesOrIds = Array.isArray(volumesOrIds) ? volumesOrIds : [volumesOrIds]
+    if (volumesOrIds.length === 0) return
+
+    try {
+      // @note: Aggregate all signatures in 1 step
+      yield
+      await Promise.all(
+        volumesOrIds.map(async (volumeOrId) => await this.del(volumeOrId)),
+      )
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
+  }
 }
