@@ -19,19 +19,15 @@ import { useTheme } from 'styled-components'
 import { WebsiteFrameworks } from '@/domain/website'
 import { cidV0Tov1 } from '@/helpers/utils'
 
-const getLimoUrl = (ens: string) => {
-  return `https://${ens}.limo`
-}
-
 export default function ManageWebsite() {
   const { website, refVolume, handleCopyHash, handleDelete } =
     useManageWebsite()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const cidV1 = refVolume?.item_hash && cidV0Tov1(refVolume.item_hash)
-  const default_url = `https://${cidV1}.ipfs.aleph.cloud`
-  const alt_url = `https://${cidV1}.ipfs.storry.tv`
+  const default_url = `https://${cidV1}.ipfs.aleph.sh`
+  /* const alt_url = `https://${cidV1}.ipfs.storry.tv`
   const alt_url_2 = `https://${cidV1}.ipfs.cf-ipfs.com`
-  const alt_url_3 = `https://${cidV1}.ipfs.dweb.link`
+  const alt_url_3 = `https://${cidV1}.ipfs.dweb.link` */
   const theme = useTheme()
 
   if (!website) {
@@ -153,14 +149,12 @@ export default function ManageWebsite() {
             <div tw="flex flex-row mb-5">
               <a
                 className="tp-body1 fs-16"
-                //href={default_url}
-                //target="_blank"
-                //referrerPolicy="no-referrer"
+                href={default_url}
+                target="_blank"
+                referrerPolicy="no-referrer"
               >
                 <IconText iconName="square-up-right">
-                  <Text tw="text-gray-500" as={'span'}>
-                    {default_url}
-                  </Text>
+                  <Text as={'span'}>{default_url}</Text>
                 </IconText>
               </a>
               <IconText
@@ -168,18 +162,19 @@ export default function ManageWebsite() {
                 onClick={() => copyAndNotify(default_url)}
               />
             </div>
-            <a
-              className="tp-body1 fs-16"
-              href={'https://ipfs.github.io/public-gateway-checker/'}
-              target="_blank"
-              referrerPolicy="no-referrer"
-            >
-              <IconText iconName="square-up-right">
-                <div className="tp-info text-main0">ALTERNATIVE GATEWAYS</div>
-              </IconText>
-            </a>
             <div tw="mb-5">
-              <div tw="flex flex-row">
+              <a
+                className="tp-body1 fs-16"
+                href={'https://ipfs.github.io/public-gateway-checker/'}
+                target="_blank"
+                referrerPolicy="no-referrer"
+              >
+                <IconText iconName="square-up-right">
+                  <div className="tp-info text-main0">ALTERNATIVE GATEWAYS</div>
+                </IconText>
+              </a>
+              <Text as={'span'}>{`https://${cidV1}.ipfs.<gateway-url>`}</Text>
+              {/* <div tw="flex flex-row">
                 <a
                   className="tp-body1 fs-16"
                   href={alt_url}
@@ -226,12 +221,12 @@ export default function ManageWebsite() {
                   iconName="copy"
                   onClick={() => copyAndNotify(alt_url_3)}
                 />
-              </div>
+              </div> */}
             </div>
             <div className="tp-info text-main0">ENS GATEWAYS</div>
             {website.ens?.length > 0 ? (
               Array.from(website.ens).map((ens, key) => {
-                const limo = getLimoUrl(ens)
+                const limo = `https://${ens}.limo`
                 return (
                   <div tw="flex flex-row" key={key}>
                     <a

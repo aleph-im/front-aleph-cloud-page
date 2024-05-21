@@ -54,6 +54,12 @@ export const VolumeList = React.memo(
                 >
                   {volume.ref}
                 </IconText>
+                {volume.mount && (
+                  <div tw="mt-5">
+                    <div className="tp-info text-main0">MOUNT</div>
+                    <Text as={'span'}>{volume.mount}</Text>
+                  </div>
+                )}
               </div>
             )}
           </div>

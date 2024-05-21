@@ -62,21 +62,39 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                       ),
                   },
                   {
-                    label: 'Size',
+                    label: 'Size / Ref',
                     align: 'right',
                     sortable: true,
                     render: (row) =>
-                      row.type !== EntityType.Website ? (
-                        humanReadableSize(row.size, 'MiB')
-                      ) : (
+                      row.type === EntityType.Program ? (
                         <ButtonLink
                           kind="functional"
                           variant="none"
                           size="sm"
                           href={row.url ?? ''}
                         >
-                          <Icon name="chain" size="lg" />
+                          <Icon name={'file-code'} size="lg" />
                         </ButtonLink>
+                      ) : row.type === EntityType.Website ? (
+                        <ButtonLink
+                          kind="functional"
+                          variant="none"
+                          size="sm"
+                          href={row.url ?? ''}
+                        >
+                          <Icon name={'database'} size="lg" />
+                        </ButtonLink>
+                      ) : row.type === EntityType.Domain ? (
+                        <ButtonLink
+                          kind="functional"
+                          variant="none"
+                          size="sm"
+                          href={row.url ?? ''}
+                        >
+                          <Icon name={'chain'} size="lg" />
+                        </ButtonLink>
+                      ) : (
+                        humanReadableSize(row.size, 'MiB')
                       ),
                   },
                   {

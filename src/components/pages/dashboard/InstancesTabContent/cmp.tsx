@@ -39,7 +39,7 @@ export const InstancesTabContent = React.memo(
                       render: (row) => row?.resources?.vcpus || 0,
                     },
                     {
-                      label: 'Memory',
+                      label: 'RAM',
                       align: 'right',
                       sortable: true,
                       render: (row) =>
@@ -50,10 +50,11 @@ export const InstancesTabContent = React.memo(
                         }),
                     },
                     {
-                      label: 'Size',
+                      label: 'HDD',
                       align: 'right',
                       sortable: true,
-                      render: (row) => humanReadableSize(row.size, 'MiB'),
+                      render: (row) =>
+                        humanReadableSize(row.rootfs.size_mib, 'MiB'),
                     },
                     {
                       label: 'Date',

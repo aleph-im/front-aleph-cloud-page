@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { AnyEntity, convertByteUnits, ellipseAddress } from '@/helpers/utils'
-import { EntityType } from '@/helpers/constants'
+import { EntityDomainType, EntityType } from '@/helpers/constants'
 import { Volume } from '@/domain/volume'
 import {
   UseAccountEntitiesReturn,
@@ -45,14 +45,16 @@ export function useDashboardPage(): UseDashboardPageReturn {
                 : ellipseAddress(entity.id || '')) || `Unknown ${type}`
 
         const size =
-          (type === EntityType.SSHKey
+          type === EntityType.SSHKey
             ? convertByteUnits(new Blob([entity.key]).size, {
                 from: 'B',
                 to: 'MiB',
               })
-            : type === EntityType.Domain || type === EntityType.Website
-              ? 0
-              : entity.size) || 0
+            : type === EntityType.Instance
+              ? entity.rootfs.size_mib
+              : type == EntityType.Volume
+                ? entity.size || 0
+                : 0
 
         const date =
           entity.type === EntityType.Domain
@@ -62,10 +64,12 @@ export function useDashboardPage(): UseDashboardPageReturn {
               : entity.date
         const url =
           entity.type === EntityType.Domain
-            ? ''
-            : entity.type === EntityType.Website
-              ? `/storage/volume/${entity.volume_id}`
-              : entity.url
+            ? `/${entity.target === EntityDomainType.Instance ? 'computing/instance' : entity.target === EntityDomainType.Program ? 'computing/function' : 'storage/volume'}/${entity.ref}`
+            : entity.type === EntityType.Program
+              ? `/storage/volume/${entity.code.ref}`
+              : entity.type === EntityType.Website
+                ? `/storage/volume/${entity.volume_id}`
+                : entity.url
 
         return {
           id,

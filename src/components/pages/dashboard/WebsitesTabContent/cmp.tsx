@@ -29,7 +29,7 @@ export const WebsitesTabContent = React.memo(
                       render: (row) => row.id,
                     },
                     {
-                      label: 'Size',
+                      label: 'Volume',
                       align: 'right',
                       sortable: true,
                       render: (row) => (
@@ -39,7 +39,7 @@ export const WebsitesTabContent = React.memo(
                           size="sm"
                           href={`/storage/volume/${row.volume_id}`}
                         >
-                          <Icon name="chain" size="lg" />
+                          <Icon name="database" size="lg" />
                         </ButtonLink>
                       ),
                     },
