@@ -66,7 +66,7 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     chainId: 1,
     eip155: true,
     currency: 'ETH',
-    explorerUrl: 'https://etherscan.io',
+    explorerUrl: 'https://etherscan.io/',
     rpcUrl: 'https://eth.drpc.org',
   },
   [BlockchainId.AVAX]: {
