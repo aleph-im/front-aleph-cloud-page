@@ -205,11 +205,13 @@ export class ProgramManager
 
   async getSteps(newInstance: AddProgram): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
-    const { volumes = [], domains = [] } = newInstance
+    const { domains = [] } = newInstance
 
-    const volumeSteps = await this.volumeManager.getSteps(volumes)
-    for (const step of volumeSteps) steps.push(step)
+    /* const volumeSteps = await this.volumeManager.getSteps(volumes)
+    for (const step of volumeSteps) steps.push(step) */
 
+    // Volumes are aggregated in 1 step, and there is always 1 for the code
+    steps.push('volume')
     steps.push('program')
 
     const domainSteps = await this.domainManager.getSteps(
@@ -323,5 +325,44 @@ export class ProgramManager
           confirmed: !!message.confirmed,
         }
       })
+  }
+
+  async getDelSteps(
+    programsOrIds: string | Program | (string | Program)[],
+  ): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    programsOrIds = Array.isArray(programsOrIds)
+      ? programsOrIds
+      : [programsOrIds]
+    programsOrIds.forEach(() => {
+      steps.push('volumeDel')
+      steps.push('programDel')
+    })
+    return steps
+  }
+
+  async *addDelSteps(
+    programsOrIds: string | Program | (string | Program)[],
+  ): AsyncGenerator<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    programsOrIds = Array.isArray(programsOrIds)
+      ? programsOrIds
+      : [programsOrIds]
+    if (programsOrIds.length === 0) return
+
+    try {
+      for (const programOrId of programsOrIds) {
+        if (typeof programOrId !== 'string') {
+          yield
+          await this.volumeManager.del((programOrId as Program).code.ref)
+        }
+        yield
+        await this.del(programOrId)
+      }
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
   }
 }

@@ -66,27 +66,39 @@ export enum EntityType {
   Website = 'website',
 }
 
-export type CheckoutStepType =
+type CheckoutAddStepType =
   | 'ssh'
   | 'volume'
   | 'domain'
   | 'stream'
   | 'instance'
   | 'program'
+  | 'indexer'
   | 'website'
+
+type CheckoutDelStepType =
   | 'sshDel'
   | 'volumeDel'
   | 'domainDel'
   | 'streamDel'
   | 'instanceDel'
   | 'programDel'
+  | 'indexerDel'
   | 'websiteDel'
+
+type CheckoutUpStepType =
   | 'sshUp'
   | 'volumeUp'
   | 'domainUp'
   | 'instanceUp'
   | 'programUp'
+  | 'indexerUp'
   | 'websiteUp'
+
+export type CheckoutStepType =
+  | CheckoutAddStepType
+  | CheckoutDelStepType
+  | CheckoutUpStepType
 
 export enum EntityDomainType {
   IPFS = 'ipfs',

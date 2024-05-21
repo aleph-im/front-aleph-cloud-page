@@ -68,9 +68,7 @@ export function useManageDomain(): ManageDomain {
     const steps = manager.addDelSteps(domain)
 
     try {
-      let accountDomain
-
-      while (!accountDomain) {
+      while (true) {
         const { done } = await steps.next()
         if (done) {
           break

@@ -378,12 +378,14 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     volumesOrIds: string | Volume | (string | Volume)[],
   ): Promise<CheckoutStepType[]> {
     volumesOrIds = Array.isArray(volumesOrIds) ? volumesOrIds : [volumesOrIds]
-    return volumesOrIds.map(() => 'volumeDel')
+    // @note: Aggregate all signatures in 1 step
+    // return volumesOrIds.map(() => 'volumeDel')
+    return volumesOrIds.length ? ['volumeDel'] : []
   }
 
   async *addDelSteps(
     volumesOrIds: string | Volume | (string | Volume)[],
-  ): AsyncGenerator<void, void, void> {
+  ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 

@@ -83,30 +83,30 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content: 'By signing this, you confirm the cancellation of your stream.',
     },
     volume: {
-      title: 'Sign Volume',
+      title: 'Sign Volume(s)',
       content:
-        'By signing this, you confirm the creation of a new volume. This is required if you are deploying a new website or if you have set up additional storage volume(s) for your instance or function.',
+        'By signing this, you confirm the creation of new volume(s). This is required if you are creating/updating a website, or if you have set up additional storage volume(s) for your instance or function.',
     },
     volumeDel: {
-      title: 'Sign Volume Deletion',
-      content: 'By signing this, you confirm the deletion of your volume.',
+      title: 'Sign Volume(s) Deletion',
+      content: 'By signing this, you confirm the deletion of your volume(s).',
     },
     volumeUp: {
-      title: 'Sign Volume Update',
-      content: 'By signing this, you confirm the update of your volume.',
+      title: 'Sign Volume(s) Update',
+      content: 'By signing this, you confirm the update of your volume(s).',
     },
     ssh: {
-      title: 'Sign SSH Key',
+      title: 'Sign SSH Key(s)',
       content:
-        'By signing this, you confirm the SSH keys configuration, enabling encrypted communication with your instance. This is crucial for securing remote access.',
+        'By signing this, you confirm the SSH key(s) configuration, enabling encrypted communication with your instance. This is crucial for securing remote access.',
     },
     sshDel: {
-      title: 'Sign SSH Key Deletion',
-      content: 'By signing this, you confirm the deletion of your SSH Key.',
+      title: 'Sign SSH Key(s) Deletion',
+      content: 'By signing this, you confirm the deletion of your SSH Key(s).',
     },
     sshUp: {
-      title: 'Sign SSH Key Update',
-      content: 'By signing this, you confirm the update of your SSH Key.',
+      title: 'Sign SSH Key(s) Update',
+      content: 'By signing this, you confirm the update of your SSH Key(s).',
     },
     instance: {
       title: 'Sign Instance',
@@ -135,18 +135,19 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content: 'By signing this, you confirm the update of your function.',
     },
     domain: {
-      title: 'Sign Custom Domain',
+      title: 'Sign Custom Domain(s)',
       content:
-        'By signing this, you confirm the custom domain settings for your website, instance or function.',
+        'By signing this, you confirm the custom domain(s) settings for your website, instance or function.',
     },
     domainDel: {
-      title: 'Sign Custom Domain Deletion',
+      title: 'Sign Custom Domain(s) Deletion',
       content:
-        'By signing this, you confirm the deletion of your custom domain.',
+        'By signing this, you confirm the deletion of your custom domain(s).',
     },
     domainUp: {
-      title: 'Sign Custom Domain Update',
-      content: 'By signing this, you confirm the update of your custom domain.',
+      title: 'Sign Custom Domain(s) Update',
+      content:
+        'By signing this, you confirm the update of your custom domain(s).',
     },
     website: {
       title: 'Sign Website',
@@ -160,5 +161,18 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
     websiteUp: {
       title: 'Sign Website Update',
       content: 'By signing this, you confirm the deletion of your website.',
+    },
+    indexer: {
+      title: 'Sign Indexer',
+      content:
+        'By signing this, you confirm the deployment of your new indexer on Twentysix.cloud.',
+    },
+    indexerDel: {
+      title: 'Sign Indexer Deletion',
+      content: 'By signing this, you confirm the deletion of your indexer.',
+    },
+    indexerUp: {
+      title: 'Sign Indexer Update',
+      content: 'By signing this, you confirm the deletion of your indexer.',
     },
   }

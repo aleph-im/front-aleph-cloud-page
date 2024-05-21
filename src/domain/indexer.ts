@@ -187,4 +187,38 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
   protected getBlockchainEnvName(blockchainId: string, name: string): string {
     return toSnakeCase(`${blockchainId}_${name}`).toUpperCase()
   }
+
+  async getDelSteps(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    indexersOrIds: string | Indexer | (string | Indexer)[],
+  ): Promise<CheckoutStepType[]> {
+    throw Err.MethodNotImplemented
+    /* indexersOrIds = Array.isArray(indexersOrIds)
+      ? indexersOrIds
+      : [indexersOrIds]
+    return indexersOrIds.map(() => 'indexerDel') */
+  }
+
+  async *addDelSteps(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    indexersOrIds: string | Indexer | (string | Indexer)[],
+  ): AsyncGenerator<void> {
+    throw Err.MethodNotImplemented
+    /* if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    indexersOrIds = Array.isArray(indexersOrIds)
+      ? indexersOrIds
+      : [indexersOrIds]
+    if (indexersOrIds.length === 0) return
+
+    try {
+      for (const indexerOrId of indexersOrIds) {
+        yield
+        await this.del(indexerOrId)
+      }
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    } */
+  }
 }

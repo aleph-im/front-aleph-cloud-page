@@ -50,9 +50,7 @@ export function useManageSSHKey(): ManageSSHKey {
     const steps = manager.addDelSteps(sshKey)
 
     try {
-      let accountSSHKey
-
-      while (!accountSSHKey) {
+      while (true) {
         const { done } = await steps.next()
         if (done) {
           break

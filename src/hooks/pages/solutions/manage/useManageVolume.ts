@@ -46,9 +46,7 @@ export function useManageVolume(): ManageVolume {
     const steps = manager.addDelSteps(volume)
 
     try {
-      let accountVolume
-
-      while (!accountVolume) {
+      while (true) {
         const { done } = await steps.next()
         if (done) {
           break

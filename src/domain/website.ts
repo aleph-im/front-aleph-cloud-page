@@ -524,11 +524,13 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   async getDelSteps(
-    websites: Website | Website[],
+    websitesOrIds: string | Website | (string | Website)[],
   ): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
-    websites = Array.isArray(websites) ? websites : [websites]
-    websites.forEach(() => {
+    websitesOrIds = Array.isArray(websitesOrIds)
+      ? websitesOrIds
+      : [websitesOrIds]
+    websitesOrIds.forEach(() => {
       steps.push('volumeDel')
       steps.push('websiteDel')
     })
@@ -536,20 +538,24 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   async *addDelSteps(
-    websites: Website | Website[],
-  ): AsyncGenerator<void, void, void> {
+    websitesOrIds: string | Website | (string | Website)[],
+  ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 
-    websites = Array.isArray(websites) ? websites : [websites]
-    if (websites.length === 0) return
+    websitesOrIds = Array.isArray(websitesOrIds)
+      ? websitesOrIds
+      : [websitesOrIds]
+    if (websitesOrIds.length === 0) return
 
     try {
-      for (const website of websites) {
+      for (const websiteOrId of websitesOrIds) {
+        if (typeof websiteOrId !== 'string') {
+          yield
+          await this.volumeManager.del((websiteOrId as Website).volume_id)
+        }
         yield
-        await this.volumeManager.del(website.volume_id)
-        yield
-        await this.del(website)
+        await this.del(websiteOrId)
       }
     } catch (err) {
       throw Err.RequestFailed(err)

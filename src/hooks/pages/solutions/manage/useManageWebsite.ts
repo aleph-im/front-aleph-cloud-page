@@ -51,9 +51,7 @@ export function useManageWebsite(): ManageWebsite {
     const steps = manager.addDelSteps(website)
 
     try {
-      let accountWebsite
-
-      while (!accountWebsite) {
+      while (true) {
         const { done } = await steps.next()
         if (done) {
           break

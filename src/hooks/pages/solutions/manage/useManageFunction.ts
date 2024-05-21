@@ -6,6 +6,10 @@ import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { useAppState } from '@/contexts/appState'
 import { useRequestPrograms } from '@/hooks/common/useRequestEntity/useRequestPrograms'
 import { EntityDelAction } from '@/store/entity'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
 
 export type ManageFunction = {
@@ -28,6 +32,7 @@ export function useManageFunction(): ManageFunction {
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
 
   const manager = useProgramManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const handleCopyHash = useCallback(() => {
     copyAndNotify(program?.id || '')
@@ -37,14 +42,27 @@ export function useManageFunction(): ManageFunction {
     if (!manager) throw Err.ConnectYourWallet
     if (!program) throw Err.FunctionNotFound
 
+    const iSteps = await manager.getDelSteps(program)
+    const nSteps = iSteps.map((i) => stepsCatalog[i])
+    const steps = manager.addDelSteps(program)
+
     try {
-      await manager.del(program)
+      while (true) {
+        const { done } = await steps.next()
+        if (done) {
+          break
+        }
+        await next(nSteps)
+      }
 
       dispatch(new EntityDelAction({ name: 'program', keys: [program.id] }))
 
       await router.replace('/')
-    } catch (e) {}
-  }, [manager, program, dispatch, router])
+    } catch (e) {
+    } finally {
+      await stop()
+    }
+  }, [manager, program, dispatch, router, next, stop])
 
   const handleDownload = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet

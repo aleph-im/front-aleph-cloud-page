@@ -115,6 +115,9 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     domains: AddDomain | AddDomain[],
     throwOnCollision?: boolean,
   ): AsyncGenerator<void, Domain[], void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     domains = Array.isArray(domains) ? domains : [domains]
 
     domains = await this.parseDomains(domains, throwOnCollision)
@@ -123,23 +126,16 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     try {
       const content: DomainAggregate = domains.reduce((ac, cv) => {
         const { name, ref, target } = cv
-
-        const domain = {
+        ac[name] = {
           message_id: ref,
           type: target,
           updated_at: new Date().toISOString(),
         }
-
-        ac[name] = domain
-
         return ac
       }, {} as DomainAggregate)
 
+      // @note: Aggregate all signatures in 1 step
       yield
-
-      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
-        throw Err.InvalidAccount
-
       const response = await this.sdkClient.createAggregate({
         key: this.key,
         channel: this.channel,
@@ -271,12 +267,14 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     domainsOrIds: string | Domain | (string | Domain)[],
   ): Promise<CheckoutStepType[]> {
     domainsOrIds = Array.isArray(domainsOrIds) ? domainsOrIds : [domainsOrIds]
-    return domainsOrIds.map(() => 'domainDel')
+    // @note: Aggregate all signatures in 1 step
+    // return domainsOrIds.map(() => 'domainDel')
+    return domainsOrIds.length ? ['domainDel'] : []
   }
 
   async *addDelSteps(
     domainsOrIds: string | Domain | (string | Domain)[],
-  ): AsyncGenerator<void, void, void> {
+  ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 

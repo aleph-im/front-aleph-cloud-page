@@ -465,4 +465,39 @@ export class InstanceManager
     }
     throw Err.InstanceStartupFailed(node.hash, errorMsg)
   }
+
+  async getDelSteps(
+    instancesOrIds: string | Instance | (string | Instance)[],
+  ): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    instancesOrIds = Array.isArray(instancesOrIds)
+      ? instancesOrIds
+      : [instancesOrIds]
+    instancesOrIds.forEach(() => {
+      steps.push('instanceDel')
+    })
+    return steps
+  }
+
+  async *addDelSteps(
+    instancesOrIds: string | Instance | (string | Instance)[],
+    account: SuperfluidAccount,
+  ): AsyncGenerator<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    instancesOrIds = Array.isArray(instancesOrIds)
+      ? instancesOrIds
+      : [instancesOrIds]
+    if (instancesOrIds.length === 0) return
+
+    try {
+      for (const instanceOrId of instancesOrIds) {
+        yield
+        await this.del(instanceOrId, account)
+      }
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
+  }
 }
