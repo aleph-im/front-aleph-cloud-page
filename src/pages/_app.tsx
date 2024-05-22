@@ -1,10 +1,13 @@
 import type { AppProps } from 'next/app'
 import { ThemeProvider } from 'styled-components'
-import { themes, GlobalStyles } from '@aleph-front/core'
+import {
+  themes,
+  GlobalStyles,
+  Notification as NotificationProvider,
+} from '@aleph-front/core'
 import { GlobalStylesOverride } from '@/styles/global'
 import Header from '@/components/common/Header'
 import Footer from '@/components/common/Footer'
-import NotificationProvider from '@/components/common/NotificationProvider'
 import Main from '@/components/common/Main'
 import Content from '@/components/common/Content'
 import Viewport from '@/components/common/Viewport'
@@ -22,7 +25,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <GlobalStyles />
       <GlobalStylesOverride />
       <AppStateProvider>
-        <NotificationProvider>
+        <NotificationProvider max={10} timeout={2000}>
           <Viewport>
             <Sidebar />
             <Main ref={mainRef}>
