@@ -26,7 +26,6 @@ export const HiddenFileInput = forwardRef(
     ref: ForwardedRef<HTMLDivElement>,
   ) => {
     const inputRef = useRef<HTMLInputElement>(null)
-    isFolder && inputRef.current?.setAttribute('webkitdirectory', '')
 
     const handleClick = useCallback(() => {
       if (!inputRef.current) return
@@ -85,6 +84,8 @@ export const HiddenFileInput = forwardRef(
           onChange={handleChange}
           accept={accept}
           required={required}
+          directory={isFolder ? '' : undefined}
+          webkitdirectory={isFolder ? '' : undefined}
         />
       </div>
     )
