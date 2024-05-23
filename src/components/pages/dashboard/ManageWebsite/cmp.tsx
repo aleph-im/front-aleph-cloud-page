@@ -18,7 +18,7 @@ import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import { WebsiteFrameworks } from '@/domain/website'
 import { getDate, cidV0Tov1 } from '@/helpers/utils'
-import { UpdateWebsiteFolder } from '@/components/form/UpdateWebsiteFolder'
+import UpdateWebsiteFolder from '@/components/form/UpdateWebsiteFolder'
 import { useNewWebsitePage } from '@/hooks/pages/hosting/useNewWebsitePage'
 import { useEffect } from 'react'
 

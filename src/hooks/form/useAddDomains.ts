@@ -17,7 +17,7 @@ export type DomainField = {
 export const defaultValues: DomainField = {
   name: '',
   ref: '',
-  target: EntityDomainType.Instance,
+  target: EntityDomainType.IPFS,
 }
 
 export type UseDomainItemProps = {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Button,
   Dropdown,
@@ -44,11 +44,6 @@ export default function NewDomain() {
       setTarget(EntityDomainType.Instance)
     }
   }
-
-  useEffect(() => {
-    setTarget(EntityDomainType.IPFS)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   return (
     <>

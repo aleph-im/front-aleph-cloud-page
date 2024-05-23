@@ -1,2 +1,2 @@
-export { default, AddWebsiteFolder } from './cmp'
+export { default } from './cmp'
 export type { AddWebsiteFolderProps } from './types'

@@ -695,8 +695,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         .slice(0, 10)
 
       if (history.length > 0) {
-        const volumes = await this.volumeManager.getVolumes(
+        const volumes = await this.volumeManager.getAll(
           history.map((item) => item[1]),
+          1,
+          10,
         )
         return Object.fromEntries(
           history

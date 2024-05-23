@@ -236,21 +236,11 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     protected channel = defaultVolumeChannel,
   ) {}
 
-  async getAll(): Promise<Volume[]> {
-    try {
-      const response = await this.sdkClient.getMessages({
-        addresses: [this.account.address],
-        messageTypes: [MessageType.store],
-        channels: [this.channel],
-      })
-
-      return await this.parseMessages(response.messages)
-    } catch (err) {
-      return []
-    }
-  }
-
-  async getVolumes(ids: string[], page = 1, pageSize = 5): Promise<Volume[]> {
+  async getAll(
+    ids?: string[],
+    page?: number,
+    pageSize?: number,
+  ): Promise<Volume[]> {
     try {
       const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
