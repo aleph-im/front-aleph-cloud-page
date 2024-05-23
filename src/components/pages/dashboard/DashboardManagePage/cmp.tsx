@@ -14,7 +14,7 @@ export default function DashboardManagePage() {
 
   if (!type) {
     return (
-      <Container as={'div'}>
+      <Container>
         <NoisyContainer tw="my-4">Loading...</NoisyContainer>
       </Container>
     )

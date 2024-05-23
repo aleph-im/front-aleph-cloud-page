@@ -84,7 +84,6 @@ export const HiddenFileInput = forwardRef(
           ref={inputRef}
           onChange={handleChange}
           accept={accept}
-          as={'input'}
           required={required}
         />
       </div>

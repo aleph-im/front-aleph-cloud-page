@@ -30,7 +30,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="1">Choose your framework</SectionTitle>
           <p tw="mb-6">
             Select your web development framework. This step provides guidance
@@ -43,7 +43,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 py-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="2">Upload your website</SectionTitle>
           <p tw="mb-6">
             Once your website is ready, upload your static folder here. This
@@ -55,7 +55,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 py-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="3">Name and tags</SectionTitle>
           <p tw="mb-6">
             Organize and identify your websites more effectively by assigning a
@@ -68,7 +68,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
       </section>
 
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="4">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
             Customize your website with our Advanced Configuration Options. Add

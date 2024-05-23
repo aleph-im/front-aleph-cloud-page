@@ -34,7 +34,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <Container $variant="xl" as={'div'}>
+      <Container $variant="xl">
         <div tw="py-10">
           <Tabs
             selected={tabId}

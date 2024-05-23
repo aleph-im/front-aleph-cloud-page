@@ -51,7 +51,7 @@ export default function ManageWebsite() {
   if (!website) {
     return (
       <>
-        <Container as={'div'}>
+        <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
@@ -61,7 +61,7 @@ export default function ManageWebsite() {
   return (
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="floppy-disk" tw="mr-4" className="text-main0" />
@@ -115,7 +115,7 @@ export default function ManageWebsite() {
               <div>
                 <div className="tp-info text-main0">FRAMEWORK</div>
                 <div>
-                  <Text as={'span'}>
+                  <Text>
                     {WebsiteFrameworks[website.metadata.framework].name}
                   </Text>
                 </div>
@@ -123,13 +123,13 @@ export default function ManageWebsite() {
               <div>
                 <div className="tp-info text-main0">VERSION</div>
                 <div>
-                  <Text as={'span'}>{website.version}</Text>
+                  <Text>{website.version}</Text>
                 </div>
               </div>
               <div>
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
-                  <Text className="fs-10 tp-body1" as={'span'}>
+                  <Text className="fs-10 tp-body1">
                     {humanReadableSize(refVolume?.size, 'MiB')}
                   </Text>
                 </div>
@@ -137,7 +137,7 @@ export default function ManageWebsite() {
               <div>
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <Text className="fs-10 tp-body1" as={'span'}>
+                  <Text className="fs-10 tp-body1">
                     {getDate(website.created_at)}
                   </Text>
                 </div>
@@ -145,9 +145,7 @@ export default function ManageWebsite() {
               <div>
                 <div className="tp-info text-main0">UPDATED ON</div>
                 <div>
-                  <Text className="fs-10 tp-body1" as={'span'}>
-                    {website.updated_at}
-                  </Text>
+                  <Text className="fs-10 tp-body1">{website.updated_at}</Text>
                 </div>
               </div>
             </div>
@@ -161,7 +159,7 @@ export default function ManageWebsite() {
                 referrerPolicy="no-referrer"
               >
                 <IconText iconName="square-up-right">
-                  <Text as={'span'}>{default_url}</Text>
+                  <Text>{default_url}</Text>
                 </IconText>
               </a>
               <IconText
@@ -180,7 +178,7 @@ export default function ManageWebsite() {
                   <div className="tp-info text-main0">ALTERNATIVE GATEWAYS</div>
                 </IconText>
               </a>
-              <Text as={'span'}>
+              <Text>
                 {`https://${cidV1}.ipfs.`}
                 <span tw="text-purple-500">{'<gateway-hostname>'}</span>
               </Text>
@@ -209,7 +207,7 @@ export default function ManageWebsite() {
                         referrerPolicy="no-referrer"
                       >
                         <IconText iconName="square-up-right">
-                          <Text as={'span'}>{limo}</Text>
+                          <Text>{limo}</Text>
                         </IconText>
                       </a>
                       <IconText
@@ -221,9 +219,7 @@ export default function ManageWebsite() {
                 })
               ) : (
                 <div tw="flex flex-col">
-                  <Text as={'span'}>
-                    Access your ENS and setup the content hash to:
-                  </Text>
+                  <Text>Access your ENS and setup the content hash to:</Text>
                   <IconText
                     iconName="copy"
                     onClick={() => copyAndNotify(`ipfs://${cidV1}` ?? '')}
@@ -232,7 +228,7 @@ export default function ManageWebsite() {
                       ipfs://{cidV1}
                     </span>
                   </IconText>
-                  <Text as={'span'} tw="mt-1">
+                  <Text tw="mt-1">
                     Then, your website will be accessible via:
                     <span tw="ml-2 not-italic text-purple-700">
                       {'https://'}
@@ -268,7 +264,7 @@ export default function ManageWebsite() {
             </div>
             <div className="tp-info text-main0">IPFS CID</div>
             <div tw="flex flex-row mb-5">
-              <Text as={'span'}>{cidV1}</Text>
+              <Text>{cidV1}</Text>
               <IconText
                 iconName="copy"
                 onClick={() => copyAndNotify(cidV1 ?? '')}
@@ -303,7 +299,7 @@ export default function ManageWebsite() {
                           <div tw="ml-10">
                             <div className="tp-info text-main0">CREATED ON</div>
                             <div>
-                              <Text className="fs-10 tp-body1" as={'span'}>
+                              <Text className="fs-10 tp-body1">
                                 {volume.date}
                               </Text>
                             </div>
@@ -326,7 +322,7 @@ export default function ManageWebsite() {
                             referrerPolicy="no-referrer"
                           >
                             <IconText iconName="square-up-right">
-                              <Text as={'span'}>{legacy_link}</Text>
+                              <Text>{legacy_link}</Text>
                             </IconText>
                           </a>
                           <IconText
@@ -339,7 +335,7 @@ export default function ManageWebsite() {
                   })}
               </>
             ) : (
-              <Text as={'span'}>No previous version</Text>
+              <Text>No previous version</Text>
             )}
           </NoisyContainer>
 

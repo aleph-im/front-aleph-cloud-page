@@ -25,7 +25,7 @@ export default function ManageFunction() {
   if (!func) {
     return (
       <>
-        <Container as={'div'}>
+        <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
@@ -39,7 +39,7 @@ export default function ManageFunction() {
   return (
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
@@ -103,14 +103,14 @@ export default function ManageFunction() {
               <div>
                 <div className="tp-info text-main0">CORES</div>
                 <div>
-                  <Text as={'span'}>{func.resources.vcpus} x86 64bit</Text>
+                  <Text>{func.resources.vcpus} x86 64bit</Text>
                 </div>
               </div>
 
               <div>
                 <div className="tp-info text-main0">RAM</div>
                 <div>
-                  <Text as={'span'}>
+                  <Text>
                     {convertByteUnits(func.resources.memory, {
                       from: 'MiB',
                       to: 'GiB',
@@ -123,14 +123,14 @@ export default function ManageFunction() {
               <div>
                 <div className="tp-info text-main0">TIMEOUT</div>
                 <div>
-                  <Text as={'span'}>{`${func.resources.seconds}s`}</Text>
+                  <Text>{`${func.resources.seconds}s`}</Text>
                 </div>
               </div>
 
               <div>
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
-                  <Text className="fs-10 tp-body1" as={'span'}>
+                  <Text className="fs-10 tp-body1">
                     {humanReadableSize(func?.size || 0, 'MiB')}
                   </Text>
                 </div>
@@ -139,9 +139,7 @@ export default function ManageFunction() {
               <div>
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <Text className="fs-10 tp-body1" as={'span'}>
-                    {func.date}
-                  </Text>
+                  <Text className="fs-10 tp-body1">{func.date}</Text>
                 </div>
               </div>
             </div>
@@ -156,7 +154,7 @@ export default function ManageFunction() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text as={'span'}>{ellipseText(func.url, 80)}</Text>
+                    <Text>{ellipseText(func.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -172,7 +170,7 @@ export default function ManageFunction() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text as={'span'}>{ellipseText(func.urlVM, 80)}</Text>
+                    <Text>{ellipseText(func.urlVM, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -192,7 +190,7 @@ export default function ManageFunction() {
             {func.runtime.comment && (
               <div tw="mt-5">
                 <div className="tp-info text-main0">COMMENT</div>
-                <Text as={'span'}>{func.runtime.comment}</Text>
+                <Text>{func.runtime.comment}</Text>
               </div>
             )}
             <Separator />
@@ -218,7 +216,7 @@ export default function ManageFunction() {
             {func.code.entrypoint && (
               <div tw="mt-5">
                 <div className="tp-info text-main0">CODE ENTRYPOINT</div>
-                <Text as={'span'}>{func.code.entrypoint}</Text>
+                <Text>{func.code.entrypoint}</Text>
               </div>
             )}
             {volumes.length > 0 && (

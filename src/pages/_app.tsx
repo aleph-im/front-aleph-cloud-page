@@ -26,9 +26,9 @@ export default function App({ Component, pageProps }: AppProps) {
         <NotificationProvider>
           <Viewport>
             <Sidebar />
-            <Main ref={mainRef} as={'main'}>
+            <Main ref={mainRef}>
               <Header />
-              <Content ref={contentRef} as={'div'}>
+              <Content ref={contentRef}>
                 <Component
                   {...{
                     ...pageProps,

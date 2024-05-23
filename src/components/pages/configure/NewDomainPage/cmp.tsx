@@ -54,7 +54,7 @@ export default function NewDomain() {
     <>
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container as={'div'}>
+          <Container>
             <SectionTitle number="1">Custom domain</SectionTitle>
             <p tw="mb-6">
               Assign a user-friendly domain to your website, instance or
@@ -80,7 +80,7 @@ export default function NewDomain() {
           </Container>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container as={'div'}>
+          <Container>
             <SectionTitle number="2">Select Resource</SectionTitle>
             <p tw="mb-6">
               You&apos;ll need to specify the resource your custom domain will

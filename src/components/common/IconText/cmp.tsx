@@ -5,10 +5,8 @@ import { StyledContainer, StyledIcon } from './styles'
 
 export const IconText = ({ children, onClick, iconName }: IconTextProps) => {
   return (
-    <StyledContainer onClick={onClick} as={'div'}>
-      <Text tw="break-all" as={'span'}>
-        {children}
-      </Text>
+    <StyledContainer onClick={onClick}>
+      <Text tw="break-all">{children}</Text>
       <StyledIcon
         name={iconName}
         tw="cursor-pointer ml-2"

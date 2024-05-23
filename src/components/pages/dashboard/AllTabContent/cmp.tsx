@@ -54,9 +54,7 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                           referrerPolicy="no-referrer"
                         >
                           <IconText iconName="square-up-right">
-                            <Text tw="not-italic! font-bold!" as={'span'}>
-                              {row.name}
-                            </Text>
+                            <Text tw="not-italic! font-bold!">{row.name}</Text>
                           </IconText>
                         </a>
                       ),

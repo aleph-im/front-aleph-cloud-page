@@ -33,12 +33,12 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 py-0 md:py-8">
-        <Container as={'div'}>
+        <Container>
           <NewEntityTab selected="function" />
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="1">Code to execute</SectionTitle>
           <p>
             If your code has any dependencies, you can upload them separately in
@@ -48,7 +48,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 py-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="2">Type of scheduling</SectionTitle>
           <p tw="mb-6">
             Configure if this program should be running continuously,
@@ -59,7 +59,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 py-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="3">Select an instance size</SectionTitle>
           <p tw="mb-6">
             Select the hardware resources allocated to your functions, ensuring
@@ -75,7 +75,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 py-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="4">Name and tags</SectionTitle>
           <p tw="mb-6">
             Organize and identify your functions more effectively by assigning a
@@ -88,7 +88,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
       </section>
 
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="5">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
             Customize your function with our Advanced Configuration Options. Add
@@ -107,12 +107,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
                   Add volumes
                 </TextGradient>
                 {values.specs && (
-                  <BorderBox
-                    $color="main2"
-                    tw="my-4"
-                    className="tp-body1"
-                    as={'div'}
-                  >
+                  <BorderBox $color="main2" tw="my-4" className="tp-body1">
                     Good news! Your selected package already includes{' '}
                     <span className="text-main0">
                       {convertByteUnits(values.specs.storage, {

@@ -111,7 +111,7 @@ export const Header = () => {
 
   return (
     <>
-      <StyledHeader $breakpoint={breakpoint} as={'header'}>
+      <StyledHeader $breakpoint={breakpoint}>
         <StyledNavbarMobile
           {...{
             routes,
@@ -126,7 +126,7 @@ export const Header = () => {
             logoTarget: '_blank',
           }}
         />
-        <StyledNavbarDesktop $breakpoint={breakpoint} as={'div'}>
+        <StyledNavbarDesktop $breakpoint={breakpoint}>
           <AutoBreadcrumb names={breadcrumbNames} />
           <AccountButtonMemo {...accountProps} />
         </StyledNavbarDesktop>

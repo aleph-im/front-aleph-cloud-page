@@ -28,7 +28,7 @@ export default function ManageInstance() {
   if (!instance) {
     return (
       <>
-        <Container as={'div'}>
+        <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
@@ -43,7 +43,7 @@ export default function ManageInstance() {
   return (
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
@@ -101,14 +101,14 @@ export default function ManageInstance() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">CORES</div>
                 <div>
-                  <Text as={'span'}>{instance.resources.vcpus} x86 64bit</Text>
+                  <Text>{instance.resources.vcpus} x86 64bit</Text>
                 </div>
               </div>
 
               <div tw="mr-5">
                 <div className="tp-info text-main0">RAM</div>
                 <div>
-                  <Text as={'span'}>
+                  <Text>
                     {convertByteUnits(instance.resources.memory, {
                       from: 'MiB',
                       to: 'GiB',
@@ -121,7 +121,7 @@ export default function ManageInstance() {
               <div tw="mr-5">
                 <div className="tp-info text-main0">HDD</div>
                 <div>
-                  <Text as={'span'}>
+                  <Text>
                     {convertByteUnits(instance.rootfs.size_mib, {
                       from: 'MiB',
                       to: 'GiB',
@@ -142,7 +142,7 @@ export default function ManageInstance() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text as={'span'}>{ellipseText(instance.url, 80)}</Text>
+                    <Text>{ellipseText(instance.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -160,7 +160,7 @@ export default function ManageInstance() {
                 <div>
                   {status ? (
                     <IconText iconName="copy" onClick={handleCopyConnect}>
-                      <Text as={'span'}>&gt;_ ssh root@{status.vm_ipv6}</Text>
+                      <Text>&gt;_ ssh root@{status.vm_ipv6}</Text>
                     </IconText>
                   ) : (
                     <div tw="flex items-end">
@@ -182,7 +182,7 @@ export default function ManageInstance() {
                 <div>
                   {status && (
                     <IconText iconName="copy" onClick={handleCopyIpv6}>
-                      <Text as={'span'}>{status.vm_ipv6}</Text>
+                      <Text>{status.vm_ipv6}</Text>
                     </IconText>
                   )}
                 </div>
@@ -209,7 +209,7 @@ export default function ManageInstance() {
                           referrerPolicy="no-referrer"
                         >
                           <IconText iconName="square-up-right">
-                            <Text as={'span'}>{key.label}</Text>
+                            <Text>{key.label}</Text>
                           </IconText>
                         </Link>
                       </div>
@@ -229,7 +229,7 @@ export default function ManageInstance() {
                 <div tw="my-5">
                   <div className="tp-info text-main0">NAME</div>
                   <div>
-                    <Text as={'span'}>{status.node.node_id}</Text>
+                    <Text>{status.node.node_id}</Text>
                   </div>
                 </div>
 
@@ -243,9 +243,7 @@ export default function ManageInstance() {
                       referrerPolicy="no-referrer"
                     >
                       <IconText iconName="square-up-right">
-                        <Text as={'span'}>
-                          {ellipseText(status.node.url, 80)}
-                        </Text>
+                        <Text>{ellipseText(status.node.url, 80)}</Text>
                       </IconText>
                     </a>
                   </div>

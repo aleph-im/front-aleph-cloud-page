@@ -64,7 +64,7 @@ const CheckoutSummarySpecsLine = ({
   )
 
   return (
-    <StyledHoldingSummaryLine as={'div'}>
+    <StyledHoldingSummaryLine>
       <div>
         <div>{EntityTypeName[type].toUpperCase()}</div>
       </div>
@@ -106,11 +106,11 @@ const CheckoutSummaryVolumeLine = ({
   const fullDiscount = !cost.cost
 
   return (
-    <StyledHoldingSummaryLine as={'div'}>
+    <StyledHoldingSummaryLine>
       <div>
         <div>
           STORAGE
-          <Label tw="ml-2" as={'span'}>
+          <Label tw="ml-2">
             {volume.volumeType === VolumeType.Persistent
               ? 'PERSISTENT'
               : 'VOLUME'}
@@ -205,7 +205,7 @@ const CheckoutSummaryWebsiteLine = ({
   if (!cost) return <></>
 
   return (
-    <StyledHoldingSummaryLine as={'div'}>
+    <StyledHoldingSummaryLine>
       <div>
         <div>WEBSITE</div>
       </div>
@@ -226,7 +226,7 @@ const CheckoutSummaryDomainLine = ({
   domain,
 }: CheckoutSummaryDomainLineProps) => {
   return (
-    <StyledHoldingSummaryLine as={'div'}>
+    <StyledHoldingSummaryLine>
       <div>CUSTOM DOMAIN</div>
       <div>{domain.name}</div>
       <div>-</div>
@@ -296,7 +296,7 @@ CheckoutSummaryProps) => {
         className="fx-noise-light fx-grain-4"
         tw="px-0 pt-6 pb-24 md:pt-16 md:pb-32 md:mt-auto"
       >
-        <Container as={'div'}>
+        <Container>
           <div className="bg-base1" tw="p-6">
             <TextGradient forwardedAs="h2" type="h5" tw="mb-1">
               Checkout summary
@@ -333,11 +333,7 @@ CheckoutSummaryProps) => {
 
             <div tw="my-6 p-6">
               <div tw="max-w-full overflow-auto">
-                <StyledHoldingSummaryLine
-                  $isHeader
-                  className="tp-body3 fs-12"
-                  as={'div'}
-                >
+                <StyledHoldingSummaryLine $isHeader className="tp-body3 fs-12">
                   <div>UNLOCKED</div>
                   <div>CURRENT WALLET {ellipseAddress(address)}</div>
                   <div>
@@ -379,7 +375,7 @@ CheckoutSummaryProps) => {
                   />
                 )}
                 {type === EntityType.Program && (
-                  <StyledHoldingSummaryLine as={'div'}>
+                  <StyledHoldingSummaryLine>
                     <div>TYPE</div>
                     <div>{isPersistent ? 'persistent' : 'on-demand'}</div>
                     <div>-</div>
@@ -394,7 +390,7 @@ CheckoutSummaryProps) => {
                       />
                     )
                   })}
-                <StyledHoldingSummaryLine as={'div'}>
+                <StyledHoldingSummaryLine>
                   <div></div>
                   <div className="text-main0 tp-body2">
                     {paymentMethod === PaymentMethod.Hold
@@ -409,7 +405,7 @@ CheckoutSummaryProps) => {
                 </StyledHoldingSummaryLine>
                 {paymentMethod === PaymentMethod.Stream &&
                   cost?.totalStreamCost && (
-                    <StyledHoldingSummaryLine as={'div'}>
+                    <StyledHoldingSummaryLine>
                       <div></div>
                       <div className="text-main0 tp-body2">Min. required</div>
                       <div>

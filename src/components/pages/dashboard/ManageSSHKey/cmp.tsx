@@ -18,7 +18,7 @@ export default function ManageSSHKey() {
   if (!sshKey) {
     return (
       <>
-        <Container as={'div'}>
+        <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
       </>
@@ -31,7 +31,7 @@ export default function ManageSSHKey() {
   return (
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="key" tw="mr-4" className="text-main0" />
@@ -85,7 +85,7 @@ export default function ManageSSHKey() {
                 <div className="tp-info text-main0">LABEL</div>
                 <div>
                   <IconText iconName="copy" onClick={handleCopyLabel}>
-                    <Text as={'span'}>{sshKey.label}</Text>
+                    <Text>{sshKey.label}</Text>
                   </IconText>
                 </div>
               </div>
@@ -101,7 +101,7 @@ export default function ManageSSHKey() {
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text as={'span'}>{ellipseText(sshKey.url, 80)}</Text>
+                    <Text>{ellipseText(sshKey.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -110,9 +110,7 @@ export default function ManageSSHKey() {
             <div tw="my-5">
               <div className="tp-info text-main0">CREATED ON</div>
               <div>
-                <Text className="fs-10 tp-body1" as={'span'}>
-                  {sshKey.date}
-                </Text>
+                <Text className="fs-10 tp-body1">{sshKey.date}</Text>
               </div>
             </div>
           </NoisyContainer>

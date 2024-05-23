@@ -40,7 +40,6 @@ const SelectInstanceImageItem = memo(
           ref={index === 0 ? ref : undefined}
           tabIndex={0}
           onKeyDown={handleKeyDown}
-          as={'div'}
         >
           <img
             src={`${imgPrefix}/image/${option.dist}.svg`}

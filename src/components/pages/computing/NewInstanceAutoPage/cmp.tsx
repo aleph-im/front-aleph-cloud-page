@@ -30,12 +30,12 @@ export default function NewInstanceHoldPage({ mainRef }: PageProps) {
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 py-0 md:py-8">
-        <Container as={'div'}>
+        <Container>
           <NewEntityTab selected="instance" />
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="1">Select your tier</SectionTitle>
           <p>
             Please select one of the available instance tiers as a base for your
@@ -53,7 +53,7 @@ export default function NewInstanceHoldPage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="2">Choose an image</SectionTitle>
           <p>
             Chose a base image for your VM. It’s the base system that you will
@@ -65,7 +65,7 @@ export default function NewInstanceHoldPage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="3">Configure SSH Key</SectionTitle>
           <p>
             Access your cloud instances securely. Give existing key’s below
@@ -79,7 +79,7 @@ export default function NewInstanceHoldPage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="4">Name and tags</SectionTitle>
           <p tw="mb-6">
             Organize and identify your instances more effectively by assigning a
@@ -91,7 +91,7 @@ export default function NewInstanceHoldPage({ mainRef }: PageProps) {
         </Container>
       </section>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="5">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
             Customize your instance with our Advanced Configuration Options. Add

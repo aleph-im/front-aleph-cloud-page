@@ -11,7 +11,7 @@ export default function NewSSHKey() {
   return (
     <Form onSubmit={handleSubmit} errors={errors}>
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container as={'div'}>
+        <Container>
           <SectionTitle number="1">Configure SSH Key</SectionTitle>
           <p tw="mb-6">
             Access your cloud instances securely. Give existing key’s below
