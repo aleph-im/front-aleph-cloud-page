@@ -28,36 +28,37 @@ export function useDashboardPage(): UseDashboardPageReturn {
   const entities = useAccountEntities()
 
   const all: AnyEntityRow[] = useMemo(() => {
-    return Object.values(entities)
-      .flatMap((entity) => entity as AnyEntity[])
-      .map((entity) => {
-        const { id, type, confirmed, date } = entity
-        const name =
-          (type !== EntityType.Volume
-            ? entity.name
-            : ellipseAddress(entity.id || '')) || `Unknown ${type}`
-        const size = entity.size || 0
-        const url =
-          entity.type === EntityType.Domain ||
-          entity.type === EntityType.Program ||
-          entity.type === EntityType.Website
-            ? entity.ref_url
-            : entity.url
+    return (
+      Object.values(entities)
+        .flatMap((entity) => entity as AnyEntity[])
+        .map((entity) => {
+          const { id, type, confirmed, date } = entity
+          const name =
+            (type !== EntityType.Volume
+              ? entity.name
+              : ellipseAddress(entity.id || '')) || `Unknown ${type}`
+          const size = entity.size || 0
+          const url =
+            entity.type === EntityType.Domain ||
+            entity.type === EntityType.Program ||
+            entity.type === EntityType.Website
+              ? entity.ref_url
+              : entity.url
 
-        return {
-          id,
-          type,
-          name,
-          size,
-          date,
-          url,
-          confirmed,
-        } as AnyEntityRow
-      })
-  }, [entities]).sort((a, b) =>
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    (b.date ?? b.updated_at!).localeCompare(a.date ?? a.updated_at!),
-  )
+          return {
+            id,
+            type,
+            name,
+            size,
+            date,
+            url,
+            confirmed,
+          } as AnyEntityRow
+        })
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .sort((a, b) => b.date!.localeCompare(a.date!))
+    )
+  }, [entities])
 
   return {
     ...entities,

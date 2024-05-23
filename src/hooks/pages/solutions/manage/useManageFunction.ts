@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { Program } from '@/domain/program'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
+import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { useAppState } from '@/contexts/appState'
 import { useRequestPrograms } from '@/hooks/common/useRequestEntity/useRequestPrograms'
@@ -34,9 +35,7 @@ export function useManageFunction(): ManageFunction {
   const manager = useProgramManager()
   const { next, stop } = useCheckoutNotification({})
 
-  const handleCopyHash = useCallback(() => {
-    copyAndNotify(program?.id || '')
-  }, [copyAndNotify, program])
+  const handleCopyHash = useCopyHash(program)
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet

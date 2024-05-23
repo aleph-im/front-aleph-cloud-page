@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { Volume } from '@/domain/volume'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
+import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { useAppState } from '@/contexts/appState'
 import { useRequestVolumes } from '@/hooks/common/useRequestEntity/useRequestVolumes'
@@ -28,14 +28,10 @@ export function useManageVolume(): ManageVolume {
   const { entities } = useRequestVolumes({ id: hash as string })
   const [volume] = entities || []
 
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
-
   const manager = useVolumeManager()
   const { next, stop } = useCheckoutNotification({})
 
-  const handleCopyHash = useCallback(() => {
-    copyAndNotify(volume?.id || '')
-  }, [copyAndNotify, volume])
+  const handleCopyHash = useCopyHash(volume)
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet

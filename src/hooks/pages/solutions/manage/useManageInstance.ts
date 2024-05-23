@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { Instance, InstanceStatus } from '@/domain/instance'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
+import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useAppState } from '@/contexts/appState'
 import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
@@ -65,9 +66,7 @@ export function useManageInstance(): ManageInstance {
     getMapped()
   }, [sshKeyManager, instance])
 
-  const handleCopyHash = useCallback(() => {
-    copyAndNotify(instance?.id || '')
-  }, [copyAndNotify, instance])
+  const handleCopyHash = useCopyHash(instance)
 
   const handleCopyConnect = useCallback(() => {
     copyAndNotify(`ssh root@${status?.vm_ipv6}`)

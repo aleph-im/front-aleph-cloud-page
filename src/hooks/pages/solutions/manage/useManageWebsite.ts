@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { Website, HistoryVolumes } from '@/domain/website'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
+import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { useAppState } from '@/contexts/appState'
 import { useHashToEntity } from './useHashToEntity'
@@ -33,8 +33,6 @@ export function useManageWebsite(): ManageWebsite {
   const { entities } = useRequestWebsites({ id: hash as string })
   const [website] = entities || []
 
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
-
   const refVolume = useHashToEntity(website?.volume_id) as Volume
 
   const manager = useWebsiteManager()
@@ -43,9 +41,7 @@ export function useManageWebsite(): ManageWebsite {
   >()
   const { next, stop } = useCheckoutNotification({})
 
-  const handleCopyHash = useCallback(() => {
-    copyAndNotify(website?.id || '')
-  }, [copyAndNotify, website])
+  const handleCopyHash = useCopyHash(website)
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
