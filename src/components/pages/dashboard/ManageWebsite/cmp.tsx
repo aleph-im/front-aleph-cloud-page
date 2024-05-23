@@ -339,7 +339,7 @@ export default function ManageWebsite() {
                   })}
               </>
             ) : (
-              <Text as={'span'}>No previous versions</Text>
+              <Text as={'span'}>No previous version</Text>
             )}
           </NoisyContainer>
 

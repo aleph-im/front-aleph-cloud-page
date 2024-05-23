@@ -79,14 +79,15 @@ export function useManageWebsite(): ManageWebsite {
       if (!website) throw Err.WebsiteNotFound
 
       const domains = await manager.getDomains(website)
-      const iSteps = await manager.getUpdateSteps(
+      const iSteps = await manager.getUpdateSteps(cid, version, domains)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
+      const steps = manager.addUpdateSteps(
         website,
         cid,
         version,
         domains,
+        historyVolumes,
       )
-      const nSteps = iSteps.map((i) => stepsCatalog[i])
-      const steps = manager.addUpdateSteps(website, cid, version, domains)
 
       try {
         let accountWebsite
@@ -109,7 +110,7 @@ export function useManageWebsite(): ManageWebsite {
         await stop()
       }
     },
-    [manager, website, dispatch, router, next, stop],
+    [manager, website, historyVolumes, dispatch, router, next, stop],
   )
 
   /* const handleDownload = useCallback(async () => {

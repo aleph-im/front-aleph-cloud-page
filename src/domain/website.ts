@@ -578,7 +578,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   async getUpdateSteps(
-    website: Website,
     cid?: string,
     version?: string,
     domains?: Domain[],
@@ -597,6 +596,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     cid?: string,
     version?: string,
     domains?: Domain[],
+    history?: HistoryVolumes,
   ): AsyncGenerator<void, Website, void> {
     try {
       if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
@@ -627,6 +627,12 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       if (!volume_id) throw Err.MissingVolumeData
 
       // Publish website
+      const last_10_history =
+        (history &&
+          Object.fromEntries(
+            Object.entries(history).map((item) => [item[0], item[1].id]),
+          )) ||
+        {}
       const date = new Date().getTime() / 1000
       const content: Record<string, any> = {
         [website.id]: {
@@ -636,7 +642,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
           volume_id: volume_id,
           history: {
             [website.version.toString()]: website.volume_id,
-            ...website.history,
+            ...last_10_history,
           },
           ens: website.ens,
           created_at: website.created_at,
@@ -686,7 +692,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     if (website?.history) {
       const history: [string, string][] = Object.entries(website.history)
         .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
-        .slice(0, 5)
+        .slice(0, 10)
 
       if (history.length > 0) {
         const volumes = await this.volumeManager.getVolumes(
