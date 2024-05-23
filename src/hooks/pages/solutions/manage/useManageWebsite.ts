@@ -53,7 +53,7 @@ export function useManageWebsite(): ManageWebsite {
 
     const iSteps = await manager.getDelSteps(website)
     const nSteps = iSteps.map((i) => stepsCatalog[i])
-    const steps = manager.addDelSteps(website)
+    const steps = manager.delSteps(website)
 
     try {
       while (true) {
@@ -81,7 +81,7 @@ export function useManageWebsite(): ManageWebsite {
       const domains = await manager.getDomains(website)
       const iSteps = await manager.getUpdateSteps(cid, version, domains)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
-      const steps = manager.addUpdateSteps(
+      const steps = manager.updateSteps(
         website,
         cid,
         version,

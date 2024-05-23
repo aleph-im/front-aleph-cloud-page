@@ -63,7 +63,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     async (state: NewDomainFormState) => {
       if (!manager) throw Err.ConnectYourWallet
 
-      const iSteps = await manager.getSteps(state)
+      const iSteps = await manager.getAddSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
       const steps = manager.addSteps(state)

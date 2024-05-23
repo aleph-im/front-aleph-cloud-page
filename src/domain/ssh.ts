@@ -128,7 +128,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     }
   }
 
-  async getSteps(
+  async getAddSteps(
     sshKeys: AddSSHKey | AddSSHKey[],
     throwOnCollision?: boolean,
   ): Promise<CheckoutStepType[]> {
@@ -198,7 +198,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     return sshKeysOrIds.length ? ['sshDel'] : []
   }
 
-  async *addDelSteps(
+  async *delSteps(
     sshKeysOrIds: string | SSHKey | (string | SSHKey)[],
   ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))

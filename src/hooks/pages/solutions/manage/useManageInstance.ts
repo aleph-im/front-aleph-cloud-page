@@ -95,7 +95,7 @@ export function useManageInstance(): ManageInstance {
       const superfluidAccount = createFromAvalancheAccount(account)
       const iSteps = await manager.getDelSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
-      const steps = manager.addDelSteps(instance, superfluidAccount)
+      const steps = manager.delSteps(instance, superfluidAccount)
 
       while (true) {
         const { done } = await steps.next()

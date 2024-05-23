@@ -297,7 +297,7 @@ export class InstanceManager
     return response
   }
 
-  async getSteps(newInstance: AddInstance): Promise<CheckoutStepType[]> {
+  async getAddSteps(newInstance: AddInstance): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
     const { sshKeys, volumes = [], domains = [] } = newInstance
 
@@ -477,7 +477,7 @@ export class InstanceManager
     return steps
   }
 
-  async *addDelSteps(
+  async *delSteps(
     instancesOrIds: string | Instance | (string | Instance)[],
     account: SuperfluidAccount,
   ): AsyncGenerator<void> {

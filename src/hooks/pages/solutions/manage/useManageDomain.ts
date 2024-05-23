@@ -65,7 +65,7 @@ export function useManageDomain(): ManageDomain {
 
     const iSteps = await manager.getDelSteps(domain)
     const nSteps = iSteps.map((i) => stepsCatalog[i])
-    const steps = manager.addDelSteps(domain)
+    const steps = manager.delSteps(domain)
 
     try {
       while (true) {

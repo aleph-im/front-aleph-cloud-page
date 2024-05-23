@@ -464,7 +464,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     return yield* this.domainManager.addSteps(parsedDomains, false)
   }
 
-  async getSteps(newWebsite: AddWebsite): Promise<CheckoutStepType[]> {
+  async getAddSteps(newWebsite: AddWebsite): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
     const valid = await this.parseNewWebsite(newWebsite)
     if (valid) {
@@ -541,7 +541,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     return steps
   }
 
-  async *addDelSteps(
+  async *delSteps(
     websitesOrIds: string | Website | (string | Website)[],
   ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
@@ -591,7 +591,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     return steps
   }
 
-  async *addUpdateSteps(
+  async *updateSteps(
     website: Website,
     cid?: string,
     version?: string,

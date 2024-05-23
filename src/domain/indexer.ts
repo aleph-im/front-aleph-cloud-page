@@ -88,7 +88,7 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
   ) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getSteps(entity: AddIndexer | AddIndexer[]): Promise<CheckoutStepType[]> {
+  getAddSteps(entity: AddIndexer | AddIndexer[]): Promise<CheckoutStepType[]> {
     throw Err.MethodNotImplemented
   }
 
@@ -199,7 +199,7 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
     return indexersOrIds.map(() => 'indexerDel') */
   }
 
-  async *addDelSteps(
+  async *delSteps(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     indexersOrIds: string | Indexer | (string | Indexer)[],
   ): AsyncGenerator<void> {

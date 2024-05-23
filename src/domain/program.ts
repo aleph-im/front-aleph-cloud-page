@@ -203,7 +203,7 @@ export class ProgramManager
     return downloadBlob(blob, `VM_${program.id.slice(-12)}.zip`)
   }
 
-  async getSteps(newInstance: AddProgram): Promise<CheckoutStepType[]> {
+  async getAddSteps(newInstance: AddProgram): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
     const { domains = [] } = newInstance
 
@@ -339,7 +339,7 @@ export class ProgramManager
     return steps
   }
 
-  async *addDelSteps(
+  async *delSteps(
     programsOrIds: string | Program | (string | Program)[],
   ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))

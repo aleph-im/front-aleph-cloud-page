@@ -341,7 +341,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return downloadBlob(blob, `Volume_${volumeOrId.slice(-12)}.sqsh`)
   }
 
-  async getSteps(
+  async getAddSteps(
     volumes: AddVolume | AddVolume[],
   ): Promise<CheckoutStepType[]> {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
@@ -400,7 +400,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return volumesOrIds.length ? ['volumeDel'] : []
   }
 
-  async *addDelSteps(
+  async *delSteps(
     volumesOrIds: string | Volume | (string | Volume)[],
   ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))

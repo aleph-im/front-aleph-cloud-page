@@ -163,7 +163,7 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
       // @todo: Refactor this
       const superfluidAccount = createFromAvalancheAccount(account)
 
-      const iSteps = await manager.getSteps(state)
+      const iSteps = await manager.getAddSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
       const steps = manager.addSteps(

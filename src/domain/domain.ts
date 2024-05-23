@@ -185,7 +185,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     return response
   }
 
-  async getSteps(
+  async getAddSteps(
     domains: AddDomain | AddDomain[],
     throwOnCollision?: boolean,
   ): Promise<CheckoutStepType[]> {
@@ -272,7 +272,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     return domainsOrIds.length ? ['domainDel'] : []
   }
 
-  async *addDelSteps(
+  async *delSteps(
     domainsOrIds: string | Domain | (string | Domain)[],
   ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))

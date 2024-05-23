@@ -47,7 +47,7 @@ export function useManageSSHKey(): ManageSSHKey {
 
     const iSteps = await manager.getDelSteps(sshKey)
     const nSteps = iSteps.map((i) => stepsCatalog[i])
-    const steps = manager.addDelSteps(sshKey)
+    const steps = manager.delSteps(sshKey)
 
     try {
       while (true) {

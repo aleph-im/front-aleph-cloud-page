@@ -44,7 +44,7 @@ export function useManageFunction(): ManageFunction {
 
     const iSteps = await manager.getDelSteps(program)
     const nSteps = iSteps.map((i) => stepsCatalog[i])
-    const steps = manager.addDelSteps(program)
+    const steps = manager.delSteps(program)
 
     try {
       while (true) {

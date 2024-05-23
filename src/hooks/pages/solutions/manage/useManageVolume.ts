@@ -43,7 +43,7 @@ export function useManageVolume(): ManageVolume {
 
     const iSteps = await manager.getDelSteps(volume)
     const nSteps = iSteps.map((i) => stepsCatalog[i])
-    const steps = manager.addDelSteps(volume)
+    const steps = manager.delSteps(volume)
 
     try {
       while (true) {
