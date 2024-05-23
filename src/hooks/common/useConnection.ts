@@ -47,8 +47,6 @@ export const useConnection = ({
     if (!triggerOnMount) return
     if (!storedConnection) return
 
-    debugger
-
     handleConnect(storedConnection)
   }, [triggerOnMount])
 

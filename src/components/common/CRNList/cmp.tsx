@@ -12,24 +12,20 @@ import {
   TextInput,
   Tooltip,
 } from '@aleph-front/core'
-import { PaymentMethod, apiServer } from '@/helpers/constants'
-import Container from '@/components/common/CenteredContainer'
-import { useNewInstanceCRNListPage } from '@/hooks/pages/computing/useNewInstanceCRNListPage'
-import NewEntityTab from '../NewEntityTab'
+import { apiServer } from '@/helpers/constants'
+import { useCRNList } from '@/hooks/common/useCRNList'
 import NodesTable from '@/components/common/NodesTable'
 import { humanReadableSize } from '@/helpers/utils'
-import ButtonLink from '@/components/common/ButtonLink'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import Price from '@/components/common/Price'
-import { PageProps } from '@/types/types'
-import { CRNItem } from './types'
-import CheckoutSummaryFooter from '@/components/form/CheckoutSummaryFooter'
+import { CRNItem, CRNListProps } from './types'
 import { StreamNotSupportedIssue } from '@/domain/node'
 
-export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
+export default function CRNList(props: CRNListProps) {
   const {
+    selected,
     lastVersion,
     specs,
     nodesIssues,
@@ -41,7 +37,8 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
     handleSortItems,
     handleFilterChange,
     handleValidPAYGNodesOnlyChange,
-  } = useNewInstanceCRNListPage()
+    onSelectedChange,
+  } = useCRNList(props)
 
   const theme = useTheme()
 
@@ -234,8 +231,6 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
     ] as TableColumn<CRNItem>[]
   }, [specs, lastVersion, theme])
 
-  const [selected, setSelected] = useState<string>()
-
   const data: CRNItem[] = useMemo(() => {
     if (!filteredNodes) return []
 
@@ -267,7 +262,7 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
         if (row.disabled) return
         if (row.isLoading) return
 
-        setSelected(row.hash)
+        onSelectedChange(row.hash)
       },
       onKeyDown: (e: KeyboardEvent) => {
         if (e.code !== 'Space' && e.code !== 'Enter') return
@@ -275,7 +270,7 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
         if (row.isLoading) return
 
         e.preventDefault()
-        setSelected(row.hash)
+        onSelectedChange(row.hash)
       },
     }),
     [],
@@ -292,71 +287,42 @@ export default function NewInstanceCRNListPage({ mainRef }: PageProps) {
 
   return (
     <>
-      <section tw="px-0 py-0 md:py-8">
-        <Container>
-          <NewEntityTab selected="instance" />
-        </Container>
-      </section>
-      <section tw="relative px-0 pt-20 pb-6 md:py-10">
-        <SpinnerOverlay show={!filteredNodes} />
-        <Container $variant="xl">
-          <NoisyContainer>
-            <div tw="flex mb-8 gap-10 justify-between flex-wrap flex-col md:flex-row items-stretch md:items-center">
-              <div tw="flex-1">
-                <TextInput
-                  value={filter}
-                  name="filter-crn"
-                  placeholder="Search CRN"
-                  onChange={handleFilterChange}
-                  icon={<Icon name="search" />}
-                />
-              </div>
-              <div>
-                <Checkbox
-                  label="Ready for PAYG"
-                  checked={validPAYGNodesOnly}
-                  onChange={handleValidPAYGNodesOnlyChange}
-                  size="xs"
-                />
-              </div>
-            </div>
-            <NodesTable
-              {...{
-                columns,
-                data,
-                infiniteScroll: !loadItemsDisabled,
-                onLoadMore: handleLoadItems,
-                onSort: handleSortItems,
-                rowProps: handleRowProps,
-                loadingPlaceholder,
-              }}
+      <SpinnerOverlay show={!filteredNodes} />
+
+      <NoisyContainer tw="w-full">
+        <div tw="flex mb-8 gap-10 justify-between flex-wrap flex-col md:flex-row items-stretch md:items-center">
+          <div tw="flex-1">
+            <TextInput
+              value={filter}
+              name="filter-crn"
+              placeholder="Search CRN"
+              onChange={handleFilterChange}
+              icon={<Icon name="search" />}
             />
-          </NoisyContainer>
-        </Container>
-      </section>
-      <CheckoutSummaryFooter
-        {...{
-          paymentMethod: PaymentMethod.Stream,
-          submitButton: (
-            <ButtonLink
-              type="button"
-              color="main0"
-              kind="default"
-              size="md"
-              variant="primary"
-              href={`./crn/${selected}`}
-              disabled={!selected}
-            >
-              Continue
-            </ButtonLink>
-          ),
-          mainRef,
-          totalCost: 0.11,
-          shouldHide: false,
-          thresholdOffset: 0,
-          deps: [data],
-        }}
-      />
+          </div>
+          <div>
+            <Checkbox
+              label="Ready for PAYG"
+              checked={validPAYGNodesOnly}
+              onChange={handleValidPAYGNodesOnlyChange}
+              size="xs"
+            />
+          </div>
+        </div>
+        <div tw="h-[30rem] overflow-auto">
+          <NodesTable
+            {...{
+              columns,
+              data,
+              infiniteScroll: !loadItemsDisabled,
+              onLoadMore: handleLoadItems,
+              onSort: handleSortItems,
+              rowProps: handleRowProps,
+              loadingPlaceholder,
+            }}
+          />
+        </div>
+      </NoisyContainer>
     </>
   )
 }

@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/computing/NewInstanceCRNListPage'
+export { default } from '@/components/common/CRNList'

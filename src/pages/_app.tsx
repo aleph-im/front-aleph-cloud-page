@@ -4,6 +4,7 @@ import {
   themes,
   GlobalStyles,
   Notification as NotificationProvider,
+  Modal as ModalProvider,
 } from '@aleph-front/core'
 import { GlobalStylesOverride } from '@/styles/global'
 import Header from '@/components/common/Header'
@@ -25,25 +26,27 @@ export default function App({ Component, pageProps }: AppProps) {
       <GlobalStyles />
       <GlobalStylesOverride />
       <AppStateProvider>
-        <NotificationProvider max={10} timeout={2000}>
-          <Viewport>
-            <Sidebar />
-            <Main ref={mainRef}>
-              <Header />
-              <Content ref={contentRef}>
-                <Component
-                  {...{
-                    ...pageProps,
-                    mainRef,
-                    contentRef,
-                  }}
-                />
-                <Loading />
-              </Content>
-              <Footer />
-            </Main>
-          </Viewport>
-        </NotificationProvider>
+        <ModalProvider>
+          <NotificationProvider max={10} timeout={2000}>
+            <Viewport>
+              <Sidebar />
+              <Main ref={mainRef}>
+                <Header />
+                <Content ref={contentRef}>
+                  <Component
+                    {...{
+                      ...pageProps,
+                      mainRef,
+                      contentRef,
+                    }}
+                  />
+                  <Loading />
+                </Content>
+                <Footer />
+              </Main>
+            </Viewport>
+          </NotificationProvider>
+        </ModalProvider>
       </AppStateProvider>
     </ThemeProvider>
   )

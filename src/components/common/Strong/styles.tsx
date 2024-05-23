@@ -1,14 +1,6 @@
-import { TextGradient, addClasses } from '@aleph-front/core'
 import styled from 'styled-components'
+import { addClasses } from '@aleph-front/core'
 
-export const StyledStrong = styled(TextGradient).attrs((props) => {
-  return {
-    ...addClasses('tp-body2')(props),
-    forwardedAs: 'strong',
-    type: 'body',
-    color: props.color || 'main0',
-  }
-})`
-  font-size: 1em !important;
-  opacity: 0.7;
+export const StyledStrong = styled.strong.attrs(addClasses('tp-body4'))`
+  color: ${({ theme }) => theme.color.main0};
 `

@@ -20,7 +20,13 @@ import {
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
-export type UseNewInstanceCRNListPage = UseRequestCRNsReturn &
+export type UseCRNListProps = {
+  selected?: string
+  onSelectedChange: (selected: string) => void
+}
+
+export type UseCRNListReturn = UseCRNListProps &
+  UseRequestCRNsReturn &
   UseRequestCRNSpecsReturn & {
     nodesIssues?: StreamSupportedIssues
     filteredNodes?: CRN[]
@@ -33,7 +39,7 @@ export type UseNewInstanceCRNListPage = UseRequestCRNsReturn &
     handleValidPAYGNodesOnlyChange: (e: ChangeEvent<HTMLInputElement>) => void
   }
 
-export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
+export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   const { nodes, lastVersion } = useRequestCRNs({})
   const nodeManager = useNodeManager()
 
@@ -191,6 +197,7 @@ export function useNewInstanceCRNListPage(): UseNewInstanceCRNListPage {
   const loading = loadingSpecs || loadingIps
 
   return {
+    ...props,
     nodes,
     lastVersion,
     specs,

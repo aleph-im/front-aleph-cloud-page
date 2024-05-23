@@ -198,6 +198,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
           <FormError error={specsCtrl.fieldState.error} />
         )}
       </div>
+      {props.children}
     </NoisyContainer>
   )
 })
