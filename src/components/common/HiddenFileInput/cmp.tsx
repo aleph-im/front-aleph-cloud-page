@@ -22,6 +22,7 @@ export const HiddenFileInput = forwardRef(
       error,
       label,
       required,
+      buttonStyle,
       isFolder,
     }: HiddenFileInputProps,
     ref: ForwardedRef<HTMLDivElement>,
@@ -68,6 +69,7 @@ export const HiddenFileInput = forwardRef(
             kind="functional"
             variant="warning"
             size="md"
+            {...buttonStyle}
             onClick={handleRemoveFile}
           >
             {!isFolder
@@ -83,6 +85,7 @@ export const HiddenFileInput = forwardRef(
             kind="functional"
             size="md"
             variant="warning"
+            {...buttonStyle}
           >
             {children}
           </Button>

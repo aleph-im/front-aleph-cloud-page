@@ -37,7 +37,7 @@ export type WebsiteFramework = {
 export const WebsiteFrameworks: Record<WebsiteFrameworkId, WebsiteFramework> = {
   [WebsiteFrameworkId.none]: {
     id: WebsiteFrameworkId.none,
-    name: 'n/a',
+    name: 'Not Specified',
   },
   [WebsiteFrameworkId.nextjs]: {
     id: WebsiteFrameworkId.nextjs,

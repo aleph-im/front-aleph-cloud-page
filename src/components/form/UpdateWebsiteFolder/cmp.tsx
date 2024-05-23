@@ -12,6 +12,10 @@ export const UpdateWebsiteFolder = memo((props: UpdateWebsiteFolderProps) => {
       {...folderCtrl.fieldState}
       required
       isFolder
+      buttonStyle={{
+        kind: 'default',
+        variant: 'tertiary',
+      }}
     >
       Update
     </HiddenFileInput>

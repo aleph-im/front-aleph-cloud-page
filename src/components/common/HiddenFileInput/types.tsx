@@ -8,5 +8,12 @@ export type HiddenFileInputProps = {
   error?: FieldError
   label?: string
   required?: boolean
+  buttonStyle?: InputButtonStyle
   isFolder?: boolean
+}
+
+export type InputButtonStyle = {
+  kind?: string
+  variant?: string
+  size?: 'sm' | 'md' | 'lg'
 }
