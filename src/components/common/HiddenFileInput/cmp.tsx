@@ -4,6 +4,7 @@ import React, {
   forwardRef,
   memo,
   useCallback,
+  useEffect,
   useRef,
 } from 'react'
 import { Button, FormError, FormLabel, Icon } from '@aleph-front/core'
@@ -46,10 +47,21 @@ export const HiddenFileInput = forwardRef(
       [onChange, isFolder],
     )
 
+    useEffect(() => {
+      if (inputRef.current) {
+        if (isFolder) {
+          inputRef.current.setAttribute('directory', '')
+          inputRef.current.setAttribute('webkitdirectory', '')
+        } else {
+          inputRef.current.removeAttribute('directory')
+          inputRef.current.removeAttribute('webkitdirectory')
+        }
+      }
+    }, [isFolder])
+
     return (
       <div tabIndex={-1} ref={ref}>
         {label && <FormLabel label={label} error={error} required />}
-
         {value ? (
           <Button
             type="button"
@@ -75,17 +87,13 @@ export const HiddenFileInput = forwardRef(
             {children}
           </Button>
         )}
-
         {error && <FormError error={error} />}
-
         <StyledHiddenFileInput
           type="file"
           ref={inputRef}
           onChange={handleChange}
           accept={accept}
           required={required}
-          directory={isFolder ? '' : undefined}
-          webkitdirectory={isFolder ? '' : undefined}
         />
       </div>
     )
