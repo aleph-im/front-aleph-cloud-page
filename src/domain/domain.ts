@@ -8,7 +8,7 @@ import {
   EntityType,
   defaultDomainAggregateKey,
   defaultDomainChannel,
-} from '../helpers/constants'
+} from '@/helpers/constants'
 import { EntityManager } from './types'
 import { domainSchema, domainsSchema } from '@/helpers/schemas/domain'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
@@ -34,8 +34,11 @@ export type AddDomain = {
 export type Domain = AddDomain & {
   type: EntityType.Domain
   id: string
-  confirmed?: boolean
   updated_at: string
+  date: string
+  size: number
+  ref_url: string
+  confirmed?: boolean
 }
 
 export type DomainStatus = {
@@ -250,6 +253,13 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     content: DomainAggregateItem,
   ): Domain {
     const { message_id, type } = content
+    const ref_path =
+      type === EntityDomainType.Instance
+        ? 'computing/instance'
+        : type === EntityDomainType.Program
+          ? 'computing/function'
+          : 'storage/volume'
+    const date = content?.updated_at.slice(0, 19).replace('T', ' ') || 'unknown'
     const domain: Domain = {
       type: EntityType.Domain,
       id: name,
@@ -257,7 +267,10 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       target: type,
       ref: message_id,
       confirmed: true,
-      updated_at: content?.updated_at || 'unknown',
+      updated_at: date,
+      date,
+      size: 0,
+      ref_url: `/${ref_path}/${message_id}`,
     }
 
     return domain

@@ -122,7 +122,7 @@ export default function ManageInstance() {
                 <div className="tp-info text-main0">HDD</div>
                 <div>
                   <Text>
-                    {convertByteUnits(instance.rootfs.size_mib, {
+                    {convertByteUnits(instance.size, {
                       from: 'MiB',
                       to: 'GiB',
                       displayUnit: true,

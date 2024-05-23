@@ -53,8 +53,7 @@ export const InstancesTabContent = React.memo(
                       label: 'HDD',
                       align: 'right',
                       sortable: true,
-                      render: (row) =>
-                        humanReadableSize(row.rootfs.size_mib, 'MiB'),
+                      render: (row) => humanReadableSize(row.size, 'MiB'),
                     },
                     {
                       label: 'Date',

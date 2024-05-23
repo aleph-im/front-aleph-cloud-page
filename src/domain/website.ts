@@ -292,6 +292,10 @@ export type WebsiteAggregate = Record<string, WebsiteAggregateItem | null>
 export type Website = WebsiteAggregateItem & {
   id: string
   type: EntityType.Website
+  name: string
+  date: string
+  size: number
+  ref_url: string
   confirmed: boolean
 }
 
@@ -448,22 +452,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     throw Err.MethodNotImplemented
   }
 
-  protected async parseNewWebsite(website: AddWebsite): Promise<AddWebsite> {
-    return await WebsiteManager.addSchema.parseAsync(website)
-  }
-
-  protected async *parseDomainsSteps(
-    ref: string,
-    domains?: Omit<DomainField, 'ref'>[],
-  ): AsyncGenerator<void, Domain[], void> {
-    if (!domains || domains.length === 0) return []
-    const parsedDomains = domains.map((domain) => ({
-      ...domain,
-      ref,
-    }))
-    return yield* this.domainManager.addSteps(parsedDomains, false)
-  }
-
   async getAddSteps(newWebsite: AddWebsite): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
     const valid = await this.parseNewWebsite(newWebsite)
@@ -474,57 +462,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       if (valid.domains && valid.domains.length > 0) steps.push('domain')
     }
     return steps
-  }
-
-  protected async parseAggregate(response: any): Promise<Website[]> {
-    return await this.parseAggregateItems(response as WebsiteAggregate)
-  }
-
-  protected async parseNewAggregate(response: any): Promise<Website[]> {
-    const websites = response.content.content as WebsiteAggregate
-    return await this.parseAggregateItems(websites)
-  }
-
-  protected async parseAggregateItems(
-    aggregate: WebsiteAggregate,
-  ): Promise<Website[]> {
-    return Promise.all(
-      Object.entries(aggregate)
-        .filter(([, value]) => value !== null)
-        .map(
-          async ([key, value]) =>
-            await this.parseAggregateItem(key, value as WebsiteAggregateItem),
-        ),
-    )
-  }
-
-  protected async parseAggregateItem(
-    name: string,
-    content: WebsiteAggregateItem,
-  ): Promise<Website> {
-    const {
-      metadata,
-      payment,
-      version,
-      volume_id,
-      history,
-      ens,
-      created_at,
-      updated_at,
-    } = content
-    return {
-      id: name,
-      type: EntityType.Website,
-      metadata,
-      payment,
-      version,
-      volume_id,
-      history,
-      ens,
-      created_at: created_at,
-      updated_at: getDate(updated_at),
-      confirmed: true,
-    }
   }
 
   async getDelSteps(
@@ -602,7 +539,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
         throw Err.InvalidAccount
 
-      let volume_id = ''
+      let volumeId = ''
       if (cid) {
         cid = await WebsiteManager.updateCid.parseAsync(cid)
         // Publish volume
@@ -617,17 +554,17 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         const volumeEntity = (
           await this.volumeManager.parseMessages([volume])
         )[0]
-        volume_id = volumeEntity.id
+        volumeId = volumeEntity.id
       }
       if (version) {
         // Select volume from history
-        volume_id = website.history?.[version] || ''
-        if (volume_id) await this.volumeManager.get(volume_id)
+        volumeId = website.history?.[version] || ''
+        if (volumeId) await this.volumeManager.get(volumeId)
       }
-      if (!volume_id) throw Err.MissingVolumeData
+      if (!volumeId) throw Err.MissingVolumeData
 
       // Publish website
-      const last_10_history =
+      const recentHistory =
         (history &&
           Object.fromEntries(
             Object.entries(history).map((item) => [item[0], item[1].id]),
@@ -639,10 +576,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
           metadata: website.metadata,
           payment: website.payment,
           version: website.version + 1,
-          volume_id: volume_id,
+          volume_id: volumeId,
           history: {
             [website.version.toString()]: website.volume_id,
-            ...last_10_history,
+            ...recentHistory,
           },
           ens: website.ens,
           created_at: website.created_at,
@@ -666,7 +603,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
           channel: this.channel,
           content: domains.reduce((ac, cv) => {
             ac[cv.name] = {
-              message_id: volume_id,
+              message_id: volumeId,
               type: cv.target,
               updated_at: new Date().toISOString(),
             }
@@ -709,6 +646,78 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
             .filter(([, volume]) => !!volume),
         )
       }
+    }
+  }
+
+  protected async parseNewWebsite(website: AddWebsite): Promise<AddWebsite> {
+    return await WebsiteManager.addSchema.parseAsync(website)
+  }
+
+  protected async *parseDomainsSteps(
+    ref: string,
+    domains?: Omit<DomainField, 'ref'>[],
+  ): AsyncGenerator<void, Domain[], void> {
+    if (!domains || domains.length === 0) return []
+    const parsedDomains = domains.map((domain) => ({
+      ...domain,
+      ref,
+    }))
+    return yield* this.domainManager.addSteps(parsedDomains, false)
+  }
+
+  protected async parseNewAggregate(response: any): Promise<Website[]> {
+    const websites = response.content.content as WebsiteAggregate
+    return await this.parseAggregateItems(websites)
+  }
+
+  protected async parseAggregate(response: any): Promise<Website[]> {
+    return await this.parseAggregateItems(response as WebsiteAggregate)
+  }
+
+  protected async parseAggregateItems(
+    aggregate: WebsiteAggregate,
+  ): Promise<Website[]> {
+    return Promise.all(
+      Object.entries(aggregate)
+        .filter(([, value]) => value !== null)
+        .map(
+          async ([key, value]) =>
+            await this.parseAggregateItem(key, value as WebsiteAggregateItem),
+        ),
+    )
+  }
+
+  protected async parseAggregateItem(
+    name: string,
+    content: WebsiteAggregateItem,
+  ): Promise<Website> {
+    const {
+      metadata,
+      payment,
+      version,
+      volume_id,
+      history,
+      ens,
+      created_at,
+      updated_at,
+    } = content
+    const date = getDate(updated_at)
+    return {
+      id: name,
+      name,
+      type: EntityType.Website,
+      metadata,
+      payment,
+      version,
+      volume_id,
+      history,
+      ens,
+      created_at: created_at,
+      updated_at: date,
+      date,
+      size: 0,
+      ref_url: `/storage/volume/${volume_id}`,
+      confirmed: true,
     }
   }
 }

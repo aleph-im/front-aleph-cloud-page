@@ -11,8 +11,8 @@ import {
   defaultInstanceChannel,
   EntityType,
   PaymentMethod,
-} from '../helpers/constants'
-import { getDate, getExplorerURL, sleep } from '../helpers/utils'
+} from '@/helpers/constants'
+import { getDate, getExplorerURL, sleep } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
@@ -69,9 +69,10 @@ export type AddInstance = Omit<
 export type Instance = InstanceContent & {
   type: EntityType.Instance
   id: string // hash
+  name: string
   url: string
   date: string
-  size?: number
+  size: number
   confirmed?: boolean
 }
 
@@ -409,24 +410,25 @@ export class InstanceManager
   }
 
   protected async parseMessages(messages: any[]): Promise<Instance[]> {
-    const sizesMap = await this.fileManager.getSizesMap()
+    /* const sizesMap = await this.fileManager.getSizesMap() */
 
     return messages
       .filter(({ content }) => content !== undefined)
       .map((message) => {
-        const size = message.content.volumes.reduce(
+        /* const size = message.content.volumes.reduce(
           (ac: number, cv: MachineVolume) =>
             ac + ('size_mib' in cv ? cv.size_mib : sizesMap[cv.ref]),
           0,
-        )
+        ) */
 
         return {
           id: message.item_hash,
           ...message.content,
+          name: message.content.metadata?.name || 'Unnamed instance',
           type: EntityType.Instance,
           url: getExplorerURL(message),
           date: getDate(message.time),
-          size,
+          size: message.content.rootfs?.size_mib || 0,
           confirmed: !!message.confirmed,
         }
       })

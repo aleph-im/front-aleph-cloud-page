@@ -37,7 +37,7 @@ export const WebsitesTabContent = React.memo(
                           kind="functional"
                           variant="none"
                           size="sm"
-                          href={`/storage/volume/${row.volume_id}`}
+                          href={row.ref_url}
                         >
                           <Icon name="database" size="lg" />
                         </ButtonLink>

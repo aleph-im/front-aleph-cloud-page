@@ -4,8 +4,8 @@ import {
   EntityType,
   defaultSSHChannel,
   defaultSSHPostType,
-} from '../helpers/constants'
-import { getDate, getExplorerURL } from '../helpers/utils'
+} from '@/helpers/constants'
+import { convertByteUnits, getDate, getExplorerURL } from '@/helpers/utils'
 import { EntityManager } from './types'
 import { sshKeySchema, sshKeysSchema } from '@/helpers/schemas/ssh'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
@@ -22,7 +22,9 @@ export type AddSSHKey = {
 export type SSHKey = AddSSHKey & {
   type: EntityType.SSHKey
   id: string // hash
+  name: string
   url: string
+  size: number
   date: string
   confirmed?: boolean
 }
@@ -183,7 +185,12 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
       type: EntityType.SSHKey,
       id: post.item_hash,
       ...content,
+      name: content.label || 'Unnamed SSH key',
       url: getExplorerURL(post),
+      size: convertByteUnits(new Blob([content.key]).size, {
+        from: 'B',
+        to: 'MiB',
+      }),
       date: getDate(post.time),
       confirmed: !!post.confirmed,
     }

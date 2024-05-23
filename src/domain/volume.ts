@@ -7,8 +7,8 @@ import {
   VolumeType,
   defaultVolumeChannel,
   programStorageURL,
-} from '../helpers/constants'
-import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
+} from '@/helpers/constants'
+import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
 import { EntityManager } from './types'

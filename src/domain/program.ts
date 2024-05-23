@@ -14,8 +14,8 @@ import {
   defaultProgramChannel,
   defaultVMURL,
   programStorageURL,
-} from '../helpers/constants'
-import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
+} from '@/helpers/constants'
+import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
 import { MachineVolume, MessageType, StoreMessage } from '@aleph-sdk/message'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
@@ -68,10 +68,12 @@ export type AddProgram = Omit<
 export type Program = Omit<ProgramContent, 'type'> & {
   type: EntityType.Program
   id: string // hash
+  name: string
   url: string
   urlVM: string
   date: string
-  size?: number
+  size: number
+  ref_url: string
   confirmed?: boolean
 }
 
@@ -315,11 +317,13 @@ export class ProgramManager
         return {
           id: message.item_hash,
           ...message.content,
+          name: message.content.metadata?.name || 'Unnamed program',
           type: EntityType.Program,
           url: getExplorerURL(message),
           urlVM: `${defaultVMURL}${message.item_hash}`,
           date: getDate(message.time),
           size,
+          ref_url: `/storage/volume/${message.content.code.ref}`,
           confirmed: !!message.confirmed,
         }
       })
