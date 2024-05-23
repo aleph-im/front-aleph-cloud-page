@@ -41,6 +41,7 @@ import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import { AvalancheAccount } from '@aleph-sdk/avalanche'
+import Err from '@/helpers/errors'
 
 export type NewInstanceCRNFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -145,24 +146,24 @@ export function useNewInstanceCRNPage(): UseNewInstanceCRNPage {
 
   const onSubmit = useCallback(
     async (state: NewInstanceCRNFormState) => {
-      if (!manager) throw new Error('Manager not ready')
-      if (!account) throw new Error('Invalid account')
-      if (!node || !node.stream_reward) throw new Error('Invalid node')
-      if (!state?.streamCost) throw new Error('Invalid stream cost')
-      if (window?.ethereum === undefined) throw new Error('No wallet found')
+      if (!manager) throw Err.ConnectYourWallet
+      if (!account) throw Err.InvalidAccount
+      if (!node || !node.stream_reward) throw Err.InvalidNode
+      if (!state?.streamCost) throw Err.InvalidStreamCost
+      if (window?.ethereum === undefined) throw Err.NoWalletDetected
 
       if (
         blockchain !== Blockchain.AVAX ||
         !(account instanceof AvalancheAccount)
       ) {
         handleConnect({ blockchain: Blockchain.AVAX })
-        throw new Error('Invalid network')
+        throw Err.InvalidNetwork
       }
 
       // @todo: Refactor this
       const superfluidAccount = createFromAvalancheAccount(account)
 
-      const iSteps = await manager.getSteps(state)
+      const iSteps = await manager.getAddSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
       const steps = manager.addSteps(

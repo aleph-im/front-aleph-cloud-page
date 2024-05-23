@@ -11,6 +11,8 @@ import {
 } from '@/helpers/constants'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
+import IconText from '@/components/common/IconText'
+import { Text } from '../common'
 
 export function entityUrl(type: EntityType, id: string): string {
   const chunk1 = EntityTypeUrlSection[type]
@@ -30,7 +32,7 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
               <EntityTable
                 borderType="none"
                 rowNoise
-                rowKey={(row) => row.id}
+                rowKey={(row) => `${row.type}-${row.id}`}
                 data={data}
                 columns={[
                   {
@@ -42,13 +44,56 @@ export const AllTabContent = React.memo(({ data }: AllTabContentProps) => {
                     label: 'Name',
                     width: '100%',
                     sortable: true,
-                    render: (row) => row.name,
+                    render: (row) =>
+                      row.type !== EntityType.Domain ? (
+                        row.name || row.id
+                      ) : (
+                        <a
+                          href={`https://${row.name}`}
+                          target="_blank"
+                          referrerPolicy="no-referrer"
+                        >
+                          <IconText iconName="square-up-right">
+                            <Text tw="not-italic! font-bold!">{row.name}</Text>
+                          </IconText>
+                        </a>
+                      ),
                   },
                   {
-                    label: 'Size',
+                    label: 'Size / Ref',
                     align: 'right',
                     sortable: true,
-                    render: (row) => humanReadableSize(row.size, 'MiB'),
+                    render: (row) =>
+                      row.type === EntityType.Program ? (
+                        <ButtonLink
+                          kind="functional"
+                          variant="none"
+                          size="sm"
+                          href={row.url ?? ''}
+                        >
+                          <Icon name={'file-code'} size="lg" />
+                        </ButtonLink>
+                      ) : row.type === EntityType.Website ? (
+                        <ButtonLink
+                          kind="functional"
+                          variant="none"
+                          size="sm"
+                          href={row.url ?? ''}
+                        >
+                          <Icon name={'database'} size="lg" />
+                        </ButtonLink>
+                      ) : row.type === EntityType.Domain ? (
+                        <ButtonLink
+                          kind="functional"
+                          variant="none"
+                          size="sm"
+                          href={row.url ?? ''}
+                        >
+                          <Icon name={'chain'} size="lg" />
+                        </ButtonLink>
+                      ) : (
+                        humanReadableSize(row.size, 'MiB')
+                      ),
                   },
                   {
                     label: 'Date',

@@ -8,6 +8,7 @@ import {
   FieldValues,
 } from 'react-hook-form'
 import { ZodError } from 'zod'
+import Err from '@/helpers/errors'
 
 export type UseFormProps<
   FormState extends Record<string, any>,
@@ -84,7 +85,7 @@ export function useForm<FormState extends Record<string, any>, Response>({
         const err = e as Error
         const error =
           err instanceof ZodError
-            ? new Error('Validation error, check highlighted form fields')
+            ? Err.ValidationError
             : ((err?.cause || err) as Error)
 
         // @note: form.setError is cloning the error obj loosing the message prop
@@ -115,17 +116,17 @@ export function useForm<FormState extends Record<string, any>, Response>({
             typeof err === 'string'
               ? err
               : err?.message
-              ? `: ${err.message}`
-              : err?.type
-              ? `: "${err?.type}" validation not satisfied`
-              : ''
+                ? `: ${err.message}`
+                : err?.type
+                  ? `: "${err?.type}" validation not satisfied`
+                  : ''
 
-          error = new Error(`Error on field "${field}"${description}`)
+          error = Err.FieldError(field, description)
         }
       }
 
       if (!error) {
-        error = new Error('Validation error')
+        error = Err.ValidationError
       }
 
       onError(error)

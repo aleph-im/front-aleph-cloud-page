@@ -47,8 +47,6 @@ export const useConnection = ({
     if (!triggerOnMount) return
     if (!storedConnection) return
 
-    debugger
-
     handleConnect(storedConnection)
   }, [triggerOnMount])
 
@@ -101,7 +99,7 @@ export const useConnection = ({
     }
   }, [triggerOnMount, provider])
 
-  // @note: Switch the blockchain network without recconecting to the providers
+  // @note: Switch the blockchain network without reconnecting to the providers
   useEffect(() => {
     if (!triggerOnMount) return
 

@@ -25,6 +25,13 @@ const Sidebar = memo(() => {
   const allowanceInfo: any = useUserStoreAllowance()
   const breakpoint = 'lg'
 
+  // Hack to extend the sidebar inner list
+  /* useEffect(() => {
+    document
+      ?.querySelectorAll('[class^="styles__StyledNav2-"]')?.[0]
+      ?.querySelectorAll('[class^="cmp___StyledDiv3-"]')?.[0]
+      ?.setAttribute('style', 'padding-top: 2rem; height: auto;')
+  }, []) */
   return (
     <RouterSidebar
       {...{

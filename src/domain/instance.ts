@@ -11,8 +11,8 @@ import {
   defaultInstanceChannel,
   EntityType,
   PaymentMethod,
-} from '../helpers/constants'
-import { getDate, getExplorerURL, sleep } from '../helpers/utils'
+} from '@/helpers/constants'
+import { getDate, getExplorerURL, sleep } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
@@ -28,7 +28,7 @@ import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
 import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { AddDomain, DomainManager } from './domain'
+import { DomainManager } from './domain'
 import { EntityManager } from './types'
 import {
   instanceSchema,
@@ -42,7 +42,7 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -69,9 +69,10 @@ export type AddInstance = Omit<
 export type Instance = InstanceContent & {
   type: EntityType.Instance
   id: string // hash
+  name: string
   url: string
   date: string
-  size?: number
+  size: number
   confirmed?: boolean
 }
 
@@ -215,20 +216,12 @@ export class InstanceManager
       instance = await this.get(instanceOrId)
     }
 
-    if (!instance) throw new Error('Invalid instance ID')
+    if (!instance) throw Err.InstanceNotFound
 
     if (instance.payment?.type === PaymentType.superfluid) {
-      if (!account)
-        throw new Error(
-          'Invalid Superfluid/AVAX account. Please connect your wallet.',
-        )
-
+      if (!account) throw Err.ConnectYourPaymentWallet
       const { receiver } = instance.payment
-
-      if (!receiver)
-        throw new Error(
-          'Invalid Superfluid/AVAX receiver reward address. Please set it up in your CRN account profile.',
-        )
+      if (!receiver) throw Err.ReceiverReward
 
       const instanceCosts = await InstanceManager.getCost({
         paymentMethod: PaymentMethod.Stream,
@@ -261,18 +254,14 @@ export class InstanceManager
   async checkStatus(instance: Instance): Promise<InstanceStatus | undefined> {
     if (instance.payment?.type === PaymentType.superfluid) {
       const { receiver } = instance.payment
-
-      if (!receiver)
-        throw new Error(
-          'Invalid Superfluid/AVAX receiver reward address. Please set it up in your CRN account profile.',
-        )
+      if (!receiver) throw Err.ReceiverReward
 
       // @todo: refactor this mess
       const node = await this.nodeManager.getCRNByStreamRewardAddress(receiver)
       if (!node) return
 
       const { address } = node
-      if (!address) throw new Error('Invalid CRN address')
+      if (!address) throw Err.InvalidCRNAddress
 
       const nodeUrl = address.replace(/\/$/, '')
       const query = await fetch(`${nodeUrl}/about/executions/list`)
@@ -309,25 +298,23 @@ export class InstanceManager
     return response
   }
 
-  async getSteps(newInstance: AddInstance): Promise<CheckoutStepType[]> {
+  async getAddSteps(newInstance: AddInstance): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
     const { sshKeys, volumes = [], domains = [] } = newInstance
 
     if (newInstance.payment?.type === PaymentMethod.Stream) steps.push('stream')
 
     const newKeys = this.parseNewSSHKeys(sshKeys)
-    const sshKeysSteps = await this.sshKeyManager.getSteps(newKeys)
-    for (const step of sshKeysSteps) steps.push(step)
+    // @note: Aggregate all signatures in 1 step
+    if (newKeys.length > 0) steps.push('ssh')
 
-    const volumeSteps = await this.volumeManager.getSteps(volumes)
-    for (const step of volumeSteps) steps.push(step)
+    // @note: Aggregate all signatures in 1 step
+    if (volumes.length > 0) steps.push('volume')
 
     steps.push('instance')
 
-    const domainSteps = await this.domainManager.getSteps(
-      domains as AddDomain[],
-    )
-    for (const step of domainSteps) steps.push(step)
+    // @note: Aggregate all signatures in 1 step
+    if (domains.length > 0) steps.push('domain')
 
     return steps
   }
@@ -337,33 +324,23 @@ export class InstanceManager
     account?: SuperfluidAccount,
   ): AsyncGenerator<void, void, void> {
     if (newInstance.payment?.type !== PaymentMethod.Stream) return
-
-    if (!account)
-      throw new Error('Invalid Superfluid account. Please connect your wallet.')
-
-    if (!newInstance.node || !newInstance.node.address)
-      throw new Error('Invalid CRN')
+    if (!account) throw Err.ConnectYourWallet
+    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
     const alephxBalance = await account.getALEPHBalance()
     const alephxFlow = await account.getALEPHFlow(receiver)
     const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
 
-    if (totalFlow.greaterThan(1))
-      throw new Error(
-        `Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost.`,
-      )
+    if (totalFlow.greaterThan(1)) throw Err.MaxFlowRate
 
     const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
     const totalRequiredAleph = usedAlephInDuration.add(streamCost)
 
-    if (alephxBalance.lt(totalRequiredAleph)) {
-      throw new Error(
-        `Insufficient balance: ${totalRequiredAleph
-          .sub(alephxBalance)
-          .toString()} ALEPH required. Try to lower the VM cost or the duration.`,
+    if (alephxBalance.lt(totalRequiredAleph))
+      throw Err.InsufficientBalance(
+        totalRequiredAleph.sub(alephxBalance).toNumber(),
       )
-    }
 
     yield
     await account.increaseALEPHFlow(
@@ -433,24 +410,25 @@ export class InstanceManager
   }
 
   protected async parseMessages(messages: any[]): Promise<Instance[]> {
-    const sizesMap = await this.fileManager.getSizesMap()
+    /* const sizesMap = await this.fileManager.getSizesMap() */
 
     return messages
       .filter(({ content }) => content !== undefined)
       .map((message) => {
-        const size = message.content.volumes.reduce(
+        /* const size = message.content.volumes.reduce(
           (ac: number, cv: MachineVolume) =>
             ac + ('size_mib' in cv ? cv.size_mib : sizesMap[cv.ref]),
           0,
-        )
+        ) */
 
         return {
           id: message.item_hash,
           ...message.content,
+          name: message.content.metadata?.name || 'Unnamed instance',
           type: EntityType.Instance,
           url: getExplorerURL(message),
           date: getDate(message.time),
-          size,
+          size: message.content.rootfs?.size_mib || 0,
           confirmed: !!message.confirmed,
         }
       })
@@ -460,7 +438,7 @@ export class InstanceManager
     node: CRN,
     instanceId: string,
   ): Promise<void> {
-    if (!node.address) throw new Error('Invalid node address')
+    if (!node.address) throw Err.InvalidCRNAddress
 
     let errorMsg = ''
     for (let i = 0; i < 5; i++) {
@@ -485,6 +463,41 @@ export class InstanceManager
         await sleep(1000)
       }
     }
-    throw new Error(`Failed to start instance on CRN ${node.hash}: ${errorMsg}`)
+    throw Err.InstanceStartupFailed(node.hash, errorMsg)
+  }
+
+  async getDelSteps(
+    instancesOrIds: string | Instance | (string | Instance)[],
+  ): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    instancesOrIds = Array.isArray(instancesOrIds)
+      ? instancesOrIds
+      : [instancesOrIds]
+    instancesOrIds.forEach(() => {
+      steps.push('instanceDel')
+    })
+    return steps
+  }
+
+  async *delSteps(
+    instancesOrIds: string | Instance | (string | Instance)[],
+    account: SuperfluidAccount,
+  ): AsyncGenerator<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    instancesOrIds = Array.isArray(instancesOrIds)
+      ? instancesOrIds
+      : [instancesOrIds]
+    if (instancesOrIds.length === 0) return
+
+    try {
+      for (const instanceOrId of instancesOrIds) {
+        yield
+        await this.del(instanceOrId, account)
+      }
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
   }
 }

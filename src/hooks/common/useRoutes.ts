@@ -26,6 +26,16 @@ export function useRoutes(): UseRoutesReturn {
             ],
           },
           {
+            name: 'Web3 Hosting',
+            href: '/hosting',
+            children: [
+              {
+                name: 'Websites',
+                href: '/hosting/website/new',
+              },
+            ],
+          },
+          {
             name: 'Computing',
             href: '/computing',
             children: [
@@ -55,6 +65,20 @@ export function useRoutes(): UseRoutesReturn {
             ],
           },
           {
+            name: 'Configure',
+            href: '/configure',
+            children: [
+              {
+                name: 'Custom domains',
+                href: '/configure/domain/new',
+              },
+              {
+                name: 'SSH keys',
+                href: '/configure/ssh/new',
+              },
+            ],
+          },
+          {
             name: 'Tools',
             href: '#',
             children: [
@@ -65,24 +89,10 @@ export function useRoutes(): UseRoutesReturn {
                 target: '_blank',
               },
               {
-                name: 'Indexing framework',
+                name: 'Indexer',
                 href: 'https://docs.aleph.im/tools/indexer/',
                 external: true,
                 target: '_blank',
-              },
-            ],
-          },
-          {
-            name: 'Configure',
-            href: '/configure',
-            children: [
-              {
-                name: 'Secrets',
-                href: '/configure/ssh/new',
-              },
-              {
-                name: 'Custom domains',
-                href: '/configure/domain/new',
               },
             ],
           },

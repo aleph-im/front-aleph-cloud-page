@@ -117,6 +117,19 @@ export default function ManageInstance() {
                   </Text>
                 </div>
               </div>
+
+              <div tw="mr-5">
+                <div className="tp-info text-main0">HDD</div>
+                <div>
+                  <Text>
+                    {convertByteUnits(instance.size, {
+                      from: 'MiB',
+                      to: 'GiB',
+                      displayUnit: true,
+                    })}
+                  </Text>
+                </div>
+              </div>
             </div>
 
             <div tw="mr-5">
@@ -243,7 +256,7 @@ export default function ManageInstance() {
                 <Separator />
 
                 <TextGradient type="h7" as="h2" color="main0">
-                  Linked storage
+                  Linked Storage(s)
                 </TextGradient>
 
                 <VolumeList

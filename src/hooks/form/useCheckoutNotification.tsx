@@ -2,17 +2,13 @@ import CheckoutNotification, {
   CheckoutNotificationProps,
 } from '@/components/form/CheckoutNotification'
 import { CheckoutNotificationStep } from '@/components/form/CheckoutNotification/types'
+import { CheckoutStepType } from '@/helpers/constants'
 import { sleep } from '@/helpers/utils'
 import { useNotification } from '@aleph-front/core'
 import { useCallback, useRef } from 'react'
+import Err from '@/helpers/errors'
 
-export type CheckoutStepType =
-  | 'ssh'
-  | 'volume'
-  | 'domain'
-  | 'stream'
-  | 'instance'
-  | 'program'
+export type { CheckoutStepType }
 
 export type UseCheckoutNotificationSteps = CheckoutNotificationProps['steps']
 
@@ -35,11 +31,8 @@ export function useCheckoutNotification({
 
   const handleNext = useCallback(
     async (newSteps?: UseCheckoutNotificationSteps) => {
-      if (!noti) throw new Error('Notifications not ready')
+      if (!noti) throw Err.NotificationsNotReady
       const steps = newSteps || stepsProp || []
-
-      console.log('steps', steps)
-
       noti.del(stepsNotiId)
 
       await sleep(200)
@@ -64,7 +57,7 @@ export function useCheckoutNotification({
   )
 
   const handleStop = useCallback(async () => {
-    if (!noti) throw new Error('Notifications not ready')
+    if (!noti) throw Err.NotificationsNotReady
 
     step.current = 0
     noti.del(stepsNotiId)
@@ -81,33 +74,105 @@ export function useCheckoutNotification({
 export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
   {
     stream: {
-      title: 'Sign PAYG',
+      title: 'Sign PAYG Activation',
       content:
         'By signing this, you authorise the initiation of a token stream for billing, ensuring a seamless and efficient payment process aligning costs directly with your usage.',
     },
+    streamDel: {
+      title: 'Sign PAYG Cancellation',
+      content: 'By signing this, you confirm the cancellation of your stream.',
+    },
     volume: {
-      title: 'Sign Volume',
+      title: 'Sign Volume(s) Creation',
       content:
-        "This step involves signing the volume configuration and is required if you've set up additional storage volume for your instance or function.",
+        'By signing this, you confirm the creation of new volume(s). This is required if you are creating/updating a website, or if you have set up additional storage volume(s) for your instance or function.',
+    },
+    volumeDel: {
+      title: 'Sign Volume(s) Deletion',
+      content: 'By signing this, you confirm the deletion of your volume(s).',
+    },
+    volumeUp: {
+      title: 'Sign Volume(s) Update',
+      content: 'By signing this, you confirm the update of your volume(s).',
     },
     ssh: {
-      title: 'Sign SSH',
+      title: 'Sign SSH Key(s) Configuration',
       content:
-        'This step is crucial for securing remote access to your instance. By signing this, you confirm the SSH keys configuration, enabling encrypted communication with your server.',
+        'By signing this, you confirm the SSH key(s) configuration, enabling encrypted communication with your instance. This is crucial for securing remote access.',
+    },
+    sshDel: {
+      title: 'Sign SSH Key(s) Deletion',
+      content: 'By signing this, you confirm the deletion of your SSH Key(s).',
+    },
+    sshUp: {
+      title: 'Sign SSH Key(s) Update',
+      content: 'By signing this, you confirm the update of your SSH Key(s).',
     },
     instance: {
-      title: 'Sign instance creation',
+      title: 'Sign Instance Creation',
       content:
         "By signing this, you confirm the creation of your new instance on Twentysix.cloud. This step finalises the setup options you've chosen, including resources, configurations, and any additional features.",
     },
+    instanceDel: {
+      title: 'Sign Instance Deletion',
+      content: 'By signing this, you confirm the deletion of your instance.',
+    },
+    instanceUp: {
+      title: 'Sign Instance Update',
+      content: 'By signing this, you confirm the update of your instance.',
+    },
     program: {
-      title: 'Sign function creation',
+      title: 'Sign Function Creation',
       content:
-        "By signing this, you confirm the creation of your new function (and the volume containing the code if it were necessary) on Twentysix.cloud. This step finalises the setup options you've chosen, including resources, configurations, and any additional features.",
+        "By signing this, you confirm the creation of your new function on Twentysix.cloud. This step finalises the setup options you've chosen, including the codebase volume, resources, configurations, and any additional features.",
+    },
+    programDel: {
+      title: 'Sign Function Deletion',
+      content: 'By signing this, you confirm the deletion of your function.',
+    },
+    programUp: {
+      title: 'Sign Function Update',
+      content: 'By signing this, you confirm the update of your function.',
     },
     domain: {
-      title: 'Sign custom domain',
+      title: 'Sign Custom Domain(s) Creation',
       content:
-        'This final step confirms your custom domain settings and integrates it with your instance.',
+        'By signing this, you confirm the custom domain(s) settings for your website, instance or function.',
+    },
+    domainDel: {
+      title: 'Sign Custom Domain(s) Deletion',
+      content:
+        'By signing this, you confirm the deletion of your custom domain(s).',
+    },
+    domainUp: {
+      title: 'Sign Custom Domain(s) Update',
+      content:
+        'By signing this, you confirm the update of your custom domain(s).',
+    },
+    website: {
+      title: 'Sign Website Creation',
+      content:
+        'By signing this, you confirm the deployment of your new website on Twentysix.cloud.',
+    },
+    websiteDel: {
+      title: 'Sign Website Deletion',
+      content: 'By signing this, you confirm the deletion of your website.',
+    },
+    websiteUp: {
+      title: 'Sign Website Update',
+      content: 'By signing this, you confirm the update of your website.',
+    },
+    indexer: {
+      title: 'Sign Indexer Creation',
+      content:
+        'By signing this, you confirm the creation of your new indexer on Twentysix.cloud.',
+    },
+    indexerDel: {
+      title: 'Sign Indexer Deletion',
+      content: 'By signing this, you confirm the deletion of your indexer.',
+    },
+    indexerUp: {
+      title: 'Sign Indexer Update',
+      content: 'By signing this, you confirm the update of your indexer.',
     },
   }

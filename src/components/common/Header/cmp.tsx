@@ -17,6 +17,8 @@ import {
 } from '@/hooks/pages/useHeader'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import { websiteUrl } from '@/helpers/constants'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 
 export type AccountButtonProps = UseAccountButtonProps & {
   isMobile?: boolean
@@ -40,6 +42,8 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
     handleDisplayWalletPicker,
   } = useAccountButton(rest)
 
+  const ensName = useEnsNameLookup(account?.address)
+
   return (
     <>
       <Button
@@ -52,7 +56,8 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
         onClick={handleDisplayWalletPicker}
       >
         <div tw="flex items-center gap-3">
-          {!isMobile && (account ? ellipseAddress(account.address) : 'Connect')}
+          {!isMobile &&
+            (account ? ensName || ellipseAddress(account.address) : 'Connect')}
           {(isMobile || account) && (
             <StyledIcon
               $network={selectedNetwork}
@@ -73,7 +78,7 @@ export const AccountButton = ({ isMobile, ...rest }: AccountButtonProps) => {
             onConnect={handleConnect}
             onDisconnect={handleDisconnect}
             address={account?.address}
-            addressHref={`https://etherscan.io/address/${account?.address}`}
+            addressHref={`${blockchains[(selectedNetwork?.id || 'ETH') as BlockchainId].explorerUrl}address/${account?.address}`}
             balance={accountBalance}
             $isOpen={walletPickerOpen}
             $position={walletPosition}

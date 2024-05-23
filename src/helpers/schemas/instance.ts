@@ -122,8 +122,8 @@ export const instanceStreamSchema = instanceSchema
           volume.volumeType === VolumeType.Persistent
             ? [`volumes.${i}.size`]
             : volume.volumeType === VolumeType.Existing
-            ? [`volumes.${i}.refHash`]
-            : [`volumes.${i}.mountPath`]
+              ? [`volumes.${i}.refHash`]
+              : [`volumes.${i}.mountPath`]
 
         ctx.addIssue({
           fatal: true,

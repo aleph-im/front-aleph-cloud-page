@@ -1,14 +1,14 @@
 import { Account } from '@aleph-sdk/account'
 import { MessageType, StoreContent } from '@aleph-sdk/message'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 import {
   EntityType,
   PaymentMethod,
   VolumeType,
   defaultVolumeChannel,
   programStorageURL,
-} from '../helpers/constants'
-import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
+} from '@/helpers/constants'
+import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
 import { EntityManager } from './types'
@@ -132,6 +132,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   /**
    * Returns the size of a volume in mb
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static getStorageVolumeMiBPrice(volume: Volume | AddVolume): number {
     // @todo: Right now we are not taking into account storage costs of the additional
     // volumes (they are considered included as part of the free storage tiers)
@@ -235,12 +236,19 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     protected channel = defaultVolumeChannel,
   ) {}
 
-  async getAll(): Promise<Volume[]> {
+  async getAll(
+    ids?: string[],
+    page?: number,
+    pageSize?: number,
+  ): Promise<Volume[]> {
     try {
       const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
         messageTypes: [MessageType.store],
         channels: [this.channel],
+        hashes: ids,
+        page,
+        pageSize,
       })
 
       return await this.parseMessages(response.messages)
@@ -323,7 +331,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return downloadBlob(blob, `Volume_${volumeOrId.slice(-12)}.sqsh`)
   }
 
-  async getSteps(
+  async getAddSteps(
     volumes: AddVolume | AddVolume[],
   ): Promise<CheckoutStepType[]> {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
@@ -349,9 +357,8 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
   // @todo: Type not exported from SDK...
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected async parseMessages(messages: any[]): Promise<Volume[]> {
+  async parseMessages(messages: any[]): Promise<Volume[]> {
     const sizesMap = await this.fileManager.getSizesMap()
-
     return messages
       .filter(({ content }) => content !== undefined)
       .map((message) => this.parseMessage(message, message.content, sizesMap))
@@ -371,6 +378,35 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       date: getDate(message.time),
       size: sizesMap[message.item_hash],
       confirmed: !!message.confirmed,
+    }
+  }
+
+  async getDelSteps(
+    volumesOrIds: string | Volume | (string | Volume)[],
+  ): Promise<CheckoutStepType[]> {
+    volumesOrIds = Array.isArray(volumesOrIds) ? volumesOrIds : [volumesOrIds]
+    // @note: Aggregate all signatures in 1 step
+    // return volumesOrIds.map(() => 'volumeDel')
+    return volumesOrIds.length ? ['volumeDel'] : []
+  }
+
+  async *delSteps(
+    volumesOrIds: string | Volume | (string | Volume)[],
+  ): AsyncGenerator<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    volumesOrIds = Array.isArray(volumesOrIds) ? volumesOrIds : [volumesOrIds]
+    if (volumesOrIds.length === 0) return
+
+    try {
+      // @note: Aggregate all signatures in 1 step
+      yield
+      await Promise.all(
+        volumesOrIds.map(async (volumeOrId) => await this.del(volumeOrId)),
+      )
+    } catch (err) {
+      throw Err.RequestFailed(err)
     }
   }
 }

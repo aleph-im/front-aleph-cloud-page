@@ -1,5 +1,6 @@
 import { BaseConnectionProviderManager, BlockchainId, ProviderId } from './base'
 import { MetaMaskInpageProvider } from '@metamask/providers'
+import Err from '@/helpers/errors'
 
 export class MetamaskConnectionProviderManager extends BaseConnectionProviderManager {
   protected providerId = ProviderId.Metamask
@@ -11,6 +12,7 @@ export class MetamaskConnectionProviderManager extends BaseConnectionProviderMan
     return !!window.ethereum?.isMetaMask
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async onConnect(blockchainId: BlockchainId): Promise<void> {
     const provider = this.getProvider()
 
@@ -29,7 +31,7 @@ export class MetamaskConnectionProviderManager extends BaseConnectionProviderMan
 
   protected getProvider(): MetaMaskInpageProvider {
     const provider = window.ethereum as any as MetaMaskInpageProvider
-    if (!provider) throw new Error('Metamask is not installed')
+    if (!provider) throw Err.MetamaskNotInstalled
     return provider
   }
 }

@@ -10,11 +10,12 @@ import {
   CheckoutSummaryProps,
   CheckoutSummarySpecsLineProps,
   CheckoutSummaryVolumeLineProps,
+  CheckoutSummaryWebsiteLineProps,
 } from './types'
 import { memo, useEffect, useMemo, useState } from 'react'
 import React from 'react'
 import { EntityType, EntityTypeName, PaymentMethod } from '@/helpers/constants'
-import { VolumeManager, VolumeType } from '@/domain/volume'
+import { VolumeCost, VolumeManager, VolumeType } from '@/domain/volume'
 import InfoTooltipButton from '../../common/InfoTooltipButton'
 import Container from '@/components/common/CenteredContainer'
 import { TextGradient, TextInput } from '@aleph-front/core'
@@ -22,6 +23,7 @@ import { useEntityCost } from '@/hooks/common/useEntityCost'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import Price from '@/components/common/Price'
 import CheckoutSummaryFooter from '../CheckoutSummaryFooter'
+import { AddWebsite, WebsiteCost, WebsiteManager } from '@/domain/website'
 
 const CheckoutSummarySpecsLine = ({
   type,
@@ -183,6 +185,43 @@ CheckoutSummaryVolumeLine.displayName = 'CheckoutSummaryVolumeLine'
 
 // ------------------------------------------
 
+const CheckoutSummaryWebsiteLine = ({
+  website,
+  cost,
+}: CheckoutSummaryWebsiteLineProps) => {
+  const [size, setSize] = useState<number>(0)
+
+  useEffect(() => {
+    async function load() {
+      const size = await WebsiteManager.getWebsiteSize({
+        website,
+      } as AddWebsite)
+      setSize(size)
+    }
+
+    load()
+  }, [website])
+
+  if (!cost) return <></>
+
+  return (
+    <StyledHoldingSummaryLine>
+      <div>
+        <div>WEBSITE</div>
+      </div>
+      <div>
+        <div>{humanReadableSize(size, 'MiB')}</div>
+      </div>
+      <div>
+        <Price value={cost} />
+      </div>
+    </StyledHoldingSummaryLine>
+  )
+}
+CheckoutSummaryWebsiteLine.displayName = 'CheckoutSummaryWebsiteLine'
+
+// ------------------------------------------
+
 const CheckoutSummaryDomainLine = ({
   domain,
 }: CheckoutSummaryDomainLineProps) => {
@@ -198,6 +237,7 @@ CheckoutSummaryDomainLine.displayName = 'CheckoutSummaryDomainLine'
 
 // ------------------------------------------
 
+// @todo: Refactor: Split in different components
 export const CheckoutSummary = ({
   address,
   unlockedAmount,
@@ -211,12 +251,14 @@ export const CheckoutSummary = ({
   receiverAddress,
   paymentMethod,
   isPersistent = type === EntityType.Instance,
+  website,
   mainRef,
 }: // streamDuration,
 CheckoutSummaryProps) => {
   const { cost } = useEntityCost({
     entityType: type,
     props: {
+      website,
       specs,
       volumes,
       isPersistent,
@@ -298,18 +340,18 @@ CheckoutSummaryProps) => {
                     <Price value={unlockedAmount} />
                   </div>
                 </StyledHoldingSummaryLine>
-
-                {specs && (
-                  <CheckoutSummarySpecsLineMemo
-                    {...{
-                      type,
-                      specs,
-                      cost: (cost as any)?.computeTotalCost,
-                      priceDuration,
-                    }}
-                  />
-                )}
-
+                {(type === EntityType.Program ||
+                  type === EntityType.Instance) &&
+                  specs && (
+                    <CheckoutSummarySpecsLineMemo
+                      {...{
+                        type,
+                        specs,
+                        cost: (cost as any)?.computeTotalCost,
+                        priceDuration,
+                      }}
+                    />
+                  )}
                 {volumes &&
                   volumes.map((volume, index) => {
                     return (
@@ -318,13 +360,20 @@ CheckoutSummaryProps) => {
                         {...{
                           volume,
                           specs,
-                          cost: cost?.perVolumeCost[index],
+                          cost: (cost as VolumeCost)?.perVolumeCost?.[index],
                           priceDuration,
                         }}
                       />
                     )
                   })}
-
+                {type === EntityType.Website && website && (
+                  <CheckoutSummaryWebsiteLineMemo
+                    {...{
+                      website,
+                      cost: (cost as WebsiteCost).totalCost,
+                    }}
+                  />
+                )}
                 {type === EntityType.Program && (
                   <StyledHoldingSummaryLine>
                     <div>TYPE</div>
@@ -332,7 +381,6 @@ CheckoutSummaryProps) => {
                     <div>-</div>
                   </StyledHoldingSummaryLine>
                 )}
-
                 {domains &&
                   domains.map((domain) => {
                     return (
@@ -342,7 +390,6 @@ CheckoutSummaryProps) => {
                       />
                     )
                   })}
-
                 <StyledHoldingSummaryLine>
                   <div></div>
                   <div className="text-main0 tp-body2">
@@ -356,7 +403,6 @@ CheckoutSummaryProps) => {
                     </span>
                   </div>
                 </StyledHoldingSummaryLine>
-
                 {paymentMethod === PaymentMethod.Stream &&
                   cost?.totalStreamCost && (
                     <StyledHoldingSummaryLine>
@@ -425,6 +471,10 @@ const CheckoutSummarySpecsLineMemo = memo(
 const CheckoutSummaryVolumeLineMemo = memo(
   CheckoutSummaryVolumeLine,
 ) as typeof CheckoutSummaryVolumeLine
+
+const CheckoutSummaryWebsiteLineMemo = memo(
+  CheckoutSummaryWebsiteLine,
+) as typeof CheckoutSummaryWebsiteLine
 
 const CheckoutSummaryDomainLineMemo = memo(
   CheckoutSummaryDomainLine,

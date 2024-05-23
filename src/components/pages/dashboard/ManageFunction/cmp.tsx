@@ -1,17 +1,23 @@
+import Link from 'next/link'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
 import { Label, NoisyContainer } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageFunction } from '@/hooks/pages/solutions/manage/useManageFunction'
-import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
+import {
+  ellipseAddress,
+  ellipseText,
+  humanReadableSize,
+  convertByteUnits,
+} from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
 export default function ManageFunction() {
-  const { func, handleCopyHash, handleDelete, copyAndNotify } =
+  const { func, handleCopyHash, handleDelete, handleDownload, copyAndNotify } =
     useManageFunction()
 
   const theme = useTheme()
@@ -57,7 +63,7 @@ export default function ManageFunction() {
               </Label>
             </div>
             <div>
-              {/* <Button
+              <Button
                 size="md"
                 variant="tertiary"
                 color="main0"
@@ -67,7 +73,7 @@ export default function ManageFunction() {
                 onClick={handleDownload}
               >
                 Download
-              </Button> */}
+              </Button>
               <Button
                 kind="functional"
                 variant="warning"
@@ -93,6 +99,50 @@ export default function ManageFunction() {
             </div>
 
             <Separator />
+            <div tw="flex flex-row justify-between my-5">
+              <div>
+                <div className="tp-info text-main0">CORES</div>
+                <div>
+                  <Text>{func.resources.vcpus} x86 64bit</Text>
+                </div>
+              </div>
+
+              <div>
+                <div className="tp-info text-main0">RAM</div>
+                <div>
+                  <Text>
+                    {convertByteUnits(func.resources.memory, {
+                      from: 'MiB',
+                      to: 'GiB',
+                      displayUnit: true,
+                    })}
+                  </Text>
+                </div>
+              </div>
+
+              <div>
+                <div className="tp-info text-main0">TIMEOUT</div>
+                <div>
+                  <Text>{`${func.resources.seconds}s`}</Text>
+                </div>
+              </div>
+
+              <div>
+                <div className="tp-info text-main0">SIZE</div>
+                <div>
+                  <Text className="fs-10 tp-body1">
+                    {humanReadableSize(func?.size || 0, 'MiB')}
+                  </Text>
+                </div>
+              </div>
+
+              <div>
+                <div className="tp-info text-main0">CREATED ON</div>
+                <div>
+                  <Text className="fs-10 tp-body1">{func.date}</Text>
+                </div>
+              </div>
+            </div>
 
             <div tw="my-5">
               <div className="tp-info text-main0">EXPLORER</div>
@@ -126,30 +176,55 @@ export default function ManageFunction() {
               </div>
             </div>
 
-            <div tw="flex my-5">
-              <div tw="mr-5">
-                <div className="tp-info text-main0">SIZE</div>
-                <div>
-                  <Text className="fs-10 tp-body1">
-                    {humanReadableSize(func.size, 'MiB')}
-                  </Text>
-                </div>
+            <Separator />
+            <TextGradient type="h7" as="h2" color="main0">
+              Linked Runtime
+            </TextGradient>
+            <div className="tp-info text-main0">ITEM HASH</div>
+            <IconText
+              iconName="copy"
+              onClick={() => copyAndNotify(func.runtime.ref)}
+            >
+              {func.runtime.ref}
+            </IconText>
+            {func.runtime.comment && (
+              <div tw="mt-5">
+                <div className="tp-info text-main0">COMMENT</div>
+                <Text>{func.runtime.comment}</Text>
               </div>
-
-              <div tw="mr-5">
-                <div className="tp-info text-main0">CREATED ON</div>
-                <div>
-                  <Text className="fs-10 tp-body1">{func.date}</Text>
-                </div>
-              </div>
+            )}
+            <Separator />
+            <TextGradient type="h7" as="h2" color="main0">
+              Linked Codebase
+            </TextGradient>
+            <div tw="my-5">
+              <div className="tp-info text-main0">IMMUTABLE VOLUME</div>
+              <Link
+                className="tp-body1 fs-16"
+                href={`/storage/volume/${func.code.ref}`}
+              >
+                <IconText iconName="square-up-right">Volume details</IconText>
+              </Link>
             </div>
-
+            <div className="tp-info text-main0">ITEM HASH</div>
+            <IconText
+              iconName="copy"
+              onClick={() => copyAndNotify(func.code.ref)}
+            >
+              {func.code.ref}
+            </IconText>
+            {func.code.entrypoint && (
+              <div tw="mt-5">
+                <div className="tp-info text-main0">CODE ENTRYPOINT</div>
+                <Text>{func.code.entrypoint}</Text>
+              </div>
+            )}
             {volumes.length > 0 && (
               <>
                 <Separator />
 
                 <TextGradient type="h7" as="h2" color="main0">
-                  Linked storage
+                  Linked Storage(s)
                 </TextGradient>
 
                 <VolumeList

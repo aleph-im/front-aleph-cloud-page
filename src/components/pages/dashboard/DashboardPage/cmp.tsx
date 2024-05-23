@@ -7,6 +7,7 @@ import SSHKeysTabContent from '../SSHKeysTabContent'
 import FunctionsTabContent from '../FunctionsTabContent'
 import InstancesTabContent from '../InstancesTabContent'
 import VolumesTabContent from '../VolumesTabContent'
+import WebsitesTabContent from '../WebsitesTabContent'
 import AllTabContent from '../AllTabContent'
 import { useDashboardPage } from '@/hooks/pages/solutions/useDashboardPage'
 import DomainsTabContent from '../DomainsTabContent'
@@ -26,7 +27,7 @@ function getLabel(entities: unknown[], beta = false): string {
 export default function DashboardPage() {
   useSPARedirect()
 
-  const { all, programs, instances, volumes, sshKeys, domains } =
+  const { all, programs, instances, volumes, sshKeys, domains, websites } =
     useDashboardPage()
 
   const [tabId, setTabId] = useState('all')
@@ -44,6 +45,11 @@ export default function DashboardPage() {
                 label: { label: getLabel(all), position: 'bottom' },
               },
               {
+                id: 'website',
+                name: 'Websites',
+                label: { label: getLabel(websites, true), position: 'top' },
+              },
+              {
                 id: 'function',
                 name: 'Functions',
                 label: { label: getLabel(programs), position: 'bottom' },
@@ -55,18 +61,18 @@ export default function DashboardPage() {
               },
               {
                 id: 'volume',
-                name: 'Immutable Volumes',
+                name: 'Volumes',
                 label: { label: getLabel(volumes), position: 'bottom' },
-              },
-              {
-                id: 'ssh',
-                name: 'SSH Keys',
-                label: { label: getLabel(sshKeys, true), position: 'top' },
               },
               {
                 id: 'domain',
                 name: 'Domains',
                 label: { label: getLabel(domains, true), position: 'top' },
+              },
+              {
+                id: 'ssh',
+                name: 'SSH Keys',
+                label: { label: getLabel(sshKeys, true), position: 'top' },
               },
             ]}
             onTabChange={setTabId}
@@ -76,15 +82,33 @@ export default function DashboardPage() {
           {tabId === 'all' ? (
             <AllTabContent data={all} />
           ) : tabId === 'function' ? (
-            <FunctionsTabContent data={programs} />
+            <FunctionsTabContent
+              data={programs.sort((a, b) => b.date.localeCompare(a.date))}
+            />
           ) : tabId === 'instance' ? (
-            <InstancesTabContent data={instances} />
+            <InstancesTabContent
+              data={instances.sort((a, b) => b.date.localeCompare(a.date))}
+            />
+          ) : tabId === 'website' ? (
+            <WebsitesTabContent
+              data={websites.sort((a, b) =>
+                b.updated_at.localeCompare(a.updated_at),
+              )}
+            />
           ) : tabId === 'volume' ? (
-            <VolumesTabContent data={volumes} />
+            <VolumesTabContent
+              data={volumes.sort((a, b) => b.date.localeCompare(a.date))}
+            />
           ) : tabId === 'ssh' ? (
-            <SSHKeysTabContent data={sshKeys} />
+            <SSHKeysTabContent
+              data={sshKeys.sort((a, b) => b.date.localeCompare(a.date))}
+            />
           ) : tabId === 'domain' ? (
-            <DomainsTabContent data={domains} />
+            <DomainsTabContent
+              data={domains.sort((a, b) =>
+                b.updated_at.localeCompare(a.updated_at),
+              )}
+            />
           ) : (
             <></>
           )}

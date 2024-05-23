@@ -1,5 +1,5 @@
 import { Button, TextGradient } from '@aleph-front/core'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import { EntityType, EntityDomainType } from '@/helpers/constants'
 import { useNewFunctionPage } from '@/hooks/pages/computing/useNewFunctionPage'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
@@ -143,14 +143,14 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
                   Custom domain
                 </TextGradient>
                 <p tw="mb-6">
-                  Configure a user-friendly domain name for your web3 function,
+                  Configure an user-friendly domain name for your web3 function,
                   providing a more accessible and professional way for users to
                   interact with your application.
                 </p>
                 <AddDomains
                   name="domains"
                   control={control}
-                  entityType={EntityType.Program}
+                  entityType={EntityDomainType.Program}
                 />
               </ToggleContainer>
             </div>
