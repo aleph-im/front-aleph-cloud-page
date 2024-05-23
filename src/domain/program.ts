@@ -30,7 +30,7 @@ import { FileManager } from './file'
 import { MessageManager } from './message'
 import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { AddDomain, DomainManager } from './domain'
+import { DomainManager } from './domain'
 import { EntityManager } from './types'
 import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
@@ -207,17 +207,13 @@ export class ProgramManager
     const steps: CheckoutStepType[] = []
     const { domains = [] } = newInstance
 
-    /* const volumeSteps = await this.volumeManager.getSteps(volumes)
-    for (const step of volumeSteps) steps.push(step) */
-
     // Volumes are aggregated in 1 step, and there is always 1 for the code
     steps.push('volume')
+
     steps.push('program')
 
-    const domainSteps = await this.domainManager.getSteps(
-      domains as AddDomain[],
-    )
-    for (const step of domainSteps) steps.push(step)
+    // @note: Aggregate all signatures in 1 step
+    if (domains.length > 0) steps.push('domain')
 
     return steps
   }
@@ -308,11 +304,13 @@ export class ProgramManager
     return messages
       .filter(({ content }) => content !== undefined)
       .map((message) => {
-        const size = message.content.volumes.reduce(
-          (ac: number, cv: MachineVolume) =>
-            ac + ('size_mib' in cv ? cv.size_mib : sizesMap[cv.ref]),
-          0,
-        )
+        const size =
+          sizesMap[message.content.code.ref] +
+          message.content.volumes.reduce(
+            (ac: number, cv: MachineVolume) =>
+              ac + ('size_mib' in cv ? cv.size_mib : sizesMap[cv.ref]),
+            0,
+          )
 
         return {
           id: message.item_hash,

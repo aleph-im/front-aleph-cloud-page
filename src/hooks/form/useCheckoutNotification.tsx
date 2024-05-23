@@ -74,7 +74,7 @@ export function useCheckoutNotification({
 export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
   {
     stream: {
-      title: 'Sign PAYG',
+      title: 'Sign PAYG Activation',
       content:
         'By signing this, you authorise the initiation of a token stream for billing, ensuring a seamless and efficient payment process aligning costs directly with your usage.',
     },
@@ -83,7 +83,7 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content: 'By signing this, you confirm the cancellation of your stream.',
     },
     volume: {
-      title: 'Sign Volume(s)',
+      title: 'Sign Volume(s) Creation',
       content:
         'By signing this, you confirm the creation of new volume(s). This is required if you are creating/updating a website, or if you have set up additional storage volume(s) for your instance or function.',
     },
@@ -96,7 +96,7 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content: 'By signing this, you confirm the update of your volume(s).',
     },
     ssh: {
-      title: 'Sign SSH Key(s)',
+      title: 'Sign SSH Key(s) Configuration',
       content:
         'By signing this, you confirm the SSH key(s) configuration, enabling encrypted communication with your instance. This is crucial for securing remote access.',
     },
@@ -109,7 +109,7 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content: 'By signing this, you confirm the update of your SSH Key(s).',
     },
     instance: {
-      title: 'Sign Instance',
+      title: 'Sign Instance Creation',
       content:
         "By signing this, you confirm the creation of your new instance on Twentysix.cloud. This step finalises the setup options you've chosen, including resources, configurations, and any additional features.",
     },
@@ -122,7 +122,7 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content: 'By signing this, you confirm the update of your instance.',
     },
     program: {
-      title: 'Sign Function',
+      title: 'Sign Function Creation',
       content:
         "By signing this, you confirm the creation of your new function on Twentysix.cloud. This step finalises the setup options you've chosen, including the codebase volume, resources, configurations, and any additional features.",
     },
@@ -135,7 +135,7 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content: 'By signing this, you confirm the update of your function.',
     },
     domain: {
-      title: 'Sign Custom Domain(s)',
+      title: 'Sign Custom Domain(s) Creation',
       content:
         'By signing this, you confirm the custom domain(s) settings for your website, instance or function.',
     },
@@ -150,7 +150,7 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
         'By signing this, you confirm the update of your custom domain(s).',
     },
     website: {
-      title: 'Sign Website',
+      title: 'Sign Website Creation',
       content:
         'By signing this, you confirm the deployment of your new website on Twentysix.cloud.',
     },
@@ -160,12 +160,12 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
     },
     websiteUp: {
       title: 'Sign Website Update',
-      content: 'By signing this, you confirm the deletion of your website.',
+      content: 'By signing this, you confirm the update of your website.',
     },
     indexer: {
-      title: 'Sign Indexer',
+      title: 'Sign Indexer Creation',
       content:
-        'By signing this, you confirm the deployment of your new indexer on Twentysix.cloud.',
+        'By signing this, you confirm the creation of your new indexer on Twentysix.cloud.',
     },
     indexerDel: {
       title: 'Sign Indexer Deletion',
@@ -173,6 +173,6 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
     },
     indexerUp: {
       title: 'Sign Indexer Update',
-      content: 'By signing this, you confirm the deletion of your indexer.',
+      content: 'By signing this, you confirm the update of your indexer.',
     },
   }

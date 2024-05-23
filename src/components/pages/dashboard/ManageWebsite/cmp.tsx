@@ -17,11 +17,20 @@ import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import { WebsiteFrameworks } from '@/domain/website'
-import { cidV0Tov1 } from '@/helpers/utils'
+import { getDate, cidV0Tov1 } from '@/helpers/utils'
+import { UpdateWebsiteFolder } from '@/components/form/UpdateWebsiteFolder'
+import { useNewWebsitePage } from '@/hooks/pages/hosting/useNewWebsitePage'
+import { useEffect } from 'react'
 
 export default function ManageWebsite() {
-  const { website, refVolume, handleCopyHash, handleDelete } =
-    useManageWebsite()
+  const {
+    website,
+    refVolume,
+    historyVolumes,
+    handleCopyHash,
+    handleDelete,
+    handleUpdate,
+  } = useManageWebsite()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
   const cidV1 = refVolume?.item_hash && cidV0Tov1(refVolume.item_hash)
   const default_url = `https://${cidV1}.ipfs.aleph.sh`
@@ -29,6 +38,15 @@ export default function ManageWebsite() {
   const alt_url_2 = `https://${cidV1}.ipfs.cf-ipfs.com`
   const alt_url_3 = `https://${cidV1}.ipfs.dweb.link` */
   const theme = useTheme()
+  const state = useNewWebsitePage()
+  const cid = state.values.website?.cid
+
+  useEffect(() => {
+    if (cid) {
+      handleUpdate(cid as string)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cid])
 
   if (!website) {
     return (
@@ -66,19 +84,8 @@ export default function ManageWebsite() {
                 )}
               </Label>
             </div>
-            <div>
-              <Button
-                size="md"
-                variant="tertiary"
-                color="main0"
-                kind="default"
-                tw="!mr-4"
-                forwardedAs="a"
-                //onClick={handleUpdate}
-                disabled
-              >
-                Update
-              </Button>
+            <div tw="flex flex-row gap-4">
+              <UpdateWebsiteFolder control={state.control} />
               <Button
                 kind="functional"
                 variant="warning"
@@ -131,7 +138,7 @@ export default function ManageWebsite() {
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
                   <Text className="fs-10 tp-body1" as={'span'}>
-                    {website.created_at}
+                    {getDate(website.created_at)}
                   </Text>
                 </div>
               </div>
@@ -173,88 +180,76 @@ export default function ManageWebsite() {
                   <div className="tp-info text-main0">ALTERNATIVE GATEWAYS</div>
                 </IconText>
               </a>
-              <Text as={'span'}>{`https://${cidV1}.ipfs.<gateway-url>`}</Text>
-              {/* <div tw="flex flex-row">
-                <a
-                  className="tp-body1 fs-16"
-                  href={alt_url}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                >
-                  <IconText iconName="square-up-right">
-                    <Text as={'span'}>{alt_url}</Text>
-                  </IconText>
-                </a>
-                <IconText
-                  iconName="copy"
-                  onClick={() => copyAndNotify(alt_url)}
-                />
-              </div>
-              <div tw="flex flex-row">
-                <a
-                  className="tp-body1 fs-16"
-                  href={alt_url_2}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                >
-                  <IconText iconName="square-up-right">
-                    <Text as={'span'}>{alt_url_2}</Text>
-                  </IconText>
-                </a>
-                <IconText
-                  iconName="copy"
-                  onClick={() => copyAndNotify(alt_url_2)}
-                />
-              </div>
-              <div tw="flex flex-row">
-                <a
-                  className="tp-body1 fs-16"
-                  href={alt_url_3}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                >
-                  <IconText iconName="square-up-right">
-                    <Text as={'span'}>{alt_url_3}</Text>
-                  </IconText>
-                </a>
-                <IconText
-                  iconName="copy"
-                  onClick={() => copyAndNotify(alt_url_3)}
-                />
-              </div> */}
+              <Text as={'span'}>
+                {`https://${cidV1}.ipfs.`}
+                <span tw="text-purple-500">{'<gateway-hostname>'}</span>
+              </Text>
             </div>
-            <div className="tp-info text-main0">ENS GATEWAYS</div>
-            {website.ens?.length > 0 ? (
-              Array.from(website.ens).map((ens, key) => {
-                const limo = `https://${ens}.limo`
-                return (
-                  <div tw="flex flex-row" key={key}>
-                    <a
-                      className="tp-body1 fs-16"
-                      href={limo}
-                      target="_blank"
-                      referrerPolicy="no-referrer"
-                    >
-                      <IconText iconName="square-up-right">
-                        <Text as={'span'}>{limo}</Text>
-                      </IconText>
-                    </a>
-                    <IconText
-                      iconName="copy"
-                      onClick={() => copyAndNotify(limo)}
-                    />
-                  </div>
-                )
-              })
-            ) : (
-              <span tw="my-5">{'-'}</span>
-            )}
+
+            <div tw="mb-5">
+              <a
+                className="tp-body1 fs-16"
+                href={'https://app.ens.domains/'}
+                target="_blank"
+                referrerPolicy="no-referrer"
+              >
+                <IconText iconName="square-up-right">
+                  <div className="tp-info text-main0">ENS GATEWAYS</div>
+                </IconText>
+              </a>
+              {website.ens && website.ens.length > 0 ? (
+                Array.from(website.ens).map((ens, key) => {
+                  const limo = `https://${ens}.limo`
+                  return (
+                    <div tw="flex flex-row" key={key}>
+                      <a
+                        className="tp-body1 fs-16"
+                        href={limo}
+                        target="_blank"
+                        referrerPolicy="no-referrer"
+                      >
+                        <IconText iconName="square-up-right">
+                          <Text as={'span'}>{limo}</Text>
+                        </IconText>
+                      </a>
+                      <IconText
+                        iconName="copy"
+                        onClick={() => copyAndNotify(limo)}
+                      />
+                    </div>
+                  )
+                })
+              ) : (
+                <div tw="flex flex-col">
+                  <Text as={'span'}>
+                    Access your ENS and setup the content hash to:
+                  </Text>
+                  <IconText
+                    iconName="copy"
+                    onClick={() => copyAndNotify(`ipfs://${cidV1}` ?? '')}
+                  >
+                    <span tw="ml-2 not-italic text-purple-700">
+                      ipfs://{cidV1}
+                    </span>
+                  </IconText>
+                  <Text as={'span'} tw="mt-1">
+                    Then, your website will be accessible via:
+                    <span tw="ml-2 not-italic text-purple-700">
+                      {'https://'}
+                      <span tw="text-purple-500">{'<your-ens-name>'}</span>
+                      {'.eth.limo'}
+                    </span>
+                  </Text>
+                </div>
+              )}
+            </div>
+
             <Separator />
             <TextGradient type="h7" as="h2" color="main0">
-              Linked IPFS Storage
+              Current Version
             </TextGradient>
             <div tw="my-5">
-              <div className="tp-info text-main0">IMMUTABLE VOLUME</div>
+              <div className="tp-info text-main0">{`Version ${website.version}`}</div>
               <Link
                 className="tp-body1 fs-16"
                 href={`/storage/volume/${refVolume?.id}`}
@@ -271,15 +266,7 @@ export default function ManageWebsite() {
                 {refVolume?.id}
               </IconText>
             </div>
-            <div className="tp-info text-main0">V0 CONTENT ID</div>
-            <div tw="flex flex-row mb-5">
-              <Text as={'span'}>{refVolume?.item_hash}</Text>
-              <IconText
-                iconName="copy"
-                onClick={() => copyAndNotify(refVolume?.item_hash ?? '')}
-              ></IconText>
-            </div>
-            <div className="tp-info text-main0">V1 CONTENT ID</div>
+            <div className="tp-info text-main0">IPFS CID</div>
             <div tw="flex flex-row mb-5">
               <Text as={'span'}>{cidV1}</Text>
               <IconText
@@ -287,6 +274,73 @@ export default function ManageWebsite() {
                 onClick={() => copyAndNotify(cidV1 ?? '')}
               ></IconText>
             </div>
+
+            <Separator />
+            <TextGradient type="h7" as="h2" color="main0">
+              Previous Versions
+            </TextGradient>
+            {historyVolumes && Object.keys(historyVolumes).length > 0 ? (
+              <>
+                {Object.entries(historyVolumes)
+                  .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
+                  .map(([version, volume]) => {
+                    const legacy_link = `https://${cidV0Tov1(volume.item_hash)}.ipfs.aleph.sh`
+                    return (
+                      <div tw="my-5" key={`version-${version}`}>
+                        <Separator />
+                        <div tw="my-5 flex flex-row justify-between">
+                          <div>
+                            <div className="tp-info text-main0">{`Version ${version}`}</div>
+                            <Link
+                              className="tp-body1 fs-16"
+                              href={`/storage/volume/${volume.id}`}
+                            >
+                              <IconText iconName="square-up-right">
+                                Volume details
+                              </IconText>
+                            </Link>
+                          </div>
+                          <div tw="ml-10">
+                            <div className="tp-info text-main0">CREATED ON</div>
+                            <div>
+                              <Text className="fs-10 tp-body1" as={'span'}>
+                                {volume.date}
+                              </Text>
+                            </div>
+                          </div>
+                          <Button
+                            kind="functional"
+                            variant="warning"
+                            size="md"
+                            onClick={() => handleUpdate(undefined, version)}
+                          >
+                            Redeploy
+                          </Button>
+                        </div>
+                        <div className="tp-info text-main0">LEGACY GATEWAY</div>
+                        <div tw="flex flex-row mb-5">
+                          <a
+                            className="tp-body1 fs-16"
+                            href={legacy_link}
+                            target="_blank"
+                            referrerPolicy="no-referrer"
+                          >
+                            <IconText iconName="square-up-right">
+                              <Text as={'span'}>{legacy_link}</Text>
+                            </IconText>
+                          </a>
+                          <IconText
+                            iconName="copy"
+                            onClick={() => copyAndNotify(legacy_link)}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+              </>
+            ) : (
+              <Text as={'span'}>No previous versions</Text>
+            )}
           </NoisyContainer>
 
           <div tw="mt-20 text-center">

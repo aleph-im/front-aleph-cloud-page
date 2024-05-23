@@ -28,7 +28,7 @@ import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
 import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { AddDomain, DomainManager } from './domain'
+import { DomainManager } from './domain'
 import { EntityManager } from './types'
 import {
   instanceSchema,
@@ -304,18 +304,16 @@ export class InstanceManager
     if (newInstance.payment?.type === PaymentMethod.Stream) steps.push('stream')
 
     const newKeys = this.parseNewSSHKeys(sshKeys)
-    const sshKeysSteps = await this.sshKeyManager.getSteps(newKeys)
-    for (const step of sshKeysSteps) steps.push(step)
+    // @note: Aggregate all signatures in 1 step
+    if (newKeys.length > 0) steps.push('ssh')
 
-    const volumeSteps = await this.volumeManager.getSteps(volumes)
-    for (const step of volumeSteps) steps.push(step)
+    // @note: Aggregate all signatures in 1 step
+    if (volumes.length > 0) steps.push('volume')
 
     steps.push('instance')
 
-    const domainSteps = await this.domainManager.getSteps(
-      domains as AddDomain[],
-    )
-    for (const step of domainSteps) steps.push(step)
+    // @note: Aggregate all signatures in 1 step
+    if (domains.length > 0) steps.push('domain')
 
     return steps
   }

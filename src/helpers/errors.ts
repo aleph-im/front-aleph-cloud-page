@@ -57,4 +57,5 @@ export default {
     new Error(`SSH key already used by another resource: ${sshKey}`),
   InstanceStartupFailed: (id: string, error: string) =>
     new Error(`Failed to start instance on CRN ${id}: ${error}`),
+  MissingVolumeData: new Error('Missing volume data'),
 }

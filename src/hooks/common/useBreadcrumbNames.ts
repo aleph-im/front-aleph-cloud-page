@@ -52,7 +52,7 @@ export function useBreadcrumbNames(): UseBreadcrumbNamesReturn {
       '/configure/domain/[hash]': `DOMAIN / ${hashParam}`,
       '/computing/instance/[hash]': `INSTANCE / ${hash}`,
       '/computing/function/[hash]': `FUNCTION / ${hash}`,
-      '/hosting/website/[hash]': `WEBSITE / ${hash}`,
+      '/hosting/website/[hash]': `WEBSITE / ${hashParam}`,
     }
   }, [router.query, names])
 

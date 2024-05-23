@@ -6,16 +6,17 @@ import {
   PaymentMethod,
   WebsiteFrameworkId,
   defaultWebsiteAggregateKey,
+  defaultDomainAggregateKey,
   defaultWebsiteChannel,
 } from '@/helpers/constants'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
-import { websiteSchema } from '@/helpers/schemas/website'
+import { websiteSchema, ipfsCIDSchema } from '@/helpers/schemas/website'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
-import { VolumeManager } from './volume'
-import { AddDomain, Domain, DomainManager } from './domain'
+import { Volume, VolumeManager } from './volume'
+import { Domain, DomainManager, DomainAggregate } from './domain'
 import { getDate } from '@/helpers/utils'
 import Err from '@/helpers/errors'
 import { ItemType } from '@aleph-sdk/message'
@@ -278,9 +279,10 @@ export type WebsiteMetadata = NameAndTagsField & WebsiteFrameworkField
 export type WebsiteAggregateItem = {
   metadata: WebsiteMetadata
   payment: WebsitePayment
-  ens: string[]
-  volume_id: string
   version: number
+  volume_id: string
+  history?: Record<string, string>
+  ens?: string[]
   created_at: string
   updated_at: string
 }
@@ -293,8 +295,11 @@ export type Website = WebsiteAggregateItem & {
   confirmed: boolean
 }
 
+export type HistoryVolumes = Record<string, Volume>
+
 export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   static addSchema = websiteSchema
+  static updateCid = ipfsCIDSchema
 
   static async getWebsiteSize(
     props: AddWebsite | WebsiteCostProps,
@@ -390,10 +395,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
             tags,
             framework,
           },
-          ens,
           payment,
-          volume_id: volume.item_hash,
           version: 1,
+          volume_id: volume.item_hash,
+          ens,
           created_at: date,
           updated_at: date,
         },
@@ -407,7 +412,8 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       const entity = (await this.parseNewAggregate(websiteEntity))[0]
 
       // Publish domains
-      if (domains) yield* this.parseDomainsSteps(volumeEntity.id, domains)
+      if (domains && domains.length > 0)
+        yield* this.parseDomainsSteps(volumeEntity.id, domains)
 
       return entity
     } catch (err) {
@@ -464,12 +470,8 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     if (valid) {
       steps.push('volume')
       steps.push('website')
-      if (!valid.domains || valid.domains.length === 0) return steps
-      const domainSteps = await this.domainManager.getSteps(
-        valid.domains as AddDomain[],
-        false,
-      )
-      for (const step of domainSteps) steps.push(step)
+      // @note: Aggregate all signatures in 1 step
+      if (valid.domains && valid.domains.length > 0) steps.push('domain')
     }
     return steps
   }
@@ -503,9 +505,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     const {
       metadata,
       payment,
-      ens,
-      volume_id,
       version,
+      volume_id,
+      history,
+      ens,
       created_at,
       updated_at,
     } = content
@@ -514,10 +517,11 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       type: EntityType.Website,
       metadata,
       payment,
-      ens,
-      volume_id,
       version,
-      created_at: getDate(created_at),
+      volume_id,
+      history,
+      ens,
+      created_at: created_at,
       updated_at: getDate(updated_at),
       confirmed: true,
     }
@@ -553,12 +557,150 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         if (typeof websiteOrId !== 'string') {
           yield
           await this.volumeManager.del((websiteOrId as Website).volume_id)
+          // Delete history volumes as well
+          if (websiteOrId.history) {
+            const uniqueVolumes = await Array.from(
+              new Set(Object.values(websiteOrId.history)),
+            )
+            await Promise.all(
+              uniqueVolumes.map(
+                async (volume_id) => await this.volumeManager.del(volume_id),
+              ),
+            )
+          }
         }
         yield
         await this.del(websiteOrId)
       }
     } catch (err) {
       throw Err.RequestFailed(err)
+    }
+  }
+
+  async getUpdateSteps(
+    website: Website,
+    cid?: string,
+    version?: string,
+    domains?: Domain[],
+  ): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    if (!cid && !version) throw Err.MissingVolumeData
+    else if (cid) steps.push('volumeUp')
+    steps.push('websiteUp')
+    // @note: Aggregate all signatures in 1 step
+    if (domains && domains.length > 0) steps.push('domainUp')
+    return steps
+  }
+
+  async *addUpdateSteps(
+    website: Website,
+    cid?: string,
+    version?: string,
+    domains?: Domain[],
+  ): AsyncGenerator<void, Website, void> {
+    try {
+      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+        throw Err.InvalidAccount
+
+      let volume_id = ''
+      if (cid) {
+        cid = await WebsiteManager.updateCid.parseAsync(cid)
+        // Publish volume
+        yield
+        const volume = await (
+          this.sdkClient as AuthenticatedAlephHttpClient
+        ).createStore({
+          channel: this.channel,
+          fileHash: cid,
+          storageEngine: ItemType.ipfs,
+        })
+        const volumeEntity = (
+          await this.volumeManager.parseMessages([volume])
+        )[0]
+        volume_id = volumeEntity.id
+      }
+      if (version) {
+        // Select volume from history
+        volume_id = website.history?.[version] || ''
+        if (volume_id) await this.volumeManager.get(volume_id)
+      }
+      if (!volume_id) throw Err.MissingVolumeData
+
+      // Publish website
+      const date = new Date().getTime() / 1000
+      const content: Record<string, any> = {
+        [website.id]: {
+          metadata: website.metadata,
+          payment: website.payment,
+          version: website.version + 1,
+          volume_id: volume_id,
+          history: {
+            [website.version.toString()]: website.volume_id,
+            ...website.history,
+          },
+          ens: website.ens,
+          created_at: website.created_at,
+          updated_at: date,
+        },
+      }
+      yield
+      const websiteEntity = await this.sdkClient.createAggregate({
+        key: this.key,
+        channel: this.channel,
+        content,
+      })
+      const entity = (await this.parseNewAggregate(websiteEntity))[0]
+
+      if (domains && domains.length > 0) {
+        // Publish domains
+        // @note: Aggregate all signatures in 1 step
+        yield
+        await this.sdkClient.createAggregate({
+          key: defaultDomainAggregateKey,
+          channel: this.channel,
+          content: domains.reduce((ac, cv) => {
+            ac[cv.name] = {
+              message_id: volume_id,
+              type: cv.target,
+              updated_at: new Date().toISOString(),
+            }
+            return ac
+          }, {} as DomainAggregate),
+        })
+      }
+
+      return entity
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
+  }
+
+  async getDomains(website: Website): Promise<Domain[]> {
+    const domains = await this.domainManager.getAll()
+    return domains.filter((domain) => domain.ref === website.volume_id)
+  }
+
+  async getHistoryVolumes(
+    website?: Website,
+  ): Promise<HistoryVolumes | undefined> {
+    if (website?.history) {
+      const history: [string, string][] = Object.entries(website.history)
+        .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
+        .slice(0, 5)
+
+      if (history.length > 0) {
+        const volumes = await this.volumeManager.getVolumes(
+          history.map((item) => item[1]),
+        )
+        return Object.fromEntries(
+          history
+            .map((item) => [
+              item[0],
+              volumes.find((volume) => volume.id === item[1]),
+            ])
+            .filter(([, volume]) => !!volume),
+        )
+      }
     }
   }
 }

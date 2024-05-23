@@ -284,9 +284,15 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     try {
       // @note: Aggregate all signatures in 1 step
       yield
-      await Promise.all(
-        domainsOrIds.map(async (domainOrId) => await this.del(domainOrId)),
-      )
+      await this.sdkClient.createAggregate({
+        key: this.key,
+        channel: this.channel,
+        content: domainsOrIds.reduce((ac, cv) => {
+          const name = typeof cv === 'string' ? cv : cv.name
+          ac[name] = null
+          return ac
+        }, {} as DomainAggregate),
+      })
     } catch (err) {
       throw Err.RequestFailed(err)
     }

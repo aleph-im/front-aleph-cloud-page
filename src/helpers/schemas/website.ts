@@ -30,10 +30,14 @@ export const websiteDataSchema = z.object({
   cid: ipfsCIDSchema,
 })
 
+export { ipfsCIDSchema }
+
 export const websitePaymentSchema = z.object({
   type: paymentMethodSchema,
   chain: blockchainSchema,
 })
+
+export const historySchema = z.record(ipfsCIDSchema)
 
 export const ensSchema = z.array(domainNameSchema)
 

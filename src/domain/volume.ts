@@ -250,6 +250,23 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     }
   }
 
+  async getVolumes(ids: string[], page = 1, pageSize = 5): Promise<Volume[]> {
+    try {
+      const response = await this.sdkClient.getMessages({
+        addresses: [this.account.address],
+        messageTypes: [MessageType.store],
+        channels: [this.channel],
+        hashes: ids,
+        page,
+        pageSize,
+      })
+
+      return await this.parseMessages(response.messages)
+    } catch (err) {
+      return []
+    }
+  }
+
   async get(id: string): Promise<Volume | undefined> {
     const message = await this.sdkClient.getMessage(id)
 
