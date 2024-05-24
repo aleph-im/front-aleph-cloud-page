@@ -8,7 +8,6 @@ import { useAppState } from '@/contexts/appState'
 import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
-import { Blockchain } from '@aleph-sdk/core'
 import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
 import { useConnection } from '@/hooks/common/useConnection'
 import { AvalancheAccount } from '@aleph-sdk/avalanche'
@@ -19,6 +18,7 @@ import {
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
+import { BlockchainId } from '@/domain/connect/base'
 
 export type ManageInstance = {
   instance?: Instance
@@ -84,10 +84,10 @@ export function useManageInstance(): ManageInstance {
 
     try {
       if (
-        blockchain !== Blockchain.AVAX ||
+        blockchain !== BlockchainId.AVAX ||
         !(account instanceof AvalancheAccount)
       ) {
-        handleConnect({ blockchain: Blockchain.AVAX })
+        handleConnect({ blockchain: BlockchainId.AVAX })
         throw Err.ConnectYourPaymentWallet
       }
 

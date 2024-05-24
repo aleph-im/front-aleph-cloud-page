@@ -15,13 +15,13 @@ import {
   defaultNameAndTags,
 } from '@/hooks/form/useAddNameAndTags'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { Blockchain } from '@aleph-sdk/core'
 import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
+import { BlockchainId } from '@/domain/connect/base'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {
@@ -33,7 +33,7 @@ export type NewWebsiteFormState = NameAndTagsField &
 
 export const defaultValues: Partial<NewWebsiteFormState> = {
   ...defaultNameAndTags,
-  payment: { chain: Blockchain.ETH, type: PaymentMethod.Hold },
+  payment: { chain: BlockchainId.ETH, type: PaymentMethod.Hold },
 }
 
 export type UseNewWebsitePagePageReturn = {

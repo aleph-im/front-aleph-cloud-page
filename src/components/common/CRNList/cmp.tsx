@@ -1,4 +1,4 @@
-import { KeyboardEvent, useCallback, useMemo, useState } from 'react'
+import { KeyboardEvent, useCallback, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import {
   Button,
@@ -273,7 +273,7 @@ export default function CRNList(props: CRNListProps) {
         onSelectedChange(row.hash)
       },
     }),
-    [],
+    [onSelectedChange],
   )
 
   const loadingPlaceholder = useMemo(
@@ -284,6 +284,8 @@ export default function CRNList(props: CRNListProps) {
     ),
     [theme],
   )
+
+  const infiniteScrollContainerRef = useRef<HTMLDivElement>(null)
 
   return (
     <>
@@ -309,12 +311,13 @@ export default function CRNList(props: CRNListProps) {
             />
           </div>
         </div>
-        <div tw="h-[30rem] overflow-auto">
+        <div tw="h-[30rem] overflow-auto" ref={infiniteScrollContainerRef}>
           <NodesTable
             {...{
               columns,
               data,
               infiniteScroll: !loadItemsDisabled,
+              infiniteScrollContainerRef,
               onLoadMore: handleLoadItems,
               onSort: handleSortItems,
               rowProps: handleRowProps,

@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import {
   Button,
@@ -10,7 +11,7 @@ import {
   useModal,
 } from '@aleph-front/core'
 import { CRN } from '@/domain/node'
-import { BlockchainId } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
@@ -19,20 +20,19 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import { EntityType, apiServer } from '@/helpers/constants'
+import { EntityDomainType, EntityType, apiServer } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstancePage } from '@/hooks/pages/computing/useNewInstancePage'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import NewEntityTab from '../NewEntityTab'
 import NodesTable from '@/components/common/NodesTable'
-import { useCallback, useEffect, useMemo, useState } from 'react'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
-import CRNList from '../../../common/CRNList'
 import { useConnection } from '@/hooks/common/useConnection'
+import CRNList from '../../../common/CRNList'
 
 export default function NewInstancePage({ mainRef }: PageProps) {
   const {
@@ -50,7 +50,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   } = useNewInstancePage()
 
   const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
-  const { handleConnect } = useConnection({ triggerOnMount: false })
+  const { account, blockchain, handleConnect } = useConnection({
+    triggerOnMount: false,
+  })
 
   // ------------------
 
@@ -67,6 +69,27 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     | 'switch-to-node-stream'
   >()
 
+  const handleCloseModal = useCallback(() => setSelectedModal(undefined), [])
+
+  const handleSwitchToNodeStream = useCallback(() => {
+    if (selectedNode !== node?.hash) {
+      handleConnect({ blockchain: BlockchainId.AVAX })
+      handleSelectNode(selectedNode)
+    }
+
+    setSelectedModal(undefined)
+  }, [handleConnect, handleSelectNode, node, selectedNode])
+
+  const handleSwitchToAutoHold = useCallback(() => {
+    if (node?.hash) {
+      handleConnect({ blockchain: BlockchainId.ETH })
+      setSelectedNode(undefined)
+      handleSelectNode(undefined)
+    }
+
+    setSelectedModal(undefined)
+  }, [handleConnect, handleSelectNode, node])
+
   useEffect(() => {
     if (!modalOpen) return
     if (!modalClose) return
@@ -78,36 +101,34 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     if (selectedModal === 'node-list') {
       return modalOpen({
         header: '',
-        width: '70rem',
-        onClose: () => setSelectedModal(undefined),
+        width: '80rem',
+        onClose: handleCloseModal,
         content: (
           <CRNList selected={selectedNode} onSelectedChange={setSelectedNode} />
         ),
         footer: (
           <>
             <div tw="w-full flex justify-between">
-              <Button
-                type="button"
-                kind="functional"
-                variant="warning"
-                size="md"
-                onClick={() => {
-                  handleSelectNode()
-                  setSelectedModal('switch-to-auto-hold')
-                }}
-              >
-                Auto-select CRN
-              </Button>
+              {node && (
+                <Button
+                  type="button"
+                  kind="functional"
+                  variant="warning"
+                  size="md"
+                  onClick={() => setSelectedModal('switch-to-auto-hold')}
+                >
+                  Auto-select CRN
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="primary"
                 size="md"
-                onClick={() => {
-                  handleSelectNode(selectedNode)
-                  setSelectedModal(undefined)
-                }}
+                onClick={handleSwitchToNodeStream}
+                disabled={!selectedNode}
+                tw="ml-auto!"
               >
-                Proceed with Changes
+                Continue
               </Button>
             </div>
           </>
@@ -117,9 +138,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
     if (selectedModal === 'switch-to-hold') {
       return modalOpen({
-        width: '38.1875rem',
-        title: 'Switch to Holder Tier',
-        onClose: () => setSelectedModal(undefined),
+        width: '40rem',
+        title: 'Confirm Payment Method Change',
+        onClose: handleCloseModal,
         content: (
           <div tw="flex flex-col gap-8" className="tp-body">
             <div>
@@ -150,20 +171,19 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               type="button"
               variant="secondary"
               size="md"
-              onClick={() => setSelectedModal(undefined)}
+              onClick={handleCloseModal}
             >
-              Cancel
+              Stay on Tier
             </Button>
             <Button
               type="button"
               variant="primary"
               size="md"
               onClick={() => {
-                handleConnect({ blockchain: BlockchainId.ETH })
-                setSelectedModal('node-list')
+                throw new Error('not supported')
               }}
             >
-              Confirm & Switch
+              Switch Tier
             </Button>
           </div>
         ),
@@ -172,14 +192,14 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
     if (selectedModal === 'switch-to-stream') {
       return modalOpen({
-        width: '38.1875rem',
+        width: '40rem',
         title: 'Confirm Payment Method Change',
-        onClose: () => setSelectedModal(undefined),
+        onClose: handleCloseModal,
         content: (
           <div tw="flex flex-col gap-8" className="tp-body">
             <div>
               You are about to switch your payment method to{' '}
-              <Strong>Pay-as-you-go</Strong>, which will also allow you to
+              <Strong>Pay-as-you-go</Strong>, which will also allow you to{' '}
               <Strong>manually select</Strong> your preferred CRN on{' '}
               <Strong>Avalanche</Strong>.
             </div>
@@ -206,20 +226,19 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               type="button"
               variant="secondary"
               size="md"
-              onClick={() => setSelectedModal(undefined)}
+              onClick={handleCloseModal}
             >
-              Stay on Holder Tier
+              Stay on Tier
             </Button>
             <Button
               type="button"
               variant="primary"
               size="md"
               onClick={() => {
-                handleConnect({ blockchain: BlockchainId.AVAX })
-                setSelectedModal('node-list')
+                throw new Error('not supported')
               }}
             >
-              Switch to PAYG Tier
+              Switch Tier
             </Button>
           </div>
         ),
@@ -228,16 +247,16 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
     if (selectedModal === 'switch-to-auto-hold') {
       return modalOpen({
-        width: '38.1875rem',
-        title: 'Switch to Automatic CRN Selection',
-        onClose: () => setSelectedModal(undefined),
+        width: '40rem',
+        title: 'Confirm CRN selection and Payment Method Change',
+        onClose: handleCloseModal,
         content: (
           <div tw="flex flex-col gap-8" className="tp-body">
             <div>
               You are about to enable <Strong>automatic CRN selection</Strong>,
               which will utilize the <Strong>Holder-tier</Strong> on{' '}
               <Strong>Ethereum</Strong>. This simplifies your setup by
-              automatically configuring resources.
+              automatically assigning a CRN node.
             </div>
             <div>
               Switching modes will prompt your wallet to automatically adjust to
@@ -261,20 +280,17 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               type="button"
               variant="secondary"
               size="md"
-              onClick={() => setSelectedModal(undefined)}
+              onClick={handleCloseModal}
             >
-              Cancel
+              Keep Current Settings
             </Button>
             <Button
               type="button"
               variant="primary"
               size="md"
-              onClick={() => {
-                handleConnect({ blockchain: BlockchainId.ETH })
-                setSelectedModal('node-list')
-              }}
+              onClick={handleSwitchToAutoHold}
             >
-              Confirm & Switch
+              Proceed with Changes
             </Button>
           </div>
         ),
@@ -283,14 +299,14 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
     if (selectedModal === 'switch-to-node-stream') {
       return modalOpen({
-        width: '38.1875rem',
-        title: 'Confirm CRN and Payment Method Change',
-        onClose: () => setSelectedModal(undefined),
+        width: '40rem',
+        title: 'Confirm CRN selection and Payment Method Change',
+        onClose: handleCloseModal,
         content: (
           <div tw="flex flex-col gap-8" className="tp-body">
             <div>
               You are about to switch from the automated Holder-tier setup on
-              Ethereum to <Strong>manually selecting</Strong> a CRN with the
+              Ethereum to <Strong>manually selecting</Strong> a CRN with the{' '}
               <Strong>Pay-as-you-go</Strong> method on{' '}
               <Strong>Avalanche</Strong>.
             </div>
@@ -316,7 +332,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               type="button"
               variant="secondary"
               size="md"
-              onClick={() => setSelectedModal(undefined)}
+              onClick={handleCloseModal}
             >
               Keep Current Settings
             </Button>
@@ -324,10 +340,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               type="button"
               variant="primary"
               size="md"
-              onClick={() => {
-                handleConnect({ blockchain: BlockchainId.AVAX })
-                setSelectedModal('node-list')
-              }}
+              onClick={() => setSelectedModal('node-list')}
             >
               Proceed with Changes
             </Button>
@@ -336,8 +349,85 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handleConnect, handleSelectNode, selectedModal, selectedNode])
+  }, [
+    handleCloseModal,
+    handleConnect,
+    handleSelectNode,
+    handleSwitchToAutoHold,
+    handleSwitchToNodeStream,
+    // modalClose,
+    // modalOpen,
+    node,
+    selectedModal,
+    selectedNode,
+  ])
 
+  useEffect(() => {
+    if (!modalOpen) return
+    if (!modalClose) return
+
+    if (!account) return
+    if (!blockchain) return
+    if (selectedModal) return
+
+    if (
+      (node && blockchain === BlockchainId.AVAX) ||
+      (!node && blockchain === BlockchainId.ETH)
+    ) {
+      return modalClose()
+    }
+
+    const switchTo = node ? BlockchainId.AVAX : BlockchainId.ETH
+    const name = blockchains[switchTo].name
+
+    return modalOpen({
+      width: '40rem',
+      title: 'Network Switch Required',
+      onClose: modalClose,
+      content: (
+        <div tw="flex flex-col gap-8" className="tp-body">
+          <div>
+            It looks like your wallet is currently connected to the wrong
+            network. To proceed with setting up your instance on
+            Twentysix.cloud, you&apos;ll need to switch to the{' '}
+            <Strong>{name}</Strong> network.
+          </div>
+        </div>
+      ),
+      footer: (
+        <div tw="w-full flex justify-between">
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={modalClose}
+          >
+            Stay on Current Network
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={() => {
+              handleConnect({ blockchain: switchTo })
+            }}
+          >
+            Proceed
+          </Button>
+        </div>
+      ),
+    })
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    // modalClose,
+    // modalOpen,
+    handleConnect,
+    account,
+    blockchain,
+    node,
+    selectedModal,
+  ])
   // ------------------------
 
   const columns = useMemo(() => {
@@ -379,7 +469,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               variant="warning"
               onClick={() => setSelectedModal('node-list')}
             >
-              Change
+              Change CRN
             </Button>
           </div>
         ),
@@ -410,6 +500,19 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                   data={data}
                   rowProps={() => ({ className: '_active' })}
                 />
+                <div tw="mt-6">
+                  <Button
+                    type="button"
+                    kind="functional"
+                    variant="warning"
+                    size="md"
+                    onClick={() => {
+                      setSelectedModal('switch-to-auto-hold')
+                    }}
+                  >
+                    Auto-select CRN
+                  </Button>
+                </div>
               </NoisyContainer>
             </div>
           </Container>
@@ -549,7 +652,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 <AddDomains
                   name="domains"
                   control={control}
-                  entityType={EntityType.Instance}
+                  entityType={EntityDomainType.Instance}
                 />
               </ToggleContainer>
             </div>

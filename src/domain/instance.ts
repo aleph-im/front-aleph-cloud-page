@@ -328,6 +328,9 @@ export class InstanceManager
     if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
+
+    await account.init()
+
     const alephxBalance = await account.getALEPHBalance()
     const alephxFlow = await account.getALEPHFlow(receiver)
     const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
@@ -360,7 +363,11 @@ export class InstanceManager
   protected async *parseInstanceSteps(
     newInstance: AddInstance,
   ): AsyncGenerator<void, InstancePublishConfiguration, void> {
-    newInstance = await InstanceManager.addSchema.parseAsync(newInstance)
+    const schema = !newInstance.node
+      ? InstanceManager.addSchema
+      : InstanceManager.addStreamSchema
+
+    newInstance = await schema.parseAsync(newInstance)
 
     const { account, channel } = this
 

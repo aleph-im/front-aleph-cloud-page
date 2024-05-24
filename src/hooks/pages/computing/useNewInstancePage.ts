@@ -1,7 +1,6 @@
 import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { Blockchain } from '@aleph-sdk/core'
 import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
@@ -28,7 +27,7 @@ import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { CRN, CRNSpecs, NodeLastVersions } from '@/domain/node'
+import { CRN, CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
 import {
   defaultStreamDuration,
   StreamDurationField,
@@ -37,10 +36,12 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
-import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import { AvalancheAccount } from '@aleph-sdk/avalanche'
+import Err from '@/helpers/errors'
+import { BlockchainId } from '@/domain/connect/base'
+import { PaymentConfiguration } from '@/domain/executable'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -85,14 +86,14 @@ export type UseNewInstancePage = {
 
 export function useNewInstancePage(): UseNewInstancePage {
   const router = useRouter()
-  const [appState, dispatch] = useAppState()
+  const [, dispatch] = useAppState()
+
   const {
     blockchain,
     account,
     balance: accountBalance = 0,
-  } = appState.connection
-
-  const { handleConnect } = useConnection({
+    handleConnect,
+  } = useConnection({
     triggerOnMount: false,
   })
 
@@ -101,12 +102,11 @@ export function useNewInstancePage(): UseNewInstancePage {
   const { crn } = router.query
 
   const handleSelectNode = useCallback(
-    (hash?: string) => {
+    async (hash?: string) => {
       const { crn, ...rest } = router.query
       const query = hash ? { ...rest, crn: hash } : rest
 
-      debugger
-      if (router.query.crn === query.crn) return
+      if (router.query.crn === query.crn) return false
 
       return router.replace({ query })
     },
@@ -136,60 +136,56 @@ export function useNewInstancePage(): UseNewInstancePage {
 
   // -------------------------
 
-  const minSpecs = useMemo(() => {
-    const [min] = getDefaultSpecsOptions(true)
-    return min
-  }, [])
-
-  const nodeManager = useNodeManager()
-
-  useEffect(() => {
-    if (!nodeSpecs) return
-
-    const isValid = nodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
-    if (isValid) return
-
-    router.replace('.')
-  }, [nodeManager, minSpecs, nodeSpecs, router])
-
-  // -------------------------
-
   const manager = useInstanceManager()
   const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewInstanceFormState) => {
-      if (!manager) throw new Error('Manager not ready')
-      if (!account) throw new Error('Invalid account')
-      if (!node || !node.stream_reward) throw new Error('Invalid node')
-      if (!state?.streamCost) throw new Error('Invalid stream cost')
-      if (window?.ethereum === undefined) throw new Error('No wallet found')
+      if (!manager) throw Err.ConnectYourWallet
+      if (!account) throw Err.InvalidAccount
 
-      if (
-        blockchain !== Blockchain.AVAX ||
-        !(account instanceof AvalancheAccount)
-      ) {
-        handleConnect({ blockchain: Blockchain.AVAX })
-        throw new Error('Invalid network')
+      let superfluidAccount
+      let payment: PaymentConfiguration = {
+        chain: BlockchainId.ETH,
+        type: PaymentMethod.Hold,
       }
 
-      // @todo: Refactor this
-      const superfluidAccount = createFromAvalancheAccount(account)
+      if (state.paymentMethod === PaymentMethod.Stream) {
+        if (!node || !node.stream_reward) throw Err.InvalidNode
+        if (!nodeSpecs) throw Err.InvalidCRNSpecs
+        if (!state?.streamCost) throw Err.InvalidStreamCost
 
-      const iSteps = await manager.getSteps(state)
+        const [minSpecs] = getDefaultSpecsOptions(true)
+        const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
+        if (!isValid) throw Err.InvalidCRNSpecs
+
+        if (
+          blockchain !== BlockchainId.AVAX ||
+          !(account instanceof AvalancheAccount)
+        ) {
+          handleConnect({ blockchain: BlockchainId.AVAX })
+          throw Err.InvalidNetwork
+        }
+
+        // @todo: Refactor this
+        superfluidAccount = createFromAvalancheAccount(account)
+        payment = {
+          chain: BlockchainId.AVAX,
+          type: PaymentMethod.Stream,
+          sender: account.address,
+          receiver: node.stream_reward,
+          streamCost: state.streamCost,
+          streamDuration: state.streamDuration,
+        }
+      }
+
+      const iSteps = await manager.getAddSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
       const steps = manager.addSteps(
         {
           ...state,
-          payment: {
-            chain: Blockchain.AVAX,
-            type: PaymentMethod.Stream,
-            sender: account.address,
-            receiver: node.stream_reward,
-            streamCost: state.streamCost,
-            streamDuration: state.streamDuration,
-          },
+          payment,
           node,
         } as AddInstance,
         superfluidAccount,
@@ -224,6 +220,7 @@ export function useNewInstancePage(): UseNewInstancePage {
       account,
       node,
       blockchain,
+      nodeSpecs,
       handleConnect,
       dispatch,
       router,
@@ -240,7 +237,9 @@ export function useNewInstancePage(): UseNewInstancePage {
   } = useForm({
     defaultValues,
     onSubmit,
-    resolver: zodResolver(InstanceManager.addStreamSchema),
+    resolver: zodResolver(
+      !node ? InstanceManager.addSchema : InstanceManager.addStreamSchema,
+    ),
     readyDeps: [],
   })
   const values = useWatch({ control }) as NewInstanceFormState
@@ -260,6 +259,11 @@ export function useNewInstancePage(): UseNewInstancePage {
   useEffect(() => {
     setValue('nodeSpecs', nodeSpecs)
   }, [nodeSpecs, setValue])
+
+  // @note: Set payment method depending on wallet blockchain network
+  useEffect(() => {
+    setValue('paymentMethod', !node ? PaymentMethod.Hold : PaymentMethod.Stream)
+  }, [node, setValue])
 
   // -------------------------
 
