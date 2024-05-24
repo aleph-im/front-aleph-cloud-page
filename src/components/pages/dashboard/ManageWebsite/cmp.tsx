@@ -48,7 +48,7 @@ export default function ManageWebsite() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cid])
 
-  if (!website) {
+  if (!website || !cidV1) {
     return (
       <>
         <Container>
@@ -219,7 +219,10 @@ export default function ManageWebsite() {
                 })
               ) : (
                 <div tw="flex flex-col">
-                  <Text>Access your ENS and setup the content hash to:</Text>
+                  <Text>
+                    Access your ENS and setup the content hash to this current
+                    version:
+                  </Text>
                   <IconText
                     iconName="copy"
                     onClick={() => copyAndNotify(`ipfs://${cidV1}` ?? '')}
@@ -296,7 +299,7 @@ export default function ManageWebsite() {
                               </IconText>
                             </Link>
                           </div>
-                          <div tw="ml-10">
+                          <div>
                             <div className="tp-info text-main0">CREATED ON</div>
                             <div>
                               <Text className="fs-10 tp-body1">
@@ -304,6 +307,8 @@ export default function ManageWebsite() {
                               </Text>
                             </div>
                           </div>
+                          <div />
+                          <div />
                           <Button
                             kind="functional"
                             variant="warning"

@@ -90,14 +90,23 @@ export default function ManageDomain() {
 
             <Separator />
 
-            {domain.target && (
-              <div tw="my-5">
+            <div tw="my-5 flex flex-row">
+              <div>
                 <div className="tp-info text-main0">TARGET</div>
                 <div>
-                  <Text>{EntityDomainTypeName[domain.target]}</Text>
+                  <Text>
+                    {(domain.target && EntityDomainTypeName[domain.target]) ||
+                      '-'}
+                  </Text>
                 </div>
               </div>
-            )}
+              <div tw="pl-12">
+                <div className="tp-info text-main0">UPDATED ON</div>
+                <div>
+                  <Text className="fs-10 tp-body1">{domain.date}</Text>
+                </div>
+              </div>
+            </div>
 
             <div tw="my-5">
               <div className="tp-info text-main0">REF</div>

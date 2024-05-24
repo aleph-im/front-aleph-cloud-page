@@ -259,7 +259,10 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
         : type === EntityDomainType.Program
           ? 'computing/function'
           : 'storage/volume'
-    const date = content?.updated_at.slice(0, 19).replace('T', ' ') || 'unknown'
+    let date = '-'
+    try {
+      date = content.updated_at?.slice(0, 19).replace('T', ' ') || '-'
+    } catch (e) {}
     const domain: Domain = {
       type: EntityType.Domain,
       id: name,

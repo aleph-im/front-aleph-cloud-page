@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelectWebsiteFramework } from '@/hooks/form/useSelectWebsiteFramework'
 import { Dropdown, DropdownOption, TextArea } from '@aleph-front/core'
 import { NoisyContainer } from '@aleph-front/core'
-import ExternalLinkButton from '@/components/common/ExternalLinkButton'
+//import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { SelectWebsiteFrameworkProps } from './types'
 
 export const SelectWebsiteFramework = React.memo(
@@ -47,11 +47,11 @@ export const SelectWebsiteFramework = React.memo(
             </div>
           )}
         </NoisyContainer>
-        <div tw="mt-6 text-right">
-          <ExternalLinkButton href="https://docs.aleph.im/computing/runtimes">
+        {/* <div tw="mt-6 text-right">
+          <ExternalLinkButton href="https://docs.aleph.im/">
             Learn more
           </ExternalLinkButton>
-        </div>
+        </div> */}
       </>
     )
   },
