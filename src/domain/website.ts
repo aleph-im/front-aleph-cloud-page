@@ -38,6 +38,13 @@ export const WebsiteFrameworks: Record<WebsiteFrameworkId, WebsiteFramework> = {
   [WebsiteFrameworkId.none]: {
     id: WebsiteFrameworkId.none,
     name: 'Not Specified',
+    docs: [
+      {
+        type: 'text',
+        value:
+          "Select this option if you don't use any framework or if you are using one that isn't listed. In the next step, your static folder must contain at least an index.html file, it will be the entrypoint of your website.",
+      },
+    ],
   },
   [WebsiteFrameworkId.nextjs]: {
     id: WebsiteFrameworkId.nextjs,

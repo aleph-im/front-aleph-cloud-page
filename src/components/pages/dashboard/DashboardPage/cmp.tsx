@@ -91,9 +91,7 @@ export default function DashboardPage() {
             />
           ) : tabId === 'website' ? (
             <WebsitesTabContent
-              data={websites.sort((a, b) =>
-                b.updated_at.localeCompare(a.updated_at),
-              )}
+              data={websites.sort((a, b) => b.date.localeCompare(a.date))}
             />
           ) : tabId === 'volume' ? (
             <VolumesTabContent
@@ -105,9 +103,7 @@ export default function DashboardPage() {
             />
           ) : tabId === 'domain' ? (
             <DomainsTabContent
-              data={domains.sort((a, b) =>
-                b.updated_at.localeCompare(a.updated_at),
-              )}
+              data={domains.sort((a, b) => b.date.localeCompare(a.date))}
             />
           ) : (
             <></>

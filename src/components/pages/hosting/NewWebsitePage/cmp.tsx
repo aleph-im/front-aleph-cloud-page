@@ -61,7 +61,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
             Organize and identify your websites more effectively by assigning a
             unique name, obtaining a hash reference, and defining multiple tags.
             This helps streamline your development process and makes it easier
-            to manage your web3 functions.
+            to manage your dapps.
           </p>
           <AddNameAndTags control={control} entityType={EntityType.Website} />
         </Container>
@@ -72,8 +72,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
           <SectionTitle number="4">Advanced Configuration Options</SectionTitle>
           <p tw="mb-6">
             Customize your website with our Advanced Configuration Options. Add
-            environment variables, and custom domains to meet your specific
-            needs.
+            custom domains or ENS domains to meet your specific needs.
           </p>
           <div tw="px-0 my-6">
             <div tw="mb-4">
@@ -99,11 +98,10 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
                 >
                   ENS domain
                 </TextGradient>
-                <p tw="mb-6">Available soon.</p>
-                {/* <p tw="mb-6">
-                  No need to do anything at this stage. Link your ENS domain
-                  after the upload.
-                </p> */}
+                <p tw="mb-6">
+                  No need to do anything at this stage. You will be able to link
+                  your ENS domains after deployment.
+                </p>
               </ToggleContainer>
             </div>
           </div>
