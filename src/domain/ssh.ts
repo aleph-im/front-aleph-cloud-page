@@ -1,12 +1,11 @@
 import { Account } from '@aleph-sdk/account'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 import {
   EntityType,
-  apiServer,
   defaultSSHChannel,
   defaultSSHPostType,
-} from '../helpers/constants'
-import { getDate, getExplorerURL } from '../helpers/utils'
+} from '@/helpers/constants'
+import { convertByteUnits, getDate, getExplorerURL } from '@/helpers/utils'
 import { EntityManager } from './types'
 import { sshKeySchema, sshKeysSchema } from '@/helpers/schemas/ssh'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
@@ -23,7 +22,9 @@ export type AddSSHKey = {
 export type SSHKey = AddSSHKey & {
   type: EntityType.SSHKey
   id: string // hash
+  name: string
   url: string
+  size: number
   date: string
   confirmed?: boolean
 }
@@ -129,7 +130,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     }
   }
 
-  async getSteps(
+  async getAddSteps(
     sshKeys: AddSSHKey | AddSSHKey[],
     throwOnCollision?: boolean,
   ): Promise<CheckoutStepType[]> {
@@ -155,11 +156,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     } else {
       return sshKeys.map((sshKey: AddSSHKey) => {
         if (!currentSSHKeySet.has(sshKey.key)) return sshKey
-        throw new Error(
-          `SSH key already exists on your collection: ${
-            sshKey.label || sshKey.key
-          }`,
-        )
+        throw Err.SSHKeysUsed(sshKey.label || sshKey.key)
       })
     }
   }
@@ -188,9 +185,43 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
       type: EntityType.SSHKey,
       id: post.item_hash,
       ...content,
+      name: content.label || 'Unnamed SSH key',
       url: getExplorerURL(post),
+      size: convertByteUnits(new Blob([content.key]).size, {
+        from: 'B',
+        to: 'MiB',
+      }),
       date: getDate(post.time),
       confirmed: !!post.confirmed,
+    }
+  }
+
+  async getDelSteps(
+    sshKeysOrIds: string | SSHKey | (string | SSHKey)[],
+  ): Promise<CheckoutStepType[]> {
+    sshKeysOrIds = Array.isArray(sshKeysOrIds) ? sshKeysOrIds : [sshKeysOrIds]
+    // @note: Aggregate all signatures in 1 step
+    // return sshKeysOrIds.map(() => 'sshDel')
+    return sshKeysOrIds.length ? ['sshDel'] : []
+  }
+
+  async *delSteps(
+    sshKeysOrIds: string | SSHKey | (string | SSHKey)[],
+  ): AsyncGenerator<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    sshKeysOrIds = Array.isArray(sshKeysOrIds) ? sshKeysOrIds : [sshKeysOrIds]
+    if (sshKeysOrIds.length === 0) return
+
+    try {
+      // @note: Aggregate all signatures in 1 step
+      yield
+      await Promise.all(
+        sshKeysOrIds.map(async (sshKeyOrId) => await this.del(sshKeyOrId)),
+      )
+    } catch (err) {
+      throw Err.RequestFailed(err)
     }
   }
 }

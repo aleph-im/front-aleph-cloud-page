@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { Instance, InstanceStatus } from '@/domain/instance'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
+import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useAppState } from '@/contexts/appState'
 import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
@@ -13,6 +14,11 @@ import { useConnection } from '@/hooks/common/useConnection'
 import { AvalancheAccount } from '@aleph-sdk/avalanche'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
 import { EntityDelAction } from '@/store/entity'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
+import Err from '@/helpers/errors'
 
 export type ManageInstance = {
   instance?: Instance
@@ -46,6 +52,7 @@ export function useManageInstance(): ManageInstance {
 
   const manager = useInstanceManager()
   const sshKeyManager = useSSHKeyManager()
+  const { next, stop } = useCheckoutNotification({})
 
   useEffect(() => {
     if (!instance || !sshKeyManager) return
@@ -59,9 +66,7 @@ export function useManageInstance(): ManageInstance {
     getMapped()
   }, [sshKeyManager, instance])
 
-  const handleCopyHash = useCallback(() => {
-    copyAndNotify(instance?.id || '')
-  }, [copyAndNotify, instance])
+  const handleCopyHash = useCopyHash(instance)
 
   const handleCopyConnect = useCallback(() => {
     copyAndNotify(`ssh root@${status?.vm_ipv6}`)
@@ -72,8 +77,8 @@ export function useManageInstance(): ManageInstance {
   }, [copyAndNotify, status])
 
   const handleDelete = useCallback(async () => {
-    if (!instance) throw new Error('Invalid function')
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!instance) throw Err.InstanceNotFound
 
     // @todo: We are assuming always that the instance is of type PAYG
 
@@ -83,17 +88,40 @@ export function useManageInstance(): ManageInstance {
         !(account instanceof AvalancheAccount)
       ) {
         handleConnect({ blockchain: Blockchain.AVAX })
-        throw new Error()
+        throw Err.ConnectYourPaymentWallet
       }
 
       const superfluidAccount = createFromAvalancheAccount(account)
-      await manager.del(instance, superfluidAccount)
+      const iSteps = await manager.getDelSteps(instance)
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
+      const steps = manager.delSteps(instance, superfluidAccount)
+
+      while (true) {
+        const { done } = await steps.next()
+        if (done) {
+          break
+        }
+        await next(nSteps)
+      }
 
       dispatch(new EntityDelAction({ name: 'instance', keys: [instance.id] }))
 
       await router.replace('/')
-    } catch (e) {}
-  }, [instance, manager, blockchain, account, dispatch, router, handleConnect])
+    } catch (e) {
+    } finally {
+      await stop()
+    }
+  }, [
+    manager,
+    instance,
+    blockchain,
+    account,
+    dispatch,
+    router,
+    handleConnect,
+    next,
+    stop,
+  ])
 
   return {
     instance,

@@ -4,23 +4,22 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import {
-  AddDomainTarget,
+  EntityDomainType,
   EntityType,
   defaultDomainAggregateKey,
   defaultDomainChannel,
-} from '../helpers/constants'
+} from '@/helpers/constants'
 import { EntityManager } from './types'
 import { domainSchema, domainsSchema } from '@/helpers/schemas/domain'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { FunctionRuntimeId } from './runtime'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 
-export { AddDomainTarget }
+export { EntityDomainType }
 
 export type DomainAggregateItem = {
-  type: AddDomainTarget
+  type: EntityDomainType
   message_id: string
-  programType?: EntityType.Instance | EntityType.Program
   updated_at: string
 }
 
@@ -28,17 +27,18 @@ export type DomainAggregate = Record<string, DomainAggregateItem | null>
 
 export type AddDomain = {
   name: string
-  target: AddDomainTarget
-  programType?: EntityType.Instance | EntityType.Program
+  target: EntityDomainType
   ref: string
 }
 
-export type Domain = Omit<AddDomain, 'programType'> & {
+export type Domain = AddDomain & {
   type: EntityType.Domain
   id: string
-  confirmed?: boolean
-  programType?: EntityType.Instance | EntityType.Program
   updated_at: string
+  date: string
+  size: number
+  ref_url: string
+  confirmed?: boolean
 }
 
 export type DomainStatus = {
@@ -80,11 +80,12 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   }
 
   async retry(domain: Domain) {
-    const content = {
-      message_id: domain.ref,
-      type: domain.target,
-      programType: domain.programType,
-      updated_at: new Date().toISOString(),
+    const content: DomainAggregate = {
+      [domain.name]: {
+        message_id: domain.ref,
+        type: domain.target,
+        updated_at: new Date().toISOString(),
+      },
     }
 
     try {
@@ -117,6 +118,9 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     domains: AddDomain | AddDomain[],
     throwOnCollision?: boolean,
   ): AsyncGenerator<void, Domain[], void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
     domains = Array.isArray(domains) ? domains : [domains]
 
     domains = await this.parseDomains(domains, throwOnCollision)
@@ -124,30 +128,17 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
     try {
       const content: DomainAggregate = domains.reduce((ac, cv) => {
-        const { name, ref, target, programType } = cv
-
-        const domain = {
+        const { name, ref, target } = cv
+        ac[name] = {
           message_id: ref,
-          programType,
           type: target,
           updated_at: new Date().toISOString(),
         }
-
-        // @note: legacy domains don't include programType (default to Instance)
-        if (target === AddDomainTarget.Program) {
-          domain.programType = cv.programType || EntityType.Instance
-        }
-
-        ac[name] = domain
-
         return ac
       }, {} as DomainAggregate)
 
+      // @note: Aggregate all signatures in 1 step
       yield
-
-      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
-        throw Err.InvalidAccount
-
       const response = await this.sdkClient.createAggregate({
         key: this.key,
         channel: this.channel,
@@ -197,7 +188,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     return response
   }
 
-  async getSteps(
+  async getAddSteps(
     domains: AddDomain | AddDomain[],
     throwOnCollision?: boolean,
   ): Promise<CheckoutStepType[]> {
@@ -230,9 +221,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     } else {
       return domains.map((domain: AddDomain) => {
         if (!currentDomainSet.has(domain.name)) return domain
-        throw new Error(
-          `Domain name already used by another resource: ${domain.name}`,
-        )
+        throw Err.DomainUsed(domain.name)
       })
     }
   }
@@ -251,7 +240,6 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     return this.parseAggregateItems(domains)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregateItems(aggregate: DomainAggregate): Domain[] {
     return Object.entries(aggregate)
       .filter(([, value]) => value !== null)
@@ -260,16 +248,18 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       )
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregateItem(
     name: string,
     content: DomainAggregateItem,
   ): Domain {
     const { message_id, type } = content
-    // @note: legacy domains don't have updated_at property
-    // Cast to string to avoid type errors
-    const updated_at = content?.updated_at || 'unknown'
-
+    const ref_path =
+      type === EntityDomainType.Instance
+        ? 'computing/instance'
+        : type === EntityDomainType.Program
+          ? 'computing/function'
+          : 'storage/volume'
+    const date = content?.updated_at.slice(0, 19).replace('T', ' ') || 'unknown'
     const domain: Domain = {
       type: EntityType.Domain,
       id: name,
@@ -277,14 +267,47 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       target: type,
       ref: message_id,
       confirmed: true,
-      updated_at: updated_at,
-    }
-
-    // @note: legacy domains don't include programType (default to Instance)
-    if (type === AddDomainTarget.Program) {
-      domain.programType = content.programType || EntityType.Instance
+      updated_at: date,
+      date,
+      size: 0,
+      ref_url: `/${ref_path}/${message_id}`,
     }
 
     return domain
+  }
+
+  async getDelSteps(
+    domainsOrIds: string | Domain | (string | Domain)[],
+  ): Promise<CheckoutStepType[]> {
+    domainsOrIds = Array.isArray(domainsOrIds) ? domainsOrIds : [domainsOrIds]
+    // @note: Aggregate all signatures in 1 step
+    // return domainsOrIds.map(() => 'domainDel')
+    return domainsOrIds.length ? ['domainDel'] : []
+  }
+
+  async *delSteps(
+    domainsOrIds: string | Domain | (string | Domain)[],
+  ): AsyncGenerator<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    domainsOrIds = Array.isArray(domainsOrIds) ? domainsOrIds : [domainsOrIds]
+    if (domainsOrIds.length === 0) return
+
+    try {
+      // @note: Aggregate all signatures in 1 step
+      yield
+      await this.sdkClient.createAggregate({
+        key: this.key,
+        channel: this.channel,
+        content: domainsOrIds.reduce((ac, cv) => {
+          const name = typeof cv === 'string' ? cv : cv.name
+          ac[name] = null
+          return ac
+        }, {} as DomainAggregate),
+      })
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
   }
 }

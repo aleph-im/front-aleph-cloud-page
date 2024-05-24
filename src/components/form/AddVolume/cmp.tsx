@@ -1,4 +1,11 @@
-import { Tabs, Icon, TextInput, Checkbox, Button } from '@aleph-front/core'
+import {
+  Tabs,
+  Icon,
+  TextInput,
+  Checkbox,
+  Button,
+  NoisyContainer,
+} from '@aleph-front/core'
 import {
   RemoveVolumeProps,
   AddVolumeProps,
@@ -56,11 +63,24 @@ export const AddNewVolume = memo((props: AddNewVolumeProps) => {
         application.
       </p>
       <div>
-        <div tw="py-4">
-          <HiddenFileInput {...fileCtrl.field} {...fileCtrl.fieldState}>
-            Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
-          </HiddenFileInput>
-        </div>
+        {isStandAlone ? (
+          <NoisyContainer>
+            <HiddenFileInput
+              {...fileCtrl.field}
+              {...fileCtrl.fieldState}
+              label="Upload volume file"
+              required
+            >
+              Upload volume <Icon name="arrow-up" tw="ml-4" />
+            </HiddenFileInput>
+          </NoisyContainer>
+        ) : (
+          <div tw="py-4">
+            <HiddenFileInput {...fileCtrl.field} {...fileCtrl.fieldState}>
+              Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
+            </HiddenFileInput>
+          </div>
+        )}
         {!isStandAlone && (
           <div tw="mt-4">
             <TextInput

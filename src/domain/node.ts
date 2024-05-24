@@ -16,6 +16,7 @@ import {
 } from '@/helpers/utils'
 import { FileManager } from './file'
 import { urlSchema } from '@/helpers/schemas/base'
+import Err from '@/helpers/errors'
 
 export type NodeType = 'ccn' | 'crn'
 
@@ -334,7 +335,7 @@ export class NodeManager {
         `3crn_specs_${node.hash}`,
         3_600,
         (res: CRNSpecs) => {
-          if (res.cpu === undefined) throw new Error('invalid response')
+          if (res.cpu === undefined) throw Err.InvalidResponse
 
           return {
             ...res,
@@ -364,7 +365,7 @@ export class NodeManager {
         `3crn_ips_${node.hash}`,
         4_600,
         (res: CRNIps) => {
-          if (res.vm === undefined) throw new Error('invalid response')
+          if (res.vm === undefined) throw Err.InvalidResponse
 
           return {
             ...res,
@@ -495,14 +496,17 @@ export class NodeManager {
   }
 
   protected linkChildrenNodes(ccns: CCN[], crns: CRN[]): void {
-    const crnsMap = crns.reduce((ac, cu) => {
-      if (!cu.parent) return ac
+    const crnsMap = crns.reduce(
+      (ac, cu) => {
+        if (!cu.parent) return ac
 
-      const crns = (ac[cu.parent] = ac[cu.parent] || [])
-      crns.push(cu)
+        const crns = (ac[cu.parent] = ac[cu.parent] || [])
+        crns.push(cu)
 
-      return ac
-    }, {} as Record<string, CRN[]>)
+        return ac
+      },
+      {} as Record<string, CRN[]>,
+    )
 
     ccns.forEach((ccn) => {
       const crnsData = crnsMap[ccn.hash] || []
@@ -513,10 +517,13 @@ export class NodeManager {
   }
 
   protected linkParentNodes(crns: CRN[], ccns: CCN[]): void {
-    const ccnsMap = ccns.reduce((ac, cu) => {
-      ac[cu.hash] = cu
-      return ac
-    }, {} as Record<string, CCN>)
+    const ccnsMap = ccns.reduce(
+      (ac, cu) => {
+        ac[cu.hash] = cu
+        return ac
+      },
+      {} as Record<string, CCN>,
+    )
 
     crns.forEach((crn) => {
       if (!crn.parent) return

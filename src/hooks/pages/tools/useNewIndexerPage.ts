@@ -12,6 +12,7 @@ import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccount
 import { EntityType, IndexerBlockchain } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { EntityAddAction } from '@/store/entity'
+import Err from '@/helpers/errors'
 
 export type NewIndexerFormState = NameAndTagsField & {
   networks: IndexerBlockchainNetworkField[]
@@ -58,7 +59,7 @@ export function useNewIndexerPage(): UseNewIndexerPage {
 
   const onSubmit = useCallback(
     async (state: NewIndexerFormState) => {
-      if (!manager) throw new Error('Manager not ready')
+      if (!manager) throw Err.ConnectYourWallet
 
       const accountIndexer = await manager.add(state)
 

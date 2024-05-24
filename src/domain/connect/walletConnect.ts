@@ -11,6 +11,7 @@ import {
 } from './base'
 import { Future, Mutex } from '@/helpers/utils'
 import { Web3Modal, createWeb3Modal, defaultConfig } from '@web3modal/ethers5'
+import Err from '@/helpers/errors'
 
 export class WalletConnectConnectionProviderManager extends BaseConnectionProviderManager {
   protected providerId = ProviderId.WalletConnect
@@ -29,6 +30,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
     return !!this.provider
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async onConnect(blockchainId: BlockchainId): Promise<void> {
     await this.init()
 
@@ -91,7 +93,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       if (this.connectModalFuture) {
         const future = this.connectModalFuture
         this.connectModalFuture = undefined
-        future.reject(new Error('User cancelled the action'))
+        future.reject(Err.UserCancelled)
       }
 
       this.disconnect()
@@ -161,7 +163,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
   }
 
   protected getProvider(): EthersProvider | CombinedProvider {
-    if (!this.provider) throw new Error('WalletConnect is not initialized')
+    if (!this.provider) throw Err.WalletConnectNotInitialized
     return this.provider
   }
 }

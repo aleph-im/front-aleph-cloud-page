@@ -14,6 +14,7 @@ export function useEntityManager(
     programManager,
     instanceManager,
     indexerManager,
+    websiteManager,
   } = appState.manager
 
   const entityMap: Record<
@@ -27,6 +28,7 @@ export function useEntityManager(
       [EntityType.Instance]: instanceManager,
       [EntityType.Program]: programManager,
       [EntityType.Indexer]: indexerManager,
+      [EntityType.Website]: websiteManager,
     }
   }, [
     domainManager,
@@ -35,6 +37,7 @@ export function useEntityManager(
     sshKeyManager,
     volumeManager,
     indexerManager,
+    websiteManager,
   ])
 
   if (!type) return

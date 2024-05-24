@@ -1,11 +1,16 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { Volume } from '@/domain/volume'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
+import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { useAppState } from '@/contexts/appState'
 import { useRequestVolumes } from '@/hooks/common/useRequestEntity/useRequestVolumes'
 import { EntityDelAction } from '@/store/entity'
+import Err from '@/helpers/errors'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export type ManageVolume = {
   volume?: Volume
@@ -23,30 +28,40 @@ export function useManageVolume(): ManageVolume {
   const { entities } = useRequestVolumes({ id: hash as string })
   const [volume] = entities || []
 
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
-
   const manager = useVolumeManager()
+  const { next, stop } = useCheckoutNotification({})
 
-  const handleCopyHash = useCallback(() => {
-    copyAndNotify(volume?.id || '')
-  }, [copyAndNotify, volume])
+  const handleCopyHash = useCopyHash(volume)
 
   const handleDelete = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
-    if (!volume) throw new Error('Invalid volume')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!volume) throw Err.WebsiteNotFound
+
+    const iSteps = await manager.getDelSteps(volume)
+    const nSteps = iSteps.map((i) => stepsCatalog[i])
+    const steps = manager.delSteps(volume)
 
     try {
-      await manager.del(volume)
+      while (true) {
+        const { done } = await steps.next()
+        if (done) {
+          break
+        }
+        await next(nSteps)
+      }
 
       dispatch(new EntityDelAction({ name: 'volume', keys: [volume.id] }))
 
       await router.replace('/')
-    } catch (e) {}
-  }, [manager, volume, dispatch, router])
+    } catch (e) {
+    } finally {
+      await stop()
+    }
+  }, [dispatch, manager, volume, next, router, stop])
 
   const handleDownload = useCallback(async () => {
-    if (!manager) throw new Error('Manager not ready')
-    if (!volume) throw new Error('Invalid volume')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!volume) throw Err.WebsiteNotFound
 
     await manager.download(volume)
   }, [manager, volume])

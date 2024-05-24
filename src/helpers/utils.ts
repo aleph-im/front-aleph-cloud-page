@@ -15,6 +15,8 @@ import { Instance } from '../domain/instance'
 import { Volume } from '@/domain/volume'
 import { Program } from '@/domain/program'
 import { Domain } from '@/domain/domain'
+import { Website } from '@/domain/website'
+import { CID } from 'multiformats'
 import Err from './errors'
 
 /**
@@ -250,7 +252,11 @@ export const unixToISODateTimeString = (timeStamp?: number, noDate = 'n/a') => {
   }).format(date)
 }
 
-export type AnyEntity = Program | Instance | Volume | SSHKey | Domain
+export const cidV0Tov1 = function (cid: string): string {
+  return CID.parse(cid).toV1().toString()
+}
+
+export type AnyEntity = Program | Instance | Volume | SSHKey | Domain | Website
 
 export type AnyMessage =
   | ProgramMessage
@@ -268,7 +274,7 @@ export function getEntityTypeFromMessage(msg: AnyMessage): EntityType {
   if (isProgram(msg)) return EntityType.Program
   if (isInstance(msg)) return EntityType.Instance
   if (isSSHKey(msg)) return EntityType.SSHKey
-  throw new Error('Unknown type')
+  throw Err.UnknownType
 }
 
 export function isVolumePersistent(
@@ -477,10 +483,10 @@ export const humanReadableDurationUnit = (
     unit === 'h'
       ? `hour${s}`
       : unit === 'd'
-      ? `day${s}`
-      : unit === 'm'
-      ? `month${s}`
-      : `year${s}`
+        ? `day${s}`
+        : unit === 'm'
+          ? `month${s}`
+          : `year${s}`
 
   return `${duration} ${subfix}`
 }

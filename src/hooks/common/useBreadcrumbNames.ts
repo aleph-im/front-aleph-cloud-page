@@ -25,6 +25,10 @@ const defaultNames = {
   '/computing/function': '-',
   '/computing/function/[hash]': '-',
   '/computing/function/new': 'SETUP NEW FUNCTION',
+  '/hosting': '-',
+  '/hosting/website': '-',
+  '/hosting/website/[hash]': '-',
+  '/hosting/website/new': 'SETUP NEW WEBSITE',
 }
 
 export type UseBreadcrumbNamesReturn = {
@@ -48,6 +52,7 @@ export function useBreadcrumbNames(): UseBreadcrumbNamesReturn {
       '/configure/domain/[hash]': `DOMAIN / ${hashParam}`,
       '/computing/instance/[hash]': `INSTANCE / ${hash}`,
       '/computing/function/[hash]': `FUNCTION / ${hash}`,
+      '/hosting/website/[hash]': `WEBSITE / ${hashParam}`,
     }
   }, [router.query, names])
 

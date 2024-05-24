@@ -4,7 +4,7 @@ import { useForm } from '@/hooks/common/useForm'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { DomainManager } from '@/domain/domain'
-import { EntityType, AddDomainTarget } from '@/helpers/constants'
+import { EntityDomainType } from '@/helpers/constants'
 import {
   FieldErrors,
   UseControllerReturn,
@@ -20,6 +20,7 @@ import {
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
+import Err from '@/helpers/errors'
 
 export type NewDomainFormState = DomainField
 
@@ -30,36 +31,39 @@ export const defaultValues: NewDomainFormState = {
 export type DomainRefOptions = {
   label: string
   value: string
-  type: EntityType
+  type: EntityDomainType
 }
 
 export type UseNewDomainPageReturn = {
   entities: DomainRefOptions[]
-  hasInstances: boolean
-  hasFunctions: boolean
-  hasEntities: boolean
   nameCtrl: UseControllerReturn<NewDomainFormState, 'name'>
-  programTypeCtrl: UseControllerReturn<NewDomainFormState, 'programType'>
+  targetCtrl: UseControllerReturn<NewDomainFormState, 'target'>
   refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
-  ipfsRefCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
   errors: FieldErrors<NewDomainFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
+  setTarget: (target: EntityDomainType) => void
+  setRef: (ref: string) => void
 }
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
   const router = useRouter()
-  const [appState, dispatch] = useAppState()
-  const { entities: instances } = appState.instance
-  const { entities: programs } = appState.program
+  const [
+    {
+      instance: { entities: instances },
+      program: { entities: programs },
+      website: { entities: websites },
+    },
+    dispatch,
+  ] = useAppState()
 
   const manager = useDomainManager()
   const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewDomainFormState) => {
-      if (!manager) throw new Error('Manager not ready')
+      if (!manager) throw Err.ConnectYourWallet
 
-      const iSteps = await manager.getSteps(state)
+      const iSteps = await manager.getAddSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
       const steps = manager.addSteps(state)
@@ -106,18 +110,13 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     name: 'name',
   })
 
-  const programTypeCtrl = useController({
+  const targetCtrl = useController({
     control,
-    name: 'programType',
+    name: 'target',
     rules: {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onChange(state) {
         setValue('ref', '')
-
-        if (state.target.value === EntityType.Program) {
-          setValue('target', AddDomainTarget.Program)
-        } else if (state.target.value === EntityType.Instance) {
-          setValue('target', AddDomainTarget.Instance)
-        }
       },
     },
   })
@@ -127,64 +126,63 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     name: 'ref',
   })
 
-  const ipfsRefCtrl = useController({
-    control,
-    name: 'ref',
-    rules: {
-      onChange() {
-        setValue('target', AddDomainTarget.IPFS)
-      },
-    },
-  })
-
-  const entityType = programTypeCtrl.field.value
+  const entityType = targetCtrl.field.value
 
   const entities = useMemo(() => {
-    const entities = !entityType
-      ? []
-      : entityType === EntityType.Instance
-      ? instances
-      : programs
-
-    return (entities || []).map(({ id, metadata, type }) => {
+    if (!entityType) return []
+    if (entityType !== EntityDomainType.IPFS) {
+      const entities =
+        entityType === EntityDomainType.Instance ? instances : programs
+      return (entities || []).map(({ id, metadata }) => {
+        return {
+          label: (metadata?.name as string | undefined) || id,
+          value: id,
+          type: entityType,
+        }
+      })
+    }
+    return (websites || []).map(({ id, volume_id }) => {
       return {
-        label: (metadata?.name as string | undefined) || id,
-        value: id,
-        type,
+        label: id,
+        value: volume_id,
+        type: entityType,
       }
     })
-  }, [entityType, instances, programs])
+  }, [entityType, instances, programs, websites])
 
   const hasInstances = useMemo(() => !!instances?.length, [instances])
   const hasFunctions = useMemo(() => !!programs?.length, [programs])
-
-  const hasEntities = useMemo(
-    () => hasInstances || hasFunctions,
-    [hasFunctions, hasInstances],
-  )
+  const hasWebsites = useMemo(() => !!websites?.length, [websites])
+  /* const hasEntities = useMemo(
+    () => hasInstances || hasFunctions || hasWebsites,
+    [hasFunctions, hasInstances, hasWebsites],
+  ) */
 
   useEffect(() => {
-    if (!hasInstances && !hasFunctions) return
-
-    if (entityType === EntityType.Instance && !hasInstances) {
-      setValue('programType', EntityType.Program)
+    if (entityType === EntityDomainType.Instance && hasInstances) {
+      setValue('target', EntityDomainType.Instance)
+    } else if (entityType === EntityDomainType.Program && hasFunctions) {
+      setValue('target', EntityDomainType.Program)
+    } else if (entityType === EntityDomainType.IPFS) {
+      setValue('target', EntityDomainType.IPFS)
     }
+  }, [entityType, hasFunctions, hasInstances, hasWebsites, setValue])
 
-    if (entityType === EntityType.Program && !hasFunctions) {
-      setValue('programType', EntityType.Instance)
-    }
-  }, [entityType, hasFunctions, hasInstances, setValue])
+  const setTarget = (target: EntityDomainType) => {
+    setValue('target', target)
+  }
+  const setRef = (ref: string) => {
+    setValue('ref', ref)
+  }
 
   return {
     entities,
-    hasInstances,
-    hasFunctions,
-    hasEntities,
     nameCtrl,
-    programTypeCtrl,
+    targetCtrl,
     refCtrl,
-    ipfsRefCtrl,
     errors,
     handleSubmit,
+    setTarget,
+    setRef,
   }
 }

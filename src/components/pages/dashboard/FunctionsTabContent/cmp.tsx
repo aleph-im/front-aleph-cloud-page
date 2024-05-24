@@ -2,11 +2,7 @@ import React from 'react'
 import tw from 'twin.macro'
 import { FunctionsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
-import {
-  convertByteUnits,
-  ellipseAddress,
-  humanReadableSize,
-} from '@/helpers/utils'
+import { convertByteUnits, ellipseAddress } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
 
@@ -42,7 +38,7 @@ export const FunctionsTabContent = React.memo(
                       render: (row) => row?.resources?.vcpus || 0,
                     },
                     {
-                      label: 'Memory',
+                      label: 'RAM',
                       align: 'right',
                       sortable: true,
                       render: (row) =>
@@ -53,10 +49,19 @@ export const FunctionsTabContent = React.memo(
                         }),
                     },
                     {
-                      label: 'Size',
+                      label: 'Volume',
                       align: 'right',
                       sortable: true,
-                      render: (row) => humanReadableSize(row.size, 'MiB'),
+                      render: (row) => (
+                        <ButtonLink
+                          kind="functional"
+                          variant="none"
+                          size="sm"
+                          href={row.ref_url}
+                        >
+                          <Icon name="file-code" size="lg" />
+                        </ButtonLink>
+                      ),
                     },
                     {
                       label: 'Date',

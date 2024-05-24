@@ -15,6 +15,7 @@ import {
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
+import Err from '@/helpers/errors'
 
 export type NewSSHKeyFormState = {
   key: string
@@ -42,9 +43,9 @@ export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
 
   const onSubmit = useCallback(
     async (state: NewSSHKeyFormState) => {
-      if (!manager) throw new Error('Manager not ready')
+      if (!manager) throw Err.ConnectYourWallet
 
-      const iSteps = await manager.getSteps(state)
+      const iSteps = await manager.getAddSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
       const steps = manager.addSteps(state)

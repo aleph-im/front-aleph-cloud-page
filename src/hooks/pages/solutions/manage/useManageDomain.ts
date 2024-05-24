@@ -7,15 +7,21 @@ import { useAppState } from '@/contexts/appState'
 import { useHashToEntity } from './useHashToEntity'
 import { Instance } from '@/domain/instance'
 import { Program } from '@/domain/program'
+import { Volume } from '@/domain/volume'
 import { useDomainStatus } from '@/hooks/common/useDomainStatus'
 import { Account } from '@aleph-sdk/account'
 import { useRequestDomains } from '@/hooks/common/useRequestEntity/useRequestDomains'
 import { EntityDelAction } from '@/store/entity'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
+import Err from '@/helpers/errors'
 
 export type ManageDomain = {
   domain?: Domain
   status?: DomainStatus
-  refEntity?: Program | Instance
+  refEntity?: Program | Instance | Volume
   account?: Account
   handleCopyRef: () => void
   handleDelete: () => void
@@ -23,8 +29,12 @@ export type ManageDomain = {
 }
 
 export function useManageDomain(): ManageDomain {
-  const [state, dispatch] = useAppState()
-  const { account } = state.connection
+  const [
+    {
+      connection: { account },
+    },
+    dispatch,
+  ] = useAppState()
 
   const router = useRouter()
   const { hash } = router.query
@@ -37,32 +47,47 @@ export function useManageDomain(): ManageDomain {
   const refEntity = useHashToEntity(domain?.ref) as
     | Program
     | Instance
+    | Volume
     | undefined
 
   const status = useDomainStatus(domain)
 
   const manager = useDomainManager()
+  const { next, stop } = useCheckoutNotification({})
 
   const handleCopyRef = useCallback(() => {
     copyAndNotify(domain?.ref || '')
   }, [copyAndNotify, domain])
 
   const handleDelete = useCallback(async () => {
-    if (!domain) throw new Error('Invalid key')
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!domain) throw Err.DomainNotFound
+
+    const iSteps = await manager.getDelSteps(domain)
+    const nSteps = iSteps.map((i) => stepsCatalog[i])
+    const steps = manager.delSteps(domain)
 
     try {
-      await manager.del(domain)
+      while (true) {
+        const { done } = await steps.next()
+        if (done) {
+          break
+        }
+        await next(nSteps)
+      }
 
       dispatch(new EntityDelAction({ name: 'domain', keys: [domain.id] }))
 
       await router.replace('/')
-    } catch (e) {}
-  }, [domain, manager, dispatch, router])
+    } catch (e) {
+    } finally {
+      await stop()
+    }
+  }, [dispatch, manager, domain, next, router, stop])
 
   const handleRetry = useCallback(async () => {
-    if (!domain) throw new Error('Invalid key')
-    if (!manager) throw new Error('Manager not ready')
+    if (!manager) throw Err.ConnectYourWallet
+    if (!domain) throw Err.DomainNotFound
 
     try {
       await manager.retry(domain)

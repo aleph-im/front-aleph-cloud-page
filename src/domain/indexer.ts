@@ -18,12 +18,13 @@ import { VolumeField } from '@/hooks/form/useAddVolume'
 import { VolumeType } from './volume'
 import { IndexerBlockchainNetworkField } from '@/hooks/form/useAddIndexerBlockchainNetworks'
 import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccounts'
-import { BlockchainDefaultABIUrl } from '@/helpers/constants'
+import { BlockchainDefaultABIUrl, CheckoutStepType } from '@/helpers/constants'
 import { FunctionLangId, FunctionLanguage } from './lang'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+import Err from '@/helpers/errors'
 
 export type AddIndexer = NameAndTagsField & {
   networks: IndexerBlockchainNetworkField[]
@@ -86,6 +87,18 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
     protected programManager: ProgramManager,
   ) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getAddSteps(entity: AddIndexer | AddIndexer[]): Promise<CheckoutStepType[]> {
+    throw Err.MethodNotImplemented
+  }
+
+  addSteps(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    entity: AddIndexer | AddIndexer[],
+  ): AsyncGenerator<void, Program | Program[], void> {
+    throw Err.MethodNotImplemented
+  }
+
   async getAll(): Promise<Indexer[]> {
     try {
       const programs = await this.programManager.getAll()
@@ -120,16 +133,19 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
 
     const INDEXER_NAMESPACE = toKebabCase(newIndexer.name)
 
-    const NETWORKS_CONFIG = newIndexer.networks.reduce((ac, cu) => {
-      ac[this.getBlockchainEnvName(cu.id, 'INDEX_LOGS')] = 'true'
-      ac[this.getBlockchainEnvName(cu.id, 'INDEX_BLOCKS')] = 'false'
-      ac[this.getBlockchainEnvName(cu.id, 'INDEX_TRANSACTIONS')] = 'false'
-      ac[this.getBlockchainEnvName(cu.id, 'RPC')] = cu.rpcUrl
-      ac[this.getBlockchainEnvName(cu.id, 'EXPLORER_URL')] = cu.abiUrl
-        ? cu.abiUrl
-        : BlockchainDefaultABIUrl[cu.blockchain]
-      return ac
-    }, {} as Record<string, string>)
+    const NETWORKS_CONFIG = newIndexer.networks.reduce(
+      (ac, cu) => {
+        ac[this.getBlockchainEnvName(cu.id, 'INDEX_LOGS')] = 'true'
+        ac[this.getBlockchainEnvName(cu.id, 'INDEX_BLOCKS')] = 'false'
+        ac[this.getBlockchainEnvName(cu.id, 'INDEX_TRANSACTIONS')] = 'false'
+        ac[this.getBlockchainEnvName(cu.id, 'RPC')] = cu.rpcUrl
+        ac[this.getBlockchainEnvName(cu.id, 'EXPLORER_URL')] = cu.abiUrl
+          ? cu.abiUrl
+          : BlockchainDefaultABIUrl[cu.blockchain]
+        return ac
+      },
+      {} as Record<string, string>,
+    )
 
     const INDEXER_ACCOUNTS = newIndexer.accounts
       .map(
@@ -170,5 +186,39 @@ export class IndexerManager implements EntityManager<Indexer, AddIndexer> {
 
   protected getBlockchainEnvName(blockchainId: string, name: string): string {
     return toSnakeCase(`${blockchainId}_${name}`).toUpperCase()
+  }
+
+  async getDelSteps(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    indexersOrIds: string | Indexer | (string | Indexer)[],
+  ): Promise<CheckoutStepType[]> {
+    throw Err.MethodNotImplemented
+    /* indexersOrIds = Array.isArray(indexersOrIds)
+      ? indexersOrIds
+      : [indexersOrIds]
+    return indexersOrIds.map(() => 'indexerDel') */
+  }
+
+  async *delSteps(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    indexersOrIds: string | Indexer | (string | Indexer)[],
+  ): AsyncGenerator<void> {
+    throw Err.MethodNotImplemented
+    /* if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    indexersOrIds = Array.isArray(indexersOrIds)
+      ? indexersOrIds
+      : [indexersOrIds]
+    if (indexersOrIds.length === 0) return
+
+    try {
+      for (const indexerOrId of indexersOrIds) {
+        yield
+        await this.del(indexerOrId)
+      }
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    } */
   }
 }

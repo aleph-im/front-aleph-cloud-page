@@ -14,8 +14,8 @@ import {
   defaultProgramChannel,
   defaultVMURL,
   programStorageURL,
-} from '../helpers/constants'
-import { downloadBlob, getDate, getExplorerURL } from '../helpers/utils'
+} from '@/helpers/constants'
+import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
 import { MachineVolume, MessageType, StoreMessage } from '@aleph-sdk/message'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
@@ -30,7 +30,7 @@ import { FileManager } from './file'
 import { MessageManager } from './message'
 import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { AddDomain, DomainManager } from './domain'
+import { DomainManager } from './domain'
 import { EntityManager } from './types'
 import { FunctionCodeField } from '@/hooks/form/useAddFunctionCode'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
@@ -38,7 +38,7 @@ import { functionSchema } from '@/helpers/schemas/program'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { FunctionLangId, FunctionLanguage } from './lang'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
-import Err from '../helpers/errors'
+import Err from '@/helpers/errors'
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -68,10 +68,12 @@ export type AddProgram = Omit<
 export type Program = Omit<ProgramContent, 'type'> & {
   type: EntityType.Program
   id: string // hash
+  name: string
   url: string
   urlVM: string
   date: string
-  size?: number
+  size: number
+  ref_url: string
   confirmed?: boolean
 }
 
@@ -203,19 +205,17 @@ export class ProgramManager
     return downloadBlob(blob, `VM_${program.id.slice(-12)}.zip`)
   }
 
-  async getSteps(newInstance: AddProgram): Promise<CheckoutStepType[]> {
+  async getAddSteps(newInstance: AddProgram): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
-    const { volumes = [], domains = [] } = newInstance
+    const { domains = [] } = newInstance
 
-    const volumeSteps = await this.volumeManager.getSteps(volumes)
-    for (const step of volumeSteps) steps.push(step)
+    // Volumes are aggregated in 1 step, and there is always 1 for the code
+    steps.push('volume')
 
     steps.push('program')
 
-    const domainSteps = await this.domainManager.getSteps(
-      domains as AddDomain[],
-    )
-    for (const step of domainSteps) steps.push(step)
+    // @note: Aggregate all signatures in 1 step
+    if (domains.length > 0) steps.push('domain')
 
     return steps
   }
@@ -233,7 +233,7 @@ export class ProgramManager
         encoding: Encoding.zip,
       }
     } else if (code.type === 'file') {
-      if (!code.file) throw new Error('Invalid function code file')
+      if (!code.file) throw Err.InvalidCodeFile
       const fileName = code.file.name
 
       let encoding: Encoding
@@ -243,7 +243,7 @@ export class ProgramManager
       } else if (fileName.endsWith('.sqsh')) {
         encoding = Encoding.squashfs
       } else {
-        throw new Error('Invalid function code file')
+        throw Err.InvalidCodeFile
       }
 
       return {
@@ -257,7 +257,7 @@ export class ProgramManager
         encoding: code.encoding,
         programRef: code.programRef,
       }
-    } else throw new Error('Invalid function code type')
+    } else throw Err.InvalidCodeType
   }
 
   protected async *parseProgramSteps(
@@ -294,10 +294,7 @@ export class ProgramManager
 
   protected parseRuntime({ code, runtime }: AddProgram): string {
     if (runtime) return runtime
-
-    if (code.lang === FunctionLangId.Other)
-      throw new Error('Custom runtime should be added')
-
+    if (code.lang === FunctionLangId.Other) throw Err.CustomRuntimeNeeded
     return FunctionLanguage[code.lang].runtime
   }
 
@@ -309,22 +306,65 @@ export class ProgramManager
     return messages
       .filter(({ content }) => content !== undefined)
       .map((message) => {
-        const size = message.content.volumes.reduce(
-          (ac: number, cv: MachineVolume) =>
-            ac + ('size_mib' in cv ? cv.size_mib : sizesMap[cv.ref]),
-          0,
-        )
+        const size =
+          sizesMap[message.content.code.ref] +
+          message.content.volumes.reduce(
+            (ac: number, cv: MachineVolume) =>
+              ac + ('size_mib' in cv ? cv.size_mib : sizesMap[cv.ref]),
+            0,
+          )
 
         return {
           id: message.item_hash,
           ...message.content,
+          name: message.content.metadata?.name || 'Unnamed program',
           type: EntityType.Program,
           url: getExplorerURL(message),
           urlVM: `${defaultVMURL}${message.item_hash}`,
           date: getDate(message.time),
           size,
+          ref_url: `/storage/volume/${message.content.code.ref}`,
           confirmed: !!message.confirmed,
         }
       })
+  }
+
+  async getDelSteps(
+    programsOrIds: string | Program | (string | Program)[],
+  ): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    programsOrIds = Array.isArray(programsOrIds)
+      ? programsOrIds
+      : [programsOrIds]
+    programsOrIds.forEach(() => {
+      steps.push('volumeDel')
+      steps.push('programDel')
+    })
+    return steps
+  }
+
+  async *delSteps(
+    programsOrIds: string | Program | (string | Program)[],
+  ): AsyncGenerator<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    programsOrIds = Array.isArray(programsOrIds)
+      ? programsOrIds
+      : [programsOrIds]
+    if (programsOrIds.length === 0) return
+
+    try {
+      for (const programOrId of programsOrIds) {
+        if (typeof programOrId !== 'string') {
+          yield
+          await this.volumeManager.del((programOrId as Program).code.ref)
+        }
+        yield
+        await this.del(programOrId)
+      }
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
   }
 }

@@ -44,6 +44,7 @@ export const defaultFileExtension: Record<LanguageType, string> = {
 }
 
 export const defaultDomainAggregateKey = 'domains'
+export const defaultWebsiteAggregateKey = 'websites'
 export const defaultSSHPostType = 'ALEPH-SSH'
 
 export const defaultConsoleChannel = 'ALEPH-CLOUDSOLUTIONS'
@@ -53,6 +54,7 @@ export const defaultSSHChannel = defaultConsoleChannel
 export const defaultInstanceChannel = defaultConsoleChannel
 export const defaultProgramChannel = defaultConsoleChannel
 export const defaultDomainChannel = defaultConsoleChannel
+export const defaultWebsiteChannel = defaultConsoleChannel
 
 export enum EntityType {
   Volume = 'volume',
@@ -61,12 +63,53 @@ export enum EntityType {
   SSHKey = 'sshKey',
   Domain = 'domain',
   Indexer = 'indexer',
+  Website = 'website',
 }
 
-export enum AddDomainTarget {
+type CheckoutAddStepType =
+  | 'ssh'
+  | 'volume'
+  | 'domain'
+  | 'stream'
+  | 'instance'
+  | 'program'
+  | 'indexer'
+  | 'website'
+
+type CheckoutDelStepType =
+  | 'sshDel'
+  | 'volumeDel'
+  | 'domainDel'
+  | 'streamDel'
+  | 'instanceDel'
+  | 'programDel'
+  | 'indexerDel'
+  | 'websiteDel'
+
+type CheckoutUpStepType =
+  | 'sshUp'
+  | 'volumeUp'
+  | 'domainUp'
+  | 'instanceUp'
+  | 'programUp'
+  | 'indexerUp'
+  | 'websiteUp'
+
+export type CheckoutStepType =
+  | CheckoutAddStepType
+  | CheckoutDelStepType
+  | CheckoutUpStepType
+
+export enum EntityDomainType {
   IPFS = 'ipfs',
   Program = 'program',
   Instance = 'instance',
+}
+
+export const EntityDomainTypeName: Record<EntityDomainType, string> = {
+  [EntityDomainType.IPFS]: 'IPFS',
+  [EntityDomainType.Program]: 'Function',
+  [EntityDomainType.Instance]: 'Instance',
 }
 
 export enum VolumeType {
@@ -82,6 +125,7 @@ export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.SSHKey]: 'SSH Key',
   [EntityType.Domain]: 'Domain',
   [EntityType.Indexer]: 'Indexer',
+  [EntityType.Website]: 'Website',
 }
 
 export const EntityTypeUrlSection: Record<EntityType, string> = {
@@ -91,6 +135,7 @@ export const EntityTypeUrlSection: Record<EntityType, string> = {
   [EntityType.SSHKey]: 'configure',
   [EntityType.Domain]: 'configure',
   [EntityType.Indexer]: 'tools',
+  [EntityType.Website]: 'hosting',
 }
 
 export const EntityTypeSlug: Record<EntityType, string> = {
@@ -100,6 +145,7 @@ export const EntityTypeSlug: Record<EntityType, string> = {
   [EntityType.SSHKey]: 'ssh',
   [EntityType.Domain]: 'domain',
   [EntityType.Indexer]: 'indexer',
+  [EntityType.Website]: 'website',
 }
 
 export enum IndexerBlockchain {
@@ -122,3 +168,14 @@ export enum PaymentMethod {
 }
 
 export const superToken = '0x1290248E01ED2F9f863A9752A8aAD396ef3a1B00'
+
+export enum WebsiteFrameworkId {
+  none = 'none',
+  nextjs = 'nextjs',
+  /* react = 'react',
+  gatsby = 'gatsby',
+  svelte = 'svelte',
+  vue = 'vue',
+  nuxt = 'nuxt',
+  angular = 'angular' */
+}

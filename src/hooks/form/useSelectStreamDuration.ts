@@ -17,10 +17,10 @@ export function getHours(streamDuration: StreamDurationField): number {
     unit === 'd'
       ? 24
       : unit === 'm'
-      ? (365 / 12) * 24
-      : unit === 'y'
-      ? 365 * 24
-      : 1
+        ? (365 / 12) * 24
+        : unit === 'y'
+          ? 365 * 24
+          : 1
 
   return duration * unitMultiplier
 }

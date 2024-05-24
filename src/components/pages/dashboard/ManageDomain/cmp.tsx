@@ -1,11 +1,17 @@
 import IconText from '@/components/common/IconText'
 import { Label, NoisyContainer } from '@aleph-front/core'
-import { EntityTypeName, AddDomainTarget } from '@/helpers/constants'
+import Link from 'next/link'
+import {
+  EntityTypeName,
+  EntityDomainType,
+  EntityDomainTypeName,
+} from '@/helpers/constants'
 import { BulletItem, Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageDomain } from '@/hooks/pages/solutions/manage/useManageDomain'
-import { ellipseAddress, ellipseText } from '@/helpers/utils'
+import { ellipseAddress } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import ButtonLink from '@/components/common/ButtonLink'
+import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 
 export default function ManageDomain() {
   const {
@@ -17,6 +23,7 @@ export default function ManageDomain() {
     handleCopyRef,
     handleRetry,
   } = useManageDomain()
+  const [, copyAndNotify] = useCopyToClipboardAndNotify()
 
   if (!domain) {
     return (
@@ -68,18 +75,16 @@ export default function ManageDomain() {
               </Tag>
               <div tw="flex-auto">
                 <div className="tp-info text-main0">NAME</div>
-                <div>
-                  <a
-                    className="tp-body1 fs-16"
-                    href={`https://${domain.name}`}
-                    target="_blank"
-                    referrerPolicy="no-referrer"
-                  >
-                    <IconText iconName="square-up-right">
-                      <Text>{domain.name}</Text>
-                    </IconText>
-                  </a>
-                </div>
+                <a
+                  className="tp-body1 fs-16"
+                  href={`https://${domain.name}`}
+                  target="_blank"
+                  referrerPolicy="no-referrer"
+                >
+                  <IconText iconName="square-up-right">
+                    <Text>{domain.name}</Text>
+                  </IconText>
+                </a>
               </div>
             </div>
 
@@ -89,7 +94,7 @@ export default function ManageDomain() {
               <div tw="my-5">
                 <div className="tp-info text-main0">TARGET</div>
                 <div>
-                  <Text>{domain.target}</Text>
+                  <Text>{EntityDomainTypeName[domain.target]}</Text>
                 </div>
               </div>
             )}
@@ -145,17 +150,17 @@ export default function ManageDomain() {
                               {domain.name}
                             </span>
                             with value
-                            {domain.target == AddDomainTarget.Program && (
+                            {domain.target == EntityDomainType.Program && (
                               <span className="text-main0" tw="mx-2">
                                 {domain.name}.program.public.aleph.sh.
                               </span>
                             )}
-                            {domain.target == AddDomainTarget.Instance && (
+                            {domain.target == EntityDomainType.Instance && (
                               <span className="text-main0" tw="mx-2">
                                 {domain.name}.instance.public.aleph.sh.
                               </span>
                             )}
-                            {domain.target == AddDomainTarget.IPFS && (
+                            {domain.target == EntityDomainType.IPFS && (
                               <span className="text-main0" tw="mx-2">
                                 ipfs.public.aleph.sh.
                               </span>
@@ -163,7 +168,7 @@ export default function ManageDomain() {
                           </div>
                         </div>
                       </Text>
-                      {domain.target == AddDomainTarget.IPFS && (
+                      {domain.target == EntityDomainType.IPFS && (
                         <Text>
                           <div tw="flex mt-2">
                             <BulletItem
@@ -235,46 +240,46 @@ export default function ManageDomain() {
               </>
             )}
 
-            {refEntity && (
+            {refEntity ? (
               <>
                 <Separator />
-
                 <TextGradient type="h7" as="h2" color="main0">
-                  Linked {domain.target}
+                  Linked {EntityDomainTypeName[domain.target]}
                 </TextGradient>
-
                 <div tw="my-5">
-                  <div className="tp-info text-main0">Type</div>
-                  <div>
-                    <Text>{EntityTypeName[refEntity.type]}</Text>
-                  </div>
+                  <div className="tp-info text-main0">Target Resource</div>
+                  <Link
+                    className="tp-body1 fs-16"
+                    href={
+                      (domain.target === 'instance'
+                        ? '/computing/instance/'
+                        : domain.target === 'program'
+                          ? '/computing/function/'
+                          : '/storage/volume/') + refEntity.id
+                    }
+                  >
+                    <IconText iconName="square-up-right">Details</IconText>
+                  </Link>
                 </div>
-
                 <div tw="my-5">
-                  <div className="tp-info text-main0">NAME</div>
-                  <div>
-                    <Text>
-                      {(refEntity?.metadata?.name as string) ||
-                        ellipseAddress(refEntity.id)}
-                    </Text>
-                  </div>
+                  <div className="tp-info text-main0">ITEM HASH</div>
+                  <IconText
+                    iconName="copy"
+                    onClick={() => copyAndNotify(refEntity.id)}
+                  >
+                    {refEntity.id}
+                  </IconText>
                 </div>
-
-                <div tw="my-5">
-                  <div className="tp-info text-main0">EXPLORER</div>
-                  <div>
-                    <a
-                      className="tp-body1 fs-16"
-                      href={refEntity.url}
-                      target="_blank"
-                      referrerPolicy="no-referrer"
-                    >
-                      <IconText iconName="square-up-right">
-                        <Text>{ellipseText(refEntity.url, 80)}</Text>
-                      </IconText>
-                    </a>
-                  </div>
-                </div>
+              </>
+            ) : (
+              <>
+                <Separator />
+                <TextGradient type="h7" as="h2" color="main0">
+                  Linked Resource
+                </TextGradient>
+                <Text>
+                  The target resource is missing or has been deleted.{' '}
+                </Text>
               </>
             )}
           </NoisyContainer>

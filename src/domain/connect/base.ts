@@ -14,13 +14,13 @@ import {
   AvalancheAccount,
 } from '@aleph-sdk/avalanche'
 import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
-import Err from '../../helpers/errors'
 import { Mutex, getERC20Balance, getSOLBalance, sleep } from '@/helpers/utils'
 import { MetaMaskInpageProvider } from '@metamask/providers'
 import type {
   Provider as EthersProvider,
   CombinedProvider,
 } from '@web3modal/scaffold-utils/ethers'
+import Err from '@/helpers/errors'
 
 export { BlockchainId }
 
@@ -66,7 +66,7 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     chainId: 1,
     eip155: true,
     currency: 'ETH',
-    explorerUrl: 'https://etherscan.io',
+    explorerUrl: 'https://etherscan.io/',
     rpcUrl: 'https://eth.drpc.org',
   },
   [BlockchainId.AVAX]: {
@@ -119,9 +119,7 @@ export abstract class BaseConnectionProviderManager {
       const blockchain = blockchains[blockchainId]
 
       if (!this.supportedBlockchains.includes(blockchainId)) {
-        throw new Error(
-          `Blockchain "${blockchain?.name || blockchainId}" not supported`,
-        )
+        throw Err.BlockchainNotSupported(blockchain?.name || blockchainId)
       }
 
       await this.onConnect(blockchainId)
@@ -154,8 +152,7 @@ export abstract class BaseConnectionProviderManager {
 
     try {
       const blockchain = blockchains[blockchainId]
-      if (!blockchain)
-        throw new Error(`Blockchain "${blockchainId}" not supported`)
+      if (!blockchain) throw Err.BlockchainNotSupported(blockchainId)
 
       const provider = this.getProvider()
       const chainId = `0x${blockchain.chainId.toString(16)}`
@@ -200,9 +197,7 @@ export abstract class BaseConnectionProviderManager {
       await this.onDisconnect()
       this.events.emit('disconnect', {
         provider: this.providerId,
-        error: new Error(
-          `Blockchain "${blockchain?.name || chainId}" not supported`,
-        ),
+        error: Err.BlockchainNotSupported(blockchain?.name || chainId),
       })
       return
     }
@@ -224,7 +219,7 @@ export abstract class BaseConnectionProviderManager {
     chainId = typeof chainId === 'string' ? parseInt(chainId, 16) : chainId
 
     const blockchain = networks[chainId]
-    if (!blockchain) throw new Error(`Blockchain "${chainId}" not supported`)
+    if (!blockchain) throw Err.BlockchainNotSupported(chainId)
 
     return blockchain.id
   }

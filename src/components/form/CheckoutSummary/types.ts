@@ -2,6 +2,7 @@ import { PerVolumeCostItem } from '@/domain/volume'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { VolumeField } from '@/hooks/form/useAddVolume'
+import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import {
   StreamDurationField,
@@ -13,7 +14,12 @@ import { Control } from 'react-hook-form'
 export type CheckoutSummaryProps = {
   address: string
   unlockedAmount: number
-  type: EntityType.Program | EntityType.Instance | EntityType.Volume
+  type:
+    | EntityType.Program
+    | EntityType.Instance
+    | EntityType.Volume
+    | EntityType.Website
+  website?: WebsiteFolderField
   isPersistent?: boolean
   specs?: InstanceSpecsField
   volumes?: VolumeField[]
@@ -21,23 +27,14 @@ export type CheckoutSummaryProps = {
   button?: ReactNode
   description?: ReactNode
   mainRef?: RefObject<HTMLElement>
-} & (
-  | {
-      paymentMethod: PaymentMethod.Stream
-      control: Control
-      receiverAddress?: string
-      streamDuration?: StreamDurationField
-    }
-  | {
-      paymentMethod: PaymentMethod.Hold
-      control?: undefined
-      receiverAddress?: undefined
-      streamDuration?: undefined
-    }
-)
+  paymentMethod: PaymentMethod
+  control?: Control
+  receiverAddress?: string
+  streamDuration?: StreamDurationField
+}
 
 export type CheckoutSummarySpecsLineProps = {
-  type: EntityType.Program | EntityType.Instance | EntityType.Volume
+  type: EntityType.Program | EntityType.Instance
   specs: InstanceSpecsField
   cost: number
   priceDuration: StreamDurationUnit | undefined
@@ -48,6 +45,11 @@ export type CheckoutSummaryVolumeLineProps = {
   specs?: InstanceSpecsField
   cost?: PerVolumeCostItem
   priceDuration: StreamDurationUnit | undefined
+}
+
+export type CheckoutSummaryWebsiteLineProps = {
+  website: WebsiteFolderField
+  cost?: number
 }
 
 export type CheckoutSummaryDomainLineProps = {

@@ -7,6 +7,7 @@ import ManageVolume from '../ManageVolume'
 import ManageInstance from '../ManageInstance'
 import ManageFunction from '../ManageFunction'
 import ManageDomain from '../ManageDomain'
+import ManageWebsite from '../ManageWebsite'
 
 export default function DashboardManagePage() {
   const { type } = useDashboardManagePage()
@@ -29,5 +30,7 @@ export default function DashboardManagePage() {
     return <ManageFunction />
   } else if (type === EntityType.Instance) {
     return <ManageInstance />
+  } else if (type === EntityType.Website) {
+    return <ManageWebsite />
   }
 }

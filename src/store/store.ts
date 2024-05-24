@@ -5,6 +5,7 @@ import { Domain } from '@/domain/domain'
 import { Instance } from '@/domain/instance'
 import { Program } from '@/domain/program'
 import { Volume } from '@/domain/volume'
+import { Website } from '@/domain/website'
 import { ManagerState, getManagerReducer } from './manager'
 
 export type StoreSubstate = Record<string, unknown>
@@ -53,6 +54,7 @@ export type StoreState = {
   instance: EntityState<Instance>
   program: EntityState<Program>
   volume: EntityState<Volume>
+  website: EntityState<Website>
 }
 
 export const storeReducer = mergeReducers<StoreState>({
@@ -63,6 +65,7 @@ export const storeReducer = mergeReducers<StoreState>({
   instance: getEntityReducer<Instance>('instance', 'id'),
   program: getEntityReducer<Program>('program', 'id'),
   volume: getEntityReducer<Volume>('volume', 'id'),
+  website: getEntityReducer<Website>('website', 'id'),
 })
 
 export const storeInitialState: StoreState = getInitialState(storeReducer)

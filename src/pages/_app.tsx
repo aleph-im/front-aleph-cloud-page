@@ -14,6 +14,7 @@ import Content from '@/components/common/Content'
 import Viewport from '@/components/common/Viewport'
 import Sidebar from '@/components/common/Sidebar'
 import { AppStateProvider } from '@/contexts/appState'
+//import { HeliaProvider } from '@/contexts/helia'
 import Loading from './_loading'
 import { useRef } from 'react'
 

@@ -30,7 +30,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         render: (row: SpecsDetail) => `${row.specs.cpu} x86 64bit`,
       },
       {
-        label: 'Memory',
+        label: 'RAM',
         align: 'right',
         sortable: true,
         sortBy: (row: SpecsDetail) => row.ram,
