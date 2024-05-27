@@ -91,7 +91,10 @@ export function useManageInstance(): ManageInstance {
         throw Err.ConnectYourPaymentWallet
       }
 
+      // @note: refactor in SDK calling init inside this method
       const superfluidAccount = createFromAvalancheAccount(account)
+      await superfluidAccount.init()
+
       const iSteps = await manager.getDelSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
       const steps = manager.delSteps(instance, superfluidAccount)

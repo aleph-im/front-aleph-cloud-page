@@ -245,11 +245,15 @@ export abstract class BaseConnectionProviderManager {
 
   async getBalance(account: Account): Promise<number> {
     if (account instanceof AvalancheAccount) {
-      const superfluidAccount = createFromAvalancheAccount(account)
       try {
+        // @note: refactor in SDK calling init inside this method
+        const superfluidAccount = createFromAvalancheAccount(account)
+        await superfluidAccount.init()
+
         const balance = await superfluidAccount.getALEPHBalance()
         return balance.toNumber()
-      } catch {
+      } catch (e) {
+        console.error(e)
         return 0
       }
     }

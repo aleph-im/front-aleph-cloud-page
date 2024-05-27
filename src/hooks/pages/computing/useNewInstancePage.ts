@@ -167,8 +167,10 @@ export function useNewInstancePage(): UseNewInstancePage {
           throw Err.InvalidNetwork
         }
 
-        // @todo: Refactor this
+        // @note: refactor in SDK calling init inside this method
         superfluidAccount = createFromAvalancheAccount(account)
+        await superfluidAccount.init()
+
         payment = {
           chain: BlockchainId.AVAX,
           type: PaymentMethod.Stream,
