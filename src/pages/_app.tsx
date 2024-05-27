@@ -1,10 +1,14 @@
 import type { AppProps } from 'next/app'
 import { ThemeProvider } from 'styled-components'
-import { themes, GlobalStyles } from '@aleph-front/core'
+import {
+  themes,
+  GlobalStyles,
+  Notification as NotificationProvider,
+  Modal as ModalProvider,
+} from '@aleph-front/core'
 import { GlobalStylesOverride } from '@/styles/global'
 import Header from '@/components/common/Header'
 import Footer from '@/components/common/Footer'
-import NotificationProvider from '@/components/common/NotificationProvider'
 import Main from '@/components/common/Main'
 import Content from '@/components/common/Content'
 import Viewport from '@/components/common/Viewport'
@@ -23,25 +27,27 @@ export default function App({ Component, pageProps }: AppProps) {
       <GlobalStyles />
       <GlobalStylesOverride />
       <AppStateProvider>
-        <NotificationProvider>
-          <Viewport>
-            <Sidebar />
-            <Main ref={mainRef}>
-              <Header />
-              <Content ref={contentRef}>
-                <Component
-                  {...{
-                    ...pageProps,
-                    mainRef,
-                    contentRef,
-                  }}
-                />
-                <Loading />
-              </Content>
-              <Footer />
-            </Main>
-          </Viewport>
-        </NotificationProvider>
+        <ModalProvider>
+          <NotificationProvider max={10} timeout={2000}>
+            <Viewport>
+              <Sidebar />
+              <Main ref={mainRef}>
+                <Header />
+                <Content ref={contentRef}>
+                  <Component
+                    {...{
+                      ...pageProps,
+                      mainRef,
+                      contentRef,
+                    }}
+                  />
+                  <Loading />
+                </Content>
+                <Footer />
+              </Main>
+            </Viewport>
+          </NotificationProvider>
+        </ModalProvider>
       </AppStateProvider>
     </ThemeProvider>
   )

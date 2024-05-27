@@ -34,6 +34,7 @@ export default {
   InvalidCodeFile: new Error('Invalid function code file'),
   InvalidCodeType: new Error('Invalid function code type'),
   InvalidCRNAddress: new Error('Invalid CRN address'),
+  InvalidCRNSpecs: new Error('Invalid CRN min specs'),
   CustomRuntimeNeeded: new Error('Custom runtime should be added'),
   ReceivedRequired: new Error(
     'Payment receiver is required for stream payments',

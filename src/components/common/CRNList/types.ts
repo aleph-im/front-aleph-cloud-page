@@ -6,3 +6,8 @@ export type CRNItem = CRN & {
   disabled?: boolean
   issue?: StreamNotSupportedIssue
 }
+
+export type CRNListProps = {
+  selected?: string
+  onSelectedChange: (selected: string) => void
+}

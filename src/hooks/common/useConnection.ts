@@ -4,6 +4,7 @@ import { useNotification } from '@aleph-front/core'
 import {
   ConnectionConnectAction,
   ConnectionDisconnectAction,
+  ConnectionState,
   ConnectionUpdateAction,
 } from '@/store/connection'
 import { connectionProviderManager } from '@/domain/connect'
@@ -14,7 +15,7 @@ export type UseConnectionProps = {
   triggerOnMount?: boolean
 }
 
-export type UseConnectionReturn = {
+export type UseConnectionReturn = ConnectionState & {
   handleConnect: (payload: ConnectionConnectAction['payload']) => void
   handleDisconnect: () => void
 }
@@ -129,6 +130,7 @@ export const useConnection = ({
   }, [triggerOnMount, provider, blockchain])
 
   return {
+    ...state.connection,
     handleConnect,
     handleDisconnect,
   }

@@ -1,5 +1,4 @@
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import { Blockchain } from '@aleph-sdk/core'
 import {
   MachineResources,
   MachineVolume,
@@ -29,6 +28,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
+import { BlockchainId } from './connect/base'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -53,12 +53,12 @@ export type ExecutableCost = Omit<VolumeCost, 'totalCost'> & {
 }
 
 export type HoldPaymentConfiguration = {
-  chain: Blockchain
+  chain: BlockchainId
   type: PaymentMethod.Hold
 }
 
 export type StreamPaymentConfiguration = {
-  chain: Blockchain
+  chain: BlockchainId
   type: PaymentMethod.Stream
   sender: string
   receiver: string
@@ -240,14 +240,14 @@ export abstract class Executable {
   protected parsePayment(payment?: PaymentConfiguration): Payment {
     if (!payment)
       return {
-        chain: Blockchain.ETH,
+        chain: BlockchainId.ETH,
         type: SDKPaymentType.hold,
       }
     if (payment.type === PaymentMethod.Stream) {
       if (!payment.receiver) throw Err.ReceivedRequired
-      if (payment.chain === Blockchain.AVAX)
+      if (payment.chain === BlockchainId.AVAX)
         return {
-          chain: Blockchain.AVAX,
+          chain: BlockchainId.AVAX,
           type: SDKPaymentType.superfluid,
           receiver: payment.receiver,
         }

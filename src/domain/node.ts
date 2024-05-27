@@ -43,7 +43,7 @@ export type BaseNode = {
   picture?: string
   banner?: string
   description?: string
-  manager?: string
+  manager?: string // not needed in CRN & optional in CCN
 
   // --------- CCN fields ?
   registration_url?: string
@@ -66,7 +66,6 @@ export type CCN = BaseNode & {
 
 export type CRN = BaseNode & {
   address?: string
-  stream_reward?: string
   status: BaseNodeStatus | 'linked'
 
   parent: string | null
@@ -74,6 +73,7 @@ export type CRN = BaseNode & {
   scoreData?: CRNScore
   metricsData?: CRNMetrics
   parentData?: CCN
+  stream_reward?: string
 }
 
 export type AlephNode = CCN | CRN
@@ -175,6 +175,7 @@ export type UpdateCCN = BaseUpdateNode & {
 
 export type UpdateCRN = BaseUpdateNode & {
   address?: string
+  stream_reward?: string
 }
 
 export type UpdateAlephNode = UpdateCCN | UpdateCRN
@@ -217,6 +218,24 @@ export type CRNSpecs = {
     }
   }
   active: boolean
+}
+
+export type CRNBenchmark = {
+  hash: string
+  name?: string
+  cpu: {
+    benchmark: {
+      series: number[]
+      average: number
+      average_str: string
+      total: number
+    }
+  }
+  ram: {
+    duration: number
+    speed: number
+    speed_str: string
+  }
 }
 
 // ---------- @todo: refactor into npm package
@@ -263,30 +282,12 @@ export class NodeManager {
   ) {}
 
   async getCCNNodes(): Promise<CCN[]> {
-    const res = await this.fetchAllNodes()
-    let { ccns, crns } = res
-
-    crns = this.parseResourceNodes(crns)
-
-    ccns = this.parseChildrenResourceNodes(ccns, crns)
-    ccns = await this.parseScores(ccns, false)
-    ccns = await this.parseMetrics(ccns, false)
-
+    const { ccns } = await this.getAllNodes()
     return ccns
   }
 
   async getCRNNodes(): Promise<CRN[]> {
-    const res = await this.fetchAllNodes()
-
-    const { ccns } = res
-    let { crns } = res
-
-    crns = this.parseResourceNodes(crns)
-
-    crns = this.parseParentNodes(crns, ccns)
-    crns = await this.parseScores(crns, true)
-    crns = await this.parseMetrics(crns, true)
-
+    const { crns } = await this.getAllNodes()
     return crns
   }
 
@@ -298,13 +299,14 @@ export class NodeManager {
 
     crns = this.parseResourceNodes(crns)
 
-    ccns = this.parseChildrenResourceNodes(ccns, crns)
+    crns = await this.parseScores(crns, true)
+    crns = await this.parseMetrics(crns, true)
+
     ccns = await this.parseScores(ccns, false)
     ccns = await this.parseMetrics(ccns, false)
 
-    crns = this.parseParentNodes(crns, ccns)
-    crns = await this.parseScores(crns, true)
-    crns = await this.parseMetrics(crns, true)
+    this.linkChildrenNodes(ccns, crns)
+    this.linkParentNodes(crns, ccns)
 
     return { ccns, crns, timestamp }
   }
@@ -493,7 +495,7 @@ export class NodeManager {
     })
   }
 
-  protected parseChildrenResourceNodes(ccns: CCN[], crns: CRN[]): CCN[] {
+  protected linkChildrenNodes(ccns: CCN[], crns: CRN[]): void {
     const crnsMap = crns.reduce(
       (ac, cu) => {
         if (!cu.parent) return ac
@@ -506,18 +508,15 @@ export class NodeManager {
       {} as Record<string, CRN[]>,
     )
 
-    return ccns.map((ccn) => {
+    ccns.forEach((ccn) => {
       const crnsData = crnsMap[ccn.hash] || []
-      if (!crnsData) return ccn
+      if (!crnsData) return
 
-      return {
-        ...ccn,
-        crnsData,
-      }
+      ccn.crnsData = crnsData
     })
   }
 
-  protected parseParentNodes(crns: CRN[], ccns: CCN[]): CRN[] {
+  protected linkParentNodes(crns: CRN[], ccns: CCN[]): void {
     const ccnsMap = ccns.reduce(
       (ac, cu) => {
         ac[cu.hash] = cu
@@ -526,16 +525,13 @@ export class NodeManager {
       {} as Record<string, CCN>,
     )
 
-    return crns.map((crn) => {
-      if (!crn.parent) return crn
+    crns.forEach((crn) => {
+      if (!crn.parent) return
 
       const parentData = ccnsMap[crn.parent]
-      if (!parentData) return crn
+      if (!parentData) return
 
-      return {
-        ...crn,
-        parentData,
-      }
+      crn.parentData = parentData
     })
   }
 

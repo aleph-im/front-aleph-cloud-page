@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { EntityDomainType, PaymentMethod } from '../constants'
-import { Blockchain } from '@aleph-sdk/core'
+import { BlockchainId } from '@/domain/connect/base'
 
 export const requiredStringSchema = z
   .string()
@@ -101,4 +101,4 @@ export const paymentMethodSchema = z.enum([
   PaymentMethod.Stream,
 ])
 
-export const blockchainSchema = z.enum([Blockchain.ETH, Blockchain.AVAX])
+export const blockchainSchema = z.enum([BlockchainId.ETH, BlockchainId.AVAX])

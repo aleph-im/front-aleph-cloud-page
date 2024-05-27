@@ -2,6 +2,7 @@ import { Control } from 'react-hook-form'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { CRNSpecs } from '@/domain/node'
+import { ReactNode } from 'react'
 
 export type SelectInstanceSpecsProps = {
   name?: string
@@ -11,6 +12,7 @@ export type SelectInstanceSpecsProps = {
   isPersistent?: boolean
   paymentMethod?: PaymentMethod
   nodeSpecs?: CRNSpecs
+  children?: ReactNode
 }
 
 export type SpecsDetail = {
