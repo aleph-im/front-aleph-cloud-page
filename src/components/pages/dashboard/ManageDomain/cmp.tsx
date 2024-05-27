@@ -43,13 +43,13 @@ export default function ManageDomain() {
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <div tw="flex justify-between pb-5">
-            <div tw="flex items-center">
+            <div tw="flex flex-wrap items-center">
               <Icon name="input-text" tw="mr-4" className="text-main0" />
               <div className="tp-body2">{name}</div>
               <Label
                 kind="secondary"
                 variant={status?.status ? 'success' : 'error'}
-                tw="ml-4"
+                tw="ml-4 mt-1"
               >
                 {status?.status
                   ? 'DOMAIN RECORDS CONFIGURED'

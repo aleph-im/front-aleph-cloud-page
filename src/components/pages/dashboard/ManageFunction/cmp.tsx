@@ -62,13 +62,12 @@ export default function ManageFunction() {
                 )}
               </Label>
             </div>
-            <div>
+            <div tw="flex flex-wrap justify-end gap-2 sm:gap-4">
               <Button
                 size="md"
                 variant="tertiary"
                 color="main0"
                 kind="default"
-                tw="!mr-4"
                 forwardedAs="a"
                 onClick={handleDownload}
               >
@@ -99,7 +98,7 @@ export default function ManageFunction() {
             </div>
 
             <Separator />
-            <div tw="flex flex-row justify-between my-5">
+            <div tw="flex flex-wrap justify-between gap-2">
               <div>
                 <div className="tp-info text-main0">CORES</div>
                 <div>

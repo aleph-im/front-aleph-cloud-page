@@ -54,13 +54,12 @@ export default function ManageVolume() {
                 )}
               </Label>
             </div>
-            <div>
+            <div tw="flex flex-wrap justify-end gap-2 sm:gap-4">
               <Button
                 size="md"
                 variant="tertiary"
                 color="main0"
                 kind="default"
-                tw="!mr-4"
                 forwardedAs="a"
                 onClick={handleDownload}
               >

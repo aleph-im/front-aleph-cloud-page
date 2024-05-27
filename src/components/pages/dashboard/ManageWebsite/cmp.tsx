@@ -84,7 +84,7 @@ export default function ManageWebsite() {
                 )}
               </Label>
             </div>
-            <div tw="flex flex-row gap-4">
+            <div tw="flex flex-wrap justify-end ml-2 gap-2 sm:gap-4">
               <UpdateWebsiteFolder control={state.control} />
               <Button
                 kind="functional"
@@ -111,7 +111,7 @@ export default function ManageWebsite() {
             </div>
 
             <Separator />
-            <div tw="flex flex-row justify-between">
+            <div tw="flex flex-wrap justify-between gap-2">
               <div>
                 <div className="tp-info text-main0">FRAMEWORK</div>
                 <div>
@@ -149,23 +149,25 @@ export default function ManageWebsite() {
                 </div>
               </div>
             </div>
-            <Separator />
-            <div className="tp-info text-main0">DEFAULT GATEWAY</div>
-            <div tw="flex flex-row mb-5">
-              <a
-                className="tp-body1 fs-16"
-                href={default_url}
-                target="_blank"
-                referrerPolicy="no-referrer"
-              >
-                <IconText iconName="square-up-right">
-                  <Text>{default_url}</Text>
-                </IconText>
-              </a>
-              <IconText
-                iconName="copy"
-                onClick={() => copyAndNotify(default_url)}
-              />
+
+            <div tw="my-5">
+              <div className="tp-info text-main0">DEFAULT GATEWAY</div>
+              <div tw="flex flex-row">
+                <a
+                  className="tp-body1 fs-16"
+                  href={default_url}
+                  target="_blank"
+                  referrerPolicy="no-referrer"
+                >
+                  <IconText iconName="square-up-right">
+                    <Text>{default_url}</Text>
+                  </IconText>
+                </a>
+                <IconText
+                  iconName="copy"
+                  onClick={() => copyAndNotify(default_url)}
+                />
+              </div>
             </div>
             <div tw="mb-5">
               <a
@@ -178,9 +180,9 @@ export default function ManageWebsite() {
                   <div className="tp-info text-main0">ALTERNATIVE GATEWAYS</div>
                 </IconText>
               </a>
-              <Text>
+              <Text tw="break-words">
                 {`https://${cidV1}.ipfs.`}
-                <span tw="text-purple-500">{'<gateway-hostname>'}</span>
+                <Text tw="text-purple-500">{'<gateway-hostname>'}</Text>
               </Text>
             </div>
 
@@ -265,13 +267,23 @@ export default function ManageWebsite() {
                 {refVolume?.id}
               </IconText>
             </div>
-            <div className="tp-info text-main0">IPFS CID</div>
+            <div className="tp-info text-main0">IPFS CID v0</div>
             <div tw="flex flex-row mb-5">
-              <Text>{cidV1}</Text>
+              <IconText
+                iconName="copy"
+                onClick={() => copyAndNotify(refVolume.item_hash)}
+              >
+                {refVolume.item_hash}
+              </IconText>
+            </div>
+            <div className="tp-info text-main0">IPFS CID v1</div>
+            <div tw="flex flex-row mb-5">
               <IconText
                 iconName="copy"
                 onClick={() => copyAndNotify(cidV1 ?? '')}
-              ></IconText>
+              >
+                {cidV1}
+              </IconText>
             </div>
 
             <Separator />
@@ -287,7 +299,7 @@ export default function ManageWebsite() {
                     return (
                       <div tw="my-5" key={`version-${version}`}>
                         <Separator />
-                        <div tw="my-5 flex flex-row justify-between">
+                        <div tw="my-5 flex flex-wrap gap-4 justify-between">
                           <div>
                             <div className="tp-info text-main0">{`Version ${version}`}</div>
                             <Link
