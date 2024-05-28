@@ -250,9 +250,11 @@ export const CheckoutSummary = ({
   control,
   receiverAddress,
   paymentMethod,
-  isPersistent = type === EntityType.Instance,
   website,
   mainRef,
+  isPersistent = type === EntityType.Instance,
+  disablePaymentMethod = true,
+  onSwitchPaymentMethod,
 }: // streamDuration,
 CheckoutSummaryProps) => {
   const { cost } = useEntityCost({
@@ -268,8 +270,10 @@ CheckoutSummaryProps) => {
   })
 
   const priceDuration = paymentMethod === PaymentMethod.Stream ? 'h' : undefined
-  const disabledHold = paymentMethod !== PaymentMethod.Hold
-  const disabledStream = paymentMethod !== PaymentMethod.Stream
+  const disabledHold =
+    disablePaymentMethod && paymentMethod !== PaymentMethod.Hold
+  const disabledStream =
+    disablePaymentMethod && paymentMethod !== PaymentMethod.Stream
 
   const paymentMethodSwitchNode = control && (
     <SelectPaymentMethod
@@ -277,6 +281,7 @@ CheckoutSummaryProps) => {
       control={control}
       disabledHold={disabledHold}
       disabledStream={disabledStream}
+      onSwitch={onSwitchPaymentMethod}
     />
   )
 
@@ -317,17 +322,6 @@ CheckoutSummaryProps) => {
                     <div tw="my-4">{paymentMethodSwitchNode}</div>
                   </div>
                 </div>
-                {/* {paymentMethod === PaymentMethod.Stream && (
-                  <div className="bg-purple0" tw="p-6">
-                    <TextGradient forwardedAs="h3" type="h7" tw="mb-3">
-                      Instance Duration
-                    </TextGradient>
-                    <SelectStreamDuration
-                      name="streamDuration"
-                      control={control}
-                    />
-                  </div>
-                )} */}
               </>
             )}
 

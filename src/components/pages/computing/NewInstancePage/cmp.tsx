@@ -20,7 +20,12 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import { EntityDomainType, EntityType, apiServer } from '@/helpers/constants'
+import {
+  EntityDomainType,
+  EntityType,
+  PaymentMethod,
+  apiServer,
+} from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import { useNewInstancePage } from '@/hooks/pages/computing/useNewInstancePage'
 import Form from '@/components/form/Form'
@@ -179,9 +184,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               type="button"
               variant="primary"
               size="md"
-              onClick={() => {
-                throw new Error('not supported')
-              }}
+              onClick={handleSwitchToAutoHold}
             >
               Switch Tier
             </Button>
@@ -234,9 +237,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               type="button"
               variant="primary"
               size="md"
-              onClick={() => {
-                throw new Error('not supported')
-              }}
+              onClick={() => setSelectedModal('node-list')}
             >
               Switch Tier
             </Button>
@@ -361,7 +362,17 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     selectedModal,
     selectedNode,
   ])
+  // ------------------------
 
+  const handleSwitchPaymentMethod = useCallback((method: PaymentMethod) => {
+    if (method === PaymentMethod.Stream) {
+      setSelectedModal('switch-to-stream')
+    } else {
+      setSelectedModal('switch-to-hold')
+    }
+  }, [])
+
+  // @note: warn the user when the wrong network configuration has been detected
   useEffect(() => {
     if (!modalOpen) return
     if (!modalClose) return
@@ -672,7 +683,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         unlockedAmount={accountBalance}
         paymentMethod={values.paymentMethod}
         streamDuration={values.streamDuration}
+        disablePaymentMethod={false}
         mainRef={mainRef}
+        onSwitchPaymentMethod={handleSwitchPaymentMethod}
         description={
           <>
             You can either leverage the traditional method of holding tokens in

@@ -31,6 +31,8 @@ export type CheckoutSummaryProps = {
   control?: Control
   receiverAddress?: string
   streamDuration?: StreamDurationField
+  disablePaymentMethod?: boolean
+  onSwitchPaymentMethod?: (e: PaymentMethod) => void
 }
 
 export type CheckoutSummarySpecsLineProps = {

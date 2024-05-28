@@ -8,6 +8,7 @@ export type UseSelectPaymentMethodProps = {
   defaultValue?: PaymentMethod
   disabledHold?: boolean
   disabledStream?: boolean
+  onSwitch?: (e: PaymentMethod) => void
 }
 
 export type UseSelectPaymentMethodReturn = {
@@ -23,6 +24,7 @@ export function useSelectPaymentMethod({
   control,
   defaultValue,
   disabledHold,
+  onSwitch,
   ...rest
 }: UseSelectPaymentMethodProps): UseSelectPaymentMethodReturn {
   const paymentMethodCtrl = useController({
@@ -31,7 +33,7 @@ export function useSelectPaymentMethod({
     defaultValue,
   })
 
-  const { value, onChange } = paymentMethodCtrl.field
+  const onChange = onSwitch || paymentMethodCtrl.field.onChange
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +44,8 @@ export function useSelectPaymentMethod({
   )
 
   paymentMethodCtrl.field.onChange = handleChange
-  ;(paymentMethodCtrl.field as any).checked = value === PaymentMethod.Stream
+  ;(paymentMethodCtrl.field as any).checked =
+    paymentMethodCtrl.field.value === PaymentMethod.Stream
 
   const handleClickStream = useCallback(() => {
     onChange(PaymentMethod.Stream)
