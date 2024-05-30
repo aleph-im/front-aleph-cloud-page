@@ -488,7 +488,7 @@ export class InstanceManager
 
   async *delSteps(
     instancesOrIds: string | Instance | (string | Instance)[],
-    account: SuperfluidAccount,
+    account?: SuperfluidAccount,
   ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
