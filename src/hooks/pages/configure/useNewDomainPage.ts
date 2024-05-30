@@ -47,6 +47,7 @@ export type UseNewDomainPageReturn = {
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
   const router = useRouter()
+  const { name } = router.query
   const [
     {
       instance: { entities: instances },
@@ -63,10 +64,10 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     async (state: NewDomainFormState) => {
       if (!manager) throw Err.ConnectYourWallet
 
-      const iSteps = await manager.getAddSteps(state)
+      const iSteps = await manager.getAddSteps(state, false)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = manager.addSteps(state)
+      const steps = manager.addSteps(state, false)
 
       try {
         let accountDomain
@@ -100,7 +101,10 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     setValue,
     formState: { errors },
   } = useForm({
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      ...(typeof name === 'string' ? { name } : {}),
+    },
     onSubmit,
     resolver: zodResolver(DomainManager.addSchema),
   })

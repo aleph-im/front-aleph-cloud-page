@@ -613,6 +613,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
               message_id: volumeId,
               type: cv.target,
               updated_at: new Date().toISOString(),
+              options: { catch_all_path: '/404.html' },
             }
             return ac
           }, {} as DomainAggregate),

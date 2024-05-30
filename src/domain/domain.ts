@@ -21,6 +21,7 @@ export type DomainAggregateItem = {
   type: EntityDomainType
   message_id: string
   updated_at: string
+  options?: Record<string, unknown>
 }
 
 export type DomainAggregate = Record<string, DomainAggregateItem | null>
@@ -85,6 +86,11 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
         message_id: domain.ref,
         type: domain.target,
         updated_at: new Date().toISOString(),
+        ...(domain.target === EntityDomainType.IPFS
+          ? {
+              options: { catch_all_path: '/404.html' },
+            }
+          : {}),
       },
     }
 
@@ -133,6 +139,11 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
           message_id: ref,
           type: target,
           updated_at: new Date().toISOString(),
+          ...(target === EntityDomainType.IPFS
+            ? {
+                options: { catch_all_path: '/404.html' },
+              }
+            : {}),
         }
         return ac
       }, {} as DomainAggregate)
@@ -212,18 +223,19 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     throwOnCollision = true,
   ): Promise<AddDomain[]> {
     domains = await DomainManager.addManySchema.parseAsync(domains)
+    if (!throwOnCollision) return domains
 
     const currentDomains = await this.getAll()
     const currentDomainSet = new Set<string>(currentDomains.map((d) => d.name))
 
-    if (!throwOnCollision) {
+    /* if (!throwOnCollision) {
       return domains.filter((domain) => !currentDomainSet.has(domain.name))
-    } else {
-      return domains.map((domain: AddDomain) => {
-        if (!currentDomainSet.has(domain.name)) return domain
-        throw Err.DomainUsed(domain.name)
-      })
-    }
+    } else { */
+    return domains.map((domain: AddDomain) => {
+      if (!currentDomainSet.has(domain.name)) return domain
+      throw Err.DomainUsed(domain.name)
+    })
+    //}
   }
 
   // @todo: Type not exported from SDK...
@@ -252,7 +264,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     name: string,
     content: DomainAggregateItem,
   ): Domain {
-    const { message_id, type } = content
+    const { message_id, type, updated_at } = content
     const ref_path =
       type === EntityDomainType.Instance
         ? 'computing/instance'
@@ -261,7 +273,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
           : 'storage/volume'
     let date = '-'
     try {
-      date = content.updated_at?.slice(0, 19).replace('T', ' ') || '-'
+      date = updated_at?.slice(0, 19).replace('T', ' ') || '-'
     } catch (e) {}
     const domain: Domain = {
       type: EntityType.Domain,

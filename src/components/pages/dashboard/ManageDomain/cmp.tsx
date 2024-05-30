@@ -1,5 +1,6 @@
 import IconText from '@/components/common/IconText'
 import { Label, NoisyContainer } from '@aleph-front/core'
+import { useRouter } from 'next/router'
 import Link from 'next/link'
 import {
   EntityTypeName,
@@ -23,6 +24,7 @@ export default function ManageDomain() {
     handleCopyRef,
     handleRetry,
   } = useManageDomain()
+  const router = useRouter()
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
 
   if (!domain) {
@@ -56,7 +58,17 @@ export default function ManageDomain() {
                   : 'DOMAIN RECORDS NOT CONFIGURED'}
               </Label>
             </div>
-            <div>
+            <div tw="flex flex-wrap justify-end ml-2 gap-2 sm:gap-4">
+              <Button
+                kind="default"
+                variant="tertiary"
+                size="md"
+                onClick={() =>
+                  router.push(`/configure/domain/new/?name=${domain.id}`)
+                }
+              >
+                Update
+              </Button>
               <Button
                 kind="functional"
                 variant="warning"
