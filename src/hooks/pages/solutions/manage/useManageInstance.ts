@@ -94,7 +94,7 @@ export function useManageInstance(): ManageInstance {
         // @note: refactor in SDK calling init inside this method
         superfluidAccount = createFromAvalancheAccount(account)
         await superfluidAccount.init()
-      } else {
+      } else if (blockchain !== BlockchainId.ETH) {
         handleConnect({ blockchain: BlockchainId.ETH })
       }
 
