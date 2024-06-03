@@ -20,7 +20,13 @@ export const websiteFrameworkSchema = z.enum([
 ])
 
 export const websiteFolderSchema = z
-  .custom<FileList>((val) => val instanceof FileList, 'Required folder')
+  .custom<File>(
+    (val) =>
+      Array.isArray(val)
+        ? val.every((v) => v instanceof File)
+        : val instanceof File,
+    'Required folder',
+  )
   .refine((folder) => folder && folder.length > 0, {
     message: 'Folder must contain at least one file',
   })

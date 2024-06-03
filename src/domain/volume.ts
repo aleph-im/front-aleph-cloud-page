@@ -90,7 +90,7 @@ export type Volume = NewVolume | ExistingVolume | PersistentVolume
 
 export type VolumeCostProps = {
   paymentMethod?: PaymentMethod
-  volumes?: (Volume | AddVolume | VolumeField)[]
+  volumes?: (Volume | AddVolume)[]
   sizeDiscount?: number
   streamDuration?: StreamDurationField
 }

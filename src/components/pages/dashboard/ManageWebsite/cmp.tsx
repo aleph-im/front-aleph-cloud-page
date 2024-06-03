@@ -85,7 +85,6 @@ export default function ManageWebsite() {
               </Label>
             </div>
             <div tw="flex flex-wrap justify-end ml-2 gap-2 sm:gap-4">
-              <UpdateWebsiteFolder control={state.control} />
               <Button
                 kind="functional"
                 variant="warning"
@@ -354,6 +353,12 @@ export default function ManageWebsite() {
             ) : (
               <Text>No previous version</Text>
             )}
+
+            <Separator />
+            <TextGradient type="h7" as="h2" color="main0">
+              Update your website
+            </TextGradient>
+            <UpdateWebsiteFolder control={state.control} />
           </NoisyContainer>
 
           <div tw="mt-20 text-center">

@@ -1,8 +1,7 @@
-import { Icon, Button, NoisyContainer, TextInput } from '@aleph-front/core'
-import { RemoveWebsiteFolderProps, AddWebsiteFolderProps } from './types'
 import React, { memo } from 'react'
+import { Button, NoisyContainer, FileInput } from '@aleph-front/core'
+import { RemoveWebsiteFolderProps, AddWebsiteFolderProps } from './types'
 import { useAddWebsiteFolderProps } from '@/hooks/form/useAddWebsiteFolder'
-import HiddenFileInput from '@/components/common/HiddenFileInput'
 import IconText from '@/components/common/IconText'
 import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 
@@ -28,29 +27,19 @@ RemoveWebsite.displayName = 'RemoveWebsite'
 // -------------------------------------------------
 
 export const AddWebsiteFolder = memo((props: AddWebsiteFolderProps) => {
-  const { folderCtrl, cidCtrl, folderSize } = useAddWebsiteFolderProps(props)
+  const { folderCtrl, cidCtrl } = useAddWebsiteFolderProps(props)
 
   const [, copyAndNotify] = useCopyToClipboardAndNotify()
 
   return (
     <NoisyContainer>
-      <div tw="flex flex-col justify-between sm:flex-row">
-        <HiddenFileInput
-          {...folderCtrl.field}
-          {...folderCtrl.fieldState}
-          label="Upload static website"
-          required
-          isFolder
-        >
-          Select folder <Icon name="arrow-up" tw="ml-4" />
-        </HiddenFileInput>
-        {folderCtrl.field.value && (
-          //<div tw="mt-4 sm:mt-0">
-          <div tw="mt-4 sm:mt-0">
-            <TextInput label="Size" name="size" value={folderSize} disabled />
-          </div>
-        )}
-      </div>
+      <FileInput
+        {...folderCtrl.field}
+        {...folderCtrl.fieldState}
+        label="Upload static website"
+        required
+        directory
+      />
       {cidCtrl.field.value && (
         <div tw="mt-6">
           <div className="tp-info text-main0">IPFS CID (Unpinned)</div>

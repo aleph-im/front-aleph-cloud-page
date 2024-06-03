@@ -30,6 +30,7 @@ export type AccountFileObject = {
   created: string
   item_hash: string
 }
+
 export type AccountFilesResponse = {
   address: string
   total_size: number
@@ -79,20 +80,20 @@ export class FileManager {
   }
 
   static async getFolderSize(hash?: string): Promise<number>
-  static async getFolderSize(folder?: FileList): Promise<number>
+  static async getFolderSize(folder?: File | File[]): Promise<number>
   static async getFolderSize(
-    folderOrFile?: string | FileList,
+    folderOrFile?: string | File | File[],
   ): Promise<number> {
     if (!folderOrFile) return Number.POSITIVE_INFINITY
 
-    if (folderOrFile instanceof FileList) {
-      let totalSize = 0
-      Array.from(folderOrFile).forEach((file) => {
-        const size = file?.size
-        if (size === undefined) return Number.POSITIVE_INFINITY
-        totalSize += convertByteUnits(file.size, { from: 'B', to: 'MiB' })
-      })
-      return totalSize
+    if (typeof folderOrFile !== 'string') {
+      const files = Array.isArray(folderOrFile) ? folderOrFile : [folderOrFile]
+
+      return files.reduce((ac, cv) => {
+        const size = cv?.size
+        if (size === undefined) return ac + Number.POSITIVE_INFINITY
+        return ac + convertByteUnits(cv.size, { from: 'B', to: 'MiB' })
+      }, 0)
     }
 
     try {
@@ -185,9 +186,15 @@ export class FileManager {
     return message.content.item_hash
   }
 
-  static async uploadFolder(folder: FileList): Promise<string | undefined> {
+  static async uploadFolder(
+    folder: File | File[],
+  ): Promise<string | undefined> {
+    const files = Array.isArray(folder) ? folder : [folder]
+    if (!files.length) throw new Error('Required folder')
+
     const data = new FormData()
-    Array.from(folder).forEach((f) => data.append('file', f))
+    files.forEach((f) => data.append('file', f))
+
     const query = await fetch(
       'https://ipfs.aleph.cloud/api/v0/add?to-files=1',
       {
@@ -195,6 +202,7 @@ export class FileManager {
         body: data,
       },
     )
+
     if (query.status === 200)
       return JSON.parse((await query.text()).split('\n').at(-2) ?? '{}')['Hash']
   }

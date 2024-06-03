@@ -1,24 +1,18 @@
-import { UpdateWebsiteFolderProps } from './types'
 import React, { memo } from 'react'
+import { FileInput } from '@aleph-front/core'
 import { useAddWebsiteFolderProps } from '@/hooks/form/useAddWebsiteFolder'
-import HiddenFileInput from '@/components/common/HiddenFileInput'
+import { UpdateWebsiteFolderProps } from './types'
 
 export const UpdateWebsiteFolder = memo((props: UpdateWebsiteFolderProps) => {
   const { folderCtrl } = useAddWebsiteFolderProps(props)
 
   return (
-    <HiddenFileInput
+    <FileInput
       {...folderCtrl.field}
       {...folderCtrl.fieldState}
       required
-      isFolder
-      buttonStyle={{
-        kind: 'default',
-        variant: 'tertiary',
-      }}
-    >
-      Update
-    </HiddenFileInput>
+      directory
+    />
   )
 })
 UpdateWebsiteFolder.displayName = 'UpdateWebsiteFolder'
