@@ -161,7 +161,7 @@ export abstract class Executable {
       ref,
     }))
 
-    return yield* this.domainManager.addSteps(parsedDomains, 'override')
+    return yield* this.domainManager.addSteps(parsedDomains, 'ignore')
   }
 
   protected async *parseVolumesSteps(
