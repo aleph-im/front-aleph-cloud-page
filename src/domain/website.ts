@@ -78,28 +78,49 @@ npm run build`,
       },
     ],
   },
-  /* [WebsiteFrameworkId.react]: {
+  [WebsiteFrameworkId.react]: {
     id: WebsiteFrameworkId.react,
-    name: 'React + CRA',
+    name: 'React',
     docs: [
       {
         type: 'text',
-        value: 'Install create-react-app and create the project',
+        value: 'Create a React project',
       },
       {
         type: 'code',
-        value: `npx create-react-app my-app
-cd my-app`,
+        value: `npx create-react-app@latest my-react-app
+cd my-react-app`,
       },
-      { type: 'text', value: 'Build the static files and zip them' },
+      { type: 'text', value: 'Build the static website' },
       {
         type: 'code',
-        value: `npm run build
-(cd build; zip -r ../website.zip .)`,
+        value: `npm install
+npm run build`,
       },
     ],
   },
-  [WebsiteFrameworkId.gatsby]: {
+  [WebsiteFrameworkId.vue]: {
+    id: WebsiteFrameworkId.vue,
+    name: 'Vue.js',
+    docs: [
+      {
+        type: 'text',
+        value: 'Create a Vue.js project',
+      },
+      {
+        type: 'code',
+        value: `npm create vue@latest
+cd vue-project`,
+      },
+      { type: 'text', value: 'Build the static website' },
+      {
+        type: 'code',
+        value: `npm install
+npm run build`,
+      },
+    ],
+  },
+  /* [WebsiteFrameworkId.gatsby]: {
     id: WebsiteFrameworkId.gatsby,
     name: 'React + Gatsby',
     docs: [
@@ -185,30 +206,6 @@ export const prerender = true;`,
         type: 'code',
         value: `npm run build
 (cd build; zip -r ../website.zip .)`,
-      },
-    ],
-  },
-  [WebsiteFrameworkId.vue]: {
-    id: WebsiteFrameworkId.vue,
-    name: 'Vue',
-    docs: [
-      {
-        type: 'text',
-        value: 'Install Vue and create the project',
-      },
-      {
-        type: 'code',
-        height: '8rem',
-        value: `npm create vue@latest
-cd vue-project
-npm install
-`,
-      },
-      { type: 'text', value: 'Build the static files and zip them' },
-      {
-        type: 'code',
-        value: `npm run build
-(cd dist; zip -r ../website.zip .)`,
       },
     ],
   },

@@ -11,10 +11,10 @@ import {
 export const websiteFrameworkSchema = z.enum([
   WebsiteFrameworkId.none,
   WebsiteFrameworkId.nextjs,
-  /* WebsiteFrameworkId.react,
-  WebsiteFrameworkId.gatsby,
-  WebsiteFrameworkId.svelte,
+  WebsiteFrameworkId.react,
   WebsiteFrameworkId.vue,
+  /* WebsiteFrameworkId.gatsby,
+  WebsiteFrameworkId.svelte,
   WebsiteFrameworkId.nuxt,
   WebsiteFrameworkId.angular */
 ])
