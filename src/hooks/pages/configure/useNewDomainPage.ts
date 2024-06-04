@@ -60,14 +60,21 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   const manager = useDomainManager()
   const { next, stop } = useCheckoutNotification({})
 
+  const defaultFields = useMemo(() => {
+    return {
+      ...defaultValues,
+      ...(typeof name === 'string' ? { name } : {}),
+    }
+  }, [name])
+
   const onSubmit = useCallback(
     async (state: NewDomainFormState) => {
       if (!manager) throw Err.ConnectYourWallet
 
-      const iSteps = await manager.getAddSteps(state, false)
+      const iSteps = await manager.getAddSteps(state, 'override')
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = manager.addSteps(state, false)
+      const steps = manager.addSteps(state, 'override')
 
       try {
         let accountDomain
@@ -101,10 +108,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     setValue,
     formState: { errors },
   } = useForm({
-    defaultValues: {
-      ...defaultValues,
-      ...(typeof name === 'string' ? { name } : {}),
-    },
+    defaultValues: defaultFields,
     onSubmit,
     resolver: zodResolver(DomainManager.addSchema),
   })

@@ -106,7 +106,7 @@ export function useNewInstancePage(): UseNewInstancePage {
       const { crn, ...rest } = router.query
       const query = hash ? { ...rest, crn: hash } : rest
 
-      if (router.query.crn === query.crn) return false
+      if (crn === query.crn) return false
 
       return router.replace({ query })
     },

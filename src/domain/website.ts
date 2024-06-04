@@ -6,7 +6,6 @@ import {
   PaymentMethod,
   WebsiteFrameworkId,
   defaultWebsiteAggregateKey,
-  defaultDomainAggregateKey,
   defaultWebsiteChannel,
 } from '@/helpers/constants'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
@@ -16,7 +15,7 @@ import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
 import { Volume, VolumeManager } from './volume'
-import { Domain, DomainManager, DomainAggregate } from './domain'
+import { Domain, DomainManager } from './domain'
 import { getDate } from '@/helpers/utils'
 import Err from '@/helpers/errors'
 import { ItemType } from '@aleph-sdk/message'
@@ -601,24 +600,9 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       })
       const entity = (await this.parseNewAggregate(websiteEntity))[0]
 
-      if (domains && domains.length > 0) {
-        // Publish domains
-        // @note: Aggregate all signatures in 1 step
-        yield
-        await this.sdkClient.createAggregate({
-          key: defaultDomainAggregateKey,
-          channel: this.channel,
-          content: domains.reduce((ac, cv) => {
-            ac[cv.name] = {
-              message_id: volumeId,
-              type: cv.target,
-              updated_at: new Date().toISOString(),
-              options: { catch_all_path: '/404.html' },
-            }
-            return ac
-          }, {} as DomainAggregate),
-        })
-      }
+      // Publish domains
+      if (domains && domains.length > 0)
+        yield* this.parseDomainsSteps(volumeId, domains)
 
       return entity
     } catch (err) {
@@ -670,7 +654,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       ...domain,
       ref,
     }))
-    return yield* this.domainManager.addSteps(parsedDomains, false)
+    return yield* this.domainManager.addSteps(parsedDomains, 'override')
   }
 
   protected async parseNewAggregate(response: any): Promise<Website[]> {

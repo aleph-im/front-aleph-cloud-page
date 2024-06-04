@@ -53,6 +53,14 @@ export type DomainStatus = {
   help: string
 }
 
+enum DomainCollision {
+  throw = 'throw',
+  ignore = 'ignore',
+  override = 'override',
+}
+
+type DomainCollisionType = keyof typeof DomainCollision
+
 export class DomainManager implements EntityManager<Domain, AddDomain> {
   static addSchema = domainSchema
   static addManySchema = domainsSchema
@@ -110,9 +118,9 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
   async add(
     domains: AddDomain | AddDomain[],
-    throwOnCollision?: boolean,
+    onCollision?: DomainCollisionType,
   ): Promise<Domain[]> {
-    const steps = this.addSteps(domains, throwOnCollision)
+    const steps = this.addSteps(domains, onCollision)
 
     while (true) {
       const { value, done } = await steps.next()
@@ -122,14 +130,14 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
   async *addSteps(
     domains: AddDomain | AddDomain[],
-    throwOnCollision?: boolean,
+    onCollision?: DomainCollisionType,
   ): AsyncGenerator<void, Domain[], void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 
     domains = Array.isArray(domains) ? domains : [domains]
 
-    domains = await this.parseDomains(domains, throwOnCollision)
+    domains = await this.parseDomains(domains, onCollision)
     if (!domains.length) return []
 
     try {
@@ -201,7 +209,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
   async getAddSteps(
     domains: AddDomain | AddDomain[],
-    throwOnCollision?: boolean,
+    onCollision?: DomainCollisionType,
   ): Promise<CheckoutStepType[]> {
     domains = Array.isArray(domains) ? domains : [domains]
 
@@ -211,7 +219,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       ref: FunctionRuntimeId.Runtime1,
     }))
 
-    domains = await this.parseDomains(domains, throwOnCollision)
+    domains = await this.parseDomains(domains, onCollision)
 
     // @note: Aggregate all signatures in 1 step
     // return domains.map(() => 'domain')
@@ -220,22 +228,22 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
   protected async parseDomains(
     domains: AddDomain[],
-    throwOnCollision = true,
+    onCollision: DomainCollisionType = DomainCollision.throw,
   ): Promise<AddDomain[]> {
     domains = await DomainManager.addManySchema.parseAsync(domains)
-    if (!throwOnCollision) return domains
+
+    if (onCollision === DomainCollision.override) return domains
 
     const currentDomains = await this.getAll()
     const currentDomainSet = new Set<string>(currentDomains.map((d) => d.name))
 
-    /* if (!throwOnCollision) {
+    if (onCollision === DomainCollision.ignore)
       return domains.filter((domain) => !currentDomainSet.has(domain.name))
-    } else { */
+
     return domains.map((domain: AddDomain) => {
       if (!currentDomainSet.has(domain.name)) return domain
       throw Err.DomainUsed(domain.name)
     })
-    //}
   }
 
   // @todo: Type not exported from SDK...
