@@ -21,6 +21,7 @@ export type DomainAggregateItem = {
   type: EntityDomainType
   message_id: string
   updated_at: string
+  options?: Record<string, unknown>
 }
 
 export type DomainAggregate = Record<string, DomainAggregateItem | null>
@@ -51,6 +52,14 @@ export type DomainStatus = {
   err: string
   help: string
 }
+
+enum DomainCollision {
+  throw = 'throw',
+  ignore = 'ignore',
+  override = 'override',
+}
+
+type DomainCollisionType = keyof typeof DomainCollision
 
 export class DomainManager implements EntityManager<Domain, AddDomain> {
   static addSchema = domainSchema
@@ -85,6 +94,11 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
         message_id: domain.ref,
         type: domain.target,
         updated_at: new Date().toISOString(),
+        ...(domain.target === EntityDomainType.IPFS
+          ? {
+              options: { catch_all_path: '/404.html' },
+            }
+          : {}),
       },
     }
 
@@ -104,9 +118,9 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
   async add(
     domains: AddDomain | AddDomain[],
-    throwOnCollision?: boolean,
+    onCollision?: DomainCollisionType,
   ): Promise<Domain[]> {
-    const steps = this.addSteps(domains, throwOnCollision)
+    const steps = this.addSteps(domains, onCollision)
 
     while (true) {
       const { value, done } = await steps.next()
@@ -116,14 +130,14 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
   async *addSteps(
     domains: AddDomain | AddDomain[],
-    throwOnCollision?: boolean,
+    onCollision?: DomainCollisionType,
   ): AsyncGenerator<void, Domain[], void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 
     domains = Array.isArray(domains) ? domains : [domains]
 
-    domains = await this.parseDomains(domains, throwOnCollision)
+    domains = await this.parseDomains(domains, onCollision)
     if (!domains.length) return []
 
     try {
@@ -133,6 +147,11 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
           message_id: ref,
           type: target,
           updated_at: new Date().toISOString(),
+          ...(target === EntityDomainType.IPFS
+            ? {
+                options: { catch_all_path: '/404.html' },
+              }
+            : {}),
         }
         return ac
       }, {} as DomainAggregate)
@@ -190,7 +209,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
   async getAddSteps(
     domains: AddDomain | AddDomain[],
-    throwOnCollision?: boolean,
+    onCollision?: DomainCollisionType,
   ): Promise<CheckoutStepType[]> {
     domains = Array.isArray(domains) ? domains : [domains]
 
@@ -200,7 +219,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       ref: FunctionRuntimeId.Runtime1,
     }))
 
-    domains = await this.parseDomains(domains, throwOnCollision)
+    domains = await this.parseDomains(domains, onCollision)
 
     // @note: Aggregate all signatures in 1 step
     // return domains.map(() => 'domain')
@@ -209,21 +228,22 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
 
   protected async parseDomains(
     domains: AddDomain[],
-    throwOnCollision = true,
+    onCollision: DomainCollisionType = DomainCollision.throw,
   ): Promise<AddDomain[]> {
     domains = await DomainManager.addManySchema.parseAsync(domains)
+
+    if (onCollision === DomainCollision.override) return domains
 
     const currentDomains = await this.getAll()
     const currentDomainSet = new Set<string>(currentDomains.map((d) => d.name))
 
-    if (!throwOnCollision) {
+    if (onCollision === DomainCollision.ignore)
       return domains.filter((domain) => !currentDomainSet.has(domain.name))
-    } else {
-      return domains.map((domain: AddDomain) => {
-        if (!currentDomainSet.has(domain.name)) return domain
-        throw Err.DomainUsed(domain.name)
-      })
-    }
+
+    return domains.map((domain: AddDomain) => {
+      if (!currentDomainSet.has(domain.name)) return domain
+      throw Err.DomainUsed(domain.name)
+    })
   }
 
   // @todo: Type not exported from SDK...
@@ -252,7 +272,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     name: string,
     content: DomainAggregateItem,
   ): Domain {
-    const { message_id, type } = content
+    const { message_id, type, updated_at } = content
     const ref_path =
       type === EntityDomainType.Instance
         ? 'computing/instance'
@@ -261,7 +281,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
           : 'storage/volume'
     let date = '-'
     try {
-      date = content.updated_at?.slice(0, 19).replace('T', ' ') || '-'
+      date = updated_at?.slice(0, 19).replace('T', ' ') || '-'
     } catch (e) {}
     const domain: Domain = {
       type: EntityType.Domain,
