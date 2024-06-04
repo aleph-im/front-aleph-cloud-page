@@ -10,6 +10,7 @@ import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
 import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
 import { useConnection } from '@/hooks/common/useConnection'
+import { PaymentType } from '@aleph-sdk/message'
 import { AvalancheAccount } from '@aleph-sdk/avalanche'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
 import { EntityDelAction } from '@/store/entity'
@@ -80,20 +81,22 @@ export function useManageInstance(): ManageInstance {
     if (!manager) throw Err.ConnectYourWallet
     if (!instance) throw Err.InstanceNotFound
 
-    // @todo: We are assuming always that the instance is of type PAYG
-
     try {
-      if (
-        blockchain !== BlockchainId.AVAX ||
-        !(account instanceof AvalancheAccount)
-      ) {
-        handleConnect({ blockchain: BlockchainId.AVAX })
-        throw Err.ConnectYourPaymentWallet
+      let superfluidAccount
+      if (instance.payment?.type === PaymentType.superfluid) {
+        if (
+          blockchain !== BlockchainId.AVAX ||
+          !(account instanceof AvalancheAccount)
+        ) {
+          handleConnect({ blockchain: BlockchainId.AVAX })
+          throw Err.ConnectYourPaymentWallet
+        }
+        // @note: refactor in SDK calling init inside this method
+        superfluidAccount = createFromAvalancheAccount(account)
+        await superfluidAccount.init()
+      } else if (blockchain !== BlockchainId.ETH) {
+        handleConnect({ blockchain: BlockchainId.ETH })
       }
-
-      // @note: refactor in SDK calling init inside this method
-      const superfluidAccount = createFromAvalancheAccount(account)
-      await superfluidAccount.init()
 
       const iSteps = await manager.getDelSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
