@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Instance, InstanceStatus } from '@/domain/instance'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useAppState } from '@/contexts/appState'
@@ -18,16 +18,21 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
 import { BlockchainId } from '@/domain/connect/base'
-import { useCopyToClipboardAndNotify } from '@aleph-front/core'
+import { useCopyToClipboardAndNotify, useNotification } from '@aleph-front/core'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
+import { CRN } from '@/domain/node'
 
 export type ManageInstance = {
   instance?: Instance
   status?: InstanceStatus
+  mappedKeys: (SSHKey | undefined)[]
+  crn?: CRN
+  nodeDetails?: { name: string; url: string }
+  handleRetryAllocation: () => void
   handleCopyHash: () => void
   handleCopyConnect: () => void
   handleCopyIpv6: () => void
   handleDelete: () => void
-  mappedKeys: (SSHKey | undefined)[]
 }
 
 export function useManageInstance(): ManageInstance {
@@ -54,6 +59,7 @@ export function useManageInstance(): ManageInstance {
   )
 
   const manager = useInstanceManager()
+  const nodeManager = useNodeManager()
   const sshKeyManager = useSSHKeyManager()
   const { next, stop } = useCheckoutNotification({})
 
@@ -69,26 +75,35 @@ export function useManageInstance(): ManageInstance {
     getMapped()
   }, [sshKeyManager, instance])
 
+  const handleEnsureNetwork = useCallback(async () => {
+    let superfluidAccount
+    if (!instance) return
+
+    if (instance.payment?.type === PaymentType.superfluid) {
+      if (
+        blockchain !== BlockchainId.AVAX ||
+        !(account instanceof AvalancheAccount)
+      ) {
+        handleConnect({ blockchain: BlockchainId.AVAX })
+        throw Err.ConnectYourPaymentWallet
+      }
+      // @note: refactor in SDK calling init inside this method
+      superfluidAccount = createFromAvalancheAccount(account)
+      await superfluidAccount.init()
+
+      return superfluidAccount
+    } else if (blockchain !== BlockchainId.ETH) {
+      handleConnect({ blockchain: BlockchainId.ETH })
+      throw Err.ConnectYourPaymentWallet
+    }
+  }, [account, blockchain, handleConnect, instance])
+
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
     if (!instance) throw Err.InstanceNotFound
 
     try {
-      let superfluidAccount
-      if (instance.payment?.type === PaymentType.superfluid) {
-        if (
-          blockchain !== BlockchainId.AVAX ||
-          !(account instanceof AvalancheAccount)
-        ) {
-          handleConnect({ blockchain: BlockchainId.AVAX })
-          throw Err.ConnectYourPaymentWallet
-        }
-        // @note: refactor in SDK calling init inside this method
-        superfluidAccount = createFromAvalancheAccount(account)
-        await superfluidAccount.init()
-      } else if (blockchain !== BlockchainId.ETH) {
-        handleConnect({ blockchain: BlockchainId.ETH })
-      }
+      const superfluidAccount = await handleEnsureNetwork()
 
       const iSteps = await manager.getDelSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
@@ -109,25 +124,74 @@ export function useManageInstance(): ManageInstance {
     } finally {
       await stop()
     }
-  }, [
-    manager,
-    instance,
-    blockchain,
-    account,
-    dispatch,
-    router,
-    handleConnect,
-    next,
-    stop,
-  ])
+  }, [dispatch, handleEnsureNetwork, instance, manager, next, router, stop])
+
+  const noti = useNotification()
+
+  const [crn, setCRN] = useState<CRN>()
+
+  useEffect(() => {
+    async function load() {
+      try {
+        if (!nodeManager) throw new Error()
+        if (!instance) throw new Error()
+        if (instance.payment?.type !== PaymentType.superfluid) throw new Error()
+
+        const { receiver } = instance.payment || {}
+        if (!receiver) throw new Error()
+
+        const node = await nodeManager.getCRNByStreamRewardAddress(receiver)
+        setCRN(node)
+      } catch {
+        setCRN(undefined)
+      }
+    }
+    load()
+  }, [instance, nodeManager])
+
+  const handleRetryAllocation = useCallback(async () => {
+    if (!manager) throw Err.ConnectYourWallet
+    if (!instance) throw Err.InstanceNotFound
+
+    try {
+      await handleEnsureNetwork()
+      if (!crn) throw Err.ConnectYourPaymentWallet
+
+      await manager.notifyCRNExecution(crn, instance.id)
+    } catch (e) {
+      noti?.add({
+        variant: 'error',
+        title: 'Error',
+        text: (e as Error)?.message,
+      })
+    }
+  }, [crn, handleEnsureNetwork, instance, manager, noti])
+
+  const nodeDetails = useMemo(() => {
+    if (status?.node) {
+      return {
+        name: status.node.node_id,
+        url: status.node.url,
+      }
+    }
+    if (crn) {
+      return {
+        name: crn.name || crn.hash,
+        url: crn.address || '',
+      }
+    }
+  }, [crn, status?.node])
 
   return {
     instance,
     status,
+    mappedKeys,
+    crn,
+    nodeDetails,
+    handleRetryAllocation,
     handleCopyHash,
     handleCopyConnect,
     handleCopyIpv6,
     handleDelete,
-    mappedKeys,
   }
 }

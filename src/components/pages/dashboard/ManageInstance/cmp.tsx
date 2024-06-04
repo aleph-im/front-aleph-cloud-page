@@ -15,11 +15,14 @@ export default function ManageInstance() {
   const {
     instance,
     status,
+    mappedKeys,
+    crn,
+    nodeDetails,
+    handleRetryAllocation,
     handleCopyHash,
     handleCopyConnect,
     handleCopyIpv6,
     handleDelete,
-    mappedKeys,
   } = useManageInstance()
 
   const theme = useTheme()
@@ -43,7 +46,7 @@ export default function ManageInstance() {
     <>
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <div tw="flex justify-between pb-5">
+          <div tw="flex justify-between pb-5 flex-wrap gap-4 flex-col md:flex-row">
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
               <div className="tp-body2">{name}</div>
@@ -69,7 +72,17 @@ export default function ManageInstance() {
                 )}
               </Label>
             </div>
-            <div>
+            <div tw="flex gap-4 flex-col md:flex-row">
+              {!status?.vm_ipv6 && crn && (
+                <Button
+                  kind="functional"
+                  variant="warning"
+                  size="md"
+                  onClick={handleRetryAllocation}
+                >
+                  Reallocate
+                </Button>
+              )}
               <Button
                 kind="functional"
                 variant="warning"
@@ -217,7 +230,7 @@ export default function ManageInstance() {
               </div>
             </div>
 
-            {status?.node && (
+            {nodeDetails && (
               <>
                 <Separator />
 
@@ -228,7 +241,7 @@ export default function ManageInstance() {
                 <div tw="my-5">
                   <div className="tp-info text-main0">NAME</div>
                   <div>
-                    <Text>{status.node.node_id}</Text>
+                    <Text>{nodeDetails.name}</Text>
                   </div>
                 </div>
 
@@ -237,12 +250,12 @@ export default function ManageInstance() {
                   <div>
                     <a
                       className="tp-body1 fs-16"
-                      href={status.node.url}
+                      href={nodeDetails.url}
                       target="_blank"
                       referrerPolicy="no-referrer"
                     >
                       <IconText iconName="square-up-right">
-                        <Text>{ellipseText(status.node.url, 80)}</Text>
+                        <Text>{ellipseText(nodeDetails.url, 80)}</Text>
                       </IconText>
                     </a>
                   </div>
