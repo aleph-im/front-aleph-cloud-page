@@ -4,7 +4,7 @@ import { EnsNameLookup, EnsAddressLookup } from '@/domain/ens'
 export const useEnsNameLookup = (address?: string) => {
   const [ensName, setEnsName] = useState('')
   useEffect(() => {
-    EnsNameLookup(address).then((name) => name && setEnsName(name))
+    EnsNameLookup(address).then((name) => setEnsName(name ?? ''))
   }, [address])
   return ensName
 }
@@ -12,7 +12,7 @@ export const useEnsNameLookup = (address?: string) => {
 export const useEnsAddressLookup = (ens?: string) => {
   const [ensAddress, setEnsAddress] = useState('')
   useEffect(() => {
-    EnsAddressLookup(ens).then((address) => address && setEnsAddress(address))
+    EnsAddressLookup(ens).then((address) => setEnsAddress(address ?? ''))
   }, [ens])
   return ensAddress
 }

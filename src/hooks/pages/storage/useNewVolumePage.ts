@@ -97,7 +97,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
   })
 
   const canAfford =
-    accountBalance > (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+    accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
