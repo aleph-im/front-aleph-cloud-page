@@ -1,8 +1,6 @@
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Instance, InstanceStatus } from '@/domain/instance'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
-import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useAppState } from '@/contexts/appState'
 import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
@@ -10,6 +8,7 @@ import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
 import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
 import { useConnection } from '@/hooks/common/useConnection'
+import { PaymentType } from '@aleph-sdk/message'
 import { AvalancheAccount } from '@aleph-sdk/avalanche'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
 import { EntityDelAction } from '@/store/entity'
@@ -19,16 +18,21 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
 import { BlockchainId } from '@/domain/connect/base'
+import { useCopyToClipboardAndNotify, useNotification } from '@aleph-front/core'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
+import { CRN } from '@/domain/node'
 
 export type ManageInstance = {
   instance?: Instance
   status?: InstanceStatus
+  mappedKeys: (SSHKey | undefined)[]
+  crn?: CRN
+  nodeDetails?: { name: string; url: string }
+  handleRetryAllocation: () => void
   handleCopyHash: () => void
   handleCopyConnect: () => void
   handleCopyIpv6: () => void
   handleDelete: () => void
-  copyAndNotify: (text: string) => void
-  mappedKeys: (SSHKey | undefined)[]
 }
 
 export function useManageInstance(): ManageInstance {
@@ -46,11 +50,16 @@ export function useManageInstance(): ManageInstance {
   const [instance] = entities || []
 
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
-
   const status = useInstanceStatus(instance)
 
+  const handleCopyHash = useCopyToClipboardAndNotify(instance?.id || '')
+  const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.vm_ipv6 || '')
+  const handleCopyConnect = useCopyToClipboardAndNotify(
+    `ssh root@${status?.vm_ipv6}`,
+  )
+
   const manager = useInstanceManager()
+  const nodeManager = useNodeManager()
   const sshKeyManager = useSSHKeyManager()
   const { next, stop } = useCheckoutNotification({})
 
@@ -66,23 +75,11 @@ export function useManageInstance(): ManageInstance {
     getMapped()
   }, [sshKeyManager, instance])
 
-  const handleCopyHash = useCopyHash(instance)
+  const handleEnsureNetwork = useCallback(async () => {
+    let superfluidAccount
+    if (!instance) return
 
-  const handleCopyConnect = useCallback(() => {
-    copyAndNotify(`ssh root@${status?.vm_ipv6}`)
-  }, [copyAndNotify, status])
-
-  const handleCopyIpv6 = useCallback(() => {
-    copyAndNotify(status?.vm_ipv6 || '')
-  }, [copyAndNotify, status])
-
-  const handleDelete = useCallback(async () => {
-    if (!manager) throw Err.ConnectYourWallet
-    if (!instance) throw Err.InstanceNotFound
-
-    // @todo: We are assuming always that the instance is of type PAYG
-
-    try {
+    if (instance.payment?.type === PaymentType.superfluid) {
       if (
         blockchain !== BlockchainId.AVAX ||
         !(account instanceof AvalancheAccount)
@@ -90,10 +87,23 @@ export function useManageInstance(): ManageInstance {
         handleConnect({ blockchain: BlockchainId.AVAX })
         throw Err.ConnectYourPaymentWallet
       }
-
       // @note: refactor in SDK calling init inside this method
-      const superfluidAccount = createFromAvalancheAccount(account)
+      superfluidAccount = createFromAvalancheAccount(account)
       await superfluidAccount.init()
+
+      return superfluidAccount
+    } else if (blockchain !== BlockchainId.ETH) {
+      handleConnect({ blockchain: BlockchainId.ETH })
+      throw Err.ConnectYourPaymentWallet
+    }
+  }, [account, blockchain, handleConnect, instance])
+
+  const handleDelete = useCallback(async () => {
+    if (!manager) throw Err.ConnectYourWallet
+    if (!instance) throw Err.InstanceNotFound
+
+    try {
+      const superfluidAccount = await handleEnsureNetwork()
 
       const iSteps = await manager.getDelSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
@@ -114,26 +124,74 @@ export function useManageInstance(): ManageInstance {
     } finally {
       await stop()
     }
-  }, [
-    manager,
-    instance,
-    blockchain,
-    account,
-    dispatch,
-    router,
-    handleConnect,
-    next,
-    stop,
-  ])
+  }, [dispatch, handleEnsureNetwork, instance, manager, next, router, stop])
+
+  const noti = useNotification()
+
+  const [crn, setCRN] = useState<CRN>()
+
+  useEffect(() => {
+    async function load() {
+      try {
+        if (!nodeManager) throw new Error()
+        if (!instance) throw new Error()
+        if (instance.payment?.type !== PaymentType.superfluid) throw new Error()
+
+        const { receiver } = instance.payment || {}
+        if (!receiver) throw new Error()
+
+        const node = await nodeManager.getCRNByStreamRewardAddress(receiver)
+        setCRN(node)
+      } catch {
+        setCRN(undefined)
+      }
+    }
+    load()
+  }, [instance, nodeManager])
+
+  const handleRetryAllocation = useCallback(async () => {
+    if (!manager) throw Err.ConnectYourWallet
+    if (!instance) throw Err.InstanceNotFound
+
+    try {
+      await handleEnsureNetwork()
+      if (!crn) throw Err.ConnectYourPaymentWallet
+
+      await manager.notifyCRNExecution(crn, instance.id)
+    } catch (e) {
+      noti?.add({
+        variant: 'error',
+        title: 'Error',
+        text: (e as Error)?.message,
+      })
+    }
+  }, [crn, handleEnsureNetwork, instance, manager, noti])
+
+  const nodeDetails = useMemo(() => {
+    if (status?.node) {
+      return {
+        name: status.node.node_id,
+        url: status.node.url,
+      }
+    }
+    if (crn) {
+      return {
+        name: crn.name || crn.hash,
+        url: crn.address || '',
+      }
+    }
+  }, [crn, status?.node])
 
   return {
     instance,
     status,
+    mappedKeys,
+    crn,
+    nodeDetails,
+    handleRetryAllocation,
     handleCopyHash,
     handleCopyConnect,
     handleCopyIpv6,
     handleDelete,
-    copyAndNotify,
-    mappedKeys,
   }
 }

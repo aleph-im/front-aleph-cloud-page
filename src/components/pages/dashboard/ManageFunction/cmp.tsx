@@ -17,12 +17,20 @@ import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
 export default function ManageFunction() {
-  const { func, handleCopyHash, handleDelete, handleDownload, copyAndNotify } =
-    useManageFunction()
+  const {
+    program,
+    handleDelete,
+    handleDownload,
+    handleCopyHash,
+    handleCopyCode,
+    handleCopyRuntime,
+  } = useManageFunction()
 
   const theme = useTheme()
 
-  if (!func) {
+  console.log(program)
+
+  if (!program) {
     return (
       <>
         <Container>
@@ -32,9 +40,9 @@ export default function ManageFunction() {
     )
   }
 
-  const name = (func?.metadata?.name as string) || ellipseAddress(func.id)
-  const typeName = EntityTypeName[func.type]
-  const volumes = func.volumes
+  const name = (program?.metadata?.name as string) || ellipseAddress(program.id)
+  const typeName = EntityTypeName[program.type]
+  const volumes = program.volumes
 
   return (
     <>
@@ -46,10 +54,10 @@ export default function ManageFunction() {
               <div className="tp-body2">{name}</div>
               <Label
                 kind="secondary"
-                variant={func.confirmed ? 'success' : 'warning'}
+                variant={program.confirmed ? 'success' : 'warning'}
                 tw="ml-4"
               >
-                {func.confirmed ? (
+                {program.confirmed ? (
                   'READY'
                 ) : (
                   <div tw="flex items-center">
@@ -92,7 +100,7 @@ export default function ManageFunction() {
               <div tw="flex-auto">
                 <div className="tp-info text-main0">ITEM HASH</div>
                 <IconText iconName="copy" onClick={handleCopyHash}>
-                  {func.id}
+                  {program.id}
                 </IconText>
               </div>
             </div>
@@ -102,7 +110,7 @@ export default function ManageFunction() {
               <div>
                 <div className="tp-info text-main0">CORES</div>
                 <div>
-                  <Text>{func.resources.vcpus} x86 64bit</Text>
+                  <Text>{program.resources.vcpus} x86 64bit</Text>
                 </div>
               </div>
 
@@ -110,7 +118,7 @@ export default function ManageFunction() {
                 <div className="tp-info text-main0">RAM</div>
                 <div>
                   <Text>
-                    {convertByteUnits(func.resources.memory, {
+                    {convertByteUnits(program.resources.memory, {
                       from: 'MiB',
                       to: 'GiB',
                       displayUnit: true,
@@ -122,7 +130,7 @@ export default function ManageFunction() {
               <div>
                 <div className="tp-info text-main0">TIMEOUT</div>
                 <div>
-                  <Text>{`${func.resources.seconds}s`}</Text>
+                  <Text>{`${program.resources.seconds}s`}</Text>
                 </div>
               </div>
 
@@ -130,7 +138,7 @@ export default function ManageFunction() {
                 <div className="tp-info text-main0">SIZE</div>
                 <div>
                   <Text className="fs-10 tp-body1">
-                    {humanReadableSize(func?.size || 0, 'MiB')}
+                    {humanReadableSize(program?.size || 0, 'MiB')}
                   </Text>
                 </div>
               </div>
@@ -138,7 +146,7 @@ export default function ManageFunction() {
               <div>
                 <div className="tp-info text-main0">CREATED ON</div>
                 <div>
-                  <Text className="fs-10 tp-body1">{func.date}</Text>
+                  <Text className="fs-10 tp-body1">{program.date}</Text>
                 </div>
               </div>
             </div>
@@ -148,12 +156,12 @@ export default function ManageFunction() {
               <div>
                 <a
                   className="tp-body1 fs-16"
-                  href={func.url}
+                  href={program.url}
                   target="_blank"
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{ellipseText(func.url, 80)}</Text>
+                    <Text>{ellipseText(program.url, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -164,12 +172,12 @@ export default function ManageFunction() {
               <div>
                 <a
                   className="tp-body1 fs-16"
-                  href={func.urlVM}
+                  href={program.urlVM}
                   target="_blank"
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{ellipseText(func.urlVM, 80)}</Text>
+                    <Text>{ellipseText(program.urlVM, 80)}</Text>
                   </IconText>
                 </a>
               </div>
@@ -180,16 +188,13 @@ export default function ManageFunction() {
               Linked Runtime
             </TextGradient>
             <div className="tp-info text-main0">ITEM HASH</div>
-            <IconText
-              iconName="copy"
-              onClick={() => copyAndNotify(func.runtime.ref)}
-            >
-              {func.runtime.ref}
+            <IconText iconName="copy" onClick={handleCopyRuntime}>
+              {program.runtime.ref}
             </IconText>
-            {func.runtime.comment && (
+            {program.runtime.comment && (
               <div tw="mt-5">
                 <div className="tp-info text-main0">COMMENT</div>
-                <Text>{func.runtime.comment}</Text>
+                <Text>{program.runtime.comment}</Text>
               </div>
             )}
             <Separator />
@@ -200,22 +205,19 @@ export default function ManageFunction() {
               <div className="tp-info text-main0">IMMUTABLE VOLUME</div>
               <Link
                 className="tp-body1 fs-16"
-                href={`/storage/volume/${func.code.ref}`}
+                href={`/storage/volume/${program.code.ref}`}
               >
                 <IconText iconName="square-up-right">Volume details</IconText>
               </Link>
             </div>
             <div className="tp-info text-main0">ITEM HASH</div>
-            <IconText
-              iconName="copy"
-              onClick={() => copyAndNotify(func.code.ref)}
-            >
-              {func.code.ref}
+            <IconText iconName="copy" onClick={handleCopyCode}>
+              {program.code.ref}
             </IconText>
-            {func.code.entrypoint && (
+            {program.code.entrypoint && (
               <div tw="mt-5">
                 <div className="tp-info text-main0">CODE ENTRYPOINT</div>
-                <Text>{func.code.entrypoint}</Text>
+                <Text>{program.code.entrypoint}</Text>
               </div>
             )}
             {volumes.length > 0 && (
@@ -226,12 +228,7 @@ export default function ManageFunction() {
                   Linked Storage(s)
                 </TextGradient>
 
-                <VolumeList
-                  {...{
-                    volumes,
-                    copyAndNotify,
-                  }}
-                />
+                <VolumeList {...{ volumes }} />
               </>
             )}
           </NoisyContainer>

@@ -12,7 +12,6 @@ import { useManageDomain } from '@/hooks/pages/solutions/manage/useManageDomain'
 import { ellipseAddress } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import ButtonLink from '@/components/common/ButtonLink'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 
 export default function ManageDomain() {
   const {
@@ -21,11 +20,11 @@ export default function ManageDomain() {
     refEntity,
     account,
     handleDelete,
-    handleCopyRef,
     handleRetry,
+    handleCopyHash,
+    handleCopyRef,
   } = useManageDomain()
   const router = useRouter()
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
 
   if (!domain) {
     return (
@@ -284,10 +283,7 @@ export default function ManageDomain() {
                 </div>
                 <div tw="my-5">
                   <div className="tp-info text-main0">ITEM HASH</div>
-                  <IconText
-                    iconName="copy"
-                    onClick={() => copyAndNotify(refEntity.id)}
-                  >
+                  <IconText iconName="copy" onClick={handleCopyHash}>
                     {refEntity.id}
                   </IconText>
                 </div>

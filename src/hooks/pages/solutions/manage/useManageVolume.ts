@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { Volume } from '@/domain/volume'
-import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { useAppState } from '@/contexts/appState'
 import { useRequestVolumes } from '@/hooks/common/useRequestEntity/useRequestVolumes'
@@ -11,12 +10,13 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 
 export type ManageVolume = {
   volume?: Volume
-  handleCopyHash: () => void
   handleDelete: () => void
   handleDownload: () => void
+  handleCopyHash: () => void
 }
 
 export function useManageVolume(): ManageVolume {
@@ -31,7 +31,7 @@ export function useManageVolume(): ManageVolume {
   const manager = useVolumeManager()
   const { next, stop } = useCheckoutNotification({})
 
-  const handleCopyHash = useCopyHash(volume)
+  const handleCopyHash = useCopyToClipboardAndNotify(volume?.id || '')
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
@@ -68,8 +68,8 @@ export function useManageVolume(): ManageVolume {
 
   return {
     volume,
-    handleCopyHash,
     handleDelete,
     handleDownload,
+    handleCopyHash,
   }
 }

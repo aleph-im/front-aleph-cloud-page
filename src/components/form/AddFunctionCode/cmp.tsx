@@ -1,16 +1,13 @@
 import React from 'react'
-import { AddFunctionCodeProps } from './types'
-import HiddenFileInput from '@/components/common/HiddenFileInput'
-import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 import {
   CodeEditor,
   FormLabel,
-  Icon,
   NoisyContainer,
   Radio,
   RadioGroup,
   Tabs,
   TextInput,
+  FileInput,
 } from '@aleph-front/core'
 import {
   defaultCodeText,
@@ -18,6 +15,8 @@ import {
 } from '@/hooks/form/useAddFunctionCode'
 import { FunctionLangId } from '@/domain/lang'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
+import InfoTooltipButton from '@/components/common/InfoTooltipButton'
+import { AddFunctionCodeProps } from './types'
 
 export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
   const {
@@ -147,15 +146,13 @@ export const AddFunctionCode = React.memo((props: AddFunctionCodeProps) => {
                 />
               </div>
               <div>
-                <HiddenFileInput
+                <FileInput
                   {...fileCtrl.field}
                   {...fileCtrl.fieldState}
                   required
                   label="Upload your code"
                   accept=".zip,.sqsh"
-                >
-                  Upload code <Icon name="arrow-up" tw="ml-4" />
-                </HiddenFileInput>
+                />
               </div>
             </NoisyContainer>
           </>

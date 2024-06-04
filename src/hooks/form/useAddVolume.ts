@@ -53,7 +53,6 @@ export type UseAddNewVolumeReturn = {
   mountPathCtrl: UseControllerReturn<any, any>
   useLatestCtrl: UseControllerReturn<any, any>
   fileCtrl: UseControllerReturn<any, any>
-  volumeSize: string
   handleRemove?: () => void
 }
 export function useAddNewVolumeProps({
@@ -84,28 +83,11 @@ export function useAddNewVolumeProps({
     defaultValue: defaultValue?.useLatest,
   })
 
-  const { value: file } = fileCtrl.field
-  const [volumeSize, setVolumeSize] = useState<string>('')
-
-  useEffect(() => {
-    async function load() {
-      const size = await VolumeManager.getVolumeSize({
-        volumeType: VolumeType.New,
-        file,
-      } as Volume)
-
-      const hSize = humanReadableSize(size, 'MiB')
-      setVolumeSize(hSize)
-    }
-    load()
-  }, [file])
-
   return {
     isStandAlone: index === undefined,
     fileCtrl,
     mountPathCtrl,
     useLatestCtrl,
-    volumeSize,
     handleRemove,
   }
 }

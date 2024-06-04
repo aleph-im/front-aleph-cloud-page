@@ -1,8 +1,7 @@
-import { useRouter } from 'next/router'
 import { useCallback } from 'react'
+import { useRouter } from 'next/router'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 import { Program } from '@/domain/program'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
-import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { useAppState } from '@/contexts/appState'
 import { useRequestPrograms } from '@/hooks/common/useRequestEntity/useRequestPrograms'
@@ -14,11 +13,12 @@ import {
 import Err from '@/helpers/errors'
 
 export type ManageFunction = {
-  func?: Program
-  handleCopyHash: () => void
+  program?: Program
   handleDelete: () => void
   handleDownload: () => void
-  copyAndNotify: (text: string) => void
+  handleCopyHash: () => void
+  handleCopyRuntime: () => void
+  handleCopyCode: () => void
 }
 
 export function useManageFunction(): ManageFunction {
@@ -30,12 +30,14 @@ export function useManageFunction(): ManageFunction {
   const { entities } = useRequestPrograms({ id: hash as string })
   const [program] = entities || []
 
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
+  const handleCopyHash = useCopyToClipboardAndNotify(program?.id || '')
+  const handleCopyRuntime = useCopyToClipboardAndNotify(
+    program?.runtime.ref || '',
+  )
+  const handleCopyCode = useCopyToClipboardAndNotify(program?.code.ref || '')
 
   const manager = useProgramManager()
   const { next, stop } = useCheckoutNotification({})
-
-  const handleCopyHash = useCopyHash(program)
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
@@ -71,10 +73,11 @@ export function useManageFunction(): ManageFunction {
   }, [manager, program])
 
   return {
-    func: program,
-    handleCopyHash,
+    program,
     handleDelete,
     handleDownload,
-    copyAndNotify,
+    handleCopyHash,
+    handleCopyRuntime,
+    handleCopyCode,
   }
 }

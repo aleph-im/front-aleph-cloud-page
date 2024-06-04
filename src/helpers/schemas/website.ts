@@ -11,16 +11,22 @@ import {
 export const websiteFrameworkSchema = z.enum([
   WebsiteFrameworkId.none,
   WebsiteFrameworkId.nextjs,
-  /* WebsiteFrameworkId.react,
-  WebsiteFrameworkId.gatsby,
-  WebsiteFrameworkId.svelte,
+  WebsiteFrameworkId.react,
   WebsiteFrameworkId.vue,
+  /* WebsiteFrameworkId.gatsby,
+  WebsiteFrameworkId.svelte,
   WebsiteFrameworkId.nuxt,
   WebsiteFrameworkId.angular */
 ])
 
 export const websiteFolderSchema = z
-  .custom<FileList>((val) => val instanceof FileList, 'Required folder')
+  .custom<File>(
+    (val) =>
+      Array.isArray(val)
+        ? val.every((v) => v instanceof File)
+        : val instanceof File,
+    'Required folder',
+  )
   .refine((folder) => folder && folder.length > 0, {
     message: 'Folder must contain at least one file',
   })

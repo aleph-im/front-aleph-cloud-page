@@ -1,10 +1,11 @@
+import React, { memo, useMemo } from 'react'
 import {
   Tabs,
-  Icon,
   TextInput,
   Checkbox,
   Button,
   NoisyContainer,
+  FileInput,
 } from '@aleph-front/core'
 import {
   RemoveVolumeProps,
@@ -14,7 +15,6 @@ import {
   AddPersistentVolumeProps,
   InstanceSystemVolumeProps,
 } from './types'
-import React, { memo, useMemo } from 'react'
 import {
   useAddVolume,
   useAddExistingVolumeProps,
@@ -22,7 +22,6 @@ import {
   useAddPersistentVolumeProps,
 } from '@/hooks/form/useAddVolume'
 import { VolumeType } from '@/domain/volume'
-import HiddenFileInput from '@/components/common/HiddenFileInput'
 import { convertByteUnits } from '@/helpers/utils'
 
 const RemoveVolume = memo(({ onRemove: handleRemove }: RemoveVolumeProps) => {
@@ -45,14 +44,8 @@ RemoveVolume.displayName = 'RemoveVolume'
 // -------------------------------------------------
 
 export const AddNewVolume = memo((props: AddNewVolumeProps) => {
-  const {
-    isStandAlone,
-    fileCtrl,
-    mountPathCtrl,
-    useLatestCtrl,
-    volumeSize,
-    handleRemove,
-  } = useAddNewVolumeProps(props)
+  const { isStandAlone, fileCtrl, mountPathCtrl, useLatestCtrl, handleRemove } =
+    useAddNewVolumeProps(props)
 
   return (
     <>
@@ -65,20 +58,16 @@ export const AddNewVolume = memo((props: AddNewVolumeProps) => {
       <div>
         {isStandAlone ? (
           <NoisyContainer>
-            <HiddenFileInput
+            <FileInput
               {...fileCtrl.field}
               {...fileCtrl.fieldState}
               label="Upload volume file"
               required
-            >
-              Upload volume <Icon name="arrow-up" tw="ml-4" />
-            </HiddenFileInput>
+            />
           </NoisyContainer>
         ) : (
           <div tw="py-4">
-            <HiddenFileInput {...fileCtrl.field} {...fileCtrl.fieldState}>
-              Upload squashfs volume <Icon name="arrow-up" tw="ml-4" />
-            </HiddenFileInput>
+            <FileInput {...fileCtrl.field} {...fileCtrl.fieldState} />
           </div>
         )}
         {!isStandAlone && (
@@ -90,11 +79,6 @@ export const AddNewVolume = memo((props: AddNewVolumeProps) => {
               label="Mount"
               placeholder="/mount/opt"
             />
-          </div>
-        )}
-        {fileCtrl.field.value && (
-          <div tw="mt-4">
-            <TextInput label="Size" name="size" value={volumeSize} disabled />
           </div>
         )}
         {!isStandAlone && (

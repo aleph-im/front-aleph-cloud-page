@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react'
-import { humanReadableSize } from '@/helpers/utils'
+import { useEffect } from 'react'
 import { FileManager } from '@/domain/file'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 import { ipfsCIDSchema } from '@/helpers/schemas/base'
-//import { useIPFS } from '@/contexts/helia'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 
 export type WebsiteFolderField = {
-  folder?: FileList
+  folder?: File
   cid?: string
 }
 
@@ -21,21 +20,23 @@ export type UseAddWebsiteFolderProps = {
 }
 
 export type UseAddWebsiteFolderReturn = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   folderCtrl: UseControllerReturn<any, any>
   cidCtrl: UseControllerReturn<any, any>
-  folderSize: string
   handleRemove?: () => void
+  handleCopyCID: () => void
 }
 
-const isCidFile = (folder: FileList): string | undefined => {
+const isCidFile = (folder: File | File[]): string | undefined => {
+  folder = Array.isArray(folder) ? folder : [folder]
+  const [file] = folder
+
   // Only match v0 CIDs
-  if (folder.length === 1) {
-    try {
-      ipfsCIDSchema.parse(folder[0].name)
-      return folder[0].name
-    } catch (e) {}
-  }
+  if (!file) return
+
+  try {
+    ipfsCIDSchema.parse(file.name)
+    return file.name
+  } catch (e) {}
 }
 
 export function useAddWebsiteFolderProps({
@@ -60,30 +61,25 @@ export function useAddWebsiteFolderProps({
   })
 
   const { value: folder } = folderCtrl.field
-  const [folderSize, setFolderSize] = useState<string>('')
+  const { onChange } = cidCtrl.field
 
   useEffect(() => {
     async function load() {
-      if (folder) {
-        const size = await FileManager.getFolderSize(folder)
-        const hSize = humanReadableSize(size, 'MiB')
-        setFolderSize(hSize)
-        const cid =
-          isCidFile(folder) || (await FileManager.uploadFolder(folder))
-        if (cid) cidCtrl.field.onChange(cid)
-      } else if (folderSize) {
-        setFolderSize('')
-        cidCtrl.field.onChange('')
-      }
+      if (!folder) return
+
+      const cid = isCidFile(folder) || (await FileManager.uploadFolder(folder))
+      if (cid) onChange(cid)
     }
+
     load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [folder])
+  }, [onChange, folder])
+
+  const handleCopyCID = useCopyToClipboardAndNotify(cidCtrl.field.value)
 
   return {
     folderCtrl,
     cidCtrl,
-    folderSize,
     handleRemove,
+    handleCopyCID,
   }
 }

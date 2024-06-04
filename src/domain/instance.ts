@@ -195,7 +195,7 @@ export class InstanceManager
         newInstance.node
       ) {
         yield
-        await this.notifyCRNExecution(newInstance.node, entity.id)
+        await this.notifyCRNExecution(newInstance.node, entity.id, false)
       }
 
       return entity
@@ -209,6 +209,7 @@ export class InstanceManager
     account?: SuperfluidAccount,
   ): Promise<void> {
     let instance: Instance | undefined
+
     if (typeof instanceOrId !== 'string') {
       instance = instanceOrId
       instanceOrId = instance.id
@@ -288,6 +289,7 @@ export class InstanceManager
         },
       } as InstanceStatus
     }
+
     const query = await fetch(
       `https://scheduler.api.aleph.sh/api/v0/allocation/${instance.id}`,
     )
@@ -317,6 +319,43 @@ export class InstanceManager
     if (domains.length > 0) steps.push('domain')
 
     return steps
+  }
+
+  async notifyCRNExecution(
+    node: CRN,
+    instanceId: string,
+    retry = true,
+  ): Promise<void> {
+    if (!node.address) throw Err.InvalidCRNAddress
+
+    let errorMsg = ''
+
+    for (let i = 0; i < 5; i++) {
+      try {
+        // strip trailing slash
+        const nodeUrl = node.address.replace(/\/$/, '')
+        const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            instance: instanceId,
+          }),
+        })
+        const resp = await req.json()
+        if (resp.success) return
+
+        errorMsg = resp.errors[instanceId]
+      } catch (e) {
+        errorMsg = (e as Error).message
+      } finally {
+        if (!retry) break
+        await sleep(1000)
+      }
+    }
+
+    throw Err.InstanceStartupFailed(node.hash, errorMsg)
   }
 
   protected async *addPAYGStreamSteps(
@@ -441,38 +480,6 @@ export class InstanceManager
       })
   }
 
-  protected async notifyCRNExecution(
-    node: CRN,
-    instanceId: string,
-  ): Promise<void> {
-    if (!node.address) throw Err.InvalidCRNAddress
-
-    let errorMsg = ''
-    for (let i = 0; i < 5; i++) {
-      try {
-        // strip trailing slash
-        const nodeUrl = node.address.replace(/\/$/, '')
-        const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            instance: instanceId,
-          }),
-        })
-        const resp = await req.json()
-        if (resp.success) return
-        errorMsg = resp.errors[instanceId]
-        await sleep(1000)
-      } catch (e) {
-        errorMsg = (e as Error).message
-        await sleep(1000)
-      }
-    }
-    throw Err.InstanceStartupFailed(node.hash, errorMsg)
-  }
-
   async getDelSteps(
     instancesOrIds: string | Instance | (string | Instance)[],
   ): Promise<CheckoutStepType[]> {
@@ -488,7 +495,7 @@ export class InstanceManager
 
   async *delSteps(
     instancesOrIds: string | Instance | (string | Instance)[],
-    account: SuperfluidAccount,
+    account?: SuperfluidAccount,
   ): AsyncGenerator<void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
