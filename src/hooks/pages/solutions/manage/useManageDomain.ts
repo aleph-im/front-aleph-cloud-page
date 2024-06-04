@@ -1,7 +1,7 @@
-import { useRouter } from 'next/router'
 import { useCallback } from 'react'
+import { useRouter } from 'next/router'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 import { Domain, DomainStatus } from '@/domain/domain'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { useHashToEntity } from './useHashToEntity'
@@ -23,9 +23,10 @@ export type ManageDomain = {
   status?: DomainStatus
   refEntity?: Program | Instance | Volume
   account?: Account
-  handleCopyRef: () => void
   handleDelete: () => void
   handleRetry: () => void
+  handleCopyHash: () => void
+  handleCopyRef: () => void
 }
 
 export function useManageDomain(): ManageDomain {
@@ -42,8 +43,6 @@ export function useManageDomain(): ManageDomain {
   const { entities } = useRequestDomains({ id: hash as string })
   const [domain] = entities || []
 
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
-
   const refEntity = useHashToEntity(domain?.ref) as
     | Program
     | Instance
@@ -54,10 +53,6 @@ export function useManageDomain(): ManageDomain {
 
   const manager = useDomainManager()
   const { next, stop } = useCheckoutNotification({})
-
-  const handleCopyRef = useCallback(() => {
-    copyAndNotify(domain?.ref || '')
-  }, [copyAndNotify, domain])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
@@ -96,13 +91,17 @@ export function useManageDomain(): ManageDomain {
     } catch (e) {}
   }, [domain, manager, router])
 
+  const handleCopyHash = useCopyToClipboardAndNotify(refEntity?.id || '')
+  const handleCopyRef = useCopyToClipboardAndNotify(domain?.ref || '')
+
   return {
     domain,
     status,
     refEntity,
     account,
-    handleCopyRef,
     handleDelete,
     handleRetry,
+    handleCopyHash,
+    handleCopyRef,
   }
 }

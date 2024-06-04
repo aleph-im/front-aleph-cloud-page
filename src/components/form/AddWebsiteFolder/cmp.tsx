@@ -3,7 +3,6 @@ import { Button, NoisyContainer, FileInput } from '@aleph-front/core'
 import { RemoveWebsiteFolderProps, AddWebsiteFolderProps } from './types'
 import { useAddWebsiteFolderProps } from '@/hooks/form/useAddWebsiteFolder'
 import IconText from '@/components/common/IconText'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 
 const RemoveWebsite = memo(
   ({ onRemove: handleRemove }: RemoveWebsiteFolderProps) => {
@@ -27,9 +26,7 @@ RemoveWebsite.displayName = 'RemoveWebsite'
 // -------------------------------------------------
 
 export const AddWebsiteFolder = memo((props: AddWebsiteFolderProps) => {
-  const { folderCtrl, cidCtrl } = useAddWebsiteFolderProps(props)
-
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
+  const { folderCtrl, cidCtrl, handleCopyCID } = useAddWebsiteFolderProps(props)
 
   return (
     <NoisyContainer>
@@ -43,10 +40,7 @@ export const AddWebsiteFolder = memo((props: AddWebsiteFolderProps) => {
       {cidCtrl.field.value && (
         <div tw="mt-6">
           <div className="tp-info text-main0">IPFS CID (Unpinned)</div>
-          <IconText
-            iconName="copy"
-            onClick={() => copyAndNotify(cidCtrl.field.value)}
-          >
+          <IconText iconName="copy" onClick={handleCopyCID}>
             {cidCtrl.field.value}
           </IconText>
         </div>

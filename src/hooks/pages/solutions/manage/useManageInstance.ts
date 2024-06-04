@@ -1,8 +1,6 @@
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { Instance, InstanceStatus } from '@/domain/instance'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
-import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useAppState } from '@/contexts/appState'
 import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
@@ -20,6 +18,7 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
 import { BlockchainId } from '@/domain/connect/base'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 
 export type ManageInstance = {
   instance?: Instance
@@ -28,7 +27,6 @@ export type ManageInstance = {
   handleCopyConnect: () => void
   handleCopyIpv6: () => void
   handleDelete: () => void
-  copyAndNotify: (text: string) => void
   mappedKeys: (SSHKey | undefined)[]
 }
 
@@ -47,9 +45,13 @@ export function useManageInstance(): ManageInstance {
   const [instance] = entities || []
 
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
-
   const status = useInstanceStatus(instance)
+
+  const handleCopyHash = useCopyToClipboardAndNotify(instance?.id || '')
+  const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.vm_ipv6 || '')
+  const handleCopyConnect = useCopyToClipboardAndNotify(
+    `ssh root@${status?.vm_ipv6}`,
+  )
 
   const manager = useInstanceManager()
   const sshKeyManager = useSSHKeyManager()
@@ -66,16 +68,6 @@ export function useManageInstance(): ManageInstance {
 
     getMapped()
   }, [sshKeyManager, instance])
-
-  const handleCopyHash = useCopyHash(instance)
-
-  const handleCopyConnect = useCallback(() => {
-    copyAndNotify(`ssh root@${status?.vm_ipv6}`)
-  }, [copyAndNotify, status])
-
-  const handleCopyIpv6 = useCallback(() => {
-    copyAndNotify(status?.vm_ipv6 || '')
-  }, [copyAndNotify, status])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
@@ -136,7 +128,6 @@ export function useManageInstance(): ManageInstance {
     handleCopyConnect,
     handleCopyIpv6,
     handleDelete,
-    copyAndNotify,
     mappedKeys,
   }
 }

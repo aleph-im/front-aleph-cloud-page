@@ -1,6 +1,5 @@
+import { memo } from 'react'
 import Link from 'next/link'
-import ButtonLink from '@/components/common/ButtonLink'
-import IconText from '@/components/common/IconText'
 import {
   Label,
   NoisyContainer,
@@ -8,45 +7,126 @@ import {
   Icon,
   Tag,
   TextGradient,
+  useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { useManageWebsite } from '@/hooks/pages/solutions/manage/useManageWebsite'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { humanReadableSize } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'
-import { useTheme } from 'styled-components'
 import { WebsiteFrameworks } from '@/domain/website'
 import { getDate, cidV0Tov1 } from '@/helpers/utils'
 import UpdateWebsiteFolder from '@/components/form/UpdateWebsiteFolder'
-import { useNewWebsitePage } from '@/hooks/pages/hosting/useNewWebsitePage'
-import { useEffect } from 'react'
+import { Volume } from '@/domain/volume'
+import ButtonLink from '@/components/common/ButtonLink'
+import IconText from '@/components/common/IconText'
 
-export default function ManageWebsite() {
+export type WebsiteVolumeProps = {
+  version: string
+  volume: Volume
+  onClick: () => void
+}
+
+export function WebsiteVolume({
+  version,
+  volume,
+  onClick,
+}: WebsiteVolumeProps) {
+  const legacy_link = `https://${cidV0Tov1(volume.item_hash)}.ipfs.aleph.sh`
+  const handleCopyLegacyUrl = useCopyToClipboardAndNotify(legacy_link)
+
+  return (
+    <div tw="my-5">
+      <Separator />
+      <div tw="my-5 flex flex-wrap gap-4 justify-between">
+        <div>
+          <div className="tp-info text-main0">{`Version ${version}`}</div>
+          <Link
+            className="tp-body1 fs-16"
+            href={`/storage/volume/${volume.id}`}
+          >
+            <IconText iconName="square-up-right">Volume details</IconText>
+          </Link>
+        </div>
+        <div>
+          <div className="tp-info text-main0">CREATED ON</div>
+          <div>
+            <Text className="fs-10 tp-body1">{volume.date}</Text>
+          </div>
+        </div>
+        <div />
+        <div />
+        <Button kind="functional" variant="warning" size="md" onClick={onClick}>
+          Redeploy
+        </Button>
+      </div>
+      <div className="tp-info text-main0">LEGACY GATEWAY</div>
+      <div tw="flex flex-row mb-5">
+        <a
+          className="tp-body1 fs-16"
+          href={legacy_link}
+          target="_blank"
+          referrerPolicy="no-referrer"
+        >
+          <IconText iconName="square-up-right">
+            <Text>{legacy_link}</Text>
+          </IconText>
+        </a>
+        <IconText iconName="copy" onClick={handleCopyLegacyUrl} />
+      </div>
+    </div>
+  )
+}
+WebsiteVolume.displayName = 'WebsiteVolume'
+
+// -------------
+
+export type WebsiteENSProps = {
+  ens: string
+}
+
+export function WebsiteENS({ ens }: WebsiteENSProps) {
+  const limo = `https://${ens}.limo`
+  const handleCopyLimo = useCopyToClipboardAndNotify(limo)
+
+  return (
+    <div tw="flex flex-row">
+      <a
+        className="tp-body1 fs-16"
+        href={limo}
+        target="_blank"
+        referrerPolicy="no-referrer"
+      >
+        <IconText iconName="square-up-right">
+          <Text>{limo}</Text>
+        </IconText>
+      </a>
+      <IconText iconName="copy" onClick={handleCopyLimo} />
+    </div>
+  )
+}
+WebsiteENS.displayName = 'WebsiteENS'
+
+// -------------
+
+export function ManageWebsite() {
   const {
+    cidV1,
+    defaultUrl,
     website,
     refVolume,
     historyVolumes,
-    handleCopyHash,
+    theme,
+    state,
     handleDelete,
     handleUpdate,
+    handleCopyCIDv0,
+    handleCopyCIDv1,
+    handleCopyHash,
+    handleCopyIpfsUrl,
+    handleCopyUrl,
+    handleCopyVolumeHash,
   } = useManageWebsite()
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
-  const cidV1 = refVolume?.item_hash && cidV0Tov1(refVolume.item_hash)
-  const default_url = `https://${cidV1}.ipfs.aleph.sh`
-  /* const alt_url = `https://${cidV1}.ipfs.storry.tv`
-  const alt_url_2 = `https://${cidV1}.ipfs.cf-ipfs.com`
-  const alt_url_3 = `https://${cidV1}.ipfs.dweb.link` */
-  const theme = useTheme()
-  const state = useNewWebsitePage()
-  const cid = state.values.website?.cid
-
-  useEffect(() => {
-    if (cid) {
-      handleUpdate(cid as string)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cid])
 
   if (!website || !cidV1) {
     return (
@@ -154,18 +234,15 @@ export default function ManageWebsite() {
               <div tw="flex flex-row">
                 <a
                   className="tp-body1 fs-16"
-                  href={default_url}
+                  href={defaultUrl}
                   target="_blank"
                   referrerPolicy="no-referrer"
                 >
                   <IconText iconName="square-up-right">
-                    <Text>{default_url}</Text>
+                    <Text>{defaultUrl}</Text>
                   </IconText>
                 </a>
-                <IconText
-                  iconName="copy"
-                  onClick={() => copyAndNotify(default_url)}
-                />
+                <IconText iconName="copy" onClick={handleCopyUrl} />
               </div>
             </div>
             <div tw="mb-5">
@@ -197,37 +274,16 @@ export default function ManageWebsite() {
                 </IconText>
               </a>
               {website.ens && website.ens.length > 0 ? (
-                Array.from(website.ens).map((ens, key) => {
-                  const limo = `https://${ens}.limo`
-                  return (
-                    <div tw="flex flex-row" key={key}>
-                      <a
-                        className="tp-body1 fs-16"
-                        href={limo}
-                        target="_blank"
-                        referrerPolicy="no-referrer"
-                      >
-                        <IconText iconName="square-up-right">
-                          <Text>{limo}</Text>
-                        </IconText>
-                      </a>
-                      <IconText
-                        iconName="copy"
-                        onClick={() => copyAndNotify(limo)}
-                      />
-                    </div>
-                  )
-                })
+                Array.from(website.ens).map((ens, key) => (
+                  <WebsiteENSMemo key={key} {...{ ens }} />
+                ))
               ) : (
                 <div tw="flex flex-col">
                   <Text>
                     Access your ENS and setup the content hash to this current
                     version:
                   </Text>
-                  <IconText
-                    iconName="copy"
-                    onClick={() => copyAndNotify(`ipfs://${cidV1}` ?? '')}
-                  >
+                  <IconText iconName="copy" onClick={handleCopyIpfsUrl}>
                     <span tw="ml-2 not-italic text-purple-700">
                       ipfs://{cidV1}
                     </span>
@@ -259,28 +315,19 @@ export default function ManageWebsite() {
             </div>
             <div tw="mb-5">
               <div className="tp-info text-main0">ITEM HASH</div>
-              <IconText
-                iconName="copy"
-                onClick={() => copyAndNotify(refVolume?.id ?? '')}
-              >
+              <IconText iconName="copy" onClick={handleCopyVolumeHash}>
                 {refVolume?.id}
               </IconText>
             </div>
             <div className="tp-info text-main0">IPFS CID v0</div>
             <div tw="flex flex-row mb-5">
-              <IconText
-                iconName="copy"
-                onClick={() => copyAndNotify(refVolume.item_hash)}
-              >
-                {refVolume.item_hash}
+              <IconText iconName="copy" onClick={handleCopyCIDv0}>
+                {refVolume?.item_hash}
               </IconText>
             </div>
             <div className="tp-info text-main0">IPFS CID v1</div>
             <div tw="flex flex-row mb-5">
-              <IconText
-                iconName="copy"
-                onClick={() => copyAndNotify(cidV1 ?? '')}
-              >
+              <IconText iconName="copy" onClick={handleCopyCIDv1}>
                 {cidV1}
               </IconText>
             </div>
@@ -292,63 +339,17 @@ export default function ManageWebsite() {
             {historyVolumes && Object.keys(historyVolumes).length > 0 ? (
               <>
                 {Object.entries(historyVolumes)
-                  .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
-                  .map(([version, volume]) => {
-                    const legacy_link = `https://${cidV0Tov1(volume.item_hash)}.ipfs.aleph.sh`
-                    return (
-                      <div tw="my-5" key={`version-${version}`}>
-                        <Separator />
-                        <div tw="my-5 flex flex-wrap gap-4 justify-between">
-                          <div>
-                            <div className="tp-info text-main0">{`Version ${version}`}</div>
-                            <Link
-                              className="tp-body1 fs-16"
-                              href={`/storage/volume/${volume.id}`}
-                            >
-                              <IconText iconName="square-up-right">
-                                Volume details
-                              </IconText>
-                            </Link>
-                          </div>
-                          <div>
-                            <div className="tp-info text-main0">CREATED ON</div>
-                            <div>
-                              <Text className="fs-10 tp-body1">
-                                {volume.date}
-                              </Text>
-                            </div>
-                          </div>
-                          <div />
-                          <div />
-                          <Button
-                            kind="functional"
-                            variant="warning"
-                            size="md"
-                            onClick={() => handleUpdate(undefined, version)}
-                          >
-                            Redeploy
-                          </Button>
-                        </div>
-                        <div className="tp-info text-main0">LEGACY GATEWAY</div>
-                        <div tw="flex flex-row mb-5">
-                          <a
-                            className="tp-body1 fs-16"
-                            href={legacy_link}
-                            target="_blank"
-                            referrerPolicy="no-referrer"
-                          >
-                            <IconText iconName="square-up-right">
-                              <Text>{legacy_link}</Text>
-                            </IconText>
-                          </a>
-                          <IconText
-                            iconName="copy"
-                            onClick={() => copyAndNotify(legacy_link)}
-                          />
-                        </div>
-                      </div>
-                    )
-                  })}
+                  .sort(([a], [b]) => parseInt(b) - parseInt(a))
+                  .map(([version, volume]) => (
+                    <WebsiteVolumeMemo
+                      key={`${volume.id}-v${version}`}
+                      {...{
+                        version,
+                        volume,
+                        onClick: () => handleUpdate(undefined, version),
+                      }}
+                    />
+                  ))}
               </>
             ) : (
               <Text>No previous version</Text>
@@ -371,3 +372,8 @@ export default function ManageWebsite() {
     </>
   )
 }
+ManageWebsite.displayName = 'ManageWebsite'
+
+export const WebsiteVolumeMemo = memo(WebsiteVolume)
+export const WebsiteENSMemo = memo(WebsiteENS)
+export default memo(ManageWebsite)

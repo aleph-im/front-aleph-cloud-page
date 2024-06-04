@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { FileManager } from '@/domain/file'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 import { ipfsCIDSchema } from '@/helpers/schemas/base'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 
 export type WebsiteFolderField = {
   folder?: File
@@ -22,6 +23,7 @@ export type UseAddWebsiteFolderReturn = {
   folderCtrl: UseControllerReturn<any, any>
   cidCtrl: UseControllerReturn<any, any>
   handleRemove?: () => void
+  handleCopyCID: () => void
 }
 
 const isCidFile = (folder: File | File[]): string | undefined => {
@@ -72,9 +74,12 @@ export function useAddWebsiteFolderProps({
     load()
   }, [onChange, folder])
 
+  const handleCopyCID = useCopyToClipboardAndNotify(cidCtrl.field.value)
+
   return {
     folderCtrl,
     cidCtrl,
     handleRemove,
+    handleCopyCID,
   }
 }

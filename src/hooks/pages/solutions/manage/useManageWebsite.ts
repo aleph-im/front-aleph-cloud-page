@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { Website, HistoryVolumes } from '@/domain/website'
-import { useCopyHash } from '@/hooks/common/useCopyHash'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { useAppState } from '@/contexts/appState'
 import { useHashToEntity } from './useHashToEntity'
@@ -13,15 +12,31 @@ import {
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
+import {
+  UseNewWebsitePagePageReturn,
+  useNewWebsitePage,
+} from '../../hosting/useNewWebsitePage'
+import { DefaultTheme, useTheme } from 'styled-components'
+import { cidV0Tov1 } from '@/helpers/utils'
 
 export type ManageWebsite = {
   website?: Website
   refVolume?: Volume
   historyVolumes?: HistoryVolumes
-  handleCopyHash: () => void
+  cidV1: string
+  defaultUrl: string
+  state: UseNewWebsitePagePageReturn
+  theme: DefaultTheme
   handleDelete: () => void
   handleUpdate: (cid?: string, version?: string) => void
   //handleDownload: () => void
+  handleCopyHash: () => void
+  handleCopyUrl: () => void
+  handleCopyIpfsUrl: () => void
+  handleCopyVolumeHash: () => void
+  handleCopyCIDv0: () => void
+  handleCopyCIDv1: () => void
 }
 
 export function useManageWebsite(): ManageWebsite {
@@ -39,9 +54,8 @@ export function useManageWebsite(): ManageWebsite {
   const [historyVolumes, setHistoryVolumes] = useState<
     HistoryVolumes | undefined
   >()
-  const { next, stop } = useCheckoutNotification({})
 
-  const handleCopyHash = useCopyHash(website)
+  const { next, stop } = useCheckoutNotification({})
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
@@ -123,13 +137,51 @@ export function useManageWebsite(): ManageWebsite {
     }
   }, [manager, website])
 
+  // -------------
+
+  const cidV1 = refVolume?.item_hash && cidV0Tov1(refVolume.item_hash)
+  const defaultUrl = `https://${cidV1}.ipfs.aleph.sh`
+  /* const alt_url = `https://${cidV1}.ipfs.storry.tv`
+  const alt_url_2 = `https://${cidV1}.ipfs.cf-ipfs.com`
+  const alt_url_3 = `https://${cidV1}.ipfs.dweb.link` */
+
+  const handleCopyHash = useCopyToClipboardAndNotify(website?.id || '')
+  const handleCopyUrl = useCopyToClipboardAndNotify(defaultUrl)
+  const handleCopyIpfsUrl = useCopyToClipboardAndNotify(`ipfs://${cidV1}` || '')
+  const handleCopyVolumeHash = useCopyToClipboardAndNotify(refVolume?.id || '')
+  const handleCopyCIDv0 = useCopyToClipboardAndNotify(
+    refVolume?.item_hash || '',
+  )
+  const handleCopyCIDv1 = useCopyToClipboardAndNotify(cidV1 ?? '')
+
+  // -------------
+
+  const state = useNewWebsitePage()
+  const theme = useTheme()
+  const cid = state.values.website?.cid
+
+  useEffect(() => {
+    if (!cid) return
+    handleUpdate(cid as string)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cid, handleUpdate])
+
   return {
     website,
     refVolume,
     historyVolumes,
-    handleCopyHash,
+    cidV1,
+    defaultUrl,
+    theme,
+    state,
     handleDelete,
     handleUpdate,
+    handleCopyHash,
+    handleCopyUrl,
+    handleCopyIpfsUrl,
+    handleCopyVolumeHash,
+    handleCopyCIDv0,
+    handleCopyCIDv1,
     //handleDownload
   }
 }

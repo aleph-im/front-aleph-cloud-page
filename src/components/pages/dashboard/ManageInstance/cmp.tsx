@@ -19,7 +19,6 @@ export default function ManageInstance() {
     handleCopyConnect,
     handleCopyIpv6,
     handleDelete,
-    copyAndNotify,
     mappedKeys,
   } = useManageInstance()
 
@@ -259,12 +258,7 @@ export default function ManageInstance() {
                   Linked Storage(s)
                 </TextGradient>
 
-                <VolumeList
-                  {...{
-                    volumes,
-                    copyAndNotify,
-                  }}
-                />
+                <VolumeList {...{ volumes }} />
               </>
             )}
           </NoisyContainer>

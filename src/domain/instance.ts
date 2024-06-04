@@ -209,6 +209,7 @@ export class InstanceManager
     account?: SuperfluidAccount,
   ): Promise<void> {
     let instance: Instance | undefined
+
     if (typeof instanceOrId !== 'string') {
       instance = instanceOrId
       instanceOrId = instance.id

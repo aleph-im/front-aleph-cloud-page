@@ -1,7 +1,7 @@
-import { useRouter } from 'next/router'
 import { useCallback } from 'react'
+import { useRouter } from 'next/router'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 import { SSHKey } from '@/domain/ssh'
-import { useCopyToClipboardAndNotify } from '@/hooks/common/useCopyToClipboard'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { useAppState } from '@/contexts/appState'
 import { useRequestSSHKeys } from '@/hooks/common/useRequestEntity/useRequestSSHKeys'
@@ -28,18 +28,11 @@ export function useManageSSHKey(): ManageSSHKey {
   const { entities } = useRequestSSHKeys({ id: hash as string })
   const [sshKey] = entities || []
 
-  const [, copyAndNotify] = useCopyToClipboardAndNotify()
+  const handleCopyLabel = useCopyToClipboardAndNotify(sshKey?.label || '')
+  const handleCopyKey = useCopyToClipboardAndNotify(sshKey?.key || '')
 
   const manager = useSSHKeyManager()
   const { next, stop } = useCheckoutNotification({})
-
-  const handleCopyLabel = useCallback(() => {
-    copyAndNotify(sshKey?.label || '')
-  }, [copyAndNotify, sshKey])
-
-  const handleCopyKey = useCallback(() => {
-    copyAndNotify(sshKey?.key || '')
-  }, [copyAndNotify, sshKey])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
