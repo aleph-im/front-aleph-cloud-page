@@ -158,13 +158,6 @@ export function useManageWebsite(): ManageWebsite {
 
   const state = useNewWebsitePage()
   const theme = useTheme()
-  const cid = state.values.website?.cid
-
-  useEffect(() => {
-    if (!cid) return
-    handleUpdate(cid as string)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cid, handleUpdate])
 
   return {
     website,

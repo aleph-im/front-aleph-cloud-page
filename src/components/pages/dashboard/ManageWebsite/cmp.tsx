@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Label,
@@ -127,6 +127,13 @@ export function ManageWebsite() {
     handleCopyUrl,
     handleCopyVolumeHash,
   } = useManageWebsite()
+
+  const cid = state.values.website?.cid
+  useEffect(() => {
+    if (!cid) return
+    handleUpdate(cid as string)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cid])
 
   if (!website || !cidV1) {
     return (
