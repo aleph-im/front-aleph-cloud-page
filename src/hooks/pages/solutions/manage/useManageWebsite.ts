@@ -164,7 +164,7 @@ export function useManageWebsite(): ManageWebsite {
     if (!cid) return
     handleUpdate(cid as string)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cid, handleUpdate])
+  }, [cid])
 
   return {
     website,
