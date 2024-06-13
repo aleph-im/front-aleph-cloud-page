@@ -11,7 +11,7 @@ import {
 import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
-import { EntityManager } from './types'
+import { EntityManager, EntityManagerFetchOptions } from './types'
 import {
   newIsolatedVolumeSchema,
   newIsolatedVolumesSchema,
@@ -236,14 +236,15 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     protected channel = defaultVolumeChannel,
   ) {}
 
-  async getAll(
-    ids?: string[],
-    page?: number,
-    pageSize?: number,
-  ): Promise<Volume[]> {
+  async getAll({
+    ids,
+    page,
+    pageSize,
+    addresses = [this.account.address],
+  }: EntityManagerFetchOptions): Promise<Volume[]> {
     try {
       const response = await this.sdkClient.getMessages({
-        addresses: [this.account.address],
+        addresses,
         messageTypes: [MessageType.store],
         channels: [this.channel],
         hashes: ids,

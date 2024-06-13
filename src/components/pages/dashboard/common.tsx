@@ -14,5 +14,4 @@ export const Text = styled.span.attrs(addClasses('tp-body1 text-text'))``
 
 export const Container = styled(CenteredContainer).attrs((props) => ({
   ...props,
-  variant: 'dashboard',
 }))``

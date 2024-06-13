@@ -57,7 +57,7 @@ export const FunctionsTabContent = React.memo(
                           kind="functional"
                           variant="none"
                           size="sm"
-                          href={row.ref_url}
+                          href={row.refUrl}
                         >
                           <Icon name="file-code" size="lg" />
                         </ButtonLink>

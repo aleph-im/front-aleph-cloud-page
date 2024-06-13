@@ -73,7 +73,7 @@ export type Program = Omit<ProgramContent, 'type'> & {
   urlVM: string
   date: string
   size: number
-  ref_url: string
+  refUrl: string
   confirmed?: boolean
 }
 
@@ -323,7 +323,7 @@ export class ProgramManager
           urlVM: `${defaultVMURL}${message.item_hash}`,
           date: getDate(message.time),
           size,
-          ref_url: `/storage/volume/${message.content.code.ref}`,
+          refUrl: `/storage/volume/${message.content.code.ref}`,
           confirmed: !!message.confirmed,
         }
       })

@@ -298,7 +298,7 @@ export type Website = WebsiteAggregateItem & {
   name: string
   date: string
   size: number
-  ref_url: string
+  refUrl: string
   confirmed: boolean
 }
 
@@ -705,7 +705,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       updated_at: date,
       date,
       size: 0,
-      ref_url: `/storage/volume/${volume_id}`,
+      refUrl: `/storage/volume/${volume_id}`,
       confirmed: true,
     }
   }

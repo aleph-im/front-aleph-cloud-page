@@ -14,7 +14,7 @@ import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { NoisyContainer } from '@aleph-front/core'
 import Form from '@/components/form/Form'
 import { EntityDomainTypeName, EntityDomainType } from '@/helpers/constants'
-import { useNewDomainPage } from '@/hooks/pages/configure/useNewDomainPage'
+import { useNewDomainPage } from '@/hooks/pages/settings/useNewDomainPage'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 
 export default function NewDomain() {

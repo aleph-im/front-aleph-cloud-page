@@ -38,7 +38,7 @@ export type Domain = AddDomain & {
   updated_at: string
   date: string
   size: number
-  ref_url: string
+  refUrl: string
   confirmed?: boolean
 }
 
@@ -250,7 +250,9 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregate(response: any): Domain[] {
     const domains = response as DomainAggregate
-    return this.parseAggregateItems(domains)
+    return this.parseAggregateItems(domains).sort((a, b) =>
+      b.date.localeCompare(a.date),
+    )
   }
 
   // @todo: Type not exported from SDK...
@@ -293,7 +295,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       updated_at: date,
       date,
       size: 0,
-      ref_url: `/${ref_path}/${message_id}`,
+      refUrl: `/${ref_path}/${message_id}`,
     }
 
     return domain

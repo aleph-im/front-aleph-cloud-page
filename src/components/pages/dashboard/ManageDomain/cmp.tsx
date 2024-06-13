@@ -12,6 +12,7 @@ import { useManageDomain } from '@/hooks/pages/solutions/manage/useManageDomain'
 import { ellipseAddress } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import ButtonLink from '@/components/common/ButtonLink'
+import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 
 export default function ManageDomain() {
   const {
@@ -63,7 +64,7 @@ export default function ManageDomain() {
                 variant="tertiary"
                 size="md"
                 onClick={() =>
-                  router.push(`/configure/domain/new/?name=${domain.id}`)
+                  router.push(`/settings/domain/new/?name=${domain.id}`)
                 }
               >
                 Update
@@ -302,20 +303,13 @@ export default function ManageDomain() {
           </NoisyContainer>
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/configure/domain/new">
+            <ButtonLink variant="primary" href="/settings/domain/new">
               Add new domain
             </ButtonLink>
           </div>
-
-          <p tw="my-24 text-center">
-            Acquire aleph.im tokens for versatile access to resources within a
-            defined duration. These tokens remain in your wallet without being
-            locked or consumed, providing you with flexibility in utilizing
-            aleph.im&apos;s infrastructure. If you choose to remove the tokens
-            from your wallet, the allocated resources will be efficiently
-            reclaimed. Feel free to use or hold the tokens according to your
-            needs, even when not actively using Aleph.im&apos;s resources.
-          </p>
+        </Container>
+        <Container>
+          <HoldTokenDisclaimer />
         </Container>
       </section>
     </>

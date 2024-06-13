@@ -1,28 +1,10 @@
-import { useState } from 'react'
-import styled from 'styled-components'
-import { Tabs } from '@aleph-front/core'
-import CenteredContainer from '@/components/common/CenteredContainer'
 import React from 'react'
-import SSHKeysTabContent from '../SSHKeysTabContent'
-import FunctionsTabContent from '../FunctionsTabContent'
-import InstancesTabContent from '../InstancesTabContent'
-import VolumesTabContent from '../VolumesTabContent'
-import WebsitesTabContent from '../WebsitesTabContent'
-import AllTabContent from '../AllTabContent'
+import { Icon } from '@aleph-front/core'
 import { useDashboardPage } from '@/hooks/pages/solutions/useDashboardPage'
-import DomainsTabContent from '../DomainsTabContent'
 import { useSPARedirect } from '@/hooks/common/useSPARedirect'
-
-const Container = styled(CenteredContainer).attrs((props) => ({
-  ...props,
-  variant: 'dashboard',
-}))``
-
-function getLabel(entities: unknown[], beta = false): string {
-  const n = entities.length > 0 ? `(${entities.length})` : ''
-  const b = beta ? 'BETA ' : ''
-  return `${b}${n}`
-}
+import { SectionTitle } from '@/components/common/CompositeTitle'
+import Container from '@/components/common/CenteredContainer'
+import EntityCard from '@/components/common/EntityCard'
 
 export default function DashboardPage() {
   useSPARedirect()
@@ -30,94 +12,85 @@ export default function DashboardPage() {
   const { all, programs, instances, volumes, sshKeys, domains, websites } =
     useDashboardPage()
 
-  const [tabId, setTabId] = useState('all')
-
   return (
     <>
       <Container $variant="xl">
-        <div tw="py-10">
-          <Tabs
-            selected={tabId}
-            tabs={[
-              {
-                id: 'all',
-                name: 'All',
-                label: { label: getLabel(all), position: 'bottom' },
-              },
-              {
-                id: 'website',
-                name: 'Websites',
-                label: { label: getLabel(websites, true), position: 'top' },
-              },
-              {
-                id: 'function',
-                name: 'Functions',
-                label: { label: getLabel(programs), position: 'bottom' },
-              },
-              {
-                id: 'instance',
-                name: 'Instances',
-                label: { label: getLabel(instances, true), position: 'top' },
-              },
-              {
-                id: 'volume',
-                name: 'Volumes',
-                label: { label: getLabel(volumes), position: 'bottom' },
-              },
-              {
-                id: 'domain',
-                name: 'Domains',
-                label: { label: getLabel(domains, true), position: 'top' },
-              },
-              {
-                id: 'ssh',
-                name: 'SSH Keys',
-                label: { label: getLabel(sshKeys, true), position: 'top' },
-              },
-            ]}
-            onTabChange={setTabId}
-          />
-        </div>
-        <div role="tabpanel">
-          {tabId === 'all' ? (
-            <AllTabContent data={all} />
-          ) : tabId === 'function' ? (
-            <FunctionsTabContent
-              data={programs.sort((a, b) => b.date.localeCompare(a.date))}
-            />
-          ) : tabId === 'instance' ? (
-            <InstancesTabContent
-              data={instances.sort((a, b) => b.date.localeCompare(a.date))}
-            />
-          ) : tabId === 'website' ? (
-            <WebsitesTabContent
-              data={websites.sort((a, b) => b.date.localeCompare(a.date))}
-            />
-          ) : tabId === 'volume' ? (
-            <VolumesTabContent
-              data={volumes.sort((a, b) => b.date.localeCompare(a.date))}
-            />
-          ) : tabId === 'ssh' ? (
-            <SSHKeysTabContent
-              data={sshKeys.sort((a, b) => b.date.localeCompare(a.date))}
-            />
-          ) : tabId === 'domain' ? (
-            <DomainsTabContent
-              data={domains.sort((a, b) => b.date.localeCompare(a.date))}
-            />
-          ) : (
-            <></>
-          )}
-        </div>
-        <p tw="my-24 text-center">
-          Acquire aleph.im tokens for versatile access to resources within a
-          defined duration. These tokens remain in your wallet without being
-          locked or consumed, providing you with flexibility in utilizing
-          aleph.im&apos;s infrastructure. If you choose to remove the tokens
-          from your wallet, the allocated resources will be efficiently
-          reclaimed. Feel free to use or hold the tokens according to your
-          needs, even when not actively using Aleph.im&apos;s resources.
-        </p>
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <SectionTitle number="1">
+            Computing <Icon name="settings" color="main0" />
+          </SectionTitle>
+          <div tw="mt-3 flex gap-6 items-stretch">
+            <EntityCard
+              title="functions"
+              img="Object10"
+              link="/computing/function/new"
+              entity="function"
+            >
+              An isolated environment created for a function to execute in
+              response to an event and can run in two modes: on-demand or
+              persistent.
+            </EntityCard>
+            <EntityCard
+              title="instance"
+              img="Object11"
+              link="/computing/instance/new"
+              entity="instance"
+            >
+              A virtual machine that runs on a Aleph.im&apos;s infrastructure
+              and can be configured with CPUs, memory, storage, and networking
+            </EntityCard>
+            <EntityCard
+              title="confidential VM"
+              img="Object9"
+              link="#"
+              entity="confidential"
+            >
+              A virtual machine running for an extended period with their
+              memory, storage, and execution fully encrypted and isolated from
+              the host.
+            </EntityCard>
+          </div>
+        </section>
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <SectionTitle number="2">Storage</SectionTitle>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum
+            dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula
+            in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante
+            non elit. 
+          </p>
+          <div tw="mt-3 flex gap-6 items-stretch">
+            <EntityCard
+              title="functions"
+              img="Object10"
+              link="/computing/function/new"
+              entity="function"
+            >
+              An isolated environment created for a function to execute in
+              response to an event and can run in two modes: on-demand or
+              persistent.
+            </EntityCard>
+            <EntityCard
+              title="instance"
+              img="Object11"
+              link="/computing/instance/new"
+              entity="instance"
+            >
+              A virtual machine that runs on a Aleph.im&apos;s infrastructure
+              and can be configured with CPUs, memory, storage, and networking
+            </EntityCard>
+            <EntityCard
+              title="confidential VM"
+              img="Object9"
+              link="#"
+              entity="confidential"
+            >
+              A virtual machine running for an extended period with their
+              memory, storage, and execution fully encrypted and isolated from
+              the host.
+            </EntityCard>
+          </div>
+        </section>
       </Container>
     </>
   )

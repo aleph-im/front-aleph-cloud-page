@@ -23,6 +23,11 @@ export function useRoutes(): UseRoutesReturn {
                 href: '/',
                 exact: true,
               },
+              {
+                name: 'Settings',
+                href: '/settings',
+                exact: true,
+              },
             ],
           },
           {
@@ -31,7 +36,7 @@ export function useRoutes(): UseRoutesReturn {
             children: [
               {
                 name: 'Websites',
-                href: '/hosting/website/new',
+                href: '/hosting/website',
               },
             ],
           },
@@ -41,15 +46,15 @@ export function useRoutes(): UseRoutesReturn {
             children: [
               {
                 name: 'Functions',
-                href: '/computing/function/new',
+                href: '/computing/function',
               },
               {
                 name: 'Instances',
-                href: '/computing/instance/new',
+                href: '/computing/instance',
               },
               {
                 name: 'Confidential',
-                href: '/computing/confidential/new',
+                href: '/computing/confidential',
                 disabled: true,
               },
             ],
@@ -59,22 +64,8 @@ export function useRoutes(): UseRoutesReturn {
             href: '/storage',
             children: [
               {
-                name: 'Immutable volumes',
-                href: '/storage/volume/new',
-              },
-            ],
-          },
-          {
-            name: 'Configure',
-            href: '/configure',
-            children: [
-              {
-                name: 'Custom domains',
-                href: '/configure/domain/new',
-              },
-              {
-                name: 'SSH keys',
-                href: '/configure/ssh/new',
+                name: 'Volumes',
+                href: '/storage',
               },
             ],
           },

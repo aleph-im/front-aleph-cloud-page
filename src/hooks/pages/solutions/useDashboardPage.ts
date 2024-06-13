@@ -42,7 +42,7 @@ export function useDashboardPage(): UseDashboardPageReturn {
             entity.type === EntityType.Domain ||
             entity.type === EntityType.Program ||
             entity.type === EntityType.Website
-              ? entity.ref_url
+              ? entity.refUrl
               : entity.url
 
           return {
