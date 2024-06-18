@@ -1,4 +1,4 @@
-import { TooltipProps } from '@aleph-front/core'
+import { IconSize, TooltipProps } from '@aleph-front/core'
 import { ReactNode } from 'react'
 
 export type InfoTooltipButtonProps = Omit<TooltipProps, 'targetRef'> & {
@@ -6,5 +6,6 @@ export type InfoTooltipButtonProps = Omit<TooltipProps, 'targetRef'> & {
   tooltipContent: ReactNode
   plain?: boolean
   align?: 'left' | 'right'
-  vAlign?: 'top' | 'center'
+  vAlign?: 'top' | 'center' | 'bottom'
+  iconSize?: IconSize
 }
