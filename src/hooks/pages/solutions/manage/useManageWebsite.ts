@@ -45,7 +45,7 @@ export function useManageWebsite(): ManageWebsite {
   const router = useRouter()
   const { hash } = router.query
 
-  const { entities } = useRequestWebsites({ id: hash as string })
+  const { entities } = useRequestWebsites({ ids: hash as string })
   const [website] = entities || []
 
   const refVolume = useHashToEntity(website?.volume_id) as Volume

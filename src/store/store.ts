@@ -55,6 +55,9 @@ export type StoreState = {
   program: EntityState<Program>
   volume: EntityState<Volume>
   website: EntityState<Website>
+
+  programVolume: EntityState<Volume>
+  instanceVolume: EntityState<Volume>
 }
 
 export const storeReducer = mergeReducers<StoreState>({
@@ -66,6 +69,10 @@ export const storeReducer = mergeReducers<StoreState>({
   program: getEntityReducer<Program>('program', 'id'),
   volume: getEntityReducer<Volume>('volume', 'id'),
   website: getEntityReducer<Website>('website', 'id'),
+
+  // @note: refactor this entities
+  programVolume: getEntityReducer<Volume>('programVolume', 'id'),
+  instanceVolume: getEntityReducer<Volume>('instanceVolume', 'id'),
 })
 
 export const storeInitialState: StoreState = getInitialState(storeReducer)

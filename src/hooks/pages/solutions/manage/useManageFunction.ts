@@ -27,7 +27,7 @@ export function useManageFunction(): ManageFunction {
   const router = useRouter()
   const { hash } = router.query
 
-  const { entities } = useRequestPrograms({ id: hash as string })
+  const { entities } = useRequestPrograms({ ids: hash as string })
   const [program] = entities || []
 
   const handleCopyHash = useCopyToClipboardAndNotify(program?.id || '')

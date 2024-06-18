@@ -40,7 +40,7 @@ export function useManageDomain(): ManageDomain {
   const router = useRouter()
   const { hash } = router.query
 
-  const { entities } = useRequestDomains({ id: hash as string })
+  const { entities } = useRequestDomains({ ids: hash as string })
   const [domain] = entities || []
 
   const refEntity = useHashToEntity(domain?.ref) as

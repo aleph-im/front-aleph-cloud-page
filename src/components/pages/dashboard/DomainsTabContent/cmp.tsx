@@ -8,7 +8,10 @@ import IconText from '@/components/common/IconText'
 import { Text } from '../common'
 import { EntityDomainTypeName } from '@/helpers/constants'
 
-export const DomainsTabContent = ({ data }: DomainsTabContentProps) => {
+export const DomainsTabContent = ({
+  data,
+  cta = true,
+}: DomainsTabContentProps) => {
   return (
     <>
       <NoisyContainer>
@@ -72,11 +75,13 @@ export const DomainsTabContent = ({ data }: DomainsTabContentProps) => {
           />
         </div>
       </NoisyContainer>
-      <div tw="mt-10 text-center">
-        <ButtonLink variant="primary" href="/settings/domain/new">
-          <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new domain
-        </ButtonLink>
-      </div>
+      {cta && (
+        <div tw="mt-10 text-center">
+          <ButtonLink variant="primary" href="/settings/domain/new">
+            <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new domain
+          </ButtonLink>
+        </div>
+      )}
     </>
   )
 }

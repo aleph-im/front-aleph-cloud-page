@@ -1,18 +1,16 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { NoisyContainer, Tabs, TextGradient } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
 import CardWithSideImage from '@/components/common/CardWithSideImage'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import ButtonLink from '@/components/common/ButtonLink'
-import { useInstanceDashboardPage } from '@/hooks/pages/computing/useInstanceDashboardPage'
+import { useWebsiteDashboardPage } from '@/hooks/pages/hosting/useWebsiteDashboardPage'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
-import InstancesTabContent from '../../dashboard/InstancesTabContent'
-import VolumesTabContent from '../../dashboard/VolumesTabContent'
+import WebsitesTabContent from '../../dashboard/WebsitesTabContent'
 import DomainsTabContent from '../../dashboard/DomainsTabContent'
 
-export default function InstanceDashboardPage() {
-  const { tabs, tabId, setTabId, instances, volumes, domains } =
-    useInstanceDashboardPage()
+function WebsiteDashboardPage() {
+  const { tabs, tabId, setTabId, websites, domains } = useWebsiteDashboardPage()
 
   return (
     <>
@@ -20,26 +18,26 @@ export default function InstanceDashboardPage() {
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
       </Container>
       <div role="tabpanel">
-        {tabId === 'instance' ? (
+        {tabId === 'website' ? (
           <>
-            {!!instances.length && (
+            {!!websites.length && (
               <Container $variant="xl" tw="my-10">
-                <InstancesTabContent data={instances} />
+                <WebsitesTabContent data={websites} />
               </Container>
             )}
             <NoisyContainer type="grain-1" tw="py-20">
               <Container $variant="xl">
                 <CardWithSideImage
-                  imageSrc="/img/dashboard/instance.svg"
-                  imageAlt="Instance ilustration"
+                  imageSrc="/img/dashboard/website.svg"
+                  imageAlt="Website ilustration"
                   imagePosition="left"
                   cardBackgroundColor="bg-white"
                   reverseColumnsWhenStacked={false}
                 >
                   <div tw="h-[16rem]">
-                    <div className="tp-info text-main0">WHAT IS AN...</div>
+                    <div className="tp-info text-main0">HOW TO...</div>
                     <TextGradient as="h2" type="h3">
-                      Instance
+                      Create your Website!
                     </TextGradient>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     Cras rutrum dignissim elit, ut maximus justo congue at.
@@ -50,9 +48,9 @@ export default function InstanceDashboardPage() {
                     <ButtonLink
                       variant="primary"
                       size="md"
-                      href="/computing/instance/new"
+                      href="/hosting/website/new"
                     >
-                      Create instance
+                      Create your website
                     </ButtonLink>
                     <ExternalLinkButton href="https://docs.aleph.im/computing/#persistent-execution">
                       Learn more
@@ -61,14 +59,6 @@ export default function InstanceDashboardPage() {
                 </CardWithSideImage>
               </Container>
             </NoisyContainer>
-          </>
-        ) : tabId === 'volume' ? (
-          <>
-            {!!volumes.length && (
-              <Container $variant="xl" tw="my-10">
-                <VolumesTabContent data={volumes} cta={false} />
-              </Container>
-            )}
           </>
         ) : tabId === 'domain' ? (
           <>
@@ -88,3 +78,5 @@ export default function InstanceDashboardPage() {
     </>
   )
 }
+
+export default memo(WebsiteDashboardPage)

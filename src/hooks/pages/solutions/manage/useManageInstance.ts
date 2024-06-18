@@ -46,7 +46,7 @@ export function useManageInstance(): ManageInstance {
   const router = useRouter()
   const { hash } = router.query
 
-  const { entities } = useRequestInstances({ id: hash as string })
+  const { entities } = useRequestInstances({ ids: hash as string })
   const [instance] = entities || []
 
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])

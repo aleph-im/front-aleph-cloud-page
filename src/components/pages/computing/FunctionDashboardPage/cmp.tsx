@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { NoisyContainer, Tabs, TextGradient } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
 import CardWithSideImage from '@/components/common/CardWithSideImage'
@@ -8,9 +8,10 @@ import { useFunctionDashboardPage } from '@/hooks/pages/computing/useFunctionDas
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import FunctionsTabContent from '../../dashboard/FunctionsTabContent'
 import VolumesTabContent from '../../dashboard/VolumesTabContent'
+import DomainsTabContent from '../../dashboard/DomainsTabContent'
 
-export default function FunctionDashboardPage() {
-  const { tabs, tabId, setTabId, programs, volumes } =
+function FunctionDashboardPage() {
+  const { tabs, tabId, setTabId, programs, volumes, domains } =
     useFunctionDashboardPage()
 
   return (
@@ -66,7 +67,15 @@ export default function FunctionDashboardPage() {
           <>
             {!!volumes.length && (
               <Container $variant="xl" tw="my-10">
-                <VolumesTabContent data={volumes} />
+                <VolumesTabContent data={volumes} cta={false} />
+              </Container>
+            )}
+          </>
+        ) : tabId === 'domain' ? (
+          <>
+            {!!domains.length && (
+              <Container $variant="xl" tw="my-10">
+                <DomainsTabContent data={domains} cta={false} />
               </Container>
             )}
           </>
@@ -80,3 +89,5 @@ export default function FunctionDashboardPage() {
     </>
   )
 }
+
+export default memo(FunctionDashboardPage)

@@ -6,7 +6,10 @@ import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
 
-export const VolumesTabContent = ({ data }: VolumesTabContentProps) => {
+export const VolumesTabContent = ({
+  data,
+  cta = true,
+}: VolumesTabContentProps) => {
   return (
     <>
       <NoisyContainer>
@@ -58,11 +61,13 @@ export const VolumesTabContent = ({ data }: VolumesTabContentProps) => {
           />
         </div>
       </NoisyContainer>
-      <div tw="mt-10 text-center">
-        <ButtonLink variant="primary" href="/storage/volume/new">
-          <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new volume
-        </ButtonLink>
-      </div>
+      {cta && (
+        <div tw="mt-10 text-center">
+          <ButtonLink variant="primary" href="/storage/volume/new">
+            <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new volume
+          </ButtonLink>
+        </div>
+      )}
     </>
   )
 }

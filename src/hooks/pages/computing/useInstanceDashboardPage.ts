@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 import { TabsProps } from '@aleph-front/core'
-import { Program } from '@/domain/program'
-import { useRequestPrograms } from '@/hooks/common/useRequestEntity/useRequestPrograms'
+import { Instance } from '@/domain/instance'
+import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
 import { Volume } from '@/domain/volume'
-import { useRequestProgramVolumes } from '@/hooks/common/useRequestEntity/useRequestProgramVolumes'
-import { useRequestProgramDomains } from '@/hooks/common/useRequestEntity/useRequestProgramDomains'
+import { useRequestInstanceVolumes } from '@/hooks/common/useRequestEntity/useRequestInstanceVolumes'
+import { useRequestInstanceDomains } from '@/hooks/common/useRequestEntity/useRequestInstanceDomains'
 import { Domain } from '@/domain/domain'
 
-export type UseFunctionDashboardPageReturn = {
-  programs: Program[]
+export type UseInstanceDashboardPageReturn = {
+  instances: Instance[]
   volumes: Volume[]
   domains: Domain[]
   tabs: TabsProps['tabs']
@@ -22,19 +22,19 @@ function getLabel(entities: unknown[], beta = false): string {
   return `${b}${n}`
 }
 
-export function useFunctionDashboardPage(): UseFunctionDashboardPageReturn {
-  const { entities: programs = [] } = useRequestPrograms()
-  const { entities: volumes = [] } = useRequestProgramVolumes()
-  const { entities: domains = [] } = useRequestProgramDomains()
+export function useInstanceDashboardPage(): UseInstanceDashboardPageReturn {
+  const { entities: instances = [] } = useRequestInstances()
+  const { entities: volumes = [] } = useRequestInstanceVolumes()
+  const { entities: domains = [] } = useRequestInstanceDomains()
 
-  const [tabId, setTabId] = useState('program')
+  const [tabId, setTabId] = useState('instance')
 
   const tabs: TabsProps['tabs'] = useMemo(() => {
     return [
       {
-        id: 'program',
-        name: 'Functions',
-        label: { label: getLabel(programs), position: 'bottom' },
+        id: 'instance',
+        name: 'Instances',
+        label: { label: getLabel(instances), position: 'bottom' },
       },
       {
         id: 'volume',
@@ -49,10 +49,10 @@ export function useFunctionDashboardPage(): UseFunctionDashboardPageReturn {
         disabled: !domains.length,
       },
     ]
-  }, [domains, programs, volumes])
+  }, [domains, instances, volumes])
 
   return {
-    programs,
+    instances,
     volumes,
     domains,
     tabs,

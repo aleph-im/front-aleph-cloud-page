@@ -25,7 +25,7 @@ export function useManageVolume(): ManageVolume {
   const router = useRouter()
   const { hash } = router.query
 
-  const { entities } = useRequestVolumes({ id: hash as string })
+  const { entities } = useRequestVolumes({ ids: hash as string })
   const [volume] = entities || []
 
   const manager = useVolumeManager()

@@ -5,6 +5,7 @@ export interface EntityManagerFetchOptions {
   page?: number
   pageSize?: number
   addresses?: string[]
+  channels?: string[]
 }
 
 export interface EntityManager<T, AT> {

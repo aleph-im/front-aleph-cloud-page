@@ -20,7 +20,8 @@ if (isGithubActions) {
 const nextConfig = {
   assetPrefix,
   basePath,
-  reactStrictMode: true,
+  // reactStrictMode: true,
+  reactStrictMode: false,
   images: {
     unoptimized: true,
   },

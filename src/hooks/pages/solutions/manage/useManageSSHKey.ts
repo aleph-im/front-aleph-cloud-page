@@ -25,7 +25,7 @@ export function useManageSSHKey(): ManageSSHKey {
   const router = useRouter()
   const { hash } = router.query
 
-  const { entities } = useRequestSSHKeys({ id: hash as string })
+  const { entities } = useRequestSSHKeys({ ids: hash as string })
   const [sshKey] = entities || []
 
   const handleCopyLabel = useCopyToClipboardAndNotify(sshKey?.label || '')

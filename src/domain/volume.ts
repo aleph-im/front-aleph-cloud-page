@@ -240,14 +240,17 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     ids,
     page,
     pageSize,
-    addresses = [this.account.address],
-  }: EntityManagerFetchOptions): Promise<Volume[]> {
+    addresses = !ids ? [this.account.address] : undefined,
+    channels = !ids ? [this.channel] : undefined,
+  }: EntityManagerFetchOptions = {}): Promise<Volume[]> {
     try {
+      console.log('0000--', ids)
+
       const response = await this.sdkClient.getMessages({
-        addresses,
         messageTypes: [MessageType.store],
-        channels: [this.channel],
         hashes: ids,
+        addresses,
+        channels,
         page,
         pageSize,
       })
