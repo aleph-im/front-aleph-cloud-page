@@ -1,7 +1,11 @@
 import React from 'react'
-import { NoisyContainer, Tabs, TextGradient } from '@aleph-front/core'
+import {
+  CardWithSideImage,
+  NoisyContainer,
+  Tabs,
+  TextGradient,
+} from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
-import CardWithSideImage from '@/components/common/CardWithSideImage'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import ButtonLink from '@/components/common/ButtonLink'
 import { useFunctionDashboardPage } from '@/hooks/pages/computing/useFunctionDashboardPage'
@@ -29,34 +33,33 @@ export default function FunctionDashboardPage() {
             <NoisyContainer type="grain-1" tw="py-20">
               <Container $variant="xl">
                 <CardWithSideImage
-                  imageSrc="/img/dashboard/function.svg"
-                  imageAlt="Function ilustration"
-                  imagePosition="left"
+                  imageSrc="/img/dashboard/instance.svg"
+                  imageAlt="Instance illustration"
                   cardBackgroundColor="bg-white"
-                  reverseColumnsWhenStacked={false}
                 >
-                  <div tw="h-[16rem]">
-                    <div className="tp-info text-main0">WHAT IS A...</div>
-                    <TextGradient as="h2" type="h3">
-                      Functions
-                    </TextGradient>
-                    Basicly, serverless computing at your fingertips (Lambda).
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Cras rutrum dignissim elit, ut maximus justo congue at.
-                    Nulla lobortis, ligula in tempus tincidunt, eros nulla
-                    congue sapien, ac aliquet mi ante non elit. 
-                  </div>
-                  <div tw="mt-6 flex items-center justify-between">
-                    <ButtonLink
-                      variant="primary"
-                      size="md"
-                      href="/computing/function/new"
-                    >
-                      Create function
-                    </ButtonLink>
-                    <ExternalLinkButton href="https://docs.aleph.im/computing/#persistent-execution">
-                      Learn more
-                    </ExternalLinkButton>
+                  <div tw="flex flex-col gap-16">
+                    <div>
+                      <div className="tp-info text-main0">WHAT IS AN...</div>
+                      <TextGradient as="h2" type="h3">
+                        Instance
+                      </TextGradient>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                      Cras rutrum dignissim elit, ut maximus justo congue at.
+                      Nulla lobortis, ligula in tempus tincidunt, eros nulla
+                      congue sapien, ac aliquet mi ante non elit.
+                    </div>
+                    <div tw="mt-6 flex flex-wrap items-center justify-between gap-6">
+                      <ButtonLink
+                        variant="primary"
+                        size="md"
+                        href="/computing/function/new"
+                      >
+                        Create instance
+                      </ButtonLink>
+                      <ExternalLinkButton href="https://docs.aleph.im/computing/#persistent-execution">
+                        Learn more
+                      </ExternalLinkButton>
+                    </div>
                   </div>
                 </CardWithSideImage>
               </Container>

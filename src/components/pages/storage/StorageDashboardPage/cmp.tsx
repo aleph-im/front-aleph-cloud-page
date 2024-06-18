@@ -1,7 +1,11 @@
 import React from 'react'
-import { NoisyContainer, Tabs, TextGradient } from '@aleph-front/core'
+import {
+  CardWithSideImage,
+  NoisyContainer,
+  Tabs,
+  TextGradient,
+} from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
-import CardWithSideImage from '@/components/common/CardWithSideImage'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import ButtonLink from '@/components/common/ButtonLink'
 import { useStorageDashboardPage } from '@/hooks/pages/storage/useStorageDashboardPage'
@@ -33,18 +37,20 @@ export default function StorageDashboardPage() {
                   cardBackgroundColor="bg-white"
                   reverseColumnsWhenStacked={false}
                 >
-                  <div>
-                    <div className="tp-info text-main0">HOW DOES IT WORK?</div>
-                    <TextGradient as="h2" type="h3">
-                      Storage
-                    </TextGradient>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Cras rutrum dignissim elit, ut maximus justo congue at.
-                    Nulla lobortis, ligula in tempus tincidunt, eros nulla
-                    congue sapien, ac aliquet mi ante non elit. 
-                  </div>
-                  <div tw="mt-6 flex items-center justify-between">
-                    {!volumes.length && (
+                  <div tw="flex flex-col gap-16">
+                    <div>
+                      <div className="tp-info text-main0">
+                        HOW DOES IT WORK?
+                      </div>
+                      <TextGradient as="h2" type="h3">
+                        Storage
+                      </TextGradient>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                      Cras rutrum dignissim elit, ut maximus justo congue at.
+                      Nulla lobortis, ligula in tempus tincidunt, eros nulla
+                      congue sapien, ac aliquet mi ante non elit.
+                    </div>
+                    <div tw="mt-6 flex flex-wrap items-center justify-between gap-6">
                       <ButtonLink
                         variant="primary"
                         size="md"
@@ -52,8 +58,10 @@ export default function StorageDashboardPage() {
                       >
                         Create new volume
                       </ButtonLink>
-                    )}
-                    <ExternalLinkButton href="#">Learn more</ExternalLinkButton>
+                      <ExternalLinkButton href="#">
+                        Learn more
+                      </ExternalLinkButton>
+                    </div>
                   </div>
                 </CardWithSideImage>
               </Container>
