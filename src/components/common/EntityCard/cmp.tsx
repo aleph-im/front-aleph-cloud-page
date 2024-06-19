@@ -72,28 +72,26 @@ export const EntityCard = ({
     switch (type) {
       case 'active':
         return (
-          <div tw="flex flex-col items-center justify-center">
-            <div tw="relative">
-              {isComingSoon && (
-                <p className="tp-info" tw="absolute top-0 right-0 -mr-3 -mt-2">
-                  &#40;SOON&#41;
-                </p>
-              )}
-              {titleTooltip ? (
-                <InfoTooltipButton
-                  plain
-                  my="top-left"
-                  at="top-right"
-                  vAlign="bottom"
-                  iconSize="0.8em"
-                  tooltipContent={titleTooltip}
-                >
-                  {titleElement}
-                </InfoTooltipButton>
-              ) : (
-                titleElement
-              )}
-            </div>
+          <div tw="flex flex-col items-center justify-center relative">
+            {isComingSoon && (
+              <p className="tp-info" tw="absolute top-0 right-0 -mr-3 -mt-2">
+                &#40;SOON&#41;
+              </p>
+            )}
+            {titleTooltip ? (
+              <InfoTooltipButton
+                plain
+                my="top-left"
+                at="top-right"
+                vAlign="bottom"
+                iconSize="0.8em"
+                tooltipContent={titleTooltip}
+              >
+                {titleElement}
+              </InfoTooltipButton>
+            ) : (
+              titleElement
+            )}
           </div>
         )
       case 'introduction':
