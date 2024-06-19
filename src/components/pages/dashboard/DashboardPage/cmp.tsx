@@ -61,8 +61,36 @@ export default function DashboardPage() {
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <SectionTitle number="0">Currently running</SectionTitle>
           <div tw="mt-3 flex gap-6 items-stretch flex-wrap">
-            <EntitySummaryCard title="functions" img="Object10" running={1} />
-            <EntitySummaryCard title="instances" img="Object10" running={6} />
+            <EntitySummaryCard
+              items={[
+                {
+                  title: 'functions',
+                  img: 'Object10',
+                  information: {
+                    type: 'computing',
+                    data: {
+                      running: 1,
+                    },
+                  },
+                },
+              ]}
+            />
+            {/* <EntitySummaryCard title="functions" img="Object10" running={1} />
+            <EntitySummaryCard title="instances" img="Object10" running={6} /> */}
+            <EntitySummaryCard
+              items={[
+                {
+                  title: 'instances',
+                  img: 'Object11',
+                  information: {
+                    type: 'computing',
+                    data: {
+                      running: 6,
+                    },
+                  },
+                },
+              ]}
+            />
           </div>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">

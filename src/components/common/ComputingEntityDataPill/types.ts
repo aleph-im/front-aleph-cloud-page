@@ -1,6 +1,6 @@
 import { IconName } from '@aleph-front/core'
 
 export type ComputingEntityDataPillProps = {
-  value: number
+  value?: number
   icon?: IconName
 }

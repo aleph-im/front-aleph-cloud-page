@@ -5,6 +5,7 @@ import { useStorageDashboardPage } from '@/hooks/pages/storage/useStorageDashboa
 import VolumesTabContent from '../../dashboard/VolumesTabContent'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
+import EntitySummaryCard from '@/components/common/EntitySummaryCard'
 
 export default function StorageDashboardPage() {
   const { tabs, tabId, setTabId, volumes } = useStorageDashboardPage()
@@ -13,6 +14,55 @@ export default function StorageDashboardPage() {
     <>
       <Container $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
+      </Container>
+      <Container $variant="xl" tw="my-10 flex flex-wrap gap-6">
+        <EntitySummaryCard
+          size="md"
+          items={[
+            {
+              title: 'IMMUTABLE VOLUMES',
+              img: 'Object15',
+              buttonUrl: '/storage/volume/new',
+              information: {
+                type: 'storage',
+                data: { storage: 100.2, amount: 3 },
+              },
+            },
+          ]}
+        />
+        <EntitySummaryCard
+          size="md"
+          items={[
+            {
+              information: {
+                title: 'LINKED',
+                type: 'storage',
+                data: { storage: 100.2, amount: 3 },
+              },
+            },
+            {
+              information: {
+                title: 'UNLINKED',
+                type: 'storage',
+                data: { storage: 100.2, amount: 3 },
+              },
+            },
+          ]}
+        />
+        <EntitySummaryCard
+          size="md"
+          items={[
+            {
+              title: 'PERSISTENT STORAGE',
+              img: 'Object16',
+              buttonUrl: '/storage/volume/new',
+              information: {
+                type: 'storage',
+                data: { storage: 128, amount: 4 },
+              },
+            },
+          ]}
+        />
       </Container>
       <div role="tabpanel">
         {tabId === 'volume' ? (

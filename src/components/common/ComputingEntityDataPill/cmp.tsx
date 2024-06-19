@@ -5,7 +5,7 @@ import { Icon } from '@aleph-front/core'
 import { useTheme } from 'styled-components'
 
 export const ComputingEntityDataPill = ({
-  value,
+  value = 0,
   icon,
 }: ComputingEntityDataPillProps) => {
   const theme = useTheme()
