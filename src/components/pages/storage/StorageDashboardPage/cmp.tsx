@@ -8,14 +8,17 @@ import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSid
 import EntitySummaryCard from '@/components/common/EntitySummaryCard'
 
 export default function StorageDashboardPage() {
-  const { tabs, tabId, setTabId, volumes } = useStorageDashboardPage()
+  const { tabs, tabId, setTabId, volumes, volumesAggregatedStorage } =
+    useStorageDashboardPage()
+
+  const { linked, unlinked } = volumesAggregatedStorage
 
   return (
     <>
       <Container $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
       </Container>
-      <Container $variant="xl" tw="my-10 flex flex-wrap gap-6">
+      <Container $variant="xl" tw="my-10 flex flex-wrap gap-6 justify-center">
         <EntitySummaryCard
           size="md"
           items={[
@@ -25,7 +28,10 @@ export default function StorageDashboardPage() {
               buttonUrl: '/storage/volume/new',
               information: {
                 type: 'storage',
-                data: { storage: 100.2, amount: 3 },
+                data: {
+                  storage: volumesAggregatedStorage.totalStorage,
+                  amount: volumesAggregatedStorage.totalAmount,
+                },
               },
             },
           ]}
@@ -37,19 +43,19 @@ export default function StorageDashboardPage() {
               information: {
                 title: 'LINKED',
                 type: 'storage',
-                data: { storage: 100.2, amount: 3 },
+                data: { storage: linked.storage, amount: linked.amount },
               },
             },
             {
               information: {
                 title: 'UNLINKED',
                 type: 'storage',
-                data: { storage: 100.2, amount: 3 },
+                data: { storage: unlinked.storage, amount: unlinked.amount },
               },
             },
           ]}
         />
-        <EntitySummaryCard
+        {/* <EntitySummaryCard
           size="md"
           items={[
             {
@@ -58,11 +64,11 @@ export default function StorageDashboardPage() {
               buttonUrl: '/storage/volume/new',
               information: {
                 type: 'storage',
-                data: { storage: 128, amount: 4 },
+                data: { storage: 0, amount: 0 },
               },
             },
           ]}
-        />
+        /> */}
       </Container>
       <div role="tabpanel">
         {tabId === 'volume' ? (
