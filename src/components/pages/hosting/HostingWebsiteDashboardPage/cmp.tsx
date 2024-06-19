@@ -1,64 +1,10 @@
 import React from 'react'
-import {
-  CardWithSideImage,
-  NoisyContainer,
-  Tabs,
-  TextGradient,
-} from '@aleph-front/core'
+import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
-import ExternalLinkButton from '@/components/common/ExternalLinkButton'
-import ButtonLink from '@/components/common/ButtonLink'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import { useHostingWebsiteDashboardPage } from '@/hooks/pages/hosting/useHostingWebsiteDashboardPage'
 import WebsitesTabContent from '../../dashboard/WebsitesTabContent'
-
-const CardWithSideImageElement = ({
-  info,
-  title,
-  description,
-  imageSrc,
-  imageAlt,
-  buttonUrl,
-  buttonText,
-  externalLinkUrl,
-}: {
-  info: string
-  title: string
-  description: string
-  imageSrc: string
-  imageAlt: string
-  buttonUrl: string
-  buttonText: string
-  externalLinkUrl: string
-}) => (
-  <NoisyContainer type="grain-1" tw="py-20">
-    <Container $variant="xl">
-      <CardWithSideImage
-        imageSrc={imageSrc}
-        imageAlt={imageAlt}
-        cardBackgroundColor="bg-white"
-      >
-        <div tw="flex flex-col gap-16">
-          <div>
-            <div className="tp-info text-main0">{info}</div>
-            <TextGradient as="h2" type="h3">
-              {title}
-            </TextGradient>
-            {description}
-          </div>
-          <div tw="mt-6 flex flex-wrap items-center justify-between gap-6">
-            <ButtonLink variant="primary" size="md" href={buttonUrl}>
-              {buttonText}
-            </ButtonLink>
-            <ExternalLinkButton href={externalLinkUrl}>
-              Learn more
-            </ExternalLinkButton>
-          </div>
-        </div>
-      </CardWithSideImage>
-    </Container>
-  </NoisyContainer>
-)
+import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 
 export default function SettingsDashboardPage() {
   const { tabs, tabId, setTabId, websites } = useHostingWebsiteDashboardPage()
@@ -82,7 +28,7 @@ export default function SettingsDashboardPage() {
                 />
               </Container>
             )}
-            <CardWithSideImageElement
+            <DashboardCardWithSideImage
               imageSrc="/img/dashboard/web3hosting.svg"
               imageAlt="SSH Key illustration"
               info="HOW TO..."
