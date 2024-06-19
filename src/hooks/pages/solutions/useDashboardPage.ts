@@ -1,67 +1,100 @@
 import { useMemo } from 'react'
-import { AnyEntity, ellipseAddress } from '@/helpers/utils'
-import { EntityType } from '@/helpers/constants'
-import { Volume } from '@/domain/volume'
-import {
-  UseAccountEntitiesReturn,
-  useAccountEntities,
-} from '@/hooks/common/useAccountEntities'
+import { useAccountEntities } from '@/hooks/common/useAccountEntities'
+import { useRequestExecutableStatus } from '@/hooks/common/useRequestEntity/useRequestExecutableStatus'
+import { useAppState } from '@/contexts/appState'
+import { useSPARedirect } from '@/hooks/common/useSPARedirect'
 
-export type AnyEntityRow = {
-  id: string
-  type: EntityType
-  name: string
-  size: number
-  volume?: Volume
-  volume_id?: string
-  date?: string
-  updated_at?: string
-  url?: string
-  confirmed?: boolean
+export type AggregatedStatus = {
+  running: number
+  paused: number
+  booting: number
+  total: number
 }
 
-export type UseDashboardPageReturn = UseAccountEntitiesReturn & {
-  all: AnyEntityRow[]
+export type UseDashboardPageReturn = {
+  programAggregatedStatus: AggregatedStatus
+  instanceAggregatedStatus: AggregatedStatus
+  cardType: 'introduction' | 'active' | undefined
 }
 
 export function useDashboardPage(): UseDashboardPageReturn {
-  const entities = useAccountEntities()
+  useSPARedirect()
 
-  const all: AnyEntityRow[] = useMemo(() => {
-    return (
-      Object.values(entities)
-        .flatMap((entity) => entity as AnyEntity[])
-        .map((entity) => {
-          const { id, type, confirmed, date } = entity
-          const name =
-            (type !== EntityType.Volume
-              ? entity.name
-              : ellipseAddress(entity.id || '')) || `Unknown ${type}`
-          const size = entity.size || 0
-          const url =
-            entity.type === EntityType.Domain ||
-            entity.type === EntityType.Program ||
-            entity.type === EntityType.Website
-              ? entity.refUrl
-              : entity.url
+  const { programs, instances, ...entities } = useAccountEntities()
 
-          return {
-            id,
-            type,
-            name,
-            size,
-            date,
-            url,
-            confirmed,
-          } as AnyEntityRow
-        })
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .sort((a, b) => b.date!.localeCompare(a.date!))
+  const { status: programsStatus } = useRequestExecutableStatus({
+    entities: programs,
+  })
+
+  const { status: instancesStatus } = useRequestExecutableStatus({
+    entities: instances,
+  })
+
+  const programAggregatedStatus = useMemo(() => {
+    return programs.reduce(
+      (ac, cv) => {
+        const key = !cv.confirmed
+          ? 'booting'
+          : !!programsStatus[cv.id]?.data?.vm_ipv6
+            ? 'running'
+            : 'paused'
+
+        ac[key] += 1
+        ac.total += 1
+        return ac
+      },
+      {
+        running: 0,
+        paused: 0,
+        booting: 0,
+        total: 0,
+      },
     )
-  }, [entities])
+  }, [programsStatus, programs])
+
+  const instanceAggregatedStatus = useMemo(() => {
+    return instances.reduce(
+      (ac, cv) => {
+        const key = !cv.confirmed
+          ? 'booting'
+          : !!instancesStatus[cv.id]?.data?.vm_ipv6
+            ? 'running'
+            : 'paused'
+
+        ac[key] += 1
+        ac.total += 1
+        return ac
+      },
+      {
+        running: 0,
+        paused: 0,
+        booting: 0,
+        total: 0,
+      },
+    )
+  }, [instancesStatus, instances])
+
+  const noEntities = useMemo(() => {
+    return programAggregatedStatus.total + instanceAggregatedStatus.total === 0
+  }, [instanceAggregatedStatus.total, programAggregatedStatus.total])
+
+  const [state] = useAppState()
+  const { account } = state.connection
+
+  const userStage = useMemo(() => {
+    if (!account) return 'new'
+    if (noEntities) return 'new'
+
+    return 'active'
+  }, [account, noEntities])
+
+  const cardType = useMemo(() => {
+    return userStage === 'active' ? 'active' : 'introduction'
+  }, [userStage])
 
   return {
-    ...entities,
-    all,
+    programAggregatedStatus,
+    instanceAggregatedStatus,
+    cardType,
   }
 }

@@ -1,50 +1,50 @@
 import { useEffect, useState } from 'react'
-import { Instance, InstanceStatus } from '@/domain/instance'
+import { Executable, ExecutableStatus } from '@/domain/executable'
 import { RequestState } from '@aleph-front/core'
 import { useInstanceManager } from '../useManager/useInstanceManager'
 
-export type UseRequestInstanceStatusProps = {
-  instances?: Instance[]
+export type UseRequestExecutableStatusProps = {
+  entities?: Executable[]
 }
 
-export type UseRequestInstanceStatusReturn = {
-  status: Record<string, RequestState<InstanceStatus>>
+export type UseRequestExecutableStatusReturn = {
+  status: Record<string, RequestState<ExecutableStatus>>
   loading: boolean
 }
 
-export function useRequestInstanceStatus({
-  instances,
-}: UseRequestInstanceStatusProps): UseRequestInstanceStatusReturn {
+export function useRequestExecutableStatus({
+  entities,
+}: UseRequestExecutableStatusProps): UseRequestExecutableStatusReturn {
   const manager = useInstanceManager()
 
   const [status, setStatus] = useState<
-    Record<string, RequestState<InstanceStatus>>
+    Record<string, RequestState<ExecutableStatus>>
   >({})
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     async function load() {
-      if (!instances) return
+      if (!entities) return
 
       await Promise.allSettled(
-        instances.map(async (instance) => {
-          if (status[instance.id]) return
+        entities.map(async (executable) => {
+          if (status[executable.id]) return
 
           setStatus((prev) => ({
             ...prev,
-            [instance.id]: {
+            [executable.id]: {
               loading: true,
               data: undefined,
               error: undefined,
             },
           }))
 
-          const instanceSpecs = await manager?.checkStatus(instance)
+          const data = await manager?.checkStatus(executable)
 
           setStatus((prev) => ({
             ...prev,
-            [instance.id]: {
-              data: instanceSpecs,
+            [executable.id]: {
+              data,
               loading: false,
               error: undefined,
             },
@@ -56,14 +56,14 @@ export function useRequestInstanceStatus({
     }
 
     load()
-  }, [manager, instances, status])
+  }, [manager, entities, status])
 
   // const { data: instanceSpecs } = useLocalRequest({
-  //   doRequest: () => manager.getInstanceStatus(instances || []),
+  //   doRequest: () => manager.getExecutableStatus(entities || []),
   //   onSuccess: () => null,
   //   flushData: false,
   //   triggerOnMount: true,
-  //   triggerDeps: [instances],
+  //   triggerDeps: [entities],
   // })
 
   return {

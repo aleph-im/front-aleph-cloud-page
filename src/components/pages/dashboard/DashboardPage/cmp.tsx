@@ -1,30 +1,18 @@
 import React, { useMemo } from 'react'
 import { Icon } from '@aleph-front/core'
 import { useDashboardPage } from '@/hooks/pages/solutions/useDashboardPage'
-import { useSPARedirect } from '@/hooks/common/useSPARedirect'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import Container from '@/components/common/CenteredContainer'
 import EntityCard from '@/components/common/EntityCard'
-import { EntityCardItemProps } from '@/components/common/EntityCard/types'
 import EntitySummaryCard from '@/components/common/EntitySummaryCard'
 import { HoldTokenDisclaimer } from '@/components/common/HoldTokenDisclaimer/cmp'
+import { EntityCardItemProps } from '@/components/common/EntityCard/types'
 
 export default function DashboardPage() {
-  useSPARedirect()
-
-  const { all, programs, instances, volumes, sshKeys, domains, websites } =
+  const { cardType, instanceAggregatedStatus, programAggregatedStatus } =
     useDashboardPage()
 
-  const userStage = useMemo(() => {
-    return 'active'
-    return 'new'
-  }, [])
-
-  const cardType = useMemo(() => {
-    return userStage === 'active' ? 'active' : 'introduction'
-  }, [userStage])
-
-  const volumesCardItems = useMemo((): EntityCardItemProps[] => {
+  const volumesCardItems = useMemo(() => {
     if (cardType !== 'active') return []
 
     return [
@@ -52,7 +40,7 @@ export default function DashboardPage() {
           },
         },
       },
-    ]
+    ] as EntityCardItemProps[]
   }, [cardType])
 
   return (
@@ -109,11 +97,7 @@ export default function DashboardPage() {
               introductionButtonText="Create your function"
               information={{
                 type: 'computing',
-                data: {
-                  running: 1,
-                  paused: 5,
-                  booting: 0,
-                },
+                data: programAggregatedStatus,
               }}
             />
             <EntityCard
@@ -126,15 +110,12 @@ export default function DashboardPage() {
               introductionButtonText="Create your instance"
               information={{
                 type: 'computing',
-                data: {
-                  running: 6,
-                  paused: 2,
-                  booting: 4,
-                },
+                data: instanceAggregatedStatus,
               }}
             />
             <EntityCard
               type={cardType}
+              isComingSoon
               title="confidential VM"
               img="Object9"
               link="#"

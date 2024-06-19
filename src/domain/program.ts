@@ -19,7 +19,7 @@ import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
 import { MachineVolume, MessageType, StoreMessage } from '@aleph-sdk/message'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
-  Executable,
+  ExecutableManager,
   ExecutableCost,
   ExecutableCostProps,
   PaymentConfiguration,
@@ -39,6 +39,7 @@ import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { FunctionLangId, FunctionLanguage } from './lang'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
+import { NodeManager } from './node'
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -98,7 +99,7 @@ export type ParsedCodeType = {
 )
 
 export class ProgramManager
-  extends Executable
+  extends ExecutableManager
   implements EntityManager<Program, AddProgram>
 {
   static addSchema = functionSchema
@@ -107,7 +108,7 @@ export class ProgramManager
    * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
    */
   static async getCost(props: ProgramCostProps): Promise<ProgramCost> {
-    return Executable.getExecutableCost({
+    return ExecutableManager.getExecutableCost({
       ...props,
       type: EntityType.Program,
     })
@@ -120,9 +121,10 @@ export class ProgramManager
     protected domainManager: DomainManager,
     protected messageManager: MessageManager,
     protected fileManager: FileManager,
+    protected nodeManager: NodeManager,
     protected channel = defaultProgramChannel,
   ) {
-    super(account, volumeManager, domainManager, sdkClient)
+    super(account, volumeManager, domainManager, nodeManager, sdkClient)
   }
 
   async getAll(): Promise<Program[]> {

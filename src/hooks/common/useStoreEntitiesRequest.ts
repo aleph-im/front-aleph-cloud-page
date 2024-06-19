@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useMemo } from 'react'
+import { Dispatch, useMemo } from 'react'
 import { useAppState } from '@/contexts/appState'
 import { EntityAction, EntitySetAction, EntityState } from '@/store/entity'
 import { StoreState } from '@/store/store'
@@ -33,10 +33,6 @@ export function useStoreEntityRequest<T, S>({
 }: UseStoreEntityRequestProps<T, S>): UseStoreEntityRequestReturn<T> {
   const slice = store[name] as EntityState<T>
 
-  useEffect(() => {
-    console.log(name, ' slice has changed')
-  }, [name, slice])
-
   const state = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { entities: data, keys, ...rest } = slice
@@ -46,7 +42,6 @@ export function useStoreEntityRequest<T, S>({
   return useRequest({
     state,
     setState: (newState) => {
-      console.log(name, ' new state ', newState)
       dispatch(new EntitySetAction({ name, state: newState }))
     },
     ...props,

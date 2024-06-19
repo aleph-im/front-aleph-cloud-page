@@ -28,8 +28,6 @@ export default function ManageFunction() {
 
   const theme = useTheme()
 
-  console.log(program)
-
   if (!program) {
     return (
       <>

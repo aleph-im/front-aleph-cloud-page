@@ -314,9 +314,7 @@ export class NodeManager {
   // @todo: move this to domain package
   async getCRNsSpecs(nodes: CRN[]): Promise<CRNSpecs[]> {
     const specs = await Promise.all(nodes.map((node) => this.getCRNspecs(node)))
-    console.log('specs', specs)
     const filtered = specs.filter((spec) => spec !== undefined) as CRNSpecs[]
-    console.log('filtered', filtered)
     return filtered
   }
 

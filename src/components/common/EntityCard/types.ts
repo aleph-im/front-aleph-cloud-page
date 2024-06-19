@@ -8,7 +8,7 @@ export type InformationDataProps =
 
 export type InformationProps = {
   type: 'computing' | 'storage'
-  data: InformationDataProps
+  data?: InformationDataProps
 }
 
 export type EntityCardItemProps = {

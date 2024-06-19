@@ -33,7 +33,6 @@ export function useRequestEntities<Entity extends ConfirmableEntity>({
   const { data: entities, request } = useAppStoreEntityRequest({
     name,
     doRequest: async () => {
-      console.log('REEEEEEQ', name, triggerDeps)
       if (!manager) return []
 
       if (typeof ids !== 'string') {

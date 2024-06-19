@@ -115,8 +115,6 @@ export function getEntityReducer<E, K extends keyof E = keyof E>(
           ...state,
           keys,
           entities,
-          loading: false,
-          error: undefined,
         }
       }
 

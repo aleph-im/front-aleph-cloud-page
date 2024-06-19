@@ -3,9 +3,9 @@ import { StorageInformationProps } from './types'
 import { StyledInformationContainer } from './styles'
 
 export const StorageInformation = ({
-  storage,
-  amount,
-}: StorageInformationProps) => {
+  storage = 0,
+  amount = 0,
+}: StorageInformationProps = {}) => {
   return (
     <div tw="flex justify-end gap-x-2.5">
       <StyledInformationContainer tw="px-3 py-2">

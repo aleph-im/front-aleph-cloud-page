@@ -394,7 +394,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       const volumeEntity = (await this.volumeManager.parseMessages([volume]))[0]
 
       // Publish website
-      const date = new Date().getTime() / 1000
+      const date = Date.now() / 1000
       const content: Record<string, any> = {
         [name]: {
           metadata: {
@@ -573,7 +573,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
             Object.entries(history).map((item) => [item[0], item[1].id]),
           )) ||
         {}
-      const date = new Date().getTime() / 1000
+      const date = Date.now() / 1000
       const content: Record<string, any> = {
         [website.id]: {
           metadata: website.metadata,
@@ -621,11 +621,11 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         .slice(0, 10)
 
       if (history.length > 0) {
-        const volumes = await this.volumeManager.getAll(
-          history.map((item) => item[1]),
-          1,
-          10,
-        )
+        const volumes = await this.volumeManager.getAll({
+          ids: history.map((item) => item[1]),
+          page: 1,
+          pageSize: 10,
+        })
         return Object.fromEntries(
           history
             .map((item) => [

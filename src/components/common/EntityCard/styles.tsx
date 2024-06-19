@@ -76,7 +76,6 @@ const ActiveCard = styled(({ isComingSoon, ...props }) =>
 
   ${({ theme, isComingSoon }) => {
     if (isComingSoon) {
-      console.log('HOLA BRO')
       return css`
         padding: 1.5rem;
         opacity: 0.4 !important;

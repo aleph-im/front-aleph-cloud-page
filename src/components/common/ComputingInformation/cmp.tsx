@@ -6,7 +6,7 @@ export const ComputingInformation = ({
   running = 0,
   paused = 0,
   booting = 0,
-}: ComputingInformationProps) => {
+}: ComputingInformationProps = {}) => {
   const total = running + paused + booting
 
   if (total === 0) return <ComputingEntityDataPill value={0} />
