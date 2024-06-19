@@ -1,14 +1,12 @@
 import React from 'react'
-import { NoisyContainer, Tabs, TextGradient } from '@aleph-front/core'
+import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
-import CardWithSideImage from '@/components/common/CardWithSideImage'
-import ExternalLinkButton from '@/components/common/ExternalLinkButton'
-import ButtonLink from '@/components/common/ButtonLink'
 import { useInstanceDashboardPage } from '@/hooks/pages/computing/useInstanceDashboardPage'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import InstancesTabContent from '../../dashboard/InstancesTabContent'
 import VolumesTabContent from '../../dashboard/VolumesTabContent'
 import DomainsTabContent from '../../dashboard/DomainsTabContent'
+import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 
 export default function InstanceDashboardPage() {
   const { tabs, tabId, setTabId, instances, volumes, domains } =
@@ -27,40 +25,16 @@ export default function InstanceDashboardPage() {
                 <InstancesTabContent data={instances} />
               </Container>
             )}
-            <NoisyContainer type="grain-1" tw="py-20">
-              <Container $variant="xl">
-                <CardWithSideImage
-                  imageSrc="/img/dashboard/instance.svg"
-                  imageAlt="Instance ilustration"
-                  imagePosition="left"
-                  cardBackgroundColor="bg-white"
-                  reverseColumnsWhenStacked={false}
-                >
-                  <div tw="h-[16rem]">
-                    <div className="tp-info text-main0">WHAT IS AN...</div>
-                    <TextGradient as="h2" type="h3">
-                      Instance
-                    </TextGradient>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Cras rutrum dignissim elit, ut maximus justo congue at.
-                    Nulla lobortis, ligula in tempus tincidunt, eros nulla
-                    congue sapien, ac aliquet mi ante non elit. 
-                  </div>
-                  <div tw="mt-6 flex items-center justify-between">
-                    <ButtonLink
-                      variant="primary"
-                      size="md"
-                      href="/computing/instance/new"
-                    >
-                      Create instance
-                    </ButtonLink>
-                    <ExternalLinkButton href="https://docs.aleph.im/computing/#persistent-execution">
-                      Learn more
-                    </ExternalLinkButton>
-                  </div>
-                </CardWithSideImage>
-              </Container>
-            </NoisyContainer>
+            <DashboardCardWithSideImage
+              imageSrc="/img/dashboard/instance.svg"
+              imageAlt="Instance illustration"
+              info="WHAT IS AN..."
+              title="Instance"
+              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              buttonUrl="/computing/function/new"
+              buttonText="Create instance"
+              externalLinkUrl="https://docs.aleph.im/computing/#persistent-execution"
+            />
           </>
         ) : tabId === 'volume' ? (
           <>

@@ -1,14 +1,12 @@
 import React, { memo } from 'react'
-import { NoisyContainer, Tabs, TextGradient } from '@aleph-front/core'
+import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
-import CardWithSideImage from '@/components/common/CardWithSideImage'
-import ExternalLinkButton from '@/components/common/ExternalLinkButton'
-import ButtonLink from '@/components/common/ButtonLink'
 import { useFunctionDashboardPage } from '@/hooks/pages/computing/useFunctionDashboardPage'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import FunctionsTabContent from '../../dashboard/FunctionsTabContent'
 import VolumesTabContent from '../../dashboard/VolumesTabContent'
 import DomainsTabContent from '../../dashboard/DomainsTabContent'
+import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 
 function FunctionDashboardPage() {
   const { tabs, tabId, setTabId, programs, volumes, domains } =
@@ -27,41 +25,16 @@ function FunctionDashboardPage() {
                 <FunctionsTabContent data={programs} />
               </Container>
             )}
-            <NoisyContainer type="grain-1" tw="py-20">
-              <Container $variant="xl">
-                <CardWithSideImage
-                  imageSrc="/img/dashboard/function.svg"
-                  imageAlt="Function ilustration"
-                  imagePosition="left"
-                  cardBackgroundColor="bg-white"
-                  reverseColumnsWhenStacked={false}
-                >
-                  <div tw="h-[16rem]">
-                    <div className="tp-info text-main0">WHAT IS A...</div>
-                    <TextGradient as="h2" type="h3">
-                      Functions
-                    </TextGradient>
-                    Basicly, serverless computing at your fingertips (Lambda).
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Cras rutrum dignissim elit, ut maximus justo congue at.
-                    Nulla lobortis, ligula in tempus tincidunt, eros nulla
-                    congue sapien, ac aliquet mi ante non elit. 
-                  </div>
-                  <div tw="mt-6 flex items-center justify-between">
-                    <ButtonLink
-                      variant="primary"
-                      size="md"
-                      href="/computing/function/new"
-                    >
-                      Create function
-                    </ButtonLink>
-                    <ExternalLinkButton href="https://docs.aleph.im/computing/#persistent-execution">
-                      Learn more
-                    </ExternalLinkButton>
-                  </div>
-                </CardWithSideImage>
-              </Container>
-            </NoisyContainer>
+            <DashboardCardWithSideImage
+              imageSrc="/img/dashboard/function.svg"
+              imageAlt="Function illustration"
+              info="WHAT IS A..."
+              title="Function"
+              description="Basicly, serverless computing at your fingertips (Lambda). Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              buttonUrl="/computing/function/new"
+              buttonText="Create function"
+              externalLinkUrl="https://docs.aleph.im/computing/#persistent-execution"
+            />
           </>
         ) : tabId === 'volume' ? (
           <>

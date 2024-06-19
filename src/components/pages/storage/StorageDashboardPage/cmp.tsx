@@ -1,12 +1,11 @@
 import React from 'react'
-import { NoisyContainer, Tabs, TextGradient } from '@aleph-front/core'
+import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
-import CardWithSideImage from '@/components/common/CardWithSideImage'
-import ExternalLinkButton from '@/components/common/ExternalLinkButton'
-import ButtonLink from '@/components/common/ButtonLink'
 import { useStorageDashboardPage } from '@/hooks/pages/storage/useStorageDashboardPage'
 import VolumesTabContent from '../../dashboard/VolumesTabContent'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
+import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
+import EntitySummaryCard from '@/components/common/EntitySummaryCard'
 
 export default function StorageDashboardPage() {
   const { tabs, tabId, setTabId, volumes } = useStorageDashboardPage()
@@ -16,6 +15,55 @@ export default function StorageDashboardPage() {
       <Container $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
       </Container>
+      <Container $variant="xl" tw="my-10 flex flex-wrap gap-6">
+        <EntitySummaryCard
+          size="md"
+          items={[
+            {
+              title: 'IMMUTABLE VOLUMES',
+              img: 'Object15',
+              buttonUrl: '/storage/volume/new',
+              information: {
+                type: 'storage',
+                data: { storage: 100.2, amount: 3 },
+              },
+            },
+          ]}
+        />
+        <EntitySummaryCard
+          size="md"
+          items={[
+            {
+              information: {
+                title: 'LINKED',
+                type: 'storage',
+                data: { storage: 100.2, amount: 3 },
+              },
+            },
+            {
+              information: {
+                title: 'UNLINKED',
+                type: 'storage',
+                data: { storage: 100.2, amount: 3 },
+              },
+            },
+          ]}
+        />
+        <EntitySummaryCard
+          size="md"
+          items={[
+            {
+              title: 'PERSISTENT STORAGE',
+              img: 'Object16',
+              buttonUrl: '/storage/volume/new',
+              information: {
+                type: 'storage',
+                data: { storage: 128, amount: 4 },
+              },
+            },
+          ]}
+        />
+      </Container>
       <div role="tabpanel">
         {tabId === 'volume' ? (
           <>
@@ -24,40 +72,16 @@ export default function StorageDashboardPage() {
                 <VolumesTabContent data={volumes} />
               </Container>
             )}
-            <NoisyContainer type="grain-1" tw="py-20">
-              <Container $variant="xl">
-                <CardWithSideImage
-                  imageSrc="/img/dashboard/volume.svg"
-                  imageAlt="Volume illustration"
-                  imagePosition="left"
-                  cardBackgroundColor="bg-white"
-                  reverseColumnsWhenStacked={false}
-                >
-                  <div>
-                    <div className="tp-info text-main0">HOW DOES IT WORK?</div>
-                    <TextGradient as="h2" type="h3">
-                      Storage
-                    </TextGradient>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Cras rutrum dignissim elit, ut maximus justo congue at.
-                    Nulla lobortis, ligula in tempus tincidunt, eros nulla
-                    congue sapien, ac aliquet mi ante non elit. 
-                  </div>
-                  <div tw="mt-6 flex items-center justify-between">
-                    {!volumes.length && (
-                      <ButtonLink
-                        variant="primary"
-                        size="md"
-                        href="/storage/volume/new"
-                      >
-                        Create new volume
-                      </ButtonLink>
-                    )}
-                    <ExternalLinkButton href="#">Learn more</ExternalLinkButton>
-                  </div>
-                </CardWithSideImage>
-              </Container>
-            </NoisyContainer>
+            <DashboardCardWithSideImage
+              imageSrc="/img/dashboard/volume.svg"
+              imageAlt="Volume illustration"
+              info="HOW DOES IT WORK?"
+              title="Storage"
+              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              buttonUrl="/storage/volume/new"
+              buttonText="Create new volume"
+              externalLinkUrl="#"
+            />
           </>
         ) : (
           <></>

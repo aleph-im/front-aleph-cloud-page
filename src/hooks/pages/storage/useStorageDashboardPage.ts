@@ -28,6 +28,12 @@ export function useStorageDashboardPage(): UseStorageDashboardPageReturn {
         name: 'Volumes',
         label: { label: getLabel(volumes), position: 'bottom' },
       },
+      {
+        id: 'persistent-storage',
+        name: 'Persistent Storage',
+        label: { label: 'SOON', position: 'top' },
+        disabled: true,
+      },
     ]
   }, [volumes])
 

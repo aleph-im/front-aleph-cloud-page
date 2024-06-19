@@ -3,6 +3,7 @@ import { StyledInfoTooltipButton } from './styles'
 import { InfoTooltipButtonProps } from './types'
 import { Icon, Tooltip, useResponsiveMax } from '@aleph-front/core'
 import tw from 'twin.macro'
+import { TwStyle } from 'twin.macro'
 
 export const InfoTooltipButton = ({
   children,
@@ -10,6 +11,7 @@ export const InfoTooltipButton = ({
   plain,
   align = 'right',
   vAlign = 'center',
+  iconSize = '1em',
   ...rest
 }: InfoTooltipButtonProps) => {
   // @note: https://reactjs.org/link/uselayouteffect-ssr
@@ -27,11 +29,22 @@ export const InfoTooltipButton = ({
     ? tw`!fixed !left-0 !top-0 !transform-none m-6 !z-20 !w-[calc(100% - 3rem)] !h-[calc(100% - 3rem)] !max-w-full`
     : tw``
 
-  const alignClass = align === 'left' ? tw`-order-1` : ''
-  const vAlignClass = vAlign === 'top' ? tw`mb-2` : ''
-  const iconCss = [alignClass, vAlignClass]
+  const iconCss: (TwStyle | string)[] = []
+  switch (align) {
+    case 'left':
+      iconCss.push(tw`-order-1`)
+      break
+  }
+  switch (vAlign) {
+    case 'top':
+      iconCss.push(tw`mb-2`)
+      break
+    case 'bottom':
+      iconCss.push(tw`-mb-1`)
+      break
+  }
 
-  const iconElm = <Icon name="info-circle" size="1em" css={iconCss} />
+  const iconElm = <Icon name="info-circle" size={iconSize} css={iconCss} />
 
   return (
     <>
