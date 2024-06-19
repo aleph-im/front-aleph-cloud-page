@@ -9,12 +9,17 @@ import { HoldTokenDisclaimer } from '@/components/common/HoldTokenDisclaimer/cmp
 import { EntityCardItemProps } from '@/components/common/EntityCard/types'
 
 export default function DashboardPage() {
-  const { cardType, instanceAggregatedStatus, programAggregatedStatus } =
-    useDashboardPage()
+  const {
+    cardType,
+    instanceAggregatedStatus,
+    programAggregatedStatus,
+    volumesAggregatedStorage,
+  } = useDashboardPage()
 
   const volumesCardItems = useMemo(() => {
     if (cardType !== 'active') return []
 
+    const { linked, unlinked } = volumesAggregatedStorage
     return [
       {
         title: 'linked',
@@ -23,8 +28,8 @@ export default function DashboardPage() {
         information: {
           type: 'storage',
           data: {
-            storage: 0,
-            amount: 0,
+            storage: linked.storage,
+            amount: linked.amount,
           },
         },
       },
@@ -35,52 +40,48 @@ export default function DashboardPage() {
         information: {
           type: 'storage',
           data: {
-            storage: 0,
-            amount: 0,
+            storage: unlinked.storage,
+            amount: unlinked.amount,
           },
         },
       },
     ] as EntityCardItemProps[]
-  }, [cardType])
+  }, [cardType, volumesAggregatedStorage])
 
   return (
     <>
       <Container $variant="xl">
-        <section tw="px-0 pt-20 pb-6 md:py-10">
-          <SectionTitle number="0">Currently running</SectionTitle>
-          <div tw="mt-3 flex gap-6 items-stretch flex-wrap">
-            <EntitySummaryCard
-              items={[
-                {
-                  title: 'functions',
-                  img: 'Object10',
-                  information: {
-                    type: 'computing',
-                    data: {
-                      running: 1,
+        {cardType !== 'introduction' && (
+          <section tw="px-0 pt-20 pb-6 md:py-10">
+            <SectionTitle number="0">Currently running</SectionTitle>
+            <div tw="mt-3 flex gap-6 items-stretch flex-wrap">
+              <EntitySummaryCard
+                items={[
+                  {
+                    title: 'functions',
+                    img: 'Object10',
+                    information: {
+                      type: 'computing',
+                      data: programAggregatedStatus,
                     },
                   },
-                },
-              ]}
-            />
-            {/* <EntitySummaryCard title="functions" img="Object10" running={1} />
-            <EntitySummaryCard title="instances" img="Object10" running={6} /> */}
-            <EntitySummaryCard
-              items={[
-                {
-                  title: 'instances',
-                  img: 'Object11',
-                  information: {
-                    type: 'computing',
-                    data: {
-                      running: 6,
+                ]}
+              />
+              <EntitySummaryCard
+                items={[
+                  {
+                    title: 'instances',
+                    img: 'Object11',
+                    information: {
+                      type: 'computing',
+                      data: instanceAggregatedStatus,
                     },
                   },
-                },
-              ]}
-            />
-          </div>
-        </section>
+                ]}
+              />
+            </div>
+          </section>
+        )}
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <SectionTitle number="1">
             Computing <Icon name="settings" color="main0" size="0.66em" />
@@ -116,7 +117,7 @@ export default function DashboardPage() {
             <EntityCard
               type={cardType}
               isComingSoon
-              title="confidential VM"
+              title="confidentials"
               img="Object9"
               link="#"
               description="A virtual machine running for an extended period with their
@@ -125,11 +126,6 @@ export default function DashboardPage() {
               introductionButtonText="Create your confidential"
               information={{
                 type: 'computing',
-                data: {
-                  running: 0,
-                  paused: 0,
-                  booting: 0,
-                },
               }}
             />
           </div>
@@ -151,7 +147,8 @@ export default function DashboardPage() {
                 information={{
                   type: 'storage',
                   data: {
-                    storage: 0,
+                    storage: volumesAggregatedStorage.totalStorage,
+                    amount: volumesAggregatedStorage.totalAmount,
                   },
                 }}
                 subItems={volumesCardItems}
@@ -166,10 +163,6 @@ export default function DashboardPage() {
                 link="/storage"
                 information={{
                   type: 'storage',
-                  data: {
-                    storage: 0,
-                    amount: 0,
-                  },
                 }}
               />
             </div>
