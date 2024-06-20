@@ -43,7 +43,9 @@ const showSubItemsStyles = css`
 
 // Styled components
 
-const IntroductionCard = styled(NoisyContainer)<{
+const IntroductionCard = styled(({ isComingSoon, ...props }) =>
+  isComingSoon ? <div {...props} /> : <NoisyContainer {...props} />,
+)<{
   showSubItems: boolean
   isComingSoon: boolean
 }>`

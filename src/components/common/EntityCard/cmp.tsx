@@ -9,6 +9,8 @@ import ComputingInformation from '../ComputingInformation'
 import { ComputingInformationProps } from '../ComputingInformation/types'
 import StorageInformation from '../StorageInformation'
 import { StorageInformationProps } from '../StorageInformation/types'
+import { AmountInformationProps } from '../AmountInformation/types'
+import AmountInformation from '../AmountInformation'
 
 const InformationElement = ({ type, data }: InformationProps) => {
   switch (type) {
@@ -16,6 +18,8 @@ const InformationElement = ({ type, data }: InformationProps) => {
       return <ComputingInformation {...(data as ComputingInformationProps)} />
     case 'storage':
       return <StorageInformation {...(data as StorageInformationProps)} />
+    case 'amount':
+      return <AmountInformation {...(data as AmountInformationProps)} />
     default:
       return null
   }
@@ -43,10 +47,10 @@ EntityCardItem.displayName = 'EntityCardItem'
 
 export const EntityCard = ({
   title,
-  titleTooltip,
   description,
   img,
-  link,
+  dashboardPath = '#',
+  createPath = '#',
   introductionButtonText,
   subItems = [],
   information,
@@ -64,47 +68,49 @@ export const EntityCard = ({
   }, [isComingSoon, theme])
 
   const headerElement = useMemo(() => {
-    const titleElement = (
-      <p className="tp-h7 text-base2" tw="text-center">
-        {title}
+    const comingSoonLabel = isComingSoon ? (
+      <p className="tp-info" tw="absolute top-0 right-0 -mr-3 -mt-2">
+        &#40;SOON&#41;
       </p>
-    )
+    ) : null
+
     switch (type) {
       case 'active':
         return (
           <div tw="flex flex-col items-center justify-center relative">
-            {isComingSoon && (
-              <p className="tp-info" tw="absolute top-0 right-0 -mr-3 -mt-2">
-                &#40;SOON&#41;
+            {comingSoonLabel}
+            <InfoTooltipButton
+              plain
+              my="top-left"
+              at="top-right"
+              vAlign="bottom"
+              iconSize="0.8em"
+              tooltipContent={description}
+            >
+              <p className="tp-h7 text-base2" tw="text-center">
+                {title}
               </p>
-            )}
-            {titleTooltip ? (
-              <InfoTooltipButton
-                plain
-                my="top-left"
-                at="top-right"
-                vAlign="bottom"
-                iconSize="0.8em"
-                tooltipContent={titleTooltip}
-              >
-                {titleElement}
-              </InfoTooltipButton>
-            ) : (
-              titleElement
-            )}
+            </InfoTooltipButton>
           </div>
         )
       case 'introduction':
         return (
           <div
-            tw="flex items-center gap-2.5 mb-2.5"
+            tw="flex items-center gap-2.5 mb-2.5 relative"
             className="tp-header fs-16"
           >
-            <ObjectImg shape color="main0" size={36} id={img as any} /> {title}
+            {comingSoonLabel}
+            <ObjectImg
+              shape={isComingSoon ? false : true}
+              color={imageColor}
+              size={36}
+              id={img as any}
+            />{' '}
+            {title}
           </div>
         )
     }
-  }, [img, isComingSoon, title, titleTooltip, type])
+  }, [description, imageColor, img, isComingSoon, title, type])
 
   const contentElement = useMemo(() => {
     const imageElement = (
@@ -125,35 +131,33 @@ export const EntityCard = ({
   }, [description, imageColor, img, type])
 
   const footerElement = useMemo(() => {
-    const buttonWithInformation = (
-      <div tw="flex justify-between items-center">
-        <ButtonLink
-          kind="functional"
-          variant="primary"
-          forwardedAs="a"
-          href={link}
-          size="md"
-          tw="h-[2.5em]! w-[2.5em]! rounded-full!"
-        >
-          <Icon name="circle-plus" size="1em" />
-        </ButtonLink>
-        <InformationElement {...information} />
-      </div>
-    )
-
     switch (type) {
       case 'active':
-        return buttonWithInformation
+        return (
+          <div tw="flex justify-between items-center">
+            <ButtonLink
+              kind="functional"
+              variant="primary"
+              forwardedAs="a"
+              href={dashboardPath}
+              size="md"
+              tw="h-[2.5em]! w-[2.5em]! rounded-full!"
+            >
+              <Icon name="angle-right" size="1em" />
+            </ButtonLink>
+            <InformationElement {...information} />
+          </div>
+        )
       case 'introduction':
         return (
           <div tw="mt-auto">
-            <ButtonLink variant="textOnly" size="sm" href={link}>
+            <ButtonLink variant="textOnly" size="sm" href={createPath}>
               <Icon name="plus-circle" /> {introductionButtonText}
             </ButtonLink>
           </div>
         )
     }
-  }, [information, introductionButtonText, link, type])
+  }, [createPath, dashboardPath, information, introductionButtonText, type])
 
   return (
     <div tw="flex">

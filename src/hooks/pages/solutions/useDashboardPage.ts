@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { useAccountEntities } from '@/hooks/common/useAccountEntities'
 import { useRequestExecutableStatus } from '@/hooks/common/useRequestEntity/useRequestExecutableStatus'
-import { useAppState } from '@/contexts/appState'
 import { useSPARedirect } from '@/hooks/common/useSPARedirect'
 import { Program } from '@/domain/program'
 import { Instance } from '@/domain/instance'
@@ -12,21 +11,26 @@ import {
   useAttachedVolumes,
 } from '@/hooks/common/useAttachedVolumes'
 
-export type AggregatedStatus = {
+export type StorageAggregatedStatus = UseAttachedVolumesReturn
+
+export type ComputingAggregatedStatus = {
   running: number
   paused: number
   booting: number
   total: number
 }
-
-export type UseDashboardPageReturn = {
-  programAggregatedStatus: AggregatedStatus
-  instanceAggregatedStatus: AggregatedStatus
-  volumesAggregatedStorage: UseAttachedVolumesReturn
-  cardType: 'introduction' | 'active' | undefined
+export type WebsitesAggregatedStatus = {
+  total: number
 }
 
-function calculateEntitiesAggregatedStatus({
+export type UseDashboardPageReturn = {
+  programAggregatedStatus: ComputingAggregatedStatus
+  instanceAggregatedStatus: ComputingAggregatedStatus
+  volumesAggregatedStatus: UseAttachedVolumesReturn
+  websitesAggregatedStatus: WebsitesAggregatedStatus
+}
+
+function calculateComputingEntitiesAggregatedStatus({
   entities,
   entitiesStatus,
 }: {
@@ -68,48 +72,35 @@ export function useDashboardPage(): UseDashboardPageReturn {
   })
 
   const programAggregatedStatus = useMemo(() => {
-    return calculateEntitiesAggregatedStatus({
+    return calculateComputingEntitiesAggregatedStatus({
       entities: programs,
       entitiesStatus: programsStatus,
     })
   }, [programsStatus, programs])
 
   const instanceAggregatedStatus = useMemo(() => {
-    return calculateEntitiesAggregatedStatus({
+    return calculateComputingEntitiesAggregatedStatus({
       entities: instances,
       entitiesStatus: instancesStatus,
     })
   }, [instancesStatus, instances])
 
-  const volumesAggregatedStorage = useAttachedVolumes({
+  const volumesAggregatedStatus = useAttachedVolumes({
     programs,
     instances,
     websites,
     volumes,
   })
 
-  const noEntities = useMemo(() => {
-    return programAggregatedStatus.total + instanceAggregatedStatus.total === 0
-  }, [instanceAggregatedStatus.total, programAggregatedStatus.total])
+  const websitesAggregatedStatus = useMemo(() => {
+    return { total: websites.length }
+  }, [websites])
 
-  const [state] = useAppState()
-  const { account } = state.connection
-
-  const userStage = useMemo(() => {
-    if (!account) return 'new'
-    if (noEntities) return 'new'
-
-    return 'active'
-  }, [account, noEntities])
-
-  const cardType = useMemo(() => {
-    return userStage === 'active' ? 'active' : 'introduction'
-  }, [userStage])
-
+  console.log('programs', programs)
   return {
     programAggregatedStatus,
     instanceAggregatedStatus,
-    volumesAggregatedStorage,
-    cardType,
+    volumesAggregatedStatus,
+    websitesAggregatedStatus,
   }
 }

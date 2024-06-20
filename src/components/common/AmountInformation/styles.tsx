@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 
-export const StyledStorageInformationContainer = styled.div`
+export const StyledAmountInformationContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;

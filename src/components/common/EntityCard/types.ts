@@ -1,13 +1,14 @@
-import { ReactNode } from 'react'
+import { AmountInformationProps } from '../AmountInformation/types'
 import { ComputingInformationProps } from '../ComputingInformation/types'
 import { StorageInformationProps } from '../StorageInformation/types'
 
 export type InformationDataProps =
   | ComputingInformationProps
   | StorageInformationProps
+  | AmountInformationProps
 
 export type InformationProps = {
-  type: 'computing' | 'storage'
+  type: 'computing' | 'storage' | 'amount'
   data?: InformationDataProps
 }
 
@@ -17,14 +18,16 @@ export type EntityCardItemProps = {
   information: InformationProps
 }
 
+export type EntityCardType = 'introduction' | 'active'
+
 export type EntityCardProps = {
-  type?: 'introduction' | 'active'
+  type?: EntityCardType
   isComingSoon?: boolean
   title: string
-  titleTooltip?: ReactNode
   img: string
   description?: string
-  link: string
+  dashboardPath?: string
+  createPath?: string
   introductionButtonText?: string
   information: InformationProps
   storage?: number

@@ -1,4 +1,4 @@
 export type StorageInformationProps = {
-  storage?: number
+  size?: number
   amount?: number
 }
