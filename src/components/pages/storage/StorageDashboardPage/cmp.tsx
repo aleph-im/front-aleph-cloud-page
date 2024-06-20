@@ -8,10 +8,13 @@ import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSid
 import EntitySummaryCard from '@/components/common/EntitySummaryCard'
 
 export default function StorageDashboardPage() {
-  const { tabs, tabId, setTabId, volumes, volumesAggregatedStorage } =
-    useStorageDashboardPage()
-
-  const { linked, unlinked } = volumesAggregatedStorage
+  const {
+    tabs,
+    tabId,
+    setTabId,
+    volumes,
+    volumesAggregatedStorage: { total, linked, unlinked },
+  } = useStorageDashboardPage()
 
   return (
     <>
@@ -23,14 +26,14 @@ export default function StorageDashboardPage() {
           size="md"
           items={[
             {
-              title: 'IMMUTABLE VOLUMES',
+              title: 'Volumes',
               img: 'Object15',
               buttonUrl: '/storage/volume/new',
               information: {
                 type: 'storage',
                 data: {
-                  storage: volumesAggregatedStorage.totalStorage,
-                  amount: volumesAggregatedStorage.totalAmount,
+                  storage: total.size,
+                  amount: total.amount,
                 },
               },
             },
@@ -41,34 +44,20 @@ export default function StorageDashboardPage() {
           items={[
             {
               information: {
-                title: 'LINKED',
+                title: 'Linked',
                 type: 'storage',
-                data: { storage: linked.storage, amount: linked.amount },
+                data: { storage: linked.size, amount: linked.amount },
               },
             },
             {
               information: {
-                title: 'UNLINKED',
+                title: 'Unlinked',
                 type: 'storage',
-                data: { storage: unlinked.storage, amount: unlinked.amount },
+                data: { storage: unlinked.size, amount: unlinked.amount },
               },
             },
           ]}
         />
-        {/* <EntitySummaryCard
-          size="md"
-          items={[
-            {
-              title: 'PERSISTENT STORAGE',
-              img: 'Object16',
-              buttonUrl: '/storage/volume/new',
-              information: {
-                type: 'storage',
-                data: { storage: 0, amount: 0 },
-              },
-            },
-          ]}
-        /> */}
       </Container>
       <div role="tabpanel">
         {tabId === 'volume' ? (

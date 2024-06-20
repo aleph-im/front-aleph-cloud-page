@@ -1,24 +1,15 @@
 import { Volume } from '@/domain/volume'
-import { useRequestVolumes } from '@/hooks/common/useRequestEntity/useRequestVolumes'
 import { useMemo, useState } from 'react'
 import { TabsProps } from '@aleph-front/core'
-
-type AggregatedStorage = {
-  totalStorage: number
-  totalAmount: number
-  linked: {
-    storage: number
-    amount: number
-  }
-  unlinked: {
-    storage: number
-    amount: number
-  }
-}
+import {
+  UseAttachedVolumesReturn,
+  useAttachedVolumes,
+} from '@/hooks/common/useAttachedVolumes'
+import { useAccountEntities } from '@/hooks/common/useAccountEntities'
 
 export type UseStorageDashboardPageReturn = {
   volumes: Volume[]
-  volumesAggregatedStorage: AggregatedStorage
+  volumesAggregatedStorage: UseAttachedVolumesReturn
   tabs: TabsProps['tabs']
   tabId: string
   setTabId: (tab: string) => void
@@ -30,35 +21,8 @@ function getLabel(entities: unknown[], beta = false): string {
   return `${b}${n}`
 }
 
-function calculateEntitiesAggregatedStorage({
-  entities,
-}: {
-  entities: Volume[]
-}): AggregatedStorage {
-  // TODO: implement linked/unlinked storage calculation
-  return entities.reduce(
-    (ac, cv) => {
-      ac.totalStorage += cv.size || 0
-      ac.totalAmount += 1
-      return ac
-    },
-    {
-      totalStorage: 0,
-      totalAmount: 0,
-      linked: {
-        storage: 0,
-        amount: 0,
-      },
-      unlinked: {
-        storage: 0,
-        amount: 0,
-      },
-    },
-  )
-}
-
 export function useStorageDashboardPage(): UseStorageDashboardPageReturn {
-  const { entities: volumes = [] } = useRequestVolumes()
+  const { programs, instances, websites, volumes } = useAccountEntities()
 
   const [tabId, setTabId] = useState('volume')
 
@@ -78,9 +42,12 @@ export function useStorageDashboardPage(): UseStorageDashboardPageReturn {
     ]
   }, [volumes])
 
-  const volumesAggregatedStorage = useMemo(() => {
-    return calculateEntitiesAggregatedStorage({ entities: volumes })
-  }, [volumes])
+  const volumesAggregatedStorage = useAttachedVolumes({
+    programs,
+    instances,
+    websites,
+    volumes,
+  })
 
   return {
     volumes,

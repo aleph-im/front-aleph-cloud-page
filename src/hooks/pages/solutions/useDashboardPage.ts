@@ -7,7 +7,10 @@ import { Program } from '@/domain/program'
 import { Instance } from '@/domain/instance'
 import { RequestState } from '@aleph-front/core'
 import { ExecutableStatus } from '@/domain/executable'
-import { useAttachedVolumes } from '@/hooks/common/useAttachedVolumes'
+import {
+  UseAttachedVolumesReturn,
+  useAttachedVolumes,
+} from '@/hooks/common/useAttachedVolumes'
 
 export type AggregatedStatus = {
   running: number
@@ -16,25 +19,10 @@ export type AggregatedStatus = {
   total: number
 }
 
-export type AggregatedStorage = {
-  total: {
-    size: number
-    amount: number
-  }
-  linked: {
-    size: number
-    amount: number
-  }
-  unlinked: {
-    size: number
-    amount: number
-  }
-}
-
 export type UseDashboardPageReturn = {
   programAggregatedStatus: AggregatedStatus
   instanceAggregatedStatus: AggregatedStatus
-  volumesAggregatedStorage: AggregatedStorage
+  volumesAggregatedStorage: UseAttachedVolumesReturn
   cardType: 'introduction' | 'active' | undefined
 }
 
