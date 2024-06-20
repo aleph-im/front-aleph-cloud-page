@@ -133,7 +133,7 @@ export const EntityCard = ({
           forwardedAs="a"
           href={link}
           size="md"
-          tw="p-3!"
+          tw="h-[2.5em]! w-[2.5em]! rounded-full!"
         >
           <Icon name="circle-plus" size="1em" />
         </ButtonLink>
