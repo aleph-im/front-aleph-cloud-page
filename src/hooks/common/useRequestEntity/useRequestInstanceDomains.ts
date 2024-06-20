@@ -6,7 +6,6 @@ import {
 } from './useRequestEntities'
 import { useRequestDomains } from './useRequestDomains'
 import { useAppState } from '@/contexts/appState'
-import { Instance } from '@/domain/instance'
 
 export type UseRequestInstanceDomainsProps = Omit<
   UseRequestEntitiesProps<Domain>,
@@ -29,15 +28,13 @@ export function useRequestInstanceDomains(
 
     const instancesMap = instances.reduce(
       (ac, cv) => {
-        ac[cv.id] = cv
+        ac[cv.id] = true
         return ac
       },
-      {} as Record<string, Instance>,
+      {} as Record<string, boolean>,
     )
 
-    return domains.filter((domain) => {
-      return !!instancesMap[domain.ref]
-    })
+    return domains.filter((domain) => !!instancesMap[domain.ref])
   }, [domains, instances])
 
   return {

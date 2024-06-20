@@ -16,10 +16,11 @@ export default function DashboardPage() {
     volumesAggregatedStorage,
   } = useDashboardPage()
 
+  const { linked, unlinked, total } = volumesAggregatedStorage
+
   const volumesCardItems = useMemo(() => {
     if (cardType !== 'active') return []
 
-    const { linked, unlinked } = volumesAggregatedStorage
     return [
       {
         title: 'linked',
@@ -28,7 +29,7 @@ export default function DashboardPage() {
         information: {
           type: 'storage',
           data: {
-            storage: linked.storage,
+            storage: linked.size,
             amount: linked.amount,
           },
         },
@@ -40,13 +41,13 @@ export default function DashboardPage() {
         information: {
           type: 'storage',
           data: {
-            storage: unlinked.storage,
+            storage: unlinked.size,
             amount: unlinked.amount,
           },
         },
       },
     ] as EntityCardItemProps[]
-  }, [cardType, volumesAggregatedStorage])
+  }, [cardType, linked, unlinked])
 
   return (
     <>
@@ -147,8 +148,8 @@ export default function DashboardPage() {
                 information={{
                   type: 'storage',
                   data: {
-                    storage: volumesAggregatedStorage.totalStorage,
-                    amount: volumesAggregatedStorage.totalAmount,
+                    storage: total.size,
+                    amount: total.amount,
                   },
                 }}
                 subItems={volumesCardItems}

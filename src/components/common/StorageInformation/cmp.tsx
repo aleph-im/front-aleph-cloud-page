@@ -1,6 +1,7 @@
 import React, { memo } from 'react'
 import { StorageInformationProps } from './types'
 import { StyledInformationContainer } from './styles'
+import { humanReadableSize } from '@aleph-front/core'
 
 export const StorageInformation = ({
   storage = 0,
@@ -9,7 +10,7 @@ export const StorageInformation = ({
   return (
     <div tw="flex justify-end gap-x-2.5">
       <StyledInformationContainer tw="px-3 py-2">
-        <p className="fs-10 tp-body1">{storage.toFixed(2)} GB</p>
+        <p className="fs-10 tp-body1">{humanReadableSize(storage, 'MiB')}</p>
       </StyledInformationContainer>
       {amount !== undefined && (
         <StyledInformationContainer tw="px-3">
