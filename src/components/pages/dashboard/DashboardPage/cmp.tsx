@@ -15,14 +15,33 @@ export default function DashboardPage() {
     websitesAggregatedStatus,
   } = useDashboardPage()
 
-  const {
-    linked: linkedVolumesStatus,
-    unlinked: unlinkedVolumesStatus,
-    total: totalVolumesStatus,
-  } = volumesAggregatedStatus
+  const programsCardItems = useMemo(() => {
+    if (!programAggregatedStatus.total.amount) return []
+
+    return [
+      {
+        title: 'persistent',
+        description:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
+        information: {
+          type: 'computing',
+          data: programAggregatedStatus.persistent,
+        },
+      },
+      {
+        title: 'on demand',
+        description:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
+        information: {
+          type: 'computing',
+          data: programAggregatedStatus.onDemand,
+        },
+      },
+    ] as EntityCardItemProps[]
+  }, [programAggregatedStatus])
 
   const volumesCardItems = useMemo(() => {
-    if (!totalVolumesStatus.amount) return []
+    if (!volumesAggregatedStatus.total.amount) return []
 
     return [
       {
@@ -31,7 +50,7 @@ export default function DashboardPage() {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
         information: {
           type: 'storage',
-          data: linkedVolumesStatus,
+          data: volumesAggregatedStatus.linked,
         },
       },
       {
@@ -40,11 +59,11 @@ export default function DashboardPage() {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
         information: {
           type: 'storage',
-          data: unlinkedVolumesStatus,
+          data: volumesAggregatedStatus.unlinked,
         },
       },
     ] as EntityCardItemProps[]
-  }, [linkedVolumesStatus, totalVolumesStatus.amount, unlinkedVolumesStatus])
+  }, [volumesAggregatedStatus])
 
   return (
     <>
@@ -55,7 +74,9 @@ export default function DashboardPage() {
           </SectionTitle>
           <div tw="mt-3 flex gap-6 items-stretch flex-wrap">
             <EntityCard
-              type={programAggregatedStatus.total ? 'active' : 'introduction'}
+              type={
+                programAggregatedStatus.total.amount ? 'active' : 'introduction'
+              }
               title="Websites"
               img="Object8"
               description="An isolated environment created for a function to execute in
@@ -66,7 +87,7 @@ export default function DashboardPage() {
               createPath="/hosting/website/new"
               information={{
                 type: 'amount',
-                data: { amount: websitesAggregatedStatus.total },
+                data: websitesAggregatedStatus.total,
               }}
             />
           </div>
@@ -77,7 +98,9 @@ export default function DashboardPage() {
           </SectionTitle>
           <div tw="mt-3 flex gap-6 items-stretch flex-wrap">
             <EntityCard
-              type={programAggregatedStatus.total ? 'active' : 'introduction'}
+              type={
+                programAggregatedStatus.total.amount ? 'active' : 'introduction'
+              }
               title="functions"
               img="Object10"
               description="An isolated environment created for a function to execute in
@@ -87,12 +110,17 @@ export default function DashboardPage() {
               dashboardPath="/computing/function"
               createPath="/computing/function/new"
               information={{
-                type: 'computing',
-                data: programAggregatedStatus,
+                type: 'amount',
+                data: programAggregatedStatus.total,
               }}
+              subItems={programsCardItems}
             />
             <EntityCard
-              type={instanceAggregatedStatus.total ? 'active' : 'introduction'}
+              type={
+                instanceAggregatedStatus.total.amount
+                  ? 'active'
+                  : 'introduction'
+              }
               title="instance"
               img="Object11"
               description="A virtual machine that runs on a Aleph.im's infrastructure
@@ -102,7 +130,7 @@ export default function DashboardPage() {
               createPath="/computing/instance/new"
               information={{
                 type: 'computing',
-                data: instanceAggregatedStatus,
+                data: instanceAggregatedStatus.total,
               }}
             />
             <EntityCard
@@ -127,7 +155,11 @@ export default function DashboardPage() {
           <div tw="flex mt-6">
             <div tw="flex flex-wrap gap-6 items-stretch">
               <EntityCard
-                type={totalVolumesStatus.amount ? 'active' : 'introduction'}
+                type={
+                  volumesAggregatedStatus.total.amount
+                    ? 'active'
+                    : 'introduction'
+                }
                 title="volumes"
                 img="Object15"
                 dashboardPath="/storage"
@@ -136,7 +168,7 @@ export default function DashboardPage() {
                 introductionButtonText="Create your volume"
                 information={{
                   type: 'storage',
-                  data: totalVolumesStatus,
+                  data: volumesAggregatedStatus.total,
                 }}
                 subItems={volumesCardItems}
               />
