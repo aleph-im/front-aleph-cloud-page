@@ -9,7 +9,7 @@ export type UseInstanceStatusReturn = InstanceStatus | undefined
 export function useInstanceStatus(
   instance: UseInstanceStatusProps,
 ): UseInstanceStatusReturn {
-  const [status, setStatus] = useState<InstanceStatus | undefined>(undefined)
+  const [status, setStatus] = useState<InstanceStatus>(undefined)
 
   const manager = useInstanceManager()
 

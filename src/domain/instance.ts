@@ -21,6 +21,7 @@ import {
   ExecutableCost,
   ExecutableCostProps,
   PaymentConfiguration,
+  ExecutableStatus,
 } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
@@ -75,6 +76,8 @@ export type Instance = InstanceContent & {
   size: number
   confirmed?: boolean
 }
+
+export type InstanceStatus = ExecutableStatus | undefined
 
 export type InstanceCostProps = Omit<ExecutableCostProps, 'type'>
 
