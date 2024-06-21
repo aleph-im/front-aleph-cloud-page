@@ -44,6 +44,7 @@ export type UseNewWebsitePagePageReturn = {
   control: Control<any>
   errors: FieldErrors<NewWebsiteFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
+  handleBack: () => void
 }
 
 export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
@@ -116,6 +117,10 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     isCreateButtonDisabled = false
   }
 
+  const handleBack = () => {
+    router.push('.')
+  }
+
   return {
     address: account?.address || '',
     accountBalance,
@@ -124,5 +129,6 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     control,
     errors,
     handleSubmit,
+    handleBack,
   }
 }
