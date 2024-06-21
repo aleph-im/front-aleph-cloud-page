@@ -33,6 +33,7 @@ export default function SettingsDashboardPage() {
               info="HOW TO..."
               title="Create your Website!"
               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              withButton={websites.length === 0}
               buttonUrl="/hosting/website/new"
               buttonText="Create your website"
               externalLinkUrl="#"

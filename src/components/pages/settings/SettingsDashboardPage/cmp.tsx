@@ -29,6 +29,7 @@ export default function SettingsDashboardPage() {
               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
               imageSrc="/img/dashboard/ssh.svg"
               imageAlt="SSH Key illustration"
+              withButton={sshKeys.length === 0}
               buttonUrl="/settings/ssh/new"
               buttonText="Create new SSH key"
               externalLinkUrl="#"
@@ -47,6 +48,7 @@ export default function SettingsDashboardPage() {
               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
               imageSrc="/img/dashboard/domain.svg"
               imageAlt="Domain illustration"
+              withButton={domains.length === 0}
               buttonUrl="/settings/domain/new"
               buttonText="Create new domain"
               externalLinkUrl="#"

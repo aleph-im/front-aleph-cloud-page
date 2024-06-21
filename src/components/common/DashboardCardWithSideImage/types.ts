@@ -4,6 +4,7 @@ export type DashboardCardWithSideImageProps = {
   description: string
   imageSrc: string
   imageAlt: string
+  withButton?: boolean
   buttonUrl: string
   buttonText: string
   externalLinkUrl: string

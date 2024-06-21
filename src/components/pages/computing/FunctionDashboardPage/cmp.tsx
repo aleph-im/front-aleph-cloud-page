@@ -31,6 +31,7 @@ function FunctionDashboardPage() {
               info="WHAT IS A..."
               title="Function"
               description="Basicly, serverless computing at your fingertips (Lambda). Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              withButton={programs.length === 0}
               buttonUrl="/computing/function/new"
               buttonText="Create function"
               externalLinkUrl="https://docs.aleph.im/computing/#persistent-execution"

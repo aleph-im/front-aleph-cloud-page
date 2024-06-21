@@ -73,6 +73,7 @@ export default function StorageDashboardPage() {
               info="HOW DOES IT WORK?"
               title="Storage"
               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              withButton={volumes.length === 0}
               buttonUrl="/storage/volume/new"
               buttonText="Create new volume"
               externalLinkUrl="#"
