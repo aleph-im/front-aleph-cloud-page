@@ -12,10 +12,10 @@ import {
 import { useCallback, useMemo } from 'react'
 import { convertByteUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
-import { Executable } from '@/domain/executable'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import Price from '@/components/common/Price'
 import Table from '@/components/common/Table'
+import { ExecutableManager } from '@/domain/executable'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { specsCtrl, options, type, isPersistent, paymentMethod } =
@@ -114,12 +114,13 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     async function load(): Promise<void> {
       const loadedData = await Promise.all(
         options.map(async (specs) => {
-          const { computeTotalCost } = await Executable.getExecutableCost({
-            type,
-            specs,
-            isPersistent,
-            paymentMethod,
-          })
+          const { computeTotalCost } =
+            await ExecutableManager.getExecutableCost({
+              type,
+              specs,
+              isPersistent,
+              paymentMethod,
+            })
 
           return computeTotalCost
         }),
