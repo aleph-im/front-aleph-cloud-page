@@ -15,50 +15,51 @@ export default function StorageDashboardPage() {
     volumes,
     volumesAggregatedStorage: { total, linked, unlinked },
   } = useStorageDashboardPage()
+  console.log('total', total)
+  console.log('linked', linked)
+  console.log('unlinked', unlinked)
 
   return (
     <>
       <Container $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
       </Container>
-      <Container $variant="xl" tw="my-10 flex flex-wrap gap-6 justify-center">
-        <EntitySummaryCard
-          size="md"
-          items={[
-            {
-              title: 'Volumes',
-              img: 'Object15',
-              buttonUrl: '/storage/volume/new',
-              information: {
-                type: 'storage',
-                data: {
-                  storage: total.size,
-                  amount: total.amount,
+      {total.amount !== 0 && (
+        <Container $variant="xl" tw="my-10 flex flex-wrap gap-6 justify-center">
+          <EntitySummaryCard
+            items={[
+              {
+                title: 'Volumes',
+                img: 'Object15',
+                buttonUrl: '/storage/volume/new',
+                information: {
+                  type: 'storage',
+                  data: total,
                 },
               },
-            },
-          ]}
-        />
-        <EntitySummaryCard
-          size="md"
-          items={[
-            {
-              information: {
-                title: 'Linked',
-                type: 'storage',
-                data: { storage: linked.size, amount: linked.amount },
+            ]}
+          />
+          <EntitySummaryCard
+            items={[
+              {
+                information: {
+                  title: 'Linked',
+                  type: 'storage',
+                  data: linked,
+                },
               },
-            },
-            {
-              information: {
-                title: 'Unlinked',
-                type: 'storage',
-                data: { storage: unlinked.size, amount: unlinked.amount },
+              {
+                information: {
+                  title: 'Unlinked',
+                  type: 'storage',
+                  data: unlinked,
+                },
               },
-            },
-          ]}
-        />
-      </Container>
+            ]}
+          />
+        </Container>
+      )}
+
       <div role="tabpanel">
         {tabId === 'volume' ? (
           <>

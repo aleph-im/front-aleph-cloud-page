@@ -1,12 +1,5 @@
-type StorageInformationProps = {
-  title?: string
-  storage: number
-  amount?: number
-}
-
-type ComputingInformationProps = {
-  running: number
-}
+import { StorageInformationProps } from '../StorageInformation/types'
+import { ComputingInformationProps } from '../ComputingInformation/types'
 
 type InformationDataProps = ComputingInformationProps | StorageInformationProps
 
@@ -25,5 +18,4 @@ type ItemsProps = {
 
 export type EntitySummaryCardProps = {
   items: ItemsProps[]
-  size?: 'sm' | 'md'
 }
