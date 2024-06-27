@@ -171,11 +171,11 @@ export function ManageWebsite() {
             <div tw="flex flex-wrap justify-end ml-2 gap-2 sm:gap-4">
               <Button
                 kind="functional"
-                variant="warning"
+                variant="error"
                 size="md"
                 onClick={handleDelete}
               >
-                Delete
+                <Icon name="trash" />
               </Button>
             </div>
           </div>

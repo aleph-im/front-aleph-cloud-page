@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   BaseExecutableContent,
@@ -31,7 +32,8 @@ import {
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
 import { BlockchainId } from './connect/base'
-import { NodeManager } from './node'
+import { CRN, NodeManager } from './node'
+import { subscribeSocketFeed } from '@/helpers/socket'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -83,14 +85,7 @@ export type Executable = {
   requirements?: any
 }
 
-export type ExecutableNode = {
-  node_id: string
-  url: string
-  ipv6: string
-  supports_ipv6: boolean
-}
-
-export type ExecutableStatus = {
+export type ExecutableSchedulerAllocation = {
   vm_hash: string
   vm_type: EntityType.Instance | EntityType.Program
   vm_ipv6: string
@@ -98,8 +93,41 @@ export type ExecutableStatus = {
     start_timestamp: string
     duration_seconds: number
   }
-  node: ExecutableNode
+  node: {
+    node_id: string
+    url: string
+    ipv6: string
+    supports_ipv6: boolean
+  }
 }
+
+export type ExecutableStatus = {
+  hash: string
+  type: EntityType.Instance | EntityType.Program
+  ipv4: string
+  ipv6: string
+  ipv6Parsed: string
+  node: CRN
+}
+
+// -----------------------------------------
+
+export type KeyOpsType = 'sign' | 'verify'
+
+export type SignedPublicKeyHeader = {
+  payload: string
+  signature: string
+}
+
+export type ExecutableOperations = 'reboot' | 'expire' | 'erase' | 'stop'
+
+export type KeyPair = {
+  publicKey: JsonWebKey
+  privateKey: JsonWebKey
+  createdAt: number
+}
+
+export const KEYPAIR_TTL = 1000 * 60 * 60 * 2
 
 export abstract class ExecutableManager {
   /**
@@ -178,76 +206,45 @@ export abstract class ExecutableManager {
   async checkStatus(
     executable: Executable,
   ): Promise<ExecutableStatus | undefined> {
+    const node = await this.getAllocationCRN(executable)
+    if (!node) return
+
+    const { address } = node
+    if (!address) throw Err.InvalidCRNAddress
+
+    const nodeUrl = NodeManager.normalizeUrl(address)
+
+    const query = await fetch(`${nodeUrl}/about/executions/list`)
+    const response = await query.json()
+
+    const hash = executable.id
+    const status = response[hash]
+    if (!status) return
+
+    const networking = status['networking']
+    if (!networking) return
+
+    const { ipv4, ipv6 } = networking
+
+    return {
+      hash,
+      type: EntityType.Instance,
+      ipv4,
+      ipv6,
+      ipv6Parsed: this.formatVMIPv6Address(ipv6),
+      node,
+    }
+  }
+
+  async getAllocationCRN(executable: Executable): Promise<CRN | undefined> {
     if (executable.payment?.type === PaymentType.superfluid) {
-      const receiver = executable.payment?.receiver
-      if (!receiver) throw Err.ReceiverReward
+      const { receiver } = executable.payment
+      if (!receiver) return
 
-      // @todo: refactor this mess
-      const node = await this.nodeManager.getCRNByStreamRewardAddress(receiver)
-      if (!node) return
+      const nodes = await this.nodeManager.getCRNNodes()
+      const node = nodes.find((node) => node.stream_reward === receiver)
 
-      const { address } = node
-      if (!address) throw Err.InvalidCRNAddress
-
-      const nodeUrl = address.replace(/\/$/, '')
-      const query = await fetch(`${nodeUrl}/about/executions/list`)
-      const response = await query.json()
-
-      const status = response[executable.id]
-      if (!status) return
-
-      const networking = status['networking']
-
-      return {
-        node: {
-          node_id: node.hash,
-          url: node.address,
-          ipv6: networking.ipv6,
-          supports_ipv6: true,
-        },
-        vm_hash: executable.id,
-        vm_type: EntityType.Instance,
-        vm_ipv6: this.formatVMIPv6Address(networking.ipv6),
-        period: {
-          start_timestamp: '',
-          duration_seconds: 0,
-        },
-      } as ExecutableStatus
-    } else if (executable.environment?.trusted_execution) {
-      const crn_hash = executable.requirements?.node?.node_hash
-      if (!crn_hash) throw Err.InvalidConfidentialNodeRequirements
-
-      // @todo: refactor this mess
-      const node = await this.nodeManager.getCRNByHash(crn_hash)
-      if (!node) return
-
-      const { address } = node
-      if (!address) throw Err.InvalidCRNAddress
-
-      const nodeUrl = address.replace(/\/$/, '')
-      const query = await fetch(`${nodeUrl}/about/executions/list`)
-      const response = await query.json()
-
-      const status = response[executable.id]
-      if (!status) return
-
-      const networking = status['networking']
-
-      return {
-        node: {
-          node_id: node.hash,
-          url: node.address,
-          ipv6: networking.ipv6,
-          supports_ipv6: true,
-        },
-        vm_hash: executable.id,
-        vm_type: EntityType.Instance,
-        vm_ipv6: this.formatVMIPv6Address(networking.ipv6),
-        period: {
-          start_timestamp: '',
-          duration_seconds: 0,
-        },
-      } as ExecutableStatus
+      return node
     }
 
     const query = await fetch(
@@ -256,8 +253,201 @@ export abstract class ExecutableManager {
 
     if (query.status === 404) return
 
-    const response = await query.json()
-    return response
+    const response = (await query.json()) as ExecutableSchedulerAllocation
+
+    const { node_id, url } = response.node
+
+    const nodes = await this.nodeManager.getCRNNodes()
+
+    let node = nodes.find((node) => node.hash === node_id)
+    node =
+      node ||
+      nodes.find(
+        (node) =>
+          node.address &&
+          NodeManager.normalizeUrl(node.address) ===
+            NodeManager.normalizeUrl(url),
+      )
+
+    return node
+  }
+
+  async getKeyPair(): Promise<KeyPair> {
+    const kp = await crypto.subtle.generateKey(
+      { name: 'ECDSA', namedCurve: 'P-256' },
+      true,
+      ['sign', 'verify'],
+    )
+
+    const publicKey = await crypto.subtle.exportKey('jwk', kp.publicKey)
+    const privateKey = await crypto.subtle.exportKey('jwk', kp.privateKey)
+    const createdAt = Date.now()
+
+    return { publicKey, privateKey, createdAt }
+  }
+
+  async getAuthPubkeyToken({
+    url,
+    keyPair,
+  }: {
+    url: string
+    keyPair: KeyPair
+  }) {
+    const { publicKey, createdAt } = keyPair
+
+    const { address } = this.account
+    const domain = new URL(url).hostname
+
+    // @todo: Quickfix that should be moved to the backend
+    const [d] = new Date(createdAt + KEYPAIR_TTL).toISOString().split('Z')
+    const expires = `${d}+00:00`
+
+    const payload = Buffer.from(
+      JSON.stringify({
+        alg: 'ECDSA',
+        pubkey: publicKey,
+        domain,
+        address,
+        expires,
+      }),
+    ).toString('hex')
+
+    // @todo: Refactor this
+    const wallet = (this.account as any).wallet.provider.provider
+
+    const signature = await wallet.request({
+      method: 'personal_sign',
+      params: [payload, address],
+    })
+
+    return {
+      payload,
+      signature,
+    }
+  }
+
+  async sendPostOperation({
+    hostname,
+    operation,
+    keyPair,
+    authPubkey,
+    vmId,
+  }: {
+    operation: ExecutableOperations
+    vmId: string
+    hostname: string
+    keyPair: KeyPair
+    authPubkey: SignedPublicKeyHeader
+  }): Promise<Response> {
+    const url = new URL(hostname + '/control/machine/' + vmId + '/' + operation)
+
+    const signedOperationToken = await this.getAuthOperationToken(
+      keyPair.privateKey,
+      url.pathname,
+    )
+
+    return fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-SignedOperation': JSON.stringify(signedOperationToken),
+        'X-SignedPubKey': JSON.stringify(authPubkey),
+      },
+      mode: 'cors',
+    })
+  }
+
+  async *subscribeLogs({
+    hostname,
+    keyPair,
+    authPubkey,
+    vmId,
+    abort,
+  }: {
+    vmId: string
+    hostname: string
+    keyPair: KeyPair
+    authPubkey: SignedPublicKeyHeader
+    abort: Promise<void>
+  }): AsyncGenerator<string[]> {
+    const url = new URL(
+      hostname.replace('https://', 'wss://') +
+        '/control/machine/' +
+        vmId +
+        '/logs',
+    )
+
+    const signedOperationToken = await this.getAuthOperationToken(
+      keyPair.privateKey,
+      url.pathname,
+    )
+
+    const feed = subscribeSocketFeed<any>(url.toString(), abort)
+
+    const { value: ws } = await feed.next()
+
+    ws.send(
+      JSON.stringify({
+        auth: {
+          'X-SignedOperation': signedOperationToken,
+          'X-SignedPubKey': authPubkey,
+        },
+      }),
+    )
+
+    for await (const data of feed) {
+      try {
+        const parsedData = JSON.parse(data)
+        console.log('parsedData', parsedData)
+
+        // if (parsedData.status === 'connected') {
+        //   authOk = true
+        //   return resolve(ws)
+        // }
+        // if (parsedData.status === 'failed') {
+        //   return reject(parsedData.reason)
+        // }
+
+        yield parsedData
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  }
+
+  protected async getAuthOperationToken(privateKey: JsonWebKey, path: string) {
+    const encoder = new TextEncoder()
+
+    // @todo: Quickfix that should be moved to the backend
+    const [d] = new Date().toISOString().split('Z')
+    const time = `${d}+00:00`
+
+    const payload = encoder.encode(
+      JSON.stringify({
+        time,
+        path,
+        method: 'POST',
+      }),
+    )
+
+    const importedKey = await crypto.subtle.importKey(
+      'jwk',
+      privateKey,
+      { name: 'ECDSA', namedCurve: 'P-256' },
+      true,
+      ['sign'],
+    )
+
+    const signature = await crypto.subtle.sign(
+      { name: 'ECDSA', hash: { name: 'SHA-256' } },
+      importedKey,
+      payload,
+    )
+
+    return {
+      payload: Buffer.from(payload).toString('hex'),
+      signature: Buffer.from(signature).toString('hex'),
+    }
   }
 
   protected formatVMIPv6Address(ipv6: string): string {

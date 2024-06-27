@@ -61,7 +61,7 @@ export function useRequestCRNSpecs({
   // const { data: nodeSpecs } = useLocalRequest({
   //   doRequest: () => nodeManager.getCRNSpecs(nodes || []),
   //   onSuccess: () => null,
-  //   flushData: false,
+  //   flushData: true,
   //   triggerOnMount: true,
   //   triggerDeps: [nodes],
   // })
