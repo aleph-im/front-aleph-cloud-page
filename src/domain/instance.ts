@@ -14,7 +14,7 @@ import {
   PaymentMethod,
   EXTRA_WEI,
 } from '@/helpers/constants'
-import { getDate, getExplorerURL, sleep } from '@/helpers/utils'
+import { getDate, getExplorerURL } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
@@ -81,8 +81,6 @@ export type Instance = InstanceContent & {
   confirmed?: boolean
 }
 
-export type InstanceStatus = ExecutableStatus | undefined
-
 export type InstanceCostProps = Omit<ExecutableCostProps, 'type'>
 
 export type InstanceCost = ExecutableCost
@@ -91,6 +89,8 @@ export type InstanceCRNNetworking = {
   ipv4: string
   ipv6: string
 }
+
+export type InstanceStatus = ExecutableStatus
 
 export class InstanceManager
   extends ExecutableManager
@@ -184,7 +184,7 @@ export class InstanceManager
         newInstance.node
       ) {
         yield
-        await this.notifyCRNExecution(newInstance.node, entity.id, false)
+        await this.notifyCRNAllocation(newInstance.node, entity.id, false)
       }
 
       return entity
@@ -263,44 +263,6 @@ export class InstanceManager
     if (domains.length > 0) steps.push('domain')
 
     return steps
-  }
-
-  async notifyCRNExecution(
-    node: CRN,
-    instanceId: string,
-    retry = true,
-  ): Promise<void> {
-    if (!node.address) throw Err.InvalidCRNAddress
-
-    let success = false
-    let errorMsg = ''
-
-    for (let i = 0; i < 5; i++) {
-      try {
-        // strip trailing slash
-        const nodeUrl = node.address.replace(/\/$/, '')
-        const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            instance: instanceId,
-          }),
-        })
-        const resp = await req.json()
-        success = resp.success
-        errorMsg = resp.errors[instanceId]
-      } catch (e) {
-        errorMsg = (e as Error).message
-      } finally {
-        if (success) return
-        if (!retry) break
-        await sleep(1000)
-      }
-    }
-
-    throw Err.InstanceStartupFailed(node.hash, errorMsg)
   }
 
   protected async *addPAYGStreamSteps(

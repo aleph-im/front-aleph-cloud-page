@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import { Label, NoisyContainer } from '@aleph-front/core'
+import { Label, NoisyContainer, Tabs, Tooltip } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageFunction } from '@/hooks/pages/solutions/manage/useManageFunction'
@@ -16,12 +16,26 @@ import VolumeList from '../VolumeList'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import BackButtonSection from '@/components/common/BackButtonSection'
+import LogsFeed from '../LogsFeed'
 
 export default function ManageFunction() {
   const {
     program,
+    isRunning,
+    nodeDetails,
+    isPersistent,
+    rebootDisabled,
+    startDisabled,
+    stopDisabled,
+    tabs,
+    tabId,
+    logs,
+    setTabId,
     handleDelete,
     handleDownload,
+    handleReboot,
+    handleStart,
+    handleStop,
     handleCopyHash,
     handleCopyCode,
     handleCopyRuntime,
@@ -50,16 +64,20 @@ export default function ManageFunction() {
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
-          <div tw="flex justify-between pb-5">
+          <div tw="flex justify-between pb-5 flex-wrap gap-4 flex-col md:flex-row">
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
               <div className="tp-body2">{name}</div>
               <Label
                 kind="secondary"
-                variant={program.confirmed ? 'success' : 'warning'}
+                variant={
+                  program.time < Date.now() - 1000 * 45 && isRunning
+                    ? 'success'
+                    : 'warning'
+                }
                 tw="ml-4"
               >
-                {program.confirmed ? (
+                {isRunning ? (
                   'READY'
                 ) : (
                   <div tw="flex items-center">
@@ -72,7 +90,54 @@ export default function ManageFunction() {
                 )}
               </Label>
             </div>
-            <div tw="flex flex-wrap justify-end gap-2 sm:gap-4">
+            <div tw="flex gap-4">
+              {isPersistent && (
+                <>
+                  <Tooltip
+                    content="Stop Function"
+                    my="bottom-center"
+                    at="top-center"
+                  >
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handleStop}
+                      disabled={stopDisabled}
+                    >
+                      <Icon name="stop" />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip
+                    content="Reallocate Function"
+                    my="bottom-center"
+                    at="top-center"
+                  >
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handleStart}
+                      disabled={startDisabled}
+                    >
+                      <Icon name="play" />
+                    </Button>
+                  </Tooltip>
+
+                  <Tooltip
+                    content="Reboot Function"
+                    my="bottom-center"
+                    at="top-center"
+                  >
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handleReboot}
+                      disabled={rebootDisabled}
+                    >
+                      <Icon name="arrow-rotate-backward" />
+                    </Button>
+                  </Tooltip>
+                </>
+              )}
               <Button
                 size="md"
                 variant="tertiary"
@@ -81,15 +146,15 @@ export default function ManageFunction() {
                 forwardedAs="a"
                 onClick={handleDownload}
               >
-                Download
+                <Icon name="download" />
               </Button>
               <Button
                 kind="functional"
-                variant="warning"
+                variant="error"
                 size="md"
                 onClick={handleDelete}
               >
-                Delete
+                <Icon name="trash" />
               </Button>
             </div>
           </div>
@@ -108,7 +173,8 @@ export default function ManageFunction() {
             </div>
 
             <Separator />
-            <div tw="flex flex-wrap justify-between gap-2">
+
+            <div tw="flex flex-wrap justify-start gap-5 my-5">
               <div>
                 <div className="tp-info text-main0">CORES</div>
                 <div>
@@ -186,53 +252,136 @@ export default function ManageFunction() {
             </div>
 
             <Separator />
-            <TextGradient type="h7" as="h2" color="main0">
-              Linked Runtime
-            </TextGradient>
-            <div className="tp-info text-main0">ITEM HASH</div>
-            <IconText iconName="copy" onClick={handleCopyRuntime}>
-              {program.runtime.ref}
-            </IconText>
-            {program.runtime.comment && (
-              <div tw="mt-5">
-                <div className="tp-info text-main0">COMMENT</div>
-                <Text>{program.runtime.comment}</Text>
-              </div>
+
+            {isPersistent && (
+              <Tabs
+                selected={tabId}
+                align="left"
+                onTabChange={setTabId}
+                tabs={tabs}
+              />
             )}
-            <Separator />
-            <TextGradient type="h7" as="h2" color="main0">
-              Linked Codebase
-            </TextGradient>
-            <div tw="my-5">
-              <div className="tp-info text-main0">IMMUTABLE VOLUME</div>
-              <Link
-                className="tp-body1 fs-16"
-                href={`/storage/volume/${program.code.ref}`}
-              >
-                <IconText iconName="square-up-right">Volume details</IconText>
-              </Link>
+
+            <div role="tabpanel" tw="mt-6">
+              {tabId === 'detail' ? (
+                <>
+                  <div tw="my-5">
+                    <TextGradient type="h7" as="h2" color="main0">
+                      Linked Runtime
+                    </TextGradient>
+
+                    <div tw="my-5">
+                      <div className="tp-info text-main0">ITEM HASH</div>
+                      <div>
+                        <IconText iconName="copy" onClick={handleCopyRuntime}>
+                          {program.runtime.ref}
+                        </IconText>
+                      </div>
+                    </div>
+
+                    <div tw="my-5">
+                      <div className="tp-info text-main0">COMMENT</div>
+                      <div>
+                        <Text>{program.runtime.comment}</Text>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div tw="my-5">
+                    <TextGradient type="h7" as="h2" color="main0">
+                      Linked Codebase
+                    </TextGradient>
+
+                    <div tw="my-5">
+                      <div className="tp-info text-main0">IMMUTABLE VOLUME</div>
+                      <div>
+                        <Link
+                          className="tp-body1 fs-16"
+                          href={`/storage/volume/${program.code.ref}`}
+                        >
+                          <IconText iconName="square-up-right">
+                            Volume details
+                          </IconText>
+                        </Link>
+                      </div>
+                    </div>
+
+                    <div tw="my-5">
+                      <div className="tp-info text-main0">ITEM HASH</div>
+                      <div>
+                        <IconText iconName="copy" onClick={handleCopyCode}>
+                          {program.code.ref}
+                        </IconText>
+                      </div>
+                    </div>
+
+                    {program.code.entrypoint && (
+                      <div tw="mt-5">
+                        <div className="tp-info text-main0">
+                          CODE ENTRYPOINT
+                        </div>
+                        <div>
+                          <Text>{program.code.entrypoint}</Text>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {nodeDetails && (
+                    <>
+                      <Separator />
+
+                      <TextGradient type="h7" as="h2" color="main0">
+                        Current CRN
+                      </TextGradient>
+
+                      <div tw="my-5">
+                        <div className="tp-info text-main0">NAME</div>
+                        <div>
+                          <Text>{nodeDetails.name}</Text>
+                        </div>
+                      </div>
+
+                      <div tw="my-5">
+                        <div className="tp-info text-main0">URL</div>
+                        <div>
+                          <a
+                            className="tp-body1 fs-16"
+                            href={nodeDetails.url}
+                            target="_blank"
+                            referrerPolicy="no-referrer"
+                          >
+                            <IconText iconName="square-up-right">
+                              <Text>{ellipseText(nodeDetails.url, 80)}</Text>
+                            </IconText>
+                          </a>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {volumes.length > 0 && (
+                    <>
+                      <Separator />
+
+                      <TextGradient type="h7" as="h2" color="main0">
+                        Linked Storage(s)
+                      </TextGradient>
+
+                      <VolumeList {...{ volumes }} />
+                    </>
+                  )}
+                </>
+              ) : tabId === 'log' ? (
+                <>
+                  <LogsFeed logs={logs} />
+                </>
+              ) : (
+                <></>
+              )}
             </div>
-            <div className="tp-info text-main0">ITEM HASH</div>
-            <IconText iconName="copy" onClick={handleCopyCode}>
-              {program.code.ref}
-            </IconText>
-            {program.code.entrypoint && (
-              <div tw="mt-5">
-                <div className="tp-info text-main0">CODE ENTRYPOINT</div>
-                <Text>{program.code.entrypoint}</Text>
-              </div>
-            )}
-            {volumes.length > 0 && (
-              <>
-                <Separator />
-
-                <TextGradient type="h7" as="h2" color="main0">
-                  Linked Storage(s)
-                </TextGradient>
-
-                <VolumeList {...{ volumes }} />
-              </>
-            )}
           </NoisyContainer>
 
           <div tw="mt-20 text-center">

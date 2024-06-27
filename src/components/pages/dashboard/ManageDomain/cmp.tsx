@@ -75,11 +75,11 @@ export default function ManageDomain() {
               </Button>
               <Button
                 kind="functional"
-                variant="warning"
+                variant="error"
                 size="md"
                 onClick={handleDelete}
               >
-                Delete
+                <Icon name="trash" />
               </Button>
             </div>
           </div>

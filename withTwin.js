@@ -47,7 +47,6 @@ module.exports = function withTwin(nextConfig) {
           module: false,
           path: false,
           os: false,
-          crypto: false,
           perf_hooks: false,
           v8: false,
         }

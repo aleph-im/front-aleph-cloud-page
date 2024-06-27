@@ -332,6 +332,10 @@ export class NodeManager {
     )
   }
 
+  static normalizeUrl(url: string): string {
+    return url?.toLowerCase().replace(/\/$/, '')
+  }
+
   constructor(
     protected fileManager: FileManager,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
@@ -379,8 +383,8 @@ export class NodeManager {
   async getCRNspecs(node: CRN, retries = 2): Promise<CRNSpecs | undefined> {
     if (!node.address) return
 
-    const address = node.address.toLowerCase().replace(/\/$/, '')
-    const url = `${address}/about/usage/system`
+    const nodeUrl = NodeManager.normalizeUrl(node.address)
+    const url = `${nodeUrl}/about/usage/system`
 
     const { success } = urlSchema.safeParse(url)
     if (!success) return
@@ -442,9 +446,9 @@ export class NodeManager {
 
   async getCRNips(node: CRN, retries = 2): Promise<CRNIps | undefined> {
     if (!node.address) return
+    const nodeUrl = NodeManager.normalizeUrl(node.address)
 
-    const address = node.address.toLowerCase().replace(/\/$/, '')
-    const url = `${address}/status/check/ipv6`
+    const url = `${nodeUrl}/status/check/ipv6`
     const { success } = urlSchema.safeParse(url)
     if (!success) return
 
@@ -492,18 +496,6 @@ export class NodeManager {
       300_000,
       getLatestReleases,
     )
-  }
-
-  async getCRNByStreamRewardAddress(
-    rewardAddress: string,
-  ): Promise<CRN | undefined> {
-    const nodes = await this.getCRNNodes()
-    return nodes.find((node) => node.stream_reward === rewardAddress)
-  }
-
-  async getCRNByHash(hash: string): Promise<CRN | undefined> {
-    const nodes = await this.getCRNNodes()
-    return nodes.find((node) => node.hash === hash)
   }
 
   protected async fetchAllNodes(): Promise<NodesResponse> {
