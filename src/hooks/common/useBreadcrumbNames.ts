@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 
 const defaultNames = {
   '/': 'HOME',
-  '/storage': '-',
+  '/storage': 'STORAGE / VOLUMES',
   '/storage/volume': '-',
   '/storage/volume/[hash]': '-',
   '/storage/volume/new': 'SETUP NEW VOLUME',
@@ -16,17 +16,17 @@ const defaultNames = {
   '/settings/domain/[hash]': '-',
   '/settings/domain/new': 'SETUP NEW DOMAIN',
   '/computing': '-',
-  '/computing/instance': '-',
+  '/computing/instance': 'COMPUTING / INSTANCES',
   '/computing/instance/[hash]': '-',
   '/computing/instance/new': 'SETUP NEW INSTANCE',
   '/computing/instance/new/auto': 'AUTOMATIC NODE ALLOCATION',
   '/computing/instance/new/crn': 'MANUAL NODE ALLOCATION',
   '/computing/instance/new/crn/[hash]': '-',
-  '/computing/function': '-',
+  '/computing/function': 'COMPUTING / FUNCTIONS',
   '/computing/function/[hash]': '-',
   '/computing/function/new': 'SETUP NEW FUNCTION',
   '/hosting': '-',
-  '/hosting/website': '-',
+  '/hosting/website': 'WEB3 HOSTING / WEBSITES',
   '/hosting/website/[hash]': '-',
   '/hosting/website/new': 'SETUP NEW WEBSITE',
 }
@@ -47,12 +47,12 @@ export function useBreadcrumbNames(): UseBreadcrumbNamesReturn {
     return {
       ...names,
       '/computing/instance/new/crn/[hash]': hash,
-      '/storage/volume/[hash]': `VOLUME / ${hash}`,
-      '/settings/ssh/[hash]': `SSH KEY / ${hash}`,
-      '/settings/domain/[hash]': `DOMAIN / ${hashParam}`,
-      '/computing/instance/[hash]': `INSTANCE / ${hash}`,
-      '/computing/function/[hash]': `FUNCTION / ${hash}`,
-      '/hosting/website/[hash]': `WEBSITE / ${hashParam}`,
+      '/storage/volume/[hash]': `${hash}`,
+      '/settings/ssh/[hash]': `SSH KEYS / ${hash}`,
+      '/settings/domain/[hash]': `DOMAINS / ${hashParam}`,
+      '/computing/instance/[hash]': `${hash}`,
+      '/computing/function/[hash]': `${hash}`,
+      '/hosting/website/[hash]': `${hashParam}`,
     }
   }, [router.query, names])
 
