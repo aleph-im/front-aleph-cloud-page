@@ -1,8 +1,6 @@
 import React, { memo } from 'react'
 import { Icon, NoisyContainer, ObjectImg } from '@aleph-front/core'
 import { EntitySummaryCardProps } from './types'
-import { StyledEntitySummaryCard } from './styles'
-import { ComputingEntityDataPill } from '../ComputingEntityDataPill/cmp'
 import StorageInformation from '../StorageInformation'
 import ButtonLink from '../ButtonLink'
 import { InformationProps } from '../EntityCard/types'
@@ -11,46 +9,22 @@ import { ComputingInformationProps } from '../ComputingInformation/types'
 import { StorageInformationProps } from '../StorageInformation/types'
 
 const InformationElement = ({
-  size,
   type,
   data,
 }: { size: string } & InformationProps) => {
   switch (type) {
     case 'computing':
-      const computingData = data as ComputingInformationProps
-
-      return size === 'sm' ? (
-        <ComputingEntityDataPill value={computingData.running} icon="play" />
-      ) : (
-        <ComputingInformation {...computingData} />
-      )
+      return <ComputingInformation {...(data as ComputingInformationProps)} />
     case 'storage':
-      const storageData = data as StorageInformationProps
-
-      return <StorageInformation {...storageData} />
+      return <StorageInformation {...(data as StorageInformationProps)} />
     default:
       return null
   }
 }
 InformationElement.displayName = 'InformationElement'
 
-export const EntitySummaryCard = ({
-  size = 'sm',
-  items,
-}: EntitySummaryCardProps) => {
-  return size === 'sm' ? (
-    <StyledEntitySummaryCard>
-      {items.map(({ title, img, information }) => (
-        <div key="title" tw="flex justify-between w-full">
-          <div tw="flex items-center gap-3">
-            <ObjectImg shape color="main0" size={36} id={img as any} />
-            <p className="tp-h7 text-base2 fs-16">{title}</p>
-          </div>
-          <InformationElement size={size} {...information} />
-        </div>
-      ))}
-    </StyledEntitySummaryCard>
-  ) : (
+export const EntitySummaryCard = ({ items }: EntitySummaryCardProps) => {
+  return (
     <NoisyContainer tw="min-w-[22rem] h-36 p-6 w-fit flex items-center gap-3">
       {items.map(({ title, img, buttonUrl, information }) => (
         <>

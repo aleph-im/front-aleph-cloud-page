@@ -31,6 +31,7 @@ export default function InstanceDashboardPage() {
               info="WHAT IS AN..."
               title="Instance"
               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              withButton={instances.length === 0}
               buttonUrl="/computing/function/new"
               buttonText="Create instance"
               externalLinkUrl="https://docs.aleph.im/computing/#persistent-execution"

@@ -14,6 +14,7 @@ export const DashboardCardWithSideImage = ({
   description,
   imageSrc,
   imageAlt,
+  withButton = true,
   buttonUrl,
   buttonText,
   externalLinkUrl,
@@ -34,9 +35,12 @@ export const DashboardCardWithSideImage = ({
             {description}
           </div>
           <div tw="mt-6 flex flex-wrap items-center justify-between gap-6">
-            <ButtonLink variant="primary" size="md" href={buttonUrl}>
-              {buttonText}
-            </ButtonLink>
+            {withButton && (
+              <ButtonLink variant="primary" size="md" href={buttonUrl}>
+                {buttonText}
+              </ButtonLink>
+            )}
+
             <ExternalLinkButton href={externalLinkUrl}>
               Learn more
             </ExternalLinkButton>

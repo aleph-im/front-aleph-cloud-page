@@ -77,6 +77,8 @@ export type Instance = InstanceContent & {
   confirmed?: boolean
 }
 
+export type InstanceStatus = ExecutableStatus | undefined
+
 export type InstanceCostProps = Omit<ExecutableCostProps, 'type'>
 
 export type InstanceCost = ExecutableCost

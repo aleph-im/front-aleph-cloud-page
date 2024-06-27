@@ -6,31 +6,52 @@ import { Program } from '@/domain/program'
 import { Instance } from '@/domain/instance'
 import { RequestState } from '@aleph-front/core'
 import { ExecutableStatus } from '@/domain/executable'
-import {
-  UseAttachedVolumesReturn,
-  useAttachedVolumes,
-} from '@/hooks/common/useAttachedVolumes'
+import { useAttachedVolumes } from '@/hooks/common/useAttachedVolumes'
 
-export type StorageAggregatedStatus = UseAttachedVolumesReturn
+export type AmountAggregatedStatus = {
+  amount: number
+}
+
+export type StorageAggregatedStatus = {
+  amount: number
+  size: number
+}
 
 export type ComputingAggregatedStatus = {
   running: number
   paused: number
   booting: number
-  total: number
+  amount: number
 }
+
+export type InstancesAggregatedStatus = {
+  total: ComputingAggregatedStatus
+}
+
+export type ProgramsAggregatedStatus = {
+  persistent: ComputingAggregatedStatus
+  onDemand: ComputingAggregatedStatus
+  total: ComputingAggregatedStatus
+}
+
 export type WebsitesAggregatedStatus = {
-  total: number
+  total: AmountAggregatedStatus
+}
+
+export type VolumesAggregatedStatus = {
+  total: StorageAggregatedStatus
+  linked: StorageAggregatedStatus
+  unlinked: StorageAggregatedStatus
 }
 
 export type UseDashboardPageReturn = {
-  programAggregatedStatus: ComputingAggregatedStatus
-  instanceAggregatedStatus: ComputingAggregatedStatus
-  volumesAggregatedStatus: UseAttachedVolumesReturn
+  programAggregatedStatus: ProgramsAggregatedStatus
+  instanceAggregatedStatus: InstancesAggregatedStatus
+  volumesAggregatedStatus: VolumesAggregatedStatus
   websitesAggregatedStatus: WebsitesAggregatedStatus
 }
 
-function calculateComputingEntitiesAggregatedStatus({
+function calculateComputingAggregatedStatus({
   entities,
   entitiesStatus,
 }: {
@@ -46,14 +67,14 @@ function calculateComputingEntitiesAggregatedStatus({
           : 'paused'
 
       ac[statusKey] += 1
-      ac.total += 1
+      ac.amount += 1
       return ac
     },
     {
       running: 0,
       paused: 0,
       booting: 0,
-      total: 0,
+      amount: 0,
     },
   )
 }
@@ -72,17 +93,29 @@ export function useDashboardPage(): UseDashboardPageReturn {
   })
 
   const programAggregatedStatus = useMemo(() => {
-    return calculateComputingEntitiesAggregatedStatus({
-      entities: programs,
-      entitiesStatus: programsStatus,
-    })
+    return {
+      total: calculateComputingAggregatedStatus({
+        entities: programs,
+        entitiesStatus: programsStatus,
+      }),
+      persistent: calculateComputingAggregatedStatus({
+        entities: programs.filter((p) => p.on.persistent),
+        entitiesStatus: programsStatus,
+      }),
+      onDemand: calculateComputingAggregatedStatus({
+        entities: programs.filter((p) => !p.on.persistent),
+        entitiesStatus: programsStatus,
+      }),
+    }
   }, [programsStatus, programs])
 
   const instanceAggregatedStatus = useMemo(() => {
-    return calculateComputingEntitiesAggregatedStatus({
-      entities: instances,
-      entitiesStatus: instancesStatus,
-    })
+    return {
+      total: calculateComputingAggregatedStatus({
+        entities: instances,
+        entitiesStatus: instancesStatus,
+      }),
+    }
   }, [instancesStatus, instances])
 
   const volumesAggregatedStatus = useAttachedVolumes({
@@ -93,7 +126,7 @@ export function useDashboardPage(): UseDashboardPageReturn {
   })
 
   const websitesAggregatedStatus = useMemo(() => {
-    return { total: websites.length }
+    return { total: { amount: websites.length } }
   }, [websites])
 
   return {
