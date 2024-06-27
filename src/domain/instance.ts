@@ -21,6 +21,7 @@ import {
   ExecutableCost,
   ExecutableCostProps,
   PaymentConfiguration,
+  ExecutableStatus,
 } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
@@ -84,6 +85,8 @@ export type InstanceCRNNetworking = {
   ipv4: string
   ipv6: string
 }
+
+export type InstanceStatus = ExecutableStatus
 
 export class InstanceManager
   extends ExecutableManager
@@ -266,8 +269,8 @@ export class InstanceManager
 
     for (let i = 0; i < 5; i++) {
       try {
-        // strip trailing slash
-        const nodeUrl = node.address.replace(/\/$/, '')
+        const nodeUrl = NodeManager.normalizeUrl(node.address)
+
         const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
           method: 'POST',
           headers: {

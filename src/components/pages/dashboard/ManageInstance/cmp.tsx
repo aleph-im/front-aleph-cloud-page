@@ -1,6 +1,6 @@
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import { Label, NoisyContainer } from '@aleph-front/core'
+import { Label, NoisyContainer, Tooltip } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
@@ -10,15 +10,21 @@ import VolumeList from '../VolumeList'
 import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function ManageInstance() {
   const {
     instance,
     status,
     mappedKeys,
-    crn,
     nodeDetails,
-    handleRetryAllocation,
+    isRunning,
+    stopDisabled,
+    startDisabled,
+    rebootDisabled,
+    handleStop,
+    handleStart,
+    handleReboot,
     handleCopyHash,
     handleCopyConnect,
     handleCopyIpv6,
@@ -26,6 +32,22 @@ export default function ManageInstance() {
   } = useManageInstance()
 
   const theme = useTheme()
+
+  const [tabId] = useState('detail')
+
+  // const tabs = useMemo(
+  //   () => [
+  //     {
+  //       id: 'detail',
+  //       name: 'Details',
+  //     },
+  //     {
+  //       id: 'log',
+  //       name: 'Logs',
+  //     },
+  //   ],
+  //   [],
+  // )
 
   if (!instance) {
     return (
@@ -53,13 +75,13 @@ export default function ManageInstance() {
               <Label
                 kind="secondary"
                 variant={
-                  instance.time < Date.now() - 1000 * 45 && status?.vm_ipv6
+                  instance.time < Date.now() - 1000 * 45 && isRunning
                     ? 'success'
                     : 'warning'
                 }
                 tw="ml-4"
               >
-                {status?.vm_ipv6 ? (
+                {isRunning ? (
                   'READY'
                 ) : (
                   <div tw="flex items-center">
@@ -73,23 +95,56 @@ export default function ManageInstance() {
               </Label>
             </div>
             <div tw="flex gap-4 flex-col md:flex-row">
-              {!status?.vm_ipv6 && crn && (
+              <Tooltip
+                content="Stop Instance"
+                my="bottom-center"
+                at="top-center"
+              >
                 <Button
-                  kind="functional"
-                  variant="warning"
+                  variant="secondary"
                   size="md"
-                  onClick={handleRetryAllocation}
+                  onClick={handleStop}
+                  disabled={stopDisabled}
                 >
-                  Reallocate
+                  <Icon name="stop" />
                 </Button>
-              )}
+              </Tooltip>
+              <Tooltip
+                content="Reallocate Instance"
+                my="bottom-center"
+                at="top-center"
+              >
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={handleStart}
+                  disabled={startDisabled}
+                >
+                  <Icon name="play" />
+                </Button>
+              </Tooltip>
+
+              <Tooltip
+                content="Reboot Instance"
+                my="bottom-center"
+                at="top-center"
+              >
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={handleReboot}
+                  disabled={rebootDisabled}
+                >
+                  <Icon name="arrow-rotate-backward" />
+                </Button>
+              </Tooltip>
               <Button
                 kind="functional"
-                variant="warning"
+                variant="error"
                 size="md"
                 onClick={handleDelete}
               >
-                Delete
+                <Icon name="trash" />
               </Button>
             </div>
           </div>
@@ -162,118 +217,138 @@ export default function ManageInstance() {
 
             <Separator />
 
-            <div tw="my-5">
-              <TextGradient type="h7" as="h2" color="main0">
-                Connection methods
-              </TextGradient>
+            {/* <Tabs
+              selected={tabId}
+              align="left"
+              onTabChange={setTabId}
+              tabs={tabs}
+            /> */}
 
-              <div tw="my-5">
-                <div className="tp-info text-main0">SSH COMMAND</div>
-                <div>
-                  {status ? (
-                    <IconText iconName="copy" onClick={handleCopyConnect}>
-                      <Text>&gt;_ ssh root@{status.vm_ipv6}</Text>
-                    </IconText>
-                  ) : (
-                    <div tw="flex items-end">
-                      <span tw="mr-1" className="tp-body1 fs-16 text-main2">
-                        Allocating
-                      </span>
-                      <ThreeDots
-                        width=".8rem"
-                        height="1rem"
-                        color={theme.color.main2}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div role="tabpanel" tw="mt-6">
+              {tabId === 'detail' ? (
+                <>
+                  <div tw="my-5">
+                    <TextGradient type="h7" as="h2" color="main0">
+                      Connection methods
+                    </TextGradient>
 
-              <div tw="my-5">
-                <div className="tp-info text-main0">IPv6</div>
-                <div>
-                  {status && (
-                    <IconText iconName="copy" onClick={handleCopyIpv6}>
-                      <Text>{status.vm_ipv6}</Text>
-                    </IconText>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div tw="my-5">
-              <TextGradient type="h7" as="h2" color="main0">
-                Accessible for
-              </TextGradient>
-
-              <div tw="my-5 flex">
-                {mappedKeys.map(
-                  (key, i) =>
-                    key && (
-                      <div key={key?.id} tw="mr-5">
-                        <div className="tp-info text-main0">
-                          SSH KEY #{i + 1}
-                        </div>
-
-                        <Link
-                          className="tp-body1 fs-16"
-                          href={'?hash=' + key.id}
-                          referrerPolicy="no-referrer"
-                        >
-                          <IconText iconName="square-up-right">
-                            <Text>{key.label}</Text>
+                    <div tw="my-5">
+                      <div className="tp-info text-main0">SSH COMMAND</div>
+                      <div>
+                        {status ? (
+                          <IconText iconName="copy" onClick={handleCopyConnect}>
+                            <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
                           </IconText>
-                        </Link>
+                        ) : (
+                          <div tw="flex items-end">
+                            <span
+                              tw="mr-1"
+                              className="tp-body1 fs-16 text-main2"
+                            >
+                              Allocating
+                            </span>
+                            <ThreeDots
+                              width=".8rem"
+                              height="1rem"
+                              color={theme.color.main2}
+                            />
+                          </div>
+                        )}
                       </div>
-                    ),
-                )}
-              </div>
+                    </div>
+
+                    <div tw="my-5">
+                      <div className="tp-info text-main0">IPv6</div>
+                      <div>
+                        {status && (
+                          <IconText iconName="copy" onClick={handleCopyIpv6}>
+                            <Text>{status.ipv6Parsed}</Text>
+                          </IconText>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div tw="my-5">
+                    <TextGradient type="h7" as="h2" color="main0">
+                      Accessible for
+                    </TextGradient>
+
+                    <div tw="my-5 flex">
+                      {mappedKeys.map(
+                        (key, i) =>
+                          key && (
+                            <div key={key?.id} tw="mr-5">
+                              <div className="tp-info text-main0">
+                                SSH KEY #{i + 1}
+                              </div>
+
+                              <Link
+                                className="tp-body1 fs-16"
+                                href={'?hash=' + key.id}
+                                referrerPolicy="no-referrer"
+                              >
+                                <IconText iconName="square-up-right">
+                                  <Text>{key.label}</Text>
+                                </IconText>
+                              </Link>
+                            </div>
+                          ),
+                      )}
+                    </div>
+                  </div>
+
+                  {nodeDetails && (
+                    <>
+                      <Separator />
+
+                      <TextGradient type="h7" as="h2" color="main0">
+                        Current CRN
+                      </TextGradient>
+
+                      <div tw="my-5">
+                        <div className="tp-info text-main0">NAME</div>
+                        <div>
+                          <Text>{nodeDetails.name}</Text>
+                        </div>
+                      </div>
+
+                      <div tw="my-5">
+                        <div className="tp-info text-main0">URL</div>
+                        <div>
+                          <a
+                            className="tp-body1 fs-16"
+                            href={nodeDetails.url}
+                            target="_blank"
+                            referrerPolicy="no-referrer"
+                          >
+                            <IconText iconName="square-up-right">
+                              <Text>{ellipseText(nodeDetails.url, 80)}</Text>
+                            </IconText>
+                          </a>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {volumes.length > 0 && (
+                    <>
+                      <Separator />
+
+                      <TextGradient type="h7" as="h2" color="main0">
+                        Linked Storage(s)
+                      </TextGradient>
+
+                      <VolumeList {...{ volumes }} />
+                    </>
+                  )}
+                </>
+              ) : tabId === 'log' ? (
+                <>LOGS</>
+              ) : (
+                <></>
+              )}
             </div>
-
-            {nodeDetails && (
-              <>
-                <Separator />
-
-                <TextGradient type="h7" as="h2" color="main0">
-                  Current CRN
-                </TextGradient>
-
-                <div tw="my-5">
-                  <div className="tp-info text-main0">NAME</div>
-                  <div>
-                    <Text>{nodeDetails.name}</Text>
-                  </div>
-                </div>
-
-                <div tw="my-5">
-                  <div className="tp-info text-main0">URL</div>
-                  <div>
-                    <a
-                      className="tp-body1 fs-16"
-                      href={nodeDetails.url}
-                      target="_blank"
-                      referrerPolicy="no-referrer"
-                    >
-                      <IconText iconName="square-up-right">
-                        <Text>{ellipseText(nodeDetails.url, 80)}</Text>
-                      </IconText>
-                    </a>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {volumes.length > 0 && (
-              <>
-                <Separator />
-
-                <TextGradient type="h7" as="h2" color="main0">
-                  Linked Storage(s)
-                </TextGradient>
-
-                <VolumeList {...{ volumes }} />
-              </>
-            )}
           </NoisyContainer>
 
           <div tw="mt-20 text-center">

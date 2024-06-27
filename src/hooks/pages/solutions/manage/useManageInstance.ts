@@ -19,16 +19,23 @@ import {
 import Err from '@/helpers/errors'
 import { BlockchainId } from '@/domain/connect/base'
 import { useCopyToClipboardAndNotify, useNotification } from '@aleph-front/core'
-import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
-import { CRN } from '@/domain/node'
+import { CRN, NodeManager } from '@/domain/node'
+import { ExecutableOperations } from '@/domain/executable'
+// import { useRequestExecutableLogsFeed } from '@/hooks/common/useRequestEntity/useRequestExecutableLogsFeed'
 
 export type ManageInstance = {
   instance?: Instance
   status?: InstanceStatus
   mappedKeys: (SSHKey | undefined)[]
-  crn?: CRN
   nodeDetails?: { name: string; url: string }
-  handleRetryAllocation: () => void
+  logs: string
+  isRunning: boolean
+  stopDisabled: boolean
+  startDisabled: boolean
+  rebootDisabled: boolean
+  handleStop: () => void
+  handleStart: () => void
+  handleReboot: () => void
   handleCopyHash: () => void
   handleCopyConnect: () => void
   handleCopyIpv6: () => void
@@ -53,15 +60,17 @@ export function useManageInstance(): ManageInstance {
   const status = useInstanceStatus(instance)
 
   const handleCopyHash = useCopyToClipboardAndNotify(instance?.id || '')
-  const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.vm_ipv6 || '')
+  const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.ipv6Parsed || '')
   const handleCopyConnect = useCopyToClipboardAndNotify(
-    `ssh root@${status?.vm_ipv6}`,
+    `ssh root@${status?.ipv6Parsed}`,
   )
 
   const manager = useInstanceManager()
-  const nodeManager = useNodeManager()
   const sshKeyManager = useSSHKeyManager()
   const { next, stop } = useCheckoutNotification({})
+
+  const isPAYG = instance?.payment?.type === PaymentType.superfluid
+  const instanceId = instance?.id
 
   useEffect(() => {
     if (!instance || !sshKeyManager) return
@@ -79,7 +88,7 @@ export function useManageInstance(): ManageInstance {
     let superfluidAccount
     if (!instance) return
 
-    if (instance.payment?.type === PaymentType.superfluid) {
+    if (isPAYG) {
       if (
         blockchain !== BlockchainId.AVAX ||
         !(account instanceof AvalancheAccount)
@@ -96,7 +105,7 @@ export function useManageInstance(): ManageInstance {
       handleConnect({ blockchain: BlockchainId.ETH })
       throw Err.ConnectYourPaymentWallet
     }
-  }, [account, blockchain, handleConnect, instance])
+  }, [account, blockchain, handleConnect, instance, isPAYG])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
@@ -131,27 +140,75 @@ export function useManageInstance(): ManageInstance {
   const [crn, setCRN] = useState<CRN>()
 
   useEffect(() => {
+    let cancelled = false
+
     async function load() {
-      try {
-        if (!nodeManager) throw new Error()
-        if (!instance) throw new Error()
-        if (instance.payment?.type !== PaymentType.superfluid) throw new Error()
+      setCRN(undefined)
 
-        const { receiver } = instance.payment || {}
-        if (!receiver) throw new Error()
+      if (!manager) return
+      if (!instance) return
 
-        const node = await nodeManager.getCRNByStreamRewardAddress(receiver)
-        setCRN(node)
-      } catch {
-        setCRN(undefined)
-      }
+      const node = await manager.getAllocationCRN(instance)
+      if (cancelled) return
+
+      setCRN(node)
     }
+
     load()
-  }, [instance, nodeManager])
+
+    return () => {
+      cancelled = true
+    }
+  }, [instance, manager])
+
+  const nodeDetails = useMemo(() => {
+    if (!crn) return
+    return {
+      name: crn.name || crn.hash,
+      url: crn.address || '',
+    }
+  }, [crn])
+
+  const nodeUrl = useMemo(() => {
+    const { url = '' } = nodeDetails || {}
+    return NodeManager.normalizeUrl(url)
+  }, [nodeDetails])
+
+  const handleSendOperation = useCallback(
+    async (operation: ExecutableOperations) => {
+      try {
+        if (!manager) throw Err.ConnectYourWallet
+        if (!nodeUrl) throw Err.InvalidNode
+        if (!instanceId) throw Err.InvalidNode
+
+        const keyPair = await manager.getKeyPair()
+        const authPubkey = await manager.getAuthPubkeyToken({
+          url: nodeUrl,
+          keyPair,
+        })
+
+        await manager.sendPostOperation({
+          hostname: nodeUrl,
+          operation,
+          keyPair,
+          authPubkey,
+          vmId: instanceId,
+        })
+      } catch (e) {
+        noti?.add({
+          variant: 'error',
+          title: 'Error',
+          text: (e as Error)?.message,
+        })
+      }
+    },
+    [manager, nodeUrl, noti, instanceId],
+  )
 
   const handleRetryAllocation = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
     if (!instance) throw Err.InstanceNotFound
+    if (!isPAYG) throw Err.StreamNotSupported
 
     try {
       await handleEnsureNetwork()
@@ -165,30 +222,42 @@ export function useManageInstance(): ManageInstance {
         text: (e as Error)?.message,
       })
     }
-  }, [crn, handleEnsureNetwork, instance, manager, noti])
+  }, [crn, handleEnsureNetwork, instance, isPAYG, manager, noti])
 
-  const nodeDetails = useMemo(() => {
-    if (status?.node) {
-      return {
-        name: status.node.node_id,
-        url: status.node.url,
-      }
-    }
-    if (crn) {
-      return {
-        name: crn.name || crn.hash,
-        url: crn.address || '',
-      }
-    }
-  }, [crn, status?.node])
+  const isRunning = !!status?.ipv6Parsed
+
+  const stopDisabled = !isPAYG || !isRunning || !crn
+  const startDisabled = !isPAYG || isRunning || !crn
+  const rebootDisabled = !isRunning || !crn
+
+  const handleStop = useCallback(
+    () => handleSendOperation('stop'),
+    [handleSendOperation],
+  )
+
+  const handleStart = handleRetryAllocation
+
+  const handleReboot = useCallback(
+    () => handleSendOperation('reboot'),
+    [handleSendOperation],
+  )
+
+  // const { logs } = useRequestExecutableLogsFeed({ nodeUrl, vmId: instanceId })
+  const logs = ''
 
   return {
     instance,
     status,
     mappedKeys,
-    crn,
     nodeDetails,
-    handleRetryAllocation,
+    logs,
+    isRunning,
+    stopDisabled,
+    startDisabled,
+    rebootDisabled,
+    handleStop,
+    handleStart,
+    handleReboot,
     handleCopyHash,
     handleCopyConnect,
     handleCopyIpv6,

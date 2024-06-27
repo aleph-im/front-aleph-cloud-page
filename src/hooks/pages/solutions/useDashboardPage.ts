@@ -96,7 +96,6 @@ export function useDashboardPage(): UseDashboardPageReturn {
     return { total: websites.length }
   }, [websites])
 
-  console.log('programs', programs)
   return {
     programAggregatedStatus,
     instanceAggregatedStatus,
