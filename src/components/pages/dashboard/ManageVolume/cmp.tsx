@@ -66,15 +66,15 @@ export default function ManageVolume() {
                 forwardedAs="a"
                 onClick={handleDownload}
               >
-                Download
+                <Icon name="download" />
               </Button>
               <Button
                 kind="functional"
-                variant="warning"
+                variant="error"
                 size="md"
                 onClick={handleDelete}
               >
-                Delete
+                <Icon name="trash" />
               </Button>
             </div>
           </div>

@@ -61,7 +61,7 @@ export function useRequestCRNIps({
   // const { data: nodeSpecs } = useLocalRequest({
   //   doRequest: () => nodeManager.getCRNIps(nodes || []),
   //   onSuccess: () => null,
-  //   flushData: false,
+  //   flushData: true,
   //   triggerOnMount: true,
   //   triggerDeps: [nodes],
   // })

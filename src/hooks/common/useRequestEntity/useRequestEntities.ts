@@ -44,7 +44,7 @@ export function useRequestEntities<Entity extends ConfirmableEntity>({
       return entity ? [entity] : []
     },
     onSuccess: () => null,
-    flushData: false,
+    flushData: true,
     triggerOnMount,
     triggerDeps,
   })

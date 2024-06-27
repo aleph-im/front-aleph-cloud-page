@@ -19,7 +19,7 @@ export function useRequestCRNs({
   const { data: nodes } = useLocalRequest({
     doRequest: () => nodeManager.getCRNNodes(),
     onSuccess: () => null,
-    flushData: false,
+    flushData: true,
     triggerOnMount: true,
     triggerDeps,
   })
@@ -30,7 +30,7 @@ export function useRequestCRNs({
     doRequest: () => nodeManager.getLatestCRNVersion(),
     onSuccess: () => null,
     onError: () => null,
-    flushData: false,
+    flushData: true,
     triggerOnMount: true,
   })
 

@@ -300,7 +300,7 @@ export default function CRNList(props: CRNListProps) {
     <>
       <SpinnerOverlay show={!filteredNodes} />
 
-      <NoisyContainer tw="w-full">
+      <NoisyContainer tw="h-full w-full">
         <div tw="flex mb-8 gap-10 justify-between flex-wrap flex-col md:flex-row items-stretch md:items-center">
           <div tw="flex-1">
             <TextInput
@@ -320,7 +320,10 @@ export default function CRNList(props: CRNListProps) {
             />
           </div>
         </div>
-        <div tw="h-[30rem] overflow-auto" ref={infiniteScrollContainerRef}>
+        <div
+          tw="min-h-[20rem] h-full overflow-auto"
+          ref={infiniteScrollContainerRef}
+        >
           <NodesTable
             {...{
               columns,

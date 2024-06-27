@@ -64,7 +64,7 @@ export function useRequestExecutableStatus({
   // const { data: instanceSpecs } = useLocalRequest({
   //   doRequest: () => manager.getExecutableStatus(entities || []),
   //   onSuccess: () => null,
-  //   flushData: false,
+  //   flushData: true,
   //   triggerOnMount: true,
   //   triggerDeps: [entities],
   // })
