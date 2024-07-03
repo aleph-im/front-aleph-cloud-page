@@ -253,19 +253,33 @@ export abstract class ExecutableManager {
 
     const { node_id, url } = response.node
 
-    const nodes = await this.nodeManager.getCRNNodes()
+    // const nodes = await this.nodeManager.getCRNNodes()
 
-    let node = nodes.find((node) => node.hash === node_id)
-    node =
-      node ||
-      nodes.find(
-        (node) =>
-          node.address &&
-          NodeManager.normalizeUrl(node.address) ===
-            NodeManager.normalizeUrl(url),
-      )
+    // let node = nodes.find((node) => node.address === url)
+    // node =
+    //   node ||
+    //   nodes.find(
+    //     (node) =>
+    //       node.address &&
+    //       NodeManager.normalizeUrl(node.address) ===
+    //         NodeManager.normalizeUrl(url),
+    //   )
 
-    return node
+    return {
+      hash: node_id,
+      owner: '',
+      reward: '',
+      locked: false,
+      time: 0,
+      score: 0,
+      score_updated: true,
+      decentralization: 0,
+      performance: 0,
+      address: url,
+      status: 'linked',
+      parent: null,
+      type: 'compute',
+    }
   }
 
   async getKeyPair(): Promise<KeyPair> {
