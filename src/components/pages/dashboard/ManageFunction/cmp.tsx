@@ -15,6 +15,7 @@ import { Container, Text, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
+import BackButtonSection from '@/components/common/BackButtonSection'
 
 export default function ManageFunction() {
   const {
@@ -24,6 +25,7 @@ export default function ManageFunction() {
     handleCopyHash,
     handleCopyCode,
     handleCopyRuntime,
+    handleBack,
   } = useManageFunction()
 
   const theme = useTheme()
@@ -31,6 +33,7 @@ export default function ManageFunction() {
   if (!program) {
     return (
       <>
+        <BackButtonSection handleBack={handleBack} />
         <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
@@ -44,6 +47,7 @@ export default function ManageFunction() {
 
   return (
     <>
+      <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <div tw="flex justify-between pb-5">

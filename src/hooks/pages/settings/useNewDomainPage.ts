@@ -41,6 +41,7 @@ export type UseNewDomainPageReturn = {
   refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
   errors: FieldErrors<NewDomainFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
+  handleBack: () => void
   setTarget: (target: EntityDomainType) => void
   setRef: (ref: string) => void
 }
@@ -183,6 +184,10 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     setValue('ref', ref)
   }
 
+  const handleBack = () => {
+    router.push('/settings/')
+  }
+
   return {
     entities,
     nameCtrl,
@@ -190,6 +195,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     refCtrl,
     errors,
     handleSubmit,
+    handleBack,
     setTarget,
     setRef,
   }

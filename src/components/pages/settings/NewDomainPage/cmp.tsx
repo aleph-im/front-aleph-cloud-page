@@ -16,6 +16,7 @@ import Form from '@/components/form/Form'
 import { EntityDomainTypeName, EntityDomainType } from '@/helpers/constants'
 import { useNewDomainPage } from '@/hooks/pages/settings/useNewDomainPage'
 import { SectionTitle } from '@/components/common/CompositeTitle'
+import BackButtonSection from '@/components/common/BackButtonSection'
 
 export default function NewDomain() {
   const {
@@ -25,6 +26,7 @@ export default function NewDomain() {
     refCtrl,
     errors,
     handleSubmit,
+    handleBack,
     setTarget,
     setRef,
   } = useNewDomainPage()
@@ -47,6 +49,7 @@ export default function NewDomain() {
 
   return (
     <>
+      <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>

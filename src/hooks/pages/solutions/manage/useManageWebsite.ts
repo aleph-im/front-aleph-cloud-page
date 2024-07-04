@@ -37,6 +37,7 @@ export type ManageWebsite = {
   handleCopyVolumeHash: () => void
   handleCopyCIDv0: () => void
   handleCopyCIDv1: () => void
+  handleBack: () => void
 }
 
 export function useManageWebsite(): ManageWebsite {
@@ -166,6 +167,10 @@ export function useManageWebsite(): ManageWebsite {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cid])
 
+  const handleBack = () => {
+    router.push('.')
+  }
+
   return {
     website,
     refVolume,
@@ -182,6 +187,7 @@ export function useManageWebsite(): ManageWebsite {
     handleCopyVolumeHash,
     handleCopyCIDv0,
     handleCopyCIDv1,
+    handleBack,
     //handleDownload
   }
 }

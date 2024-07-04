@@ -13,6 +13,7 @@ import { ellipseAddress } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import ButtonLink from '@/components/common/ButtonLink'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
+import BackButtonSection from '@/components/common/BackButtonSection'
 
 export default function ManageDomain() {
   const {
@@ -24,12 +25,14 @@ export default function ManageDomain() {
     handleRetry,
     handleCopyHash,
     handleCopyRef,
+    handleBack,
   } = useManageDomain()
   const router = useRouter()
 
   if (!domain) {
     return (
       <>
+        <BackButtonSection handleBack={handleBack} />
         <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
@@ -42,6 +45,7 @@ export default function ManageDomain() {
 
   return (
     <>
+      <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <div tw="flex justify-between pb-5">

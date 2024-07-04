@@ -82,6 +82,7 @@ export type UseNewInstancePage = {
   nodeSpecs?: CRNSpecs
   handleSubmit: (e: FormEvent) => Promise<void>
   handleSelectNode: (hash?: string) => Promise<boolean>
+  handleBack: () => void
 }
 
 export function useNewInstancePage(): UseNewInstancePage {
@@ -293,8 +294,11 @@ export function useNewInstancePage(): UseNewInstancePage {
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
   }
-
   // -------------------------
+
+  const handleBack = () => {
+    router.push('.')
+  }
 
   return {
     address: account?.address || '',
@@ -308,5 +312,6 @@ export function useNewInstancePage(): UseNewInstancePage {
     nodeSpecs,
     handleSubmit,
     handleSelectNode,
+    handleBack,
   }
 }

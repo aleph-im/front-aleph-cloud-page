@@ -15,6 +15,7 @@ import ToggleContainer from '@/components/common/ToggleContainer'
 import AddDomains from '@/components/form/AddDomains'
 import SelectWebsiteFramework from '@/components/form/SelectWebsiteFramework'
 import { PageProps } from '@/types/types'
+import BackButtonSection from '@/components/common/BackButtonSection'
 
 export default function NewWebsitePage({ mainRef }: PageProps) {
   const {
@@ -30,18 +31,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
 
   return (
     <>
-      <section tw="px-0 py-0! md:pt-10!">
-        <Container>
-          <Button kind="functional" variant="textOnly" onClick={handleBack}>
-            <p
-              className="tp-info text-base2"
-              tw="flex items-center justify-center text-center gap-1"
-            >
-              <Icon name="arrow-left" /> Back
-            </p>
-          </Button>
-        </Container>
-      </section>
+      <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>

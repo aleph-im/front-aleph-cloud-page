@@ -27,6 +27,7 @@ export type ManageDomain = {
   handleRetry: () => void
   handleCopyHash: () => void
   handleCopyRef: () => void
+  handleBack: () => void
 }
 
 export function useManageDomain(): ManageDomain {
@@ -94,6 +95,10 @@ export function useManageDomain(): ManageDomain {
   const handleCopyHash = useCopyToClipboardAndNotify(refEntity?.id || '')
   const handleCopyRef = useCopyToClipboardAndNotify(domain?.ref || '')
 
+  const handleBack = () => {
+    router.push('/settings/')
+  }
+
   return {
     domain,
     status,
@@ -103,5 +108,6 @@ export function useManageDomain(): ManageDomain {
     handleRetry,
     handleCopyHash,
     handleCopyRef,
+    handleBack,
   }
 }

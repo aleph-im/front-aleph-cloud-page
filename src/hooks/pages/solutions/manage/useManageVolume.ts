@@ -17,6 +17,7 @@ export type ManageVolume = {
   handleDelete: () => void
   handleDownload: () => void
   handleCopyHash: () => void
+  handleBack: () => void
 }
 
 export function useManageVolume(): ManageVolume {
@@ -66,10 +67,15 @@ export function useManageVolume(): ManageVolume {
     await manager.download(volume)
   }, [manager, volume])
 
+  const handleBack = () => {
+    router.push('/storage/')
+  }
+
   return {
     volume,
     handleDelete,
     handleDownload,
     handleCopyHash,
+    handleBack,
   }
 }

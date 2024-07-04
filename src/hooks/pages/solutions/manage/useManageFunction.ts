@@ -19,6 +19,7 @@ export type ManageFunction = {
   handleCopyHash: () => void
   handleCopyRuntime: () => void
   handleCopyCode: () => void
+  handleBack: () => void
 }
 
 export function useManageFunction(): ManageFunction {
@@ -72,6 +73,10 @@ export function useManageFunction(): ManageFunction {
     await manager.download(program)
   }, [manager, program])
 
+  const handleBack = () => {
+    router.push('.')
+  }
+
   return {
     program,
     handleDelete,
@@ -79,5 +84,6 @@ export function useManageFunction(): ManageFunction {
     handleCopyHash,
     handleCopyRuntime,
     handleCopyCode,
+    handleBack,
   }
 }

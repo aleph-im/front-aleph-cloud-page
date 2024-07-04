@@ -32,6 +32,7 @@ export type UseNewSSHKeyPageReturn = {
   labelCtrl: UseControllerReturn<NewSSHKeyFormState, 'label'>
   errors: FieldErrors<NewSSHKeyFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
+  handleBack: () => void
 }
 
 export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
@@ -94,10 +95,15 @@ export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
     name: 'label',
   })
 
+  const handleBack = () => {
+    router.push('/settings/')
+  }
+
   return {
     keyCtrl,
     labelCtrl,
     handleSubmit,
+    handleBack,
     errors,
   }
 }

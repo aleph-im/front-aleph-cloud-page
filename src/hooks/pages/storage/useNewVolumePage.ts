@@ -30,6 +30,7 @@ export type UseNewVolumePageReturn = {
   control: Control<any>
   errors: FieldErrors<NewVolumeFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
+  handleBack: () => void
 }
 
 export function useNewVolumePage(): UseNewVolumePageReturn {
@@ -103,6 +104,10 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     isCreateButtonDisabled = false
   }
 
+  const handleBack = () => {
+    router.push('/storage/')
+  }
+
   return {
     address: account?.address || '',
     accountBalance,
@@ -111,5 +116,6 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     control,
     errors,
     handleSubmit,
+    handleBack,
   }
 }

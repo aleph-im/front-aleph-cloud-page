@@ -9,9 +9,10 @@ import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
+import BackButtonSection from '@/components/common/BackButtonSection'
 
 export default function ManageSSHKey() {
-  const { sshKey, handleCopyKey, handleCopyLabel, handleDelete } =
+  const { sshKey, handleCopyKey, handleCopyLabel, handleDelete, handleBack } =
     useManageSSHKey()
 
   const theme = useTheme()
@@ -19,6 +20,7 @@ export default function ManageSSHKey() {
   if (!sshKey) {
     return (
       <>
+        <BackButtonSection handleBack={handleBack} />
         <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
@@ -31,6 +33,7 @@ export default function ManageSSHKey() {
 
   return (
     <>
+      <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <div tw="flex justify-between pb-5">

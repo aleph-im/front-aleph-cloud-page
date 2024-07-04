@@ -20,6 +20,7 @@ import UpdateWebsiteFolder from '@/components/form/UpdateWebsiteFolder'
 import { Volume } from '@/domain/volume'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
+import BackButtonSection from '@/components/common/BackButtonSection'
 
 export type WebsiteVolumeProps = {
   version: string
@@ -126,11 +127,13 @@ export function ManageWebsite() {
     handleCopyIpfsUrl,
     handleCopyUrl,
     handleCopyVolumeHash,
+    handleBack,
   } = useManageWebsite()
 
   if (!website || !cidV1) {
     return (
       <>
+        <BackButtonSection handleBack={handleBack} />
         <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
@@ -140,6 +143,7 @@ export function ManageWebsite() {
 
   return (
     <>
+      <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <div tw="flex justify-between pb-5">
