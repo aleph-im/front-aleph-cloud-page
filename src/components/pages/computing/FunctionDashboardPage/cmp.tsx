@@ -28,13 +28,13 @@ function FunctionDashboardPage() {
             <DashboardCardWithSideImage
               imageSrc="/img/dashboard/function.svg"
               imageAlt="Function illustration"
-              info="WHAT IS A..."
-              title="Function"
-              description="Basicly, serverless computing at your fingertips (Lambda). Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              info="WHAT ARE..."
+              title="Functions"
+              description="Deploy and manage serverless functions effortlessly with our robust computing platform. Run code on-demand or persistently, with seamless integration and scalability."
               withButton={programs.length === 0}
               buttonUrl="/computing/function/new"
               buttonText="Create function"
-              externalLinkUrl="https://docs.aleph.im/computing/#persistent-execution"
+              externalLinkUrl="https://docs.aleph.im/tools/webconsole/"
             />
           </>
         ) : tabId === 'volume' ? (

@@ -79,10 +79,8 @@ export default function DashboardPage() {
               }
               title="Websites"
               img="Object8"
-              description="An isolated environment created for a function to execute in
-              response to an event and can run in two modes: on-demand or
-              persistent."
-              introductionButtonText="Create your website"
+              description="Deploy and manage your websites with ease. Support for static pages, Next.js, React, and Vue.js ensures you can create dynamic and robust web experiences."
+              introductionButtonText="Deploy your website"
               dashboardPath="/hosting/website"
               createPath="/hosting/website/new"
               information={{
@@ -103,9 +101,7 @@ export default function DashboardPage() {
               }
               title="functions"
               img="Object10"
-              description="An isolated environment created for a function to execute in
-              response to an event and can run in two modes: on-demand or
-              persistent."
+              description="Run code on-demand or persistently with our serverless computing platform. Scale effortlessly and integrate seamlessly."
               introductionButtonText="Create your function"
               dashboardPath="/computing/function"
               createPath="/computing/function/new"
@@ -123,8 +119,7 @@ export default function DashboardPage() {
               }
               title="instance"
               img="Object11"
-              description="A virtual machine that runs on a Aleph.im's infrastructure
-              and can be configured with CPUs, memory, storage, and networking"
+              description="Launch and manage virtual private servers (VPS) tailored to your needs. Choose automatic or manual node selection for complete control over your computing environment."
               introductionButtonText="Create your instance"
               dashboardPath="/computing/instance"
               createPath="/computing/instance/new"
@@ -138,9 +133,7 @@ export default function DashboardPage() {
               isComingSoon
               title="confidentials"
               img="Object9"
-              description="A virtual machine running for an extended period with their
-              memory, storage, and execution fully encrypted and isolated from
-              the host."
+              description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your data stays safe."
               introductionButtonText="Create your confidential"
               information={{
                 type: 'computing',
@@ -164,7 +157,7 @@ export default function DashboardPage() {
                 img="Object15"
                 dashboardPath="/storage"
                 createPath="/storage/new"
-                description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. "
+                description="Secure and reliable immutable volumes for your data storage needs. Ideal for dependency volumes and critical data, ensuring consistency and integrity."
                 introductionButtonText="Create your volume"
                 information={{
                   type: 'storage',

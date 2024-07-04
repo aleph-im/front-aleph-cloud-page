@@ -32,11 +32,10 @@ export default function SettingsDashboardPage() {
               imageAlt="Web3 Hosting illustration"
               info="HOW TO..."
               title="Create your Website!"
-              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              description="Build and deploy your website effortlessly using our web3 hosting solutions. Support for static pages, Next.js, React, and Vue.js ensures you have the flexibility to create the perfect site."
               withButton={websites.length === 0}
               buttonUrl="/hosting/website/new"
-              buttonText="Create your website"
-              externalLinkUrl="#"
+              buttonText="Deploy your website"
             />
           </>
         ) : tabId === 'domain' ? (

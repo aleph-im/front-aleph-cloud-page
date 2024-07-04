@@ -34,17 +34,20 @@ export const DashboardCardWithSideImage = ({
             </TextGradient>
             {description}
           </div>
-          <div tw="mt-6 flex flex-wrap items-center justify-between gap-6">
-            {withButton && (
-              <ButtonLink variant="primary" size="md" href={buttonUrl}>
-                {buttonText}
-              </ButtonLink>
-            )}
-
-            <ExternalLinkButton href={externalLinkUrl}>
-              Learn more
-            </ExternalLinkButton>
-          </div>
+          {(withButton || externalLinkUrl) && (
+            <div tw="mt-6 flex flex-wrap items-center justify-between gap-6">
+              {withButton && (
+                <ButtonLink variant="primary" size="md" href={buttonUrl}>
+                  {buttonText}
+                </ButtonLink>
+              )}
+              {externalLinkUrl && (
+                <ExternalLinkButton href={externalLinkUrl}>
+                  Learn more
+                </ExternalLinkButton>
+              )}
+            </div>
+          )}
         </div>
       </CardWithSideImage>
     </Container>

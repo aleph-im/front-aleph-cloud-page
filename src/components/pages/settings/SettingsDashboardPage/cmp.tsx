@@ -24,15 +24,14 @@ export default function SettingsDashboardPage() {
               </Container>
             )}
             <DashboardCardWithSideImage
-              info="WHAT IS A..."
-              title="SSH Key?"
-              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              info="WHAT ARE..."
+              title="SSH Keys"
+              description="Securely manage your instances with SSH access. Use our SSH feature to establish secure connections, ensuring safe and efficient administration of your instances."
               imageSrc="/img/dashboard/ssh.svg"
               imageAlt="SSH Key illustration"
               withButton={sshKeys.length === 0}
               buttonUrl="/settings/ssh/new"
-              buttonText="Create new SSH key"
-              externalLinkUrl="#"
+              buttonText="Add SSH key"
             />
           </>
         ) : tabId === 'domain' ? (
@@ -43,15 +42,15 @@ export default function SettingsDashboardPage() {
               </Container>
             )}
             <DashboardCardWithSideImage
-              info="WHAT IS A..."
-              title="Domain?"
-              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              info="WHAT ARE..."
+              title="Custom domains"
+              description="Link your custom domains effortlessly to functions, instances, volumes, or websites. Simplify your web3 hosting experience with streamlined domain management."
               imageSrc="/img/dashboard/domain.svg"
               imageAlt="Domain illustration"
               withButton={domains.length === 0}
               buttonUrl="/settings/domain/new"
-              buttonText="Create new domain"
-              externalLinkUrl="#"
+              buttonText="Create custom domain"
+              externalLinkUrl="https://docs.aleph.im/computing/custom_domain/setup/"
             />
           </>
         ) : (

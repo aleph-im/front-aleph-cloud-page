@@ -28,13 +28,12 @@ export default function InstanceDashboardPage() {
             <DashboardCardWithSideImage
               imageSrc="/img/dashboard/instance.svg"
               imageAlt="Instance illustration"
-              info="WHAT IS AN..."
-              title="Instance"
-              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              info="WHAT ARE..."
+              title="Instances"
+              description="Launch and control virtual private servers (VPS) with ease. Choose between automatic or manual node selection, and customize your computing environment to meet your specific needs."
               withButton={instances.length === 0}
-              buttonUrl="/computing/function/new"
+              buttonUrl="/computing/instance/new"
               buttonText="Create instance"
-              externalLinkUrl="https://docs.aleph.im/computing/#persistent-execution"
             />
           </>
         ) : tabId === 'volume' ? (

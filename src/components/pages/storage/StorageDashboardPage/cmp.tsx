@@ -15,9 +15,6 @@ export default function StorageDashboardPage() {
     volumes,
     volumesAggregatedStorage: { total, linked, unlinked },
   } = useStorageDashboardPage()
-  console.log('total', total)
-  console.log('linked', linked)
-  console.log('unlinked', unlinked)
 
   return (
     <>
@@ -71,13 +68,13 @@ export default function StorageDashboardPage() {
             <DashboardCardWithSideImage
               imageSrc="/img/dashboard/volume.svg"
               imageAlt="Volume illustration"
-              info="HOW DOES IT WORK?"
-              title="Storage"
-              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rutrum dignissim elit, ut maximus justo congue at. Nulla lobortis, ligula in tempus tincidunt, eros nulla congue sapien, ac aliquet mi ante non elit."
+              info="WHAT ARE..."
+              title="Volumes"
+              description="Create immutable volumes for secure and dependable data storage. Ideal for dependencies and other critical data, ensuring consistency and reliability across your applications"
               withButton={volumes.length === 0}
               buttonUrl="/storage/volume/new"
               buttonText="Create new volume"
-              externalLinkUrl="#"
+              externalLinkUrl="https://docs.aleph.im/computing/volumes/immutable/"
             />
           </>
         ) : (
