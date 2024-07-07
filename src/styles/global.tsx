@@ -12,9 +12,9 @@ export const GlobalStylesOverride = createGlobalStyle`
   }
 
   // @note: Use it only for development
-  html {
-    font-size: 16px;
-  }
+  // html {
+  //   font-size: 16px;
+  // }
 
   /* FIXME: */
   .unavailable-content {

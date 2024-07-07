@@ -6,7 +6,11 @@ import Container from '@/components/common/CenteredContainer'
 import EntityCard from '@/components/common/EntityCard'
 import { HoldTokenDisclaimer } from '@/components/common/HoldTokenDisclaimer/cmp'
 import { EntityCardItemProps } from '@/components/common/EntityCard/types'
-import { EntityCardWrapper, StyledEntityCardsContainer } from './styles'
+import {
+  EntityCardWrapper,
+  StyledEntityCardsContainer,
+  StyledSectionDescription,
+} from './styles'
 
 export default function DashboardPage() {
   const {
@@ -23,7 +27,7 @@ export default function DashboardPage() {
       {
         title: 'persistent',
         description:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
+          'Run and maintain continuous functions for ongoing, long-term processes and operations.',
         information: {
           type: 'computing',
           data: programAggregatedStatus.persistent,
@@ -32,7 +36,7 @@ export default function DashboardPage() {
       {
         title: 'on demand',
         description:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
+          'Execute code instantly as needed, used for responsive and scalable tasks.',
         information: {
           type: 'computing',
           data: programAggregatedStatus.onDemand,
@@ -47,8 +51,7 @@ export default function DashboardPage() {
     return [
       {
         title: 'linked',
-        description:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
+        description: 'Active and in use with your services.',
         information: {
           type: 'storage',
           data: volumesAggregatedStatus.linked,
@@ -56,8 +59,7 @@ export default function DashboardPage() {
       },
       {
         title: 'unlinked',
-        description:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
+        description: 'Available for linking to new services.',
         information: {
           type: 'storage',
           data: volumesAggregatedStatus.unlinked,
@@ -69,12 +71,19 @@ export default function DashboardPage() {
   return (
     <>
       <Container $variant="xl">
-        <section tw="px-0 pt-20 pb-6 md:py-10">
+        <section tw="px-0 pb-6 pt-12 lg:pb-5 ">
           <SectionTitle number="1">
             Web3 Hosting
             <Icon name="web3HostingBox" color="main0" size="0.66em" tw="ml-2" />
           </SectionTitle>
-          <StyledEntityCardsContainer tw="mt-3">
+          <StyledSectionDescription>
+            Experience the future of web hosting with our Web3 solutions.
+            Whether you&apos;re building static sites or dynamic web apps with
+            Next.js, React, or Vue.js, our platform offers seamless deployment
+            and robust support. Connect your custom domains and leverage the
+            power of decentralized technology.
+          </StyledSectionDescription>
+          <StyledEntityCardsContainer>
             <EntityCardWrapper>
               <EntityCard
                 tw="overflow-scroll"
@@ -97,7 +106,7 @@ export default function DashboardPage() {
             </EntityCardWrapper>
           </StyledEntityCardsContainer>
         </section>
-        <section tw="px-0 pt-20 pb-6 md:py-10">
+        <section tw="px-0 pb-6 pt-6 lg:pb-5 ">
           <SectionTitle number="2">
             Computing
             <Icon
@@ -107,7 +116,14 @@ export default function DashboardPage() {
               tw="ml-2"
             />
           </SectionTitle>
-          <StyledEntityCardsContainer tw="mt-3">
+          <StyledSectionDescription>
+            Unleash the full potential of your applications with our advanced
+            computing solutions. From serverless functions that run on-demand to
+            fully managed instances and confidential VMs, our platform provides
+            the flexibility and power you need. Secure, scalable, and easy to
+            manage.
+          </StyledSectionDescription>
+          <StyledEntityCardsContainer>
             <EntityCardWrapper>
               <EntityCard
                 type={
@@ -162,7 +178,7 @@ export default function DashboardPage() {
             </EntityCardWrapper>
           </StyledEntityCardsContainer>
         </section>
-        <section tw="px-0 pt-20 pb-6 md:py-10">
+        <section tw="px-0 pb-6 pt-6 lg:pb-5">
           <SectionTitle number="3">
             Storage
             <Icon
@@ -172,7 +188,14 @@ export default function DashboardPage() {
               tw="ml-2"
             />
           </SectionTitle>
-          <StyledEntityCardsContainer tw="mt-6">
+          <StyledSectionDescription>
+            Ensure your data is safe, secure, and always available with our
+            cutting-edge storage solutions. Create immutable volumes for
+            consistent and reliable data storage, perfect for dependency volumes
+            and other critical data. Harness the power of decentralized storage
+            with ease.
+          </StyledSectionDescription>
+          <StyledEntityCardsContainer>
             <EntityCardWrapper>
               <EntityCard
                 type={
