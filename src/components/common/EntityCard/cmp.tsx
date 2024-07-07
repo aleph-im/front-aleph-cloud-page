@@ -39,7 +39,7 @@ const EntityCardItem = ({
       <p className="fs-10" tw="-mr-1 mb-1">
         {description}
       </p>
-      <InformationElement {...information} />
+      <InformationElementMemo {...information} />
     </div>
   )
 }
@@ -173,10 +173,7 @@ export const EntityCard = ({
       {showSubItems && (
         <StyledSubItemCard>
           {subItems.map((props) => (
-            <EntityCardItemMemo
-              key={`storage-subitem-${props.title}`}
-              {...props}
-            />
+            <EntityCardItemMemo key={`${props.title}-subitem`} {...props} />
           ))}
         </StyledSubItemCard>
       )}
