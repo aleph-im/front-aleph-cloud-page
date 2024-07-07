@@ -79,7 +79,7 @@ export default function DashboardPage() {
               <EntityCard
                 tw="overflow-scroll"
                 type={
-                  programAggregatedStatus.total.amount
+                  websitesAggregatedStatus.total.amount
                     ? 'active'
                     : 'introduction'
                 }

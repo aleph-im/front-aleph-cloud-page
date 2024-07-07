@@ -4,7 +4,7 @@ import {
   PaymentMethod,
 } from '@/helpers/constants'
 import { useNewWebsitePage } from '@/hooks/pages/hosting/useNewWebsitePage'
-import { Button, Icon, TextGradient } from '@aleph-front/core'
+import { Button, TextGradient } from '@aleph-front/core'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import Container from '@/components/common/CenteredContainer'
 import AddWebsiteFolder from '@/components/form/AddWebsiteFolder'
