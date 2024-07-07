@@ -71,7 +71,8 @@ export default function DashboardPage() {
       <Container $variant="xl">
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <SectionTitle number="1">
-            Web3 Hosting <Icon name="globe" color="main0" size="0.66em" />
+            Web3 Hosting
+            <Icon name="web3HostingBox" color="main0" size="0.66em" tw="ml-2" />
           </SectionTitle>
           <StyledEntityCardsContainer tw="mt-3">
             <EntityCardWrapper>
@@ -83,7 +84,7 @@ export default function DashboardPage() {
                     : 'introduction'
                 }
                 title="Websites"
-                img="Object8"
+                img="Object20"
                 description="Deploy and manage your websites with ease. Support for static pages, Next.js, React, and Vue.js ensures you can create dynamic and robust web experiences."
                 introductionButtonText="Deploy your website"
                 dashboardPath="/hosting/website"
@@ -98,7 +99,13 @@ export default function DashboardPage() {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <SectionTitle number="2">
-            Computing <Icon name="settings" color="main0" size="0.66em" />
+            Computing
+            <Icon
+              name="computeSolutions"
+              color="main0"
+              size="0.66em"
+              tw="ml-2"
+            />
           </SectionTitle>
           <StyledEntityCardsContainer tw="mt-3">
             <EntityCardWrapper>
@@ -157,7 +164,13 @@ export default function DashboardPage() {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <SectionTitle number="3">
-            Storage <Icon name="folders" color="main0" size="0.66em" />
+            Storage
+            <Icon
+              name="storageSolutions"
+              color="main0"
+              size="0.66em"
+              tw="ml-2"
+            />
           </SectionTitle>
           <StyledEntityCardsContainer tw="mt-6">
             <EntityCardWrapper>
