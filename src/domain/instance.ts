@@ -77,8 +77,6 @@ export type Instance = InstanceContent & {
   confirmed?: boolean
 }
 
-export type InstanceStatus = ExecutableStatus | undefined
-
 export type InstanceCostProps = Omit<ExecutableCostProps, 'type'>
 
 export type InstanceCost = ExecutableCost
@@ -87,6 +85,8 @@ export type InstanceCRNNetworking = {
   ipv4: string
   ipv6: string
 }
+
+export type InstanceStatus = ExecutableStatus
 
 export class InstanceManager
   extends ExecutableManager
@@ -269,8 +269,8 @@ export class InstanceManager
 
     for (let i = 0; i < 5; i++) {
       try {
-        // strip trailing slash
-        const nodeUrl = node.address.replace(/\/$/, '')
+        const nodeUrl = NodeManager.normalizeUrl(node.address)
+
         const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
           method: 'POST',
           headers: {

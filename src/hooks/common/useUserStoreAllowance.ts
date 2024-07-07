@@ -24,7 +24,7 @@ export function useUserStoreAllowance(): UseUserStoreAllowanceReturn {
     onSuccess: () => null,
     triggerOnMount: true,
     triggerDeps: [manager],
-    flushData: false,
+    flushData: true,
   })
 
   const consumedSize = fileInfo?.totalSize

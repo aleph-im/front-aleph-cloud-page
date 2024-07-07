@@ -109,6 +109,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       return modalOpen({
         header: '',
         width: '80rem',
+        height: '80%',
         onClose: handleCloseModal,
         content: (
           <CRNList selected={selectedNode} onSelectedChange={setSelectedNode} />

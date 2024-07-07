@@ -12,10 +12,10 @@ import {
 import { useCallback, useMemo } from 'react'
 import { convertByteUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
+import { ExecutableManager } from '@/domain/executable'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import Price from '@/components/common/Price'
 import Table from '@/components/common/Table'
-import { ExecutableManager } from '@/domain/executable'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { specsCtrl, options, type, isPersistent, paymentMethod } =

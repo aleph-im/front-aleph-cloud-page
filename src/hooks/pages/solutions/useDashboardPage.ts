@@ -62,7 +62,7 @@ function calculateComputingAggregatedStatus({
     (ac, cv) => {
       const statusKey = !cv.confirmed
         ? 'booting'
-        : !!entitiesStatus[cv.id]?.data?.vm_ipv6
+        : !!entitiesStatus[cv.id]?.data?.ipv6Parsed
           ? 'running'
           : 'paused'
 
