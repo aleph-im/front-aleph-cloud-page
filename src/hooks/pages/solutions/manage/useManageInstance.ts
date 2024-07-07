@@ -33,6 +33,7 @@ export type ManageInstance = {
   handleCopyConnect: () => void
   handleCopyIpv6: () => void
   handleDelete: () => void
+  handleBack: () => void
 }
 
 export function useManageInstance(): ManageInstance {
@@ -46,7 +47,7 @@ export function useManageInstance(): ManageInstance {
   const router = useRouter()
   const { hash } = router.query
 
-  const { entities } = useRequestInstances({ id: hash as string })
+  const { entities } = useRequestInstances({ ids: hash as string })
   const [instance] = entities || []
 
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
@@ -182,6 +183,10 @@ export function useManageInstance(): ManageInstance {
     }
   }, [crn, status?.node])
 
+  const handleBack = () => {
+    router.push('.')
+  }
+
   return {
     instance,
     status,
@@ -193,5 +198,6 @@ export function useManageInstance(): ManageInstance {
     handleCopyConnect,
     handleCopyIpv6,
     handleDelete,
+    handleBack,
   }
 }

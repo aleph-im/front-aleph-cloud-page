@@ -1,8 +1,10 @@
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
+  BaseExecutableContent,
   MachineResources,
   MachineVolume,
   Payment,
+  PaymentType,
   PaymentType as SDKPaymentType,
 } from '@aleph-sdk/message'
 import {
@@ -29,6 +31,7 @@ import {
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
 import { BlockchainId } from './connect/base'
+import { NodeManager } from './node'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -70,7 +73,31 @@ export type PaymentConfiguration =
   | HoldPaymentConfiguration
   | StreamPaymentConfiguration
 
-export abstract class Executable {
+export type Executable = {
+  type: EntityType.Instance | EntityType.Program
+  id: string // hash
+  payment?: BaseExecutableContent['payment']
+}
+
+export type ExecutableNode = {
+  node_id: string
+  url: string
+  ipv6: string
+  supports_ipv6: boolean
+}
+
+export type ExecutableStatus = {
+  vm_hash: string
+  vm_type: EntityType.Instance | EntityType.Program
+  vm_ipv6: string
+  period: {
+    start_timestamp: string
+    duration_seconds: number
+  }
+  node: ExecutableNode
+}
+
+export abstract class ExecutableManager {
   /**
    * Calculates the amount of tokens required to deploy a function
    * https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
@@ -140,8 +167,67 @@ export abstract class Executable {
     protected account: Account,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
+    protected nodeManager: NodeManager,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
   ) {}
+
+  async checkStatus(
+    executable: Executable,
+  ): Promise<ExecutableStatus | undefined> {
+    if (executable.payment?.type === PaymentType.superfluid) {
+      const { receiver } = executable.payment
+      if (!receiver) throw Err.ReceiverReward
+
+      // @todo: refactor this mess
+      const node = await this.nodeManager.getCRNByStreamRewardAddress(receiver)
+      if (!node) return
+
+      const { address } = node
+      if (!address) throw Err.InvalidCRNAddress
+
+      const nodeUrl = address.replace(/\/$/, '')
+      const query = await fetch(`${nodeUrl}/about/executions/list`)
+      const response = await query.json()
+
+      const status = response[executable.id]
+      if (!status) return
+
+      const networking = status['networking']
+
+      return {
+        node: {
+          node_id: node.hash,
+          url: node.address,
+          ipv6: networking.ipv6,
+          supports_ipv6: true,
+        },
+        vm_hash: executable.id,
+        vm_type: EntityType.Instance,
+        vm_ipv6: this.formatVMIPv6Address(networking.ipv6),
+        period: {
+          start_timestamp: '',
+          duration_seconds: 0,
+        },
+      } as ExecutableStatus
+    }
+
+    const query = await fetch(
+      `https://scheduler.api.aleph.sh/api/v0/allocation/${executable.id}`,
+    )
+
+    if (query.status === 404) return
+
+    const response = await query.json()
+    return response
+  }
+
+  protected formatVMIPv6Address(ipv6: string): string {
+    // Replace the trailing slash and number
+    let newIpv6 = ipv6.replace(/\/\d+$/, '')
+    // Replace the last '0' of the IPv6 address with '1'
+    newIpv6 = newIpv6.replace(/0(?!.*0)/, '1')
+    return newIpv6
+  }
 
   protected parseEnvVars(
     envVars?: EnvVarField[],

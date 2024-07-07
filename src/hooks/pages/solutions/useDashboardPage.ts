@@ -1,67 +1,138 @@
 import { useMemo } from 'react'
-import { AnyEntity, ellipseAddress } from '@/helpers/utils'
-import { EntityType } from '@/helpers/constants'
-import { Volume } from '@/domain/volume'
-import {
-  UseAccountEntitiesReturn,
-  useAccountEntities,
-} from '@/hooks/common/useAccountEntities'
+import { useAccountEntities } from '@/hooks/common/useAccountEntities'
+import { useRequestExecutableStatus } from '@/hooks/common/useRequestEntity/useRequestExecutableStatus'
+import { useSPARedirect } from '@/hooks/common/useSPARedirect'
+import { Program } from '@/domain/program'
+import { Instance } from '@/domain/instance'
+import { RequestState } from '@aleph-front/core'
+import { ExecutableStatus } from '@/domain/executable'
+import { useAttachedVolumes } from '@/hooks/common/useAttachedVolumes'
 
-export type AnyEntityRow = {
-  id: string
-  type: EntityType
-  name: string
-  size: number
-  volume?: Volume
-  volume_id?: string
-  date?: string
-  updated_at?: string
-  url?: string
-  confirmed?: boolean
+export type AmountAggregatedStatus = {
+  amount: number
 }
 
-export type UseDashboardPageReturn = UseAccountEntitiesReturn & {
-  all: AnyEntityRow[]
+export type StorageAggregatedStatus = {
+  amount: number
+  size: number
+}
+
+export type ComputingAggregatedStatus = {
+  running: number
+  paused: number
+  booting: number
+  amount: number
+}
+
+export type InstancesAggregatedStatus = {
+  total: ComputingAggregatedStatus
+}
+
+export type ProgramsAggregatedStatus = {
+  persistent: ComputingAggregatedStatus
+  onDemand: ComputingAggregatedStatus
+  total: ComputingAggregatedStatus
+}
+
+export type WebsitesAggregatedStatus = {
+  total: AmountAggregatedStatus
+}
+
+export type VolumesAggregatedStatus = {
+  total: StorageAggregatedStatus
+  linked: StorageAggregatedStatus
+  unlinked: StorageAggregatedStatus
+}
+
+export type UseDashboardPageReturn = {
+  programAggregatedStatus: ProgramsAggregatedStatus
+  instanceAggregatedStatus: InstancesAggregatedStatus
+  volumesAggregatedStatus: VolumesAggregatedStatus
+  websitesAggregatedStatus: WebsitesAggregatedStatus
+}
+
+function calculateComputingAggregatedStatus({
+  entities,
+  entitiesStatus,
+}: {
+  entities: Program[] | Instance[]
+  entitiesStatus: Record<string, RequestState<ExecutableStatus>>
+}) {
+  return entities.reduce(
+    (ac, cv) => {
+      const statusKey = !cv.confirmed
+        ? 'booting'
+        : !!entitiesStatus[cv.id]?.data?.vm_ipv6
+          ? 'running'
+          : 'paused'
+
+      ac[statusKey] += 1
+      ac.amount += 1
+      return ac
+    },
+    {
+      running: 0,
+      paused: 0,
+      booting: 0,
+      amount: 0,
+    },
+  )
 }
 
 export function useDashboardPage(): UseDashboardPageReturn {
-  const entities = useAccountEntities()
+  useSPARedirect()
 
-  const all: AnyEntityRow[] = useMemo(() => {
-    return (
-      Object.values(entities)
-        .flatMap((entity) => entity as AnyEntity[])
-        .map((entity) => {
-          const { id, type, confirmed, date } = entity
-          const name =
-            (type !== EntityType.Volume
-              ? entity.name
-              : ellipseAddress(entity.id || '')) || `Unknown ${type}`
-          const size = entity.size || 0
-          const url =
-            entity.type === EntityType.Domain ||
-            entity.type === EntityType.Program ||
-            entity.type === EntityType.Website
-              ? entity.ref_url
-              : entity.url
+  const { programs, instances, websites, volumes } = useAccountEntities()
 
-          return {
-            id,
-            type,
-            name,
-            size,
-            date,
-            url,
-            confirmed,
-          } as AnyEntityRow
-        })
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .sort((a, b) => b.date!.localeCompare(a.date!))
-    )
-  }, [entities])
+  const { status: programsStatus } = useRequestExecutableStatus({
+    entities: programs,
+  })
+
+  const { status: instancesStatus } = useRequestExecutableStatus({
+    entities: instances,
+  })
+
+  const programAggregatedStatus = useMemo(() => {
+    return {
+      total: calculateComputingAggregatedStatus({
+        entities: programs,
+        entitiesStatus: programsStatus,
+      }),
+      persistent: calculateComputingAggregatedStatus({
+        entities: programs.filter((p) => p.on.persistent),
+        entitiesStatus: programsStatus,
+      }),
+      onDemand: calculateComputingAggregatedStatus({
+        entities: programs.filter((p) => !p.on.persistent),
+        entitiesStatus: programsStatus,
+      }),
+    }
+  }, [programsStatus, programs])
+
+  const instanceAggregatedStatus = useMemo(() => {
+    return {
+      total: calculateComputingAggregatedStatus({
+        entities: instances,
+        entitiesStatus: instancesStatus,
+      }),
+    }
+  }, [instancesStatus, instances])
+
+  const volumesAggregatedStatus = useAttachedVolumes({
+    programs,
+    instances,
+    websites,
+    volumes,
+  })
+
+  const websitesAggregatedStatus = useMemo(() => {
+    return { total: { amount: websites.length } }
+  }, [websites])
 
   return {
-    ...entities,
-    all,
+    programAggregatedStatus,
+    instanceAggregatedStatus,
+    volumesAggregatedStatus,
+    websitesAggregatedStatus,
   }
 }

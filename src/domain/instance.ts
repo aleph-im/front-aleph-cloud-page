@@ -17,10 +17,11 @@ import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
 import {
-  Executable,
+  ExecutableManager,
   ExecutableCost,
   ExecutableCostProps,
   PaymentConfiguration,
+  ExecutableStatus,
 } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
@@ -76,27 +77,11 @@ export type Instance = InstanceContent & {
   confirmed?: boolean
 }
 
+export type InstanceStatus = ExecutableStatus | undefined
+
 export type InstanceCostProps = Omit<ExecutableCostProps, 'type'>
 
 export type InstanceCost = ExecutableCost
-
-export type InstanceNode = {
-  node_id: string
-  url: string
-  ipv6: string
-  supports_ipv6: boolean
-}
-
-export type InstanceStatus = {
-  vm_hash: string
-  vm_type: EntityType.Instance | EntityType.Program
-  vm_ipv6: string
-  period: {
-    start_timestamp: string
-    duration_seconds: number
-  }
-  node: InstanceNode
-}
 
 export type InstanceCRNNetworking = {
   ipv4: string
@@ -104,7 +89,7 @@ export type InstanceCRNNetworking = {
 }
 
 export class InstanceManager
-  extends Executable
+  extends ExecutableManager
   implements EntityManager<Instance, AddInstance>
 {
   static addSchema = instanceSchema
@@ -114,7 +99,7 @@ export class InstanceManager
    * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
    */
   static getCost = (props: InstanceCostProps): Promise<InstanceCost> => {
-    return Executable.getExecutableCost({
+    return ExecutableManager.getExecutableCost({
       ...props,
       type: EntityType.Instance,
     })
@@ -130,7 +115,7 @@ export class InstanceManager
     protected nodeManager: NodeManager,
     protected channel = defaultInstanceChannel,
   ) {
-    super(account, volumeManager, domainManager, sdkClient)
+    super(account, volumeManager, domainManager, nodeManager, sdkClient)
   }
 
   async getAll(): Promise<Instance[]> {
@@ -252,54 +237,6 @@ export class InstanceManager
     }
   }
 
-  async checkStatus(instance: Instance): Promise<InstanceStatus | undefined> {
-    if (instance.payment?.type === PaymentType.superfluid) {
-      const { receiver } = instance.payment
-      if (!receiver) throw Err.ReceiverReward
-
-      // @todo: refactor this mess
-      const node = await this.nodeManager.getCRNByStreamRewardAddress(receiver)
-      if (!node) return
-
-      const { address } = node
-      if (!address) throw Err.InvalidCRNAddress
-
-      const nodeUrl = address.replace(/\/$/, '')
-      const query = await fetch(`${nodeUrl}/about/executions/list`)
-      const response = await query.json()
-
-      const status = response[instance.id]
-      if (!status) return
-
-      const networking = status['networking']
-
-      return {
-        node: {
-          node_id: node.hash,
-          url: node.address,
-          ipv6: networking.ipv6,
-          supports_ipv6: true,
-        },
-        vm_hash: instance.id,
-        vm_type: EntityType.Instance,
-        vm_ipv6: this.formatVMIPv6Address(networking.ipv6),
-        period: {
-          start_timestamp: '',
-          duration_seconds: 0,
-        },
-      } as InstanceStatus
-    }
-
-    const query = await fetch(
-      `https://scheduler.api.aleph.sh/api/v0/allocation/${instance.id}`,
-    )
-
-    if (query.status === 404) return
-
-    const response = await query.json()
-    return response
-  }
-
   async getAddSteps(newInstance: AddInstance): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
     const { sshKeys, volumes = [], domains = [] } = newInstance
@@ -389,14 +326,6 @@ export class InstanceManager
       receiver,
       streamCost / getHours(streamDuration),
     )
-  }
-
-  protected formatVMIPv6Address(ipv6: string): string {
-    // Replace the trailing slash and number
-    let newIpv6 = ipv6.replace(/\/\d+$/, '')
-    // Replace the last '0' of the IPv6 address with '1'
-    newIpv6 = newIpv6.replace(/0(?!.*0)/, '1')
-    return newIpv6
   }
 
   protected async *parseInstanceSteps(

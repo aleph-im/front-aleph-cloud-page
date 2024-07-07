@@ -10,7 +10,7 @@ export const AddNameAndTags = React.memo((props: AddNameAndTagsProps) => {
 
   return (
     <>
-      <NoisyContainer $type="grain-3">
+      <NoisyContainer type="grain-3">
         <div>
           <TextInput
             {...nameCtrl.field}

@@ -8,9 +8,10 @@ import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
+import BackButtonSection from '@/components/common/BackButtonSection'
 
 export default function ManageVolume() {
-  const { volume, handleCopyHash, handleDelete, handleDownload } =
+  const { volume, handleCopyHash, handleDelete, handleDownload, handleBack } =
     useManageVolume()
 
   const theme = useTheme()
@@ -18,6 +19,7 @@ export default function ManageVolume() {
   if (!volume) {
     return (
       <>
+        <BackButtonSection handleBack={handleBack} />
         <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
@@ -30,6 +32,7 @@ export default function ManageVolume() {
 
   return (
     <>
+      <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <div tw="flex justify-between pb-5">

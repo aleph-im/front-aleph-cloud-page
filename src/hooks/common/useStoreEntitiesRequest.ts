@@ -41,8 +41,9 @@ export function useStoreEntityRequest<T, S>({
 
   return useRequest({
     state,
-    setState: (newState) =>
-      dispatch(new EntitySetAction({ name, state: newState })),
+    setState: (newState) => {
+      dispatch(new EntitySetAction({ name, state: newState }))
+    },
     ...props,
   })
 }

@@ -10,6 +10,7 @@ import VolumeList from '../VolumeList'
 import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import Link from 'next/link'
+import BackButtonSection from '@/components/common/BackButtonSection'
 
 export default function ManageInstance() {
   const {
@@ -23,6 +24,7 @@ export default function ManageInstance() {
     handleCopyConnect,
     handleCopyIpv6,
     handleDelete,
+    handleBack,
   } = useManageInstance()
 
   const theme = useTheme()
@@ -30,6 +32,7 @@ export default function ManageInstance() {
   if (!instance) {
     return (
       <>
+        <BackButtonSection handleBack={handleBack} />
         <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
@@ -44,6 +47,7 @@ export default function ManageInstance() {
 
   return (
     <>
+      <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <div tw="flex justify-between pb-5 flex-wrap gap-4 flex-col md:flex-row">

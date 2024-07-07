@@ -104,6 +104,7 @@ export function getManagerReducer(): ManagerReducer {
           domainManager,
           messageManager,
           fileManager,
+          nodeManager,
         )
         const instanceManager = new InstanceManager(
           account,

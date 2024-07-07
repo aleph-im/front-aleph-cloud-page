@@ -17,6 +17,7 @@ export type ManageSSHKey = {
   handleCopyLabel: () => void
   handleCopyKey: () => void
   handleDelete: () => void
+  handleBack: () => void
 }
 
 export function useManageSSHKey(): ManageSSHKey {
@@ -25,7 +26,7 @@ export function useManageSSHKey(): ManageSSHKey {
   const router = useRouter()
   const { hash } = router.query
 
-  const { entities } = useRequestSSHKeys({ id: hash as string })
+  const { entities } = useRequestSSHKeys({ ids: hash as string })
   const [sshKey] = entities || []
 
   const handleCopyLabel = useCopyToClipboardAndNotify(sshKey?.label || '')
@@ -60,10 +61,15 @@ export function useManageSSHKey(): ManageSSHKey {
     }
   }, [dispatch, manager, sshKey, next, router, stop])
 
+  const handleBack = () => {
+    router.push('/settings/')
+  }
+
   return {
     sshKey,
     handleCopyLabel,
     handleCopyKey,
     handleDelete,
+    handleBack,
   }
 }

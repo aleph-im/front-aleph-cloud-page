@@ -8,9 +8,11 @@ import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
+import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
+import BackButtonSection from '@/components/common/BackButtonSection'
 
 export default function ManageSSHKey() {
-  const { sshKey, handleCopyKey, handleCopyLabel, handleDelete } =
+  const { sshKey, handleCopyKey, handleCopyLabel, handleDelete, handleBack } =
     useManageSSHKey()
 
   const theme = useTheme()
@@ -18,6 +20,7 @@ export default function ManageSSHKey() {
   if (!sshKey) {
     return (
       <>
+        <BackButtonSection handleBack={handleBack} />
         <Container>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
         </Container>
@@ -30,6 +33,7 @@ export default function ManageSSHKey() {
 
   return (
     <>
+      <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <Container>
           <div tw="flex justify-between pb-5">
@@ -116,20 +120,13 @@ export default function ManageSSHKey() {
           </NoisyContainer>
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/configure/ssh/new">
+            <ButtonLink variant="primary" href="/settings/ssh/new">
               Add new SSH Key
             </ButtonLink>
           </div>
-
-          <p tw="my-24 text-center">
-            Acquire aleph.im tokens for versatile access to resources within a
-            defined duration. These tokens remain in your wallet without being
-            locked or consumed, providing you with flexibility in utilizing
-            aleph.im&apos;s infrastructure. If you choose to remove the tokens
-            from your wallet, the allocated resources will be efficiently
-            reclaimed. Feel free to use or hold the tokens according to your
-            needs, even when not actively using Aleph.im&apos;s resources.
-          </p>
+        </Container>
+        <Container>
+          <HoldTokenDisclaimer />
         </Container>
       </section>
     </>

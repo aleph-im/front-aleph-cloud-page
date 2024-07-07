@@ -78,11 +78,11 @@ export const Footer = () => {
               },
               {
                 label: 'Custom domains',
-                href: '/configure/domain/new/',
+                href: '/settings/domain/new/',
               },
               {
                 label: 'SSH',
-                href: '/configure/ssh/new/',
+                href: '/settings/ssh/new/',
               },
             ],
           },

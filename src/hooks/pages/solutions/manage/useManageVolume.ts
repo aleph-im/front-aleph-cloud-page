@@ -17,6 +17,7 @@ export type ManageVolume = {
   handleDelete: () => void
   handleDownload: () => void
   handleCopyHash: () => void
+  handleBack: () => void
 }
 
 export function useManageVolume(): ManageVolume {
@@ -25,7 +26,7 @@ export function useManageVolume(): ManageVolume {
   const router = useRouter()
   const { hash } = router.query
 
-  const { entities } = useRequestVolumes({ id: hash as string })
+  const { entities } = useRequestVolumes({ ids: hash as string })
   const [volume] = entities || []
 
   const manager = useVolumeManager()
@@ -66,10 +67,15 @@ export function useManageVolume(): ManageVolume {
     await manager.download(volume)
   }, [manager, volume])
 
+  const handleBack = () => {
+    router.push('/storage/')
+  }
+
   return {
     volume,
     handleDelete,
     handleDownload,
     handleCopyHash,
+    handleBack,
   }
 }

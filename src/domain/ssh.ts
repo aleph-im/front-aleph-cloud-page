@@ -164,7 +164,9 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
   // @todo: Type not exported from SDK...
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parsePosts(posts: any[]): SSHKey[] {
-    return posts.map((post) => this.parsePost(post, post.content))
+    return posts
+      .map((post) => this.parsePost(post, post.content))
+      .sort((a, b) => b.date.localeCompare(a.date))
   }
 
   // @todo: Type not exported from SDK...

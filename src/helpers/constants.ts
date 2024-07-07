@@ -132,8 +132,8 @@ export const EntityTypeUrlSection: Record<EntityType, string> = {
   [EntityType.Volume]: 'storage',
   [EntityType.Program]: 'computing',
   [EntityType.Instance]: 'computing',
-  [EntityType.SSHKey]: 'configure',
-  [EntityType.Domain]: 'configure',
+  [EntityType.SSHKey]: 'settings',
+  [EntityType.Domain]: 'settings',
   [EntityType.Indexer]: 'tools',
   [EntityType.Website]: 'hosting',
 }

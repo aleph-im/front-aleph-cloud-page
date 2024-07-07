@@ -1,55 +1,22 @@
-import { useAppStoreEntityRequest } from '../useStoreEntitiesRequest'
 import { Program } from '@/domain/program'
 import { useProgramManager } from '../useManager/useProgramManager'
-import { useRetryNotConfirmedEntities } from '../useRetryNotConfirmedEntities'
-import { useAppState } from '@/contexts/appState'
 
-export type UseRequestProgramsProps = {
-  id?: string
-  triggerOnMount?: boolean
-  triggerDeps?: unknown[]
-}
+import {
+  UseRequestEntitiesProps,
+  UseRequestEntitiesReturn,
+  useRequestEntities,
+} from './useRequestEntities'
 
-export type UseRequestProgramsReturn = {
-  entities?: Program[]
-}
+export type UseRequestProgramsProps = Omit<
+  UseRequestEntitiesProps<Program>,
+  'name'
+>
 
-export function useRequestPrograms({
-  id,
-  triggerDeps = [],
-  triggerOnMount = true,
-}: UseRequestProgramsProps = {}): UseRequestProgramsReturn {
-  const [state] = useAppState()
-  const { account } = state.connection
-  triggerDeps = [account, ...triggerDeps]
+export type UseRequestProgramsReturn = UseRequestEntitiesReturn<Program>
 
+export function useRequestPrograms(
+  props: UseRequestProgramsProps = {},
+): UseRequestProgramsReturn {
   const manager = useProgramManager()
-
-  const { data: entities, request } = useAppStoreEntityRequest({
-    name: 'program',
-    doRequest: async () => {
-      if (!manager) return []
-
-      if (!id) {
-        return manager.getAll()
-      } else {
-        const entity = await manager.get(id)
-        return entity ? [entity] : []
-      }
-    },
-    onSuccess: () => null,
-    flushData: !id,
-    triggerOnMount,
-    triggerDeps,
-  })
-
-  useRetryNotConfirmedEntities({
-    entities,
-    request,
-    triggerOnMount,
-  })
-
-  return {
-    entities,
-  }
+  return useRequestEntities({ ...props, manager, name: 'program' })
 }

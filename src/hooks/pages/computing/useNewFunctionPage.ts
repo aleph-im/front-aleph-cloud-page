@@ -57,6 +57,7 @@ export type UseNewFunctionPage = {
   control: Control<any>
   errors: FieldErrors<NewFunctionFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
+  handleBack: () => void
 }
 
 export function useNewFunctionPage(): UseNewFunctionPage {
@@ -131,6 +132,10 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     isCreateButtonDisabled = false
   }
 
+  const handleBack = () => {
+    router.push('.')
+  }
+
   return {
     address: account?.address || '',
     accountBalance,
@@ -139,5 +144,6 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     control,
     errors,
     handleSubmit,
+    handleBack,
   }
 }
