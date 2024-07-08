@@ -6,7 +6,7 @@ export const StyledEntityCardsContainer = styled.div`
 `
 
 export const EntityCardWrapper = styled.div`
-  ${tw`flex overflow-scroll`}
+  ${tw`flex overflow-x-scroll`}
 `
 
 export const StyledSectionDescription = styled.p`

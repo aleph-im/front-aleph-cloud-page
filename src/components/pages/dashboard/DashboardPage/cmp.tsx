@@ -86,7 +86,6 @@ export default function DashboardPage() {
           <StyledEntityCardsContainer>
             <EntityCardWrapper>
               <EntityCard
-                tw="overflow-scroll"
                 type={
                   websitesAggregatedStatus.total.amount
                     ? 'active'
