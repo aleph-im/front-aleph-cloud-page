@@ -35,7 +35,7 @@ export function useWebsiteDashboardPage(): UseWebsiteDashboardPageReturn {
       {
         id: 'domain',
         name: 'Linked Domains',
-        label: { label: getLabel(domains), position: 'bottom' },
+        label: { label: 'SOON', position: 'top' },
         disabled: !domains.length,
       },
     ]
