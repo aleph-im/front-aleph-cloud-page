@@ -24,6 +24,9 @@ import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import Price from '@/components/common/Price'
 import CheckoutSummaryFooter from '../CheckoutSummaryFooter'
 import { AddWebsite, WebsiteCost, WebsiteManager } from '@/domain/website'
+import { useConnection } from '@/hooks/common/useConnection'
+import { Blockchain } from '@aleph-sdk/core'
+import { useNFTVoucherBalance } from '@/hooks/common/useNFTVoucherBalance'
 
 const CheckoutSummarySpecsLine = ({
   type,
@@ -268,6 +271,10 @@ CheckoutSummaryProps) => {
       // streamDuration,
     },
   })
+  const { blockchain } = useConnection({
+    triggerOnMount: false,
+  })
+  const nftVoucherBalance = useNFTVoucherBalance()
 
   const priceDuration = paymentMethod === PaymentMethod.Stream ? 'h' : undefined
   const disabledHold =
@@ -334,6 +341,20 @@ CheckoutSummaryProps) => {
                     <Price value={unlockedAmount} />
                   </div>
                 </StyledHoldingSummaryLine>
+                {nftVoucherBalance > 0 && (
+                  <StyledHoldingSummaryLine
+                    $isHeader
+                    className="tp-body3 fs-12"
+                  >
+                    <div className="text-main0">NFT VOUCHER</div>
+                    <div className="text-main0">
+                      {blockchain !== Blockchain.ETH
+                        ? 'SWITCH TO ETHEREUM TO CHECK'
+                        : 'EXCLUSIVE ALLOCATION'}
+                    </div>
+                    <div className="text-main0">{nftVoucherBalance} NFT(s)</div>
+                  </StyledHoldingSummaryLine>
+                )}
                 {(type === EntityType.Program ||
                   type === EntityType.Instance) &&
                   specs && (

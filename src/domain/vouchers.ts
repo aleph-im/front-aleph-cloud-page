@@ -1,0 +1,30 @@
+import { ethers, providers } from 'ethers'
+
+const provider = new providers.JsonRpcProvider('https://avalanche.drpc.org')
+const contractAddress = '0x44c9B8558067F12993Fed260C84debb89E66e93f'
+const contractABI = [
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'target',
+        type: 'address',
+      },
+    ],
+    name: 'balanceOf',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+]
+const contract = new ethers.Contract(contractAddress, contractABI, provider)
+
+export const NftVoucherBalance = async (address?: string): Promise<number> => {
+  return (address && Number(await contract.balanceOf(address))) || 0
+}
