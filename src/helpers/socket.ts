@@ -118,7 +118,6 @@ export async function* subscribeSocketFeed<T>(
     }
   } finally {
     // @note. close socket on abort (useEffect Destructor)
-
     close(undefined, false)
   }
 }

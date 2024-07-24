@@ -180,7 +180,7 @@ export class InstanceManager
         newInstance.node
       ) {
         yield
-        await this.notifyCRNExecution(newInstance.node, entity.id, false)
+        await this.notifyCRNAllocation(newInstance.node, entity.id, false)
       }
 
       return entity
@@ -256,43 +256,6 @@ export class InstanceManager
     if (domains.length > 0) steps.push('domain')
 
     return steps
-  }
-
-  async notifyCRNExecution(
-    node: CRN,
-    instanceId: string,
-    retry = true,
-  ): Promise<void> {
-    if (!node.address) throw Err.InvalidCRNAddress
-
-    let errorMsg = ''
-
-    for (let i = 0; i < 5; i++) {
-      try {
-        const nodeUrl = NodeManager.normalizeUrl(node.address)
-
-        const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            instance: instanceId,
-          }),
-        })
-        const resp = await req.json()
-        if (resp.success) return
-
-        errorMsg = resp.errors[instanceId]
-      } catch (e) {
-        errorMsg = (e as Error).message
-      } finally {
-        if (!retry) break
-        await sleep(1000)
-      }
-    }
-
-    throw Err.InstanceStartupFailed(node.hash, errorMsg)
   }
 
   protected async *addPAYGStreamSteps(

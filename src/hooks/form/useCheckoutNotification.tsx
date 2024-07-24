@@ -23,7 +23,7 @@ export type UseCheckoutNotificationReturn = {
 
 export function useCheckoutNotification({
   steps: stepsProp,
-}: UseCheckoutNotificationProps): UseCheckoutNotificationReturn {
+}: UseCheckoutNotificationProps = {}): UseCheckoutNotificationReturn {
   const noti = useNotification()
   const step = useRef(0)
 

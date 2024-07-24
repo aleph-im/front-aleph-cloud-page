@@ -21,7 +21,11 @@ import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { Domain, DomainManager } from './domain'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import {
+  CheckoutStepType,
+  EntityType,
+  PaymentMethod,
+} from '@/helpers/constants'
 import {
   getHours,
   StreamDurationField,
@@ -34,6 +38,8 @@ import Err from '@/helpers/errors'
 import { BlockchainId } from './connect/base'
 import { CRN, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
+import { sleep } from '@aleph-front/core'
+import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -103,7 +109,6 @@ export type ExecutableSchedulerAllocation = {
 
 export type ExecutableStatus = {
   hash: string
-  type: EntityType.Instance | EntityType.Program
   ipv4: string
   ipv6: string
   ipv6Parsed: string
@@ -127,9 +132,16 @@ export type KeyPair = {
   createdAt: number
 }
 
+export type AuthPubKeyToken = {
+  pubKeyHeader: SignedPublicKeyHeader
+  keyPair: KeyPair
+}
+
 export const KEYPAIR_TTL = 1000 * 60 * 60 * 2
 
 export abstract class ExecutableManager {
+  protected static cachedPubKeyToken: AuthPubKeyToken
+
   /**
    * Calculates the amount of tokens required to deploy a function
    * https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
@@ -203,6 +215,15 @@ export abstract class ExecutableManager {
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
   ) {}
 
+  abstract getDelSteps(
+    executableOrIds: string | Executable | (string | Executable)[],
+  ): Promise<CheckoutStepType[]>
+
+  abstract delSteps(
+    executableOrIds: string | Executable | (string | Executable)[],
+    account?: SuperfluidAccount,
+  ): AsyncGenerator<void>
+
   async checkStatus(
     executable: Executable,
   ): Promise<ExecutableStatus | undefined> {
@@ -228,7 +249,6 @@ export abstract class ExecutableManager {
 
     return {
       hash,
-      type: EntityType.Instance,
       ipv4,
       ipv6,
       ipv6Parsed: this.formatVMIPv6Address(ipv6),
@@ -257,17 +277,16 @@ export abstract class ExecutableManager {
 
     const { node_id, url } = response.node
 
-    // const nodes = await this.nodeManager.getCRNNodes()
+    const nodes = await this.nodeManager.getCRNNodes()
 
-    // let node = nodes.find((node) => node.address === url)
-    // node =
-    //   node ||
-    //   nodes.find(
-    //     (node) =>
-    //       node.address &&
-    //       NodeManager.normalizeUrl(node.address) ===
-    //         NodeManager.normalizeUrl(url),
-    //   )
+    const node = nodes.find(
+      (node) =>
+        node.address &&
+        NodeManager.normalizeUrl(node.address) ===
+          NodeManager.normalizeUrl(url),
+    )
+
+    if (node) return node
 
     return {
       hash: node_id,
@@ -286,6 +305,43 @@ export abstract class ExecutableManager {
     }
   }
 
+  async notifyCRNAllocation(
+    node: CRN,
+    instanceId: string,
+    retry = true,
+  ): Promise<void> {
+    if (!node.address) throw Err.InvalidCRNAddress
+
+    let errorMsg = ''
+
+    for (let i = 0; i < 5; i++) {
+      try {
+        const nodeUrl = NodeManager.normalizeUrl(node.address)
+
+        const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            instance: instanceId,
+          }),
+        })
+        const resp = await req.json()
+        if (resp.success) return
+
+        errorMsg = resp.errors[instanceId]
+      } catch (e) {
+        errorMsg = (e as Error).message
+      } finally {
+        if (!retry) break
+        await sleep(1000)
+      }
+    }
+
+    throw Err.InstanceStartupFailed(node.hash, errorMsg)
+  }
+
   async getKeyPair(): Promise<KeyPair> {
     const kp = await crypto.subtle.generateKey(
       { name: 'ECDSA', namedCurve: 'P-256' },
@@ -300,31 +356,40 @@ export abstract class ExecutableManager {
     return { publicKey, privateKey, createdAt }
   }
 
-  async getAuthPubkeyToken({
-    url,
-    keyPair,
-  }: {
-    url: string
-    keyPair: KeyPair
-  }) {
-    const { publicKey, createdAt } = keyPair
+  async getAuthPubKeyToken(keyPair?: KeyPair): Promise<AuthPubKeyToken> {
+    // @todo: Improve this by caching on local storage
+    const { cachedPubKeyToken } = ExecutableManager
 
+    if (cachedPubKeyToken) {
+      const { payload } = cachedPubKeyToken.pubKeyHeader
+      const { expires } = JSON.parse(
+        Buffer.from(payload, 'hex').toString('utf-8'),
+      )
+
+      const expireTimestamp = new Date(expires).valueOf()
+
+      if (expireTimestamp >= Date.now()) {
+        return cachedPubKeyToken
+      }
+    }
+
+    keyPair = keyPair || (await this.getKeyPair())
+
+    const { publicKey, createdAt } = keyPair
     const { address } = this.account
-    const domain = new URL(url).hostname
 
     // @todo: Quickfix that should be moved to the backend
     const [d] = new Date(createdAt + KEYPAIR_TTL).toISOString().split('Z')
     const expires = `${d}+00:00`
 
-    const payload = Buffer.from(
-      JSON.stringify({
-        alg: 'ECDSA',
-        pubkey: publicKey,
-        domain,
-        address,
-        expires,
-      }),
-    ).toString('hex')
+    const rawPayload = {
+      alg: 'ECDSA',
+      pubkey: publicKey,
+      address,
+      expires,
+    }
+
+    const payload = Buffer.from(JSON.stringify(rawPayload)).toString('hex')
 
     // @todo: Refactor this
     const wallet = (this.account as any).wallet.provider.provider
@@ -334,30 +399,37 @@ export abstract class ExecutableManager {
       params: [payload, address],
     })
 
-    return {
-      payload,
-      signature,
+    const pubKeyToken = {
+      keyPair,
+      pubKeyHeader: {
+        payload,
+        signature,
+      },
     }
+
+    ExecutableManager.cachedPubKeyToken = pubKeyToken
+
+    return pubKeyToken
   }
 
   async sendPostOperation({
     hostname,
     operation,
-    keyPair,
-    authPubkey,
     vmId,
   }: {
     operation: ExecutableOperations
     vmId: string
     hostname: string
-    keyPair: KeyPair
-    authPubkey: SignedPublicKeyHeader
   }): Promise<Response> {
+    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
+
     const url = new URL(hostname + '/control/machine/' + vmId + '/' + operation)
+    const { hostname: domain, pathname: path } = url
 
     const signedOperationToken = await this.getAuthOperationToken(
       keyPair.privateKey,
-      url.pathname,
+      domain,
+      path,
     )
 
     return fetch(url.toString(), {
@@ -365,7 +437,7 @@ export abstract class ExecutableManager {
       headers: {
         'Content-Type': 'application/json',
         'X-SignedOperation': JSON.stringify(signedOperationToken),
-        'X-SignedPubKey': JSON.stringify(authPubkey),
+        'X-SignedPubKey': JSON.stringify(pubKeyHeader),
       },
       mode: 'cors',
     })
@@ -373,27 +445,28 @@ export abstract class ExecutableManager {
 
   async *subscribeLogs({
     hostname,
-    keyPair,
-    authPubkey,
     vmId,
     abort,
   }: {
     vmId: string
     hostname: string
-    keyPair: KeyPair
-    authPubkey: SignedPublicKeyHeader
     abort: Promise<void>
-  }): AsyncGenerator<string[]> {
+  }): AsyncGenerator<{ type: string; message: string }> {
+    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
+
     const url = new URL(
       hostname.replace('https://', 'wss://') +
         '/control/machine/' +
         vmId +
-        '/logs',
+        '/stream_logs',
     )
+
+    const { hostname: domain, pathname: path } = url
 
     const signedOperationToken = await this.getAuthOperationToken(
       keyPair.privateKey,
-      url.pathname,
+      domain,
+      path,
     )
 
     const feed = subscribeSocketFeed<any>(url.toString(), abort)
@@ -404,32 +477,33 @@ export abstract class ExecutableManager {
       JSON.stringify({
         auth: {
           'X-SignedOperation': signedOperationToken,
-          'X-SignedPubKey': authPubkey,
+          'X-SignedPubKey': pubKeyHeader,
         },
       }),
     )
 
+    let auth = false
+
     for await (const data of feed) {
       try {
-        const parsedData = JSON.parse(data)
-        console.log('parsedData', parsedData)
+        if (!auth) {
+          if (data.status !== 'connected') throw new Error('WS auth')
+          auth = true
+          continue
+        }
 
-        // if (parsedData.status === 'connected') {
-        //   authOk = true
-        //   return resolve(ws)
-        // }
-        // if (parsedData.status === 'failed') {
-        //   return reject(parsedData.reason)
-        // }
-
-        yield parsedData
+        yield data
       } catch (err) {
         console.log(err)
       }
     }
   }
 
-  protected async getAuthOperationToken(privateKey: JsonWebKey, path: string) {
+  protected async getAuthOperationToken(
+    privateKey: JsonWebKey,
+    domain: string,
+    path: string,
+  ) {
     const encoder = new TextEncoder()
 
     // @todo: Quickfix that should be moved to the backend
@@ -440,6 +514,7 @@ export abstract class ExecutableManager {
       JSON.stringify({
         time,
         path,
+        domain,
         method: 'POST',
       }),
     )

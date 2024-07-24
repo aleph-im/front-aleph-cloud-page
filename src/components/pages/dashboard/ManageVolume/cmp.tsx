@@ -66,7 +66,7 @@ export default function ManageVolume() {
                 forwardedAs="a"
                 onClick={handleDownload}
               >
-                Download
+                <Icon name="download" />
               </Button>
               <Button
                 kind="functional"

@@ -1,17 +1,16 @@
+import Link from 'next/link'
+import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import { Label, NoisyContainer, Tooltip } from '@aleph-front/core'
+import { Label, NoisyContainer, Tabs, Tooltip } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
 import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import VolumeList from '../VolumeList'
-import { RotatingLines, ThreeDots } from 'react-loader-spinner'
-import { useTheme } from 'styled-components'
-import Link from 'next/link'
 import BackButtonSection from '@/components/common/BackButtonSection'
-import { useState } from 'react'
+import LogsFeed from '../LogsFeed'
 
 export default function ManageInstance() {
   const {
@@ -23,6 +22,10 @@ export default function ManageInstance() {
     stopDisabled,
     startDisabled,
     rebootDisabled,
+    logs,
+    tabs,
+    tabId,
+    theme,
     handleStop,
     handleStart,
     handleReboot,
@@ -31,25 +34,8 @@ export default function ManageInstance() {
     handleCopyIpv6,
     handleDelete,
     handleBack,
+    setTabId,
   } = useManageInstance()
-
-  const theme = useTheme()
-
-  const [tabId] = useState('detail')
-
-  // const tabs = useMemo(
-  //   () => [
-  //     {
-  //       id: 'detail',
-  //       name: 'Details',
-  //     },
-  //     {
-  //       id: 'log',
-  //       name: 'Logs',
-  //     },
-  //   ],
-  //   [],
-  // )
 
   if (!instance) {
     return (
@@ -98,7 +84,7 @@ export default function ManageInstance() {
                 )}
               </Label>
             </div>
-            <div tw="flex gap-4 flex-col md:flex-row">
+            <div tw="flex gap-4">
               <Tooltip
                 content="Stop Instance"
                 my="bottom-center"
@@ -168,15 +154,15 @@ export default function ManageInstance() {
 
             <Separator />
 
-            <div tw="flex my-5">
-              <div tw="mr-5">
+            <div tw="flex flex-wrap justify-start gap-5 my-5">
+              <div>
                 <div className="tp-info text-main0">CORES</div>
                 <div>
                   <Text>{instance.resources.vcpus} x86 64bit</Text>
                 </div>
               </div>
 
-              <div tw="mr-5">
+              <div>
                 <div className="tp-info text-main0">RAM</div>
                 <div>
                   <Text>
@@ -189,7 +175,7 @@ export default function ManageInstance() {
                 </div>
               </div>
 
-              <div tw="mr-5">
+              <div>
                 <div className="tp-info text-main0">HDD</div>
                 <div>
                   <Text>
@@ -203,7 +189,7 @@ export default function ManageInstance() {
               </div>
             </div>
 
-            <div tw="mr-5">
+            <div tw="my-5">
               <div className="tp-info text-main0">EXPLORER</div>
               <div>
                 <a
@@ -221,12 +207,12 @@ export default function ManageInstance() {
 
             <Separator />
 
-            {/* <Tabs
+            <Tabs
               selected={tabId}
               align="left"
               onTabChange={setTabId}
               tabs={tabs}
-            /> */}
+            />
 
             <div role="tabpanel" tw="mt-6">
               {tabId === 'detail' ? (
@@ -348,7 +334,9 @@ export default function ManageInstance() {
                   )}
                 </>
               ) : tabId === 'log' ? (
-                <>LOGS</>
+                <>
+                  <LogsFeed logs={logs} />
+                </>
               ) : (
                 <></>
               )}

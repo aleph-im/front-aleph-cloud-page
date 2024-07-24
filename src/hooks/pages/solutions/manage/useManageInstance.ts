@@ -1,41 +1,24 @@
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Instance, InstanceStatus } from '@/domain/instance'
+import { useEffect, useMemo, useState } from 'react'
+import { Instance } from '@/domain/instance'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
-import { useAppState } from '@/contexts/appState'
-import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
-import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
-import { useConnection } from '@/hooks/common/useConnection'
-import { PaymentType } from '@aleph-sdk/message'
-import { AvalancheAccount } from '@aleph-sdk/avalanche'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
-import { EntityDelAction } from '@/store/entity'
+import { TabsProps, useCopyToClipboardAndNotify } from '@aleph-front/core'
+import { DefaultTheme, useTheme } from 'styled-components'
 import {
-  stepsCatalog,
-  useCheckoutNotification,
-} from '@/hooks/form/useCheckoutNotification'
-import Err from '@/helpers/errors'
-import { BlockchainId } from '@/domain/connect/base'
-import { useCopyToClipboardAndNotify, useNotification } from '@aleph-front/core'
-import { CRN, NodeManager } from '@/domain/node'
-import { ExecutableOperations } from '@/domain/executable'
-// import { useRequestExecutableLogsFeed } from '@/hooks/common/useRequestEntity/useRequestExecutableLogsFeed'
+  UseExecutableActionsReturn,
+  useExecutableActions,
+} from '@/hooks/common/useExecutableActions'
 
-export type ManageInstance = {
+export type ManageInstance = UseExecutableActionsReturn & {
   instance?: Instance
-  status?: InstanceStatus
   mappedKeys: (SSHKey | undefined)[]
-  nodeDetails?: { name: string; url: string }
-  logs: string
-  isRunning: boolean
-  stopDisabled: boolean
-  startDisabled: boolean
-  rebootDisabled: boolean
-  handleStop: () => void
-  handleStart: () => void
-  handleReboot: () => void
+  theme: DefaultTheme
+  tabs: TabsProps['tabs']
+  tabId: string
+  setTabId: (tabId: string) => void
   handleCopyHash: () => void
   handleCopyConnect: () => void
   handleCopyIpv6: () => void
@@ -44,21 +27,44 @@ export type ManageInstance = {
 }
 
 export function useManageInstance(): ManageInstance {
-  const [state, dispatch] = useAppState()
-  const { account, blockchain } = state.connection
-
-  const { handleConnect } = useConnection({
-    triggerOnMount: false,
-  })
-
   const router = useRouter()
   const { hash } = router.query
 
   const { entities } = useRequestInstances({ ids: hash as string })
   const [instance] = entities || []
 
+  const manager = useInstanceManager()
+
+  const theme = useTheme()
+
+  const [tabId, setTabId] = useState('detail')
+  const subscribeLogs = tabId === 'log'
+
+  const executableActions = useExecutableActions({
+    executable: instance,
+    manager,
+    subscribeLogs,
+  })
+
+  const { logsDisabled, status } = executableActions
+
+  const tabs = useMemo(
+    () =>
+      [
+        {
+          id: 'detail',
+          name: 'Details',
+        },
+        {
+          id: 'log',
+          name: 'Logs',
+          disabled: logsDisabled,
+        },
+      ] as TabsProps['tabs'],
+    [logsDisabled],
+  )
+
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
-  const status = useInstanceStatus(instance)
 
   const handleCopyHash = useCopyToClipboardAndNotify(instance?.id || '')
   const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.ipv6Parsed || '')
@@ -66,12 +72,7 @@ export function useManageInstance(): ManageInstance {
     `ssh root@${status?.ipv6Parsed}`,
   )
 
-  const manager = useInstanceManager()
   const sshKeyManager = useSSHKeyManager()
-  const { next, stop } = useCheckoutNotification({})
-
-  const isPAYG = instance?.payment?.type === PaymentType.superfluid
-  const instanceId = instance?.id
 
   useEffect(() => {
     if (!instance || !sshKeyManager) return
@@ -251,18 +252,13 @@ export function useManageInstance(): ManageInstance {
   }
 
   return {
+    ...executableActions,
     instance,
-    status,
     mappedKeys,
-    nodeDetails,
-    logs,
-    isRunning,
-    stopDisabled,
-    startDisabled,
-    rebootDisabled,
-    handleStop,
-    handleStart,
-    handleReboot,
+    theme,
+    tabs,
+    tabId,
+    setTabId,
     handleCopyHash,
     handleCopyConnect,
     handleCopyIpv6,
