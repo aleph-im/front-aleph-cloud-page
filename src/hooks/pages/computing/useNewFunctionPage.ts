@@ -65,7 +65,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const { account, balance: accountBalance = 0 } = appState.connection
 
   const manager = useProgramManager()
-  const { next, stop } = useCheckoutNotification({})
+  const { next, stop } = useCheckoutNotification()
 
   const onSubmit = useCallback(
     async (state: NewFunctionFormState) => {

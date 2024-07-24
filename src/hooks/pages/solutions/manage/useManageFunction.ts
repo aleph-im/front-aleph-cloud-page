@@ -1,20 +1,21 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useCopyToClipboardAndNotify } from '@aleph-front/core'
+import { TabsProps, useCopyToClipboardAndNotify } from '@aleph-front/core'
 import { Program } from '@/domain/program'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
-import { useAppState } from '@/contexts/appState'
 import { useRequestPrograms } from '@/hooks/common/useRequestEntity/useRequestPrograms'
-import { EntityDelAction } from '@/store/entity'
-import {
-  stepsCatalog,
-  useCheckoutNotification,
-} from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
+import {
+  UseExecutableActionsReturn,
+  useExecutableActions,
+} from '@/hooks/common/useExecutableActions'
 
-export type ManageFunction = {
+export type ManageFunction = UseExecutableActionsReturn & {
   program?: Program
-  handleDelete: () => void
+  tabs: TabsProps['tabs']
+  tabId: string
+  isPersistent: boolean
+  setTabId: (tabId: string) => void
   handleDownload: () => void
   handleCopyHash: () => void
   handleCopyRuntime: () => void
@@ -22,48 +23,46 @@ export type ManageFunction = {
 }
 
 export function useManageFunction(): ManageFunction {
-  const [, dispatch] = useAppState()
-
   const router = useRouter()
   const { hash } = router.query
 
   const { entities } = useRequestPrograms({ ids: hash as string })
   const [program] = entities || []
 
+  const manager = useProgramManager()
+
+  const [tabId, setTabId] = useState('detail')
+  const subscribeLogs = tabId === 'log'
+
+  const executableActions = useExecutableActions({
+    executable: program,
+    manager,
+    subscribeLogs,
+  })
+
+  const { logsDisabled } = executableActions
+
+  const tabs = useMemo(
+    () =>
+      [
+        {
+          id: 'detail',
+          name: 'Details',
+        },
+        {
+          id: 'log',
+          name: 'Logs',
+          disabled: logsDisabled,
+        },
+      ] as TabsProps['tabs'],
+    [logsDisabled],
+  )
+
   const handleCopyHash = useCopyToClipboardAndNotify(program?.id || '')
   const handleCopyRuntime = useCopyToClipboardAndNotify(
     program?.runtime.ref || '',
   )
   const handleCopyCode = useCopyToClipboardAndNotify(program?.code.ref || '')
-
-  const manager = useProgramManager()
-  const { next, stop } = useCheckoutNotification({})
-
-  const handleDelete = useCallback(async () => {
-    if (!manager) throw Err.ConnectYourWallet
-    if (!program) throw Err.FunctionNotFound
-
-    const iSteps = await manager.getDelSteps(program)
-    const nSteps = iSteps.map((i) => stepsCatalog[i])
-    const steps = manager.delSteps(program)
-
-    try {
-      while (true) {
-        const { done } = await steps.next()
-        if (done) {
-          break
-        }
-        await next(nSteps)
-      }
-
-      dispatch(new EntityDelAction({ name: 'program', keys: [program.id] }))
-
-      await router.replace('/')
-    } catch (e) {
-    } finally {
-      await stop()
-    }
-  }, [manager, program, dispatch, router, next, stop])
 
   const handleDownload = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
@@ -72,9 +71,20 @@ export function useManageFunction(): ManageFunction {
     await manager.download(program)
   }, [manager, program])
 
+  const isPersistent = !!program?.on.persistent
+
+  const isRunning = isPersistent
+    ? executableActions.isRunning
+    : !!program?.confirmed
+
   return {
+    ...executableActions,
+    isPersistent,
+    isRunning,
     program,
-    handleDelete,
+    tabs,
+    tabId,
+    setTabId,
     handleDownload,
     handleCopyHash,
     handleCopyRuntime,
