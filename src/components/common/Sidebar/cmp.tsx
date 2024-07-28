@@ -17,7 +17,7 @@ export type SidebarLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
 const Sidebar = memo(() => {
   const { routes } = useRoutes()
   const { pathname } = useRouter()
-  const [open] = useState<boolean>()
+  const [open, setOpen] = useState<boolean>()
 
   // --------------------------------------------
 
@@ -40,7 +40,7 @@ const Sidebar = memo(() => {
         pathname,
         allowanceInfo,
         open,
-        onToggle: undefined,
+        onToggle: setOpen,
         Link: Link as LinkComponent,
         logoHref: websiteUrl,
         logoTarget: '_blank',
