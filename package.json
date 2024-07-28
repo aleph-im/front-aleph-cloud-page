@@ -11,7 +11,7 @@
     "lint:fix": "next lint --fix"
   },
   "dependencies": {
-    "@aleph-front/core": "^1.20.1",
+    "@aleph-front/core": "^1.21.0",
     "@aleph-sdk/account": "^1.0.3",
     "@aleph-sdk/avalanche": "^1.0.3",
     "@aleph-sdk/client": "^1.0.6",
