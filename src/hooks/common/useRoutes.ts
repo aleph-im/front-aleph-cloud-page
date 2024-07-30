@@ -22,68 +22,84 @@ export function useRoutes(): UseRoutesReturn {
                 name: 'Dashboard',
                 href: '/',
                 exact: true,
+                icon: 'dashboard',
               },
               {
                 name: 'Settings',
                 href: '/settings',
                 exact: true,
-              },
-            ],
-          },
-          {
-            name: 'Web3 Hosting',
-            href: '/hosting',
-            children: [
-              {
-                name: 'Websites',
-                href: '/hosting/website',
-              },
-            ],
-          },
-          {
-            name: 'Computing',
-            href: '/computing',
-            children: [
-              {
-                name: 'Functions',
-                href: '/computing/function',
+                icon: 'settings',
               },
               {
-                name: 'Instances',
-                href: '/computing/instance',
+                name: 'Web3 Hosting',
+                href: '/hosting',
+                icon: 'web3HostingBox',
+                children: [
+                  {
+                    name: 'Manage your webiste',
+                    href: '/hosting/website',
+                    icon: 'manageWebsite',
+                  },
+                ],
               },
               {
-                name: 'Confidential',
-                href: '/computing/confidential',
-                disabled: true,
+                name: 'Computing',
+                href: '/computing',
+                icon: 'computeSolutions',
+                children: [
+                  {
+                    name: 'Functions',
+                    href: '/computing/function',
+                    icon: 'functions',
+                  },
+                  {
+                    name: 'Instances',
+                    href: '/computing/instance',
+                    icon: 'instance',
+                  },
+                  {
+                    name: 'Confidential',
+                    href: '/computing/confidential',
+                    disabled: true,
+                    label: '(SOON)',
+                    icon: 'confidential',
+                  },
+                ],
               },
-            ],
-          },
-          {
-            name: 'Storage',
-            href: '/storage',
-            children: [
               {
-                name: 'Volumes',
+                name: 'Storage',
                 href: '/storage',
-              },
-            ],
-          },
-          {
-            name: 'Tools',
-            href: '#',
-            children: [
-              {
-                name: 'VRF',
-                href: 'https://medium.com/aleph-im/aleph-im-verifiable-random-function-vrf-b03544a7e904',
-                external: true,
-                target: '_blank',
+                icon: 'storageSolutions',
+                children: [
+                  {
+                    name: 'Volumes',
+                    href: '/storage',
+                    icon: 'storageSolutions',
+                  },
+                ],
               },
               {
-                name: 'Indexer',
-                href: 'https://docs.aleph.im/tools/indexer/',
-                external: true,
-                target: '_blank',
+                name: 'Tools',
+                href: '#',
+                icon: 'console',
+                children: [
+                  {
+                    name: 'VRF',
+                    href: 'https://medium.com/aleph-im/aleph-im-verifiable-random-function-vrf-b03544a7e904',
+                    external: true,
+                    target: '_blank',
+                    icon: 'arrow-up-right-from-square',
+                    highlighted: true,
+                  },
+                  {
+                    name: 'Indexing Framework',
+                    href: 'https://docs.aleph.im/tools/indexer/',
+                    external: true,
+                    target: '_blank',
+                    icon: 'arrow-up-right-from-square',
+                    highlighted: true,
+                  },
+                ],
               },
             ],
           },
