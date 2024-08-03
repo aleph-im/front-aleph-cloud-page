@@ -1,5 +1,1 @@
-export {
-  default,
-  default as Header,
-  AccountButtonMemo as AccountButton,
-} from './cmp'
+export { default, default as Header } from './cmp'

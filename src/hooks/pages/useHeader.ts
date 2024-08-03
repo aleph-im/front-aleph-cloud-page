@@ -1,16 +1,10 @@
 import { useRouter } from 'next/router'
-import { useCallback, useState, useRef, RefObject, useMemo } from 'react'
-import { Account } from '@aleph-sdk/account'
+import { useCallback, useState, useMemo } from 'react'
 import { useAppState } from '@/contexts/appState'
 import {
+  AccountPickerProps,
   BreakpointId,
   Network,
-  useClickOutside,
-  useFloatPosition,
-  useTransition,
-  useWindowScroll,
-  useWindowSize,
-  WalletPickerProps,
   Wallet,
 } from '@aleph-front/core'
 import {
@@ -21,117 +15,30 @@ import { UseRoutesReturn, useRoutes } from '../common/useRoutes'
 import { useConnection } from '../common/useConnection'
 import { BlockchainId, ProviderId, blockchains } from '@/domain/connect/base'
 
-export type UseAccountButtonProps = Pick<
-  UseHeaderReturn,
-  | 'rewards'
-  | 'rewards'
-  | 'networks'
-  | 'selectedNetwork'
-  | 'handleSwitchNetwork'
-  | 'handleConnect'
-  | 'handleDisconnect'
->
-
-export type UseAccountButtonReturn = UseAccountButtonProps &
-  Pick<
-    UseHeaderReturn,
-    'handleSwitchNetwork' | 'handleConnect' | 'handleDisconnect'
-  > & {
-    account: Account | undefined
-    accountBalance?: number
-    displayWalletPicker: boolean
-    walletPickerOpen: boolean
-    walletPickerRef: RefObject<HTMLDivElement>
-    walletPickerTriggerRef: RefObject<HTMLButtonElement>
-    walletPosition: { x: number; y: number }
-    handleDisplayWalletPicker: () => void
-  }
-
-export function useAccountButton({
-  handleConnect: handleConnectProp,
-  handleDisconnect: handleDisconnectProp,
-  ...rest
-}: UseAccountButtonProps): UseAccountButtonReturn {
-  const [state] = useAppState()
-  const { account, balance: accountBalance } = state.connection
-
-  const [displayWalletPicker, setDisplayWalletPicker] = useState(false)
-
-  // --------------------
-
-  const walletPickerRef = useRef<HTMLDivElement>(null)
-  const walletPickerTriggerRef = useRef<HTMLButtonElement>(null)
-
-  useClickOutside(() => {
-    if (displayWalletPicker) setDisplayWalletPicker(false)
-  }, [walletPickerRef, walletPickerTriggerRef])
-
-  const handleDisplayWalletPicker = () => {
-    setDisplayWalletPicker(!displayWalletPicker)
-  }
-
-  const windowSize = useWindowSize(0)
-  const windowScroll = useWindowScroll(0)
-
-  const { shouldMount, stage } = useTransition(displayWalletPicker, 250)
-
-  const { myRef, atRef, position } = useFloatPosition({
-    my: 'top-right',
-    at: 'bottom-right',
-    myRef: walletPickerRef,
-    atRef: walletPickerTriggerRef,
-    deps: [account, windowSize, windowScroll, shouldMount],
-  })
-
-  const walletPickerOpen = stage === 'enter'
-
-  const handleConnect = useCallback(
-    (wallet: Wallet, network: Network) => {
-      handleConnectProp(wallet, network)
-      setDisplayWalletPicker(false)
-    },
-    [handleConnectProp],
-  )
-
-  const handleDisconnect = useCallback(() => {
-    handleDisconnectProp()
-    setDisplayWalletPicker(false)
-  }, [handleDisconnectProp])
-
-  return {
-    account,
-    accountBalance,
-    walletPickerOpen,
-    displayWalletPicker: shouldMount,
-    walletPickerRef: myRef,
-    walletPickerTriggerRef: atRef,
-    walletPosition: position,
-    handleDisplayWalletPicker,
-    handleConnect,
-    handleDisconnect,
-    ...rest,
-  }
-}
-
-// -----------------------------
-
 export type UseHeaderReturn = UseRoutesReturn & {
+  accountAddress?: string
+  accountBalance?: number
   networks: Network[]
   pathname: string
   breadcrumbNames: UseBreadcrumbNamesReturn['names']
   breakpoint: BreakpointId
   isOpen: boolean
-  rewards?: WalletPickerProps['rewards']
-  selectedNetwork: WalletPickerProps['selectedNetwork']
-  handleSwitchNetwork: WalletPickerProps['onSwitchNetwork']
+  rewards?: AccountPickerProps['rewards']
+  selectedNetwork: AccountPickerProps['selectedNetwork']
+  handleSwitchNetwork: AccountPickerProps['handleSwitchNetwork']
   handleToggle: (isOpen: boolean) => void
-  handleConnect: (wallet: Wallet, network: Network) => void
-  handleDisconnect: () => void
+  handleConnect: AccountPickerProps['handleConnect']
+  handleDisconnect: AccountPickerProps['handleDisconnect']
 }
 
 export function useHeader(): UseHeaderReturn {
   const [state] = useAppState()
-  const { provider, blockchain } = state.connection
+  const {
+    provider,
+    blockchain,
+    account,
+    balance: accountBalance,
+  } = state.connection
 
   const { handleConnect: connect, handleDisconnect: disconnect } =
     useConnection({ triggerOnMount: true })
@@ -219,19 +126,21 @@ export function useHeader(): UseHeaderReturn {
     if (!blockchain) return
 
     const id = blockchains[blockchain].id
-    return networks.find((network) => (network as any).id === id)
+    return networks.find((network) => (network as Network).id === id)
   }, [networks, blockchain])
 
   // -----------------------
 
   return {
+    accountAddress: account?.address,
+    accountBalance,
     networks,
     pathname,
     routes,
     breadcrumbNames,
     breakpoint,
     isOpen,
-    selectedNetwork,
+    selectedNetwork: selectedNetwork || networks[0],
     handleSwitchNetwork,
     handleToggle,
     handleConnect,
