@@ -25,18 +25,47 @@ export type UseCRNListProps = {
   onSelectedChange: (selected: string) => void
 }
 
+export type NameFilter = {
+  value: string
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void
+}
+
+export type ValidPAYGNodesOnlyFilter = {
+  value: boolean
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void
+}
+
+export type CpuFilter = {
+  value: string
+  options: string[]
+  onChange: (value: string) => void
+}
+
+export type RamFilter = {
+  value: string
+  options: string[]
+  onChange: (value: string) => void
+}
+
+export type HddFilter = {
+  value: string
+  options: string[]
+  onChange: (value: string) => void
+}
+
 export type UseCRNListReturn = UseCRNListProps &
   UseRequestCRNsReturn &
   UseRequestCRNSpecsReturn & {
     nodesIssues?: StreamSupportedIssues
     filteredNodes?: CRN[]
-    filter: string
-    validPAYGNodesOnly: boolean
+    nameFilter: NameFilter
+    validPAYGNodesOnlyFilter: ValidPAYGNodesOnlyFilter
+    cpuFilter: CpuFilter
+    ramFilter: RamFilter
+    hddFilter: HddFilter
     loadItemsDisabled: boolean
     handleLoadItems: () => Promise<void>
     handleSortItems: UseSortedListReturn<any>['handleSortItems']
-    handleFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
-    handleValidPAYGNodesOnlyChange: (e: ChangeEvent<HTMLInputElement>) => void
   }
 
 export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
@@ -44,33 +73,40 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   const nodeManager = useNodeManager()
 
   // -----------------------------
+  const [nameFilterValue, setNameFilterValue] =
+    useState<NameFilter['value']>('')
 
-  const [filter, setFilter] = useState('')
+  const [validPAYGNodesOnlyFilterValue, setValidPAYGNodesOnlyFilterValue] =
+    useState<ValidPAYGNodesOnlyFilter['value']>(true)
 
-  const debouncedFilter = useDebounceState(filter, 200)
+  const [cpuFilterValue, setCpuFilterValue] = useState<CpuFilter['value']>('')
+  const [ramFilterValue, setRamFilterValue] = useState<RamFilter['value']>('')
+  const [hddFilterValue, setHddFilterValue] = useState<HddFilter['value']>('')
 
-  const handleFilterChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const filter = e.target.value
-    setFilter(filter)
-  }, [])
+  const debouncedNameFilter = useDebounceState(nameFilterValue, 200)
 
   // -----------------------------
 
   const filterNodes = useCallback(
-    (query: string, nodes?: CRN[]): CRN[] | undefined => {
+    (nameFilter: string, nodes?: CRN[]): CRN[] | undefined => {
       if (!nodes) return
-      if (!query) return nodes
+      if (!nameFilter) return nodes
 
-      return nodes.filter((node) =>
-        node.name?.toLowerCase().includes(query.toLowerCase()),
-      )
+      let filteredNodes: CRN[] = [...nodes]
+      if (nameFilter) {
+        filteredNodes = filteredNodes.filter((node) =>
+          node.name?.toLowerCase().includes(nameFilter.toLowerCase()),
+        )
+      }
+
+      return filteredNodes
     },
     [],
   )
 
   const baseFilteredNodes = useMemo(
-    () => filterNodes(debouncedFilter, nodes),
-    [filterNodes, debouncedFilter, nodes],
+    () => filterNodes(debouncedNameFilter, nodes),
+    [filterNodes, debouncedNameFilter, nodes],
   )
 
   // -----------------------------
@@ -82,6 +118,48 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   const { ips, loading: loadingIps } = useRequestCRNIps({
     nodes: baseFilteredNodes,
   })
+
+  const cpuFilterOptions: CpuFilter['options'] = useMemo(() => {
+    if (!baseFilteredNodes) return []
+
+    const options = baseFilteredNodes.reduce((ac, node) => {
+      const cpuCount = specs[node.hash]?.data?.cpu.count
+      if (cpuCount && !ac.includes(cpuCount.toString())) {
+        ac.push(cpuCount.toString())
+      }
+      return ac
+    }, [] as string[])
+
+    return options.sort((a, b) => Number(a) - Number(b))
+  }, [baseFilteredNodes, specs])
+
+  const ramFilterOptions: RamFilter['options'] = useMemo(() => {
+    if (!baseFilteredNodes) return []
+
+    const options = baseFilteredNodes.reduce((ac, node) => {
+      const ram = specs[node.hash]?.data?.mem.available_kB
+      if (ram && !ac.includes(ram.toString())) {
+        ac.push(ram.toString())
+      }
+      return ac
+    }, [] as string[])
+
+    return options.sort((a, b) => Number(a) - Number(b))
+  }, [baseFilteredNodes, specs])
+
+  const hddFilterOptions: HddFilter['options'] = useMemo(() => {
+    if (!baseFilteredNodes) return []
+
+    const options = baseFilteredNodes.reduce((ac, node) => {
+      const hdd = specs[node.hash]?.data?.disk.available_kB
+      if (hdd && !ac.includes(hdd.toString())) {
+        ac.push(hdd.toString())
+      }
+      return ac
+    }, [] as string[])
+
+    return options.sort((a, b) => Number(a) - Number(b))
+  }, [baseFilteredNodes, specs])
 
   // -----------------------------
 
@@ -143,27 +221,74 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
   // -----------------------------
 
-  const [validPAYGNodesOnly, setValidPAYGNodesOnly] = useState<boolean>(true)
-
-  const handleValidPAYGNodesOnlyChange = useCallback(
-    async (e: ChangeEvent<HTMLInputElement>) => {
-      const show = e.target.checked
-      setValidPAYGNodesOnly(show)
+  const handleNameFilterChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const nameFilterValue = e.target.value
+      setNameFilterValue(nameFilterValue)
     },
     [],
   )
 
-  const validPAYGNodes = useMemo(() => {
-    if (!baseFilteredNodes) return
-    if (!nodesIssues) return baseFilteredNodes
+  const handleValidPAYGNodesOnlyFilterChange = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      setValidPAYGNodesOnlyFilterValue(e.target.checked)
+    },
+    [],
+  )
 
-    return baseFilteredNodes.filter((node) => !nodesIssues[node.hash])
-  }, [baseFilteredNodes, nodesIssues])
+  const handleCpuFilterChange = useCallback(async (value: string) => {
+    setCpuFilterValue(value)
+  }, [])
+
+  const handleRamFilterChange = useCallback(async (value: string) => {
+    setRamFilterValue(value)
+  }, [])
+
+  const handleHddFilterChange = useCallback(async (value: string) => {
+    setHddFilterValue(value)
+  }, [])
 
   const filteredNodes = useMemo(() => {
-    if (!validPAYGNodesOnly) return baseFilteredNodes
-    return validPAYGNodes
-  }, [validPAYGNodesOnly, baseFilteredNodes, validPAYGNodes])
+    if (!baseFilteredNodes) return
+
+    let filteredNodes = [...baseFilteredNodes]
+
+    if (validPAYGNodesOnlyFilterValue && nodesIssues) {
+      filteredNodes = filteredNodes.filter((node) => !nodesIssues[node.hash])
+    }
+
+    if (cpuFilterValue && specs) {
+      filteredNodes = filteredNodes.filter((node) => {
+        return specs[node.hash]?.data?.cpu.count === Number(cpuFilterValue)
+      })
+    }
+
+    if (ramFilterValue && specs) {
+      filteredNodes = filteredNodes.filter((node) => {
+        return (
+          specs[node.hash]?.data?.mem.available_kB === Number(ramFilterValue)
+        )
+      })
+    }
+
+    if (hddFilterValue && specs) {
+      filteredNodes = filteredNodes.filter((node) => {
+        return (
+          specs[node.hash]?.data?.disk.available_kB === Number(hddFilterValue)
+        )
+      })
+    }
+
+    return filteredNodes
+  }, [
+    baseFilteredNodes,
+    cpuFilterValue,
+    hddFilterValue,
+    nodesIssues,
+    ramFilterValue,
+    specs,
+    validPAYGNodesOnlyFilterValue,
+  ])
 
   const sortedNodes = useMemo(() => {
     if (!filteredNodes) return
@@ -204,12 +329,31 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     loading,
     nodesIssues,
     filteredNodes: paginatedSortedFilteredNodes,
-    filter,
-    validPAYGNodesOnly,
     loadItemsDisabled,
+    nameFilter: {
+      value: nameFilterValue,
+      onChange: handleNameFilterChange,
+    },
+    validPAYGNodesOnlyFilter: {
+      value: validPAYGNodesOnlyFilterValue,
+      onChange: handleValidPAYGNodesOnlyFilterChange,
+    },
+    cpuFilter: {
+      value: cpuFilterValue,
+      options: cpuFilterOptions,
+      onChange: handleCpuFilterChange,
+    },
+    ramFilter: {
+      value: ramFilterValue,
+      options: ramFilterOptions,
+      onChange: handleRamFilterChange,
+    },
+    hddFilter: {
+      value: hddFilterValue,
+      options: hddFilterOptions,
+      onChange: handleHddFilterChange,
+    },
     handleLoadItems,
     handleSortItems,
-    handleFilterChange,
-    handleValidPAYGNodesOnlyChange,
   }
 }

@@ -3,6 +3,8 @@ import Image from 'next/image'
 import {
   Button,
   Checkbox,
+  Dropdown,
+  DropdownOption,
   Icon,
   NodeName,
   NodeScore,
@@ -29,14 +31,30 @@ export default function CRNList(props: CRNListProps) {
     lastVersion,
     specs,
     nodesIssues,
-    filter,
     filteredNodes,
-    validPAYGNodesOnly,
     loadItemsDisabled,
+    nameFilter: { value: nameFilter, onChange: handleNameFilterChange },
+    validPAYGNodesOnlyFilter: {
+      value: validPAYGNodesOnlyFilter,
+      onChange: handleValidPAYGNodesOnlyFilterChange,
+    },
+    cpuFilter: {
+      value: cpuFilter,
+      options: cpuFilterOptions,
+      onChange: handleCpuFilterChange,
+    },
+    ramFilter: {
+      value: ramFilter,
+      options: ramFilterOptions,
+      onChange: handleRamFilterChange,
+    },
+    hddFilter: {
+      value: hddFilter,
+      options: hddFilterOptions,
+      onChange: handleHddFilterChange,
+    },
     handleLoadItems,
     handleSortItems,
-    handleFilterChange,
-    handleValidPAYGNodesOnlyChange,
     onSelectedChange,
   } = useCRNList(props)
 
@@ -295,21 +313,56 @@ export default function CRNList(props: CRNListProps) {
         <div tw="flex mb-8 gap-10 justify-between flex-wrap flex-col md:flex-row items-stretch md:items-center">
           <div tw="flex-1">
             <TextInput
-              value={filter}
+              value={nameFilter}
               name="filter-crn"
               placeholder="Search CRN"
-              onChange={handleFilterChange}
+              onChange={handleNameFilterChange}
               icon={<Icon name="search" />}
             />
           </div>
           <div>
             <Checkbox
               label="Ready for PAYG"
-              checked={validPAYGNodesOnly}
-              onChange={handleValidPAYGNodesOnlyChange}
+              checked={validPAYGNodesOnlyFilter}
+              onChange={handleValidPAYGNodesOnlyFilterChange}
               size="xs"
             />
           </div>
+        </div>
+        <div tw="flex gap-6">
+          <Dropdown
+            label="CPU"
+            onChange={handleCpuFilterChange}
+            value={`${cpuFilter}`}
+          >
+            {cpuFilterOptions.map((value) => (
+              <DropdownOption key={value} value={value}>
+                {value}
+              </DropdownOption>
+            ))}
+          </Dropdown>
+          <Dropdown
+            label="RAM"
+            onChange={handleRamFilterChange}
+            value={`${ramFilter}`}
+          >
+            {ramFilterOptions.map((value) => (
+              <DropdownOption key={value} value={value}>
+                {humanReadableSize(Number(value))}
+              </DropdownOption>
+            ))}
+          </Dropdown>
+          <Dropdown
+            label="HDD"
+            onChange={handleHddFilterChange}
+            value={`${hddFilter}`}
+          >
+            {hddFilterOptions.map((value) => (
+              <DropdownOption key={value} value={value}>
+                {humanReadableSize(Number(value))}
+              </DropdownOption>
+            ))}
+          </Dropdown>
         </div>
         <div tw="h-[30rem] overflow-auto" ref={infiniteScrollContainerRef}>
           <NodesTable
