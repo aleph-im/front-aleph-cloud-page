@@ -36,7 +36,7 @@ export function useRoutes(): UseRoutesReturn {
                 icon: 'web3HostingBox',
                 children: [
                   {
-                    name: 'Manage your webiste',
+                    name: 'Manage your website',
                     href: '/hosting/website',
                     icon: 'manageWebsite',
                   },

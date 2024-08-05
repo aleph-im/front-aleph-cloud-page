@@ -82,7 +82,7 @@ export default function NewDomain() {
             <SectionTitle number="2">Select Resource</SectionTitle>
             <p tw="mb-6">
               You&apos;ll need to specify the resource your custom domain will
-              be associated with. This could either be a wesbite, an instance or
+              be associated with. This could either be a website, an instance or
               a function, depending on what you want your custom domain to point
               to.
             </p>
