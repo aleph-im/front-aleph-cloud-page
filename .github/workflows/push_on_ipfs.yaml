@@ -45,3 +45,4 @@ jobs:
           python3 ./scripts/push_on_ipfs.py
           export IPFS_CID=$(python3 ./scripts/push_on_ipfs.py)
           echo $IPFS_CID
+          echo "CID: $IPFS_CID" >> $GITHUB_STEP_SUMMARY
