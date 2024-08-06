@@ -2,7 +2,6 @@ import { AnchorHTMLAttributes, ReactNode, memo, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { IconName, LinkComponent, RouterSidebar } from '@aleph-front/core'
-import { useUserStoreAllowance } from '@/hooks/common/useUserStoreAllowance'
 import { useRoutes } from '@/hooks/common/useRoutes'
 import { websiteUrl } from '@/helpers/constants'
 
@@ -21,8 +20,6 @@ const Sidebar = memo(() => {
 
   // --------------------------------------------
 
-  // @todo: fix types in core and install new version
-  const allowanceInfo: any = useUserStoreAllowance()
   const breakpoint = 'lg'
 
   // Hack to extend the sidebar inner list
@@ -34,17 +31,14 @@ const Sidebar = memo(() => {
   }, []) */
   return (
     <RouterSidebar
-      {...{
-        breakpoint,
-        routes,
-        pathname,
-        allowanceInfo,
-        open,
-        onToggle: setOpen,
-        Link: Link as LinkComponent,
-        logoHref: websiteUrl,
-        logoTarget: '_blank',
-      }}
+      breakpoint={breakpoint}
+      routes={routes}
+      pathname={pathname}
+      open={open}
+      onToggle={setOpen}
+      Link={Link as LinkComponent}
+      logoHref={websiteUrl}
+      logoTarget="_blank"
     />
   )
 })
