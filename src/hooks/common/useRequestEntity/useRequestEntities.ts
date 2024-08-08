@@ -4,12 +4,12 @@ import {
   useRetryNotConfirmedEntities,
 } from '../useRetryNotConfirmedEntities'
 import { useAppState } from '@/contexts/appState'
-import { EntityManager } from '@/domain/types'
+import { EntityManager, ReadOnlyEntityManager } from '@/domain/types'
 import { StoreState } from '@/store/store'
 
 export type UseRequestEntitiesProps<Entity> = {
   name: keyof StoreState
-  manager?: EntityManager<Entity, any>
+  manager?: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>
   ids?: string | string[]
   triggerOnMount?: boolean
   triggerDeps?: unknown[]

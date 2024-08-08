@@ -36,7 +36,7 @@ export const DashboardCardWithSideImage = ({
           </div>
           {(withButton || externalLinkUrl) && (
             <div tw="mt-6 flex flex-wrap items-center justify-between gap-6">
-              {withButton && (
+              {withButton && buttonUrl && buttonText && (
                 <ButtonLink variant="primary" size="md" href={buttonUrl}>
                   {buttonText}
                 </ButtonLink>

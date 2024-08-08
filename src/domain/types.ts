@@ -8,9 +8,7 @@ export interface EntityManagerFetchOptions {
   channels?: string[]
 }
 
-export interface EntityManager<T, AT> {
-  getAll(opts: EntityManagerFetchOptions): Promise<T[]>
-  get(id: string): Promise<T | undefined>
+export interface EntityManager<T, AT> extends ReadOnlyEntityManager<T> {
   add(entity: AT | AT[]): Promise<T | T[]>
   del(entityOrId: string | T): Promise<void>
 
@@ -22,4 +20,9 @@ export interface EntityManager<T, AT> {
     entity: string | T | (string | T)[],
     extra?: any,
   ): AsyncGenerator<void>
+}
+
+export interface ReadOnlyEntityManager<T> {
+  getAll(opts: EntityManagerFetchOptions): Promise<T[]>
+  get(id: string): Promise<T | undefined>
 }

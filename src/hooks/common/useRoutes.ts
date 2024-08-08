@@ -60,8 +60,8 @@ export function useRoutes(): UseRoutesReturn {
                   {
                     name: 'Confidential',
                     href: '/computing/confidential',
-                    disabled: true,
-                    label: '(SOON)',
+                    // disabled: true,
+                    // label: '(SOON)',
                     icon: 'confidential',
                   },
                 ],
