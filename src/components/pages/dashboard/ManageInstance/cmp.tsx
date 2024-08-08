@@ -221,8 +221,7 @@ export default function ManageInstance() {
 
                         <Link
                           className="tp-body1 fs-16"
-                          href={'?hash=' + key.id}
-                          referrerPolicy="no-referrer"
+                          href={`/settings/ssh/${key.id}`}
                         >
                           <IconText iconName="square-up-right">
                             <Text>{key.label}</Text>
