@@ -18,6 +18,7 @@ import {
 import { StoreReducer } from './store'
 import { ConnectionAction, ConnectionActionType } from './connection'
 import { ConfidentialManager } from '@/domain/confidential'
+import { VoucherManager } from '@/domain/voucher'
 
 function createDefaultManagers(account?: Account) {
   const sdkClient = !account
@@ -49,6 +50,7 @@ export type ManagerState = {
   confidentialManager?: ConfidentialManager
   indexerManager?: IndexerManager
   websiteManager?: WebsiteManager
+  voucherManager?: VoucherManager
 }
 
 export const initialState: ManagerState = {
@@ -62,6 +64,7 @@ export const initialState: ManagerState = {
   instanceManager: undefined,
   indexerManager: undefined,
   websiteManager: undefined,
+  voucherManager: undefined,
 }
 
 export type ManagerAction = ConnectionAction
@@ -87,6 +90,7 @@ export function getManagerReducer(): ManagerReducer {
           confidentialManager: undefined,
           indexerManager: undefined,
           websiteManager: undefined,
+          voucherManager: undefined,
         }
       }
 
@@ -138,6 +142,7 @@ export function getManagerReducer(): ManagerReducer {
           volumeManager,
           domainManager,
         )
+        const voucherManager = new VoucherManager(account, sdkClient)
 
         return {
           ...state,
@@ -152,6 +157,7 @@ export function getManagerReducer(): ManagerReducer {
           confidentialManager,
           indexerManager,
           websiteManager,
+          voucherManager,
         }
       }
 

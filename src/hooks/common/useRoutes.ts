@@ -1,11 +1,48 @@
+import { useAppState } from '@/contexts/appState'
 import { Route } from '@aleph-front/core'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 export type UseRoutesReturn = {
   routes: Route[]
 }
-
 export function useRoutes(): UseRoutesReturn {
+  const [state] = useAppState()
+  const {
+    connection: { account },
+    manager: { voucherManager },
+  } = state
+
+  const CONFIDENTIAL_VOUCHER_METADATA_ID = '3'
+  const DEFAULT_CONFIDENTIAL_ROUTE: Route = useMemo(
+    () => ({
+      name: 'Confidential',
+      href: '/computing/confidential',
+      disabled: true,
+      label: '(SOON)',
+      icon: 'confidential',
+    }),
+    [],
+  )
+
+  const [confidentialRoute, setConfidentialRoute] = useState<Route>(
+    DEFAULT_CONFIDENTIAL_ROUTE,
+  )
+
+  useMemo(async () => {
+    if (!account) return setConfidentialRoute(DEFAULT_CONFIDENTIAL_ROUTE)
+    if (!voucherManager) return setConfidentialRoute(DEFAULT_CONFIDENTIAL_ROUTE)
+
+    const vouchers = await voucherManager.getAll()
+
+    if (vouchers.some((v) => v.metadataId === CONFIDENTIAL_VOUCHER_METADATA_ID))
+      setConfidentialRoute({
+        name: 'Confidential',
+        href: '/computing/confidential',
+        label: '(BETA)',
+        icon: 'confidential',
+      })
+  }, [DEFAULT_CONFIDENTIAL_ROUTE, account, voucherManager])
+
   const routes: Route[] = useMemo(() => {
     return [
       {
@@ -57,13 +94,7 @@ export function useRoutes(): UseRoutesReturn {
                     href: '/computing/instance',
                     icon: 'instance',
                   },
-                  {
-                    name: 'Confidential',
-                    href: '/computing/confidential',
-                    disabled: true,
-                    label: '(SOON)',
-                    icon: 'confidential',
-                  },
+                  confidentialRoute,
                 ],
               },
               {
@@ -127,7 +158,7 @@ export function useRoutes(): UseRoutesReturn {
         external: true,
       },
     ] as Route[]
-  }, [])
+  }, [confidentialRoute])
 
   return {
     routes,
