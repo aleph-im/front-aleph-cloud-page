@@ -25,6 +25,7 @@ const defaultNames = {
   '/computing/function': 'COMPUTING / FUNCTIONS',
   '/computing/function/[hash]': '-',
   '/computing/function/new': 'SETUP NEW FUNCTION',
+  '/computing/confidential': 'COMPUTING / CONFIDENTIALS',
   '/hosting': '-',
   '/hosting/website': 'WEB3 HOSTING / WEBSITES',
   '/hosting/website/[hash]': '-',

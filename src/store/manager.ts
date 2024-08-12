@@ -17,6 +17,7 @@ import {
 
 import { StoreReducer } from './store'
 import { ConnectionAction, ConnectionActionType } from './connection'
+import { ConfidentialManager } from '@/domain/confidential'
 
 function createDefaultManagers(account?: Account) {
   const sdkClient = !account
@@ -45,6 +46,7 @@ export type ManagerState = {
   volumeManager?: VolumeManager
   programManager?: ProgramManager
   instanceManager?: InstanceManager
+  confidentialManager?: ConfidentialManager
   indexerManager?: IndexerManager
   websiteManager?: WebsiteManager
 }
@@ -82,6 +84,7 @@ export function getManagerReducer(): ManagerReducer {
           volumeManager: undefined,
           programManager: undefined,
           instanceManager: undefined,
+          confidentialManager: undefined,
           indexerManager: undefined,
           websiteManager: undefined,
         }
@@ -115,6 +118,15 @@ export function getManagerReducer(): ManagerReducer {
           fileManager,
           nodeManager,
         )
+        const confidentialManager = new ConfidentialManager(
+          account,
+          sdkClient,
+          volumeManager,
+          domainManager,
+          sshKeyManager,
+          fileManager,
+          nodeManager,
+        )
         const indexerManager = new IndexerManager(
           account,
           sdkClient,
@@ -137,6 +149,7 @@ export function getManagerReducer(): ManagerReducer {
           volumeManager,
           programManager,
           instanceManager,
+          confidentialManager,
           indexerManager,
           websiteManager,
         }

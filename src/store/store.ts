@@ -7,6 +7,7 @@ import { Program } from '@/domain/program'
 import { Volume } from '@/domain/volume'
 import { Website } from '@/domain/website'
 import { ManagerState, getManagerReducer } from './manager'
+import { Confidential } from '@/domain/confidential'
 
 export type StoreSubstate = Record<string, unknown>
 
@@ -52,12 +53,14 @@ export type StoreState = {
   ssh: EntityState<SSHKey>
   domain: EntityState<Domain>
   instance: EntityState<Instance>
+  confidential: EntityState<Confidential>
   program: EntityState<Program>
   volume: EntityState<Volume>
   website: EntityState<Website>
 
   programVolume: EntityState<Volume>
   instanceVolume: EntityState<Volume>
+  confidentialVolume: EntityState<Volume>
 }
 
 export const storeReducer = mergeReducers<StoreState>({
@@ -66,6 +69,7 @@ export const storeReducer = mergeReducers<StoreState>({
   ssh: getEntityReducer<SSHKey>('ssh', 'id'),
   domain: getEntityReducer<Domain>('domain', 'id'),
   instance: getEntityReducer<Instance>('instance', 'id'),
+  confidential: getEntityReducer<Confidential>('confidential', 'id'),
   program: getEntityReducer<Program>('program', 'id'),
   volume: getEntityReducer<Volume>('volume', 'id'),
   website: getEntityReducer<Website>('website', 'id'),
@@ -73,6 +77,7 @@ export const storeReducer = mergeReducers<StoreState>({
   // @note: refactor this entities
   programVolume: getEntityReducer<Volume>('programVolume', 'id'),
   instanceVolume: getEntityReducer<Volume>('instanceVolume', 'id'),
+  confidentialVolume: getEntityReducer<Volume>('instanceVolume', 'id'),
 })
 
 export const storeInitialState: StoreState = getInitialState(storeReducer)
