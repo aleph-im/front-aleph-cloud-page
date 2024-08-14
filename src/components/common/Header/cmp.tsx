@@ -24,6 +24,7 @@ export const Header = () => {
     networks,
     accountAddress,
     accountBalance,
+    accountVouchers,
     rewards,
     selectedNetwork,
     handleToggle,
@@ -51,6 +52,7 @@ export const Header = () => {
                 isMobile
                 accountAddress={accountAddress}
                 accountBalance={accountBalance}
+                accountVouchers={accountVouchers}
                 blockchains={blockchains}
                 networks={networks}
                 selectedNetwork={selectedNetwork}
@@ -70,6 +72,7 @@ export const Header = () => {
           <AccountPicker
             accountAddress={accountAddress}
             accountBalance={accountBalance}
+            accountVouchers={accountVouchers}
             blockchains={blockchains}
             networks={networks}
             selectedNetwork={selectedNetwork}
