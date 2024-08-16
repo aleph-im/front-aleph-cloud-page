@@ -7,6 +7,7 @@ import { Instance } from '@/domain/instance'
 import { RequestState } from '@aleph-front/core'
 import { ExecutableStatus } from '@/domain/executable'
 import { useAttachedVolumes } from '@/hooks/common/useAttachedVolumes'
+import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
 
 export type AmountAggregatedStatus = {
   amount: number
@@ -49,6 +50,7 @@ export type UseDashboardPageReturn = {
   instanceAggregatedStatus: InstancesAggregatedStatus
   volumesAggregatedStatus: VolumesAggregatedStatus
   websitesAggregatedStatus: WebsitesAggregatedStatus
+  confidentialsAuthz: boolean
 }
 
 function calculateComputingAggregatedStatus({
@@ -82,7 +84,10 @@ function calculateComputingAggregatedStatus({
 export function useDashboardPage(): UseDashboardPageReturn {
   useSPARedirect()
 
-  const { programs, instances, websites, volumes } = useAccountEntities()
+  const { confidentials: confidentialsAuthz } = useAuthorization()
+
+  const { programs, instances, confidentials, websites, volumes } =
+    useAccountEntities()
 
   const { status: programsStatus } = useRequestExecutableStatus({
     entities: programs,
@@ -134,5 +139,6 @@ export function useDashboardPage(): UseDashboardPageReturn {
     instanceAggregatedStatus,
     volumesAggregatedStatus,
     websitesAggregatedStatus,
+    confidentialsAuthz,
   }
 }

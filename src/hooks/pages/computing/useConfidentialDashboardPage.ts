@@ -1,15 +1,17 @@
 import { useMemo, useState } from 'react'
 import { TabsProps } from '@aleph-front/core'
 import { Volume } from '@/domain/volume'
-import { useRequestInstanceVolumes } from '@/hooks/common/useRequestEntity/useRequestInstanceVolumes'
-import { useRequestInstanceDomains } from '@/hooks/common/useRequestEntity/useRequestInstanceDomains'
 import { Domain } from '@/domain/domain'
 import { useRequestConfidentials } from '@/hooks/common/useRequestEntity/useRequestConfidentials'
 import { Confidential } from '@/domain/confidential'
 import { useRequestConfidentialVolumes } from '@/hooks/common/useRequestEntity/useRequestConfidentialVolumes'
 import { useRequestConfidentialDomains } from '@/hooks/common/useRequestEntity/useRequestConfidentialDomains'
+import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
+import { useRouter } from 'next/router'
 
 export type UseConfidentialDashboardPageReturn = {
+  authorized: boolean
+  onUnauthorized: () => void
   confidentials: Confidential[]
   volumes: Volume[]
   domains: Domain[]
@@ -25,6 +27,11 @@ function getLabel(entities: unknown[], beta = false): string {
 }
 
 export function useConfidentialDashboardPage(): UseConfidentialDashboardPageReturn {
+  const { push } = useRouter()
+  const { confidentials: confidentialsAuthz } = useAuthorization()
+
+  const onUnauthorized = () => push('/')
+
   const { entities: confidentials = [] } = useRequestConfidentials()
   const { entities: volumes = [] } = useRequestConfidentialVolumes()
   const { entities: domains = [] } = useRequestConfidentialDomains()
@@ -54,6 +61,8 @@ export function useConfidentialDashboardPage(): UseConfidentialDashboardPageRetu
   }, [domains, confidentials, volumes])
 
   return {
+    authorized: confidentialsAuthz,
+    onUnauthorized,
     confidentials,
     volumes,
     domains,

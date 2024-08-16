@@ -1,47 +1,35 @@
-import { useAppState } from '@/contexts/appState'
 import { Route } from '@aleph-front/core'
 import { useMemo, useState } from 'react'
+import { useAuthorization } from './authorization/useAuthorization'
+
+const DEFAULT_CONFIDENTIAL_ROUTE: Route = {
+  name: 'Confidential',
+  href: '/computing/confidential',
+  disabled: true,
+  label: '(SOON)',
+  icon: 'confidential',
+}
 
 export type UseRoutesReturn = {
   routes: Route[]
 }
 export function useRoutes(): UseRoutesReturn {
-  const [state] = useAppState()
-  const {
-    connection: { account },
-    manager: { voucherManager },
-  } = state
-
-  const CONFIDENTIAL_VOUCHER_METADATA_ID = '3'
-  const DEFAULT_CONFIDENTIAL_ROUTE: Route = useMemo(
-    () => ({
-      name: 'Confidential',
-      href: '/computing/confidential',
-      disabled: true,
-      label: '(SOON)',
-      icon: 'confidential',
-    }),
-    [],
-  )
+  const { confidentials: confidentialsAuthz } = useAuthorization()
 
   const [confidentialRoute, setConfidentialRoute] = useState<Route>(
     DEFAULT_CONFIDENTIAL_ROUTE,
   )
 
   useMemo(async () => {
-    if (!account) return setConfidentialRoute(DEFAULT_CONFIDENTIAL_ROUTE)
-    if (!voucherManager) return setConfidentialRoute(DEFAULT_CONFIDENTIAL_ROUTE)
-
-    const vouchers = await voucherManager.getAll()
-
-    if (vouchers.some((v) => v.metadataId === CONFIDENTIAL_VOUCHER_METADATA_ID))
-      setConfidentialRoute({
-        name: 'Confidential',
-        href: '/computing/confidential',
-        label: '(BETA)',
-        icon: 'confidential',
-      })
-  }, [DEFAULT_CONFIDENTIAL_ROUTE, account, voucherManager])
+    confidentialsAuthz
+      ? setConfidentialRoute({
+          name: 'Confidential',
+          href: '/computing/confidential',
+          label: '(BETA)',
+          icon: 'confidential',
+        })
+      : setConfidentialRoute(DEFAULT_CONFIDENTIAL_ROUTE)
+  }, [confidentialsAuthz])
 
   const routes: Route[] = useMemo(() => {
     return [

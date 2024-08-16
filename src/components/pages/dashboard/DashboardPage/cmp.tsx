@@ -18,6 +18,7 @@ export default function DashboardPage() {
     programAggregatedStatus,
     volumesAggregatedStatus,
     websitesAggregatedStatus,
+    confidentialsAuthz,
   } = useDashboardPage()
 
   const programsCardItems = useMemo(() => {
@@ -165,7 +166,7 @@ export default function DashboardPage() {
             <EntityCardWrapper>
               <EntityCard
                 type={'introduction'}
-                isComingSoon
+                isComingSoon={!confidentialsAuthz}
                 title="confidentials"
                 img="Object9"
                 createPath="https://docs.aleph.im/computing/confidential/"
