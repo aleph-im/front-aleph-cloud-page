@@ -51,6 +51,7 @@ export const EntityCard = ({
   img,
   dashboardPath = '#',
   createPath = '#',
+  createTarget = '_self',
   introductionButtonText,
   subItems = [],
   information,
@@ -151,13 +152,25 @@ export const EntityCard = ({
       case 'introduction':
         return (
           <div tw="mt-auto">
-            <ButtonLink variant="textOnly" size="sm" href={createPath}>
+            <ButtonLink
+              variant="textOnly"
+              size="sm"
+              href={createPath}
+              target={createTarget}
+            >
               <Icon name="plus-circle" /> {introductionButtonText}
             </ButtonLink>
           </div>
         )
     }
-  }, [createPath, dashboardPath, information, introductionButtonText, type])
+  }, [
+    createPath,
+    createTarget,
+    dashboardPath,
+    information,
+    introductionButtonText,
+    type,
+  ])
 
   return (
     <div tw="flex">

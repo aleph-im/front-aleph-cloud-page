@@ -168,6 +168,8 @@ export default function DashboardPage() {
                 isComingSoon
                 title="confidentials"
                 img="Object9"
+                createPath="https://docs.aleph.im/computing/confidential/"
+                createTarget="_blank"
                 description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your data stays safe."
                 introductionButtonText="Create your confidential"
                 information={{
