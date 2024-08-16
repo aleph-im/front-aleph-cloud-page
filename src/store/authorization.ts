@@ -46,8 +46,6 @@ export function getAuthorizationReducer(): AuthorizationReducer {
 
     switch (type) {
       case AuthorizationActionType.AUTHORIZATION_GRANT: {
-        console.log('grant', payload.features)
-
         return {
           ...state,
           ...payload.features.reduce(
@@ -57,8 +55,6 @@ export function getAuthorizationReducer(): AuthorizationReducer {
         }
       }
       case AuthorizationActionType.AUTHORIZATION_DENY: {
-        console.log('deny', payload.features)
-
         return {
           ...state,
           ...payload.features.reduce(
