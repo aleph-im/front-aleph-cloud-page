@@ -8,6 +8,7 @@ import { Volume } from '@/domain/volume'
 import { Website } from '@/domain/website'
 import { ManagerState, getManagerReducer } from './manager'
 import { Confidential } from '@/domain/confidential'
+import { AuthorizationState, getAuthorizationReducer } from './authorization'
 
 export type StoreSubstate = Record<string, unknown>
 
@@ -50,6 +51,7 @@ export function getInitialState<
 export type StoreState = {
   connection: ConnectionState
   manager: ManagerState
+  authorization: AuthorizationState
   ssh: EntityState<SSHKey>
   domain: EntityState<Domain>
   instance: EntityState<Instance>
@@ -66,6 +68,7 @@ export type StoreState = {
 export const storeReducer = mergeReducers<StoreState>({
   connection: getConnectionReducer(),
   manager: getManagerReducer(),
+  authorization: getAuthorizationReducer(),
   ssh: getEntityReducer<SSHKey>('ssh', 'id'),
   domain: getEntityReducer<Domain>('domain', 'id'),
   instance: getEntityReducer<Instance>('instance', 'id'),
