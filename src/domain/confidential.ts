@@ -54,7 +54,6 @@ export class ConfidentialManager
       const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
         messageTypes: [MessageType.instance],
-        channels: [this.channel],
       })
 
       return await this.parseMessages(response.messages)
