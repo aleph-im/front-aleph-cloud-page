@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const {
     instanceAggregatedStatus,
     programAggregatedStatus,
+    confidentialsAggregatedStatus,
     volumesAggregatedStatus,
     websitesAggregatedStatus,
     confidentialsAuthz,
@@ -151,7 +152,7 @@ export default function DashboardPage() {
                     ? 'active'
                     : 'introduction'
                 }
-                title="instance"
+                title="instances"
                 img="Object11"
                 description="Launch and manage virtual private servers (VPS) tailored to your needs. Choose automatic or manual node selection for complete control over your computing environment."
                 introductionButtonText="Create your instance"
@@ -165,16 +166,22 @@ export default function DashboardPage() {
             </EntityCardWrapper>
             <EntityCardWrapper>
               <EntityCard
-                type={'introduction'}
+                type={
+                  confidentialsAggregatedStatus.total.amount
+                    ? 'active'
+                    : 'introduction'
+                }
                 isComingSoon={!confidentialsAuthz}
                 title="confidentials"
                 img="Object9"
+                dashboardPath="/computing/confidential"
                 createPath="https://docs.aleph.im/computing/confidential/"
                 createTarget="_blank"
                 description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your data stays safe."
                 introductionButtonText="Create your confidential"
                 information={{
                   type: 'computing',
+                  data: confidentialsAggregatedStatus.total,
                 }}
               />
             </EntityCardWrapper>

@@ -8,6 +8,7 @@ import { RequestState } from '@aleph-front/core'
 import { ExecutableStatus } from '@/domain/executable'
 import { useAttachedVolumes } from '@/hooks/common/useAttachedVolumes'
 import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
+import { useConfidentialManager } from '@/hooks/common/useManager/useConfidentialManager'
 
 export type AmountAggregatedStatus = {
   amount: number
@@ -26,6 +27,10 @@ export type ComputingAggregatedStatus = {
 }
 
 export type InstancesAggregatedStatus = {
+  total: ComputingAggregatedStatus
+}
+
+export type ConfidentialsAggregatedStatus = {
   total: ComputingAggregatedStatus
 }
 
@@ -48,6 +53,7 @@ export type VolumesAggregatedStatus = {
 export type UseDashboardPageReturn = {
   programAggregatedStatus: ProgramsAggregatedStatus
   instanceAggregatedStatus: InstancesAggregatedStatus
+  confidentialsAggregatedStatus: ConfidentialsAggregatedStatus
   volumesAggregatedStatus: VolumesAggregatedStatus
   websitesAggregatedStatus: WebsitesAggregatedStatus
   confidentialsAuthz: boolean
@@ -97,6 +103,11 @@ export function useDashboardPage(): UseDashboardPageReturn {
     entities: instances,
   })
 
+  const { status: confidentialsStatus } = useRequestExecutableStatus({
+    entities: confidentials,
+    managerHook: useConfidentialManager,
+  })
+
   const programAggregatedStatus = useMemo(() => {
     return {
       total: calculateComputingAggregatedStatus({
@@ -123,6 +134,16 @@ export function useDashboardPage(): UseDashboardPageReturn {
     }
   }, [instancesStatus, instances])
 
+  // @todo: Check if this is correct
+  const confidentialsAggregatedStatus = useMemo(() => {
+    return {
+      total: calculateComputingAggregatedStatus({
+        entities: confidentials,
+        entitiesStatus: confidentialsStatus,
+      }),
+    }
+  }, [confidentials, confidentialsStatus])
+
   const volumesAggregatedStatus = useAttachedVolumes({
     programs,
     instances,
@@ -137,6 +158,7 @@ export function useDashboardPage(): UseDashboardPageReturn {
   return {
     programAggregatedStatus,
     instanceAggregatedStatus,
+    confidentialsAggregatedStatus,
     volumesAggregatedStatus,
     websitesAggregatedStatus,
     confidentialsAuthz,
