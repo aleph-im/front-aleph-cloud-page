@@ -392,7 +392,7 @@ export class InstanceManager
         if (content === undefined) return false
 
         // Filter out confidential VMs
-        return !content.environment?.trusted_execution?.firmware
+        return !content.environment?.trusted_execution
       })
       .map((message) => {
         /* const size = message.content.volumes.reduce(

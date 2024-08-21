@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { useAuthorization } from './authorization/useAuthorization'
 
 const DEFAULT_CONFIDENTIAL_ROUTE: Route = {
-  name: 'Confidential',
+  name: 'Confidentials',
   href: '/computing/confidential',
   disabled: true,
   label: '(SOON)',
@@ -23,7 +23,7 @@ export function useRoutes(): UseRoutesReturn {
   useMemo(async () => {
     confidentialsAuthz
       ? setConfidentialRoute({
-          name: 'Confidential',
+          name: 'Confidentials',
           href: '/computing/confidential',
           label: '(BETA)',
           icon: 'confidential',

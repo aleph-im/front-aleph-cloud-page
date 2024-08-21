@@ -26,8 +26,8 @@ export function useRequestConfidentialVolumes(
   const ids = useMemo(() => {
     if (!confidentials) return []
 
-    return confidentials.flatMap((prog) => {
-      return prog.volumes
+    return confidentials.flatMap((conf) => {
+      return conf.volumes
         .filter((vol): vol is ImmutableVolume => 'ref' in vol)
         .map((vol) => vol.ref)
     })
