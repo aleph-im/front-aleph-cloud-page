@@ -68,11 +68,12 @@ function calculateComputingAggregatedStatus({
 }) {
   return entities.reduce(
     (ac, cv) => {
-      const statusKey = !cv.confirmed
-        ? 'booting'
-        : !!entitiesStatus[cv.id]?.data?.vm_ipv6
-          ? 'running'
-          : 'paused'
+      const hasIpv6 = !!entitiesStatus[cv.id]?.data?.vm_ipv6
+      const statusKey = hasIpv6
+        ? 'running'
+        : cv.confirmed
+          ? 'paused'
+          : 'booting'
 
       ac[statusKey] += 1
       ac.amount += 1
@@ -145,9 +146,6 @@ export function useDashboardPage(): UseDashboardPageReturn {
   }, [confidentials, confidentialsStatus])
 
   const volumesAggregatedStatus = useAttachedVolumes({
-    programs,
-    instances,
-    websites,
     volumes,
   })
 

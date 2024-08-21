@@ -1,14 +1,11 @@
 import { Volume } from '@/domain/volume'
-import { ImmutableVolume } from '@aleph-sdk/message'
-import { Program } from '@/domain/program'
-import { Instance } from '@/domain/instance'
-import { Website } from '@/domain/website'
 import { useMemo } from 'react'
+import { useProgramsVolumesIds } from './useProgramsVolumesIds'
+import { useConfidentialsVolumesIds } from './useConfidentialsVolumesIds'
+import { useInstancesVolumesIds } from './useInstancesVolumesIds'
+import { useWebsitesVolumesIds } from './useWebsitesVolumesIds'
 
 export type UseAttachedVolumesProps = {
-  programs?: Program[]
-  instances?: Instance[]
-  websites?: Website[]
   volumes?: Volume[]
 }
 
@@ -27,67 +24,34 @@ export type UseAttachedVolumesReturn = {
   }
 }
 
-export function getProgramVolumes(programs?: Program[]): string[] {
-  if (!programs) return []
-
-  return programs.flatMap((prog) => {
-    const codeVolume = prog.code.ref
-    const runtimeVolume = prog.runtime.ref
-    const linkedVolumes = prog.volumes
-      .filter((vol): vol is ImmutableVolume => 'ref' in vol)
-      .map((vol) => vol.ref)
-
-    return [codeVolume, runtimeVolume, ...linkedVolumes]
-  })
-}
-
-export function getInstanceVolumes(instances?: Instance[]): string[] {
-  if (!instances) return []
-
-  return instances.flatMap((instance) =>
-    instance.volumes
-      .filter((vol): vol is ImmutableVolume => 'ref' in vol)
-      .map((vol) => vol.ref),
-  )
-}
-
-export function getWebsiteVolumes(websites?: Website[]): string[] {
-  if (!websites) return []
-
-  return websites.map((website) => website.volume_id)
-}
-
 export function useAttachedVolumes({
-  instances,
-  programs,
-  websites,
   volumes,
 }: UseAttachedVolumesProps = {}): UseAttachedVolumesReturn {
-  const programVolumeIds = useMemo(
-    () => getProgramVolumes(programs),
-    [programs],
-  )
-
-  const instanceVolumeIds = useMemo(
-    () => getInstanceVolumes(instances),
-    [instances],
-  )
-
-  const websiteVolumeIds = useMemo(
-    () => getWebsiteVolumes(websites),
-    [websites],
-  )
+  const programVolumeIds = useProgramsVolumesIds()
+  const instanceVolumeIds = useInstancesVolumesIds()
+  const confidentialVolumeIds = useConfidentialsVolumesIds()
+  const websiteVolumeIds = useWebsitesVolumesIds()
 
   const volumesMap = useMemo(
     () =>
-      [...programVolumeIds, ...instanceVolumeIds, ...websiteVolumeIds].reduce(
+      [
+        ...programVolumeIds,
+        ...instanceVolumeIds,
+        ...confidentialVolumeIds,
+        ...websiteVolumeIds,
+      ].reduce(
         (ac, cv) => {
           ac[cv] = true
           return ac
         },
         {} as Record<string, boolean>,
       ),
-    [programVolumeIds, instanceVolumeIds, websiteVolumeIds],
+    [
+      programVolumeIds,
+      instanceVolumeIds,
+      confidentialVolumeIds,
+      websiteVolumeIds,
+    ],
   )
 
   const result = useMemo(

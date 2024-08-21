@@ -1,13 +1,11 @@
-import { useMemo } from 'react'
 import { Volume } from '@/domain/volume'
-import { useAppState } from '@/contexts/appState'
 import { useVolumeManager } from '../useManager/useVolumeManager'
 import {
   UseRequestEntitiesProps,
   UseRequestEntitiesReturn,
   useRequestEntities,
 } from './useRequestEntities'
-import { ImmutableVolume } from '@aleph-sdk/message'
+import { useConfidentialsVolumesIds } from '../useConfidentialsVolumesIds'
 
 export type UseRequestConfidentialVolumesProps = Omit<
   UseRequestEntitiesProps<Volume>,
@@ -20,20 +18,9 @@ export type UseRequestConfidentialVolumesReturn =
 export function useRequestConfidentialVolumes(
   props: UseRequestConfidentialVolumesProps = {},
 ): UseRequestConfidentialVolumesReturn {
-  const [state] = useAppState()
-  const confidentials = state.confidential.entities
-
-  const ids = useMemo(() => {
-    if (!confidentials) return []
-
-    return confidentials.flatMap((conf) => {
-      return conf.volumes
-        .filter((vol): vol is ImmutableVolume => 'ref' in vol)
-        .map((vol) => vol.ref)
-    })
-  }, [confidentials])
-
+  const ids = useConfidentialsVolumesIds()
   const manager = useVolumeManager()
+
   return useRequestEntities({
     ...props,
     manager,
