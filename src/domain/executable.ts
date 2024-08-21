@@ -77,6 +77,10 @@ export type Executable = {
   type: EntityType.Instance | EntityType.Program
   id: string // hash
   payment?: BaseExecutableContent['payment']
+  //@todo: Add `trusted_execution` field in FunctionEnvironment in ts sdk
+  environment?: any
+  //@todo: Add `hash` field in NodeRequirements in ts sdk
+  requirements?: any
 }
 
 export type ExecutableNode = {
@@ -175,11 +179,46 @@ export abstract class ExecutableManager {
     executable: Executable,
   ): Promise<ExecutableStatus | undefined> {
     if (executable.payment?.type === PaymentType.superfluid) {
-      const { receiver } = executable.payment
+      const receiver = executable.payment?.receiver
       if (!receiver) throw Err.ReceiverReward
 
       // @todo: refactor this mess
       const node = await this.nodeManager.getCRNByStreamRewardAddress(receiver)
+      if (!node) return
+
+      const { address } = node
+      if (!address) throw Err.InvalidCRNAddress
+
+      const nodeUrl = address.replace(/\/$/, '')
+      const query = await fetch(`${nodeUrl}/about/executions/list`)
+      const response = await query.json()
+
+      const status = response[executable.id]
+      if (!status) return
+
+      const networking = status['networking']
+
+      return {
+        node: {
+          node_id: node.hash,
+          url: node.address,
+          ipv6: networking.ipv6,
+          supports_ipv6: true,
+        },
+        vm_hash: executable.id,
+        vm_type: EntityType.Instance,
+        vm_ipv6: this.formatVMIPv6Address(networking.ipv6),
+        period: {
+          start_timestamp: '',
+          duration_seconds: 0,
+        },
+      } as ExecutableStatus
+    } else if (executable.environment?.trusted_execution) {
+      const crn_hash = executable.requirements?.node?.node_hash
+      if (!crn_hash) throw Err.InvalidConfidentialNodeRequirements
+
+      // @todo: refactor this mess
+      const node = await this.nodeManager.getCRNByHash(crn_hash)
       if (!node) return
 
       const { address } = node

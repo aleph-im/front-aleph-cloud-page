@@ -80,7 +80,7 @@ export const storeReducer = mergeReducers<StoreState>({
   // @note: refactor this entities
   programVolume: getEntityReducer<Volume>('programVolume', 'id'),
   instanceVolume: getEntityReducer<Volume>('instanceVolume', 'id'),
-  confidentialVolume: getEntityReducer<Volume>('instanceVolume', 'id'),
+  confidentialVolume: getEntityReducer<Volume>('confidentialVolume', 'id'),
 })
 
 export const storeInitialState: StoreState = getInitialState(storeReducer)

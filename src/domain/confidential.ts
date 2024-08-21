@@ -2,7 +2,7 @@ import { Account } from '@aleph-sdk/account'
 import { InstanceContent, MessageType } from '@aleph-sdk/message'
 import { defaultInstanceChannel, EntityType } from '@/helpers/constants'
 import { getDate, getExplorerURL } from '@/helpers/utils'
-import { ExecutableManager } from './executable'
+import { ExecutableManager, ExecutableStatus } from './executable'
 import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
 import { VolumeManager } from './volume'
@@ -17,6 +17,8 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+
+export type ConfidentialStatus = ExecutableStatus | undefined
 
 // @todo: Refactor
 export type Confidential = InstanceContent & {
@@ -75,7 +77,7 @@ export class ConfidentialManager
         if (content === undefined) return false
 
         // Filter out normal instances (non-confidential VMs)
-        return content.environment?.trusted_execution?.firmware
+        return content.environment?.trusted_execution
       })
       .map((message) => {
         return {
