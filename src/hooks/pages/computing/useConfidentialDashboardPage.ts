@@ -11,7 +11,7 @@ import { useRouter } from 'next/router'
 
 export type UseConfidentialDashboardPageReturn = {
   authorized: boolean
-  onUnauthorized: () => void
+  handleUnauthorized: () => void
   confidentials: Confidential[]
   volumes: Volume[]
   domains: Domain[]
@@ -30,7 +30,7 @@ export function useConfidentialDashboardPage(): UseConfidentialDashboardPageRetu
   const { push } = useRouter()
   const { confidentials: confidentialsAuthz } = useAuthorization()
 
-  const onUnauthorized = () => push('/')
+  const handleUnauthorized = () => push('/')
 
   const { entities: confidentials = [] } = useRequestConfidentials()
   const { entities: volumes = [] } = useRequestConfidentialVolumes()
@@ -62,7 +62,7 @@ export function useConfidentialDashboardPage(): UseConfidentialDashboardPageRetu
 
   return {
     authorized: confidentialsAuthz,
-    onUnauthorized,
+    handleUnauthorized,
     confidentials,
     volumes,
     domains,
