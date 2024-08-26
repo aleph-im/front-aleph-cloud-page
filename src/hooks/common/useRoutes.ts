@@ -10,6 +10,13 @@ const DEFAULT_CONFIDENTIAL_ROUTE: Route = {
   icon: 'confidential',
 }
 
+const BETA_CONFIDENTIAL_ROUTE_BETA: Route = {
+  ...DEFAULT_CONFIDENTIAL_ROUTE,
+  disabled: false,
+  label: '(BETA)',
+  icon: 'confidential',
+}
+
 export type UseRoutesReturn = {
   routes: Route[]
 }
@@ -20,14 +27,9 @@ export function useRoutes(): UseRoutesReturn {
     DEFAULT_CONFIDENTIAL_ROUTE,
   )
 
-  useMemo(async () => {
+  useMemo(() => {
     confidentialsAuthz
-      ? setConfidentialRoute({
-          name: 'Confidentials',
-          href: '/computing/confidential',
-          label: '(BETA)',
-          icon: 'confidential',
-        })
+      ? setConfidentialRoute(BETA_CONFIDENTIAL_ROUTE_BETA)
       : setConfidentialRoute(DEFAULT_CONFIDENTIAL_ROUTE)
   }, [confidentialsAuthz])
 

@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export function useConfidentialsAuthorization(): boolean {
   const [state] = useAppState()
@@ -8,33 +8,35 @@ export function useConfidentialsAuthorization(): boolean {
     manager: { voucherManager, confidentialManager },
     authorization: { confidentials },
   } = state
-  const [accessConfidential, setAccessConfidential] = useState(confidentials)
 
-  useMemo(async () => {
-    if (!account) return setAccessConfidential(false)
-    if (!voucherManager) return setAccessConfidential(false)
+  const [accessConfidential, setAccessConfidential] =
+    useState<boolean>(confidentials)
 
-    const vouchers = await voucherManager.getAll()
+  useEffect(() => {
+    const checkAuthorization = async () => {
+      if (!account || !voucherManager || !confidentialManager) {
+        setAccessConfidential(false)
+        return
+      }
 
-    if (
-      vouchers
+      const [vouchers, confidentials] = await Promise.all([
+        voucherManager.getAll(),
+        confidentialManager.getAll(),
+      ])
+
+      const hasVoucherAccess = vouchers
         .flatMap((v) => v.attributes)
         .some(
           (attr) =>
             attr.traitType === 'Confidential' && attr.value === 'Allowed',
         )
-    )
-      setAccessConfidential(true)
-  }, [account, voucherManager])
 
-  useMemo(async () => {
-    if (!account) return setAccessConfidential(false)
-    if (!confidentialManager) return setAccessConfidential(false)
+      const hasConfidentialsAccess = confidentials.length > 0
 
-    const confidentials = await confidentialManager.getAll()
-
-    if (confidentials.length) setAccessConfidential(true)
-  }, [account, confidentialManager])
+      setAccessConfidential(hasVoucherAccess || hasConfidentialsAccess)
+    }
+    checkAuthorization()
+  }, [account, confidentialManager, voucherManager])
 
   return accessConfidential
 }

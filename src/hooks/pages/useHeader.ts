@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useCallback, useState, useMemo } from 'react'
+import { useCallback, useState, useMemo, useEffect } from 'react'
 import { useAppState } from '@/contexts/appState'
 import {
   AccountPickerProps,
@@ -104,30 +104,40 @@ export function useHeader(): UseHeaderReturn {
     AccountPickerProps['accountVouchers']
   >([])
 
-  useMemo(async () => {
-    if (!account) return
-    if (!voucherManager) return
+  useEffect(() => {
+    const fetchAndFormatVouchers = async () => {
+      if (!account || !voucherManager) return
 
-    const vouchers = await voucherManager.getAll()
-    const groupedVouchers = Object.groupBy(
-      vouchers,
-      ({ metadataId }) => metadataId,
-    )
+      const vouchers = await voucherManager.getAll()
+      const groupedVouchers = vouchers.reduce(
+        (grouped, voucher) => {
+          const { metadataId } = voucher
+          if (!grouped[metadataId]) grouped[metadataId] = []
+          grouped[metadataId].push(voucher)
+          return grouped
+        },
+        {} as Record<string, typeof vouchers>,
+      )
 
-    setAccountVouchers(
-      Object.values(groupedVouchers).flatMap((vouchers) => {
-        if (!vouchers?.length) return []
+      const formattedVouchers = Object.values(groupedVouchers).flatMap(
+        (vouchers) => {
+          if (!vouchers.length) return []
 
-        const { name, icon } = vouchers[0]
-        return {
-          name: name,
-          image: icon,
-          imageAlt: name,
-          amount: vouchers.length,
-        }
-      }),
-    )
-  }, [voucherManager, account])
+          const { name, icon } = vouchers[0]
+          return {
+            name: name,
+            image: icon,
+            imageAlt: name,
+            amount: vouchers.length,
+          }
+        },
+      )
+
+      setAccountVouchers(formattedVouchers)
+    }
+
+    fetchAndFormatVouchers()
+  }, [account, voucherManager])
 
   // --------------------
 
