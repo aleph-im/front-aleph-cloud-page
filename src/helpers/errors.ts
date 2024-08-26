@@ -19,6 +19,7 @@ export default {
   UserCancelled: new Error('User cancelled the action'),
   InvalidNetwork: new Error('Invalid network'),
   InstanceNotFound: new Error('Instance not found'),
+  ConfidentialNotFound: new Error('Confidential not found'),
   FunctionNotFound: new Error('Function not found'),
   WebsiteNotFound: new Error('Website not found'),
   VolumeNotFound: new Error('Volume not found'),
@@ -35,6 +36,9 @@ export default {
   InvalidCodeType: new Error('Invalid function code type'),
   InvalidCRNAddress: new Error('Invalid CRN address'),
   InvalidCRNSpecs: new Error('Invalid CRN min specs'),
+  InvalidConfidentialNodeRequirements: new Error(
+    'Invalid Confidential VM Node Requirements',
+  ),
   CustomRuntimeNeeded: new Error('Custom runtime should be added'),
   ReceivedRequired: new Error(
     'Payment receiver is required for stream payments',

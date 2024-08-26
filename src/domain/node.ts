@@ -410,6 +410,11 @@ export class NodeManager {
     return nodes.find((node) => node.stream_reward === rewardAddress)
   }
 
+  async getCRNByHash(hash: string): Promise<CRN | undefined> {
+    const nodes = await this.getCRNNodes()
+    return nodes.find((node) => node.hash === hash)
+  }
+
   protected async fetchAllNodes(): Promise<NodesResponse> {
     return fetchAndCache(
       `${apiServer}/api/v0/aggregates/0xa1B3bb7d2332383D96b7796B908fB7f7F3c2Be10.json?keys=corechannel&limit=100`,

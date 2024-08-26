@@ -388,7 +388,12 @@ export class InstanceManager
     /* const sizesMap = await this.fileManager.getSizesMap() */
 
     return messages
-      .filter(({ content }) => content !== undefined)
+      .filter(({ content }) => {
+        if (content === undefined) return false
+
+        // Filter out confidential VMs
+        return !content.environment?.trusted_execution
+      })
       .map((message) => {
         /* const size = message.content.volumes.reduce(
           (ac: number, cv: MachineVolume) =>

@@ -25,6 +25,8 @@ const defaultNames = {
   '/computing/function': 'COMPUTING / FUNCTIONS',
   '/computing/function/[hash]': '-',
   '/computing/function/new': 'SETUP NEW FUNCTION',
+  '/computing/confidential': 'COMPUTING / CONFIDENTIALS',
+  '/computing/confidential/[hash]': '-',
   '/hosting': '-',
   '/hosting/website': 'WEB3 HOSTING / WEBSITES',
   '/hosting/website/[hash]': '-',
@@ -51,6 +53,7 @@ export function useBreadcrumbNames(): UseBreadcrumbNamesReturn {
       '/settings/ssh/[hash]': `SSH KEYS / ${hash}`,
       '/settings/domain/[hash]': `DOMAINS / ${hashParam}`,
       '/computing/instance/[hash]': `${hash}`,
+      '/computing/confidential/[hash]': `${hash}`,
       '/computing/function/[hash]': `${hash}`,
       '/hosting/website/[hash]': `${hashParam}`,
     }

@@ -22,7 +22,7 @@ function getLabel(entities: unknown[], beta = false): string {
 }
 
 export function useStorageDashboardPage(): UseStorageDashboardPageReturn {
-  const { programs, instances, websites, volumes } = useAccountEntities()
+  const { volumes } = useAccountEntities()
 
   const [tabId, setTabId] = useState('volume')
 
@@ -37,9 +37,6 @@ export function useStorageDashboardPage(): UseStorageDashboardPageReturn {
   }, [volumes])
 
   const volumesAggregatedStorage = useAttachedVolumes({
-    programs,
-    instances,
-    websites,
     volumes,
   })
 

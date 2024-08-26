@@ -11,10 +11,13 @@ import { useRequestVolumes } from './useRequestEntity/useRequestVolumes'
 import { useRequestPrograms } from './useRequestEntity/useRequestPrograms'
 import { useRequestWebsites } from './useRequestEntity/useRequestWebsites'
 import { useAppState } from '@/contexts/appState'
+import { useRequestConfidentials } from './useRequestEntity/useRequestConfidentials'
+import { Confidential } from '@/domain/confidential'
 
 export type UseAccountEntitiesReturn = {
   programs: Program[]
   instances: Instance[]
+  confidentials: Confidential[]
   volumes: Volume[]
   sshKeys: SSHKey[]
   domains: Domain[]
@@ -30,6 +33,9 @@ export function useAccountEntities(): UseAccountEntitiesReturn {
   const { entities: volumes = [] } = useRequestVolumes({ triggerDeps })
   const { entities: programs = [] } = useRequestPrograms({ triggerDeps })
   const { entities: instances = [] } = useRequestInstances({ triggerDeps })
+  const { entities: confidentials = [] } = useRequestConfidentials({
+    triggerDeps,
+  })
   const { entities: sshKeys = [] } = useRequestSSHKeys({ triggerDeps })
   const { entities: domains = [] } = useRequestDomains({ triggerDeps })
   const { entities: websites = [] } = useRequestWebsites({ triggerDeps })
@@ -38,6 +44,7 @@ export function useAccountEntities(): UseAccountEntitiesReturn {
     programs,
     volumes,
     instances,
+    confidentials,
     sshKeys,
     domains,
     websites,

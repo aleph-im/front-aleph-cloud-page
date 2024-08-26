@@ -1,3 +1,4 @@
+import { HTMLAttributeAnchorTarget } from 'react'
 import { AmountInformationProps } from '../AmountInformation/types'
 import { ComputingInformationProps } from '../ComputingInformation/types'
 import { StorageInformationProps } from '../StorageInformation/types'
@@ -28,6 +29,7 @@ export type EntityCardProps = {
   description?: string
   dashboardPath?: string
   createPath?: string
+  createTarget?: HTMLAttributeAnchorTarget
   introductionButtonText?: string
   information: InformationProps
   storage?: number

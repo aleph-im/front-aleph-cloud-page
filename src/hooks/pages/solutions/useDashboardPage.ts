@@ -7,6 +7,8 @@ import { Instance } from '@/domain/instance'
 import { RequestState } from '@aleph-front/core'
 import { ExecutableStatus } from '@/domain/executable'
 import { useAttachedVolumes } from '@/hooks/common/useAttachedVolumes'
+import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
+import { useConfidentialManager } from '@/hooks/common/useManager/useConfidentialManager'
 
 export type AmountAggregatedStatus = {
   amount: number
@@ -25,6 +27,10 @@ export type ComputingAggregatedStatus = {
 }
 
 export type InstancesAggregatedStatus = {
+  total: ComputingAggregatedStatus
+}
+
+export type ConfidentialsAggregatedStatus = {
   total: ComputingAggregatedStatus
 }
 
@@ -47,8 +53,10 @@ export type VolumesAggregatedStatus = {
 export type UseDashboardPageReturn = {
   programAggregatedStatus: ProgramsAggregatedStatus
   instanceAggregatedStatus: InstancesAggregatedStatus
+  confidentialsAggregatedStatus: ConfidentialsAggregatedStatus
   volumesAggregatedStatus: VolumesAggregatedStatus
   websitesAggregatedStatus: WebsitesAggregatedStatus
+  confidentialsAuthz: boolean
 }
 
 function calculateComputingAggregatedStatus({
@@ -60,11 +68,12 @@ function calculateComputingAggregatedStatus({
 }) {
   return entities.reduce(
     (ac, cv) => {
-      const statusKey = !cv.confirmed
-        ? 'booting'
-        : !!entitiesStatus[cv.id]?.data?.vm_ipv6
-          ? 'running'
-          : 'paused'
+      const hasIpv6 = !!entitiesStatus[cv.id]?.data?.vm_ipv6
+      const statusKey = hasIpv6
+        ? 'running'
+        : cv.confirmed
+          ? 'paused'
+          : 'booting'
 
       ac[statusKey] += 1
       ac.amount += 1
@@ -82,7 +91,10 @@ function calculateComputingAggregatedStatus({
 export function useDashboardPage(): UseDashboardPageReturn {
   useSPARedirect()
 
-  const { programs, instances, websites, volumes } = useAccountEntities()
+  const { confidentials: confidentialsAuthz } = useAuthorization()
+
+  const { programs, instances, confidentials, websites, volumes } =
+    useAccountEntities()
 
   const { status: programsStatus } = useRequestExecutableStatus({
     entities: programs,
@@ -90,6 +102,11 @@ export function useDashboardPage(): UseDashboardPageReturn {
 
   const { status: instancesStatus } = useRequestExecutableStatus({
     entities: instances,
+  })
+
+  const { status: confidentialsStatus } = useRequestExecutableStatus({
+    entities: confidentials,
+    managerHook: useConfidentialManager,
   })
 
   const programAggregatedStatus = useMemo(() => {
@@ -118,10 +135,17 @@ export function useDashboardPage(): UseDashboardPageReturn {
     }
   }, [instancesStatus, instances])
 
+  // @todo: Check if this is correct
+  const confidentialsAggregatedStatus = useMemo(() => {
+    return {
+      total: calculateComputingAggregatedStatus({
+        entities: confidentials,
+        entitiesStatus: confidentialsStatus,
+      }),
+    }
+  }, [confidentials, confidentialsStatus])
+
   const volumesAggregatedStatus = useAttachedVolumes({
-    programs,
-    instances,
-    websites,
     volumes,
   })
 
@@ -132,7 +156,9 @@ export function useDashboardPage(): UseDashboardPageReturn {
   return {
     programAggregatedStatus,
     instanceAggregatedStatus,
+    confidentialsAggregatedStatus,
     volumesAggregatedStatus,
     websitesAggregatedStatus,
+    confidentialsAuthz,
   }
 }

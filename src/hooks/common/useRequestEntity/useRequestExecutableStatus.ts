@@ -5,6 +5,8 @@ import { useInstanceManager } from '../useManager/useInstanceManager'
 
 export type UseRequestExecutableStatusProps = {
   entities?: Executable[]
+  //@todo: fix managerHook type
+  managerHook?: any
 }
 
 export type UseRequestExecutableStatusReturn = {
@@ -14,8 +16,9 @@ export type UseRequestExecutableStatusReturn = {
 
 export function useRequestExecutableStatus({
   entities,
+  managerHook = useInstanceManager,
 }: UseRequestExecutableStatusProps): UseRequestExecutableStatusReturn {
-  const manager = useInstanceManager()
+  const manager = managerHook()
 
   const [status, setStatus] = useState<
     Record<string, RequestState<ExecutableStatus>>
