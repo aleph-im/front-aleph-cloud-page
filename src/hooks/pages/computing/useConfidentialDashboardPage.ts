@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { TabsProps } from '@aleph-front/core'
 import { Volume } from '@/domain/volume'
 import { Domain } from '@/domain/domain'
@@ -11,7 +11,6 @@ import { useRouter } from 'next/router'
 
 export type UseConfidentialDashboardPageReturn = {
   authorized: boolean
-  handleUnauthorized: () => void
   confidentials: Confidential[]
   volumes: Volume[]
   domains: Domain[]
@@ -28,9 +27,7 @@ function getLabel(entities: unknown[], beta = false): string {
 
 export function useConfidentialDashboardPage(): UseConfidentialDashboardPageReturn {
   const { push } = useRouter()
-  const { confidentials: confidentialsAuthz } = useAuthorization()
-
-  const handleUnauthorized = () => push('/')
+  const { confidentials: authorized } = useAuthorization()
 
   const { entities: confidentials = [] } = useRequestConfidentials()
   const { entities: volumes = [] } = useRequestConfidentialVolumes()
@@ -60,9 +57,12 @@ export function useConfidentialDashboardPage(): UseConfidentialDashboardPageRetu
     ]
   }, [domains, confidentials, volumes])
 
+  useEffect(() => {
+    if (!authorized) push('/')
+  }, [authorized, push])
+
   return {
-    authorized: confidentialsAuthz,
-    handleUnauthorized,
+    authorized,
     confidentials,
     volumes,
     domains,

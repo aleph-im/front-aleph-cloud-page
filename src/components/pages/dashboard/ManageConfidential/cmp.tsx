@@ -7,15 +7,14 @@ import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import { RotatingLines, ThreeDots } from 'react-loader-spinner'
-import { useTheme } from 'styled-components'
 import Link from 'next/link'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import { useManageConfidential } from '@/hooks/pages/solutions/manage/useManageConfidential'
-import { useEffect } from 'react'
 
 export default function ManageConfidential() {
   const {
     authorized,
+    theme,
     confidential,
     status,
     mappedKeys,
@@ -24,14 +23,7 @@ export default function ManageConfidential() {
     handleCopyConnect,
     handleCopyIpv6,
     handleBack,
-    handleUnauthorized,
   } = useManageConfidential()
-
-  const theme = useTheme()
-
-  useEffect(() => {
-    if (!authorized) handleUnauthorized()
-  }, [authorized, handleUnauthorized])
 
   if (!authorized) return
 

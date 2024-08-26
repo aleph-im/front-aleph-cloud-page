@@ -10,9 +10,11 @@ import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { CRN } from '@/domain/node'
 import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
+import { DefaultTheme, useTheme } from 'styled-components'
 
 export type ManageConfidential = {
   authorized: boolean
+  theme: DefaultTheme
   confidential?: Confidential
   status?: ConfidentialStatus
   mappedKeys: (SSHKey | undefined)[]
@@ -22,17 +24,22 @@ export type ManageConfidential = {
   handleCopyConnect: () => void
   handleCopyIpv6: () => void
   handleBack: () => void
-  handleUnauthorized: () => void
 }
 
 export function useManageConfidential(): ManageConfidential {
+  const theme = useTheme()
   const router = useRouter()
   const {
     push,
     query: { hash },
   } = router
 
-  const { confidentials: confidentialsAuthz } = useAuthorization()
+  const { confidentials: authorized } = useAuthorization()
+
+  useEffect(() => {
+    if (!authorized) push('/')
+  }, [authorized, push])
+
   const { entities } = useRequestConfidentials({ ids: hash as string })
   const [confidential] = entities || []
 
@@ -97,13 +104,13 @@ export function useManageConfidential(): ManageConfidential {
     }
   }, [crn, status?.node])
 
-  const handleUnauthorized = () => push('/')
   const handleBack = () => {
     push('.')
   }
 
   return {
-    authorized: confidentialsAuthz,
+    authorized,
+    theme,
     confidential,
     status,
     mappedKeys,
@@ -113,6 +120,5 @@ export function useManageConfidential(): ManageConfidential {
     handleCopyConnect,
     handleCopyIpv6,
     handleBack,
-    handleUnauthorized,
   }
 }

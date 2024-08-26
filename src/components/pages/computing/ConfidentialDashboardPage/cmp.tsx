@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react'
 import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
@@ -9,20 +8,8 @@ import { useConfidentialDashboardPage } from '@/hooks/pages/computing/useConfide
 import ConfidentialsTabContent from '../../dashboard/ConfidentialsTabContent'
 
 export default function ConfidentialDashboardPage() {
-  const {
-    authorized,
-    handleUnauthorized,
-    tabs,
-    tabId,
-    setTabId,
-    confidentials,
-    volumes,
-    domains,
-  } = useConfidentialDashboardPage()
-
-  useEffect(() => {
-    if (!authorized) handleUnauthorized()
-  }, [authorized, handleUnauthorized])
+  const { authorized, tabs, tabId, setTabId, confidentials, volumes, domains } =
+    useConfidentialDashboardPage()
 
   if (!authorized) return
 
