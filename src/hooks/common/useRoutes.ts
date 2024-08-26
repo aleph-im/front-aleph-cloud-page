@@ -1,40 +1,11 @@
 import { Route } from '@aleph-front/core'
-import { useMemo, useState } from 'react'
-import { useAuthorization } from './authorization/useAuthorization'
-
-const DEFAULT_CONFIDENTIAL_ROUTE: Route = {
-  name: 'Confidentials',
-  href: '/computing/confidential',
-  disabled: true,
-  label: '(SOON)',
-  icon: 'confidential',
-}
-
-const BETA_CONFIDENTIAL_ROUTE_BETA: Route = {
-  ...DEFAULT_CONFIDENTIAL_ROUTE,
-  disabled: false,
-  label: '(BETA)',
-  icon: 'confidential',
-}
 
 export type UseRoutesReturn = {
   routes: Route[]
 }
 export function useRoutes(): UseRoutesReturn {
-  const { confidentials: confidentialsAuthz } = useAuthorization()
-
-  const [confidentialRoute, setConfidentialRoute] = useState<Route>(
-    DEFAULT_CONFIDENTIAL_ROUTE,
-  )
-
-  useMemo(() => {
-    confidentialsAuthz
-      ? setConfidentialRoute(BETA_CONFIDENTIAL_ROUTE_BETA)
-      : setConfidentialRoute(DEFAULT_CONFIDENTIAL_ROUTE)
-  }, [confidentialsAuthz])
-
-  const routes: Route[] = useMemo(() => {
-    return [
+  return {
+    routes: [
       {
         name: 'Console',
         href: '/',
@@ -84,7 +55,12 @@ export function useRoutes(): UseRoutesReturn {
                     href: '/computing/instance',
                     icon: 'instance',
                   },
-                  confidentialRoute,
+                  {
+                    name: 'Confidentials',
+                    href: '/computing/confidential',
+                    label: '(BETA)',
+                    icon: 'confidential',
+                  },
                 ],
               },
               {
@@ -147,10 +123,6 @@ export function useRoutes(): UseRoutesReturn {
         target: '_blank',
         external: true,
       },
-    ] as Route[]
-  }, [confidentialRoute])
-
-  return {
-    routes,
+    ],
   }
 }
