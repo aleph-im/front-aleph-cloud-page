@@ -32,7 +32,8 @@ export default function ConfidentialDashboardPage() {
               info="WHAT IS A..."
               title="Confidential Instance"
               description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your execution and data stays safe."
-              withButton={false}
+              externalLinkText="How to create"
+              externalLinkUrl="https://docs.aleph.im/computing/confidential/"
             />
           </>
         ) : tabId === 'volume' ? (

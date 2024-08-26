@@ -17,6 +17,7 @@ export const DashboardCardWithSideImage = ({
   withButton = true,
   buttonUrl,
   buttonText,
+  externalLinkText,
   externalLinkUrl,
 }: DashboardCardWithSideImageProps) => (
   <NoisyContainer type="grain-1" tw="py-20">
@@ -43,7 +44,7 @@ export const DashboardCardWithSideImage = ({
               )}
               {externalLinkUrl && (
                 <ExternalLinkButton href={externalLinkUrl}>
-                  Learn more
+                  {externalLinkText}
                 </ExternalLinkButton>
               )}
             </div>
