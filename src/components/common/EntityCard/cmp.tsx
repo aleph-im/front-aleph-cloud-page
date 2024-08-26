@@ -57,6 +57,7 @@ export const EntityCard = ({
   information,
   type = 'active',
   isComingSoon = false,
+  isBeta = false,
 }: EntityCardProps) => {
   const theme = useTheme()
 
@@ -69,17 +70,18 @@ export const EntityCard = ({
   }, [isComingSoon, theme])
 
   const headerElement = useMemo(() => {
-    const comingSoonLabel = isComingSoon ? (
-      <p className="tp-info" tw="absolute top-0 right-0 -mr-3 -mt-2">
-        &#40;SOON&#41;
-      </p>
-    ) : null
+    const topRightLabel =
+      isBeta || isComingSoon ? (
+        <p className="tp-info" tw="absolute top-0 right-0 -mr-3 -mt-2">
+          &#40;{isBeta ? 'BETA' : 'SOON'}&#41;
+        </p>
+      ) : null
 
     switch (type) {
       case 'active':
         return (
           <div tw="flex flex-col items-center justify-center relative">
-            {comingSoonLabel}
+            {topRightLabel}
             <InfoTooltipButton
               plain
               my="top-left"
@@ -100,7 +102,7 @@ export const EntityCard = ({
             tw="flex items-center gap-2.5 mb-2.5 relative"
             className="tp-header fs-16"
           >
-            {comingSoonLabel}
+            {topRightLabel}
             <ObjectImg
               shape={isComingSoon ? false : true}
               color={imageColor}
@@ -111,7 +113,7 @@ export const EntityCard = ({
           </div>
         )
     }
-  }, [description, imageColor, img, isComingSoon, title, type])
+  }, [description, imageColor, img, isBeta, isComingSoon, title, type])
 
   const contentElement = useMemo(() => {
     const imageElement = (

@@ -172,6 +172,7 @@ export default function DashboardPage() {
                     : 'introduction'
                 }
                 isComingSoon={!confidentialsAuthz}
+                isBeta
                 title="confidentials"
                 img="Object9"
                 dashboardPath="/computing/confidential"

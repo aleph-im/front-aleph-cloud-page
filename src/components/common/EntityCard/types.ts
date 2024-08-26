@@ -24,6 +24,7 @@ export type EntityCardType = 'introduction' | 'active'
 export type EntityCardProps = {
   type?: EntityCardType
   isComingSoon?: boolean
+  isBeta?: boolean
   title: string
   img: string
   description?: string
