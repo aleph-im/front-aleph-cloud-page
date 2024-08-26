@@ -5,7 +5,7 @@ import { useAuthorization } from './authorization/useAuthorization'
 const DEFAULT_CONFIDENTIAL_ROUTE: Route = {
   name: 'Confidentials',
   href: '/computing/confidential',
-  disabled: true,
+  disabled: false,
   label: '(SOON)',
   icon: 'confidential',
 }
