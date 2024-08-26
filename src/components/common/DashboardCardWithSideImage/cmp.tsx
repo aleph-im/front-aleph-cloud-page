@@ -17,7 +17,7 @@ export const DashboardCardWithSideImage = ({
   withButton = true,
   buttonUrl,
   buttonText,
-  externalLinkText,
+  externalLinkText = 'Learn more',
   externalLinkUrl,
 }: DashboardCardWithSideImageProps) => (
   <NoisyContainer type="grain-1" tw="py-20">
