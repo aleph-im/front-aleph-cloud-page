@@ -5,7 +5,7 @@ export type AuthorizationState = {
 }
 
 export const initialState: AuthorizationState = {
-  confidentials: false,
+  confidentials: true,
 }
 
 export enum AuthorizationActionType {
