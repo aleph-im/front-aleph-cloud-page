@@ -9,11 +9,12 @@ import {
   getAccountFromProvider as getSOLAccount,
   SOLAccount,
 } from '@aleph-sdk/solana'
+import { getAccountFromProvider as getAVAXAccount } from '@aleph-sdk/avalanche'
+import { getAccountFromProvider as getBASEAccount } from '@aleph-sdk/base'
 import {
-  getAccountFromProvider as getAVAXAccount,
-  AvalancheAccount,
-} from '@aleph-sdk/avalanche'
-import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
+  createFromEVMAccount,
+  isAccountSupported as isAccountPAYGCompatible,
+} from '@aleph-sdk/superfluid'
 import { Mutex, getERC20Balance, getSOLBalance, sleep } from '@/helpers/utils'
 import { MetaMaskInpageProvider } from '@metamask/providers'
 import type {
@@ -21,6 +22,7 @@ import type {
   CombinedProvider,
 } from '@web3modal/scaffold-utils/ethers'
 import Err from '@/helpers/errors'
+import { EVMAccount } from '@aleph-sdk/evm'
 
 export { BlockchainId }
 
@@ -78,6 +80,15 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     explorerUrl: 'https://snowtrace.io/',
     rpcUrl: 'https://avalanche.drpc.org',
   },
+  [BlockchainId.BASE]: {
+    id: BlockchainId.BASE,
+    name: 'Base',
+    chainId: 8453,
+    eip155: true,
+    currency: 'ETH',
+    explorerUrl: 'https://basescan.org',
+    rpcUrl: 'https://mainnet.base.org',
+  },
   [BlockchainId.SOL]: {
     id: BlockchainId.SOL,
     name: 'Solana',
@@ -90,6 +101,7 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
 export const networks: Record<number, Blockchain> = {
   1: blockchains.ETH,
   43114: blockchains.AVAX,
+  8453: blockchains.BASE,
   900: blockchains.SOL,
 }
 
@@ -235,6 +247,9 @@ export abstract class BaseConnectionProviderManager {
       case BlockchainId.AVAX:
         return getAVAXAccount(provider as any)
 
+      case BlockchainId.BASE:
+        return getBASEAccount(provider as any)
+
       case BlockchainId.SOL:
         return getSOLAccount(provider as any)
 
@@ -244,12 +259,11 @@ export abstract class BaseConnectionProviderManager {
   }
 
   async getBalance(account: Account): Promise<number> {
-    if (account instanceof AvalancheAccount) {
+    if (isAccountPAYGCompatible(account)) {
       try {
-        // @note: refactor in SDK calling init inside this method
-        const superfluidAccount = createFromAvalancheAccount(account)
-        await superfluidAccount.init()
-
+        const superfluidAccount = await createFromEVMAccount(
+          account as EVMAccount,
+        )
         const balance = await superfluidAccount.getALEPHBalance()
         return balance.toNumber()
       } catch (e) {

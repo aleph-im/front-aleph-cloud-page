@@ -24,4 +24,5 @@ export class ConnectionProviderManager {
 export const connectionProviderManager = new ConnectionProviderManager([
   BlockchainId.ETH,
   BlockchainId.AVAX,
+  BlockchainId.BASE,
 ])

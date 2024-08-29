@@ -1,7 +1,11 @@
 import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
+import {
+  createFromEVMAccount,
+  isAccountSupported as isAccountPAYGCompatible,
+  isBlockchainSupported as isBlockchainPAYGCompatible,
+} from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
@@ -38,10 +42,10 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
-import { AvalancheAccount } from '@aleph-sdk/avalanche'
 import Err from '@/helpers/errors'
 import { BlockchainId } from '@/domain/connect/base'
 import { PaymentConfiguration } from '@/domain/executable'
+import { EVMAccount } from '@aleph-sdk/evm'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -161,16 +165,14 @@ export function useNewInstancePage(): UseNewInstancePage {
         if (!isValid) throw Err.InvalidCRNSpecs
 
         if (
-          blockchain !== BlockchainId.AVAX ||
-          !(account instanceof AvalancheAccount)
+          !isBlockchainPAYGCompatible(blockchain) ||
+          !isAccountPAYGCompatible(account)
         ) {
           handleConnect({ blockchain: BlockchainId.AVAX })
           throw Err.InvalidNetwork
         }
 
-        // @note: refactor in SDK calling init inside this method
-        superfluidAccount = createFromAvalancheAccount(account)
-        await superfluidAccount.init()
+        superfluidAccount = await createFromEVMAccount(account as EVMAccount)
 
         payment = {
           chain: BlockchainId.AVAX,

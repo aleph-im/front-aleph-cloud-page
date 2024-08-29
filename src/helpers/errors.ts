@@ -47,7 +47,7 @@ export default {
     'Invalid Superfluid/AVAX receiver reward address. Please set it up in your CRN account profile',
   ),
   StreamNotSupported: new Error(
-    'Stream payments are only supported on Avalanche',
+    'Stream payments are only supported on Avalanche or Base',
   ),
   MaxFlowRate: new Error(
     `Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost`,

@@ -305,8 +305,6 @@ export class InstanceManager
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
 
-    await account.init()
-
     const alephxBalance = await account.getALEPHBalance()
     const alephxFlow = await account.getALEPHFlow(receiver)
     const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))

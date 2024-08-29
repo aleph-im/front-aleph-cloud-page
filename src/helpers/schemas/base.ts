@@ -101,4 +101,8 @@ export const paymentMethodSchema = z.enum([
   PaymentMethod.Stream,
 ])
 
-export const blockchainSchema = z.enum([BlockchainId.ETH, BlockchainId.AVAX])
+export const blockchainSchema = z.enum([
+  BlockchainId.ETH,
+  BlockchainId.AVAX,
+  BlockchainId.BASE,
+])

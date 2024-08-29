@@ -32,6 +32,7 @@ import {
 import Err from '@/helpers/errors'
 import { BlockchainId } from './connect/base'
 import { NodeManager } from './node'
+import { isBlockchainSupported as isBlockchainPAYGCompatible } from '@aleph-sdk/superfluid'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
@@ -370,9 +371,9 @@ export abstract class ExecutableManager {
       }
     if (payment.type === PaymentMethod.Stream) {
       if (!payment.receiver) throw Err.ReceivedRequired
-      if (payment.chain === BlockchainId.AVAX)
+      if (isBlockchainPAYGCompatible(payment.chain))
         return {
-          chain: BlockchainId.AVAX,
+          chain: payment.chain,
           type: SDKPaymentType.superfluid,
           receiver: payment.receiver,
         }
