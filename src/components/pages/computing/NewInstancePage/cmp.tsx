@@ -81,7 +81,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
   const handleSwitchToNodeStream = useCallback(() => {
     if (selectedNode !== node?.hash) {
-      handleConnect({ blockchain: BlockchainId.AVAX })
+      handleConnect({ blockchain: BlockchainId.BASE })
       handleSelectNode(selectedNode)
     }
 
@@ -391,7 +391,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       return modalClose()
     }
 
-    const switchTo = node ? BlockchainId.AVAX : BlockchainId.ETH
+    const switchTo = node ? BlockchainId.BASE : BlockchainId.ETH
     const name = blockchains[switchTo].name
 
     return modalOpen({

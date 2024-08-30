@@ -88,7 +88,7 @@ export function useManageInstance(): ManageInstance {
         !isBlockchainPAYGCompatible(blockchain) ||
         !isAccountPAYGCompatible(account)
       ) {
-        handleConnect({ blockchain: BlockchainId.AVAX })
+        handleConnect({ blockchain: BlockchainId.BASE })
         throw Err.InvalidNetwork
       }
 

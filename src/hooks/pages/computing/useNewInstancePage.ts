@@ -165,17 +165,18 @@ export function useNewInstancePage(): UseNewInstancePage {
         if (!isValid) throw Err.InvalidCRNSpecs
 
         if (
+          !blockchain ||
           !isBlockchainPAYGCompatible(blockchain) ||
           !isAccountPAYGCompatible(account)
         ) {
-          handleConnect({ blockchain: BlockchainId.AVAX })
+          handleConnect({ blockchain: BlockchainId.BASE })
           throw Err.InvalidNetwork
         }
 
         superfluidAccount = await createFromEVMAccount(account as EVMAccount)
 
         payment = {
-          chain: BlockchainId.AVAX,
+          chain: blockchain,
           type: PaymentMethod.Stream,
           sender: account.address,
           receiver: node.stream_reward,
