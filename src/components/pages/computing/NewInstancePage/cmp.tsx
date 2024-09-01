@@ -207,7 +207,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               You are about to switch your payment method to{' '}
               <Strong>Pay-as-you-go</Strong>, which will also allow you to{' '}
               <Strong>manually select</Strong> your preferred CRN on{' '}
-              <Strong>Avalanche or Base</Strong>.
+              <Strong>Base</Strong>.
             </div>
             <div>
               Making this change will prompt your wallet to automatically switch
@@ -218,10 +218,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <div>
               <strong className="tp-body3 fs-12">Token Requirements</strong>
               <div className="tp-body1 fs-12">
-                To maintain your service in the Holder Tier, you must hold
-                sufficient $ALEPH tokens in your wallet for the duration of your
-                instance usage. You can acquire $ALEPH tokens at Uniswap or
-                Coinbase.
+                You will need $ETH on Base to start the PAYG stream and $ALEPH
+                on Base to stream. Purchase $ETH on Base at Uniswap and get
+                $ALEPH on Base by swapping your Ethereum $ALEPH on
+                swap.aleph.im.
               </div>
             </div>
           </div>
@@ -311,8 +311,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <div>
               You are about to switch from the automated Holder-tier setup on
               Ethereum to <Strong>manually selecting</Strong> a CRN with the{' '}
-              <Strong>Pay-as-you-go</Strong> method on{' '}
-              <Strong>Avalanche or Base</Strong>.
+              <Strong>Pay-as-you-go</Strong> method on <Strong>Base</Strong>.
             </div>
             <div>
               Making this change will prompt your wallet to automatically switch
@@ -323,9 +322,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <div>
               <strong className="tp-body3 fs-12">Token Requirements</strong>
               <div className="tp-body1 fs-12">
-                You will need $AVAX to start the PAYG stream and $ALEPH funds on
-                the Avalanche chain to stream. Purchase $AVAX at Trader Joe XYZ
-                and get $ALEPH at Swap Aleph or Trader Joe XYZ.
+                You will need $ETH on Base to start the PAYG stream and $ALEPH
+                on Base to stream. Purchase $ETH on Base at Uniswap and get
+                $ALEPH on Base by swapping your Ethereum $ALEPH on
+                swap.aleph.im.
               </div>
             </div>
           </div>
