@@ -22,7 +22,7 @@ import type {
   CombinedProvider,
 } from '@web3modal/scaffold-utils/ethers'
 import Err from '@/helpers/errors'
-import { EVMAccount } from '@aleph-sdk/evm'
+import { EVMAccount, findChainDataByChainId } from '@aleph-sdk/evm'
 
 export { BlockchainId }
 
@@ -128,7 +128,7 @@ export abstract class BaseConnectionProviderManager {
     const release = await this.mutex.acquire()
 
     try {
-      const blockchain = blockchains[blockchainId]
+      const blockchain = this.getBlockchainData(blockchainId)
 
       if (!this.supportedBlockchains.includes(blockchainId)) {
         throw Err.BlockchainNotSupported(blockchain?.name || blockchainId)
@@ -159,23 +159,26 @@ export abstract class BaseConnectionProviderManager {
   }
 
   async switchBlockchain(blockchainId: BlockchainId): Promise<void> {
-    const prevBlockchain = await this.getBlockchain().catch(() => undefined)
+    const prevBlockchain = await this.getPreviousBlockchain()
     if (prevBlockchain === blockchainId) return
 
+    const blockchain = this.getBlockchainData(blockchainId)
+
+    const provider = this.getProvider()
+    const chainIdHex = `0x${blockchain.chainId.toString(16)}`
+
     try {
-      const blockchain = blockchains[blockchainId]
-      if (!blockchain) throw Err.BlockchainNotSupported(blockchainId)
-
-      const provider = this.getProvider()
-      const chainId = `0x${blockchain.chainId.toString(16)}`
-
       await provider.request?.({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId }],
+        params: [{ chainId: chainIdHex }],
       })
     } catch (e) {
-      await this.onUpdate(prevBlockchain)
-      throw e
+      await this.handleSwitchError(
+        provider,
+        blockchain,
+        chainIdHex,
+        prevBlockchain,
+      )
     }
   }
 
@@ -279,5 +282,52 @@ export abstract class BaseConnectionProviderManager {
     }
 
     throw Err.ChainNotYetSupported
+  }
+
+  private async getPreviousBlockchain(): Promise<BlockchainId | undefined> {
+    try {
+      return await this.getBlockchain()
+    } catch {
+      return undefined
+    }
+  }
+
+  private getBlockchainData(blockchainId: BlockchainId): Blockchain {
+    const blockchain = blockchains[blockchainId]
+    if (!blockchain) throw Err.BlockchainNotSupported(blockchainId)
+    return blockchain
+  }
+
+  private async handleSwitchError(
+    provider: any,
+    blockchain: Blockchain,
+    chainIdHex: string,
+    prevBlockchain?: BlockchainId,
+  ): Promise<void> {
+    try {
+      await this.addBlockchain(provider, blockchain.chainId)
+      await this.switchBlockchainRequest(provider, chainIdHex)
+    } catch {
+      await this.onUpdate(prevBlockchain)
+    }
+  }
+
+  private async switchBlockchainRequest(
+    provider: any,
+    chainId: string,
+  ): Promise<void> {
+    await provider.request?.({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId }],
+    })
+  }
+
+  private async addBlockchain(provider: any, chainId: number): Promise<void> {
+    const chainData = findChainDataByChainId(chainId)
+
+    await provider.request?.({
+      method: 'wallet_addEthereumChain',
+      params: [chainData],
+    })
   }
 }
