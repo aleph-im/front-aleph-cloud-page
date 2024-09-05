@@ -12,6 +12,7 @@ import {
   defaultInstanceChannel,
   EntityType,
   PaymentMethod,
+  EXTRA_WEI,
 } from '@/helpers/constants'
 import { getDate, getExplorerURL, sleep } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
@@ -308,9 +309,10 @@ export class InstanceManager
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
 
+    const streamCostByHour = streamCost / getHours(streamDuration) + EXTRA_WEI
     const alephxBalance = await account.getALEPHBalance()
     const alephxFlow = await account.getALEPHFlow(receiver)
-    const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
+    const totalFlow = alephxFlow.add(streamCostByHour)
 
     if (totalFlow.greaterThan(1)) throw Err.MaxFlowRate
 
@@ -323,10 +325,7 @@ export class InstanceManager
       )
 
     yield
-    await account.increaseALEPHFlow(
-      receiver,
-      streamCost / getHours(streamDuration),
-    )
+    await account.increaseALEPHFlow(receiver, streamCostByHour)
   }
 
   protected async *parseInstanceSteps(

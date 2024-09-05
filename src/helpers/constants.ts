@@ -179,3 +179,5 @@ export enum WebsiteFrameworkId {
   nuxt = 'nuxt',
   angular = 'angular' */
 }
+
+export const EXTRA_WEI = 3600 / 10 ** 18
