@@ -478,7 +478,7 @@ export class NodeManager {
   isStreamPaymentNotSupported(node: CRN): StreamNotSupportedIssue {
     if (!node.stream_reward) return StreamNotSupportedIssue.RewardAddress
 
-    if (this.getNodeVersionNumber(node) < getVersionNumber('v0.4.0'))
+    if (this.getNodeVersionNumber(node) < getVersionNumber('1.1.0'))
       return StreamNotSupportedIssue.Version
 
     return StreamNotSupportedIssue.Valid
