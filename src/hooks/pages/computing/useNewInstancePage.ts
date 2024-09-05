@@ -184,16 +184,17 @@ export function useNewInstancePage(): UseNewInstancePage {
           streamDuration: state.streamDuration,
         }
       }
+      const instance = {
+        ...state,
+        payment,
+        node,
+      } as AddInstance
 
-      const iSteps = await manager.getAddSteps(state)
+      const iSteps = await manager.getAddSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
       const steps = manager.addSteps(
-        {
-          ...state,
-          payment,
-          node,
-        } as AddInstance,
+        instance,
         superfluidAccount,
       )
 
