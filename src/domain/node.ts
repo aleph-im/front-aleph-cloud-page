@@ -215,6 +215,7 @@ export type CRNSpecs = {
     cpu: {
       architecture: string
       vendor: string
+      features?: string[]
     }
   }
   active: boolean

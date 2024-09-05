@@ -46,6 +46,7 @@ export const nodeSpecsSchema = z.object({
     cpu: z.object({
       architecture: z.string(),
       vendor: z.string(),
+      features: z.array(z.string()).optional(),
     }),
   }),
   active: z.boolean(),
