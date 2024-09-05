@@ -1,6 +1,7 @@
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   BaseExecutableContent,
+  HostRequirements,
   MachineResources,
   MachineVolume,
   Payment,
@@ -31,7 +32,7 @@ import {
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
 import { BlockchainId } from './connect/base'
-import { NodeManager } from './node'
+import { CRN, NodeManager } from './node'
 import { isBlockchainSupported as isBlockchainPAYGCompatible } from '@aleph-sdk/superfluid'
 
 type ExecutableCapabilitiesProps = {
@@ -382,6 +383,15 @@ export abstract class ExecutableManager {
     return {
       chain: payment.chain,
       type: SDKPaymentType.hold,
+    }
+  }
+
+  protected parseRequirements(node?: CRN): HostRequirements | undefined {
+    if (!node || !node.hash) return
+    return {
+      node: {
+        node_hash: node.hash
+      }
     }
   }
 }

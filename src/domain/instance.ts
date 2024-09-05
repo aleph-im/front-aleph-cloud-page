@@ -1,6 +1,7 @@
 import { Account } from '@aleph-sdk/account'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import {
+  HostRequirements,
   InstanceContent,
   InstancePublishConfiguration,
   MachineVolume,
@@ -54,6 +55,7 @@ export type AddInstance = Omit<
   | 'resources'
   | 'volumes'
   | 'payment'
+  | 'requirements'
 > &
   NameAndTagsField & {
     image: InstanceImageField
@@ -63,6 +65,7 @@ export type AddInstance = Omit<
     envVars?: EnvVarField[]
     domains?: Omit<DomainField, 'ref'>[]
     payment?: PaymentConfiguration
+    requirements?: HostRequirements
     node?: CRN
   }
 
@@ -337,11 +340,12 @@ export class InstanceManager
 
     const { account, channel } = this
 
-    const { envVars, specs, image, sshKeys, name, tags } = newInstance
+    const { envVars, specs, image, sshKeys, name, tags, node } = newInstance
 
     const variables = this.parseEnvVars(envVars)
     const resources = this.parseSpecs(specs)
     const metadata = this.parseMetadata(name, tags)
+    const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
     const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
     const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
@@ -356,6 +360,7 @@ export class InstanceManager
       authorized_keys,
       volumes,
       payment,
+      requirements
     }
   }
 
