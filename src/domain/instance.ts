@@ -272,6 +272,7 @@ export class InstanceManager
   ): Promise<void> {
     if (!node.address) throw Err.InvalidCRNAddress
 
+    let success = false
     let errorMsg = ''
 
     for (let i = 0; i < 5; i++) {
@@ -288,12 +289,12 @@ export class InstanceManager
           }),
         })
         const resp = await req.json()
-        if (resp.success) return
-
+        success = resp.success
         errorMsg = resp.errors[instanceId]
       } catch (e) {
         errorMsg = (e as Error).message
       } finally {
+        if (success) return
         if (!retry) break
         await sleep(1000)
       }
