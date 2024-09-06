@@ -359,7 +359,7 @@ export class InstanceManager
       authorized_keys,
       volumes,
       payment,
-      requirements
+      requirements,
     }
   }
 

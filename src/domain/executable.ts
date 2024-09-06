@@ -390,8 +390,8 @@ export abstract class ExecutableManager {
     if (!node || !node.hash) return
     return {
       node: {
-        node_hash: node.hash
-      }
+        node_hash: node.hash,
+      },
     }
   }
 }

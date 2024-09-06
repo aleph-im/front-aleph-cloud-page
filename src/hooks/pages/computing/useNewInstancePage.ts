@@ -193,10 +193,7 @@ export function useNewInstancePage(): UseNewInstancePage {
       const iSteps = await manager.getAddSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = manager.addSteps(
-        instance,
-        superfluidAccount,
-      )
+      const steps = manager.addSteps(instance, superfluidAccount)
 
       try {
         let accountInstance
