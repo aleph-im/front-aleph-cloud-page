@@ -225,7 +225,10 @@ export class InstanceManager
         },
       })
 
-      await account.decreaseALEPHFlow(receiver, instanceCosts.totalCost)
+      await account.decreaseALEPHFlow(
+        receiver,
+        instanceCosts.totalCost + EXTRA_WEI,
+      )
     }
 
     try {
@@ -423,7 +426,13 @@ export class InstanceManager
     instancesOrIds = Array.isArray(instancesOrIds)
       ? instancesOrIds
       : [instancesOrIds]
-    instancesOrIds.forEach(() => {
+    instancesOrIds.forEach((instance) => {
+      if (
+        typeof instance !== 'string' &&
+        instance.payment?.type === PaymentType.superfluid &&
+        instance.payment?.receiver
+      )
+        steps.push('streamDel')
       steps.push('instanceDel')
     })
     return steps
