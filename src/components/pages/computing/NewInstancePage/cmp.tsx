@@ -80,23 +80,25 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   const handleCloseModal = useCallback(() => setSelectedModal(undefined), [])
 
   const handleSwitchToNodeStream = useCallback(() => {
-    if (selectedNode !== node?.hash) {
+    if (!isBlockchainPAYGCompatible(blockchain))
       handleConnect({ blockchain: BlockchainId.BASE })
-      handleSelectNode(selectedNode)
-    }
+
+    if (selectedNode !== node?.hash) handleSelectNode(selectedNode)
 
     setSelectedModal(undefined)
-  }, [handleConnect, handleSelectNode, node, selectedNode])
+  }, [blockchain, handleConnect, handleSelectNode, node, selectedNode])
 
   const handleSwitchToAutoHold = useCallback(() => {
     if (node?.hash) {
-      handleConnect({ blockchain: BlockchainId.ETH })
       setSelectedNode(undefined)
       handleSelectNode(undefined)
     }
 
+    if (blockchain != BlockchainId.ETH)
+      handleConnect({ blockchain: BlockchainId.ETH })
+
     setSelectedModal(undefined)
-  }, [handleConnect, handleSelectNode, node])
+  }, [blockchain, handleConnect, handleSelectNode, node])
 
   useEffect(() => {
     if (!modalOpen) return
