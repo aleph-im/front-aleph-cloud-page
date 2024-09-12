@@ -23,6 +23,7 @@ import type {
 } from '@web3modal/scaffold-utils/ethers'
 import Err from '@/helpers/errors'
 import { EVMAccount, findChainDataByChainId } from '@aleph-sdk/evm'
+import { MetamaskErrorCodes } from './constants'
 
 export { BlockchainId }
 
@@ -168,12 +169,10 @@ export abstract class BaseConnectionProviderManager {
     const chainIdHex = `0x${blockchain.chainId.toString(16)}`
 
     try {
-      await provider.request?.({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: chainIdHex }],
-      })
-    } catch (e) {
+      await this.switchBlockchainRequest(provider, chainIdHex)
+    } catch (error) {
       await this.handleSwitchError(
+        error as any,
         provider,
         blockchain,
         chainIdHex,
@@ -299,16 +298,28 @@ export abstract class BaseConnectionProviderManager {
   }
 
   private async handleSwitchError(
+    error: { code?: number; message?: string },
     provider: any,
     blockchain: Blockchain,
     chainIdHex: string,
     prevBlockchain?: BlockchainId,
   ): Promise<void> {
-    try {
-      await this.addBlockchain(provider, blockchain.chainId)
-      await this.switchBlockchainRequest(provider, chainIdHex)
-    } catch {
+    if (error?.code === MetamaskErrorCodes.UNRECOGNIZED) {
+      try {
+        await this.addBlockchain(provider, blockchain.chainId)
+        await this.switchBlockchainRequest(provider, chainIdHex)
+      } catch (e) {
+        await this.onUpdate(prevBlockchain)
+        console.warn(
+          `[Add & Switch Network]: ${(e as { code?: number; message?: string })?.message}`,
+        )
+      }
+    } else if (error?.code === MetamaskErrorCodes.REJECTED) {
       await this.onUpdate(prevBlockchain)
+      console.warn(`[Switch Network]: ${error?.message}`)
+    } else {
+      await this.onUpdate(prevBlockchain)
+      throw new Error(`[Switch Network]: ${error?.message}`)
     }
   }
 
