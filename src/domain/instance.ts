@@ -12,7 +12,7 @@ import {
   EntityType,
   PaymentMethod,
 } from '@/helpers/constants'
-import { getDate, getExplorerURL, sleep } from '@/helpers/utils'
+import { getDate, getExplorerURL } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'

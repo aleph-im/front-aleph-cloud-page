@@ -13,7 +13,7 @@ import { BlockchainId } from '@/domain/connect/base'
 import { useAppState } from '@/contexts/appState'
 import { AvalancheAccount } from '@aleph-sdk/avalanche'
 import { useConnection } from './useConnection'
-import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
+import { createFromEVMAccount } from '@aleph-sdk/superfluid'
 import { useExecutableStatus } from './useExecutableStatus'
 import {
   UseRequestExecutableLogsFeedReturn,
@@ -112,7 +112,6 @@ export function useExecutableActions({
   // ----------------------------
 
   const handleEnsureNetwork = useCallback(async () => {
-    let superfluidAccount
     if (!executable) return
 
     if (isPAYG) {
@@ -123,11 +122,8 @@ export function useExecutableActions({
         handleConnect({ blockchain: BlockchainId.AVAX })
         throw Err.ConnectYourPaymentWallet
       }
-      // @note: refactor in SDK calling init inside this method
-      superfluidAccount = createFromAvalancheAccount(account)
-      await superfluidAccount.init()
 
-      return superfluidAccount
+      return await createFromEVMAccount(account)
     } else if (blockchain !== BlockchainId.ETH) {
       handleConnect({ blockchain: BlockchainId.ETH })
       throw Err.ConnectYourPaymentWallet
