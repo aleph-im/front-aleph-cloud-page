@@ -505,3 +505,13 @@ export function getVersionNumber(version: string): number {
     return 0
   }
 }
+
+export function extractValidEthAddress(address?: string): string {
+  if (!address) return ''
+  const ethAddressRegex = /0x[a-fA-F0-9]{40}/g
+  const match = address.match(ethAddressRegex)
+  if (match && match.length > 0) {
+    return match[0]
+  }
+  return ''
+}

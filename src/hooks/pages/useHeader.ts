@@ -95,6 +95,12 @@ export function useHeader(): UseHeaderReturn {
         name: 'Avalanche',
         wallets,
       },
+      {
+        id: BlockchainId.BASE,
+        icon: 'base',
+        name: 'Base',
+        wallets,
+      },
     ],
     [wallets],
   )

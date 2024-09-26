@@ -9,6 +9,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import {
+  extractValidEthAddress,
   fetchAndCache,
   getLatestReleases,
   getVersionNumber,
@@ -184,6 +185,61 @@ export type NodesResponse = { ccns: CCN[]; crns: CRN[]; timestamp: number }
 
 // ---------- @todo: refactor into npm package
 
+export type ChainInfo = {
+  chain_id: number
+  rpc: string
+  token: string
+  super_token?: string
+  active?: boolean
+}
+
+export type CRNConfig = {
+  hash: string
+  name?: string
+  DOMAIN_NAME: string
+  version: string
+  references: {
+    API_SERVER: string
+    CHECK_FASTAPI_VM_ID: string
+    CONNECTOR_URL: string
+  }
+  security: {
+    USE_JAILER: boolean
+    PRINT_SYSTEM_LOGS: boolean
+    WATCH_FOR_UPDATES: boolean
+    ALLOW_VM_NETWORKING: boolean
+    USE_DEVELOPER_SSH_KEYS: boolean
+  }
+  networking: {
+    IPV6_ADDRESS_POOL: string
+    IPV6_ALLOCATION_POLICY: string
+    IPV6_SUBNET_PREFIX: number
+    IPV6_FORWARDING_ENABLED: boolean
+    USE_NDP_PROXY: boolean
+  }
+  debug: {
+    SENTRY_DSN_CONFIGURED: boolean
+    DEBUG_ASYNCIO: boolean
+    EXECUTION_LOG_ENABLED: boolean
+  }
+  payment: {
+    // Legacy
+    PAYMENT_SUPER_TOKEN?: string
+    PAYMENT_CHAIN_ID?: number
+    // Current
+    PAYMENT_RECEIVER_ADDRESS: string
+    AVAILABLE_PAYMENTS?: { [key: string]: ChainInfo }
+    PAYMENT_MONITOR_INTERVAL: number
+    // Extra
+    matched_reward_addresses: boolean
+  }
+  computing: {
+    ENABLE_QEMU_SUPPORT: boolean
+    INSTANCE_DEFAULT_HYPERVISOR: string
+    ENABLE_CONFIDENTIAL_COMPUTING?: boolean
+  }
+}
+
 export type CRNSpecs = {
   hash: string
   name?: string
@@ -215,6 +271,7 @@ export type CRNSpecs = {
     cpu: {
       architecture: string
       vendor: string
+      features?: string[]
     }
   }
   active: boolean
@@ -253,6 +310,7 @@ export enum StreamNotSupportedIssue {
   MinSpecs = 2,
   Version = 3,
   RewardAddress = 4,
+  MismatchRewardAddress = 5,
 }
 
 export type ReducedCRNSpecs = {
@@ -346,6 +404,39 @@ export class NodeManager {
       if (!retries) return
       await sleep(100 * 2)
       return this.getCRNspecs(node, retries - 1)
+    }
+  }
+
+  async getCRNConfig(node: CRN, retries = 2): Promise<CRNConfig | undefined> {
+    if (!node.address) return
+
+    const address = node.address.toLowerCase().replace(/\/$/, '')
+    const url = `${address}/status/config`
+    const { success } = urlSchema.safeParse(url)
+    if (!success) return
+
+    try {
+      return await fetchAndCache(
+        url,
+        `crn_specs_${node.hash}_2`,
+        3_600,
+        (res: CRNConfig) => {
+          return {
+            ...res,
+            hash: node.hash,
+            name: node.name,
+            payment: {
+              ...res.payment,
+              matched_reward_addresses:
+                res.payment.PAYMENT_RECEIVER_ADDRESS === node.stream_reward,
+            },
+          }
+        },
+      )
+    } catch (e) {
+      if (!retries) return
+      await sleep(100 * 2)
+      return this.getCRNConfig(node, retries - 1)
     }
   }
 
@@ -475,10 +566,17 @@ export class NodeManager {
   }
 
   isStreamPaymentNotSupported(node: CRN): StreamNotSupportedIssue {
-    if (!node.stream_reward) return StreamNotSupportedIssue.RewardAddress
+    if (!extractValidEthAddress(node.stream_reward))
+      return StreamNotSupportedIssue.RewardAddress
 
-    if (this.getNodeVersionNumber(node) < getVersionNumber('v0.4.0'))
+    if (this.getNodeVersionNumber(node) < getVersionNumber('1.1.0'))
       return StreamNotSupportedIssue.Version
+
+    let mismatch = false
+    this.getCRNConfig(node).then((config) => {
+      mismatch = !config?.payment.matched_reward_addresses
+    })
+    if (mismatch) return StreamNotSupportedIssue.MismatchRewardAddress
 
     return StreamNotSupportedIssue.Valid
   }

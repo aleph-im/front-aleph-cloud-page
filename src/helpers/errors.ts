@@ -14,7 +14,7 @@ export default {
   WalletConnectNotInitialized: new Error('WalletConnect not initialized'),
   ConnectYourWallet: new Error('Please connect your wallet'),
   ConnectYourPaymentWallet: new Error(
-    'Please connect your Superfluid/AVAX wallet',
+    'Please connect your Superfluid Base/Avalanche wallet',
   ),
   UserCancelled: new Error('User cancelled the action'),
   InvalidNetwork: new Error('Invalid network'),
@@ -44,10 +44,10 @@ export default {
     'Payment receiver is required for stream payments',
   ),
   ReceiverReward: new Error(
-    'Invalid Superfluid/AVAX receiver reward address. Please set it up in your CRN account profile',
+    'Invalid Superfluid ETH/AVAX receiver reward address. Please set it up in your CRN account profile',
   ),
   StreamNotSupported: new Error(
-    'Stream payments are only supported on Avalanche',
+    'Stream payments are only supported on Avalanche or Base',
   ),
   MaxFlowRate: new Error(
     `Current maximum total flow rate of 1 ALEPH/hour exceeded. Delete other instances or lower the VM cost`,

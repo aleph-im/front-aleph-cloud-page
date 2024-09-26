@@ -1,7 +1,11 @@
 import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
+import {
+  createFromEVMAccount,
+  isAccountSupported as isAccountPAYGCompatible,
+  isBlockchainSupported as isBlockchainPAYGCompatible,
+} from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
@@ -38,10 +42,10 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
-import { AvalancheAccount } from '@aleph-sdk/avalanche'
 import Err from '@/helpers/errors'
 import { BlockchainId } from '@/domain/connect/base'
 import { PaymentConfiguration } from '@/domain/executable'
+import { EVMAccount } from '@aleph-sdk/evm'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -161,19 +165,18 @@ export function useNewInstancePage(): UseNewInstancePage {
         if (!isValid) throw Err.InvalidCRNSpecs
 
         if (
-          blockchain !== BlockchainId.AVAX ||
-          !(account instanceof AvalancheAccount)
+          !blockchain ||
+          !isBlockchainPAYGCompatible(blockchain) ||
+          !isAccountPAYGCompatible(account)
         ) {
-          handleConnect({ blockchain: BlockchainId.AVAX })
+          handleConnect({ blockchain: BlockchainId.BASE })
           throw Err.InvalidNetwork
         }
 
-        // @note: refactor in SDK calling init inside this method
-        superfluidAccount = createFromAvalancheAccount(account)
-        await superfluidAccount.init()
+        superfluidAccount = await createFromEVMAccount(account as EVMAccount)
 
         payment = {
-          chain: BlockchainId.AVAX,
+          chain: blockchain,
           type: PaymentMethod.Stream,
           sender: account.address,
           receiver: node.stream_reward,
@@ -181,18 +184,16 @@ export function useNewInstancePage(): UseNewInstancePage {
           streamDuration: state.streamDuration,
         }
       }
+      const instance = {
+        ...state,
+        payment,
+        node,
+      } as AddInstance
 
-      const iSteps = await manager.getAddSteps(state)
+      const iSteps = await manager.getAddSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = manager.addSteps(
-        {
-          ...state,
-          payment,
-          node,
-        } as AddInstance,
-        superfluidAccount,
-      )
+      const steps = manager.addSteps(instance, superfluidAccount)
 
       try {
         let accountInstance

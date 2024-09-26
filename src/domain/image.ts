@@ -1,7 +1,7 @@
 export enum InstanceImageId {
-  Debian11 = '887957042bb0e360da3485ed33175882ce72a70d79f1ba599400ff4802b7cee7',
-  Debian12 = '6e30de68c6cedfa6b45240c2b51e52495ac6fb1bd4b36457b3d5ca307594d595',
-  Ubuntu22 = '77fef271aa6ff9825efa3186ca2e715d19e7108279b817201c69c34cedc74c27',
+  Debian11 = 'f7e68c568906b4ebcd3cd3c4bfdff96c489cd2a9ef73ba2d7503f244dfd578de',
+  Debian12 = 'b6ff5c3a8205d1ca4c7c3369300eeafff498b558f71b851aa2114afd0a532717',
+  Ubuntu22 = '4a0f62da42f4478544616519e6f5d58adb1096e069b392b151d47c3609492d0c',
 }
 
 export type InstanceImage = {

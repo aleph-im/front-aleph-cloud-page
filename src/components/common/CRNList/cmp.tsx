@@ -178,6 +178,15 @@ export default function CRNList(props: CRNListProps) {
                             is necessary for operation.
                           </li>
                         )}
+                        {node.issue ===
+                          StreamNotSupportedIssue.MismatchRewardAddress && (
+                          <li>
+                            <strong>Stream Reward Address Mismatch:</strong> The
+                            stream reward address registered by the node
+                            operator and the one specified in the target CRN
+                            configuration do not match.
+                          </li>
+                        )}
                       </ul>
                       <div>
                         Please select from the available nodes that meet all the

@@ -25,31 +25,30 @@ export function useRequestCRNSpecs({
       if (!nodes) return
 
       await Promise.allSettled(
-        nodes
-          .filter((node) => !nodeManager.isStreamPaymentNotSupported(node))
-          .map(async (node) => {
-            if (specs[node.hash]) return
+        nodes.map(async (node) => {
+          if (nodeManager.isStreamPaymentNotSupported(node)) return
+          if (specs[node.hash]) return
 
-            setSpecs((prev) => ({
-              ...prev,
-              [node.hash]: {
-                loading: true,
-                data: undefined,
-                error: undefined,
-              },
-            }))
+          setSpecs((prev) => ({
+            ...prev,
+            [node.hash]: {
+              loading: true,
+              data: undefined,
+              error: undefined,
+            },
+          }))
 
-            const nodeSpecs = await nodeManager.getCRNspecs(node)
+          const nodeSpecs = await nodeManager.getCRNspecs(node)
 
-            setSpecs((prev) => ({
-              ...prev,
-              [node.hash]: {
-                data: nodeSpecs,
-                loading: false,
-                error: undefined,
-              },
-            }))
-          }),
+          setSpecs((prev) => ({
+            ...prev,
+            [node.hash]: {
+              data: nodeSpecs,
+              loading: false,
+              error: undefined,
+            },
+          }))
+        }),
       )
 
       setLoading(false)

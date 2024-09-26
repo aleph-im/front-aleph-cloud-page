@@ -6,10 +6,13 @@ import { useAppState } from '@/contexts/appState'
 import { useInstanceStatus } from '@/hooks/common/useInstanceStatus'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
-import { createFromAvalancheAccount } from '@aleph-sdk/superfluid'
+import {
+  createFromEVMAccount,
+  isAccountSupported as isAccountPAYGCompatible,
+  isBlockchainSupported as isBlockchainPAYGCompatible,
+} from '@aleph-sdk/superfluid'
 import { useConnection } from '@/hooks/common/useConnection'
 import { PaymentType } from '@aleph-sdk/message'
-import { AvalancheAccount } from '@aleph-sdk/avalanche'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
 import { EntityDelAction } from '@/store/entity'
 import {
@@ -21,6 +24,7 @@ import { BlockchainId } from '@/domain/connect/base'
 import { useCopyToClipboardAndNotify, useNotification } from '@aleph-front/core'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { CRN } from '@/domain/node'
+import { EVMAccount } from '@aleph-sdk/evm'
 
 export type ManageInstance = {
   instance?: Instance
@@ -77,22 +81,18 @@ export function useManageInstance(): ManageInstance {
   }, [sshKeyManager, instance])
 
   const handleEnsureNetwork = useCallback(async () => {
-    let superfluidAccount
     if (!instance) return
 
     if (instance.payment?.type === PaymentType.superfluid) {
       if (
-        blockchain !== BlockchainId.AVAX ||
-        !(account instanceof AvalancheAccount)
+        !isBlockchainPAYGCompatible(blockchain) ||
+        !isAccountPAYGCompatible(account)
       ) {
-        handleConnect({ blockchain: BlockchainId.AVAX })
-        throw Err.ConnectYourPaymentWallet
+        handleConnect({ blockchain: BlockchainId.BASE })
+        throw Err.InvalidNetwork
       }
-      // @note: refactor in SDK calling init inside this method
-      superfluidAccount = createFromAvalancheAccount(account)
-      await superfluidAccount.init()
 
-      return superfluidAccount
+      return await createFromEVMAccount(account as EVMAccount)
     } else if (blockchain !== BlockchainId.ETH) {
       handleConnect({ blockchain: BlockchainId.ETH })
       throw Err.ConnectYourPaymentWallet

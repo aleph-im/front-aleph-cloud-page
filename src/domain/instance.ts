@@ -1,6 +1,7 @@
 import { Account } from '@aleph-sdk/account'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import {
+  HostRequirements,
   InstanceContent,
   InstancePublishConfiguration,
   MachineVolume,
@@ -11,6 +12,7 @@ import {
   defaultInstanceChannel,
   EntityType,
   PaymentMethod,
+  EXTRA_WEI,
 } from '@/helpers/constants'
 import { getDate, getExplorerURL, sleep } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
@@ -54,6 +56,7 @@ export type AddInstance = Omit<
   | 'resources'
   | 'volumes'
   | 'payment'
+  | 'requirements'
 > &
   NameAndTagsField & {
     image: InstanceImageField
@@ -63,6 +66,7 @@ export type AddInstance = Omit<
     envVars?: EnvVarField[]
     domains?: Omit<DomainField, 'ref'>[]
     payment?: PaymentConfiguration
+    requirements?: HostRequirements
     node?: CRN
   }
 
@@ -221,7 +225,10 @@ export class InstanceManager
         },
       })
 
-      await account.decreaseALEPHFlow(receiver, instanceCosts.totalCost)
+      await account.decreaseALEPHFlow(
+        receiver,
+        instanceCosts.totalCost + EXTRA_WEI,
+      )
     }
 
     try {
@@ -265,6 +272,7 @@ export class InstanceManager
   ): Promise<void> {
     if (!node.address) throw Err.InvalidCRNAddress
 
+    let success = false
     let errorMsg = ''
 
     for (let i = 0; i < 5; i++) {
@@ -281,12 +289,12 @@ export class InstanceManager
           }),
         })
         const resp = await req.json()
-        if (resp.success) return
-
+        success = resp.success
         errorMsg = resp.errors[instanceId]
       } catch (e) {
         errorMsg = (e as Error).message
       } finally {
+        if (success) return
         if (!retry) break
         await sleep(1000)
       }
@@ -305,11 +313,10 @@ export class InstanceManager
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
 
-    await account.init()
-
+    const streamCostByHour = streamCost / getHours(streamDuration) + EXTRA_WEI
     const alephxBalance = await account.getALEPHBalance()
     const alephxFlow = await account.getALEPHFlow(receiver)
-    const totalFlow = alephxFlow.add(streamCost / getHours(streamDuration))
+    const totalFlow = alephxFlow.add(streamCostByHour)
 
     if (totalFlow.greaterThan(1)) throw Err.MaxFlowRate
 
@@ -322,10 +329,7 @@ export class InstanceManager
       )
 
     yield
-    await account.increaseALEPHFlow(
-      receiver,
-      streamCost / getHours(streamDuration),
-    )
+    await account.increaseALEPHFlow(receiver, streamCostByHour)
   }
 
   protected async *parseInstanceSteps(
@@ -339,11 +343,12 @@ export class InstanceManager
 
     const { account, channel } = this
 
-    const { envVars, specs, image, sshKeys, name, tags } = newInstance
+    const { envVars, specs, image, sshKeys, name, tags, node } = newInstance
 
     const variables = this.parseEnvVars(envVars)
     const resources = this.parseSpecs(specs)
     const metadata = this.parseMetadata(name, tags)
+    const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
     const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
     const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
@@ -358,6 +363,7 @@ export class InstanceManager
       authorized_keys,
       volumes,
       payment,
+      requirements,
     }
   }
 
@@ -421,7 +427,13 @@ export class InstanceManager
     instancesOrIds = Array.isArray(instancesOrIds)
       ? instancesOrIds
       : [instancesOrIds]
-    instancesOrIds.forEach(() => {
+    instancesOrIds.forEach((instance) => {
+      if (
+        typeof instance !== 'string' &&
+        instance.payment?.type === PaymentType.superfluid &&
+        instance.payment?.receiver
+      )
+        steps.push('streamDel')
       steps.push('instanceDel')
     })
     return steps
