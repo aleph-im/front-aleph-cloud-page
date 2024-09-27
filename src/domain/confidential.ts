@@ -1,13 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Account } from '@aleph-sdk/account'
 import { InstanceContent, MessageType } from '@aleph-sdk/message'
-import { defaultInstanceChannel, EntityType } from '@/helpers/constants'
+import {
+  CheckoutStepType,
+  defaultInstanceChannel,
+  EntityType,
+} from '@/helpers/constants'
 import { getDate, getExplorerURL } from '@/helpers/utils'
 import { ExecutableManager, ExecutableStatus } from './executable'
 import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
 import { VolumeManager } from './volume'
 import { DomainManager } from './domain'
-import { ReadOnlyEntityManager } from './types'
+import { EntityManager } from './types'
 import {
   instanceSchema,
   instanceStreamSchema,
@@ -33,7 +38,7 @@ export type Confidential = InstanceContent & {
 
 export class ConfidentialManager
   extends ExecutableManager
-  implements ReadOnlyEntityManager<Confidential>
+  implements EntityManager<Confidential, unknown>
 {
   static addSchema = instanceSchema
   static addStreamSchema = instanceStreamSchema
@@ -49,6 +54,32 @@ export class ConfidentialManager
     protected channel = defaultInstanceChannel,
   ) {
     super(account, volumeManager, domainManager, nodeManager, sdkClient)
+  }
+
+  add(entity: unknown): Promise<Confidential | Confidential[]> {
+    throw new Error('Method not implemented.')
+  }
+  del(entityOrId: string | Confidential): Promise<void> {
+    throw new Error('Method not implemented.')
+  }
+  getAddSteps(entity: unknown): Promise<CheckoutStepType[]> {
+    throw new Error('Method not implemented.')
+  }
+  addSteps(
+    entity: unknown,
+  ): AsyncGenerator<void, Confidential | Confidential[], void> {
+    throw new Error('Method not implemented.')
+  }
+  getDelSteps(
+    entity: string | Confidential | (string | Confidential)[],
+  ): Promise<CheckoutStepType[]> {
+    throw new Error('Method not implemented.')
+  }
+  delSteps(
+    entity: string | Confidential | (string | Confidential)[],
+    extra?: any,
+  ): AsyncGenerator<void> {
+    throw new Error('Method not implemented.')
   }
 
   async getAll(): Promise<Confidential[]> {

@@ -89,16 +89,22 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   }
 
   async retry(domain: Domain) {
+    const isConfidential = domain.target == EntityDomainType.Confidential
+    const type = isConfidential ? EntityDomainType.Instance : domain.target
     const content: DomainAggregate = {
       [domain.name]: {
         message_id: domain.ref,
-        type: domain.target,
+        type,
         updated_at: new Date().toISOString(),
-        ...(domain.target === EntityDomainType.IPFS
+        ...(type === EntityDomainType.IPFS
           ? {
               options: { catch_all_path: '/404.html' },
             }
-          : {}),
+          : isConfidential
+            ? {
+                options: { confidential: true },
+              }
+            : {}),
       },
     }
 
@@ -143,15 +149,21 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     try {
       const content: DomainAggregate = domains.reduce((ac, cv) => {
         const { name, ref, target } = cv
+        const isConfidential = target == EntityDomainType.Confidential
+        const type = isConfidential ? EntityDomainType.Instance : target
         ac[name] = {
           message_id: ref,
-          type: target,
+          type,
           updated_at: new Date().toISOString(),
-          ...(target === EntityDomainType.IPFS
+          ...(type === EntityDomainType.IPFS
             ? {
                 options: { catch_all_path: '/404.html' },
               }
-            : {}),
+            : isConfidential
+              ? {
+                  options: { confidential: true },
+                }
+              : {}),
         }
         return ac
       }, {} as DomainAggregate)
@@ -200,7 +212,10 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       body: JSON.stringify({
         name: domain.name,
         owner: this.account.address,
-        target: domain.target,
+        target:
+          domain.target == EntityDomainType.Confidential
+            ? EntityDomainType.Instance
+            : domain.target,
       }),
     })
     const response = await query.json()
@@ -274,13 +289,18 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
     name: string,
     content: DomainAggregateItem,
   ): Domain {
-    const { message_id, type, updated_at } = content
+    const { message_id, type, updated_at, options } = content
+    const target = options?.['confidential']
+      ? EntityDomainType.Confidential
+      : type
     const ref_path =
-      type === EntityDomainType.Instance
-        ? 'computing/instance'
-        : type === EntityDomainType.Program
-          ? 'computing/function'
-          : 'storage/volume'
+      type === EntityDomainType.Program
+        ? 'computing/function'
+        : type === EntityDomainType.Instance
+          ? 'computing/instance'
+          : type === EntityDomainType.Confidential
+            ? 'computing/confidential'
+            : 'storage/volume'
     let date = '-'
     try {
       date = updated_at?.slice(0, 19).replace('T', ' ') || '-'
@@ -289,7 +309,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       type: EntityType.Domain,
       id: name,
       name,
-      target: type,
+      target,
       ref: message_id,
       confirmed: true,
       updated_at: date,

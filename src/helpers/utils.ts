@@ -268,10 +268,14 @@ export const isVolume = (msg: AnyMessage) => msg.type === MessageType.store
 export const isProgram = (msg: AnyMessage) => msg.type === MessageType.program
 export const isInstance = (msg: AnyMessage) => msg.type === MessageType.instance
 export const isSSHKey = (msg: AnyMessage) => msg.type === MessageType.post
+export const isConfidential = (msg: AnyMessage) =>
+  msg.type === MessageType.instance &&
+  (msg.content as any)?.environment?.trusted_execution?.firmware.length == 64
 
 export function getEntityTypeFromMessage(msg: AnyMessage): EntityType {
   if (isVolume(msg)) return EntityType.Volume
   if (isProgram(msg)) return EntityType.Program
+  if (isConfidential(msg)) return EntityType.Confidential
   if (isInstance(msg)) return EntityType.Instance
   if (isSSHKey(msg)) return EntityType.SSHKey
   throw Err.UnknownType

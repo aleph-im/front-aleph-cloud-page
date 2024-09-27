@@ -15,6 +15,7 @@ export function useEntityManager(
     instanceManager,
     indexerManager,
     websiteManager,
+    confidentialManager,
   } = appState.manager
 
   const entityMap: Record<
@@ -29,6 +30,7 @@ export function useEntityManager(
       [EntityType.Program]: programManager,
       [EntityType.Indexer]: indexerManager,
       [EntityType.Website]: websiteManager,
+      [EntityType.Confidential]: confidentialManager,
     }
   }, [
     domainManager,
@@ -38,6 +40,7 @@ export function useEntityManager(
     volumeManager,
     indexerManager,
     websiteManager,
+    confidentialManager,
   ])
 
   if (!type) return
