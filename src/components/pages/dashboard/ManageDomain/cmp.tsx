@@ -180,7 +180,10 @@ export default function ManageDomain() {
                                 {domain.name}.program.public.aleph.sh.
                               </span>
                             )}
-                            {domain.target == EntityDomainType.Instance && (
+                            {[
+                              EntityDomainType.Instance,
+                              EntityDomainType.Confidential,
+                            ].includes(domain.target) && (
                               <span className="text-main0" tw="mx-2">
                                 {domain.name}.instance.public.aleph.sh.
                               </span>
@@ -278,9 +281,11 @@ export default function ManageDomain() {
                     href={
                       (domain.target === 'instance'
                         ? '/computing/instance/'
-                        : domain.target === 'program'
-                          ? '/computing/function/'
-                          : '/storage/volume/') + refEntity.id
+                        : domain.target === 'confidential'
+                          ? '/computing/confidential/'
+                          : domain.target === 'program'
+                            ? '/computing/function/'
+                            : '/storage/volume/') + refEntity.id
                     }
                   >
                     <IconText iconName="square-up-right">Details</IconText>

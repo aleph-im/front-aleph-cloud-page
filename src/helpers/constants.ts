@@ -55,6 +55,7 @@ export const defaultInstanceChannel = defaultConsoleChannel
 export const defaultProgramChannel = defaultConsoleChannel
 export const defaultDomainChannel = defaultConsoleChannel
 export const defaultWebsiteChannel = defaultConsoleChannel
+export const defaultConfidentialChannel = defaultConsoleChannel
 
 export enum EntityType {
   Volume = 'volume',
@@ -64,6 +65,7 @@ export enum EntityType {
   Domain = 'domain',
   Indexer = 'indexer',
   Website = 'website',
+  Confidential = 'confidential',
 }
 
 type CheckoutAddStepType =
@@ -104,12 +106,14 @@ export enum EntityDomainType {
   IPFS = 'ipfs',
   Program = 'program',
   Instance = 'instance',
+  Confidential = 'confidential',
 }
 
 export const EntityDomainTypeName: Record<EntityDomainType, string> = {
   [EntityDomainType.IPFS]: 'IPFS',
   [EntityDomainType.Program]: 'Function',
   [EntityDomainType.Instance]: 'Instance',
+  [EntityDomainType.Confidential]: 'Confidential',
 }
 
 export enum VolumeType {
@@ -126,12 +130,14 @@ export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.Domain]: 'Domain',
   [EntityType.Indexer]: 'Indexer',
   [EntityType.Website]: 'Website',
+  [EntityType.Confidential]: 'Confidential',
 }
 
 export const EntityTypeUrlSection: Record<EntityType, string> = {
   [EntityType.Volume]: 'storage',
   [EntityType.Program]: 'computing',
   [EntityType.Instance]: 'computing',
+  [EntityType.Confidential]: 'computing',
   [EntityType.SSHKey]: 'settings',
   [EntityType.Domain]: 'settings',
   [EntityType.Indexer]: 'tools',
@@ -146,6 +152,7 @@ export const EntityTypeSlug: Record<EntityType, string> = {
   [EntityType.Domain]: 'domain',
   [EntityType.Indexer]: 'indexer',
   [EntityType.Website]: 'website',
+  [EntityType.Confidential]: 'confidential',
 }
 
 export enum IndexerBlockchain {

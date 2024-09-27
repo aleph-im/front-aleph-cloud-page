@@ -92,6 +92,7 @@ export const ipfsCIDSchema = requiredStringSchema.regex(
 
 export const targetSchema = z.enum([
   EntityDomainType.Instance,
+  EntityDomainType.Confidential,
   EntityDomainType.Program,
   EntityDomainType.IPFS,
 ])

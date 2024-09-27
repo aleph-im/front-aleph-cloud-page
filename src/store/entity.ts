@@ -82,6 +82,7 @@ export type EntityReducer<T> = StoreReducer<EntityState<T>, EntityAction<T>>
 export function getEntityReducer<E, K extends keyof E = keyof E>(
   name: string,
   key: K,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   virtualKey?: K,
 ): EntityReducer<E> {
   return (state = initialState, action) => {

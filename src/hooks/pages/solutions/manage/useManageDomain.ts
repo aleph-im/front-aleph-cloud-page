@@ -17,6 +17,7 @@ import {
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
+import { Confidential } from '@/domain/confidential'
 
 export type ManageDomain = {
   domain?: Domain
@@ -47,6 +48,7 @@ export function useManageDomain(): ManageDomain {
   const refEntity = useHashToEntity(domain?.ref) as
     | Program
     | Instance
+    | Confidential
     | Volume
     | undefined
 

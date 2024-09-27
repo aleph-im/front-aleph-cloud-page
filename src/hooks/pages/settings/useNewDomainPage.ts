@@ -54,6 +54,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
       instance: { entities: instances },
       program: { entities: programs },
       website: { entities: websites },
+      confidential: { entities: confidentials },
     },
     dispatch,
   ] = useAppState()
@@ -141,7 +142,11 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     if (!entityType) return []
     if (entityType !== EntityDomainType.IPFS) {
       const entities =
-        entityType === EntityDomainType.Instance ? instances : programs
+        entityType === EntityDomainType.Instance
+          ? instances
+          : entityType === EntityDomainType.Confidential
+            ? confidentials
+            : programs
       return (entities || []).map(({ id, metadata }) => {
         return {
           label: (metadata?.name as string | undefined) || id,
@@ -157,11 +162,15 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
         type: entityType,
       }
     })
-  }, [entityType, instances, programs, websites])
+  }, [entityType, instances, programs, websites, confidentials])
 
   const hasInstances = useMemo(() => !!instances?.length, [instances])
   const hasFunctions = useMemo(() => !!programs?.length, [programs])
   const hasWebsites = useMemo(() => !!websites?.length, [websites])
+  const hasConfidentials = useMemo(
+    () => !!confidentials?.length,
+    [confidentials],
+  )
   /* const hasEntities = useMemo(
     () => hasInstances || hasFunctions || hasWebsites,
     [hasFunctions, hasInstances, hasWebsites],
@@ -170,12 +179,24 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   useEffect(() => {
     if (entityType === EntityDomainType.Instance && hasInstances) {
       setValue('target', EntityDomainType.Instance)
+    } else if (
+      entityType === EntityDomainType.Confidential &&
+      hasConfidentials
+    ) {
+      setValue('target', EntityDomainType.Confidential)
     } else if (entityType === EntityDomainType.Program && hasFunctions) {
       setValue('target', EntityDomainType.Program)
     } else if (entityType === EntityDomainType.IPFS) {
       setValue('target', EntityDomainType.IPFS)
     }
-  }, [entityType, hasFunctions, hasInstances, hasWebsites, setValue])
+  }, [
+    entityType,
+    hasFunctions,
+    hasInstances,
+    hasConfidentials,
+    hasWebsites,
+    setValue,
+  ])
 
   const setTarget = (target: EntityDomainType) => {
     setValue('target', target)

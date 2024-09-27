@@ -35,7 +35,9 @@ export default function NewDomain() {
   const labelResourceType =
     targetCtrl.field.value == EntityDomainType.Instance
       ? 'instance'
-      : 'function'
+      : targetCtrl.field.value == EntityDomainType.Confidential
+        ? 'confidential'
+        : 'function'
 
   const onTabChange = (tabId: string) => {
     setRef('')
@@ -43,7 +45,7 @@ export default function NewDomain() {
     if (['website', 'ipfs'].includes(tabId)) {
       setTarget(EntityDomainType.IPFS)
     } else {
-      setTarget(EntityDomainType.Instance)
+      setTarget(EntityDomainType.Program)
     }
   }
 
@@ -151,12 +153,18 @@ export default function NewDomain() {
                     direction="row"
                   >
                     <Radio
+                      label={EntityDomainTypeName[EntityDomainType.Program]}
+                      value={EntityDomainType.Program}
+                    />
+                    <Radio
                       label={EntityDomainTypeName[EntityDomainType.Instance]}
                       value={EntityDomainType.Instance}
                     />
                     <Radio
-                      label={EntityDomainTypeName[EntityDomainType.Program]}
-                      value={EntityDomainType.Program}
+                      label={
+                        EntityDomainTypeName[EntityDomainType.Confidential]
+                      }
+                      value={EntityDomainType.Confidential}
                     />
                   </RadioGroup>
                   {entities.length > 0 ? (
