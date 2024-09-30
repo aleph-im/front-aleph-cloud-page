@@ -1,4 +1,4 @@
-import { providers } from 'ethers'
+import { providers } from 'ethers5'
 
 const provider = new providers.JsonRpcProvider('https://eth.drpc.org')
 

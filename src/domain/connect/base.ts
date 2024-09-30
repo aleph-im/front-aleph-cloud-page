@@ -17,10 +17,10 @@ import {
 } from '@aleph-sdk/superfluid'
 import { Mutex, getERC20Balance, getSOLBalance, sleep } from '@/helpers/utils'
 import { MetaMaskInpageProvider } from '@metamask/providers'
-import type {
-  Provider as EthersProvider,
-  CombinedProvider,
-} from '@web3modal/scaffold-utils/ethers'
+import {
+  Provider as AppKitProvider,
+  CombinedProvider as AppKitCombinedProvider,
+} from '@reown/appkit/react'
 import Err from '@/helpers/errors'
 import { EVMAccount, findChainDataByChainId } from '@aleph-sdk/evm'
 import { MetamaskErrorCodes } from './constants'
@@ -121,12 +121,14 @@ export abstract class BaseConnectionProviderManager {
   protected abstract onConnect(blockchainId: BlockchainId): Promise<void>
   protected abstract onDisconnect(): Promise<void>
   protected abstract getProvider():
-    | EthersProvider
-    | CombinedProvider
+    | AppKitProvider
+    | AppKitCombinedProvider
     | MetaMaskInpageProvider
 
   async connect(blockchainId: BlockchainId): Promise<void> {
     const release = await this.mutex.acquire()
+
+    console.log('CONNECTING')
 
     try {
       const blockchain = this.getBlockchainData(blockchainId)
@@ -147,11 +149,11 @@ export abstract class BaseConnectionProviderManager {
   }
 
   async disconnect(error?: Error): Promise<void> {
+    console.log('DISCONECTING BECAUSE: ', error)
     const release = await this.mutex.acquire()
-
+    console.log('DISCONNECTING')
     try {
       this.isReady = false
-
       await this.onDisconnect()
       this.events.emit('disconnect', { provider: this.providerId, error })
     } finally {
@@ -183,6 +185,8 @@ export abstract class BaseConnectionProviderManager {
 
   protected async onUpdate(blockchainId?: BlockchainId): Promise<void> {
     if (!this.isReady) return
+
+    console.log('UPDATING')
 
     const blockchain = blockchainId || (await this.getBlockchain())
     const account = await this.getAccount()

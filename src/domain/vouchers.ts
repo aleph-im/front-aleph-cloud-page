@@ -1,4 +1,4 @@
-import { ethers, providers } from 'ethers'
+import { ethers, providers } from 'ethers5'
 
 //@note: for future development use VoucherManager from '@/domain/voucher'
 const provider = new providers.JsonRpcProvider('https://avalanche.drpc.org')
