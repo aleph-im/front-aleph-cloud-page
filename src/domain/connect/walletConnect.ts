@@ -47,9 +47,10 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       await this.provider.emit('disconnect')
     if (this.modal?.getState().open) await this.modal.close()
 
-    // this.provider = undefined
+    this.provider = undefined
     this.prevChainId = undefined
     this.prevAddress = undefined
+    this.connectModalFuture = undefined
   }
 
   protected onWalletInfo(info: any) {
@@ -92,9 +93,10 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
 
   protected async onEvent({ data }: any) {
     if (data.event === 'CONNECT_SUCCESS') {
-      const connectors = this.modal?.getConnectors()
-      let provider
-      if (connectors) provider = connectors[3].provider
+      const provider = this.modal?.getConnectors().filter(
+        (connector: any) => connector.name === data.properties.name,
+      )?.[0].provider
+
       this.handleProvider({
         provider: provider as Provider,
       })
@@ -203,6 +205,8 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       features: {
         analytics: false,
         onramp: false,
+        email: false,
+        socials: false,
       },
     })
 
