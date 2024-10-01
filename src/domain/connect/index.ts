@@ -25,4 +25,5 @@ export const connectionProviderManager = new ConnectionProviderManager([
   BlockchainId.ETH,
   BlockchainId.AVAX,
   BlockchainId.BASE,
+  BlockchainId.SOL,
 ])

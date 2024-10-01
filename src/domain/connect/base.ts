@@ -149,7 +149,7 @@ export abstract class BaseConnectionProviderManager {
   }
 
   async disconnect(error?: Error): Promise<void> {
-    console.log('DISCONECTING BECAUSE: ', error)
+    console.log('DISCONNECTING BECAUSE: ', error)
     const release = await this.mutex.acquire()
     console.log('DISCONNECTING')
     try {

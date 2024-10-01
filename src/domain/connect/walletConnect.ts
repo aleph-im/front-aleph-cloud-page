@@ -11,7 +11,7 @@ import {
   SolflareWalletAdapter,
   PhantomWalletAdapter,
 } from '@solana/wallet-adapter-wallets'
-import { avalanche, base, mainnet, solana } from '@reown/appkit/networks'
+//import { avalanche, base, mainnet, solana } from '@reown/appkit/networks'
 import { BaseConnectionProviderManager, BlockchainId, ProviderId } from './base'
 import { Future, Mutex } from '@/helpers/utils'
 import Err from '@/helpers/errors'
@@ -86,18 +86,16 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       this.onAccount().catch(() => 'ignore')
     }
 
-    this.prevChainId = chainId
-    this.prevAddress = address
-
     if (this.provider && this.connectModalFuture) {
-      const future = this.connectModalFuture
+      this.connectModalFuture.resolve()
       this.connectModalFuture = undefined
-      future.resolve()
     }
   }
 
   protected async onEvent({ data }: any) {
     if (data.event === 'CONNECT_SUCCESS') {
+      this.modal
+        ?.getConnectors().forEach(console.log)
       const provider = this.modal
         ?.getConnectors()
         .filter(
@@ -123,11 +121,10 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
 
       this.provider?.on('accountsChanged', (accountsChanged: any) => {
         console.log('Provider accountsChanged:', accountsChanged)
-        const address = accountsChanged[0]
-        if (this.prevAddress !== address && address) {
-          this.prevAddress = address
-          this.onAccount().catch(() => 'ignore')
-        }
+        this.handleProvider({
+        provider: provider as Provider,
+        address: accountsChanged[0],
+      })
       })
 
       this.provider?.on('message', (message: any) => {
@@ -163,7 +160,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
   protected async init(): Promise<void> {
     if (this.modal) return
 
-    /* this.chains = [
+    this.chains = [
       {
         id: 'eip155:1',
         chainId: 1,
@@ -191,17 +188,17 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
         explorerUrl: 'https://basescan.org',
         rpcUrl: 'https://mainnet.base.org',
       },
-      // {
-      //   id: 'solana:900',
-      //   chainId: 900,
-      //   chainNamespace: 'solana',
-      //   name: 'Solana',
-      //   currency: 'SOL',
-      //   explorerUrl: 'https://explorer.solana.com/',
-      //   rpcUrl: 'https://api.mainnet-beta.solana.com',
-      // },
-    ] */
-    this.chains = [mainnet, avalanche, base, solana]
+      {
+        id: 'solana:900',
+        chainId: 900,
+        chainNamespace: 'solana',
+        name: 'Solana',
+        currency: 'SOL',
+        explorerUrl: 'https://explorer.solana.com/',
+        rpcUrl: 'https://api.mainnet-beta.solana.com',
+      },
+    ]
+    // this.chains = [mainnet, avalanche, base, solana]
 
     const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID as string
     const metadata = {
