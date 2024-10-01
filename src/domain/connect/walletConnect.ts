@@ -6,7 +6,12 @@ import {
   createAppKit,
 } from '@reown/appkit/react'
 import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
-
+import { SolanaAdapter } from '@reown/appkit-adapter-solana'
+import {
+  SolflareWalletAdapter,
+  PhantomWalletAdapter,
+} from '@solana/wallet-adapter-wallets'
+import { avalanche, base, mainnet, solana } from '@reown/appkit/networks'
 import { BaseConnectionProviderManager, BlockchainId, ProviderId } from './base'
 import { Future, Mutex } from '@/helpers/utils'
 import Err from '@/helpers/errors'
@@ -93,9 +98,11 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
 
   protected async onEvent({ data }: any) {
     if (data.event === 'CONNECT_SUCCESS') {
-      const provider = this.modal?.getConnectors().filter(
-        (connector: any) => connector.name === data.properties.name,
-      )?.[0].provider
+      const provider = this.modal
+        ?.getConnectors()
+        .filter(
+          (connector: any) => connector.name === data.properties.name,
+        )?.[0].provider
 
       this.handleProvider({
         provider: provider as Provider,
@@ -116,6 +123,11 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
 
       this.provider?.on('accountsChanged', (accountsChanged: any) => {
         console.log('Provider accountsChanged:', accountsChanged)
+        const address = accountsChanged[0]
+        if (this.prevAddress !== address && address) {
+          this.prevAddress = address
+          this.onAccount().catch(() => 'ignore')
+        }
       })
 
       this.provider?.on('message', (message: any) => {
@@ -151,7 +163,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
   protected async init(): Promise<void> {
     if (this.modal) return
 
-    this.chains = [
+    /* this.chains = [
       {
         id: 'eip155:1',
         chainId: 1,
@@ -188,7 +200,8 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       //   explorerUrl: 'https://explorer.solana.com/',
       //   rpcUrl: 'https://api.mainnet-beta.solana.com',
       // },
-    ]
+    ] */
+    this.chains = [mainnet, avalanche, base, solana]
 
     const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID as string
     const metadata = {
@@ -198,7 +211,12 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       icons: ['https://account.aleph.im/favicon-32x32.png'],
     }
     this.modal = createAppKit({
-      adapters: [new Ethers5Adapter()],
+      adapters: [
+        new Ethers5Adapter(),
+        new SolanaAdapter({
+          wallets: [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+        }),
+      ],
       metadata: metadata,
       networks: this.chains,
       projectId,

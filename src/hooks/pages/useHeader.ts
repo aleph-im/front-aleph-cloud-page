@@ -101,6 +101,12 @@ export function useHeader(): UseHeaderReturn {
         name: 'Base',
         wallets,
       },
+      {
+        id: BlockchainId.SOL,
+        icon: 'solana',
+        name: 'Solana',
+        wallets: [wallets[1]],
+      },
     ],
     [wallets],
   )
