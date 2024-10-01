@@ -249,7 +249,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
         : undefined
       this.handleProvider({
         provider: this.provider,
-        chainId: chainId,
+        chainId,
       })
     })
     this.modal.subscribeWalletInfo(this.handleWalletInfo)

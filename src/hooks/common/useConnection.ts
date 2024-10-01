@@ -10,10 +10,6 @@ import {
 import { connectionProviderManager } from '@/domain/connect'
 import { useAppState } from '@/contexts/appState'
 import { useSessionStorage } from 'usehooks-ts'
-import { useAppKitEvents } from '@reown/appkit/react'
-import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
-import { createAppKit } from '@reown/appkit'
-
 export type UseConnectionProps = {
   triggerOnMount?: boolean
 }

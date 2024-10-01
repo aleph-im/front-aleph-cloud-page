@@ -2,7 +2,7 @@
 export default {
   ChainNotYetSupported: new Error('Chain is not yet supported'),
   BlockchainNotSupported: (chainId: number | string) =>
-    new Error(`Blockchain "${chainId}" not supported`),
+    new Error(`Blockchain "${chainId}" not supported on this provider`),
   RequestTimeout: new Error('Request timed out'),
   RequestFailed: (cause: unknown) => new Error('Request failed', { cause }),
   InvalidResponse: new Error('Invalid response'),

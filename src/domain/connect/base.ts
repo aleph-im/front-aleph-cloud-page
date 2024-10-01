@@ -172,6 +172,9 @@ export abstract class BaseConnectionProviderManager {
     const chainIdHex = `0x${blockchain.chainId.toString(16)}`
 
     try {
+      if (!this.supportedBlockchains.includes(blockchainId)) {
+        throw Err.BlockchainNotSupported(blockchain?.name || blockchainId)
+      }
       await this.switchBlockchainRequest(provider, chainIdHex)
     } catch (error) {
       await this.handleSwitchError(
@@ -211,8 +214,6 @@ export abstract class BaseConnectionProviderManager {
     const blockchainId = blockchain?.id
 
     if (!this.supportedBlockchains.includes(blockchainId)) {
-      await sleep(0)
-
       await this.onDisconnect()
       this.events.emit('disconnect', {
         provider: this.providerId,
@@ -220,7 +221,7 @@ export abstract class BaseConnectionProviderManager {
       })
       return
     }
-
+    
     return this.onUpdate(blockchainId)
   }
 

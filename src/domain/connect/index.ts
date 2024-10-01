@@ -4,13 +4,14 @@ import { WalletConnectConnectionProviderManager } from './walletConnect'
 
 export class ConnectionProviderManager {
   constructor(
-    private supportedBlockchains: BlockchainId[],
+    private evmSupportedBlockchains: BlockchainId[],
+    private solanaSupportedBlockchains: BlockchainId[],
     private providers: Record<string, BaseConnectionProviderManager> = {
       [ProviderId.Metamask]: new MetamaskConnectionProviderManager(
-        supportedBlockchains,
+        evmSupportedBlockchains,
       ),
       [ProviderId.WalletConnect]: new WalletConnectConnectionProviderManager(
-        supportedBlockchains,
+        evmSupportedBlockchains.concat(solanaSupportedBlockchains),
       ),
     },
   ) {}
@@ -21,9 +22,13 @@ export class ConnectionProviderManager {
 }
 
 // @todo: move to global state
-export const connectionProviderManager = new ConnectionProviderManager([
-  BlockchainId.ETH,
-  BlockchainId.AVAX,
-  BlockchainId.BASE,
-  BlockchainId.SOL,
-])
+export const connectionProviderManager = new ConnectionProviderManager(
+  [
+    BlockchainId.ETH,
+    BlockchainId.AVAX,
+    BlockchainId.BASE
+  ],
+  [
+    BlockchainId.SOL,
+  ],
+)
