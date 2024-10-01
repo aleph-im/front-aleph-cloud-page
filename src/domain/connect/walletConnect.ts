@@ -68,13 +68,6 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
     address?: any
     chainId?: number
   }) {
-    console.log(
-      'ON PROVIDER ==\n',
-      `Provider: ${provider} \n`,
-      `Address: ${address} \n`,
-      `Chain ID: ${chainId} \n`,
-      '== ',
-    )
     this.provider = provider
 
     if (this.prevChainId !== chainId && chainId) {
@@ -104,6 +97,27 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       if (connectors) provider = connectors[3].provider
       this.handleProvider({
         provider: provider as Provider,
+      })
+
+      console.log('USING PROVIDER: ', this.provider)
+      this.provider?.on('connect', (connect: any) => {
+        console.log('Provider connect:', connect)
+      })
+
+      this.provider?.on('disconnect', (disconnect: any) => {
+        console.log('Provider disconnect:', disconnect)
+      })
+
+      this.provider?.on('chainChanged', (chainChanged: any) => {
+        console.log('Provider chainChanged:', chainChanged)
+      })
+
+      this.provider?.on('accountsChanged', (accountsChanged: any) => {
+        console.log('Provider accountsChanged:', accountsChanged)
+      })
+
+      this.provider?.on('message', (message: any) => {
+        console.log('Provider message:', message)
       })
     }
 
@@ -192,51 +206,15 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       },
     })
 
-    this.modal.subscribeWalletInfo((...e) => console.log('WalletInfo', ...e))
-
-    this.modal.subscribeEvents((...e) => {
-      console.log('Events', ...e)
-
-      if (e[0].data.event === 'CONNECT_SUCCESS') {
-        console.log(e.length)
-        const connectors = this.modal?.getConnectors()
-
-        let provider
-
-        if (connectors) provider = connectors[3].provider
-
-        console.log('Using: ', provider)
-        this.handleProvider({
-          provider: provider as Provider,
-          address: '0x5f78199cd833c1dc1735bee4a7416caaE58Facca',
-          chainId: 1,
-        })
-      }
-    })
-
-    this.modal.subscribeState((...e) => {
-      console.log('State', ...e)
-    })
-
-    this.modal.subscribeCaipNetworkChange((...e) =>
-      console.log('CaipNetworkChange', ...e),
-    )
-    this.modal.subscribeTheme((...e) => console.log('Theme', ...e))
-
-    if (this.modal.adapter?.subscribeProvider)
-      this.modal.adapter.subscribeProvider((...e) => console.log(e))
-
-    this.modal.subscribeShouldUpdateToAddress((...e) => {
-      console.log('ShouldUpdateToAddress', ...e)
-    })
-
     this.modal.subscribeEvents(this.handleEvent)
     this.modal.subscribeState((...e) => {
-      // this.handleProvider({
-      //   provider: this.provider,
-      //   address: '0x5f78199cd833c1dc1735bee4a7416caaE58Facca',
-      //   chainId: 1,
-      // })
+      const chainId = e[0].selectedNetworkId
+        ? parseInt(e[0].selectedNetworkId?.split(':')[1])
+        : undefined
+      this.handleProvider({
+        provider: this.provider,
+        chainId: chainId,
+      })
     })
     this.modal.subscribeWalletInfo(this.handleWalletInfo)
   }

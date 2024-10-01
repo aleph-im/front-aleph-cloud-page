@@ -163,6 +163,7 @@ export abstract class BaseConnectionProviderManager {
 
   async switchBlockchain(blockchainId: BlockchainId): Promise<void> {
     const prevBlockchain = await this.getPreviousBlockchain()
+    console.log(`prev: ${prevBlockchain}`, `new: ${blockchainId}`)
     if (prevBlockchain === blockchainId) return
 
     const blockchain = this.getBlockchainData(blockchainId)
