@@ -94,13 +94,30 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
 
   protected async onEvent({ data }: any) {
     if (data.event === 'CONNECT_SUCCESS') {
-      this.modal
-        ?.getConnectors().forEach(console.log)
-      const provider = this.modal
-        ?.getConnectors()
-        .filter(
-          (connector: any) => connector.name === data.properties.name,
-        )?.[0].provider
+      const connectors = this.modal?.getConnectors()
+
+      console.log('modal:', this.modal)
+      console.log('chain:', this.modal?.getChainId())
+      console.log('chain2:', this.prevChainId)
+      console.log('data:', data)
+      console.log('CONNECTORS: ')
+      connectors?.forEach((c) => {
+        console.log('====')
+        console.log(c.name)
+        console.log(c)
+        console.log('====')
+      })
+
+      const connector = connectors?.filter(
+        (connector: any) => connector.name === data.properties.name,
+      )?.[0]
+
+      // get chain namespace to get proper provider
+      const provider = connector?.provider
+        ? connector?.provider
+        : connector?.connectors?.[0]?.provider
+
+      console.log('using provider: ', provider)
 
       this.handleProvider({
         provider: provider as Provider,
@@ -122,9 +139,9 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       this.provider?.on('accountsChanged', (accountsChanged: any) => {
         console.log('Provider accountsChanged:', accountsChanged)
         this.handleProvider({
-        provider: provider as Provider,
-        address: accountsChanged[0],
-      })
+          provider: provider as Provider,
+          address: accountsChanged[0],
+        })
       })
 
       this.provider?.on('message', (message: any) => {
