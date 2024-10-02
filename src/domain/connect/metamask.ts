@@ -34,4 +34,8 @@ export class MetamaskConnectionProviderManager extends BaseConnectionProviderMan
     if (!provider) throw Err.MetamaskNotInstalled
     return provider
   }
+
+  protected getConnector(): any {
+    return undefined
+  }
 }

@@ -1,6 +1,6 @@
 import { providers } from 'ethers5'
 
-const provider = new providers.JsonRpcProvider('https://eth.drpc.org')
+const provider = new providers.JsonRpcProvider('https://eth-mainnet.public.blastapi.io')
 
 export const EnsNameLookup = async (
   address?: string,

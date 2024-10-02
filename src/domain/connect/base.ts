@@ -15,7 +15,7 @@ import {
   createFromEVMAccount,
   isAccountSupported as isAccountPAYGCompatible,
 } from '@aleph-sdk/superfluid'
-import { Mutex, getERC20Balance, getSOLBalance, sleep } from '@/helpers/utils'
+import { Mutex, getERC20Balance, getSOLBalance } from '@/helpers/utils'
 import { MetaMaskInpageProvider } from '@metamask/providers'
 import {
   Provider as AppKitProvider,
@@ -70,7 +70,7 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     eip155: true,
     currency: 'ETH',
     explorerUrl: 'https://etherscan.io/',
-    rpcUrl: 'https://eth.drpc.org',
+    rpcUrl: 'https://eth-mainnet.public.blastapi.io',
   },
   [BlockchainId.AVAX]: {
     id: BlockchainId.AVAX,
@@ -79,7 +79,7 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     eip155: true,
     currency: 'AVAX',
     explorerUrl: 'https://snowtrace.io/',
-    rpcUrl: 'https://avalanche.drpc.org',
+    rpcUrl: 'https://ava-mainnet.public.blastapi.io/ext/bc/C/rpc',
   },
   [BlockchainId.BASE]: {
     id: BlockchainId.BASE,
@@ -120,6 +120,15 @@ export abstract class BaseConnectionProviderManager {
   abstract isConnected(): Promise<boolean>
   protected abstract onConnect(blockchainId: BlockchainId): Promise<void>
   protected abstract onDisconnect(): Promise<void>
+  protected abstract getConnector(): {
+    chain: string
+    id: string
+    imageUrl: string
+    info: any,
+    name: string
+    provider: any
+    type: string
+  } | undefined
   protected abstract getProvider():
     | AppKitProvider
     | AppKitCombinedProvider
@@ -168,12 +177,25 @@ export abstract class BaseConnectionProviderManager {
 
     const blockchain = this.getBlockchainData(blockchainId)
 
+    const connector = this.getConnector()
     const provider = this.getProvider()
     const chainIdHex = `0x${blockchain.chainId.toString(16)}`
 
     try {
-      if (!this.supportedBlockchains.includes(blockchainId)) {
-        throw Err.BlockchainNotSupported(blockchain?.name || blockchainId)
+      console.log('blockchains', this.supportedBlockchains)
+      if (!this.supportedBlockchains.includes(blockchainId) || (connector?.chain === 'eip155') !== blockchain.eip155) {
+        if (blockchainId === BlockchainId.SOL) {
+          console.log('not a solana provider')
+        } else {
+          console.log('not a evm provider')
+          //throw Err.BlockchainNotSupported(blockchain?.name || blockchainId)
+        }
+        await this.onUpdate(prevBlockchain)
+        return
+      }
+      else if (blockchainId === BlockchainId.SOL && connector?.chain === 'solana') {
+        console.log('is a solana provider')
+        return
       }
       await this.switchBlockchainRequest(provider, chainIdHex)
     } catch (error) {
@@ -192,16 +214,20 @@ export abstract class BaseConnectionProviderManager {
 
     console.log('UPDATING')
 
-    const blockchain = blockchainId || (await this.getBlockchain())
-    const account = await this.getAccount()
-    const balance = await this.getBalance(account)
-
-    this.events.emit('update', {
+    try {
+      const blockchain = blockchainId || (await this.getBlockchain())
+      const account = await this.getAccount()
+      const balance = await this.getBalance(account)
+      console.log('[UPDATING] blockchain:', blockchain, 'account:', account, 'balance:', balance)
+      this.events.emit('update', {
       provider: this.providerId,
       blockchain,
       account,
       balance,
     })
+    } catch (error) {
+      console.error('[UPDATING ERROR]', error)
+    }
   }
 
   protected async onBlockchain(chainId: string | number): Promise<void> {
@@ -230,6 +256,10 @@ export abstract class BaseConnectionProviderManager {
   }
 
   protected async getBlockchain(): Promise<BlockchainId> {
+    const connector = this.getConnector()
+    if(connector?.chain === 'solana')
+      return BlockchainId.SOL
+    
     const provider = this.getProvider()
 
     let chainId = (await provider.request?.({
@@ -259,7 +289,8 @@ export abstract class BaseConnectionProviderManager {
         return getBASEAccount(provider as any)
 
       case BlockchainId.SOL:
-        return getSOLAccount(provider as any)
+        return await getSOLAccount(window.phantom?.solana)
+        //return getSOLAccount(provider as any)
 
       default:
         throw Err.ChainNotYetSupported

@@ -72,7 +72,8 @@ export const getERC20Balance = async (address: string) => {
  * @returns The Aleph balance of the address
  */
 export const getSOLBalance = async (address: string) => {
-  // FIXME: This is a temporary solution
+  // FIXME: Use indexer
+  return 0
   try {
     const query = await fetch(
       `https://balance1.api.aleph.cloud/solana/${address}`,

@@ -8,10 +8,10 @@ import {
 import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
 import { SolanaAdapter } from '@reown/appkit-adapter-solana'
 import {
-  SolflareWalletAdapter,
+  //SolflareWalletAdapter,
   PhantomWalletAdapter,
 } from '@solana/wallet-adapter-wallets'
-//import { avalanche, base, mainnet, solana } from '@reown/appkit/networks'
+import { solana } from '@reown/appkit/networks'
 import { BaseConnectionProviderManager, BlockchainId, ProviderId } from './base'
 import { Future, Mutex } from '@/helpers/utils'
 import Err from '@/helpers/errors'
@@ -20,6 +20,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
   protected providerId = ProviderId.WalletConnect
   protected chains!: CaipNetwork[]
   protected modal?: AppKit
+  protected connector?: any
   protected provider?: Provider | CombinedProvider
   protected connectModalFuture?: Future<void>
   protected prevAddress?: string
@@ -52,10 +53,11 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       await this.provider.emit('disconnect')
     if (this.modal?.getState().open) await this.modal.close()
 
+    this.connector = undefined
     this.provider = undefined
     this.prevChainId = undefined
     this.prevAddress = undefined
-    this.connectModalFuture = undefined
+    //this.connectModalFuture = undefined
   }
 
   protected onWalletInfo(info: any) {
@@ -88,7 +90,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
 
     if (this.provider && this.connectModalFuture) {
       this.connectModalFuture.resolve()
-      this.connectModalFuture = undefined
+      //this.connectModalFuture = undefined
     }
   }
 
@@ -97,32 +99,31 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       const connectors = this.modal?.getConnectors()
 
       console.log('modal:', this.modal)
-      console.log('chain:', this.modal?.getChainId())
-      console.log('chain2:', this.prevChainId)
+      console.log('prevChain:', this.prevChainId)
+      console.log('currentChain:', this.modal?.getChainId())
+      console.log('address:', this.modal?.getAddress())
       console.log('data:', data)
       console.log('CONNECTORS: ')
       connectors?.forEach((c) => {
-        console.log('====')
-        console.log(c.name)
-        console.log(c)
-        console.log('====')
+        console.log(c.name, c)
       })
 
-      const connector = connectors?.filter(
+      this.connector = connectors?.filter(
         (connector: any) => connector.name === data.properties.name,
       )?.[0]
 
       // get chain namespace to get proper provider
-      const provider = connector?.provider
-        ? connector?.provider
-        : connector?.connectors?.[0]?.provider
-
-      console.log('using provider: ', provider)
+      const provider = this.connector?.provider
+        ? this.connector?.provider
+        : this.connector?.connectors?.[0]?.provider
 
       this.handleProvider({
         provider: provider as Provider,
+        chainId: this.modal?.getChainId() as number,
+        address: this.modal?.getAddress(),
       })
 
+      console.log('USING CONNECTOR: ', this.connector)
       console.log('USING PROVIDER: ', this.provider)
       this.provider?.on('connect', (connect: any) => {
         console.log('Provider connect:', connect)
@@ -144,7 +145,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
         })
       })
 
-      this.provider?.on('message', (message: any) => {
+      this.connector?.chain === 'eip155' && this.provider?.on('message', (message: any) => {
         console.log('Provider message:', message)
       })
     }
@@ -185,7 +186,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
         name: 'Ethereum',
         currency: 'ETH',
         explorerUrl: 'https://etherscan.io/',
-        rpcUrl: 'https://eth.drpc.org',
+        rpcUrl: 'https://eth-mainnet.public.blastapi.io',
       },
       {
         id: 'eip155:43114',
@@ -194,7 +195,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
         name: 'Avalanche',
         currency: 'AVAX',
         explorerUrl: 'https://snowtrace.io/',
-        rpcUrl: 'https://avalanche.drpc.org',
+        rpcUrl: 'https://ava-mainnet.public.blastapi.io/ext/bc/C/rpc',
       },
       {
         id: 'eip155:8453',
@@ -205,7 +206,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
         explorerUrl: 'https://basescan.org',
         rpcUrl: 'https://mainnet.base.org',
       },
-      {
+      /* {
         id: 'solana:900',
         chainId: 900,
         chainNamespace: 'solana',
@@ -213,7 +214,8 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
         currency: 'SOL',
         explorerUrl: 'https://explorer.solana.com/',
         rpcUrl: 'https://api.mainnet-beta.solana.com',
-      },
+      }, */
+      solana
     ]
     // this.chains = [mainnet, avalanche, base, solana]
 
@@ -228,7 +230,7 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       adapters: [
         new Ethers5Adapter(),
         new SolanaAdapter({
-          wallets: [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+          wallets: [new PhantomWalletAdapter()],
         }),
       ],
       metadata: metadata,
@@ -240,6 +242,12 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
         email: false,
         socials: false,
       },
+      enableInjected: true,
+      enableEIP6963: true,
+      enableCoinbase: true,
+      coinbasePreference: 'eoaOnly',
+      enableWalletConnect: true,
+      connectorImages: {}
     })
 
     this.modal.subscribeEvents(this.handleEvent)
@@ -252,11 +260,16 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
         chainId,
       })
     })
-    this.modal.subscribeWalletInfo(this.handleWalletInfo)
+    //this.modal.subscribeWalletInfo(this.handleWalletInfo)
   }
 
   protected getProvider(): Provider | CombinedProvider {
     if (!this.provider) throw Err.WalletConnectNotInitialized
     return this.provider
+  }
+
+  protected getConnector(): any {
+    if (!this.connector) throw Err.WalletConnectNotInitialized
+    return this.connector
   }
 }
