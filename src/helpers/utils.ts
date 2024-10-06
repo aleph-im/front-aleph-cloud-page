@@ -72,6 +72,7 @@ export const getERC20Balance = async (address: string) => {
  * @returns The Aleph balance of the address
  */
 export const getSOLBalance = async (address: string) => {
+  return 100000
   // FIXME: This is a temporary solution
   try {
     const query = await fetch(
