@@ -86,7 +86,7 @@ export function useHeader(): UseHeaderReturn {
       {
         id: ProviderId.Phantom,
         name: 'Phantom',
-        icon: 'pencil',
+        icon: 'phantom',
         color: 'main0',
       },
     ],
