@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useNotification } from '@aleph-front/core'
 import {
   ConnectionConnectAction,
@@ -10,6 +9,7 @@ import {
 import { connectionProviderManager } from '@/domain/connect'
 import { useAppState } from '@/contexts/appState'
 import { useSessionStorage } from 'usehooks-ts'
+import { BaseConnectionProviderManager } from '@/domain/connect/base'
 
 export type UseConnectionProps = {
   triggerOnMount?: boolean
@@ -26,6 +26,10 @@ export const useConnection = ({
   const [state, dispatch] = useAppState()
   const { blockchain, provider } = state.connection
 
+  const prevConnectionProviderRef = useRef<
+    BaseConnectionProviderManager | undefined
+  >()
+
   const noti = useNotification()
   const addNotification = noti?.add
 
@@ -36,8 +40,8 @@ export const useConnection = ({
   )
 
   const handleDisconnect = useCallback(
-    () => dispatch(new ConnectionDisconnectAction()),
-    [dispatch],
+    () => dispatch(new ConnectionDisconnectAction({ provider })),
+    [dispatch, provider],
   )
 
   const [storedConnection, setStoredConnection] = useSessionStorage<
@@ -49,24 +53,19 @@ export const useConnection = ({
     if (!storedConnection) return
 
     handleConnect(storedConnection)
-  }, [triggerOnMount])
+  }, [handleConnect, storedConnection, triggerOnMount])
 
-  // @note: Switch the wallet provider each time there is a new one selected
   useEffect(() => {
-    if (!triggerOnMount) return
-    if (!provider) return
-
-    const connectionProvider = connectionProviderManager.of(provider)
-
     const handleUpdate = (payload: ConnectionUpdateAction['payload']) => {
       dispatch(new ConnectionUpdateAction(payload))
     }
 
-    const handleDisconnect = ({ error }: { error?: Error }) => {
-      dispatch(new ConnectionDisconnectAction())
-
+    const handleDisconnect = ({
+      provider,
+      error,
+    }: ConnectionDisconnectAction['payload']) => {
+      dispatch(new ConnectionDisconnectAction({ provider, error }))
       if (!error) return
-
       addNotification &&
         addNotification({
           variant: 'error',
@@ -76,58 +75,91 @@ export const useConnection = ({
     }
 
     async function exec() {
-      if (!blockchain) return
+      if (!triggerOnMount) return
 
-      connectionProvider.events.on('update', handleUpdate)
-      connectionProvider.events.on('disconnect', handleDisconnect)
+      // Load connection providers
+      const prevConnectionProvider = prevConnectionProviderRef.current
+      const connectionProvider = provider
+        ? connectionProviderManager.of(provider)
+        : undefined
 
-      try {
-        await connectionProvider.connect(blockchain)
-        setStoredConnection({ provider, blockchain })
-      } catch (error) {
-        handleDisconnect({ error: error as Error })
+      // If there's a previous connection provider and it's different from the current one
+      // then disconnect from the previous provider
+      if (
+        prevConnectionProvider &&
+        connectionProvider !== prevConnectionProvider
+      ) {
+        console.log(
+          'DISCONNECTING from previous provider',
+          prevConnectionProvider,
+        )
+        prevConnectionProvider.events.off('update', handleUpdate)
+        prevConnectionProvider.events.off('disconnect', handleDisconnect)
+
+        await prevConnectionProvider.disconnect()
+      }
+
+      // Update refs
+      prevConnectionProviderRef.current = connectionProvider
+
+      // If no blockchain or provider => Do not connect or switch
+      if (!connectionProvider) return console.log('No connection provider')
+      if (!blockchain) return console.log('No blockchain')
+
+      if (connectionProvider !== prevConnectionProvider) {
+        console.log(
+          'CONNECTING to',
+          blockchain,
+          'from provider',
+          prevConnectionProvider,
+          'to',
+          connectionProvider,
+        )
+
+        connectionProvider.events.on('update', handleUpdate)
+        connectionProvider.events.on('disconnect', handleDisconnect)
+
+        try {
+          await connectionProvider.connect(blockchain)
+
+          setStoredConnection({ provider, blockchain })
+        } catch (error) {
+          handleDisconnect({ error: error as Error })
+        }
+      } else {
+        console.log(
+          'SWITCHING to',
+          blockchain,
+          'from provider',
+          prevConnectionProvider,
+          'to',
+          connectionProvider,
+        )
+
+        try {
+          await connectionProvider.switchBlockchain(blockchain)
+
+          setStoredConnection({ provider, blockchain })
+        } catch (error) {
+          addNotification &&
+            addNotification({
+              variant: 'error',
+              title: 'Error',
+              text: (error as Error)?.message,
+            })
+        }
       }
     }
 
     exec()
-
-    return () => {
-      connectionProvider.events.off('update', handleUpdate)
-      connectionProvider.events.off('disconnect', handleDisconnect)
-
-      connectionProvider.disconnect()
-      setStoredConnection(undefined)
-    }
-  }, [triggerOnMount, provider])
-
-  // @note: Switch the blockchain network without reconnecting to the providers
-  useEffect(() => {
-    if (!triggerOnMount) return
-
-    async function exec() {
-      if (!provider) return
-      if (!blockchain) return
-
-      const connectionProvider = connectionProviderManager.of(provider)
-      const isConnected = await connectionProvider.isConnected()
-
-      if (!isConnected) return
-
-      try {
-        await connectionProvider.switchBlockchain(blockchain)
-        setStoredConnection({ provider, blockchain })
-      } catch (error) {
-        addNotification &&
-          addNotification({
-            variant: 'error',
-            title: 'Error',
-            text: (error as Error)?.message,
-          })
-      }
-    }
-
-    exec()
-  }, [triggerOnMount, provider, blockchain])
+  }, [
+    triggerOnMount,
+    provider,
+    blockchain,
+    dispatch,
+    addNotification,
+    setStoredConnection,
+  ])
 
   return {
     ...state.connection,
