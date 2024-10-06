@@ -24,6 +24,7 @@ import type {
 import Err from '@/helpers/errors'
 import { EVMAccount, findChainDataByChainId } from '@aleph-sdk/evm'
 import { MetamaskErrorCodes } from './constants'
+import { WindowPhantomProvider as PhantomProvider } from '@/types/types'
 
 export { BlockchainId }
 
@@ -32,6 +33,7 @@ export { BlockchainId }
 export enum ProviderId {
   Metamask = 'metamask',
   WalletConnect = 'wallet-connect',
+  Phantom = 'phantom',
 }
 
 export type Provider = {
@@ -48,7 +50,18 @@ export const providers: Record<ProviderId, Provider> = {
     id: ProviderId.WalletConnect,
     name: 'WalletConnect',
   },
+  [ProviderId.Phantom]: {
+    id: ProviderId.Phantom,
+    name: 'Phantom',
+  },
 }
+
+export const defaultBlockchainProviders: Record<BlockchainId, ProviderId> = {
+  [BlockchainId.ETH]: ProviderId.WalletConnect,
+  [BlockchainId.AVAX]: ProviderId.WalletConnect,
+  [BlockchainId.BASE]: ProviderId.WalletConnect,
+  [BlockchainId.SOL]: ProviderId.Phantom,
+} as Record<BlockchainId, ProviderId>
 
 // ------------------------
 
@@ -57,6 +70,7 @@ export type Blockchain = {
   name: string
   chainId: number
   eip155: boolean
+  solana: boolean
   currency: string
   explorerUrl?: string
   rpcUrl?: string
@@ -68,6 +82,7 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     name: 'Ethereum',
     chainId: 1,
     eip155: true,
+    solana: false,
     currency: 'ETH',
     explorerUrl: 'https://etherscan.io/',
     rpcUrl: 'https://eth.drpc.org',
@@ -77,6 +92,7 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     name: 'Avalanche',
     chainId: 43114,
     eip155: true,
+    solana: false,
     currency: 'AVAX',
     explorerUrl: 'https://snowtrace.io/',
     rpcUrl: 'https://avalanche.drpc.org',
@@ -86,6 +102,7 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     name: 'Base',
     chainId: 8453,
     eip155: true,
+    solana: false,
     currency: 'ETH',
     explorerUrl: 'https://basescan.org',
     rpcUrl: 'https://mainnet.base.org',
@@ -95,7 +112,10 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     name: 'Solana',
     chainId: 900,
     eip155: false,
+    solana: true,
     currency: 'SOL',
+    rpcUrl: 'https://api.mainnet-beta.solana.com',
+    explorerUrl: 'https://explorer.solana.com/',
   },
 } as Record<BlockchainId, Blockchain>
 
@@ -124,20 +144,22 @@ export abstract class BaseConnectionProviderManager {
     | EthersProvider
     | CombinedProvider
     | MetaMaskInpageProvider
+    | PhantomProvider
 
   async connect(blockchainId: BlockchainId): Promise<void> {
     const release = await this.mutex.acquire()
 
     try {
       const blockchain = this.getBlockchainData(blockchainId)
-
       if (!this.supportedBlockchains.includes(blockchainId)) {
+        console.log('[connect] Provider ID raising:', this.providerId)
         throw Err.BlockchainNotSupported(blockchain?.name || blockchainId)
       }
 
       await this.onConnect(blockchainId)
       this.events.emit('connect', { provider: this.providerId })
 
+      // console.log('CONNECT state after emit', this.getProvider().isConnected)
       this.isReady = true
       await this.switchBlockchain(blockchainId)
       await this.onUpdate(blockchainId)
@@ -206,6 +228,7 @@ export abstract class BaseConnectionProviderManager {
     const blockchainId = blockchain?.id
 
     if (!this.supportedBlockchains.includes(blockchainId)) {
+      console.log('[onBlockchain] Provider ID raising:', this.providerId)
       await sleep(0)
 
       await this.onDisconnect()

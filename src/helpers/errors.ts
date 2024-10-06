@@ -10,7 +10,8 @@ export default {
   ManagerNotReady: new Error('Manager not ready'),
   MethodNotImplemented: new Error('Method not implemented'),
   NoWalletDetected: new Error('No wallet detected'),
-  MetamaskNotInstalled: new Error('WalletConnect not installed'),
+  MetamaskNotInstalled: new Error('Metamask not installed'),
+  PhantomNotInitialized: new Error('Phantom not initialized'),
   WalletConnectNotInitialized: new Error('WalletConnect not initialized'),
   ConnectYourWallet: new Error('Please connect your wallet'),
   ConnectYourPaymentWallet: new Error(
