@@ -64,6 +64,17 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
   // ------------------
 
+  const isBlockchainHoldingCompatible = useCallback(
+    (blockchain: BlockchainId | undefined): boolean => {
+      if (!blockchain) return false
+
+      return [BlockchainId.ETH, BlockchainId.SOL].includes(blockchain)
+    },
+    [],
+  )
+
+  // ------------------
+
   const modal = useModal()
   const modalOpen = modal?.open
   const modalClose = modal?.close
@@ -94,11 +105,17 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       handleSelectNode(undefined)
     }
 
-    if (blockchain != BlockchainId.ETH)
+    if (!isBlockchainHoldingCompatible(blockchain))
       handleConnect({ blockchain: BlockchainId.ETH })
 
     setSelectedModal(undefined)
-  }, [blockchain, handleConnect, handleSelectNode, node])
+  }, [
+    blockchain,
+    handleConnect,
+    handleSelectNode,
+    isBlockchainHoldingCompatible,
+    node?.hash,
+  ])
 
   useEffect(() => {
     if (!modalOpen) return
@@ -388,7 +405,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
     if (
       (node && isBlockchainPAYGCompatible(blockchain)) ||
-      (!node && blockchain === BlockchainId.ETH)
+      (!node && isBlockchainHoldingCompatible(blockchain))
     ) {
       return modalClose()
     }
