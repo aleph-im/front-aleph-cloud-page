@@ -63,7 +63,7 @@ export function useHeader(): UseHeaderReturn {
 
   // --------------------
 
-  const EVMWallets: Wallet[] = useMemo(
+  const wallets: Wallet[] = useMemo(
     () => [
       {
         id: ProviderId.Metamask,
@@ -77,12 +77,6 @@ export function useHeader(): UseHeaderReturn {
         icon: 'walletConnect',
         color: 'main0',
       },
-    ],
-    [],
-  )
-
-  const solanaWallets: Wallet[] = useMemo(
-    () => [
       {
         id: ProviderId.Phantom,
         name: 'Phantom',
@@ -99,28 +93,28 @@ export function useHeader(): UseHeaderReturn {
         id: BlockchainId.ETH,
         icon: 'ethereum',
         name: 'Ethereum',
-        wallets: EVMWallets,
+        wallets: wallets,
       },
       {
         id: BlockchainId.AVAX,
         icon: 'avalanche',
         name: 'Avalanche',
-        wallets: EVMWallets,
+        wallets: wallets,
       },
       {
         id: BlockchainId.BASE,
         icon: 'base',
         name: 'Base',
-        wallets: EVMWallets,
+        wallets: wallets,
       },
       {
         id: BlockchainId.SOL,
         icon: 'solana',
         name: 'Solana',
-        wallets: solanaWallets,
+        wallets: wallets,
       },
     ],
-    [EVMWallets, solanaWallets],
+    [wallets],
   )
 
   // --------------------
