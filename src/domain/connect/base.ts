@@ -15,7 +15,7 @@ import {
   createFromEVMAccount,
   isAccountSupported as isAccountPAYGCompatible,
 } from '@aleph-sdk/superfluid'
-import { Mutex, getERC20Balance, getSOLBalance, sleep } from '@/helpers/utils'
+import { Mutex, getAddressBalance, sleep } from '@/helpers/utils'
 import { MetaMaskInpageProvider } from '@metamask/providers'
 import type {
   Provider as EthersProvider,
@@ -296,11 +296,8 @@ export abstract class BaseConnectionProviderManager {
         return 0
       }
     }
-    if (account instanceof ETHAccount) {
-      return getERC20Balance(account.address)
-    }
-    if (account instanceof SOLAccount) {
-      return getSOLBalance(account.address)
+    if (account instanceof ETHAccount || account instanceof SOLAccount) {
+      return getAddressBalance(account.address)
     }
 
     throw Err.ChainNotYetSupported
