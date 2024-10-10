@@ -19,7 +19,7 @@
     "@aleph-sdk/ethereum": "^1.2.0",
     "@aleph-sdk/evm": "^1.2.0",
     "@aleph-sdk/message": "^1.2.0",
-    "@aleph-sdk/solana": "^1.2.0",
+    "@aleph-sdk/solana": "^1.2.1",
     "@aleph-sdk/superfluid": "^1.2.0",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
     "@hookform/resolvers": "^3.1.1",
