@@ -80,6 +80,15 @@ export function useManageInstance(): ManageInstance {
     getMapped()
   }, [sshKeyManager, instance])
 
+  const isBlockchainHoldingCompatible = useCallback(
+    (blockchain: BlockchainId | undefined): boolean => {
+      if (!blockchain) return false
+
+      return [BlockchainId.ETH, BlockchainId.SOL].includes(blockchain)
+    },
+    [],
+  )
+
   const handleEnsureNetwork = useCallback(async () => {
     if (!instance) return
 
@@ -93,11 +102,17 @@ export function useManageInstance(): ManageInstance {
       }
 
       return await createFromEVMAccount(account as EVMAccount)
-    } else if (blockchain !== BlockchainId.ETH) {
+    } else if (!isBlockchainHoldingCompatible(blockchain)) {
       handleConnect({ blockchain: BlockchainId.ETH })
       throw Err.ConnectYourPaymentWallet
     }
-  }, [account, blockchain, handleConnect, instance])
+  }, [
+    account,
+    blockchain,
+    handleConnect,
+    instance,
+    isBlockchainHoldingCompatible,
+  ])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet

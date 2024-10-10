@@ -44,12 +44,12 @@ export const ellipseAddress = (address: string) => {
 }
 
 /**
- * Get the Aleph balance for a given Ethereum address
+ * Get the Aleph balance for a given blockchain address
  *
- * @param address An Ethereum address
+ * @param address An blockchain address
  * returns The Aleph balance of the address
  */
-export const getERC20Balance = async (address: string) => {
+export const getAddressBalance = async (address: string) => {
   try {
     const query = await fetch(
       `${apiServer}/api/v0/addresses/${address}/balance`,
@@ -57,26 +57,6 @@ export const getERC20Balance = async (address: string) => {
 
     // @note: 404 means the balance is 0, don't throw error in that case
     if (query.status === 404) return 0
-
-    const { balance } = await query.json()
-    return balance
-  } catch (error) {
-    throw Err.RequestFailed(error)
-  }
-}
-
-/**
- * Gets the Aleph balance for a given Solana address
- *
- * @param address A Solana address
- * @returns The Aleph balance of the address
- */
-export const getSOLBalance = async (address: string) => {
-  // FIXME: This is a temporary solution
-  try {
-    const query = await fetch(
-      `https://balance1.api.aleph.cloud/solana/${address}`,
-    )
 
     const { balance } = await query.json()
     return balance
