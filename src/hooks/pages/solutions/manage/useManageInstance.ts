@@ -25,6 +25,7 @@ import { useCopyToClipboardAndNotify, useNotification } from '@aleph-front/core'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { CRN } from '@/domain/node'
 import { EVMAccount } from '@aleph-sdk/evm'
+import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 
 export type ManageInstance = {
   instance?: Instance
@@ -80,15 +81,6 @@ export function useManageInstance(): ManageInstance {
     getMapped()
   }, [sshKeyManager, instance])
 
-  const isBlockchainHoldingCompatible = useCallback(
-    (blockchain: BlockchainId | undefined): boolean => {
-      if (!blockchain) return false
-
-      return [BlockchainId.ETH, BlockchainId.SOL].includes(blockchain)
-    },
-    [],
-  )
-
   const handleEnsureNetwork = useCallback(async () => {
     if (!instance) return
 
@@ -106,13 +98,7 @@ export function useManageInstance(): ManageInstance {
       handleConnect({ blockchain: BlockchainId.ETH })
       throw Err.ConnectYourPaymentWallet
     }
-  }, [
-    account,
-    blockchain,
-    handleConnect,
-    instance,
-    isBlockchainHoldingCompatible,
-  ])
+  }, [account, blockchain, handleConnect, instance])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
