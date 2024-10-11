@@ -152,14 +152,11 @@ export abstract class BaseConnectionProviderManager {
     try {
       const blockchain = this.getBlockchainData(blockchainId)
       if (!this.supportedBlockchains.includes(blockchainId)) {
-        console.log('[connect] Provider ID raising:', this.providerId)
         throw Err.BlockchainNotSupported(blockchain?.name || blockchainId)
       }
 
       await this.onConnect(blockchainId)
-      this.events.emit('connect', { provider: this.providerId })
 
-      // console.log('CONNECT state after emit', this.getProvider().isConnected)
       this.isReady = true
       await this.switchBlockchain(blockchainId)
       await this.onUpdate(blockchainId)
@@ -228,7 +225,6 @@ export abstract class BaseConnectionProviderManager {
     const blockchainId = blockchain?.id
 
     if (!this.supportedBlockchains.includes(blockchainId)) {
-      console.log('[onBlockchain] Provider ID raising:', this.providerId)
       await sleep(0)
 
       await this.onDisconnect()

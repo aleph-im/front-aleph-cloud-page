@@ -151,12 +151,6 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       enableOnramp: false,
     })
 
-    // this.modal.subscribeWalletInfo((...e) => console.log('WalletInfo', ...e))
-    // this.modal.subscribeEvents((...e) => console.log('Events', ...e))
-    // this.modal.subscribeProvider((...e) => console.log('Provider', ...e))
-    // this.modal.subscribeState((...e) => console.log('State', ...e))
-    // this.modal.subscribeTheme((...e) => console.log('Theme', ...e))
-
     this.modal.subscribeEvents(this.handleEvent)
     this.modal.subscribeProvider(this.handleProvider)
     this.modal.subscribeWalletInfo(this.handleWalletInfo)

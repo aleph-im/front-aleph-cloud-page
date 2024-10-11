@@ -89,10 +89,6 @@ export const useConnection = ({
         prevConnectionProvider &&
         connectionProvider !== prevConnectionProvider
       ) {
-        console.log(
-          'DISCONNECTING from previous provider',
-          prevConnectionProvider,
-        )
         prevConnectionProvider.events.off('update', handleUpdate)
         prevConnectionProvider.events.off('disconnect', handleDisconnect)
 
@@ -103,19 +99,10 @@ export const useConnection = ({
       prevConnectionProviderRef.current = connectionProvider
 
       // If no blockchain or provider => Do not connect or switch
-      if (!connectionProvider) return console.log('No connection provider')
-      if (!blockchain) return console.log('No blockchain')
+      if (!connectionProvider) return
+      if (!blockchain) return
 
       if (connectionProvider !== prevConnectionProvider) {
-        console.log(
-          'CONNECTING to',
-          blockchain,
-          'from provider',
-          prevConnectionProvider,
-          'to',
-          connectionProvider,
-        )
-
         connectionProvider.events.on('update', handleUpdate)
         connectionProvider.events.on('disconnect', handleDisconnect)
 
@@ -127,15 +114,6 @@ export const useConnection = ({
           handleDisconnect({ error: error as Error })
         }
       } else {
-        console.log(
-          'SWITCHING to',
-          blockchain,
-          'from provider',
-          prevConnectionProvider,
-          'to',
-          connectionProvider,
-        )
-
         try {
           await connectionProvider.switchBlockchain(blockchain)
 
