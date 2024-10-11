@@ -66,12 +66,6 @@ export function useHeader(): UseHeaderReturn {
   const wallets: Wallet[] = useMemo(
     () => [
       {
-        id: ProviderId.Metamask,
-        name: 'Metamask',
-        icon: 'metamask',
-        color: 'orange',
-      },
-      {
         id: ProviderId.WalletConnect,
         name: 'Wallet Connect',
         icon: 'walletConnect',
