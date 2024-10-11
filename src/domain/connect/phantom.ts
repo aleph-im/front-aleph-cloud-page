@@ -19,14 +19,14 @@ export class PhantomConnectionProviderManager extends BaseConnectionProviderMana
 
     const provider = this.getProvider()
 
-    provider.off('accountsChanged', this.handleAccountChange)
+    provider.on('accountChanged', this.handleAccountChange)
     provider.on('disconnect', this.handleDisconnect)
   }
 
   async onDisconnect(): Promise<void> {
     const provider = this.getProvider()
 
-    provider.on('accountsChanged', this.handleAccountChange)
+    provider.off('accountChanged', this.handleAccountChange)
     provider.off('disconnect', this.handleDisconnect)
   }
 

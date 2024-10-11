@@ -1,11 +1,13 @@
+import { WindowPhantomProvider } from './types'
+
 export {}
 
 declare global {
   interface Window {
     ethereum: import('ethers').providers.ExternalProvider
     phantom: {
-      solana: PhantomProvider
+      solana: WindowPhantomProvider
     }
-    solana: PhantomProvider
+    solana: WindowPhantomProvider
   }
 }
