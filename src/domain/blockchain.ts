@@ -10,5 +10,10 @@ export function isBlockchainHoldingCompatible(
 ): boolean {
   if (!blockchain) return false
 
-  return [BlockchainId.ETH, BlockchainId.SOL].includes(blockchain)
+  return [
+    BlockchainId.ETH,
+    BlockchainId.AVAX,
+    BlockchainId.BASE,
+    BlockchainId.SOL,
+  ].includes(blockchain)
 }
