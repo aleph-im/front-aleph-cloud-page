@@ -1,6 +1,10 @@
 import { Account } from '@aleph-sdk/account'
 import { StoreReducer } from './store'
-import { BlockchainId, ProviderId } from '@/domain/connect/base'
+import {
+  BlockchainId,
+  defaultBlockchainProviders,
+  ProviderId,
+} from '@/domain/connect/base'
 
 export type ConnectionState = {
   account?: Account
@@ -35,7 +39,12 @@ export class ConnectionConnectAction {
 
 export class ConnectionDisconnectAction {
   readonly type = ConnectionActionType.CONNECTION_DISCONNECT
-  payload = null
+  constructor(
+    public payload: {
+      provider?: ProviderId
+      error?: Error
+    },
+  ) {}
 }
 
 export class ConnectionUpdateAction {
@@ -68,14 +77,69 @@ export type ConnectionAction =
 export type ConnectionReducer = StoreReducer<ConnectionState, ConnectionAction>
 
 export function getConnectionReducer(): ConnectionReducer {
+  console.log('Inside CONNECTION REDUCER')
+
   return (state = initialState, action) => {
     switch (action.type) {
       case ConnectionActionType.CONNECTION_DISCONNECT: {
+        console.log('DISCONNECTING', action.payload)
+        console.log('State', state)
+
+        if (action.payload && action.payload.provider !== state.provider)
+          return state
+
+        console.log('RESETTING Connection state', action.payload)
+
         return { ...initialState }
       }
 
-      case ConnectionActionType.CONNECTION_CONNECT:
-      case ConnectionActionType.CONNECTION_UPDATE:
+      case ConnectionActionType.CONNECTION_CONNECT: {
+        console.log('CONNECTING')
+      }
+      case ConnectionActionType.CONNECTION_UPDATE: {
+        console.log('UPDATING Connection', action.payload)
+        const { provider: initialProvider, blockchain: initialBlockchain } =
+          state
+        const { provider, blockchain } = action.payload
+
+        let newProvider = provider
+        let newBalance =
+          (action as ConnectionUpdateAction).payload.balance || state.balance
+
+        // If we are switching between EVM and Solana, we need to hardcode the provider
+        if (initialProvider) {
+          const isSwitchingToSolana =
+            initialBlockchain !== BlockchainId.SOL &&
+            blockchain === BlockchainId.SOL
+          const isSwitchingToEVM =
+            initialBlockchain === BlockchainId.SOL &&
+            blockchain !== BlockchainId.SOL
+
+          newProvider =
+            isSwitchingToSolana || isSwitchingToEVM
+              ? defaultBlockchainProviders[blockchain]
+              : newProvider
+
+          if (initialProvider !== newProvider)
+            console.log('Hardcoding provider to', newProvider)
+        }
+
+        // If we are switching blockchains, we need to reset the balance
+        if (initialBlockchain && initialBlockchain !== blockchain) {
+          console.log('Switching blockchains, resetting account and balance')
+          newBalance = undefined
+        }
+
+        const newState = {
+          ...state,
+          ...action.payload,
+          provider: newProvider,
+          balance: newBalance,
+        }
+
+        console.log('NEW STATE', newState)
+        return newState
+      }
       case ConnectionActionType.CONNECTION_SET_BALANCE: {
         return {
           ...state,

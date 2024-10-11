@@ -25,6 +25,7 @@ import { useCopyToClipboardAndNotify, useNotification } from '@aleph-front/core'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 import { CRN } from '@/domain/node'
 import { EVMAccount } from '@aleph-sdk/evm'
+import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 
 export type ManageInstance = {
   instance?: Instance
@@ -93,7 +94,7 @@ export function useManageInstance(): ManageInstance {
       }
 
       return await createFromEVMAccount(account as EVMAccount)
-    } else if (blockchain !== BlockchainId.ETH) {
+    } else if (!isBlockchainHoldingCompatible(blockchain)) {
       handleConnect({ blockchain: BlockchainId.ETH })
       throw Err.ConnectYourPaymentWallet
     }

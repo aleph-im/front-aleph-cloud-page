@@ -40,6 +40,7 @@ import { useConnection } from '@/hooks/common/useConnection'
 import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import { isBlockchainSupported as isBlockchainPAYGCompatible } from '@aleph-sdk/superfluid'
+import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 
 export default function NewInstancePage({ mainRef }: PageProps) {
   const {
@@ -94,11 +95,11 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       handleSelectNode(undefined)
     }
 
-    if (blockchain != BlockchainId.ETH)
+    if (!isBlockchainHoldingCompatible(blockchain))
       handleConnect({ blockchain: BlockchainId.ETH })
 
     setSelectedModal(undefined)
-  }, [blockchain, handleConnect, handleSelectNode, node])
+  }, [blockchain, handleConnect, handleSelectNode, node?.hash])
 
   useEffect(() => {
     if (!modalOpen) return
@@ -388,7 +389,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
     if (
       (node && isBlockchainPAYGCompatible(blockchain)) ||
-      (!node && blockchain === BlockchainId.ETH)
+      (!node && isBlockchainHoldingCompatible(blockchain))
     ) {
       return modalClose()
     }

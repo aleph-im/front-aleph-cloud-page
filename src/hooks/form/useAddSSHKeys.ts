@@ -130,6 +130,9 @@ export function useAddSSHKeys({
     [accountSSHKeys],
   )
 
+  // Empty when the account changes
+  useEffect(() => handleRemove(), [handleRemove, accountSSHKeys])
+
   useEffect(() => {
     let newValues = accountSSHKeyItems
 

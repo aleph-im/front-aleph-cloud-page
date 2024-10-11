@@ -106,4 +106,5 @@ export const blockchainSchema = z.enum([
   BlockchainId.ETH,
   BlockchainId.AVAX,
   BlockchainId.BASE,
+  BlockchainId.SOL,
 ])
