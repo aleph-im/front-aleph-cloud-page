@@ -59,7 +59,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   } = useNewInstancePage()
 
   const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
-  const { account, blockchain, handleConnect } = useConnection({
+  const { account, blockchain, provider, handleConnect } = useConnection({
     triggerOnMount: false,
   })
 
@@ -80,14 +80,21 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
   const handleCloseModal = useCallback(() => setSelectedModal(undefined), [])
 
-  const handleSwitchToNodeStream = useCallback(() => {
+  const handleSwitchToNodeStream = useCallback(async () => {
     if (!isBlockchainPAYGCompatible(blockchain))
-      handleConnect({ blockchain: BlockchainId.BASE })
+      handleConnect({ blockchain: BlockchainId.BASE, provider })
 
     if (selectedNode !== node?.hash) handleSelectNode(selectedNode)
 
     setSelectedModal(undefined)
-  }, [blockchain, handleConnect, handleSelectNode, node, selectedNode])
+  }, [
+    blockchain,
+    provider,
+    handleConnect,
+    handleSelectNode,
+    node,
+    selectedNode,
+  ])
 
   const handleSwitchToAutoHold = useCallback(() => {
     if (node?.hash) {
@@ -96,10 +103,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     }
 
     if (!isBlockchainHoldingCompatible(blockchain))
-      handleConnect({ blockchain: BlockchainId.ETH })
+      handleConnect({ blockchain: BlockchainId.ETH, provider })
 
     setSelectedModal(undefined)
-  }, [blockchain, handleConnect, handleSelectNode, node?.hash])
+  }, [blockchain, provider, handleConnect, handleSelectNode, node?.hash])
 
   useEffect(() => {
     if (!modalOpen) return
@@ -362,8 +369,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleSelectNode,
     handleSwitchToAutoHold,
     handleSwitchToNodeStream,
-    // modalClose,
-    // modalOpen,
     node,
     selectedModal,
     selectedNode,
@@ -426,7 +431,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             variant="primary"
             size="md"
             onClick={() => {
-              handleConnect({ blockchain: switchTo })
+              handleConnect({ blockchain: switchTo, provider })
             }}
           >
             Proceed
@@ -436,15 +441,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    // modalClose,
-    // modalOpen,
-    handleConnect,
-    account,
-    blockchain,
-    node,
-    selectedModal,
-  ])
+  }, [handleConnect, account, blockchain, provider, node, selectedModal])
   // ------------------------
 
   const columns = useMemo(() => {

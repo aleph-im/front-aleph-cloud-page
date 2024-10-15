@@ -88,7 +88,7 @@ export function getConnectionReducer(): ConnectionReducer {
 
       case ConnectionActionType.CONNECTION_CONNECT:
       case ConnectionActionType.CONNECTION_UPDATE: {
-        const { provider: initialProvider, blockchain: initialBlockchain } =
+        const { provider: currentProvider, blockchain: currentBlockchain } =
           state
         const { provider, blockchain } = action.payload
 
@@ -96,13 +96,13 @@ export function getConnectionReducer(): ConnectionReducer {
         let newBalance =
           (action as ConnectionUpdateAction).payload.balance || state.balance
 
-        // If we are switching between EVM and Solana, we need to hardcode the provider
-        if (initialProvider) {
+        // If we are switching between EVM and Solana, hardcode the provider
+        if (currentProvider) {
           const isSwitchingToSolana =
-            initialBlockchain !== BlockchainId.SOL &&
+            currentBlockchain !== BlockchainId.SOL &&
             blockchain === BlockchainId.SOL
           const isSwitchingToEVM =
-            initialBlockchain === BlockchainId.SOL &&
+            currentBlockchain === BlockchainId.SOL &&
             blockchain !== BlockchainId.SOL
 
           newProvider =
@@ -111,8 +111,8 @@ export function getConnectionReducer(): ConnectionReducer {
               : newProvider
         }
 
-        // If we are switching blockchains, we need to reset the balance
-        if (initialBlockchain && initialBlockchain !== blockchain)
+        // If we are switching blockchains, reset the balance
+        if (currentBlockchain && currentBlockchain !== blockchain)
           newBalance = undefined
 
         return {
