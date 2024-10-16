@@ -403,6 +403,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   const data = useMemo(() => (node ? [node] : []), [node])
 
   const createButtonRef = useRef<HTMLButtonElement>(null)
+  const createButtonFooterRef = useRef<HTMLButtonElement>(null)
   const isMobile = useResponsiveMax('md')
   const mobileTw = isMobile
     ? tw`!fixed !left-0 !top-0 !transform-none m-6 !z-20 !w-[calc(100% - 3rem)] !h-[calc(100% - 3rem)] !max-w-full`
@@ -618,6 +619,32 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               feature, enabling real-time payment for resources as you use them.
             </>
           }
+          footerButton={
+            <>
+              <Button
+                ref={createButtonFooterRef}
+                type="submit"
+                color="main0"
+                kind="default"
+                size="lg"
+                variant="primary"
+                disabled={isCreateButtonDisabled}
+                // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
+                onClick={handleSubmit}
+              >
+                Create instance
+              </Button>
+              {createButtonTooltipContent && (
+                <Tooltip
+                  my="bottom-center"
+                  at="top-center"
+                  targetRef={createButtonFooterRef}
+                  content={createButtonTooltipContent}
+                  css={mobileTw}
+                />
+              )}
+            </>
+          }
           button={
             <>
               <Button
@@ -649,3 +676,5 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     </>
   )
 }
+
+const CheckoutButton = () => {}
