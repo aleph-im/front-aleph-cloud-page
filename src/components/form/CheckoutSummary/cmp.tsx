@@ -250,6 +250,7 @@ export const CheckoutSummary = ({
   domains,
   description,
   button: buttonNode,
+  footerButton = buttonNode,
   control,
   receiverAddress,
   paymentMethod,
@@ -298,7 +299,7 @@ CheckoutSummaryProps) => {
       <CheckoutSummaryFooter
         {...{
           paymentMethod,
-          submitButton: buttonNode,
+          submitButton: footerButton,
           paymentMethodSwitch: paymentMethodSwitchNode,
           mainRef,
           totalCost: cost?.totalCost,

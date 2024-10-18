@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import {
   Button,
@@ -9,9 +9,11 @@ import {
   TableColumn,
   NoisyContainer,
   useModal,
+  Tooltip,
+  useResponsiveMax,
 } from '@aleph-front/core'
 import { CRN } from '@/domain/node'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { BlockchainId } from '@/domain/connect/base'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
@@ -27,7 +29,10 @@ import {
   apiServer,
 } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
-import { useNewInstancePage } from '@/hooks/pages/computing/useNewInstancePage'
+import {
+  useNewInstancePage,
+  UseNewInstancePageReturn,
+} from '@/hooks/pages/computing/useNewInstancePage'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import NewEntityTab from '../NewEntityTab'
@@ -41,27 +46,85 @@ import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import { isBlockchainSupported as isBlockchainPAYGCompatible } from '@aleph-sdk/superfluid'
 import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
+import tw from 'twin.macro'
+import { useAppState } from '@/contexts/appState'
+import {
+  ConnectionConfirmUpdateAction,
+  ConnectionConnectAction,
+  ConnectionDisconnectAction,
+  ConnectionUpdateAction,
+} from '@/store/connection'
+
+const CheckoutButton = ({
+  disabled,
+  handleSubmit,
+  tooltipContent,
+}: {
+  disabled: boolean
+  handleSubmit: UseNewInstancePageReturn['handleSubmit']
+  tooltipContent?: React.ReactNode
+}) => {
+  const checkoutButtonRef = useRef<HTMLButtonElement>(null)
+  const isMobile = useResponsiveMax('md')
+  const mobileTw = isMobile
+    ? tw`!fixed !left-0 !top-0 !transform-none m-6 !z-20 !w-[calc(100% - 3rem)] !h-[calc(100% - 3rem)] !max-w-full`
+    : tw``
+
+  return (
+    <>
+      <Button
+        ref={checkoutButtonRef}
+        type="submit"
+        color="main0"
+        kind="default"
+        size="lg"
+        variant="primary"
+        disabled={disabled}
+        onClick={handleSubmit}
+      >
+        Create instance
+      </Button>
+      {tooltipContent && (
+        <Tooltip
+          my="bottom-center"
+          at="top-center"
+          targetRef={checkoutButtonRef}
+          content={tooltipContent}
+          css={mobileTw}
+        />
+      )}
+    </>
+  )
+}
 
 export default function NewInstancePage({ mainRef }: PageProps) {
+  const [, dispatch] = useAppState()
+
   const {
     address,
     accountBalance,
+    blockchainName,
     isCreateButtonDisabled,
+    createButtonTooltipContent,
     values,
     control,
     errors,
     node,
     nodeSpecs,
     lastVersion,
+    hasModifiedFormValues,
+    disabledPAYG,
+    resetForm,
     handleSubmit,
     handleSelectNode,
     handleBack,
   } = useNewInstancePage()
 
   const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
-  const { account, blockchain, handleConnect } = useConnection({
-    triggerOnMount: false,
-  })
+  const { blockchain, account, provider, handleConnect, waitingConfirmation } =
+    useConnection({
+      triggerOnMount: false,
+    })
 
   // ------------------
 
@@ -74,20 +137,146 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     | 'node-list'
     | 'switch-to-hold'
     | 'switch-to-stream'
-    | 'switch-to-auto-hold'
     | 'switch-to-node-stream'
+    | 'external'
   >()
 
-  const handleCloseModal = useCallback(() => setSelectedModal(undefined), [])
+  const removeConfirmationModal = useCallback(
+    () =>
+      dispatch(
+        new ConnectionConfirmUpdateAction({
+          confirmationModal: undefined,
+          waitingConfirmation: false,
+        }),
+      ),
+    [dispatch],
+  )
 
-  const handleSwitchToNodeStream = useCallback(() => {
+  const handleCloseModal = useCallback(() => {
+    dispatch(
+      new ConnectionConfirmUpdateAction({
+        waitingConfirmation: false,
+      }),
+    )
+    setSelectedModal(undefined)
+  }, [dispatch])
+
+  const handleResetForm = useCallback(
+    (action: any, payload: any) => {
+      handleCloseModal()
+      dispatch(new action({ ...payload, confirmed: true }))
+      resetForm()
+    },
+    [dispatch, handleCloseModal, resetForm],
+  )
+
+  const confirmationModal = useCallback(
+    ({
+      action,
+      payload,
+    }: {
+      action:
+        | ConnectionConnectAction
+        | ConnectionUpdateAction
+        | ConnectionDisconnectAction
+      payload: any
+    }) => {
+      return {
+        width: '40rem',
+        title: 'Confirm Chain Switch',
+        onClose: handleCloseModal,
+        content: (
+          <div tw="flex flex-col gap-8" className="tp-body">
+            <div>
+              <strong>Switching chains will reset all data</strong> you&apos;ve
+              currently entered in the form. This is necessary to align with the
+              specific configurations and requirements of the new chain. Please
+              save any important information before proceeding.
+            </div>
+          </div>
+        ),
+        footer: (
+          <div tw="w-full flex justify-between">
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={handleCloseModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={() => handleResetForm(action, payload)}
+            >
+              Switch Chains
+            </Button>
+          </div>
+        ),
+      }
+    },
+    [handleCloseModal, handleResetForm],
+  )
+
+  useEffect(() => {
+    console.log(
+      'confirmation modal effect',
+      blockchain,
+      account,
+      hasModifiedFormValues,
+      modalOpen,
+    )
+    if (!blockchain) return removeConfirmationModal()
+    if (!account) return removeConfirmationModal()
+    if (!hasModifiedFormValues) return removeConfirmationModal()
+    if (!modalOpen) return removeConfirmationModal()
+
+    dispatch(
+      new ConnectionConfirmUpdateAction({
+        confirmationModal: { modalOpen, cardProps: confirmationModal },
+      }),
+    )
+  }, [
+    account,
+    blockchain,
+    hasModifiedFormValues,
+    confirmationModal,
+    dispatch,
+    modalOpen,
+    removeConfirmationModal,
+  ])
+
+  // useEffect(() => {
+  //   if (!blockchain) return
+  //   if (!account) return
+  //   if (!hasModifiedFormValues) return
+
+  //   setSelectedModal('confirm-chain-switch')
+  // }, [account, blockchain, hasModifiedFormValues])
+
+  const handleManuallySelectCRN = useCallback(() => {
+    isBlockchainPAYGCompatible(blockchain)
+      ? setSelectedModal('node-list')
+      : setSelectedModal('switch-to-node-stream')
+  }, [blockchain])
+
+  const handleSwitchToNodeStream = useCallback(async () => {
     if (!isBlockchainPAYGCompatible(blockchain))
-      handleConnect({ blockchain: BlockchainId.BASE })
+      handleConnect({ blockchain: BlockchainId.BASE, provider })
 
     if (selectedNode !== node?.hash) handleSelectNode(selectedNode)
 
     setSelectedModal(undefined)
-  }, [blockchain, handleConnect, handleSelectNode, node, selectedNode])
+  }, [
+    blockchain,
+    provider,
+    handleConnect,
+    handleSelectNode,
+    node,
+    selectedNode,
+  ])
 
   const handleSwitchToAutoHold = useCallback(() => {
     if (node?.hash) {
@@ -96,16 +285,16 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     }
 
     if (!isBlockchainHoldingCompatible(blockchain))
-      handleConnect({ blockchain: BlockchainId.ETH })
+      handleConnect({ blockchain: BlockchainId.ETH, provider })
 
     setSelectedModal(undefined)
-  }, [blockchain, handleConnect, handleSelectNode, node?.hash])
+  }, [blockchain, provider, handleConnect, handleSelectNode, node?.hash])
 
   useEffect(() => {
     if (!modalOpen) return
     if (!modalClose) return
 
-    if (!selectedModal) {
+    if (!selectedModal && !waitingConfirmation) {
       return modalClose()
     }
 
@@ -126,7 +315,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                   kind="functional"
                   variant="warning"
                   size="md"
-                  onClick={() => setSelectedModal('switch-to-auto-hold')}
+                  onClick={handleSwitchToAutoHold}
                 >
                   Auto-select CRN
                 </Button>
@@ -252,58 +441,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       })
     }
 
-    if (selectedModal === 'switch-to-auto-hold') {
-      return modalOpen({
-        width: '40rem',
-        title: 'Confirm CRN selection and Payment Method Change',
-        onClose: handleCloseModal,
-        content: (
-          <div tw="flex flex-col gap-8" className="tp-body">
-            <div>
-              You are about to enable <Strong>automatic CRN selection</Strong>,
-              which will utilize the <Strong>Holder-tier</Strong> on{' '}
-              <Strong>Ethereum</Strong>. This simplifies your setup by
-              automatically assigning a CRN node.
-            </div>
-            <div>
-              Switching modes will prompt your wallet to automatically adjust to
-              the Ethereum network if needed, and the system will reset to align
-              with your new selection preferences. Ensure your wallet is ready
-              for the Ethereum network.
-            </div>
-            <div>
-              <strong className="tp-body3 fs-12">Token Requirements</strong>
-              <div className="tp-body1 fs-12">
-                You will need to hold sufficient $ALEPH tokens in your wallet to
-                continue using the instance. $ALEPH can be acquired from Uniswap
-                or Coinbase.
-              </div>
-            </div>
-          </div>
-        ),
-        footer: (
-          <div tw="w-full flex justify-between">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={handleCloseModal}
-            >
-              Keep Current Settings
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={handleSwitchToAutoHold}
-            >
-              Proceed with Changes
-            </Button>
-          </div>
-        ),
-      })
-    }
-
     if (selectedModal === 'switch-to-node-stream') {
       return modalOpen({
         width: '40rem',
@@ -312,9 +449,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         content: (
           <div tw="flex flex-col gap-8" className="tp-body">
             <div>
-              You are about to switch from the automated Holder-tier setup on
-              Ethereum to <Strong>manually selecting</Strong> a CRN with the{' '}
-              <Strong>Pay-as-you-go</Strong> method on <Strong>Base</Strong>.
+              You are about to switch from the automated Holder-tier setup on{' '}
+              {blockchainName} to <Strong>manually selecting</Strong> a CRN with
+              the <Strong>Pay-as-you-go</Strong> method on <Strong>Base</Strong>
+              .
             </div>
             <div>
               Making this change will prompt your wallet to automatically switch
@@ -355,97 +493,39 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         ),
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     handleCloseModal,
     handleConnect,
     handleSelectNode,
     handleSwitchToAutoHold,
     handleSwitchToNodeStream,
-    // modalClose,
-    // modalOpen,
+    handleResetForm,
+    modalClose,
+    modalOpen,
     node,
     selectedModal,
     selectedNode,
+    blockchainName,
+    waitingConfirmation,
   ])
   // ------------------------
 
-  const handleSwitchPaymentMethod = useCallback((method: PaymentMethod) => {
-    if (method === PaymentMethod.Stream) {
-      setSelectedModal('switch-to-stream')
-    } else {
-      setSelectedModal('switch-to-hold')
-    }
-  }, [])
-
-  // @note: warn the user when the wrong network configuration has been detected
-  useEffect(() => {
-    if (!modalOpen) return
-    if (!modalClose) return
-
-    if (!account) return
-    if (!blockchain) return
-    if (selectedModal) return
-
-    if (
-      (node && isBlockchainPAYGCompatible(blockchain)) ||
-      (!node && isBlockchainHoldingCompatible(blockchain))
-    ) {
-      return modalClose()
-    }
-
-    const switchTo = node ? BlockchainId.BASE : BlockchainId.ETH
-    const name = blockchains[switchTo].name
-
-    return modalOpen({
-      width: '40rem',
-      title: 'Network Switch Required',
-      onClose: modalClose,
-      content: (
-        <div tw="flex flex-col gap-8" className="tp-body">
-          <div>
-            It looks like your wallet is currently connected to the wrong
-            network. To proceed with setting up your instance on
-            Twentysix.cloud, you&apos;ll need to switch to the{' '}
-            <Strong>{name}</Strong> network.
-          </div>
-        </div>
-      ),
-      footer: (
-        <div tw="w-full flex justify-between">
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            onClick={modalClose}
-          >
-            Stay on Current Network
-          </Button>
-          <Button
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={() => {
-              handleConnect({ blockchain: switchTo })
-            }}
-          >
-            Proceed
-          </Button>
-        </div>
-      ),
-    })
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    // modalClose,
-    // modalOpen,
-    handleConnect,
-    account,
-    blockchain,
-    node,
-    selectedModal,
-  ])
-  // ------------------------
+  const handleSwitchPaymentMethod = useCallback(
+    (method: PaymentMethod) => {
+      if (method === PaymentMethod.Stream) {
+        isBlockchainPAYGCompatible(blockchain)
+          ? node
+            ? handleSwitchToNodeStream()
+            : setSelectedModal('node-list')
+          : setSelectedModal('switch-to-stream')
+      } else if (method === PaymentMethod.Hold) {
+        isBlockchainHoldingCompatible(blockchain)
+          ? handleSwitchToAutoHold()
+          : setSelectedModal('switch-to-hold')
+      }
+    },
+    [blockchain, node, handleSwitchToAutoHold, handleSwitchToNodeStream],
+  )
 
   const columns = useMemo(() => {
     return [
@@ -525,9 +605,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                       kind="functional"
                       variant="warning"
                       size="md"
-                      onClick={() => {
-                        setSelectedModal('switch-to-auto-hold')
-                      }}
+                      onClick={handleSwitchToAutoHold}
                     >
                       Auto-select CRN
                     </Button>
@@ -568,7 +646,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                       kind="functional"
                       variant="warning"
                       size="md"
-                      onClick={() => setSelectedModal('switch-to-node-stream')}
+                      onClick={handleManuallySelectCRN}
                     >
                       Manually select CRN
                     </Button>
@@ -696,7 +774,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           unlockedAmount={accountBalance}
           paymentMethod={values.paymentMethod}
           streamDuration={values.streamDuration}
-          disablePaymentMethod={false}
+          disablePaymentMethod={disabledPAYG}
           mainRef={mainRef}
           onSwitchPaymentMethod={handleSwitchPaymentMethod}
           description={
@@ -708,19 +786,20 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               feature, enabling real-time payment for resources as you use them.
             </>
           }
+          // Duplicate buttons to have different references for the tooltip on each one
           button={
-            <Button
-              type="submit"
-              color="main0"
-              kind="default"
-              size="lg"
-              variant="primary"
+            <CheckoutButton
               disabled={isCreateButtonDisabled}
-              // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
-              onClick={handleSubmit}
-            >
-              Create instance
-            </Button>
+              handleSubmit={handleSubmit}
+              tooltipContent={createButtonTooltipContent}
+            />
+          }
+          footerButton={
+            <CheckoutButton
+              disabled={isCreateButtonDisabled}
+              handleSubmit={handleSubmit}
+              tooltipContent={createButtonTooltipContent}
+            />
           }
         />
       </Form>

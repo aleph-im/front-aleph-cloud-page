@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback, useEffect, useMemo } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import {
   createFromEVMAccount,
@@ -43,9 +43,10 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
-import { BlockchainId } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
 import { PaymentConfiguration } from '@/domain/executable'
 import { EVMAccount } from '@aleph-sdk/evm'
+import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -74,24 +75,33 @@ export const defaultValues: Partial<NewInstanceFormState> = {
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
-export type UseNewInstancePage = {
+export type UseNewInstancePageReturn = {
   address: string
   accountBalance: number
+  blockchainName: string
   isCreateButtonDisabled: boolean
+  createButtonTooltipContent?: string
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
   node?: CRN
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
+  hasModifiedFormValues: boolean
+  disabledPAYG: boolean
+  resetForm: () => void
   handleSubmit: (e: FormEvent) => Promise<void>
   handleSelectNode: (hash?: string) => Promise<boolean>
   handleBack: () => void
 }
 
-export function useNewInstancePage(): UseNewInstancePage {
+export function useNewInstancePage(): UseNewInstancePageReturn {
   const router = useRouter()
   const [, dispatch] = useAppState()
+  const [isCreateButtonDisabled, setIsCreateButtonDisabled] = useState(false)
+  const [createButtonTooltipContent, setCreateButtonTooltipContent] = useState<
+    string | undefined
+  >(undefined)
 
   const {
     blockchain,
@@ -236,8 +246,9 @@ export function useNewInstancePage(): UseNewInstancePage {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty: hasModifiedFormValues, dirtyFields },
     setValue,
+    reset: handleResetForm,
   } = useForm({
     defaultValues,
     onSubmit,
@@ -247,9 +258,15 @@ export function useNewInstancePage(): UseNewInstancePage {
     readyDeps: [],
   })
   const values = useWatch({ control }) as NewInstanceFormState
+  console.log('dirty: ', hasModifiedFormValues, dirtyFields, defaultValues)
 
   const { storage } = values.specs
   const { systemVolumeSize } = values
+
+  const resetForm = useCallback(
+    () => handleResetForm(defaultValues),
+    [handleResetForm],
+  )
 
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
@@ -289,12 +306,59 @@ export function useNewInstancePage(): UseNewInstancePage {
     setValue('streamCost', cost.totalStreamCost)
   }, [cost, setValue, values])
 
-  const canAfford =
-    accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
-  let isCreateButtonDisabled = !canAfford
-  if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
-    isCreateButtonDisabled = false
-  }
+  const blockchainName = useMemo(() => {
+    return blockchain ? blockchains[blockchain]?.name : 'current network'
+  }, [blockchain])
+
+  const disabledPAYG = useMemo(() => {
+    return !isAccountPAYGCompatible(account)
+  }, [account])
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
+      setCreateButtonTooltipContent(undefined)
+      return setIsCreateButtonDisabled(false)
+    }
+
+    const canAfford =
+      accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+
+    const hasValidPAYGConfig =
+      values.paymentMethod === PaymentMethod.Stream &&
+      node &&
+      isBlockchainPAYGCompatible(blockchain)
+
+    const hasValidHoldingConfig =
+      values.paymentMethod === PaymentMethod.Hold &&
+      isBlockchainHoldingCompatible(blockchain)
+
+    if (!canAfford || !(hasValidPAYGConfig || hasValidHoldingConfig)) {
+      if (!account) setCreateButtonTooltipContent('No account connected')
+      else if (!canAfford) setCreateButtonTooltipContent('Insufficient balance')
+      else if (!hasValidPAYGConfig)
+        setCreateButtonTooltipContent(
+          `"Pay-as-you-go" payment method is not supported on ${blockchainName}`,
+        )
+      else if (!hasValidHoldingConfig)
+        setCreateButtonTooltipContent(
+          `"Hold tokens" payment method is not supported on ${blockchainName}`,
+        )
+
+      setIsCreateButtonDisabled(true)
+    } else {
+      setCreateButtonTooltipContent(undefined)
+      setIsCreateButtonDisabled(false)
+    }
+  }, [
+    account,
+    accountBalance,
+    blockchain,
+    blockchainName,
+    cost,
+    node,
+    values.paymentMethod,
+  ])
+
   // -------------------------
 
   const handleBack = () => {
@@ -304,13 +368,18 @@ export function useNewInstancePage(): UseNewInstancePage {
   return {
     address: account?.address || '',
     accountBalance,
+    blockchainName,
     isCreateButtonDisabled,
+    createButtonTooltipContent,
     values,
     control,
     errors,
     node,
     lastVersion,
     nodeSpecs,
+    hasModifiedFormValues,
+    disabledPAYG,
+    resetForm,
     handleSubmit,
     handleSelectNode,
     handleBack,

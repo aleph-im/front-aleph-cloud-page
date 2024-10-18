@@ -25,6 +25,7 @@ export type CheckoutSummaryProps = {
   volumes?: VolumeField[]
   domains?: DomainField[]
   button?: ReactNode
+  footerButton?: ReactNode
   description?: ReactNode
   mainRef?: RefObject<HTMLElement>
   paymentMethod: PaymentMethod
