@@ -29,7 +29,10 @@ import {
   apiServer,
 } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
-import { useNewInstancePage } from '@/hooks/pages/computing/useNewInstancePage'
+import {
+  useNewInstancePage,
+  UseNewInstancePageReturn,
+} from '@/hooks/pages/computing/useNewInstancePage'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import NewEntityTab from '../NewEntityTab'
@@ -44,8 +47,59 @@ import BackButtonSection from '@/components/common/BackButtonSection'
 import { isBlockchainSupported as isBlockchainPAYGCompatible } from '@aleph-sdk/superfluid'
 import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 import tw from 'twin.macro'
+import { useAppState } from '@/contexts/appState'
+import {
+  ConnectionConfirmUpdateAction,
+  ConnectionConnectAction,
+  ConnectionDisconnectAction,
+  ConnectionUpdateAction,
+} from '@/store/connection'
+
+const CheckoutButton = ({
+  disabled,
+  handleSubmit,
+  tooltipContent,
+}: {
+  disabled: boolean
+  handleSubmit: UseNewInstancePageReturn['handleSubmit']
+  tooltipContent?: React.ReactNode
+}) => {
+  const checkoutButtonRef = useRef<HTMLButtonElement>(null)
+  const isMobile = useResponsiveMax('md')
+  const mobileTw = isMobile
+    ? tw`!fixed !left-0 !top-0 !transform-none m-6 !z-20 !w-[calc(100% - 3rem)] !h-[calc(100% - 3rem)] !max-w-full`
+    : tw``
+
+  return (
+    <>
+      <Button
+        ref={checkoutButtonRef}
+        type="submit"
+        color="main0"
+        kind="default"
+        size="lg"
+        variant="primary"
+        disabled={disabled}
+        onClick={handleSubmit}
+      >
+        Create instance
+      </Button>
+      {tooltipContent && (
+        <Tooltip
+          my="bottom-center"
+          at="top-center"
+          targetRef={checkoutButtonRef}
+          content={tooltipContent}
+          css={mobileTw}
+        />
+      )}
+    </>
+  )
+}
 
 export default function NewInstancePage({ mainRef }: PageProps) {
+  const [, dispatch] = useAppState()
+
   const {
     address,
     accountBalance,
@@ -58,15 +112,19 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     node,
     nodeSpecs,
     lastVersion,
+    hasModifiedFormValues,
+    disabledPAYG,
+    resetForm,
     handleSubmit,
     handleSelectNode,
     handleBack,
   } = useNewInstancePage()
 
   const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
-  const { blockchain, provider, handleConnect } = useConnection({
-    triggerOnMount: false,
-  })
+  const { blockchain, account, provider, handleConnect, waitingConfirmation } =
+    useConnection({
+      triggerOnMount: false,
+    })
 
   // ------------------
 
@@ -80,9 +138,123 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     | 'switch-to-hold'
     | 'switch-to-stream'
     | 'switch-to-node-stream'
+    | 'external'
   >()
 
-  const handleCloseModal = useCallback(() => setSelectedModal(undefined), [])
+  const removeConfirmationModal = useCallback(
+    () =>
+      dispatch(
+        new ConnectionConfirmUpdateAction({
+          confirmationModal: undefined,
+          waitingConfirmation: false,
+        }),
+      ),
+    [dispatch],
+  )
+
+  const handleCloseModal = useCallback(() => {
+    dispatch(
+      new ConnectionConfirmUpdateAction({
+        waitingConfirmation: false,
+      }),
+    )
+    setSelectedModal(undefined)
+  }, [dispatch])
+
+  const handleResetForm = useCallback(
+    (action: any, payload: any) => {
+      handleCloseModal()
+      dispatch(new action({ ...payload, confirmed: true }))
+      resetForm()
+    },
+    [dispatch, handleCloseModal, resetForm],
+  )
+
+  const confirmationModal = useCallback(
+    ({
+      action,
+      payload,
+    }: {
+      action:
+        | ConnectionConnectAction
+        | ConnectionUpdateAction
+        | ConnectionDisconnectAction
+      payload: any
+    }) => {
+      return {
+        width: '40rem',
+        title: 'Confirm Chain Switch',
+        onClose: handleCloseModal,
+        content: (
+          <div tw="flex flex-col gap-8" className="tp-body">
+            <div>
+              <strong>Switching chains will reset all data</strong> you&apos;ve
+              currently entered in the form. This is necessary to align with the
+              specific configurations and requirements of the new chain. Please
+              save any important information before proceeding.
+            </div>
+          </div>
+        ),
+        footer: (
+          <div tw="w-full flex justify-between">
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={handleCloseModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={() => handleResetForm(action, payload)}
+            >
+              Switch Chains
+            </Button>
+          </div>
+        ),
+      }
+    },
+    [handleCloseModal, handleResetForm],
+  )
+
+  useEffect(() => {
+    console.log(
+      'confirmation modal effect',
+      blockchain,
+      account,
+      hasModifiedFormValues,
+      modalOpen,
+    )
+    if (!blockchain) return removeConfirmationModal()
+    if (!account) return removeConfirmationModal()
+    if (!hasModifiedFormValues) return removeConfirmationModal()
+    if (!modalOpen) return removeConfirmationModal()
+
+    dispatch(
+      new ConnectionConfirmUpdateAction({
+        confirmationModal: { modalOpen, cardProps: confirmationModal },
+      }),
+    )
+  }, [
+    account,
+    blockchain,
+    hasModifiedFormValues,
+    confirmationModal,
+    dispatch,
+    modalOpen,
+    removeConfirmationModal,
+  ])
+
+  // useEffect(() => {
+  //   if (!blockchain) return
+  //   if (!account) return
+  //   if (!hasModifiedFormValues) return
+
+  //   setSelectedModal('confirm-chain-switch')
+  // }, [account, blockchain, hasModifiedFormValues])
 
   const handleManuallySelectCRN = useCallback(() => {
     isBlockchainPAYGCompatible(blockchain)
@@ -122,7 +294,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     if (!modalOpen) return
     if (!modalClose) return
 
-    if (!selectedModal) {
+    if (!selectedModal && !waitingConfirmation) {
       return modalClose()
     }
 
@@ -327,12 +499,14 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleSelectNode,
     handleSwitchToAutoHold,
     handleSwitchToNodeStream,
+    handleResetForm,
     modalClose,
     modalOpen,
     node,
     selectedModal,
     selectedNode,
     blockchainName,
+    waitingConfirmation,
   ])
   // ------------------------
 
@@ -401,13 +575,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   }, [lastVersion])
 
   const data = useMemo(() => (node ? [node] : []), [node])
-
-  const createButtonRef = useRef<HTMLButtonElement>(null)
-  const createButtonFooterRef = useRef<HTMLButtonElement>(null)
-  const isMobile = useResponsiveMax('md')
-  const mobileTw = isMobile
-    ? tw`!fixed !left-0 !top-0 !transform-none m-6 !z-20 !w-[calc(100% - 3rem)] !h-[calc(100% - 3rem)] !max-w-full`
-    : tw``
 
   return (
     <>
@@ -607,7 +774,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           unlockedAmount={accountBalance}
           paymentMethod={values.paymentMethod}
           streamDuration={values.streamDuration}
-          disablePaymentMethod={false}
+          disablePaymentMethod={disabledPAYG}
           mainRef={mainRef}
           onSwitchPaymentMethod={handleSwitchPaymentMethod}
           description={
@@ -619,62 +786,23 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               feature, enabling real-time payment for resources as you use them.
             </>
           }
-          footerButton={
-            <>
-              <Button
-                ref={createButtonFooterRef}
-                type="submit"
-                color="main0"
-                kind="default"
-                size="lg"
-                variant="primary"
-                disabled={isCreateButtonDisabled}
-                // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
-                onClick={handleSubmit}
-              >
-                Create instance
-              </Button>
-              {createButtonTooltipContent && (
-                <Tooltip
-                  my="bottom-center"
-                  at="top-center"
-                  targetRef={createButtonFooterRef}
-                  content={createButtonTooltipContent}
-                  css={mobileTw}
-                />
-              )}
-            </>
-          }
+          // Duplicate buttons to have different references for the tooltip on each one
           button={
-            <>
-              <Button
-                ref={createButtonRef}
-                type="submit"
-                color="main0"
-                kind="default"
-                size="lg"
-                variant="primary"
-                disabled={isCreateButtonDisabled}
-                // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
-                onClick={handleSubmit}
-              >
-                Create instance
-              </Button>
-              {createButtonTooltipContent && (
-                <Tooltip
-                  my="bottom-center"
-                  at="top-center"
-                  targetRef={createButtonRef}
-                  content={createButtonTooltipContent}
-                  css={mobileTw}
-                />
-              )}
-            </>
+            <CheckoutButton
+              disabled={isCreateButtonDisabled}
+              handleSubmit={handleSubmit}
+              tooltipContent={createButtonTooltipContent}
+            />
+          }
+          footerButton={
+            <CheckoutButton
+              disabled={isCreateButtonDisabled}
+              handleSubmit={handleSubmit}
+              tooltipContent={createButtonTooltipContent}
+            />
           }
         />
       </Form>
     </>
   )
 }
-
-const CheckoutButton = () => {}

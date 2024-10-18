@@ -75,7 +75,7 @@ export const defaultValues: Partial<NewInstanceFormState> = {
   // sshKeys: [{ ...sshKeyDefaultValues }],
 }
 
-export type UseNewInstancePage = {
+export type UseNewInstancePageReturn = {
   address: string
   accountBalance: number
   blockchainName: string
@@ -87,12 +87,15 @@ export type UseNewInstancePage = {
   node?: CRN
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
+  hasModifiedFormValues: boolean
+  disabledPAYG: boolean
+  resetForm: () => void
   handleSubmit: (e: FormEvent) => Promise<void>
   handleSelectNode: (hash?: string) => Promise<boolean>
   handleBack: () => void
 }
 
-export function useNewInstancePage(): UseNewInstancePage {
+export function useNewInstancePage(): UseNewInstancePageReturn {
   const router = useRouter()
   const [, dispatch] = useAppState()
   const [isCreateButtonDisabled, setIsCreateButtonDisabled] = useState(false)
@@ -243,8 +246,9 @@ export function useNewInstancePage(): UseNewInstancePage {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty: hasModifiedFormValues, dirtyFields },
     setValue,
+    reset: handleResetForm,
   } = useForm({
     defaultValues,
     onSubmit,
@@ -254,9 +258,15 @@ export function useNewInstancePage(): UseNewInstancePage {
     readyDeps: [],
   })
   const values = useWatch({ control }) as NewInstanceFormState
+  console.log('dirty: ', hasModifiedFormValues, dirtyFields, defaultValues)
 
   const { storage } = values.specs
   const { systemVolumeSize } = values
+
+  const resetForm = useCallback(
+    () => handleResetForm(defaultValues),
+    [handleResetForm],
+  )
 
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
@@ -299,6 +309,10 @@ export function useNewInstancePage(): UseNewInstancePage {
   const blockchainName = useMemo(() => {
     return blockchain ? blockchains[blockchain]?.name : 'current network'
   }, [blockchain])
+
+  const disabledPAYG = useMemo(() => {
+    return !isAccountPAYGCompatible(account)
+  }, [account])
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
@@ -363,6 +377,9 @@ export function useNewInstancePage(): UseNewInstancePage {
     node,
     lastVersion,
     nodeSpecs,
+    hasModifiedFormValues,
+    disabledPAYG,
+    resetForm,
     handleSubmit,
     handleSelectNode,
     handleBack,
