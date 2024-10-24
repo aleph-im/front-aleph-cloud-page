@@ -20,6 +20,21 @@ export const defaultValues: SSHKeyField = {
   isNew: true,
 }
 
+export function useAccountSSHKeyItems(): SSHKeyField[] {
+  const { entities: accountSSHKeys } = useRequestSSHKeys()
+
+  return useMemo(
+    () =>
+      (accountSSHKeys || []).map(({ key, label = '' }, i) => ({
+        key,
+        label,
+        isSelected: i === 0,
+        isNew: false,
+      })),
+    [accountSSHKeys],
+  )
+}
+
 export type UseSSHKeyItemProps = {
   name?: string
   index: number
@@ -116,22 +131,10 @@ export function useAddSSHKeys({
 
   const { remove: handleRemove, append, replace, prepend } = sshKeysCtrl
   const fields = sshKeysCtrl.fields as (SSHKeyField & { id: string })[]
-
-  const { entities: accountSSHKeys } = useRequestSSHKeys()
-
-  const accountSSHKeyItems: SSHKeyField[] = useMemo(
-    () =>
-      (accountSSHKeys || []).map(({ key, label = '' }, i) => ({
-        key,
-        label,
-        isSelected: i === 0,
-        isNew: false,
-      })),
-    [accountSSHKeys],
-  )
+  const accountSSHKeyItems = useAccountSSHKeyItems()
 
   // Empty when the account changes
-  useEffect(() => handleRemove(), [handleRemove, accountSSHKeys])
+  useEffect(() => handleRemove(), [handleRemove, accountSSHKeyItems])
 
   useEffect(() => {
     let newValues = accountSSHKeyItems

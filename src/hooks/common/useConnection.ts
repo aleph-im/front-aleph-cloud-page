@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { useNotification } from '@aleph-front/core'
+import { useModal, useNotification } from '@aleph-front/core'
 import {
+  ConnectionConfirmUpdateAction,
   ConnectionConnectAction,
   ConnectionDisconnectAction,
   ConnectionState,
@@ -13,6 +14,7 @@ import { BaseConnectionProviderManager } from '@/domain/connect/base'
 
 export type UseConnectionProps = {
   triggerOnMount?: boolean
+  confirmSwitchModal?: React.ReactNode
 }
 
 export type UseConnectionReturn = ConnectionState & {
@@ -24,7 +26,7 @@ export const useConnection = ({
   triggerOnMount,
 }: UseConnectionProps): UseConnectionReturn => {
   const [state, dispatch] = useAppState()
-  const { blockchain, provider } = state.connection
+  const { blockchain, provider, confirmationModal } = state.connection
 
   const prevConnectionProviderRef = useRef<
     BaseConnectionProviderManager | undefined
@@ -32,11 +34,25 @@ export const useConnection = ({
 
   const noti = useNotification()
   const addNotification = noti?.add
+  const modal = useModal()
+  const openModal = modal?.open
 
   const handleConnect = useCallback(
-    (payload: ConnectionConnectAction['payload']) =>
-      dispatch(new ConnectionConnectAction(payload)),
-    [dispatch],
+    (payload: ConnectionConnectAction['payload']) => {
+      if (confirmationModal) {
+        if (!openModal) return
+
+        dispatch(
+          new ConnectionConfirmUpdateAction({ waitingConfirmation: true }),
+        )
+
+        openModal(confirmationModal(ConnectionConnectAction, payload))
+      } else {
+        dispatch(new ConnectionConnectAction(payload))
+      }
+    },
+
+    [confirmationModal, openModal, dispatch],
   )
 
   const handleDisconnect = useCallback(

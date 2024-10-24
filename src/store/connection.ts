@@ -1,4 +1,5 @@
 import { Account } from '@aleph-sdk/account'
+import { ModalCardProps } from '@aleph-front/core'
 import { StoreReducer } from './store'
 import {
   BlockchainId,
@@ -6,11 +7,18 @@ import {
   ProviderId,
 } from '@/domain/connect/base'
 
+export type ConnectionConfirmationModal = <Action extends ConnectionAction>(
+  action: { new (payload: Action['payload']): Action },
+  payload: Action['payload'],
+) => ModalCardProps
+
 export type ConnectionState = {
   account?: Account
   balance?: number
   blockchain?: BlockchainId
   provider?: ProviderId
+  waitingConfirmation?: boolean
+  confirmationModal?: ConnectionConfirmationModal
 }
 
 export const initialState: ConnectionState = {
@@ -25,6 +33,7 @@ export enum ConnectionActionType {
   CONNECTION_DISCONNECT = 'CONNECTION_DISCONNECT',
   CONNECTION_UPDATE = 'CONNECTION_UPDATE',
   CONNECTION_SET_BALANCE = 'CONNECTION_SET_BALANCE',
+  CONNECTION_CONFIRM_UPDATE = 'CONNECTION_CONFIRM_UPDATE',
 }
 
 export class ConnectionConnectAction {
@@ -68,11 +77,22 @@ export class ConnectionSetBalanceAction {
   ) {}
 }
 
+export class ConnectionConfirmUpdateAction {
+  readonly type = ConnectionActionType.CONNECTION_CONFIRM_UPDATE
+  constructor(
+    public payload: {
+      waitingConfirmation?: ConnectionState['waitingConfirmation']
+      confirmationModal?: ConnectionState['confirmationModal']
+    },
+  ) {}
+}
+
 export type ConnectionAction =
   | ConnectionConnectAction
   | ConnectionDisconnectAction
   | ConnectionUpdateAction
   | ConnectionSetBalanceAction
+  | ConnectionConfirmUpdateAction
 
 export type ConnectionReducer = StoreReducer<ConnectionState, ConnectionAction>
 
@@ -123,6 +143,12 @@ export function getConnectionReducer(): ConnectionReducer {
         }
       }
       case ConnectionActionType.CONNECTION_SET_BALANCE: {
+        return {
+          ...state,
+          ...action.payload,
+        }
+      }
+      case ConnectionActionType.CONNECTION_CONFIRM_UPDATE: {
         return {
           ...state,
           ...action.payload,
