@@ -1,9 +1,10 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { StyledInfoTooltipButton } from './styles'
 import { InfoTooltipButtonProps } from './types'
-import { Icon, Tooltip, useResponsiveMax } from '@aleph-front/core'
+import { Icon } from '@aleph-front/core'
 import tw from 'twin.macro'
 import { TwStyle } from 'twin.macro'
+import ResponsiveTooltip from '../ResponsiveTooltip'
 
 export const InfoTooltipButton = ({
   children,
@@ -22,12 +23,6 @@ export const InfoTooltipButton = ({
   }, [])
 
   const targetRef = useRef<HTMLButtonElement>(null)
-
-  // @todo: Improve this using css
-  const isMobile = useResponsiveMax('md')
-  const mobileTw = isMobile
-    ? tw`!fixed !left-0 !top-0 !transform-none m-6 !z-20 !w-[calc(100% - 3rem)] !h-[calc(100% - 3rem)] !max-w-full`
-    : tw``
 
   const iconCss: (TwStyle | string)[] = []
   switch (align) {
@@ -63,11 +58,10 @@ export const InfoTooltipButton = ({
         </StyledInfoTooltipButton>
       )}
       {renderTooltip && (
-        <Tooltip
+        <ResponsiveTooltip
           {...rest}
           targetRef={targetRef}
           content={tooltipContent}
-          css={mobileTw}
         />
       )}
     </>
