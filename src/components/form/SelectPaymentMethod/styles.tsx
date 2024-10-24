@@ -1,14 +1,11 @@
 import tw from 'twin.macro'
 import styled, { css } from 'styled-components'
 
-export type StyledLabelProps = { $disabled?: boolean }
+export type StyledLabelProps = { $selected?: boolean; $disabled?: boolean }
 
 export const StyledLabel = styled.label<StyledLabelProps>`
-  ${({ $disabled = false }) => css`
-    /* ${tw`cursor-pointer`} */
-    /* @todo: fix it after supporting stream payment with automatic allocation or hold payment with manual allocation */
-    ${tw`cursor-not-allowed`}
-
+  ${({ $selected = false, $disabled = false }) => css`
+    ${$disabled ? tw`cursor-not-allowed` : !$selected ? tw`cursor-pointer` : ''}
     ${$disabled &&
     css`
       ${tw`opacity-40 cursor-not-allowed`}

@@ -250,6 +250,7 @@ export const CheckoutSummary = ({
   domains,
   description,
   button: buttonNode,
+  footerButton = buttonNode,
   control,
   receiverAddress,
   paymentMethod,
@@ -257,6 +258,7 @@ export const CheckoutSummary = ({
   mainRef,
   isPersistent = type === EntityType.Instance,
   disablePaymentMethod = true,
+  disabledStreamTooltip,
   onSwitchPaymentMethod,
 }: // streamDuration,
 CheckoutSummaryProps) => {
@@ -289,6 +291,7 @@ CheckoutSummaryProps) => {
       disabledHold={disabledHold}
       disabledStream={disabledStream}
       onSwitch={onSwitchPaymentMethod}
+      disabledStreamTooltip={disabledStreamTooltip}
     />
   )
 
@@ -298,7 +301,7 @@ CheckoutSummaryProps) => {
       <CheckoutSummaryFooter
         {...{
           paymentMethod,
-          submitButton: buttonNode,
+          submitButton: footerButton,
           paymentMethodSwitch: paymentMethodSwitchNode,
           mainRef,
           totalCost: cost?.totalCost,

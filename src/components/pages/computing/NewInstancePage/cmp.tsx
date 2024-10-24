@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import {
   Button,
@@ -8,10 +8,8 @@ import {
   NodeScore,
   TableColumn,
   NoisyContainer,
-  useModal,
 } from '@aleph-front/core'
 import { CRN } from '@/domain/node'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
@@ -27,7 +25,10 @@ import {
   apiServer,
 } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
-import { useNewInstancePage } from '@/hooks/pages/computing/useNewInstancePage'
+import {
+  useNewInstancePage,
+  UseNewInstancePageReturn,
+} from '@/hooks/pages/computing/useNewInstancePage'
 import Form from '@/components/form/Form'
 import ToggleContainer from '@/components/common/ToggleContainer'
 import NewEntityTab from '../NewEntityTab'
@@ -36,378 +37,98 @@ import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
-import { useConnection } from '@/hooks/common/useConnection'
 import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
-import { isBlockchainSupported as isBlockchainPAYGCompatible } from '@aleph-sdk/superfluid'
-import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
+import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
+import { ConnectionConfirmationModal } from '@/store/connection'
+
+const CheckoutButton = ({
+  disabled,
+  handleSubmit,
+  tooltipContent,
+}: {
+  disabled: boolean
+  handleSubmit: UseNewInstancePageReturn['handleSubmit']
+  tooltipContent?: React.ReactNode
+}) => {
+  const checkoutButtonRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <>
+      <Button
+        ref={checkoutButtonRef}
+        type="submit"
+        color="main0"
+        kind="default"
+        size="lg"
+        variant="primary"
+        disabled={disabled}
+        onClick={handleSubmit}
+      >
+        Create instance
+      </Button>
+      {tooltipContent && (
+        <ResponsiveTooltip
+          my="bottom-center"
+          at="top-center"
+          targetRef={checkoutButtonRef}
+          content={<p className="tp-body2">{tooltipContent}</p>}
+        />
+      )}
+    </>
+  )
+}
 
 export default function NewInstancePage({ mainRef }: PageProps) {
   const {
     address,
     accountBalance,
+    blockchainName,
     isCreateButtonDisabled,
+    createButtonTooltipContent,
     values,
     control,
     errors,
     node,
     nodeSpecs,
     lastVersion,
+    disabledPAYG,
+    hasModifiedFormValues,
+    waitingModalConfirmation,
+    selectedModal,
+    setSelectedModal,
+    selectedNode,
+    setSelectedNode,
+    modalOpen,
+    modalClose,
     handleSubmit,
-    handleSelectNode,
+    handleCloseModal,
+    handleResetForm,
+    handleSwitchPaymentMethod,
+    handleManuallySelectCRN,
+    handleSwitchToAutoHold,
+    handleSwitchToNodeStream,
+    handleEnableConfirmationModal,
+    handleDisableConfirmationModal,
     handleBack,
   } = useNewInstancePage()
 
   const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
-  const { account, blockchain, handleConnect } = useConnection({
-    triggerOnMount: false,
-  })
 
   // ------------------
 
-  const modal = useModal()
-  const modalOpen = modal?.open
-  const modalClose = modal?.close
-
-  const [selectedNode, setSelectedNode] = useState<string>()
-  const [selectedModal, setSelectedModal] = useState<
-    | 'node-list'
-    | 'switch-to-hold'
-    | 'switch-to-stream'
-    | 'switch-to-auto-hold'
-    | 'switch-to-node-stream'
-  >()
-
-  const handleCloseModal = useCallback(() => setSelectedModal(undefined), [])
-
-  const handleSwitchToNodeStream = useCallback(() => {
-    if (!isBlockchainPAYGCompatible(blockchain))
-      handleConnect({ blockchain: BlockchainId.BASE })
-
-    if (selectedNode !== node?.hash) handleSelectNode(selectedNode)
-
-    setSelectedModal(undefined)
-  }, [blockchain, handleConnect, handleSelectNode, node, selectedNode])
-
-  const handleSwitchToAutoHold = useCallback(() => {
-    if (node?.hash) {
-      setSelectedNode(undefined)
-      handleSelectNode(undefined)
-    }
-
-    if (!isBlockchainHoldingCompatible(blockchain))
-      handleConnect({ blockchain: BlockchainId.ETH })
-
-    setSelectedModal(undefined)
-  }, [blockchain, handleConnect, handleSelectNode, node?.hash])
-
-  useEffect(() => {
-    if (!modalOpen) return
-    if (!modalClose) return
-
-    if (!selectedModal) {
-      return modalClose()
-    }
-
-    if (selectedModal === 'node-list') {
-      return modalOpen({
-        header: '',
-        width: '80rem',
-        onClose: handleCloseModal,
-        content: (
-          <CRNList selected={selectedNode} onSelectedChange={setSelectedNode} />
-        ),
-        footer: (
-          <>
-            <div tw="w-full flex justify-between">
-              {node && (
-                <Button
-                  type="button"
-                  kind="functional"
-                  variant="warning"
-                  size="md"
-                  onClick={() => setSelectedModal('switch-to-auto-hold')}
-                >
-                  Auto-select CRN
-                </Button>
-              )}
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                onClick={handleSwitchToNodeStream}
-                disabled={!selectedNode}
-                tw="ml-auto!"
-              >
-                Continue
-              </Button>
-            </div>
-          </>
-        ),
-      })
-    }
-
-    if (selectedModal === 'switch-to-hold') {
-      return modalOpen({
-        width: '40rem',
-        title: 'Confirm Payment Method Change',
-        onClose: handleCloseModal,
-        content: (
-          <div tw="flex flex-col gap-8" className="tp-body">
-            <div>
-              Switching to the <Strong>Holder tier</Strong> will set your
-              payment method to holding $ALEPH tokens on{' '}
-              <Strong>Ethereum</Strong> and{' '}
-              <Strong>automatically select</Strong> the most suitable CRN.
-            </div>
-            <div>
-              Switching modes will prompt your wallet to automatically adjust to
-              the Ethereum network if needed, and the system will reset to align
-              with your new selection preferences. Ensure your wallet is ready
-              for the Ethereum network.
-            </div>
-            <div>
-              <strong className="tp-body3 fs-12">Token Requirements</strong>
-              <div className="tp-body1 fs-12">
-                You will need to hold sufficient $ALEPH tokens in your wallet to
-                continue using the instance. $ALEPH can be acquired from Uniswap
-                or Coinbase.
-              </div>
-            </div>
-          </div>
-        ),
-        footer: (
-          <div tw="w-full flex justify-between">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={handleCloseModal}
-            >
-              Stay on Tier
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={handleSwitchToAutoHold}
-            >
-              Switch Tier
-            </Button>
-          </div>
-        ),
-      })
-    }
-
-    if (selectedModal === 'switch-to-stream') {
-      return modalOpen({
-        width: '40rem',
-        title: 'Confirm Payment Method Change',
-        onClose: handleCloseModal,
-        content: (
-          <div tw="flex flex-col gap-8" className="tp-body">
-            <div>
-              You are about to switch your payment method to{' '}
-              <Strong>Pay-as-you-go</Strong>, which will also allow you to{' '}
-              <Strong>manually select</Strong> your preferred CRN on{' '}
-              <Strong>Base</Strong>.
-            </div>
-            <div>
-              Making this change will prompt your wallet to automatically switch
-              networks. This will reset your current configuration to
-              accommodate your new selection. Please ensure your wallet is
-              compatible and ready for this transition.
-            </div>
-            <div>
-              <strong className="tp-body3 fs-12">Token Requirements</strong>
-              <div className="tp-body1 fs-12">
-                You will need $ETH on Base to start the PAYG stream and $ALEPH
-                on Base to stream. Purchase $ETH on Base at Uniswap and get
-                $ALEPH on Base by swapping your Ethereum $ALEPH on
-                swap.aleph.im.
-              </div>
-            </div>
-          </div>
-        ),
-        footer: (
-          <div tw="w-full flex justify-between">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={handleCloseModal}
-            >
-              Stay on Tier
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={() => setSelectedModal('node-list')}
-            >
-              Switch Tier
-            </Button>
-          </div>
-        ),
-      })
-    }
-
-    if (selectedModal === 'switch-to-auto-hold') {
-      return modalOpen({
-        width: '40rem',
-        title: 'Confirm CRN selection and Payment Method Change',
-        onClose: handleCloseModal,
-        content: (
-          <div tw="flex flex-col gap-8" className="tp-body">
-            <div>
-              You are about to enable <Strong>automatic CRN selection</Strong>,
-              which will utilize the <Strong>Holder-tier</Strong> on{' '}
-              <Strong>Ethereum</Strong>. This simplifies your setup by
-              automatically assigning a CRN node.
-            </div>
-            <div>
-              Switching modes will prompt your wallet to automatically adjust to
-              the Ethereum network if needed, and the system will reset to align
-              with your new selection preferences. Ensure your wallet is ready
-              for the Ethereum network.
-            </div>
-            <div>
-              <strong className="tp-body3 fs-12">Token Requirements</strong>
-              <div className="tp-body1 fs-12">
-                You will need to hold sufficient $ALEPH tokens in your wallet to
-                continue using the instance. $ALEPH can be acquired from Uniswap
-                or Coinbase.
-              </div>
-            </div>
-          </div>
-        ),
-        footer: (
-          <div tw="w-full flex justify-between">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={handleCloseModal}
-            >
-              Keep Current Settings
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={handleSwitchToAutoHold}
-            >
-              Proceed with Changes
-            </Button>
-          </div>
-        ),
-      })
-    }
-
-    if (selectedModal === 'switch-to-node-stream') {
-      return modalOpen({
-        width: '40rem',
-        title: 'Confirm CRN selection and Payment Method Change',
-        onClose: handleCloseModal,
-        content: (
-          <div tw="flex flex-col gap-8" className="tp-body">
-            <div>
-              You are about to switch from the automated Holder-tier setup on
-              Ethereum to <Strong>manually selecting</Strong> a CRN with the{' '}
-              <Strong>Pay-as-you-go</Strong> method on <Strong>Base</Strong>.
-            </div>
-            <div>
-              Making this change will prompt your wallet to automatically switch
-              networks. This will reset your current configuration to
-              accommodate your new selection. Please ensure your wallet is
-              compatible and ready for this transition.
-            </div>
-            <div>
-              <strong className="tp-body3 fs-12">Token Requirements</strong>
-              <div className="tp-body1 fs-12">
-                You will need $ETH on Base to start the PAYG stream and $ALEPH
-                on Base to stream. Purchase $ETH on Base at Uniswap and get
-                $ALEPH on Base by swapping your Ethereum $ALEPH on
-                swap.aleph.im.
-              </div>
-            </div>
-          </div>
-        ),
-        footer: (
-          <div tw="w-full flex justify-between">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={handleCloseModal}
-            >
-              Keep Current Settings
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={() => setSelectedModal('node-list')}
-            >
-              Proceed with Changes
-            </Button>
-          </div>
-        ),
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    handleCloseModal,
-    handleConnect,
-    handleSelectNode,
-    handleSwitchToAutoHold,
-    handleSwitchToNodeStream,
-    // modalClose,
-    // modalOpen,
-    node,
-    selectedModal,
-    selectedNode,
-  ])
-  // ------------------------
-
-  const handleSwitchPaymentMethod = useCallback((method: PaymentMethod) => {
-    if (method === PaymentMethod.Stream) {
-      setSelectedModal('switch-to-stream')
-    } else {
-      setSelectedModal('switch-to-hold')
-    }
-  }, [])
-
-  // @note: warn the user when the wrong network configuration has been detected
-  useEffect(() => {
-    if (!modalOpen) return
-    if (!modalClose) return
-
-    if (!account) return
-    if (!blockchain) return
-    if (selectedModal) return
-
-    if (
-      (node && isBlockchainPAYGCompatible(blockchain)) ||
-      (!node && isBlockchainHoldingCompatible(blockchain))
-    ) {
-      return modalClose()
-    }
-
-    const switchTo = node ? BlockchainId.BASE : BlockchainId.ETH
-    const name = blockchains[switchTo].name
-
-    return modalOpen({
+  const confirmationModal: ConnectionConfirmationModal = useCallback(
+    (action, payload) => ({
       width: '40rem',
-      title: 'Network Switch Required',
-      onClose: modalClose,
+      title: 'Confirm Chain Switch',
+      onClose: handleCloseModal,
       content: (
         <div tw="flex flex-col gap-8" className="tp-body">
           <div>
-            It looks like your wallet is currently connected to the wrong
-            network. To proceed with setting up your instance on
-            Twentysix.cloud, you&apos;ll need to switch to the{' '}
-            <Strong>{name}</Strong> network.
+            <strong>Switching chains will reset all data</strong> you&apos;ve
+            currently entered in the form. This is necessary to align with the
+            specific configurations and requirements of the new chain. Please
+            save any important information before proceeding.
           </div>
         </div>
       ),
@@ -417,33 +138,95 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             type="button"
             variant="secondary"
             size="md"
-            onClick={modalClose}
+            onClick={handleCloseModal}
           >
-            Stay on Current Network
+            Cancel
           </Button>
           <Button
             type="button"
             variant="primary"
             size="md"
-            onClick={() => {
-              handleConnect({ blockchain: switchTo })
-            }}
+            onClick={() => handleResetForm(action, payload)}
           >
-            Proceed
+            Switch Chains
           </Button>
         </div>
       ),
-    })
+    }),
+    [handleCloseModal, handleResetForm],
+  )
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Handle confirmation modal
+  useEffect(() => {
+    if (node) return handleEnableConfirmationModal(confirmationModal)
+
+    if (!address) return handleDisableConfirmationModal()
+    if (!hasModifiedFormValues) return handleDisableConfirmationModal()
+    if (!modalOpen) return handleDisableConfirmationModal()
+
+    handleEnableConfirmationModal(confirmationModal)
+
+    return () => handleDisableConfirmationModal()
   }, [
-    // modalClose,
-    // modalOpen,
-    handleConnect,
-    account,
-    blockchain,
+    address,
+    hasModifiedFormValues,
+    confirmationModal,
+    modalOpen,
+    handleDisableConfirmationModal,
+    handleEnableConfirmationModal,
     node,
+  ])
+
+  // Handle modals
+  useEffect(() => {
+    if (!modalOpen) return
+    if (!modalClose) return
+    if (waitingModalConfirmation) return
+    if (!selectedModal) return modalClose()
+
+    switch (selectedModal) {
+      case 'node-list':
+        return modalOpen({
+          header: '',
+          width: '80rem',
+          onClose: handleCloseModal,
+          content: (
+            <CRNList
+              selected={selectedNode}
+              onSelectedChange={setSelectedNode}
+            />
+          ),
+          footer: (
+            <>
+              <div tw="w-full flex justify-end">
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={handleSwitchToNodeStream}
+                  disabled={!selectedNode}
+                  tw="ml-auto!"
+                >
+                  Continue
+                </Button>
+              </div>
+            </>
+          ),
+        })
+    }
+  }, [
+    blockchainName,
+    node,
+    selectedNode,
+    setSelectedNode,
     selectedModal,
+    setSelectedModal,
+    waitingModalConfirmation,
+    modalOpen,
+    modalClose,
+    handleCloseModal,
+    handleSwitchToAutoHold,
+    handleSwitchToNodeStream,
   ])
   // ------------------------
 
@@ -492,9 +275,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         ),
       },
     ] as TableColumn<CRN>[]
-  }, [lastVersion])
+  }, [lastVersion, setSelectedModal])
 
-  const data = useMemo(() => (node ? [node] : []), [node])
+  const nodeData = useMemo(() => (node ? [node] : []), [node])
+  const manuallySelectButtonRef = useRef<HTMLButtonElement>(null)
 
   return (
     <>
@@ -505,32 +289,41 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <NewEntityTab selected="instance" />
           </Container>
         </section>
-        {node && (
+        {values.paymentMethod === PaymentMethod.Stream && (
           <section tw="px-0 pt-20 pb-6 md:py-10">
             <Container>
               <SectionTitle number={sectionNumber(0)}>
                 Selected instance
               </SectionTitle>
+              <p>
+                Your instance is set up with your manually selected Compute
+                Resource Node (CRN), operating under the{' '}
+                <Strong>Pay-as-you-go</Strong> payment method on{' '}
+                <Strong>{blockchainName}</Strong>. This setup gives you direct
+                control over your resource allocation and costs, requiring
+                active management of your instance. To adjust your CRN or
+                explore different payment options, you can modify your selection
+                below.
+              </p>
               <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
                 <NoisyContainer>
-                  <SpinnerOverlay show={!node} />
                   <NodesTable
                     columns={columns}
-                    data={data}
+                    data={nodeData}
                     rowProps={() => ({ className: '_active' })}
                   />
                   <div tw="mt-6">
-                    <Button
-                      type="button"
-                      kind="functional"
-                      variant="warning"
-                      size="md"
-                      onClick={() => {
-                        setSelectedModal('switch-to-auto-hold')
-                      }}
-                    >
-                      Auto-select CRN
-                    </Button>
+                    {!node && (
+                      <Button
+                        type="button"
+                        kind="functional"
+                        variant="warning"
+                        size="md"
+                        onClick={handleManuallySelectCRN}
+                      >
+                        Manually select CRN
+                      </Button>
+                    )}
                   </div>
                 </NoisyContainer>
               </div>
@@ -542,15 +335,24 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <SectionTitle number={sectionNumber(1)}>
               Select your tier
             </SectionTitle>
-            <p>
-              Your instance is ready to be configured using our{' '}
-              <Strong>automated CRN selection</Strong>, set to run on{' '}
-              <Strong>Ethereum</Strong> with the{' '}
-              <Strong>Holder-tier payment</Strong> method, allowing you seamless
-              access while you hold ALEPH tokens. If you wish to customize your
-              Compute Resource Node (CRN) or use a different payment approach,
-              you can change your selection below.
-            </p>
+            {values.paymentMethod === PaymentMethod.Hold ? (
+              <p>
+                Your instance is ready to be configured using our{' '}
+                <Strong>automated CRN selection</Strong>, set to run on{' '}
+                <Strong>{blockchainName}</Strong> with the{' '}
+                <Strong>Holder-tier payment</Strong> method, allowing you
+                seamless access while you hold ALEPH tokens. If you wish to
+                customize your Compute Resource Node (CRN) or use a different
+                payment approach, you can change your selection below.
+              </p>
+            ) : (
+              <p>
+                Please select one of the available instance tiers as a base for
+                your VM. You will be able to customize the volumes further below
+                in the form.
+              </p>
+            )}
+
             <div tw="px-0 my-6 relative">
               <SpinnerOverlay show={!!node && !nodeSpecs} />
               <SelectInstanceSpecs
@@ -564,14 +366,37 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 {!node && (
                   <div tw="mt-6">
                     <Button
+                      ref={manuallySelectButtonRef}
                       type="button"
                       kind="functional"
                       variant="warning"
                       size="md"
-                      onClick={() => setSelectedModal('switch-to-node-stream')}
+                      disabled={disabledPAYG}
+                      onClick={handleManuallySelectCRN}
                     >
                       Manually select CRN
                     </Button>
+                    {disabledPAYG && (
+                      <ResponsiveTooltip
+                        my="bottom-left"
+                        at="center-center"
+                        targetRef={manuallySelectButtonRef}
+                        content={
+                          <div>
+                            <p className="tp-body3 fs-18 text-base2">
+                              Manual CRN Selection Unavailable
+                            </p>
+                            <p className="tp-body1 fs-14 text-base2">
+                              Manual selection of CRN is not supported on{' '}
+                              {blockchainName}. To access manual CRN selection,
+                              please switch to the <strong>Base</strong>{' '}
+                              <strong>or Avalanche</strong> chain using the
+                              dropdown at the top of the page.
+                            </p>
+                          </div>
+                        }
+                      />
+                    )}
                   </div>
                 )}
               </SelectInstanceSpecs>
@@ -696,7 +521,20 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           unlockedAmount={accountBalance}
           paymentMethod={values.paymentMethod}
           streamDuration={values.streamDuration}
-          disablePaymentMethod={false}
+          disablePaymentMethod={disabledPAYG}
+          disabledStreamTooltip={
+            <div>
+              <p className="tp-body3 fs-18 text-base2">
+                Payment Method Toggle Disabled
+              </p>
+              <p className="tp-body1 fs-14 text-base2">
+                {blockchainName} supports only the Holder tier payment method.
+                To use the Pay-As-You-Go tier, please switch to the{' '}
+                <strong>Base</strong> or <strong>Avalanche</strong> chain using
+                the dropdown at the top of the page.
+              </p>
+            </div>
+          }
           mainRef={mainRef}
           onSwitchPaymentMethod={handleSwitchPaymentMethod}
           description={
@@ -708,19 +546,20 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               feature, enabling real-time payment for resources as you use them.
             </>
           }
+          // Duplicate buttons to have different references for the tooltip on each one
           button={
-            <Button
-              type="submit"
-              color="main0"
-              kind="default"
-              size="lg"
-              variant="primary"
+            <CheckoutButton
               disabled={isCreateButtonDisabled}
-              // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
-              onClick={handleSubmit}
-            >
-              Create instance
-            </Button>
+              handleSubmit={handleSubmit}
+              tooltipContent={createButtonTooltipContent}
+            />
+          }
+          footerButton={
+            <CheckoutButton
+              disabled={isCreateButtonDisabled}
+              handleSubmit={handleSubmit}
+              tooltipContent={createButtonTooltipContent}
+            />
           }
         />
       </Form>

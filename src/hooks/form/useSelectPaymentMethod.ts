@@ -1,5 +1,5 @@
 import { PaymentMethod } from '@/helpers/constants'
-import { ChangeEvent, useCallback } from 'react'
+import { ChangeEvent, useCallback, useRef } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 export type UseSelectPaymentMethodProps = {
@@ -8,6 +8,7 @@ export type UseSelectPaymentMethodProps = {
   defaultValue?: PaymentMethod
   disabledHold?: boolean
   disabledStream?: boolean
+  disabledStreamTooltip: React.ReactNode
   onSwitch?: (e: PaymentMethod) => void
 }
 
@@ -15,6 +16,9 @@ export type UseSelectPaymentMethodReturn = {
   disabledHold?: boolean
   disabledStream?: boolean
   paymentMethodCtrl: UseControllerReturn<any, any>
+  disabledStreamTooltip: React.ReactNode
+  switchRef: React.Ref<HTMLInputElement>
+  selectedPaymentMethod: PaymentMethod
   handleClickStream: () => void
   handleClickHold: () => void
 }
@@ -24,6 +28,7 @@ export function useSelectPaymentMethod({
   control,
   defaultValue,
   disabledHold,
+  disabledStream,
   onSwitch,
   ...rest
 }: UseSelectPaymentMethodProps): UseSelectPaymentMethodReturn {
@@ -47,20 +52,32 @@ export function useSelectPaymentMethod({
   ;(paymentMethodCtrl.field as any).checked =
     paymentMethodCtrl.field.value === PaymentMethod.Stream
 
+  const selectedPaymentMethod = paymentMethodCtrl.field.value
+
   const handleClickStream = useCallback(() => {
+    if (disabledStream) return
+    if (selectedPaymentMethod === PaymentMethod.Stream) return
+
     onChange(PaymentMethod.Stream)
-  }, [onChange])
+  }, [disabledStream, onChange, selectedPaymentMethod])
 
   const handleClickHold = useCallback(() => {
     if (disabledHold) return
+    if (selectedPaymentMethod === PaymentMethod.Hold) return
+
     onChange(PaymentMethod.Hold)
-  }, [disabledHold, onChange])
+  }, [disabledHold, onChange, selectedPaymentMethod])
+
+  const switchRef = useRef<HTMLInputElement>(null)
 
   return {
     paymentMethodCtrl,
+    selectedPaymentMethod,
+    disabledHold,
+    disabledStream,
+    switchRef,
     handleClickStream,
     handleClickHold,
-    disabledHold,
     ...rest,
   }
 }
