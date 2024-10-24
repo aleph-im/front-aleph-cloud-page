@@ -407,7 +407,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const handleSwitchPaymentMethod = useCallback(
     (method: PaymentMethod) => {
       if (method === PaymentMethod.Stream) {
-        !isBlockchainPAYGCompatible(blockchain)
+        isBlockchainPAYGCompatible(blockchain)
           ? handleSwitchToNodeStream()
           : handleShowNotification({
               variant: 'warning',
@@ -415,7 +415,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
               text: `${blockchainName} does not support the Pay-As-You-Go tier payment method`,
             })
       } else if (method === PaymentMethod.Hold) {
-        !isBlockchainHoldingCompatible(blockchain)
+        isBlockchainHoldingCompatible(blockchain)
           ? handleSwitchToAutoHold()
           : handleShowNotification({
               variant: 'warning',
@@ -514,12 +514,14 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       if (!account) setCreateButtonTooltipContent('No account connected')
       else if (!canAfford) setCreateButtonTooltipContent('Insufficient balance')
       else if (!hasValidPAYGConfig)
-        setCreateButtonTooltipContent(
-          `"Pay-as-you-go" payment method is not supported on ${blockchainName}`,
-        )
+        if (!node) setCreateButtonTooltipContent('No CRN selected')
+        else
+          setCreateButtonTooltipContent(
+            `Pay-As-You-Go payment method is not supported on ${blockchainName}`,
+          )
       else if (!hasValidHoldingConfig)
         setCreateButtonTooltipContent(
-          `"Hold tokens" payment method is not supported on ${blockchainName}`,
+          `Holder tier payment method is not supported on ${blockchainName}`,
         )
 
       setIsCreateButtonDisabled(true)

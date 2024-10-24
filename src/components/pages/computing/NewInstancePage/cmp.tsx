@@ -72,7 +72,7 @@ const CheckoutButton = ({
           my="bottom-center"
           at="top-center"
           targetRef={checkoutButtonRef}
-          content={tooltipContent}
+          content={<p className="tp-body2">{tooltipContent}</p>}
         />
       )}
     </>
@@ -295,6 +295,16 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               <SectionTitle number={sectionNumber(0)}>
                 Selected instance
               </SectionTitle>
+              <p>
+                Your instance is set up with your manually selected Compute
+                Resource Node (CRN), operating under the{' '}
+                <Strong>Pay-as-you-go</Strong> payment method on{' '}
+                <Strong>{blockchainName}</Strong>. This setup gives you direct
+                control over your resource allocation and costs, requiring
+                active management of your instance. To adjust your CRN or
+                explore different payment options, you can modify your selection
+                below.
+              </p>
               <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
                 <NoisyContainer>
                   <NodesTable
@@ -325,15 +335,24 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <SectionTitle number={sectionNumber(1)}>
               Select your tier
             </SectionTitle>
-            <p>
-              Your instance is ready to be configured using our{' '}
-              <Strong>automated CRN selection</Strong>, set to run on{' '}
-              <Strong>Ethereum</Strong> with the{' '}
-              <Strong>Holder-tier payment</Strong> method, allowing you seamless
-              access while you hold ALEPH tokens. If you wish to customize your
-              Compute Resource Node (CRN) or use a different payment approach,
-              you can change your selection below.
-            </p>
+            {values.paymentMethod === PaymentMethod.Hold ? (
+              <p>
+                Your instance is ready to be configured using our{' '}
+                <Strong>automated CRN selection</Strong>, set to run on{' '}
+                <Strong>{blockchainName}</Strong> with the{' '}
+                <Strong>Holder-tier payment</Strong> method, allowing you
+                seamless access while you hold ALEPH tokens. If you wish to
+                customize your Compute Resource Node (CRN) or use a different
+                payment approach, you can change your selection below.
+              </p>
+            ) : (
+              <p>
+                Please select one of the available instance tiers as a base for
+                your VM. You will be able to customize the volumes further below
+                in the form.
+              </p>
+            )}
+
             <div tw="px-0 my-6 relative">
               <SpinnerOverlay show={!!node && !nodeSpecs} />
               <SelectInstanceSpecs
@@ -368,9 +387,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                               Manual CRN Selection Unavailable
                             </p>
                             <p className="tp-body1 fs-14 text-base2">
-                              Manual selection of CRN is not supported on this
-                              chain. To access manual CRN selection, please
-                              switch to the <strong>Base</strong>{' '}
+                              Manual selection of CRN is not supported on{' '}
+                              {blockchainName}. To access manual CRN selection,
+                              please switch to the <strong>Base</strong>{' '}
                               <strong>or Avalanche</strong> chain using the
                               dropdown at the top of the page.
                             </p>
@@ -509,8 +528,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 Payment Method Toggle Disabled
               </p>
               <p className="tp-body1 fs-14 text-base2">
-                This chain supports only the Holder tier payment method. To use
-                the Pay-As-You-Go tier, please switch to the{' '}
+                {blockchainName} supports only the Holder tier payment method.
+                To use the Pay-As-You-Go tier, please switch to the{' '}
                 <strong>Base</strong> or <strong>Avalanche</strong> chain using
                 the dropdown at the top of the page.
               </p>
