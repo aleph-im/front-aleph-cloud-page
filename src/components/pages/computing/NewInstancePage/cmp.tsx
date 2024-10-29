@@ -1,3 +1,4 @@
+import React from 'react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import {
@@ -42,53 +43,56 @@ import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
 
-const CheckoutButton = ({
-  disabled,
-  handleSubmit,
-  tooltipContent,
-  isFooter,
-}: {
-  disabled: boolean
-  handleSubmit: UseNewInstancePageReturn['handleSubmit']
-  tooltipContent?: TooltipContent
-  isFooter: boolean
-}) => {
-  const checkoutButtonRef = useRef<HTMLButtonElement>(null)
+const CheckoutButton = React.memo(
+  ({
+    disabled,
+    handleSubmit,
+    tooltipContent,
+    isFooter,
+  }: {
+    disabled: boolean
+    handleSubmit: UseNewInstancePageReturn['handleSubmit']
+    tooltipContent?: TooltipContent
+    isFooter: boolean
+  }) => {
+    const checkoutButtonRef = useRef<HTMLButtonElement>(null)
 
-  return (
-    <>
-      <Button
-        ref={checkoutButtonRef}
-        type="submit"
-        color="main0"
-        kind="default"
-        size="lg"
-        variant="primary"
-        disabled={disabled}
-        onClick={handleSubmit}
-      >
-        Create instance
-      </Button>
-      {tooltipContent && (
-        <ResponsiveTooltip
-          my={isFooter ? 'bottom-right' : 'bottom-center'}
-          at={isFooter ? 'top-right' : 'top-center'}
-          targetRef={checkoutButtonRef}
-          content={
-            <div>
-              <p className="tp-body3 fs-18 text-base2">
-                {tooltipContent.title}
-              </p>
-              <p className="tp-body1 fs-14 text-base2">
-                {tooltipContent.description}
-              </p>
-            </div>
-          }
-        />
-      )}
-    </>
-  )
-}
+    return (
+      <>
+        <Button
+          ref={checkoutButtonRef}
+          type="submit"
+          color="main0"
+          kind="default"
+          size="lg"
+          variant="primary"
+          disabled={disabled}
+          onClick={handleSubmit}
+        >
+          Create instance
+        </Button>
+        {tooltipContent && (
+          <ResponsiveTooltip
+            my={isFooter ? 'bottom-right' : 'bottom-center'}
+            at={isFooter ? 'top-right' : 'top-center'}
+            targetRef={checkoutButtonRef}
+            content={
+              <div>
+                <p className="tp-body3 fs-18 text-base2">
+                  {tooltipContent.title}
+                </p>
+                <p className="tp-body1 fs-14 text-base2">
+                  {tooltipContent.description}
+                </p>
+              </div>
+            }
+          />
+        )}
+      </>
+    )
+  },
+)
+CheckoutButton.displayName = 'CheckoutButton'
 
 export default function NewInstancePage({ mainRef }: PageProps) {
   const {
