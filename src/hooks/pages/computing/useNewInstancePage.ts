@@ -147,16 +147,25 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const notification = useNotification()
   const addNotification = notification?.add
 
-  const [node, setNode] = useState<CRN | undefined>()
+  const [paymentMethod, setPaymentMethod] = useState(PaymentMethod.Hold)
   const [selectedNode, setSelectedNode] = useState<string>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
 
   // -------------------------
   // Request CRNs specs
 
-  const userNodes = useMemo(() => (node ? [node] : undefined), [node])
-
+  const { crn } = router.query
   const { nodes, lastVersion } = useRequestCRNs({})
+
+  // @note: Set node depending on CRN
+  const node = useMemo(() => {
+    if (!nodes) return
+    if (paymentMethod === PaymentMethod.Hold) return
+
+    return nodes.find((node) => node.hash === crn)
+  }, [crn, nodes, paymentMethod])
+
+  const userNodes = useMemo(() => (node ? [node] : undefined), [node])
   const { specs } = useRequestCRNSpecs({ nodes: userNodes })
 
   const nodeSpecs = useMemo(() => {
@@ -263,7 +272,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Setup form
 
-  const { crn } = router.query
   const accountSSHKeyItems = useAccountSSHKeyItems()
   const defaultFormValues: Partial<NewInstanceFormState> = useMemo(
     () => ({
@@ -300,8 +308,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     props: {
       specs: formValues.specs,
       volumes: formValues.volumes,
-      paymentMethod: formValues.paymentMethod,
       streamDuration: formValues.streamDuration,
+      paymentMethod,
     },
   })
 
@@ -335,14 +343,14 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         using the dropdown at the top of the page.`,
         }
 
-      if (formValues.paymentMethod === PaymentMethod.Hold) {
+      if (paymentMethod === PaymentMethod.Hold) {
         return {
           title: 'Feature Unavailable in Holder Tier',
           description: `Manual CRN selection is disabled in the Holder tier.
         Switch to the Pay-As-You-Go tier to enable manual selection of CRNs.`,
         }
       }
-    }, [account, blockchainName, formValues.paymentMethod])
+    }, [account, blockchainName, paymentMethod])
 
   const manuallySelectCRNDisabled = useMemo(() => {
     return manuallySelectCRNTooltipContent ? true : false
@@ -370,7 +378,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       }
 
       // Checks configuration for PAYG tier
-      if (formValues.paymentMethod === PaymentMethod.Stream) {
+      if (paymentMethod === PaymentMethod.Stream) {
         if (!node)
           return {
             title: 'Invalid configuration',
@@ -385,7 +393,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       }
 
       // Checks configuration for Holder tier
-      if (formValues.paymentMethod === PaymentMethod.Hold) {
+      if (paymentMethod === PaymentMethod.Hold) {
         if (!isBlockchainHoldingCompatible(blockchain))
           return {
             title: 'Payment Method not supported',
@@ -398,7 +406,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       blockchain,
       blockchainName,
       cost,
-      formValues.paymentMethod,
+      paymentMethod,
       node,
     ])
 
@@ -449,6 +457,14 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         })
   }, [blockchain, blockchainName, handleShowNotification])
 
+  const switchPaymentMethod = useCallback(
+    (newPaymentMethod: PaymentMethod) => {
+      setPaymentMethod(newPaymentMethod)
+      setValue('paymentMethod', newPaymentMethod)
+    },
+    [setValue],
+  )
+
   const handleSwitchToNodeStream = useCallback(async () => {
     if (!isBlockchainPAYGCompatible(blockchain))
       handleConnect({ blockchain: BlockchainId.BASE, provider })
@@ -456,15 +472,15 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     if (selectedNode !== node?.hash) handleSelectNode(selectedNode)
 
     setSelectedModal(undefined)
-    setValue('paymentMethod', PaymentMethod.Stream)
+    switchPaymentMethod(PaymentMethod.Stream)
   }, [
     blockchain,
-    handleConnect,
     provider,
     selectedNode,
     node?.hash,
+    switchPaymentMethod,
+    handleConnect,
     handleSelectNode,
-    setValue,
   ])
 
   const handleSwitchToAutoHold = useCallback(() => {
@@ -474,8 +490,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     }
 
     setSelectedModal(undefined)
-    setValue('paymentMethod', PaymentMethod.Hold)
-  }, [handleSelectNode, node?.hash, setValue])
+    switchPaymentMethod(PaymentMethod.Hold)
+  }, [node?.hash, switchPaymentMethod, handleSelectNode])
 
   const handleSwitchPaymentMethod = useCallback(
     (method: PaymentMethod) => {
@@ -528,15 +544,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   // -------------------------
   // Effects
-
-  // @note: Set node depending on CRN
-  useEffect(() => {
-    if (!nodes) return setNode(undefined)
-    if (formValues.paymentMethod === PaymentMethod.Hold)
-      return setNode(undefined)
-
-    setNode(nodes.find((node) => node.hash === crn))
-  }, [crn, nodes, formValues.paymentMethod])
 
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
