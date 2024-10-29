@@ -26,6 +26,7 @@ import {
 } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import {
+  TooltipContent,
   useNewInstancePage,
   UseNewInstancePageReturn,
 } from '@/hooks/pages/computing/useNewInstancePage'
@@ -45,10 +46,12 @@ const CheckoutButton = ({
   disabled,
   handleSubmit,
   tooltipContent,
+  isFooter,
 }: {
   disabled: boolean
   handleSubmit: UseNewInstancePageReturn['handleSubmit']
-  tooltipContent?: React.ReactNode
+  tooltipContent?: TooltipContent
+  isFooter: boolean
 }) => {
   const checkoutButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -68,10 +71,19 @@ const CheckoutButton = ({
       </Button>
       {tooltipContent && (
         <ResponsiveTooltip
-          my="bottom-center"
-          at="top-center"
+          my={isFooter ? 'bottom-right' : 'bottom-center'}
+          at={isFooter ? 'top-right' : 'top-center'}
           targetRef={checkoutButtonRef}
-          content={<p className="tp-body2">{tooltipContent}</p>}
+          content={
+            <div>
+              <p className="tp-body3 fs-18 text-base2">
+                {tooltipContent.title}
+              </p>
+              <p className="tp-body1 fs-14 text-base2">
+                {tooltipContent.description}
+              </p>
+            </div>
+          }
         />
       )}
     </>
@@ -83,8 +95,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     address,
     accountBalance,
     blockchainName,
+    manuallySelectCRNDisabled,
+    manuallySelectCRNTooltipContent,
     createInstanceDisabled,
-    createInstanceTooltipMessage,
+    createInstanceTooltipContent,
     values,
     control,
     errors,
@@ -340,12 +354,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                       kind="functional"
                       variant="warning"
                       size="md"
-                      disabled={disabledPAYG}
+                      disabled={manuallySelectCRNDisabled}
                       onClick={handleManuallySelectCRN}
                     >
                       Manually select CRN
                     </Button>
-                    {disabledPAYG && (
+                    {manuallySelectCRNTooltipContent && (
                       <ResponsiveTooltip
                         my="bottom-left"
                         at="center-center"
@@ -353,14 +367,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                         content={
                           <div>
                             <p className="tp-body3 fs-18 text-base2">
-                              Manual CRN Selection Unavailable
+                              {manuallySelectCRNTooltipContent.title}
                             </p>
                             <p className="tp-body1 fs-14 text-base2">
-                              Manual selection of CRN is not supported on{' '}
-                              {blockchainName}. To access manual CRN selection,
-                              please switch to the <strong>Base</strong>{' '}
-                              <strong>or Avalanche</strong> chain using the
-                              dropdown at the top of the page.
+                              {manuallySelectCRNTooltipContent.description}
                             </p>
                           </div>
                         }
@@ -520,14 +530,16 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <CheckoutButton
               disabled={createInstanceDisabled}
               handleSubmit={handleSubmit}
-              tooltipContent={createInstanceTooltipMessage}
+              tooltipContent={createInstanceTooltipContent}
+              isFooter={false}
             />
           }
           footerButton={
             <CheckoutButton
               disabled={createInstanceDisabled}
               handleSubmit={handleSubmit}
-              tooltipContent={createInstanceTooltipMessage}
+              tooltipContent={createInstanceTooltipContent}
+              isFooter={true}
             />
           }
         />

@@ -55,7 +55,7 @@ export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
       {disabledStream && (
         <ResponsiveTooltip
           my="bottom-left"
-          at="center-center"
+          at="top-left"
           targetRef={switchRef as React.RefObject<HTMLButtonElement>}
           content={disabledStreamTooltip}
         />

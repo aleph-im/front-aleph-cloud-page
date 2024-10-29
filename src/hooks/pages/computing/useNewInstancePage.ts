@@ -88,12 +88,19 @@ export const defaultValues: Partial<NewInstanceFormState> = {
 
 export type Modal = 'node-list'
 
+export type TooltipContent = {
+  title: string
+  description: string
+}
+
 export type UseNewInstancePageReturn = {
   address: string
   accountBalance: number
   blockchainName: string
+  manuallySelectCRNDisabled: boolean
+  manuallySelectCRNTooltipContent?: TooltipContent
   createInstanceDisabled: boolean
-  createInstanceTooltipMessage?: string
+  createInstanceTooltipContent?: TooltipContent
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
@@ -311,43 +318,93 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const address = useMemo(() => account?.address || '', [account])
 
-  // @note: Checks if configuration is valid and sets a disabled tooltip message
-  const createInstanceTooltipMessage = useMemo(() => {
-    if (!account) return 'No account connected'
+  const manuallySelectCRNTooltipContent: TooltipContent | undefined =
+    useMemo(() => {
+      if (!account)
+        return {
+          title: 'Account Connection Required',
+          description: `Please connect your account to enable switching payment methods.
+        Connect your wallet using the top-right button to access all features.`,
+        }
 
-    function canAfford() {
-      if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') return true
+      if (!isAccountPAYGCompatible(account))
+        return {
+          title: 'Manual CRN Selection Unavailable',
+          description: `Manual selection of CRN is not supported on ${blockchainName}.
+        To access manual CRN selection, please switch to the Base or Avalanche chain
+        using the dropdown at the top of the page.`,
+        }
 
-      return accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
-    }
+      if (formValues.paymentMethod === PaymentMethod.Hold) {
+        return {
+          title: 'Feature Unavailable in Holder Tier',
+          description: `Manual CRN selection is disabled in the Holder tier.
+        Switch to the Pay-As-You-Go tier to enable manual selection of CRNs.`,
+        }
+      }
+    }, [account, blockchainName, formValues.paymentMethod])
 
-    if (!canAfford()) {
-      return 'Insufficient balance'
-    }
+  const manuallySelectCRNDisabled = useMemo(() => {
+    return manuallySelectCRNTooltipContent ? true : false
+  }, [manuallySelectCRNTooltipContent])
 
-    if (formValues.paymentMethod === PaymentMethod.Stream) {
-      if (!node) return 'No CRN selected'
-      if (!isBlockchainPAYGCompatible(blockchain))
-        return `Pay-As-You-Go payment method is not supported on ${blockchainName}`
-    }
+  const createInstanceTooltipContent: TooltipContent | undefined =
+    useMemo(() => {
+      if (!account)
+        return {
+          title: 'Account Connection Required',
+          description: `Please connect your account to enable Instance creation.
+         Connect your wallet using the top-right button to access all features.`,
+        }
 
-    if (formValues.paymentMethod === PaymentMethod.Hold) {
-      if (!isBlockchainHoldingCompatible(blockchain))
-        return `Holder tier payment method is not supported on ${blockchainName}`
-    }
-  }, [
-    account,
-    accountBalance,
-    blockchain,
-    blockchainName,
-    cost,
-    formValues.paymentMethod,
-    node,
-  ])
+      // Checks if user can afford with current balance
+      if (
+        process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE !== 'true' &&
+        accountBalance < (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+      ) {
+        return {
+          title: 'Insufficient balance',
+          description: `Please add funds to your account to create an instance
+         with the current configuration.`,
+        }
+      }
+
+      // Checks configuration for PAYG tier
+      if (formValues.paymentMethod === PaymentMethod.Stream) {
+        if (!node)
+          return {
+            title: 'Invalid configuration',
+            description: `Please select a CRN to enable Instance creation.
+           Select a CRN using the "Manually select CRN" button on the form.`,
+          }
+        if (!isBlockchainPAYGCompatible(blockchain))
+          return {
+            title: 'Payment Method not supported',
+            description: `Pay-As-You-Go payment method is not supported on ${blockchainName}.`,
+          }
+      }
+
+      // Checks configuration for Holder tier
+      if (formValues.paymentMethod === PaymentMethod.Hold) {
+        if (!isBlockchainHoldingCompatible(blockchain))
+          return {
+            title: 'Payment Method not supported',
+            description: `Holder tier payment method is not supported on ${blockchainName}.`,
+          }
+      }
+    }, [
+      account,
+      accountBalance,
+      blockchain,
+      blockchainName,
+      cost,
+      formValues.paymentMethod,
+      node,
+    ])
 
   const createInstanceDisabled = useMemo(() => {
-    return createInstanceTooltipMessage ? true : false
-  }, [createInstanceTooltipMessage])
+    return createInstanceTooltipContent ? true : false
+  }, [createInstanceTooltipContent])
 
   // -------------------------
   // Handlers
@@ -537,7 +594,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     accountBalance,
     blockchainName,
     createInstanceDisabled,
-    createInstanceTooltipMessage,
+    createInstanceTooltipContent,
+    manuallySelectCRNDisabled,
+    manuallySelectCRNTooltipContent,
     values: formValues,
     control,
     errors,
