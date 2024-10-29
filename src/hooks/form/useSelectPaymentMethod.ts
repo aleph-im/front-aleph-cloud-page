@@ -18,7 +18,6 @@ export type UseSelectPaymentMethodReturn = {
   paymentMethodCtrl: UseControllerReturn<any, any>
   disabledStreamTooltip: React.ReactNode
   switchRef: React.Ref<HTMLInputElement>
-  selectedPaymentMethod: PaymentMethod
   handleClickStream: () => void
   handleClickHold: () => void
 }
@@ -52,27 +51,24 @@ export function useSelectPaymentMethod({
   ;(paymentMethodCtrl.field as any).checked =
     paymentMethodCtrl.field.value === PaymentMethod.Stream
 
-  const selectedPaymentMethod = paymentMethodCtrl.field.value
-
   const handleClickStream = useCallback(() => {
     if (disabledStream) return
-    if (selectedPaymentMethod === PaymentMethod.Stream) return
+    if (paymentMethodCtrl.field.value === PaymentMethod.Stream) return
 
     onChange(PaymentMethod.Stream)
-  }, [disabledStream, onChange, selectedPaymentMethod])
+  }, [disabledStream, onChange, paymentMethodCtrl.field.value])
 
   const handleClickHold = useCallback(() => {
     if (disabledHold) return
-    if (selectedPaymentMethod === PaymentMethod.Hold) return
+    if (paymentMethodCtrl.field.value === PaymentMethod.Hold) return
 
     onChange(PaymentMethod.Hold)
-  }, [disabledHold, onChange, selectedPaymentMethod])
+  }, [disabledHold, onChange, paymentMethodCtrl.field.value])
 
   const switchRef = useRef<HTMLInputElement>(null)
 
   return {
     paymentMethodCtrl,
-    selectedPaymentMethod,
     disabledHold,
     disabledStream,
     switchRef,

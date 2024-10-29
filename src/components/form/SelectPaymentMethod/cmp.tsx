@@ -13,7 +13,6 @@ export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
     paymentMethodCtrl,
     disabledStreamTooltip,
     switchRef,
-    selectedPaymentMethod,
     handleClickHold,
     handleClickStream,
   } = useSelectPaymentMethod(props)
@@ -28,7 +27,7 @@ export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
         <StyledLabel
           {...{
             onClick: handleClickHold,
-            $selected: selectedPaymentMethod === PaymentMethod.Hold,
+            $selected: paymentMethodCtrl.field.value === PaymentMethod.Hold,
             $disabled: disabledHold,
           }}
         >
@@ -45,7 +44,7 @@ export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
         <StyledLabel
           {...{
             onClick: handleClickStream,
-            $selected: selectedPaymentMethod === PaymentMethod.Stream,
+            $selected: paymentMethodCtrl.field.value === PaymentMethod.Stream,
             $disabled: disabledStream,
           }}
         >
