@@ -39,7 +39,6 @@ export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
             ...paymentMethodCtrl.fieldState,
             disabled: disabledHold || disabledStream,
           }}
-          ref={switchRef}
         />
         <StyledLabel
           {...{
