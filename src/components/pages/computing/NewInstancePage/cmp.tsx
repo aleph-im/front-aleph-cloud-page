@@ -83,8 +83,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     address,
     accountBalance,
     blockchainName,
-    isCreateButtonDisabled,
-    createButtonTooltipContent,
+    createInstanceDisabled,
+    createInstanceTooltipMessage,
     values,
     control,
     errors,
@@ -518,16 +518,16 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           // Duplicate buttons to have different references for the tooltip on each one
           button={
             <CheckoutButton
-              disabled={isCreateButtonDisabled}
+              disabled={createInstanceDisabled}
               handleSubmit={handleSubmit}
-              tooltipContent={createButtonTooltipContent}
+              tooltipContent={createInstanceTooltipMessage}
             />
           }
           footerButton={
             <CheckoutButton
-              disabled={isCreateButtonDisabled}
+              disabled={createInstanceDisabled}
               handleSubmit={handleSubmit}
-              tooltipContent={createButtonTooltipContent}
+              tooltipContent={createInstanceTooltipMessage}
             />
           }
         />

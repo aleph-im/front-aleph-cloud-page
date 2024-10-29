@@ -92,8 +92,8 @@ export type UseNewInstancePageReturn = {
   address: string
   accountBalance: number
   blockchainName: string
-  isCreateButtonDisabled: boolean
-  createButtonTooltipContent?: string
+  createInstanceDisabled: boolean
+  createInstanceTooltipMessage?: string
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
@@ -143,10 +143,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const [node, setNode] = useState<CRN | undefined>()
   const [selectedNode, setSelectedNode] = useState<string>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
-  const [isCreateButtonDisabled, setIsCreateButtonDisabled] = useState(false)
-  const [createButtonTooltipContent, setCreateButtonTooltipContent] = useState<
-    string | undefined
-  >(undefined)
 
   // -------------------------
   // Request CRNs specs
@@ -314,6 +310,44 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   }, [account])
 
   const address = useMemo(() => account?.address || '', [account])
+
+  // @note: Checks if configuration is valid and sets a disabled tooltip message
+  const createInstanceTooltipMessage = useMemo(() => {
+    if (!account) return 'No account connected'
+
+    function canAfford() {
+      if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') return true
+
+      return accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+    }
+
+    if (!canAfford()) {
+      return 'Insufficient balance'
+    }
+
+    if (formValues.paymentMethod === PaymentMethod.Stream) {
+      if (!node) return 'No CRN selected'
+      if (!isBlockchainPAYGCompatible(blockchain))
+        return `Pay-As-You-Go payment method is not supported on ${blockchainName}`
+    }
+
+    if (formValues.paymentMethod === PaymentMethod.Hold) {
+      if (!isBlockchainHoldingCompatible(blockchain))
+        return `Holder tier payment method is not supported on ${blockchainName}`
+    }
+  }, [
+    account,
+    accountBalance,
+    blockchain,
+    blockchainName,
+    cost,
+    formValues.paymentMethod,
+    node,
+  ])
+
+  const createInstanceDisabled = useMemo(() => {
+    return createInstanceTooltipMessage ? true : false
+  }, [createInstanceTooltipMessage])
 
   // -------------------------
   // Handlers
@@ -498,60 +532,12 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return () => disableConnectionConfirmationModal()
   }, [address, hasModifiedFormValues, node, dispatch])
 
-  // @note: Check if configuration is valid and set tooltip message
-  useEffect(() => {
-    if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
-      setCreateButtonTooltipContent(undefined)
-      return setIsCreateButtonDisabled(false)
-    }
-
-    const canAfford =
-      accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
-
-    const hasValidPAYGConfig =
-      formValues.paymentMethod === PaymentMethod.Stream &&
-      node &&
-      isBlockchainPAYGCompatible(blockchain)
-
-    const hasValidHoldingConfig =
-      formValues.paymentMethod === PaymentMethod.Hold &&
-      isBlockchainHoldingCompatible(blockchain)
-
-    if (!canAfford || !(hasValidPAYGConfig || hasValidHoldingConfig)) {
-      if (!account) setCreateButtonTooltipContent('No account connected')
-      else if (!canAfford) setCreateButtonTooltipContent('Insufficient balance')
-      else if (!hasValidPAYGConfig)
-        if (!node) setCreateButtonTooltipContent('No CRN selected')
-        else
-          setCreateButtonTooltipContent(
-            `Pay-As-You-Go payment method is not supported on ${blockchainName}`,
-          )
-      else if (!hasValidHoldingConfig)
-        setCreateButtonTooltipContent(
-          `Holder tier payment method is not supported on ${blockchainName}`,
-        )
-
-      setIsCreateButtonDisabled(true)
-    } else {
-      setCreateButtonTooltipContent(undefined)
-      setIsCreateButtonDisabled(false)
-    }
-  }, [
-    account,
-    accountBalance,
-    blockchain,
-    blockchainName,
-    cost,
-    node,
-    formValues.paymentMethod,
-  ])
-
   return {
     address,
     accountBalance,
     blockchainName,
-    isCreateButtonDisabled,
-    createButtonTooltipContent,
+    createInstanceDisabled,
+    createInstanceTooltipMessage,
     values: formValues,
     control,
     errors,
