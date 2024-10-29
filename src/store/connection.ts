@@ -17,8 +17,8 @@ export type ConnectionState = {
   balance?: number
   blockchain?: BlockchainId
   provider?: ProviderId
-  waitingConfirmation?: boolean
-  confirmationModal?: ConnectionConfirmationModal
+  needsConfirmation?: boolean
+  connectionAttempt?: ConnectionAction
 }
 
 export const initialState: ConnectionState = {
@@ -81,8 +81,8 @@ export class ConnectionConfirmUpdateAction {
   readonly type = ConnectionActionType.CONNECTION_CONFIRM_UPDATE
   constructor(
     public payload: {
-      waitingConfirmation?: ConnectionState['waitingConfirmation']
-      confirmationModal?: ConnectionState['confirmationModal']
+      needsConfirmation?: ConnectionState['needsConfirmation']
+      connectionAttempt?: ConnectionState['connectionAttempt']
     },
   ) {}
 }

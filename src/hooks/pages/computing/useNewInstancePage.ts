@@ -101,8 +101,7 @@ export type UseNewInstancePageReturn = {
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
   disabledPAYG: boolean
-  hasModifiedFormValues?: boolean
-  waitingModalConfirmation?: boolean
+  connectionAttempt: ConnectionState['connectionAttempt']
   selectedModal?: Modal
   setSelectedModal: (modal?: Modal) => void
   selectedNode?: string
@@ -111,15 +110,12 @@ export type UseNewInstancePageReturn = {
   modalClose?: () => void
   handleSubmit: (e: FormEvent) => Promise<void>
   handleCloseModal: () => void
-  handleResetForm: (action: any, payload: any) => void
+  handleResetForm: (
+    connectionAttempt: ConnectionState['connectionAttempt'],
+  ) => void
   handleSwitchPaymentMethod: (method: PaymentMethod) => void
   handleManuallySelectCRN: () => void
-  handleSwitchToAutoHold: () => void
   handleSwitchToNodeStream: () => Promise<void>
-  handleEnableConfirmationModal: (
-    confirmationModal: ConnectionState['confirmationModal'],
-  ) => void
-  handleDisableConfirmationModal: () => void
   handleBack: () => void
 }
 
@@ -131,7 +127,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     account,
     provider,
     balance: accountBalance = 0,
-    waitingConfirmation: waitingModalConfirmation,
+    connectionAttempt,
     handleConnect,
   } = useConnection({
     triggerOnMount: false,
@@ -306,6 +302,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     },
   })
 
+  // -------------------------
+  // Memos
+
   const blockchainName = useMemo(() => {
     return blockchain ? blockchains[blockchain]?.name : 'current network'
   }, [blockchain])
@@ -338,27 +337,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     [router],
   )
 
-  const handleDisableConfirmationModal = useCallback(
-    () =>
-      dispatch(
-        new ConnectionConfirmUpdateAction({
-          confirmationModal: undefined,
-          waitingConfirmation: false,
-        }),
-      ),
-    [dispatch],
-  )
-
-  const handleEnableConfirmationModal = useCallback(
-    (confirmationModal: ConnectionState['confirmationModal']) =>
-      dispatch(new ConnectionConfirmUpdateAction({ confirmationModal })),
-    [dispatch],
-  )
-
   const handleCloseModal = useCallback(() => {
     dispatch(
       new ConnectionConfirmUpdateAction({
-        waitingConfirmation: false,
+        connectionAttempt: undefined,
       }),
     )
     setSelectedModal(undefined)
@@ -434,11 +416,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   )
 
   const handleResetForm = useCallback(
-    (action: any, payload: any) => {
+    (connectionAttempt: ConnectionState['connectionAttempt']) => {
       resetForm(defaultFormValues)
       handleSwitchToAutoHold()
       handleCloseModal()
-      dispatch(new action({ ...payload }))
+      if (connectionAttempt) dispatch(connectionAttempt)
     },
     [
       defaultFormValues,
@@ -490,6 +472,31 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
     setValue('streamCost', cost.totalStreamCost)
   }, [cost, setValue, formValues])
+
+  // Manage connection confirmation modal
+  useEffect(() => {
+    function disableConnectionConfirmationModal() {
+      dispatch(
+        new ConnectionConfirmUpdateAction({
+          needsConfirmation: false,
+          connectionAttempt: undefined,
+        }),
+      )
+    }
+
+    function enableConnectionConfirmationModal() {
+      dispatch(new ConnectionConfirmUpdateAction({ needsConfirmation: true }))
+    }
+
+    if (node) return enableConnectionConfirmationModal()
+
+    if (!address) return disableConnectionConfirmationModal()
+    if (!hasModifiedFormValues) return disableConnectionConfirmationModal()
+
+    enableConnectionConfirmationModal()
+
+    return () => disableConnectionConfirmationModal()
+  }, [address, hasModifiedFormValues, node, dispatch])
 
   // @note: Check if configuration is valid and set tooltip message
   useEffect(() => {
@@ -552,8 +559,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     lastVersion,
     nodeSpecs,
     disabledPAYG,
-    hasModifiedFormValues,
-    waitingModalConfirmation,
+    connectionAttempt,
     selectedModal,
     setSelectedModal,
     selectedNode,
@@ -565,10 +571,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     handleResetForm,
     handleSwitchPaymentMethod,
     handleManuallySelectCRN,
-    handleSwitchToAutoHold,
     handleSwitchToNodeStream,
-    handleEnableConfirmationModal,
-    handleDisableConfirmationModal,
     handleBack,
   }
 }

@@ -40,7 +40,6 @@ import Strong from '@/components/common/Strong'
 import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
-import { ConnectionConfirmationModal } from '@/store/connection'
 
 const CheckoutButton = ({
   disabled,
@@ -93,8 +92,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     nodeSpecs,
     lastVersion,
     disabledPAYG,
-    hasModifiedFormValues,
-    waitingModalConfirmation,
+    connectionAttempt,
     selectedModal,
     setSelectedModal,
     selectedNode,
@@ -106,10 +104,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleResetForm,
     handleSwitchPaymentMethod,
     handleManuallySelectCRN,
-    handleSwitchToAutoHold,
     handleSwitchToNodeStream,
-    handleEnableConfirmationModal,
-    handleDisableConfirmationModal,
     handleBack,
   } = useNewInstancePage()
 
@@ -117,72 +112,47 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
   // ------------------
 
-  const confirmationModal: ConnectionConfirmationModal = useCallback(
-    (action, payload) => ({
-      width: '40rem',
-      title: 'Confirm Chain Switch',
-      onClose: handleCloseModal,
-      content: (
-        <div tw="flex flex-col gap-8" className="tp-body">
-          <div>
-            <strong>Switching chains will reset all data</strong> you&apos;ve
-            currently entered in the form. This is necessary to align with the
-            specific configurations and requirements of the new chain. Please
-            save any important information before proceeding.
-          </div>
-        </div>
-      ),
-      footer: (
-        <div tw="w-full flex justify-between">
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            onClick={handleCloseModal}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={() => handleResetForm(action, payload)}
-          >
-            Switch Chains
-          </Button>
-        </div>
-      ),
-    }),
-    [handleCloseModal, handleResetForm],
-  )
-
-  // Handle confirmation modal
-  useEffect(() => {
-    if (node) return handleEnableConfirmationModal(confirmationModal)
-
-    if (!address) return handleDisableConfirmationModal()
-    if (!hasModifiedFormValues) return handleDisableConfirmationModal()
-    if (!modalOpen) return handleDisableConfirmationModal()
-
-    handleEnableConfirmationModal(confirmationModal)
-
-    return () => handleDisableConfirmationModal()
-  }, [
-    address,
-    hasModifiedFormValues,
-    confirmationModal,
-    modalOpen,
-    handleDisableConfirmationModal,
-    handleEnableConfirmationModal,
-    node,
-  ])
-
   // Handle modals
   useEffect(() => {
     if (!modalOpen) return
     if (!modalClose) return
-    if (waitingModalConfirmation) return
-    if (!selectedModal) return modalClose()
+
+    if (connectionAttempt)
+      return modalOpen({
+        width: '40rem',
+        title: 'Confirm Chain Switch',
+        onClose: handleCloseModal,
+        content: (
+          <div tw="flex flex-col gap-8" className="tp-body">
+            <div>
+              <strong>Switching chains will reset all data</strong> you&apos;ve
+              currently entered in the form. This is necessary to align with the
+              specific configurations and requirements of the new chain. Please
+              save any important information before proceeding.
+            </div>
+          </div>
+        ),
+        footer: (
+          <div tw="w-full flex justify-between">
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={handleCloseModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={() => handleResetForm(connectionAttempt)}
+            >
+              Switch Chains
+            </Button>
+          </div>
+        ),
+      })
 
     switch (selectedModal) {
       case 'node-list':
@@ -213,20 +183,19 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             </>
           ),
         })
+      default:
+        return modalClose()
     }
   }, [
-    blockchainName,
-    node,
+    connectionAttempt,
+    selectedModal,
     selectedNode,
     setSelectedNode,
-    selectedModal,
-    setSelectedModal,
-    waitingModalConfirmation,
-    modalOpen,
-    modalClose,
     handleCloseModal,
-    handleSwitchToAutoHold,
+    handleResetForm,
     handleSwitchToNodeStream,
+    modalClose,
+    modalOpen,
   ])
   // ------------------------
 

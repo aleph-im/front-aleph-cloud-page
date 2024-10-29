@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { useModal, useNotification } from '@aleph-front/core'
+import { useNotification } from '@aleph-front/core'
 import {
   ConnectionConfirmUpdateAction,
   ConnectionConnectAction,
@@ -26,7 +26,7 @@ export const useConnection = ({
   triggerOnMount,
 }: UseConnectionProps): UseConnectionReturn => {
   const [state, dispatch] = useAppState()
-  const { blockchain, provider, confirmationModal } = state.connection
+  const { blockchain, provider, needsConfirmation } = state.connection
 
   const prevConnectionProviderRef = useRef<
     BaseConnectionProviderManager | undefined
@@ -34,25 +34,21 @@ export const useConnection = ({
 
   const noti = useNotification()
   const addNotification = noti?.add
-  const modal = useModal()
-  const openModal = modal?.open
 
   const handleConnect = useCallback(
     (payload: ConnectionConnectAction['payload']) => {
-      if (confirmationModal) {
-        if (!openModal) return
-
+      if (needsConfirmation) {
         dispatch(
-          new ConnectionConfirmUpdateAction({ waitingConfirmation: true }),
+          new ConnectionConfirmUpdateAction({
+            connectionAttempt: new ConnectionConnectAction(payload),
+          }),
         )
-
-        openModal(confirmationModal(ConnectionConnectAction, payload))
       } else {
         dispatch(new ConnectionConnectAction(payload))
       }
     },
 
-    [confirmationModal, openModal, dispatch],
+    [needsConfirmation, dispatch],
   )
 
   const handleDisconnect = useCallback(
@@ -64,12 +60,13 @@ export const useConnection = ({
     ConnectionConnectAction['payload'] | undefined
   >('connection', undefined)
 
+  // @note: Loads the stored connection in case page is refreshed
   useEffect(() => {
     if (!triggerOnMount) return
     if (!storedConnection) return
 
-    handleConnect(storedConnection)
-  }, [handleConnect, storedConnection, triggerOnMount])
+    dispatch(new ConnectionConnectAction(storedConnection))
+  }, [dispatch, storedConnection, triggerOnMount])
 
   useEffect(() => {
     const handleUpdate = (payload: ConnectionUpdateAction['payload']) => {
