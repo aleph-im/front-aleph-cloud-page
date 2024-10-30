@@ -68,6 +68,16 @@ import {
   useModal,
   useNotification,
 } from '@aleph-front/core'
+import {
+  accountConnectionRequiredTooltipContent,
+  insufficientBalanceTooltipContent,
+  missingNodeTooltipContent,
+  TooltipContent,
+  unsupportedHoldingTooltipContent,
+  unsupportedManualCRNSelectionTooltipContent,
+  unsupportedStreamManualCRNSelectionTooltipContent,
+  unsupportedStreamTooltipContent,
+} from '@/components/pages/computing/NewInstancePage/tooltips'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -99,11 +109,6 @@ export const defaultValues: Partial<NewInstanceFormState> = {
 
 export type Modal = 'node-list'
 
-export type TooltipContent = {
-  title: string
-  description: string
-}
-
 export type UseNewInstancePageReturn = {
   address: string
   accountBalance: number
@@ -112,13 +117,14 @@ export type UseNewInstancePageReturn = {
   manuallySelectCRNTooltipContent?: TooltipContent
   createInstanceDisabled: boolean
   createInstanceTooltipContent?: TooltipContent
+  streamDisabled: boolean
+  disabledStreamTooltipContent?: TooltipContent
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
   node?: CRN
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
-  disabledPAYG: boolean
   connectionAttempt: ConnectionState['connectionAttempt']
   selectedModal?: Modal
   setSelectedModal: (modal?: Modal) => void
@@ -332,85 +338,66 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return blockchain ? blockchains[blockchain]?.name : 'current network'
   }, [blockchain])
 
-  const disabledPAYG = useMemo(() => {
-    return !isAccountPAYGCompatible(account)
-  }, [account])
+  const disabledStreamTooltipContent: UseNewInstancePageReturn['disabledStreamTooltipContent'] =
+    useMemo(() => {
+      if (!account)
+        return accountConnectionRequiredTooltipContent(
+          'enable switching payment methods',
+        )
+
+      if (!isAccountPAYGCompatible(account))
+        return unsupportedStreamTooltipContent(blockchainName)
+    }, [account, blockchainName])
+
+  const streamDisabled = useMemo(() => {
+    return disabledStreamTooltipContent ? true : false
+  }, [disabledStreamTooltipContent])
 
   const address = useMemo(() => account?.address || '', [account])
 
-  const manuallySelectCRNTooltipContent: TooltipContent | undefined =
+  const manuallySelectCRNTooltipContent: UseNewInstancePageReturn['manuallySelectCRNTooltipContent'] =
     useMemo(() => {
       if (!account)
-        return {
-          title: 'Account Connection Required',
-          description: `Please connect your account to enable switching payment methods.
-        Connect your wallet using the top-right button to access all features.`,
-        }
+        return accountConnectionRequiredTooltipContent(
+          'manually selecting CRNs',
+        )
 
       if (!isAccountPAYGCompatible(account))
-        return {
-          title: 'Manual CRN Selection Unavailable',
-          description: `Manual selection of CRN is not supported on ${blockchainName}.
-        To access manual CRN selection, please switch to the Base or Avalanche chain
-        using the dropdown at the top of the page.`,
-        }
+        return unsupportedStreamManualCRNSelectionTooltipContent(blockchainName)
 
-      if (paymentMethod === PaymentMethod.Hold) {
-        return {
-          title: 'Feature Unavailable in Holder Tier',
-          description: `Manual CRN selection is disabled in the Holder tier.
-        Switch to the Pay-As-You-Go tier to enable manual selection of CRNs.`,
-        }
-      }
+      if (paymentMethod === PaymentMethod.Hold)
+        return unsupportedManualCRNSelectionTooltipContent()
     }, [account, blockchainName, paymentMethod])
 
   const manuallySelectCRNDisabled = useMemo(() => {
     return manuallySelectCRNTooltipContent ? true : false
   }, [manuallySelectCRNTooltipContent])
 
-  const createInstanceTooltipContent: TooltipContent | undefined =
+  const createInstanceTooltipContent: UseNewInstancePageReturn['createInstanceTooltipContent'] =
     useMemo(() => {
       if (!account)
-        return {
-          title: 'Account Connection Required',
-          description: `Please connect your account to enable Instance creation.
-         Connect your wallet using the top-right button to access all features.`,
-        }
+        return accountConnectionRequiredTooltipContent(
+          'enable Instance creation',
+        )
 
       // Checks if user can afford with current balance
       if (
         process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE !== 'true' &&
         accountBalance < (cost?.totalCost || Number.MAX_SAFE_INTEGER)
-      ) {
-        return {
-          title: 'Insufficient balance',
-          description: `Please add funds to your account to create an instance
-         with the current configuration.`,
-        }
-      }
+      )
+        return insufficientBalanceTooltipContent()
 
       // Checks configuration for PAYG tier
       if (paymentMethod === PaymentMethod.Stream) {
-        if (!node)
-          return {
-            title: 'Invalid configuration',
-            description: `Please select a CRN to enable Instance creation.
-           Select a CRN using the "Manually select CRN" button on the form.`,
-          }
+        if (!node) return missingNodeTooltipContent()
         if (!isBlockchainPAYGCompatible(blockchain))
-          return {
-            title: 'Payment Method not supported',
-            description: `Pay-As-You-Go payment method is not supported on ${blockchainName}.`,
-          }
+          return unsupportedStreamTooltipContent(blockchainName)
       }
 
       // Checks configuration for Holder tier
       if (paymentMethod === PaymentMethod.Hold) {
         if (!isBlockchainHoldingCompatible(blockchain))
-          return {
-            title: 'Payment Method not supported',
-            description: `Holder tier payment method is not supported on ${blockchainName}.`,
-          }
+          return unsupportedHoldingTooltipContent(blockchainName)
       }
     }, [
       account,
@@ -638,7 +625,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     node,
     lastVersion,
     nodeSpecs,
-    disabledPAYG,
+    streamDisabled,
+    disabledStreamTooltipContent,
     connectionAttempt,
     selectedModal,
     setSelectedModal,

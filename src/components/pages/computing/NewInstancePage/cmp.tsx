@@ -27,7 +27,6 @@ import {
 } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
 import {
-  TooltipContent,
   useNewInstancePage,
   UseNewInstancePageReturn,
 } from '@/hooks/pages/computing/useNewInstancePage'
@@ -42,6 +41,7 @@ import Strong from '@/components/common/Strong'
 import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
+import { TooltipContent } from './tooltips'
 
 const CheckoutButton = React.memo(
   ({
@@ -99,6 +99,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     address,
     accountBalance,
     blockchainName,
+    streamDisabled,
+    disabledStreamTooltipContent,
     manuallySelectCRNDisabled,
     manuallySelectCRNTooltipContent,
     createInstanceDisabled,
@@ -109,7 +111,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     node,
     nodeSpecs,
     lastVersion,
-    disabledPAYG,
     connectionAttempt,
     selectedModal,
     setSelectedModal,
@@ -504,19 +505,18 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           unlockedAmount={accountBalance}
           paymentMethod={values.paymentMethod}
           streamDuration={values.streamDuration}
-          disablePaymentMethod={disabledPAYG}
+          disablePaymentMethod={streamDisabled}
           disabledStreamTooltip={
-            <div>
-              <p className="tp-body3 fs-18 text-base2">
-                Payment Method Toggle Disabled
-              </p>
-              <p className="tp-body1 fs-14 text-base2">
-                {blockchainName} supports only the Holder tier payment method.
-                To use the Pay-As-You-Go tier, please switch to the{' '}
-                <strong>Base</strong> or <strong>Avalanche</strong> chain using
-                the dropdown at the top of the page.
-              </p>
-            </div>
+            disabledStreamTooltipContent && (
+              <div>
+                <p className="tp-body3 fs-18 text-base2">
+                  {disabledStreamTooltipContent.title}
+                </p>
+                <p className="tp-body1 fs-14 text-base2">
+                  {disabledStreamTooltipContent.description}
+                </p>
+              </div>
+            )
           }
           mainRef={mainRef}
           onSwitchPaymentMethod={handleSwitchPaymentMethod}
