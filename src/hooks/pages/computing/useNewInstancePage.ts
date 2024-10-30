@@ -65,6 +65,7 @@ import {
 import {
   ModalCardProps,
   NotificationCardProps,
+  TooltipProps,
   useModal,
   useNotification,
 } from '@aleph-front/core'
@@ -72,7 +73,6 @@ import {
   accountConnectionRequiredTooltipContent,
   insufficientBalanceTooltipContent,
   missingNodeTooltipContent,
-  TooltipContent,
   unsupportedHoldingTooltipContent,
   unsupportedManualCRNSelectionTooltipContent,
   unsupportedStreamManualCRNSelectionTooltipContent,
@@ -114,11 +114,11 @@ export type UseNewInstancePageReturn = {
   accountBalance: number
   blockchainName: string
   manuallySelectCRNDisabled: boolean
-  manuallySelectCRNTooltipContent?: TooltipContent
+  manuallySelectCRNTooltipContent?: TooltipProps['content']
   createInstanceDisabled: boolean
-  createInstanceTooltipContent?: TooltipContent
+  createInstanceTooltipContent?: TooltipProps['content']
   streamDisabled: boolean
-  disabledStreamTooltipContent?: TooltipContent
+  disabledStreamTooltipContent?: TooltipProps['content']
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>

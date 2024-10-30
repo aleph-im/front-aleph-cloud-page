@@ -9,6 +9,7 @@ import {
   NodeScore,
   TableColumn,
   NoisyContainer,
+  TooltipProps,
 } from '@aleph-front/core'
 import { CRN } from '@/domain/node'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
@@ -41,7 +42,6 @@ import Strong from '@/components/common/Strong'
 import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
-import { TooltipContent } from './tooltips'
 
 const CheckoutButton = React.memo(
   ({
@@ -52,7 +52,7 @@ const CheckoutButton = React.memo(
   }: {
     disabled: boolean
     handleSubmit: UseNewInstancePageReturn['handleSubmit']
-    tooltipContent?: TooltipContent
+    tooltipContent?: TooltipProps['content']
     isFooter: boolean
   }) => {
     const checkoutButtonRef = useRef<HTMLButtonElement>(null)
@@ -76,16 +76,7 @@ const CheckoutButton = React.memo(
             my={isFooter ? 'bottom-right' : 'bottom-center'}
             at={isFooter ? 'top-right' : 'top-center'}
             targetRef={checkoutButtonRef}
-            content={
-              <div>
-                <p className="tp-body3 fs-18 text-base2">
-                  {tooltipContent.title}
-                </p>
-                <p className="tp-body1 fs-14 text-base2">
-                  {tooltipContent.description}
-                </p>
-              </div>
-            }
+            content={tooltipContent}
           />
         )}
       </>
@@ -369,16 +360,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                         my="bottom-left"
                         at="center-center"
                         targetRef={manuallySelectButtonRef}
-                        content={
-                          <div>
-                            <p className="tp-body3 fs-18 text-base2">
-                              {manuallySelectCRNTooltipContent.title}
-                            </p>
-                            <p className="tp-body1 fs-14 text-base2">
-                              {manuallySelectCRNTooltipContent.description}
-                            </p>
-                          </div>
-                        }
+                        content={manuallySelectCRNTooltipContent}
                       />
                     )}
                   </div>
@@ -506,18 +488,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           paymentMethod={values.paymentMethod}
           streamDuration={values.streamDuration}
           disablePaymentMethod={streamDisabled}
-          disabledStreamTooltip={
-            disabledStreamTooltipContent && (
-              <div>
-                <p className="tp-body3 fs-18 text-base2">
-                  {disabledStreamTooltipContent.title}
-                </p>
-                <p className="tp-body1 fs-14 text-base2">
-                  {disabledStreamTooltipContent.description}
-                </p>
-              </div>
-            )
-          }
+          disabledStreamTooltip={disabledStreamTooltipContent}
           mainRef={mainRef}
           onSwitchPaymentMethod={handleSwitchPaymentMethod}
           description={

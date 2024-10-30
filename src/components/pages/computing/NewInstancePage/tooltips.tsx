@@ -1,24 +1,37 @@
+import { TooltipProps } from '@aleph-front/core'
 import React from 'react'
 
-export type TooltipContent = {
+type TooltipContentProps = {
   title: React.ReactNode
   description: React.ReactNode
 }
 
+function tooltipContent({
+  title,
+  description,
+}: TooltipContentProps): TooltipProps['content'] {
+  return (
+    <div>
+      <p className="tp-body3 fs-18 text-base2">{title}</p>
+      <p className="tp-body1 fs-14 text-base2">{description}</p>
+    </div>
+  )
+}
+
 export function accountConnectionRequiredTooltipContent(
   actionDescription: string,
-): TooltipContent {
-  return {
+): TooltipProps['content'] {
+  return tooltipContent({
     title: `Account connection required`,
     description: `Please connect your account to ${actionDescription}.
                   Connect your wallet using the top-right button to access all features.`,
-  }
+  })
 }
 
 export function unsupportedHoldingTooltipContent(
   blockchainName: string,
-): TooltipContent {
-  return {
+): TooltipProps['content'] {
+  return tooltipContent({
     title: `Payment Method not supported`,
     description: (
       <>
@@ -26,13 +39,13 @@ export function unsupportedHoldingTooltipContent(
         switch the chain using the dropdown at the top of the page.
       </>
     ),
-  }
+  })
 }
 
 export function unsupportedStreamTooltipContent(
   blockchainName: string,
-): TooltipContent {
-  return {
+): TooltipProps['content'] {
+  return tooltipContent({
     title: `Payment Method not supported`,
     description: (
       <>
@@ -42,13 +55,13 @@ export function unsupportedStreamTooltipContent(
         page.
       </>
     ),
-  }
+  })
 }
 
 export function unsupportedStreamManualCRNSelectionTooltipContent(
   blockchainName: string,
-): TooltipContent {
-  return {
+): TooltipProps['content'] {
+  return tooltipContent({
     title: `Manual CRN Selection Unavailable`,
     description: (
       <>
@@ -58,11 +71,11 @@ export function unsupportedStreamManualCRNSelectionTooltipContent(
         page.
       </>
     ),
-  }
+  })
 }
 
-export function unsupportedManualCRNSelectionTooltipContent(): TooltipContent {
-  return {
+export function unsupportedManualCRNSelectionTooltipContent(): TooltipProps['content'] {
+  return tooltipContent({
     title: `Feature Unavailable in Holder Tier`,
     description: (
       <>
@@ -70,19 +83,19 @@ export function unsupportedManualCRNSelectionTooltipContent(): TooltipContent {
         <strong>Pay-As-You-Go</strong> tier to enable manual selection of CRNs.
       </>
     ),
-  }
+  })
 }
 
-export function insufficientBalanceTooltipContent(): TooltipContent {
-  return {
+export function insufficientBalanceTooltipContent(): TooltipProps['content'] {
+  return tooltipContent({
     title: `Insufficient balance`,
     description: `Please add funds to your account to create an instance
                   with the current configuration.`,
-  }
+  })
 }
 
-export function missingNodeTooltipContent(): TooltipContent {
-  return {
+export function missingNodeTooltipContent(): TooltipProps['content'] {
+  return tooltipContent({
     title: `Missing CRN`,
     description: (
       <>
@@ -90,5 +103,5 @@ export function missingNodeTooltipContent(): TooltipContent {
         <strong>Manually select CRN</strong> button on the form.
       </>
     ),
-  }
+  })
 }
