@@ -1,5 +1,12 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useRouter } from 'next/router'
 import {
   createFromEVMAccount,
@@ -43,7 +50,11 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import {
+  BlockchainId,
+  blockchains,
+  defaultBlockchainProviders,
+} from '@/domain/connect/base'
 import { PaymentConfiguration } from '@/domain/executable'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
@@ -127,7 +138,6 @@ export type UseNewInstancePageReturn = {
 }
 
 export function useNewInstancePage(): UseNewInstancePageReturn {
-  const router = useRouter()
   const [, dispatch] = useAppState()
   const {
     blockchain,
@@ -139,7 +149,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   } = useConnection({
     triggerOnMount: false,
   })
-
   const modal = useModal()
   const modalOpen = modal?.open
   const modalClose = modal?.close
@@ -147,6 +156,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const notification = useNotification()
   const addNotification = notification?.add
 
+  const router = useRouter()
+  const { crn } = router.query
+
+  const hasInitialized = useRef(false)
   const [paymentMethod, setPaymentMethod] = useState(PaymentMethod.Hold)
   const [selectedNode, setSelectedNode] = useState<string>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
@@ -154,7 +167,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Request CRNs specs
 
-  const { crn } = router.query
   const { nodes, lastVersion } = useRequestCRNs({})
 
   // @note: Set node depending on CRN
@@ -223,7 +235,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       const instance = {
         ...state,
         payment,
-        node,
+        node: state.paymentMethod === PaymentMethod.Stream ? node : undefined,
       } as AddInstance
 
       const iSteps = await manager.getAddSteps(instance)
@@ -276,10 +288,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const defaultFormValues: Partial<NewInstanceFormState> = useMemo(
     () => ({
       ...defaultValues,
-      // paymentMethod: crn ? PaymentMethod.Stream : PaymentMethod.Hold,
+      paymentMethod: paymentMethod || defaultValues.paymentMethod,
       sshKeys: accountSSHKeyItems,
     }),
-    [accountSSHKeyItems],
+    [paymentMethod, accountSSHKeyItems],
   )
 
   const {
@@ -426,12 +438,12 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const handleSelectNode = useCallback(
     async (hash?: string) => {
+      if (!hash) return false
+
       const { crn, ...rest } = router.query
-      const query = hash ? { ...rest, crn: hash } : rest
+      if (crn === hash) return false
 
-      if (crn === query.crn) return false
-
-      return router.replace({ query })
+      return router.replace({ query: hash ? { ...rest, crn: hash } : rest })
     },
     [router],
   )
@@ -501,7 +513,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
           : handleShowNotification({
               variant: 'warning',
               title: 'Unsupported chain',
-              text: `${blockchainName} does not support the Pay-As-You-Go tier payment method`,
+              text: `${blockchainName} does not support the Pay-As-You-Go tier payment method.
+                     Change to the Base or Avalanche chain to enable it.`,
             })
       } else if (method === PaymentMethod.Hold) {
         isBlockchainHoldingCompatible(blockchain)
@@ -544,6 +557,21 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   // -------------------------
   // Effects
+
+  useEffect(() => {
+    if (hasInitialized.current) return
+    if (!router.isReady) return
+
+    hasInitialized.current = true
+
+    if (crn) {
+      handleConnect({
+        blockchain: BlockchainId.BASE,
+        provider: defaultBlockchainProviders[BlockchainId.BASE],
+      })
+      switchPaymentMethod(PaymentMethod.Stream)
+    }
+  }, [router.isReady, crn, switchPaymentMethod, handleConnect])
 
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
