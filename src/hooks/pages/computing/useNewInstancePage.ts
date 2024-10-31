@@ -357,7 +357,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
       // Checks configuration for PAYG tier
       if (formValues.paymentMethod === PaymentMethod.Stream) {
-        if (!node) return missingNodeTooltipContent()
         if (!isBlockchainPAYGCompatible(blockchain))
           return unsupportedStreamTooltipContent(blockchainName)
       }
@@ -374,7 +373,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       blockchainName,
       cost,
       formValues.paymentMethod,
-      node,
     ])
 
   const createInstanceDisabled = useMemo(() => {

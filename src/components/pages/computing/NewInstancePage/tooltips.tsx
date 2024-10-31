@@ -79,7 +79,7 @@ export function unsupportedManualCRNSelectionTooltipContent(): TooltipProps['con
     title: `Feature Unavailable in Holder Tier`,
     description: (
       <>
-        Manual CRN selection is disabled in the Holder tier. Switch to the
+        Manual CRN selection is disabled in the Holder tier. Switch to the{' '}
         <strong>Pay-As-You-Go</strong> tier to enable manual selection of CRNs.
       </>
     ),
