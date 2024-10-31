@@ -42,6 +42,7 @@ import Strong from '@/components/common/Strong'
 import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
+import BorderBox from '@/components/common/BorderBox'
 
 const CheckoutButton = React.memo(
   ({
@@ -93,11 +94,11 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     accountBalance,
     blockchainName,
     streamDisabled,
-    disabledStreamTooltipContent,
+    disabledStreamDisabledMessage,
     manuallySelectCRNDisabled,
-    manuallySelectCRNTooltipContent,
+    manuallySelectCRNDisabledMessage,
     createInstanceDisabled,
-    createInstanceTooltipContent,
+    createInstanceDisabledMessage,
     createInstanceButtonTitle,
     values,
     control,
@@ -230,6 +231,15 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <NewEntityTab selected="instance" />
           </Container>
         </section>
+        {createInstanceDisabledMessage && (
+          <section tw="px-0 pt-20 pb-6 md:py-10">
+            <Container>
+              <BorderBox $color="warning">
+                {createInstanceDisabledMessage}
+              </BorderBox>
+            </Container>
+          </section>
+        )}
         {values.paymentMethod === PaymentMethod.Stream && (
           <section tw="px-0 pt-20 pb-6 md:py-10">
             <Container>
@@ -267,12 +277,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                         >
                           Manually select CRN
                         </Button>
-                        {manuallySelectCRNTooltipContent && (
+                        {manuallySelectCRNDisabledMessage && (
                           <ResponsiveTooltip
                             my="bottom-left"
                             at="center-center"
                             targetRef={manuallySelectButtonRef}
-                            content={manuallySelectCRNTooltipContent}
+                            content={manuallySelectCRNDisabledMessage}
                           />
                         )}
                       </>
@@ -329,12 +339,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                     >
                       Manually select CRN
                     </Button>
-                    {manuallySelectCRNTooltipContent && (
+                    {manuallySelectCRNDisabledMessage && (
                       <ResponsiveTooltip
                         my="bottom-left"
                         at="center-center"
                         targetRef={manuallySelectButtonRef2}
-                        content={manuallySelectCRNTooltipContent}
+                        content={manuallySelectCRNDisabledMessage}
                       />
                     )}
                   </div>
@@ -462,7 +472,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           paymentMethod={values.paymentMethod}
           streamDuration={values.streamDuration}
           disablePaymentMethod={streamDisabled}
-          disabledStreamTooltip={disabledStreamTooltipContent}
+          disabledStreamTooltip={disabledStreamDisabledMessage}
           mainRef={mainRef}
           description={
             <>
@@ -479,7 +489,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               disabled={createInstanceDisabled}
               handleSubmit={handleSubmit}
               title={createInstanceButtonTitle}
-              tooltipContent={createInstanceTooltipContent}
+              tooltipContent={createInstanceDisabledMessage}
               isFooter={false}
             />
           }
@@ -488,7 +498,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               disabled={createInstanceDisabled}
               handleSubmit={handleSubmit}
               title={createInstanceButtonTitle}
-              tooltipContent={createInstanceTooltipContent}
+              tooltipContent={createInstanceDisabledMessage}
               isFooter={true}
             />
           }

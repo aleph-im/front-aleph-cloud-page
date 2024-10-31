@@ -56,13 +56,12 @@ import { EVMAccount } from '@aleph-sdk/evm'
 import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
 import {
-  accountConnectionRequiredTooltipContent,
-  insufficientBalanceTooltipContent,
-  unsupportedHoldingTooltipContent,
-  unsupportedManualCRNSelectionTooltipContent,
-  unsupportedStreamManualCRNSelectionTooltipContent,
-  unsupportedStreamTooltipContent,
-} from '@/components/pages/computing/NewInstancePage/tooltips'
+  accountConnectionRequiredDisabledMessage,
+  unsupportedHoldingDisabledMessage,
+  unsupportedManualCRNSelectionDisabledMessage,
+  unsupportedStreamManualCRNSelectionDisabledMessage,
+  unsupportedStreamDisabledMessage,
+} from '@/components/pages/computing/NewInstancePage/disabledMessages'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -99,12 +98,12 @@ export type UseNewInstancePageReturn = {
   accountBalance: number
   blockchainName: string
   manuallySelectCRNDisabled: boolean
-  manuallySelectCRNTooltipContent?: TooltipProps['content']
+  manuallySelectCRNDisabledMessage?: TooltipProps['content']
   createInstanceDisabled: boolean
-  createInstanceTooltipContent?: TooltipProps['content']
+  createInstanceDisabledMessage?: TooltipProps['content']
   createInstanceButtonTitle?: string
   streamDisabled: boolean
-  disabledStreamTooltipContent?: TooltipProps['content']
+  disabledStreamDisabledMessage?: TooltipProps['content']
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
@@ -153,7 +152,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   // @note: Set node depending on CRN
   const node: CRN | undefined = useMemo(() => {
-    console.log('calculating node')
     if (!nodes) return
     if (!queryCRN) return nodeRef.current
 
@@ -303,10 +301,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return blockchain ? blockchains[blockchain]?.name : 'Current network'
   }, [blockchain])
 
-  const disabledStreamTooltipContent: UseNewInstancePageReturn['disabledStreamTooltipContent'] =
+  const disabledStreamDisabledMessage: UseNewInstancePageReturn['disabledStreamDisabledMessage'] =
     useMemo(() => {
       if (!account)
-        return accountConnectionRequiredTooltipContent(
+        return accountConnectionRequiredDisabledMessage(
           'enable switching payment methods',
         )
 
@@ -314,32 +312,34 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         !isAccountPAYGCompatible(account) &&
         formValues.paymentMethod === PaymentMethod.Hold
       )
-        return unsupportedStreamTooltipContent(blockchainName)
+        return unsupportedStreamDisabledMessage(blockchainName)
     }, [account, blockchainName, formValues.paymentMethod])
 
   const streamDisabled = useMemo(() => {
-    return !!disabledStreamTooltipContent
-  }, [disabledStreamTooltipContent])
+    return !!disabledStreamDisabledMessage
+  }, [disabledStreamDisabledMessage])
 
   const address = useMemo(() => account?.address || '', [account])
 
-  const manuallySelectCRNTooltipContent: UseNewInstancePageReturn['manuallySelectCRNTooltipContent'] =
+  const manuallySelectCRNDisabledMessage: UseNewInstancePageReturn['manuallySelectCRNDisabledMessage'] =
     useMemo(() => {
       if (!account)
-        return accountConnectionRequiredTooltipContent(
+        return accountConnectionRequiredDisabledMessage(
           'manually selecting CRNs',
         )
 
       if (!isAccountPAYGCompatible(account))
-        return unsupportedStreamManualCRNSelectionTooltipContent(blockchainName)
+        return unsupportedStreamManualCRNSelectionDisabledMessage(
+          blockchainName,
+        )
 
       if (formValues.paymentMethod === PaymentMethod.Hold)
-        return unsupportedManualCRNSelectionTooltipContent()
+        return unsupportedManualCRNSelectionDisabledMessage()
     }, [account, blockchainName, formValues.paymentMethod])
 
   const manuallySelectCRNDisabled = useMemo(() => {
-    return !!manuallySelectCRNTooltipContent
-  }, [manuallySelectCRNTooltipContent])
+    return !!manuallySelectCRNDisabledMessage
+  }, [manuallySelectCRNDisabledMessage])
 
   // Checks if user can afford with current balance
   const hasEnoughBalance = useMemo(() => {
@@ -349,18 +349,18 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   }, [account, accountBalance, cost?.totalCost])
 
-  const createInstanceTooltipContent: UseNewInstancePageReturn['createInstanceTooltipContent'] =
+  const createInstanceDisabledMessage: UseNewInstancePageReturn['createInstanceDisabledMessage'] =
     useMemo(() => {
       // Checks configuration for PAYG tier
       if (formValues.paymentMethod === PaymentMethod.Stream) {
         if (!isBlockchainPAYGCompatible(blockchain))
-          return unsupportedStreamTooltipContent(blockchainName)
+          return unsupportedStreamDisabledMessage(blockchainName)
       }
 
       // Checks configuration for Holder tier
       if (formValues.paymentMethod === PaymentMethod.Hold) {
         if (!isBlockchainHoldingCompatible(blockchain))
-          return unsupportedHoldingTooltipContent(blockchainName)
+          return unsupportedHoldingDisabledMessage(blockchainName)
       }
     }, [blockchain, blockchainName, formValues.paymentMethod])
 
@@ -375,8 +375,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const createInstanceDisabled = useMemo(() => {
     if (createInstanceButtonTitle !== 'Create instance') return true
 
-    return !!createInstanceTooltipContent
-  }, [createInstanceButtonTitle, createInstanceTooltipContent])
+    return !!createInstanceDisabledMessage
+  }, [createInstanceButtonTitle, createInstanceDisabledMessage])
 
   // -------------------------
   // Handlers
@@ -460,10 +460,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     accountBalance,
     blockchainName,
     createInstanceDisabled,
-    createInstanceTooltipContent,
+    createInstanceDisabledMessage,
     createInstanceButtonTitle,
     manuallySelectCRNDisabled,
-    manuallySelectCRNTooltipContent,
+    manuallySelectCRNDisabledMessage,
     values: formValues,
     control,
     errors,
@@ -471,7 +471,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     lastVersion,
     nodeSpecs,
     streamDisabled,
-    disabledStreamTooltipContent,
+    disabledStreamDisabledMessage,
     selectedModal,
     setSelectedModal,
     selectedNode,

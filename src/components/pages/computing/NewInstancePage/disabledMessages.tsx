@@ -1,7 +1,7 @@
 import { TooltipProps } from '@aleph-front/core'
 import React from 'react'
 
-type TooltipContentProps = {
+type DisabledMessageProps = {
   title: React.ReactNode
   description: React.ReactNode
 }
@@ -9,7 +9,7 @@ type TooltipContentProps = {
 function tooltipContent({
   title,
   description,
-}: TooltipContentProps): TooltipProps['content'] {
+}: DisabledMessageProps): TooltipProps['content'] {
   return (
     <div>
       <p className="tp-body3 fs-18 text-base2">{title}</p>
@@ -18,7 +18,7 @@ function tooltipContent({
   )
 }
 
-export function accountConnectionRequiredTooltipContent(
+export function accountConnectionRequiredDisabledMessage(
   actionDescription: string,
 ): TooltipProps['content'] {
   return tooltipContent({
@@ -28,7 +28,7 @@ export function accountConnectionRequiredTooltipContent(
   })
 }
 
-export function unsupportedHoldingTooltipContent(
+export function unsupportedHoldingDisabledMessage(
   blockchainName: string,
 ): TooltipProps['content'] {
   return tooltipContent({
@@ -42,7 +42,7 @@ export function unsupportedHoldingTooltipContent(
   })
 }
 
-export function unsupportedStreamTooltipContent(
+export function unsupportedStreamDisabledMessage(
   blockchainName: string,
 ): TooltipProps['content'] {
   return tooltipContent({
@@ -58,7 +58,7 @@ export function unsupportedStreamTooltipContent(
   })
 }
 
-export function unsupportedStreamManualCRNSelectionTooltipContent(
+export function unsupportedStreamManualCRNSelectionDisabledMessage(
   blockchainName: string,
 ): TooltipProps['content'] {
   return tooltipContent({
@@ -74,7 +74,7 @@ export function unsupportedStreamManualCRNSelectionTooltipContent(
   })
 }
 
-export function unsupportedManualCRNSelectionTooltipContent(): TooltipProps['content'] {
+export function unsupportedManualCRNSelectionDisabledMessage(): TooltipProps['content'] {
   return tooltipContent({
     title: `Feature Unavailable in Holder Tier`,
     description: (
@@ -83,13 +83,5 @@ export function unsupportedManualCRNSelectionTooltipContent(): TooltipProps['con
         <strong>Pay-As-You-Go</strong> tier to enable manual selection of CRNs.
       </>
     ),
-  })
-}
-
-export function insufficientBalanceTooltipContent(): TooltipProps['content'] {
-  return tooltipContent({
-    title: `Insufficient balance`,
-    description: `Please add funds to your account to create an instance
-                  with the current configuration.`,
   })
 }
