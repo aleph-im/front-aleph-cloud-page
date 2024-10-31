@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useRouter } from 'next/router'
+import Router, { useRouter } from 'next/router'
 import {
   createFromEVMAccount,
   isAccountSupported as isAccountPAYGCompatible,
@@ -19,7 +19,7 @@ import {
   defaultNameAndTags,
   NameAndTagsField,
 } from '@/hooks/form/useAddNameAndTags'
-import { SSHKeyField, useAccountSSHKeyItems } from '@/hooks/form/useAddSSHKeys'
+import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import {
   defaultInstanceImage,
@@ -50,25 +50,11 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
-import {
-  BlockchainId,
-  blockchains,
-  defaultBlockchainProviders,
-} from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
 import { PaymentConfiguration } from '@/domain/executable'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
-import {
-  ConnectionConfirmUpdateAction,
-  ConnectionState,
-} from '@/store/connection'
-import {
-  ModalCardProps,
-  NotificationCardProps,
-  TooltipProps,
-  useModal,
-  useNotification,
-} from '@aleph-front/core'
+import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
 import {
   accountConnectionRequiredTooltipContent,
   insufficientBalanceTooltipContent,
@@ -125,21 +111,16 @@ export type UseNewInstancePageReturn = {
   node?: CRN
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
-  connectionAttempt: ConnectionState['connectionAttempt']
   selectedModal?: Modal
   setSelectedModal: (modal?: Modal) => void
   selectedNode?: string
   setSelectedNode: (hash?: string) => void
   modalOpen?: (info: ModalCardProps) => void
   modalClose?: () => void
+  handleManuallySelectCRN: () => void
+  handleSelectNode: () => void
   handleSubmit: (e: FormEvent) => Promise<void>
   handleCloseModal: () => void
-  handleResetForm: (
-    connectionAttempt: ConnectionState['connectionAttempt'],
-  ) => void
-  handleSwitchPaymentMethod: (method: PaymentMethod) => void
-  handleManuallySelectCRN: () => void
-  handleSwitchToNodeStream: () => Promise<void>
   handleBack: () => void
 }
 
@@ -148,9 +129,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const {
     blockchain,
     account,
-    provider,
     balance: accountBalance = 0,
-    connectionAttempt,
     handleConnect,
   } = useConnection({
     triggerOnMount: false,
@@ -159,14 +138,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const modalOpen = modal?.open
   const modalClose = modal?.close
 
-  const notification = useNotification()
-  const addNotification = notification?.add
-
   const router = useRouter()
-  const { crn } = router.query
+  const { crn: queryCRN } = router.query
 
   const hasInitialized = useRef(false)
-  const [paymentMethod, setPaymentMethod] = useState(PaymentMethod.Hold)
+  const nodeRef = useRef<CRN | undefined>(undefined)
   const [selectedNode, setSelectedNode] = useState<string>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
 
@@ -176,12 +152,14 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const { nodes, lastVersion } = useRequestCRNs({})
 
   // @note: Set node depending on CRN
-  const node = useMemo(() => {
+  const node: CRN | undefined = useMemo(() => {
+    console.log('calculating node')
     if (!nodes) return
-    if (paymentMethod === PaymentMethod.Hold) return
+    if (!queryCRN) return nodeRef.current
 
-    return nodes.find((node) => node.hash === crn)
-  }, [crn, nodes, paymentMethod])
+    nodeRef.current = nodes.find((node) => node.hash === queryCRN)
+    return nodeRef.current
+  }, [queryCRN, nodes])
 
   const userNodes = useMemo(() => (node ? [node] : undefined), [node])
   const { specs } = useRequestCRNSpecs({ nodes: userNodes })
@@ -268,7 +246,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
           new EntityAddAction({ name: 'instance', entities: accountInstance }),
         )
 
-        await router.replace('/')
+        await Router.replace('/')
       } finally {
         await stop()
       }
@@ -281,7 +259,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       nodeSpecs,
       handleConnect,
       dispatch,
-      router,
       next,
       stop,
     ],
@@ -289,30 +266,18 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   // -------------------------
   // Setup form
-
-  const accountSSHKeyItems = useAccountSSHKeyItems()
-  const defaultFormValues: Partial<NewInstanceFormState> = useMemo(
-    () => ({
-      ...defaultValues,
-      paymentMethod: paymentMethod || defaultValues.paymentMethod,
-      sshKeys: accountSSHKeyItems,
-    }),
-    [paymentMethod, accountSSHKeyItems],
-  )
-
   const {
     control,
     handleSubmit,
-    formState: { errors, isDirty: hasModifiedFormValues },
+    formState: { errors },
     setValue,
-    reset: resetForm,
   } = useForm({
-    defaultValues: defaultFormValues,
+    defaultValues,
     onSubmit,
     resolver: zodResolver(
       !node ? InstanceManager.addSchema : InstanceManager.addStreamSchema,
     ),
-    readyDeps: [defaultFormValues],
+    readyDeps: [],
   })
 
   const formValues = useWatch({ control }) as NewInstanceFormState
@@ -327,7 +292,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       specs: formValues.specs,
       volumes: formValues.volumes,
       streamDuration: formValues.streamDuration,
-      paymentMethod,
+      paymentMethod: formValues.paymentMethod,
     },
   })
 
@@ -335,7 +300,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // Memos
 
   const blockchainName = useMemo(() => {
-    return blockchain ? blockchains[blockchain]?.name : 'current network'
+    return blockchain ? blockchains[blockchain]?.name : 'Current network'
   }, [blockchain])
 
   const disabledStreamTooltipContent: UseNewInstancePageReturn['disabledStreamTooltipContent'] =
@@ -345,9 +310,12 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
           'enable switching payment methods',
         )
 
-      if (!isAccountPAYGCompatible(account))
+      if (
+        !isAccountPAYGCompatible(account) &&
+        formValues.paymentMethod === PaymentMethod.Hold
+      )
         return unsupportedStreamTooltipContent(blockchainName)
-    }, [account, blockchainName])
+    }, [account, blockchainName, formValues.paymentMethod])
 
   const streamDisabled = useMemo(() => {
     return disabledStreamTooltipContent ? true : false
@@ -365,9 +333,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       if (!isAccountPAYGCompatible(account))
         return unsupportedStreamManualCRNSelectionTooltipContent(blockchainName)
 
-      if (paymentMethod === PaymentMethod.Hold)
+      if (formValues.paymentMethod === PaymentMethod.Hold)
         return unsupportedManualCRNSelectionTooltipContent()
-    }, [account, blockchainName, paymentMethod])
+    }, [account, blockchainName, formValues.paymentMethod])
 
   const manuallySelectCRNDisabled = useMemo(() => {
     return manuallySelectCRNTooltipContent ? true : false
@@ -388,14 +356,14 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         return insufficientBalanceTooltipContent()
 
       // Checks configuration for PAYG tier
-      if (paymentMethod === PaymentMethod.Stream) {
+      if (formValues.paymentMethod === PaymentMethod.Stream) {
         if (!node) return missingNodeTooltipContent()
         if (!isBlockchainPAYGCompatible(blockchain))
           return unsupportedStreamTooltipContent(blockchainName)
       }
 
       // Checks configuration for Holder tier
-      if (paymentMethod === PaymentMethod.Hold) {
+      if (formValues.paymentMethod === PaymentMethod.Hold) {
         if (!isBlockchainHoldingCompatible(blockchain))
           return unsupportedHoldingTooltipContent(blockchainName)
       }
@@ -405,7 +373,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       blockchain,
       blockchainName,
       cost,
-      paymentMethod,
+      formValues.paymentMethod,
       node,
     ])
 
@@ -416,127 +384,26 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Handlers
 
-  const handleShowNotification = useCallback(
-    (props: NotificationCardProps) => {
-      addNotification && addNotification(props)
-    },
-    [addNotification],
-  )
-
-  const handleSelectNode = useCallback(
-    async (hash?: string) => {
-      if (!hash) return false
-
-      const { crn, ...rest } = router.query
-      if (crn === hash) return false
-
-      return router.replace({ query: hash ? { ...rest, crn: hash } : rest })
-    },
-    [router],
-  )
-
-  const handleCloseModal = useCallback(() => {
-    dispatch(
-      new ConnectionConfirmUpdateAction({
-        connectionAttempt: undefined,
-      }),
-    )
+  const handleSelectNode = useCallback(async () => {
     setSelectedModal(undefined)
-  }, [dispatch])
+
+    if (!selectedNode) return
+
+    const { crn: queryCRN, ...rest } = router.query
+    if (queryCRN === selectedNode) return
+
+    Router.replace({
+      query: selectedNode ? { ...rest, crn: selectedNode } : rest,
+    })
+  }, [router.query, selectedNode])
 
   const handleManuallySelectCRN = useCallback(() => {
-    isBlockchainPAYGCompatible(blockchain)
-      ? setSelectedModal('node-list')
-      : handleShowNotification({
-          variant: 'warning',
-          title: `Manual CRN Selection Unavailable`,
-          text: `Manual selection of CRN is not supported on ${blockchainName}.
-           To access manual CRN selection, please switch to the Base or
-           Avalanche chain using the dropdown at the top of the page.`,
-        })
-  }, [blockchain, blockchainName, handleShowNotification])
+    setSelectedModal('node-list')
+  }, [])
 
-  const switchPaymentMethod = useCallback(
-    (newPaymentMethod: PaymentMethod) => {
-      setPaymentMethod(newPaymentMethod)
-      setValue('paymentMethod', newPaymentMethod)
-    },
-    [setValue],
-  )
-
-  const handleSwitchToNodeStream = useCallback(async () => {
-    if (!isBlockchainPAYGCompatible(blockchain))
-      handleConnect({ blockchain: BlockchainId.BASE, provider })
-
-    if (selectedNode !== node?.hash) handleSelectNode(selectedNode)
-
+  const handleCloseModal = useCallback(() => {
     setSelectedModal(undefined)
-    switchPaymentMethod(PaymentMethod.Stream)
-  }, [
-    blockchain,
-    provider,
-    selectedNode,
-    node?.hash,
-    switchPaymentMethod,
-    handleConnect,
-    handleSelectNode,
-  ])
-
-  const handleSwitchToAutoHold = useCallback(() => {
-    if (node?.hash) {
-      setSelectedNode(undefined)
-      handleSelectNode(undefined)
-    }
-
-    setSelectedModal(undefined)
-    switchPaymentMethod(PaymentMethod.Hold)
-  }, [node?.hash, switchPaymentMethod, handleSelectNode])
-
-  const handleSwitchPaymentMethod = useCallback(
-    (method: PaymentMethod) => {
-      if (method === PaymentMethod.Stream) {
-        isBlockchainPAYGCompatible(blockchain)
-          ? handleSwitchToNodeStream()
-          : handleShowNotification({
-              variant: 'warning',
-              title: 'Unsupported chain',
-              text: `${blockchainName} does not support the Pay-As-You-Go tier payment method.
-                     Change to the Base or Avalanche chain to enable it.`,
-            })
-      } else if (method === PaymentMethod.Hold) {
-        isBlockchainHoldingCompatible(blockchain)
-          ? handleSwitchToAutoHold()
-          : handleShowNotification({
-              variant: 'warning',
-              title: 'Unsupported chain',
-              text: `${blockchainName} does not support the Holder tier payment method`,
-            })
-      }
-    },
-    [
-      blockchain,
-      blockchainName,
-      handleShowNotification,
-      handleSwitchToAutoHold,
-      handleSwitchToNodeStream,
-    ],
-  )
-
-  const handleResetForm = useCallback(
-    (connectionAttempt: ConnectionState['connectionAttempt']) => {
-      resetForm(defaultFormValues)
-      handleSwitchToAutoHold()
-      handleCloseModal()
-      if (connectionAttempt) dispatch(connectionAttempt)
-    },
-    [
-      defaultFormValues,
-      dispatch,
-      handleCloseModal,
-      handleSwitchToAutoHold,
-      resetForm,
-    ],
-  )
+  }, [])
 
   const handleBack = () => {
     router.push('.')
@@ -545,20 +412,30 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Effects
 
+  // @note: First time the user loads the page, set payment method to Stream if CRN is present
   useEffect(() => {
     if (hasInitialized.current) return
     if (!router.isReady) return
 
     hasInitialized.current = true
 
-    if (crn) {
-      handleConnect({
-        blockchain: BlockchainId.BASE,
-        provider: defaultBlockchainProviders[BlockchainId.BASE],
-      })
-      switchPaymentMethod(PaymentMethod.Stream)
-    }
-  }, [router.isReady, crn, switchPaymentMethod, handleConnect])
+    if (queryCRN) setValue('paymentMethod', PaymentMethod.Stream)
+  }, [queryCRN, router.isReady, setValue])
+
+  // @note: Updates url depending on payment method
+  useEffect(() => {
+    if (!node) return
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { crn, ...rest } = Router.query
+
+    Router.replace({
+      query:
+        formValues.paymentMethod === PaymentMethod.Hold
+          ? { ...rest }
+          : { ...rest, crn: node.hash },
+    })
+  }, [node, formValues.paymentMethod])
 
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
@@ -573,11 +450,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setValue('nodeSpecs', nodeSpecs)
   }, [nodeSpecs, setValue])
 
-  // // @note: Set payment method depending on wallet blockchain network
-  // useEffect(() => {
-  //   setValue('paymentMethod', !node ? PaymentMethod.Hold : PaymentMethod.Stream)
-  // }, [node, setValue])
-
   // @note: Set streamCost
   useEffect(() => {
     if (!cost) return
@@ -585,31 +457,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
     setValue('streamCost', cost.totalStreamCost)
   }, [cost, setValue, formValues])
-
-  // Manage connection confirmation modal
-  useEffect(() => {
-    function disableConnectionConfirmationModal() {
-      dispatch(
-        new ConnectionConfirmUpdateAction({
-          needsConfirmation: false,
-          connectionAttempt: undefined,
-        }),
-      )
-    }
-
-    function enableConnectionConfirmationModal() {
-      dispatch(new ConnectionConfirmUpdateAction({ needsConfirmation: true }))
-    }
-
-    if (node) return enableConnectionConfirmationModal()
-
-    if (!address) return disableConnectionConfirmationModal()
-    if (!hasModifiedFormValues) return disableConnectionConfirmationModal()
-
-    enableConnectionConfirmationModal()
-
-    return () => disableConnectionConfirmationModal()
-  }, [address, hasModifiedFormValues, node, dispatch])
 
   return {
     address,
@@ -627,19 +474,16 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     nodeSpecs,
     streamDisabled,
     disabledStreamTooltipContent,
-    connectionAttempt,
     selectedModal,
     setSelectedModal,
     selectedNode,
     setSelectedNode,
     modalOpen,
     modalClose,
+    handleManuallySelectCRN,
+    handleSelectNode,
     handleSubmit,
     handleCloseModal,
-    handleResetForm,
-    handleSwitchPaymentMethod,
-    handleManuallySelectCRN,
-    handleSwitchToNodeStream,
     handleBack,
   }
 }

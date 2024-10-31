@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useNotification } from '@aleph-front/core'
 import {
-  ConnectionConfirmUpdateAction,
   ConnectionConnectAction,
   ConnectionDisconnectAction,
   ConnectionState,
@@ -26,7 +25,7 @@ export const useConnection = ({
   triggerOnMount,
 }: UseConnectionProps): UseConnectionReturn => {
   const [state, dispatch] = useAppState()
-  const { blockchain, provider, needsConfirmation } = state.connection
+  const { blockchain, provider } = state.connection
 
   const prevConnectionProviderRef = useRef<
     BaseConnectionProviderManager | undefined
@@ -36,19 +35,9 @@ export const useConnection = ({
   const addNotification = noti?.add
 
   const handleConnect = useCallback(
-    (payload: ConnectionConnectAction['payload']) => {
-      if (needsConfirmation) {
-        dispatch(
-          new ConnectionConfirmUpdateAction({
-            connectionAttempt: new ConnectionConnectAction(payload),
-          }),
-        )
-      } else {
-        dispatch(new ConnectionConnectAction(payload))
-      }
-    },
-
-    [needsConfirmation, dispatch],
+    (payload: ConnectionConnectAction['payload']) =>
+      dispatch(new ConnectionConnectAction(payload)),
+    [dispatch],
   )
 
   const handleDisconnect = useCallback(

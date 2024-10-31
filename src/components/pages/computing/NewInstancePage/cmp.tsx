@@ -102,19 +102,16 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     node,
     nodeSpecs,
     lastVersion,
-    connectionAttempt,
     selectedModal,
     setSelectedModal,
     selectedNode,
     setSelectedNode,
     modalOpen,
     modalClose,
+    handleManuallySelectCRN,
+    handleSelectNode,
     handleSubmit,
     handleCloseModal,
-    handleResetForm,
-    handleSwitchPaymentMethod,
-    handleManuallySelectCRN,
-    handleSwitchToNodeStream,
     handleBack,
   } = useNewInstancePage()
 
@@ -126,43 +123,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   useEffect(() => {
     if (!modalOpen) return
     if (!modalClose) return
-
-    if (connectionAttempt)
-      return modalOpen({
-        width: '40rem',
-        title: 'Confirm Chain Switch',
-        onClose: handleCloseModal,
-        content: (
-          <div tw="flex flex-col gap-8" className="tp-body">
-            <div>
-              <strong>Switching chains will reset all data</strong> you&apos;ve
-              currently entered in the form. This is necessary to align with the
-              specific configurations and requirements of the new chain. Please
-              save any important information before proceeding.
-            </div>
-          </div>
-        ),
-        footer: (
-          <div tw="w-full flex justify-between">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={handleCloseModal}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={() => handleResetForm(connectionAttempt)}
-            >
-              Switch Chains
-            </Button>
-          </div>
-        ),
-      })
 
     switch (selectedModal) {
       case 'node-list':
@@ -183,7 +143,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                   type="button"
                   variant="primary"
                   size="md"
-                  onClick={handleSwitchToNodeStream}
+                  onClick={handleSelectNode}
                   disabled={!selectedNode}
                   tw="ml-auto!"
                 >
@@ -197,15 +157,13 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         return modalClose()
     }
   }, [
-    connectionAttempt,
     selectedModal,
     selectedNode,
     setSelectedNode,
-    handleCloseModal,
-    handleResetForm,
-    handleSwitchToNodeStream,
-    modalClose,
     modalOpen,
+    modalClose,
+    handleSelectNode,
+    handleCloseModal,
   ])
   // ------------------------
 
@@ -258,6 +216,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
   const manuallySelectButtonRef = useRef<HTMLButtonElement>(null)
+  const manuallySelectButtonRef2 = useRef<HTMLButtonElement>(null)
 
   return (
     <>
@@ -293,15 +252,27 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                   />
                   <div tw="mt-6">
                     {!node && (
-                      <Button
-                        type="button"
-                        kind="functional"
-                        variant="warning"
-                        size="md"
-                        onClick={handleManuallySelectCRN}
-                      >
-                        Manually select CRN
-                      </Button>
+                      <>
+                        <Button
+                          ref={manuallySelectButtonRef}
+                          type="button"
+                          kind="functional"
+                          variant="warning"
+                          size="md"
+                          onClick={handleManuallySelectCRN}
+                          disabled={manuallySelectCRNDisabled}
+                        >
+                          Manually select CRN
+                        </Button>
+                        {manuallySelectCRNTooltipContent && (
+                          <ResponsiveTooltip
+                            my="bottom-left"
+                            at="center-center"
+                            targetRef={manuallySelectButtonRef}
+                            content={manuallySelectCRNTooltipContent}
+                          />
+                        )}
+                      </>
                     )}
                   </div>
                 </NoisyContainer>
@@ -345,7 +316,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 {!node && (
                   <div tw="mt-6">
                     <Button
-                      ref={manuallySelectButtonRef}
+                      ref={manuallySelectButtonRef2}
                       type="button"
                       kind="functional"
                       variant="warning"
@@ -359,7 +330,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                       <ResponsiveTooltip
                         my="bottom-left"
                         at="center-center"
-                        targetRef={manuallySelectButtonRef}
+                        targetRef={manuallySelectButtonRef2}
                         content={manuallySelectCRNTooltipContent}
                       />
                     )}
@@ -490,7 +461,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           disablePaymentMethod={streamDisabled}
           disabledStreamTooltip={disabledStreamTooltipContent}
           mainRef={mainRef}
-          onSwitchPaymentMethod={handleSwitchPaymentMethod}
           description={
             <>
               You can either leverage the traditional method of holding tokens
