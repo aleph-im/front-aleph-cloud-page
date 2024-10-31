@@ -58,7 +58,6 @@ import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
 import {
   accountConnectionRequiredTooltipContent,
   insufficientBalanceTooltipContent,
-  missingNodeTooltipContent,
   unsupportedHoldingTooltipContent,
   unsupportedManualCRNSelectionTooltipContent,
   unsupportedStreamManualCRNSelectionTooltipContent,
@@ -103,6 +102,7 @@ export type UseNewInstancePageReturn = {
   manuallySelectCRNTooltipContent?: TooltipProps['content']
   createInstanceDisabled: boolean
   createInstanceTooltipContent?: TooltipProps['content']
+  createInstanceButtonTitle?: string
   streamDisabled: boolean
   disabledStreamTooltipContent?: TooltipProps['content']
   values: any
@@ -318,7 +318,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     }, [account, blockchainName, formValues.paymentMethod])
 
   const streamDisabled = useMemo(() => {
-    return disabledStreamTooltipContent ? true : false
+    return !!disabledStreamTooltipContent
   }, [disabledStreamTooltipContent])
 
   const address = useMemo(() => account?.address || '', [account])
@@ -338,23 +338,19 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     }, [account, blockchainName, formValues.paymentMethod])
 
   const manuallySelectCRNDisabled = useMemo(() => {
-    return manuallySelectCRNTooltipContent ? true : false
+    return !!manuallySelectCRNTooltipContent
   }, [manuallySelectCRNTooltipContent])
+
+  // Checks if user can afford with current balance
+  const hasEnoughBalance = useMemo(() => {
+    if (!account) return false
+    if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') return true
+
+    return accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+  }, [account, accountBalance, cost?.totalCost])
 
   const createInstanceTooltipContent: UseNewInstancePageReturn['createInstanceTooltipContent'] =
     useMemo(() => {
-      if (!account)
-        return accountConnectionRequiredTooltipContent(
-          'enable Instance creation',
-        )
-
-      // Checks if user can afford with current balance
-      if (
-        process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE !== 'true' &&
-        accountBalance < (cost?.totalCost || Number.MAX_SAFE_INTEGER)
-      )
-        return insufficientBalanceTooltipContent()
-
       // Checks configuration for PAYG tier
       if (formValues.paymentMethod === PaymentMethod.Stream) {
         if (!isBlockchainPAYGCompatible(blockchain))
@@ -366,18 +362,21 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         if (!isBlockchainHoldingCompatible(blockchain))
           return unsupportedHoldingTooltipContent(blockchainName)
       }
-    }, [
-      account,
-      accountBalance,
-      blockchain,
-      blockchainName,
-      cost,
-      formValues.paymentMethod,
-    ])
+    }, [blockchain, blockchainName, formValues.paymentMethod])
+
+  const createInstanceButtonTitle: UseNewInstancePageReturn['createInstanceButtonTitle'] =
+    useMemo(() => {
+      if (!account) return 'Connect'
+      if (!hasEnoughBalance) return 'Insufficient ALEPH'
+
+      return 'Create instance'
+    }, [account, hasEnoughBalance])
 
   const createInstanceDisabled = useMemo(() => {
-    return createInstanceTooltipContent ? true : false
-  }, [createInstanceTooltipContent])
+    if (createInstanceButtonTitle !== 'Create instance') return true
+
+    return !!createInstanceTooltipContent
+  }, [createInstanceButtonTitle, createInstanceTooltipContent])
 
   // -------------------------
   // Handlers
@@ -462,6 +461,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     blockchainName,
     createInstanceDisabled,
     createInstanceTooltipContent,
+    createInstanceButtonTitle,
     manuallySelectCRNDisabled,
     manuallySelectCRNTooltipContent,
     values: formValues,

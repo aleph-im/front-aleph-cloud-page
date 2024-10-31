@@ -93,15 +93,3 @@ export function insufficientBalanceTooltipContent(): TooltipProps['content'] {
                   with the current configuration.`,
   })
 }
-
-export function missingNodeTooltipContent(): TooltipProps['content'] {
-  return tooltipContent({
-    title: `Missing CRN`,
-    description: (
-      <>
-        Please select a CRN to enable Instance creation. Select a CRN using the{' '}
-        <strong>Manually select CRN</strong> button on the form.
-      </>
-    ),
-  })
-}

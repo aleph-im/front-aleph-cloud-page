@@ -47,11 +47,13 @@ const CheckoutButton = React.memo(
   ({
     disabled,
     handleSubmit,
+    title = 'Create instance',
     tooltipContent,
     isFooter,
   }: {
     disabled: boolean
     handleSubmit: UseNewInstancePageReturn['handleSubmit']
+    title?: string
     tooltipContent?: TooltipProps['content']
     isFooter: boolean
   }) => {
@@ -69,7 +71,7 @@ const CheckoutButton = React.memo(
           disabled={disabled}
           onClick={handleSubmit}
         >
-          Create instance
+          {title}
         </Button>
         {tooltipContent && (
           <ResponsiveTooltip
@@ -96,6 +98,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     manuallySelectCRNTooltipContent,
     createInstanceDisabled,
     createInstanceTooltipContent,
+    createInstanceButtonTitle,
     values,
     control,
     errors,
@@ -475,6 +478,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <CheckoutButton
               disabled={createInstanceDisabled}
               handleSubmit={handleSubmit}
+              title={createInstanceButtonTitle}
               tooltipContent={createInstanceTooltipContent}
               isFooter={false}
             />
@@ -483,6 +487,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <CheckoutButton
               disabled={createInstanceDisabled}
               handleSubmit={handleSubmit}
+              title={createInstanceButtonTitle}
               tooltipContent={createInstanceTooltipContent}
               isFooter={true}
             />
