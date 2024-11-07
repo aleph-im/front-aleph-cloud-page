@@ -27,7 +27,12 @@ import Err from './errors'
  * @param end Number of chars to print from the end
  * @returns A shortened text
  */
-export const ellipseText = (text: string, start = 10, end = 0) => {
+export const ellipseText = (text?: string, start = 10, end = 0) => {
+  if (!text) {
+    console.debug(`Cannot ellipse text for: ${text}`)
+    return ''
+  }
+
   if (text.length <= start) return text
   if (text.length <= end) return text
   return `${text.slice(0, start)}...${end > 0 ? text.slice(-end) : ''}`
