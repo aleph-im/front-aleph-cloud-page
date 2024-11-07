@@ -21,7 +21,7 @@ export default function ConfidentialDashboardPage() {
       <div role="tabpanel">
         {tabId === 'confidential' ? (
           <>
-            {!!confidentials.length && (
+            {!!confidentials?.length && (
               <Container $variant="xl" tw="my-10">
                 <ConfidentialsTabContent data={confidentials} />
               </Container>
@@ -38,7 +38,7 @@ export default function ConfidentialDashboardPage() {
           </>
         ) : tabId === 'volume' ? (
           <>
-            {!!volumes.length && (
+            {!!volumes?.length && (
               <Container $variant="xl" tw="my-10">
                 <VolumesTabContent data={volumes} cta={false} />
               </Container>
@@ -46,7 +46,7 @@ export default function ConfidentialDashboardPage() {
           </>
         ) : tabId === 'domain' ? (
           <>
-            {!!domains.length && (
+            {!!domains?.length && (
               <Container $variant="xl" tw="my-10">
                 <DomainsTabContent data={domains} cta={false} />
               </Container>

@@ -20,7 +20,7 @@ export default function InstanceDashboardPage() {
       <div role="tabpanel">
         {tabId === 'instance' ? (
           <>
-            {!!instances.length && (
+            {!!instances?.length && (
               <Container $variant="xl" tw="my-10">
                 <InstancesTabContent data={instances} />
               </Container>
@@ -31,7 +31,7 @@ export default function InstanceDashboardPage() {
               info="WHAT ARE..."
               title="Instances"
               description="Launch and control virtual private servers (VPS) with ease. Choose between automatic or manual node selection, and customize your computing environment to meet your specific needs."
-              withButton={instances.length === 0}
+              withButton={instances?.length === 0}
               buttonUrl="/computing/instance/new"
               buttonText="Create instance"
             />

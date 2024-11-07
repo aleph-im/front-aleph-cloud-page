@@ -22,7 +22,7 @@ export default function SettingsDashboardPage() {
       <div role="tabpanel">
         {tabId === 'website' ? (
           <>
-            {!!websites.length && (
+            {!!websites?.length && (
               <Container $variant="xl" tw="my-10">
                 <WebsitesTabContent data={websites} />
               </Container>
@@ -33,14 +33,14 @@ export default function SettingsDashboardPage() {
               info="HOW TO..."
               title="Host your Website!"
               description="Build and deploy your website effortlessly using our web3 hosting solutions. Support for static pages, Next.js, React, and Vue.js ensures you have the flexibility to create the perfect site."
-              withButton={websites.length === 0}
+              withButton={websites?.length === 0}
               buttonUrl="/hosting/website/new"
               buttonText="Deploy your website"
             />
           </>
         ) : tabId === 'domain' ? (
           <>
-            {!!domains.length && (
+            {!!domains?.length && (
               <Container $variant="xl" tw="my-10">
                 <DomainsTabContent data={domains} cta={false} />
               </Container>

@@ -20,7 +20,7 @@ function FunctionDashboardPage() {
       <div role="tabpanel">
         {tabId === 'program' ? (
           <>
-            {!!programs.length && (
+            {!!programs?.length && (
               <Container $variant="xl" tw="my-10">
                 <FunctionsTabContent data={programs} />
               </Container>
@@ -31,7 +31,7 @@ function FunctionDashboardPage() {
               info="WHAT ARE..."
               title="Functions"
               description="Deploy and manage serverless functions effortlessly with our robust computing platform. Run code on-demand or persistently, with seamless integration and scalability."
-              withButton={programs.length === 0}
+              withButton={programs?.length === 0}
               buttonUrl="/computing/function/new"
               buttonText="Create function"
               externalLinkUrl="https://docs.aleph.im/tools/webconsole/"
@@ -39,7 +39,7 @@ function FunctionDashboardPage() {
           </>
         ) : tabId === 'volume' ? (
           <>
-            {!!volumes.length && (
+            {!!volumes?.length && (
               <Container $variant="xl" tw="my-10">
                 <VolumesTabContent data={volumes} cta={false} />
               </Container>
@@ -47,7 +47,7 @@ function FunctionDashboardPage() {
           </>
         ) : tabId === 'domain' ? (
           <>
-            {!!domains.length && (
+            {!!domains?.length && (
               <Container $variant="xl" tw="my-10">
                 <DomainsTabContent data={domains} cta={false} />
               </Container>
