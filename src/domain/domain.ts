@@ -19,6 +19,7 @@ export { EntityDomainType }
 
 export type DomainAggregateItem = {
   type: EntityDomainType
+  programType: EntityDomainType
   message_id: string
   updated_at: string
   options?: Record<string, unknown>
@@ -95,6 +96,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
       [domain.name]: {
         message_id: domain.ref,
         type,
+        programType: type,
         updated_at: new Date().toISOString(),
         ...(type === EntityDomainType.IPFS
           ? {
@@ -154,6 +156,7 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
         ac[name] = {
           message_id: ref,
           type,
+          programType: type,
           updated_at: new Date().toISOString(),
           ...(type === EntityDomainType.IPFS
             ? {
