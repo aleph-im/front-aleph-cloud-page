@@ -13,6 +13,7 @@ import { BaseConnectionProviderManager } from '@/domain/connect/base'
 
 export type UseConnectionProps = {
   triggerOnMount?: boolean
+  confirmSwitchModal?: React.ReactNode
 }
 
 export type UseConnectionReturn = ConnectionState & {
@@ -48,12 +49,13 @@ export const useConnection = ({
     ConnectionConnectAction['payload'] | undefined
   >('connection', undefined)
 
+  // @note: Loads the stored connection in case page is refreshed
   useEffect(() => {
     if (!triggerOnMount) return
     if (!storedConnection) return
 
-    handleConnect(storedConnection)
-  }, [handleConnect, storedConnection, triggerOnMount])
+    dispatch(new ConnectionConnectAction(storedConnection))
+  }, [dispatch, storedConnection, triggerOnMount])
 
   useEffect(() => {
     const handleUpdate = (payload: ConnectionUpdateAction['payload']) => {

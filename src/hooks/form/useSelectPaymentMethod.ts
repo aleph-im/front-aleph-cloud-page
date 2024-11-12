@@ -1,5 +1,5 @@
 import { PaymentMethod } from '@/helpers/constants'
-import { ChangeEvent, useCallback } from 'react'
+import { ChangeEvent, useCallback, useRef } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 export type UseSelectPaymentMethodProps = {
@@ -8,6 +8,7 @@ export type UseSelectPaymentMethodProps = {
   defaultValue?: PaymentMethod
   disabledHold?: boolean
   disabledStream?: boolean
+  disabledStreamTooltip: React.ReactNode
   onSwitch?: (e: PaymentMethod) => void
 }
 
@@ -15,6 +16,8 @@ export type UseSelectPaymentMethodReturn = {
   disabledHold?: boolean
   disabledStream?: boolean
   paymentMethodCtrl: UseControllerReturn<any, any>
+  disabledStreamTooltip: React.ReactNode
+  switchRef: React.Ref<HTMLInputElement>
   handleClickStream: () => void
   handleClickHold: () => void
 }
@@ -24,6 +27,7 @@ export function useSelectPaymentMethod({
   control,
   defaultValue,
   disabledHold,
+  disabledStream,
   onSwitch,
   ...rest
 }: UseSelectPaymentMethodProps): UseSelectPaymentMethodReturn {
@@ -48,19 +52,28 @@ export function useSelectPaymentMethod({
     paymentMethodCtrl.field.value === PaymentMethod.Stream
 
   const handleClickStream = useCallback(() => {
+    if (disabledStream) return
+    if (paymentMethodCtrl.field.value === PaymentMethod.Stream) return
+
     onChange(PaymentMethod.Stream)
-  }, [onChange])
+  }, [disabledStream, onChange, paymentMethodCtrl.field.value])
 
   const handleClickHold = useCallback(() => {
     if (disabledHold) return
+    if (paymentMethodCtrl.field.value === PaymentMethod.Hold) return
+
     onChange(PaymentMethod.Hold)
-  }, [disabledHold, onChange])
+  }, [disabledHold, onChange, paymentMethodCtrl.field.value])
+
+  const switchRef = useRef<HTMLInputElement>(null)
 
   return {
     paymentMethodCtrl,
+    disabledHold,
+    disabledStream,
+    switchRef,
     handleClickStream,
     handleClickHold,
-    disabledHold,
     ...rest,
   }
 }

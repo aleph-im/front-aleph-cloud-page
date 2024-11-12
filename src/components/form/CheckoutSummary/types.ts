@@ -25,6 +25,7 @@ export type CheckoutSummaryProps = {
   volumes?: VolumeField[]
   domains?: DomainField[]
   button?: ReactNode
+  footerButton?: ReactNode
   description?: ReactNode
   mainRef?: RefObject<HTMLElement>
   paymentMethod: PaymentMethod
@@ -32,6 +33,7 @@ export type CheckoutSummaryProps = {
   receiverAddress?: string
   streamDuration?: StreamDurationField
   disablePaymentMethod?: boolean
+  disabledStreamTooltip?: ReactNode
   onSwitchPaymentMethod?: (e: PaymentMethod) => void
 }
 
