@@ -135,7 +135,7 @@ export abstract class ExecutableManager {
       paymentMethod === PaymentMethod.Hold
         ? isPersistent
           ? 1_000
-          : 100
+          : 200
         : 0.055
 
     const capabilitiesCost = Object.values(capabilities).reduce(
