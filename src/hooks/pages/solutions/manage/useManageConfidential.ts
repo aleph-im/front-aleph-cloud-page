@@ -47,9 +47,9 @@ export function useManageConfidential(): ManageConfidential {
   const status = useConfidentialStatus(confidential)
 
   const handleCopyHash = useCopyToClipboardAndNotify(confidential?.id || '')
-  const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.vm_ipv6 || '')
+  const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.ipv6Parsed || '')
   const handleCopyConnect = useCopyToClipboardAndNotify(
-    `ssh root@${status?.vm_ipv6}`,
+    `ssh root@${status?.ipv6Parsed}`,
   )
 
   const nodeManager = useNodeManager()

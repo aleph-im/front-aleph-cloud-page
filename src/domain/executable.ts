@@ -41,6 +41,7 @@ import { CRN, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
 import { sleep } from '@aleph-front/core'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
+import { isBlockchainPAYGCompatible } from './blockchain'
 
 type ExecutableCapabilitiesProps = {
   internetAccess?: boolean
