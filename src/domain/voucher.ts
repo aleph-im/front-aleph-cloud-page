@@ -6,6 +6,15 @@ import {
 } from '@aleph-sdk/client'
 import { Blockchain } from '@aleph-sdk/core'
 
+export type VoucherMetadata = {
+  name: string
+  description: string
+  externalUrl: string
+  image: string
+  icon: string
+  attributes: VoucherAttribute[]
+}
+
 export type VoucherAttribute = {
   value: string | number
   traitType: string
@@ -24,10 +33,14 @@ export type Voucher = {
 }
 
 export class VoucherManager {
+  private metadataCache: Map<Voucher['metadataId'], VoucherMetadata>
+
   constructor(
     protected account: Account,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
-  ) {}
+  ) {
+    this.metadataCache = new Map()
+  }
 
   async getAll(): Promise<Voucher[]> {
     if (!this.account) return []
@@ -86,7 +99,7 @@ export class VoucherManager {
 
       if (voucher?.claimer === this.account.address) {
         const metadataId = voucher.metadata_id
-        const metadata = content.metadata[metadataId]
+        const metadata = await this.fetchMetadata(metadataId)
 
         if (metadata) {
           vouchers.push(this.createVoucher(voucherId, metadataId, metadata))
@@ -98,13 +111,25 @@ export class VoucherManager {
   }
 
   private async fetchMetadata(metadataId: string) {
+    if (this.metadataCache.has(metadataId))
+      return this.metadataCache.get(metadataId)
+
     try {
       const metadataUrl = `https://claim.twentysix.cloud/sbt/metadata/${metadataId}.json`
       const response = await axios.get(metadataUrl)
 
       if (response.status !== 200) return null
 
-      return response.data
+      const { external_url: externalUrl, ...rest } = response.data
+
+      const metadata: VoucherMetadata = {
+        externalUrl,
+        ...rest,
+      }
+
+      this.metadataCache.set(metadataId, metadata)
+
+      return metadata
     } catch (error) {
       console.error('Error fetching metadata:', error)
       return null
@@ -114,16 +139,9 @@ export class VoucherManager {
   private createVoucher(
     voucherId: string,
     metadataId: string,
-    metadata: any,
+    metadata: VoucherMetadata,
   ): Voucher {
-    const {
-      name,
-      description,
-      external_url: externalUrl,
-      image,
-      icon,
-      attributes,
-    } = metadata
+    const { name, description, externalUrl, image, icon, attributes } = metadata
 
     return {
       id: voucherId,
