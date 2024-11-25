@@ -358,7 +358,10 @@ export abstract class ExecutableManager {
     return { publicKey, privateKey, createdAt }
   }
 
-  async getAuthPubKeyToken(keyPair?: KeyPair): Promise<AuthPubKeyToken> {
+  async getAuthPubKeyToken(
+    keyPair?: KeyPair,
+    domain?: string,
+  ): Promise<AuthPubKeyToken> {
     // @todo: Improve this by caching on local storage
     const { cachedPubKeyToken } = ExecutableManager
 
@@ -381,13 +384,16 @@ export abstract class ExecutableManager {
     const { address } = this.account
 
     // @todo: Quickfix that should be moved to the backend
-    const [d] = new Date(createdAt + KEYPAIR_TTL).toISOString().split('Z')
-    const expires = `${d}+00:00`
+    const expires = new Date(createdAt + KEYPAIR_TTL).toISOString()
+
+    const { kty, crv, x, y } = publicKey
 
     const rawPayload = {
       alg: 'ECDSA',
-      pubkey: publicKey,
+      pubkey: { kty, crv, x, y },
       address,
+      domain,
+      chain: this.account.getChain(),
       expires,
     }
 
@@ -454,8 +460,6 @@ export abstract class ExecutableManager {
     hostname: string
     abort: Promise<void>
   }): AsyncGenerator<{ type: string; message: string }> {
-    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
-
     const url = new URL(
       hostname.replace('https://', 'wss://') +
         '/control/machine/' +
@@ -464,6 +468,11 @@ export abstract class ExecutableManager {
     )
 
     const { hostname: domain, pathname: path } = url
+
+    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken(
+      undefined,
+      domain,
+    )
 
     const signedOperationToken = await this.getAuthOperationToken(
       keyPair.privateKey,
