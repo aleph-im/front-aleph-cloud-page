@@ -1,16 +1,14 @@
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Confidential, ConfidentialStatus } from '@/domain/confidential'
-import { useConfidentialStatus } from '@/hooks/common/useConfidentialStatus'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
-import { PaymentType } from '@aleph-sdk/message'
 import { useRequestConfidentials } from '@/hooks/common/useRequestEntity/useRequestConfidentials'
 import { useCopyToClipboardAndNotify } from '@aleph-front/core'
-import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
-import { CRN } from '@/domain/node'
 import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
 import { DefaultTheme, useTheme } from 'styled-components'
+import { useExecutableActions } from '@/hooks/common/useExecutableActions'
+import { useConfidentialManager } from '@/hooks/common/useManager/useConfidentialManager'
 
 export type ManageConfidential = {
   authorized: boolean
@@ -18,7 +16,6 @@ export type ManageConfidential = {
   confidential?: Confidential
   status?: ConfidentialStatus
   mappedKeys: (SSHKey | undefined)[]
-  crn?: CRN
   nodeDetails?: { name: string; url: string }
   handleCopyHash: () => void
   handleCopyConnect: () => void
@@ -34,25 +31,32 @@ export function useManageConfidential(): ManageConfidential {
     query: { hash },
   } = router
 
+  // Check if user is authorized
   const { confidentials: authorized } = useAuthorization()
 
   useEffect(() => {
     if (!authorized) push('/')
   }, [authorized, push])
 
+  // ------------------
+  // Fetch confidential instance data
   const { entities } = useRequestConfidentials({ ids: hash as string })
   const [confidential] = entities || []
 
+  // ------------------
+  // Load confidential instance actions
+  const manager = useConfidentialManager()
+  const executableActions = useExecutableActions({
+    executable: confidential,
+    manager,
+    subscribeLogs: false,
+  })
+
+  const { status } = executableActions
+
+  // ------------------
+  // Load SSH keys
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
-  const status = useConfidentialStatus(confidential)
-
-  const handleCopyHash = useCopyToClipboardAndNotify(confidential?.id || '')
-  const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.ipv6Parsed || '')
-  const handleCopyConnect = useCopyToClipboardAndNotify(
-    `ssh root@${status?.ipv6Parsed}`,
-  )
-
-  const nodeManager = useNodeManager()
   const sshKeyManager = useSSHKeyManager()
 
   useEffect(() => {
@@ -67,55 +71,26 @@ export function useManageConfidential(): ManageConfidential {
     getMapped()
   }, [sshKeyManager, confidential])
 
-  const [crn, setCRN] = useState<CRN>()
+  // ------------------
+  // Handlers
 
-  useEffect(() => {
-    async function load() {
-      try {
-        if (!nodeManager) throw new Error()
-        if (!confidential) throw new Error()
-        if (confidential.payment?.type !== PaymentType.superfluid)
-          throw new Error()
-
-        const { receiver } = confidential.payment || {}
-        if (!receiver) throw new Error()
-
-        const node = await nodeManager.getCRNByStreamRewardAddress(receiver)
-        setCRN(node)
-      } catch {
-        setCRN(undefined)
-      }
-    }
-    load()
-  }, [confidential, nodeManager])
-
-  const nodeDetails = useMemo(() => {
-    if (status?.node) {
-      return {
-        name: status.node.node_id,
-        url: status.node.url,
-      }
-    }
-    if (crn) {
-      return {
-        name: crn.name || crn.hash,
-        url: crn.address || '',
-      }
-    }
-  }, [crn, status?.node])
+  const handleCopyHash = useCopyToClipboardAndNotify(confidential?.id || '')
+  const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.ipv6Parsed || '')
+  const handleCopyConnect = useCopyToClipboardAndNotify(
+    `ssh root@${status?.ipv6Parsed}`,
+  )
 
   const handleBack = () => {
     push('.')
   }
 
   return {
+    ...executableActions,
     authorized,
     theme,
     confidential,
     status,
     mappedKeys,
-    crn,
-    nodeDetails,
     handleCopyHash,
     handleCopyConnect,
     handleCopyIpv6,
