@@ -142,7 +142,7 @@ export type AuthPubKeyToken = {
 export const KEYPAIR_TTL = 1000 * 60 * 60 * 2
 
 export abstract class ExecutableManager {
-  protected static cachedPubKeyToken: AuthPubKeyToken
+  protected static cachedPubKeyToken?: AuthPubKeyToken
 
   /**
    * Calculates the amount of tokens required to deploy a function
@@ -367,14 +367,15 @@ export abstract class ExecutableManager {
 
     if (cachedPubKeyToken) {
       const { payload } = cachedPubKeyToken.pubKeyHeader
-      const { expires } = JSON.parse(
-        Buffer.from(payload, 'hex').toString('utf-8'),
-      )
+      const parsedPayload = Buffer.from(payload, 'hex').toString('utf-8')
+      const { expires, chain } = JSON.parse(parsedPayload)
 
       const expireTimestamp = new Date(expires).valueOf()
 
-      if (expireTimestamp >= Date.now()) {
+      if (chain === this.account.getChain() && expireTimestamp >= Date.now()) {
         return cachedPubKeyToken
+      } else {
+        ExecutableManager.cachedPubKeyToken = undefined
       }
     }
 
@@ -397,20 +398,33 @@ export abstract class ExecutableManager {
       expires,
     }
 
-    const payload = Buffer.from(JSON.stringify(rawPayload)).toString('hex')
+    // Sign message using wallet provider
+    let signature
+    const payload = JSON.stringify(rawPayload)
+    const message = Buffer.from(payload).toString('hex')
+    if (this.account.getChain() === BlockchainId.SOL) {
+      const wallet = (this.account as any).wallet
+      const encodedMessage = new TextEncoder().encode(payload)
 
-    // @todo: Refactor this
-    const wallet = (this.account as any).wallet.provider.provider
+      const signedMessage = await wallet.request({
+        method: 'signMessage',
+        params: { message: encodedMessage, display: 'hex' },
+      })
 
-    const signature = await wallet.request({
-      method: 'personal_sign',
-      params: [payload, address],
-    })
+      signature = Buffer.from(signedMessage.signature).toString('hex')
+    } else {
+      const wallet = (this.account as any).wallet.provider.provider
+
+      signature = await wallet.request({
+        method: 'personal_sign',
+        params: [message, address],
+      })
+    }
 
     const pubKeyToken = {
       keyPair,
       pubKeyHeader: {
-        payload,
+        payload: message,
         signature,
       },
     }
@@ -493,9 +507,14 @@ export abstract class ExecutableManager {
       }),
     )
 
+    console.log('signedOperationToken', signedOperationToken)
+    console.log('pubKeyHeader', pubKeyHeader)
+
     let auth = false
 
     for await (const data of feed) {
+      console.log('feed', feed)
+      console.log('data', data)
       try {
         if (!auth) {
           if (data.status !== 'connected') throw new Error('WS auth')
