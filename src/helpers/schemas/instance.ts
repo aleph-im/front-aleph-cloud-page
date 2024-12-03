@@ -92,6 +92,7 @@ export const instanceSchema = z
     systemVolumeSize: z.number().optional(),
     payment: z.any().optional(),
     node: z.any().optional(),
+    termsAndConditions: z.string().optional(),
   })
   .merge(addNameAndTagsSchema)
 

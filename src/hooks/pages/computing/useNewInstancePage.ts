@@ -75,6 +75,7 @@ export type NewInstanceFormState = NameAndTagsField & {
   paymentMethod: PaymentMethod
   streamDuration: StreamDurationField
   streamCost: number
+  termsAndConditions?: string
 }
 
 const defaultSpecs = {
@@ -89,9 +90,10 @@ export const defaultValues: Partial<NewInstanceFormState> = {
   paymentMethod: PaymentMethod.Hold,
   streamDuration: defaultStreamDuration,
   streamCost: Number.POSITIVE_INFINITY,
+  termsAndConditions: undefined,
 }
 
-export type Modal = 'node-list'
+export type Modal = 'node-list' | 'terms-and-conditions'
 
 export type UseNewInstancePageReturn = {
   address: string
@@ -118,6 +120,9 @@ export type UseNewInstancePageReturn = {
   modalClose?: () => void
   handleManuallySelectCRN: () => void
   handleSelectNode: () => void
+  handleRequestTermsAndConditionsAgreement: () => void
+  handleCheckTermsAndConditions: () => void
+  handleAcceptTermsAndConditions: (e: FormEvent) => void
   handleSubmit: (e: FormEvent) => Promise<void>
   handleCloseModal: () => void
   handleBack: () => void
@@ -156,6 +161,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     if (!queryCRN) return nodeRef.current
 
     nodeRef.current = nodes.find((node) => node.hash === queryCRN)
+    if (nodeRef.current)
+      nodeRef.current.terms_and_conditions =
+        '6db007f4c6160fdc73f1e13c1ff40354b9e7e7b95e71a1b19f4b571d0cf2ae4f'
     return nodeRef.current
   }, [queryCRN, nodes])
 
@@ -174,8 +182,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const manager = useInstanceManager()
   const { next, stop } = useCheckoutNotification({})
+
   const onSubmit = useCallback(
     async (state: NewInstanceFormState) => {
+      console.log(node)
+
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
 
@@ -214,6 +225,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
           streamDuration: state.streamDuration,
         }
       }
+
       const instance = {
         ...state,
         payment,
@@ -253,8 +265,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       manager,
       account,
       node,
-      blockchain,
       nodeSpecs,
+      blockchain,
       handleConnect,
       dispatch,
       next,
@@ -402,6 +414,25 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setSelectedModal(undefined)
   }, [])
 
+  const handleRequestTermsAndConditionsAgreement = useCallback(() => {
+    setSelectedModal('terms-and-conditions')
+  }, [])
+
+  const handleCheckTermsAndConditions = useCallback(() => {
+    console.log(formValues.termsAndConditions)
+    console.log(node?.terms_and_conditions)
+    if (formValues.termsAndConditions) setValue('termsAndConditions', undefined)
+    else setValue('termsAndConditions', node?.terms_and_conditions)
+  }, [formValues.termsAndConditions, node, setValue])
+
+  const handleAcceptTermsAndConditions = useCallback(
+    (e: React.FormEvent) => {
+      handleCloseModal()
+      handleSubmit(e)
+    },
+    [handleCloseModal, handleSubmit],
+  )
+
   const handleBack = () => {
     router.push('.')
   }
@@ -483,5 +514,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     handleSubmit,
     handleCloseModal,
     handleBack,
+    handleRequestTermsAndConditionsAgreement,
+    handleCheckTermsAndConditions,
+    handleAcceptTermsAndConditions,
   }
 }

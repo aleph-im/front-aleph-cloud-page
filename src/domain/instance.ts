@@ -166,6 +166,7 @@ export class InstanceManager
       yield* this.addPAYGStreamSteps(newInstance, account)
 
       const instanceMessage = yield* this.parseInstanceSteps(newInstance)
+      console.log('Creating instance', instanceMessage)
 
       yield
 

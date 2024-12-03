@@ -75,6 +75,7 @@ export type CRN = BaseNode & {
   metricsData?: CRNMetrics
   parentData?: CCN
   stream_reward?: string
+  terms_and_conditions?: string
 }
 
 export type AlephNode = CCN | CRN
