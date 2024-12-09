@@ -25,6 +25,12 @@ import {
 } from '../form/useCheckoutNotification'
 import { EntityDelAction } from '@/store/entity'
 import { useRouter } from 'next/router'
+import {
+  isBlockchainHoldingCompatible,
+  isBlockchainPAYGCompatible,
+} from '@/domain/blockchain'
+import { isAccountPAYGCompatible } from '@/domain/account'
+import { EVMAccount } from '@aleph-sdk/evm'
 
 export type UseExecutableActionsProps = {
   executable: Executable
@@ -116,15 +122,15 @@ export function useExecutableActions({
 
     if (isPAYG) {
       if (
-        blockchain !== BlockchainId.AVAX ||
-        !(account instanceof AvalancheAccount)
+        !isBlockchainPAYGCompatible(blockchain) ||
+        !isAccountPAYGCompatible(account)
       ) {
-        handleConnect({ blockchain: BlockchainId.AVAX })
+        handleConnect({ blockchain: BlockchainId.BASE })
         throw Err.ConnectYourPaymentWallet
       }
 
-      return await createFromEVMAccount(account)
-    } else if (blockchain !== BlockchainId.ETH) {
+      return await createFromEVMAccount(account as EVMAccount)
+    } else if (!isBlockchainHoldingCompatible(blockchain)) {
       handleConnect({ blockchain: BlockchainId.ETH })
       throw Err.ConnectYourPaymentWallet
     }
@@ -202,6 +208,8 @@ export function useExecutableActions({
   const { next, stop } = useCheckoutNotification({})
 
   const handleDelete = useCallback(async () => {
+    console.log('manager', manager)
+    console.log('executable', executable)
     if (!manager) throw Err.ConnectYourWallet
     if (!executable) throw Err.InstanceNotFound
 

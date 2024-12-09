@@ -402,6 +402,7 @@ export abstract class ExecutableManager {
     let signature
     const payload = JSON.stringify(rawPayload)
     const message = Buffer.from(payload).toString('hex')
+
     if (this.account.getChain() === BlockchainId.SOL) {
       const wallet = (this.account as any).wallet
       const encodedMessage = new TextEncoder().encode(payload)
