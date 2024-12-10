@@ -239,7 +239,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   async getAll({
     ids,
     page,
-    pageSize,
+    pagination,
     addresses = !ids ? [this.account.address] : undefined,
     channels = !ids ? [this.channel] : undefined,
   }: EntityManagerFetchOptions = {}): Promise<Volume[]> {
@@ -250,7 +250,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
         addresses,
         channels,
         page,
-        pageSize,
+        pagination,
       })
 
       return await this.parseMessages(response.messages)
