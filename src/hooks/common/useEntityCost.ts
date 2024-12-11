@@ -29,27 +29,17 @@ export function useEntityCost({ entityType, props }: UseEntityCostProps) {
 
   useEffect(() => {
     async function load() {
-      let result
-
-      switch (entityType) {
-        case EntityType.Volume:
-          result = await VolumeManager.getCost(props as VolumeCostProps)
-          break
-        case EntityType.Instance:
-          result = await InstanceManager.getCost(props as InstanceCostProps)
-          break
-        case EntityType.Program:
-          result = await ProgramManager.getCost(props as ProgramCostProps)
-          break
-        case EntityType.Indexer:
-          result = await IndexerManager.getCost(props as IndexerCostProps)
-          break
-        case EntityType.Website:
-          result = await WebsiteManager.getCost(props as WebsiteCostProps)
-          break
-        default:
-          result = undefined
-      }
+      const result = await (entityType === EntityType.Volume
+        ? VolumeManager.getCost(props as VolumeCostProps)
+        : entityType === EntityType.Instance
+          ? InstanceManager.getCost(props as InstanceCostProps)
+          : entityType === EntityType.Program
+            ? ProgramManager.getCost(props as ProgramCostProps)
+            : entityType === EntityType.Indexer
+              ? IndexerManager.getCost(props as IndexerCostProps)
+              : entityType === EntityType.Website
+                ? WebsiteManager.getCost(props as WebsiteCostProps)
+                : undefined)
 
       setCost(result)
     }

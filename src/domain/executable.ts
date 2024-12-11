@@ -132,11 +132,7 @@ export abstract class ExecutableManager {
     isPersistent = type === EntityType.Instance ? true : isPersistent
 
     const basePrice =
-      paymentMethod === PaymentMethod.Hold
-        ? isPersistent
-          ? 1_000
-          : 200
-        : 0.055
+      paymentMethod === PaymentMethod.Hold ? (isPersistent ? 2_000 : 200) : 0.11
 
     const capabilitiesCost = Object.values(capabilities).reduce(
       (ac, cv) => ac + Number(cv),
