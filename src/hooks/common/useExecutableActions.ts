@@ -208,8 +208,6 @@ export function useExecutableActions({
   const { next, stop } = useCheckoutNotification({})
 
   const handleDelete = useCallback(async () => {
-    console.log('manager', manager)
-    console.log('executable', executable)
     if (!manager) throw Err.ConnectYourWallet
     if (!executable) throw Err.InstanceNotFound
 

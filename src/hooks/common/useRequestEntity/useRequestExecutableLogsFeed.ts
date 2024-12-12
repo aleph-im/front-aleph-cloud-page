@@ -66,7 +66,7 @@ export function useRequestExecutableLogsFeed({
           })
         }
       } catch (e) {
-        console.log('!!!!!!', e)
+        console.error(e)
       }
     }
 
