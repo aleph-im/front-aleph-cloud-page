@@ -400,8 +400,7 @@ export abstract class ExecutableManager {
 
     // Sign message using wallet provider
     let signature
-    const payload = JSON.stringify(rawPayload)
-    const message = Buffer.from(payload).toString('hex')
+    const payload = Buffer.from(JSON.stringify(rawPayload)).toString('hex')
 
     if (this.account.getChain() === BlockchainId.SOL) {
       const wallet = (this.account as any).wallet
@@ -418,14 +417,14 @@ export abstract class ExecutableManager {
 
       signature = await wallet.request({
         method: 'personal_sign',
-        params: [message, address],
+        params: [payload, address],
       })
     }
 
     const pubKeyToken = {
       keyPair,
       pubKeyHeader: {
-        payload: message,
+        payload,
         signature,
       },
     }
@@ -497,25 +496,24 @@ export abstract class ExecutableManager {
 
     const feed = subscribeSocketFeed<any>(url.toString(), abort)
 
-    const { value: ws } = await feed.next()
+    try {
+      const { value: ws } = await feed.next()
 
-    ws.send(
-      JSON.stringify({
-        auth: {
-          'X-SignedOperation': signedOperationToken,
-          'X-SignedPubKey': pubKeyHeader,
-        },
-      }),
-    )
-
-    console.log('signedOperationToken', signedOperationToken)
-    console.log('pubKeyHeader', pubKeyHeader)
+      ws.send(
+        JSON.stringify({
+          auth: {
+            'X-SignedOperation': signedOperationToken,
+            'X-SignedPubKey': pubKeyHeader,
+          },
+        }),
+      )
+    } catch (e) {
+      console.error(e)
+    }
 
     let auth = false
 
     for await (const data of feed) {
-      console.log('feed', feed)
-      console.log('data', data)
       try {
         if (!auth) {
           if (data.status !== 'connected') throw new Error('WS auth')
@@ -525,7 +523,7 @@ export abstract class ExecutableManager {
 
         yield data
       } catch (err) {
-        console.log(err)
+        console.error(err)
       }
     }
   }
