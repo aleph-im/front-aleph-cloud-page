@@ -388,13 +388,15 @@ export abstract class ExecutableManager {
     const expires = new Date(createdAt + KEYPAIR_TTL).toISOString()
 
     const { kty, crv, x, y } = publicKey
+    const currentChain = this.account.getChain()
 
     const rawPayload = {
       alg: 'ECDSA',
       pubkey: { kty, crv, x, y },
       address,
       domain,
-      chain: this.account.getChain(),
+      chain:
+        currentChain === BlockchainId.SOL ? BlockchainId.SOL : BlockchainId.ETH,
       expires,
     }
 
@@ -402,7 +404,7 @@ export abstract class ExecutableManager {
     let signature
     const payload = Buffer.from(JSON.stringify(rawPayload)).toString('hex')
 
-    if (this.account.getChain() === BlockchainId.SOL) {
+    if (currentChain === BlockchainId.SOL) {
       const wallet = (this.account as any).wallet
       const encodedMessage = new TextEncoder().encode(payload)
 
