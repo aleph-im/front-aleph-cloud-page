@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router'
+import Router from 'next/router'
 import { useCallback } from 'react'
 
 export type NewEntityTabId = 'instance' | 'function' | 'confidential'
@@ -12,14 +12,9 @@ export type UseNewEntityTab = UseNewEntityTabProps & {
 }
 
 export function useNewEntityTab(props: UseNewEntityTabProps): UseNewEntityTab {
-  const router = useRouter()
-
-  const handleChange = useCallback(
-    (id: string) => {
-      router.push(`/computing/${id}/new`)
-    },
-    [router],
-  )
+  const handleChange = useCallback((id: string) => {
+    Router.push(`/computing/${id}/new`)
+  }, [])
 
   return {
     ...props,

@@ -3,7 +3,7 @@ import { CheckoutStepType } from '@/helpers/constants'
 export interface EntityManagerFetchOptions {
   ids?: string[]
   page?: number
-  pageSize?: number
+  pagination?: number
   addresses?: string[]
   channels?: string[]
 }

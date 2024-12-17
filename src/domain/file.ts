@@ -207,6 +207,12 @@ export class FileManager {
       return JSON.parse((await query.text()).split('\n').at(-2) ?? '{}')['Hash']
   }
 
+  async downloadFile(fileHash: string): Promise<File> {
+    const file = await this.sdkClient.downloadFile(fileHash)
+
+    return new File([file], fileHash)
+  }
+
   protected parseSizesMap(files: AccountFileObject[]): void {
     this.lastFetch = Date.now()
     this.sizesMapCache = files.reduce(
@@ -265,7 +271,7 @@ export class FileManager {
     const items = await this.sdkClient.getMessages({
       messageTypes: [MessageType.store],
       addresses: [address],
-      pageSize: 1000,
+      pagination: 1000,
     })
 
     const files = (items?.messages || []) as StoreMessage[]

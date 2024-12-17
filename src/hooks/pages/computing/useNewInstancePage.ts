@@ -62,6 +62,7 @@ import {
   unsupportedStreamManualCRNSelectionDisabledMessage,
   unsupportedStreamDisabledMessage,
 } from '@/components/pages/computing/NewInstancePage/disabledMessages'
+import { StoreContent } from '@aleph-sdk/message'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -75,6 +76,7 @@ export type NewInstanceFormState = NameAndTagsField & {
   paymentMethod: PaymentMethod
   streamDuration: StreamDurationField
   streamCost: number
+  termsAndConditions?: string
 }
 
 const defaultSpecs = {
@@ -89,9 +91,15 @@ export const defaultValues: Partial<NewInstanceFormState> = {
   paymentMethod: PaymentMethod.Hold,
   streamDuration: defaultStreamDuration,
   streamCost: Number.POSITIVE_INFINITY,
+  termsAndConditions: undefined,
 }
 
-export type Modal = 'node-list'
+export type Modal = 'node-list' | 'terms-and-conditions'
+
+export type TermsAndConditions = {
+  cid: string
+  name: string
+}
 
 export type UseNewInstancePageReturn = {
   address: string
@@ -114,17 +122,26 @@ export type UseNewInstancePageReturn = {
   setSelectedModal: (modal?: Modal) => void
   selectedNode?: string
   setSelectedNode: (hash?: string) => void
+  termsAndConditions?: TermsAndConditions
   modalOpen?: (info: ModalCardProps) => void
   modalClose?: () => void
   handleManuallySelectCRN: () => void
   handleSelectNode: () => void
+  handleRequestTermsAndConditionsAgreement: () => void
+  handleCheckTermsAndConditions: () => void
+  handleAcceptTermsAndConditions: (e: FormEvent) => void
+  handleDownloadFile: (fileHash: string, fileName: string) => Promise<void>
   handleSubmit: (e: FormEvent) => Promise<void>
   handleCloseModal: () => void
   handleBack: () => void
 }
 
 export function useNewInstancePage(): UseNewInstancePageReturn {
-  const [, dispatch] = useAppState()
+  const [state, dispatch] = useAppState()
+  const {
+    manager: { fileManager, messageManager },
+  } = state
+
   const {
     blockchain,
     account,
@@ -142,6 +159,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const hasInitialized = useRef(false)
   const nodeRef = useRef<CRN | undefined>(undefined)
+  const [termsAndConditions, setTermsAndConditions] = useState<
+    TermsAndConditions | undefined
+  >()
   const [selectedNode, setSelectedNode] = useState<string>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
 
@@ -174,6 +194,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const manager = useInstanceManager()
   const { next, stop } = useCheckoutNotification({})
+
   const onSubmit = useCallback(
     async (state: NewInstanceFormState) => {
       if (!manager) throw Err.ConnectYourWallet
@@ -214,6 +235,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
           streamDuration: state.streamDuration,
         }
       }
+
       const instance = {
         ...state,
         payment,
@@ -253,8 +275,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       manager,
       account,
       node,
-      blockchain,
       nodeSpecs,
+      blockchain,
       handleConnect,
       dispatch,
       next,
@@ -402,6 +424,38 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setSelectedModal(undefined)
   }, [])
 
+  const handleRequestTermsAndConditionsAgreement = useCallback(() => {
+    setSelectedModal('terms-and-conditions')
+  }, [])
+
+  const handleCheckTermsAndConditions = useCallback(() => {
+    if (formValues.termsAndConditions) setValue('termsAndConditions', undefined)
+    else setValue('termsAndConditions', node?.terms_and_conditions)
+  }, [formValues.termsAndConditions, node, setValue])
+
+  const handleAcceptTermsAndConditions = useCallback(
+    (e: React.FormEvent) => {
+      handleCloseModal()
+      handleSubmit(e)
+    },
+    [handleCloseModal, handleSubmit],
+  )
+
+  const handleDownloadFile = useCallback(
+    async (fileHash: string, fileName: string) => {
+      const downloadedFile = await fileManager.downloadFile(fileHash)
+      const customDownloadUrl = window.URL.createObjectURL(downloadedFile)
+      const a = document.createElement('a')
+      a.href = customDownloadUrl
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(customDownloadUrl)
+    },
+    [fileManager],
+  )
+
   const handleBack = () => {
     router.push('.')
   }
@@ -455,6 +509,30 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setValue('streamCost', cost.totalStreamCost)
   }, [cost, setValue, formValues])
 
+  useEffect(() => {
+    const fetchTermsAndConditions = async () => {
+      if (!messageManager) return setTermsAndConditions(undefined)
+      if (!node?.terms_and_conditions) return setTermsAndConditions(undefined)
+
+      let storeMessageContent
+      try {
+        const { content } = await messageManager.get(node.terms_and_conditions)
+        storeMessageContent = content as StoreContent
+      } catch (e) {
+        console.error(e)
+      }
+
+      if (!storeMessageContent) return setTermsAndConditions(undefined)
+
+      setTermsAndConditions({
+        cid: storeMessageContent.item_hash,
+        name: storeMessageContent.metadata?.name as string,
+      })
+    }
+
+    fetchTermsAndConditions()
+  }, [messageManager, node])
+
   return {
     address,
     accountBalance,
@@ -476,6 +554,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setSelectedModal,
     selectedNode,
     setSelectedNode,
+    termsAndConditions,
     modalOpen,
     modalClose,
     handleManuallySelectCRN,
@@ -483,5 +562,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     handleSubmit,
     handleCloseModal,
     handleBack,
+    handleDownloadFile,
+    handleRequestTermsAndConditionsAgreement,
+    handleCheckTermsAndConditions,
+    handleAcceptTermsAndConditions,
   }
 }

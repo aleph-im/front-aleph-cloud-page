@@ -624,7 +624,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         const volumes = await this.volumeManager.getAll({
           ids: history.map((item) => item[1]),
           page: 1,
-          pageSize: 10,
+          pagination: 10,
         })
         return Object.fromEntries(
           history

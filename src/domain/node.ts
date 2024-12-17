@@ -75,6 +75,7 @@ export type CRN = BaseNode & {
   metricsData?: CRNMetrics
   parentData?: CCN
   stream_reward?: string
+  terms_and_conditions?: string
 }
 
 export type AlephNode = CCN | CRN
@@ -680,7 +681,7 @@ export class NodeManager {
     const res = await this.sdkClient.getPosts({
       types: 'aleph-scoring-scores',
       addresses: [scoringAddress],
-      pageSize: 1,
+      pagination: 1,
       page: 1,
     })
 
@@ -694,7 +695,7 @@ export class NodeManager {
     const res = await this.sdkClient.getPosts({
       types: 'aleph-network-metrics',
       addresses: [scoringAddress],
-      pageSize: 1,
+      pagination: 1,
       page: 1,
     })
 

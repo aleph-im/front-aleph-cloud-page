@@ -10,6 +10,7 @@ import {
   TableColumn,
   NoisyContainer,
   TooltipProps,
+  Checkbox,
 } from '@aleph-front/core'
 import { CRN } from '@/domain/node'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
@@ -43,20 +44,25 @@ import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
 import BorderBox from '@/components/common/BorderBox'
+import ExternalLink from '@/components/common/ExternalLink'
 
 const CheckoutButton = React.memo(
   ({
     disabled,
-    handleSubmit,
     title = 'Create instance',
     tooltipContent,
     isFooter,
+    termsAndConditions,
+    handleRequestTermsAndConditionsAgreement,
+    handleSubmit,
   }: {
     disabled: boolean
-    handleSubmit: UseNewInstancePageReturn['handleSubmit']
     title?: string
     tooltipContent?: TooltipProps['content']
     isFooter: boolean
+    termsAndConditions?: string
+    handleRequestTermsAndConditionsAgreement: UseNewInstancePageReturn['handleRequestTermsAndConditionsAgreement']
+    handleSubmit: UseNewInstancePageReturn['handleSubmit']
   }) => {
     const checkoutButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -64,13 +70,17 @@ const CheckoutButton = React.memo(
       <>
         <Button
           ref={checkoutButtonRef}
-          type="submit"
+          type={!!termsAndConditions ? 'button' : 'submit'}
           color="main0"
           kind="default"
           size="lg"
           variant="primary"
           disabled={disabled}
-          onClick={handleSubmit}
+          onClick={
+            !!termsAndConditions
+              ? handleRequestTermsAndConditionsAgreement
+              : handleSubmit
+          }
         >
           {title}
         </Button>
@@ -110,6 +120,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     setSelectedModal,
     selectedNode,
     setSelectedNode,
+    termsAndConditions,
     modalOpen,
     modalClose,
     handleManuallySelectCRN,
@@ -117,6 +128,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleSubmit,
     handleCloseModal,
     handleBack,
+    handleRequestTermsAndConditionsAgreement,
+    handleAcceptTermsAndConditions,
+    handleCheckTermsAndConditions,
+    handleDownloadFile,
   } = useNewInstancePage()
 
   const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
@@ -124,51 +139,120 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   // ------------------
 
   // Handle modals
-  useEffect(() => {
-    if (!modalOpen) return
-    if (!modalClose) return
+  useEffect(
+    () => {
+      if (!modalOpen) return
+      if (!modalClose) return
 
-    switch (selectedModal) {
-      case 'node-list':
-        return modalOpen({
-          header: '',
-          width: '80rem',
-          onClose: handleCloseModal,
-          content: (
-            <CRNList
-              selected={selectedNode}
-              onSelectedChange={setSelectedNode}
-            />
-          ),
-          footer: (
-            <>
-              <div tw="w-full flex justify-end">
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="md"
-                  onClick={handleSelectNode}
-                  disabled={!selectedNode}
-                  tw="ml-auto!"
-                >
-                  Continue
-                </Button>
-              </div>
-            </>
-          ),
-        })
-      default:
-        return modalClose()
-    }
-  }, [
-    selectedModal,
-    selectedNode,
-    setSelectedNode,
-    modalOpen,
-    modalClose,
-    handleSelectNode,
-    handleCloseModal,
-  ])
+      switch (selectedModal) {
+        case 'node-list':
+          return modalOpen({
+            header: '',
+            width: '80rem',
+            onClose: handleCloseModal,
+            content: (
+              <CRNList
+                selected={selectedNode}
+                onSelectedChange={setSelectedNode}
+              />
+            ),
+            footer: (
+              <>
+                <div tw="w-full flex justify-end">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="md"
+                    onClick={handleSelectNode}
+                    disabled={!selectedNode}
+                    tw="ml-auto!"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </>
+            ),
+          })
+        case 'terms-and-conditions':
+          if (!termsAndConditions) return modalClose()
+
+          return modalOpen({
+            header: (
+              <TextGradient type="h6">Accept Terms & Conditions</TextGradient>
+            ),
+            width: '34rem',
+            onClose: handleCloseModal,
+            content: (
+              <>
+                <div tw="flex items-center gap-4 max-w-md mb-8">
+                  <Checkbox
+                    onChange={handleCheckTermsAndConditions}
+                    checked={values.termsAndConditions}
+                  />
+                  <div className="tp-body">
+                    I have read, understood, and agree to the{' '}
+                    <ExternalLink
+                      text="Terms & Conditions"
+                      href="#"
+                      target="_self"
+                      onClick={() =>
+                        handleDownloadFile(
+                          termsAndConditions.cid,
+                          termsAndConditions.name,
+                        )
+                      }
+                      color="main0"
+                      typo="body3"
+                      underline
+                    />{' '}
+                    of this Core Resouce Node.
+                  </div>
+                </div>
+              </>
+            ),
+            footer: (
+              <>
+                <div tw="w-full flex justify-between">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="md"
+                    onClick={handleCloseModal}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    onClick={handleAcceptTermsAndConditions}
+                    disabled={!values.termsAndConditions}
+                  >
+                    Confirm & Proceed
+                  </Button>
+                </div>
+              </>
+            ),
+          })
+        default:
+          return modalClose()
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      node,
+      selectedModal,
+      selectedNode,
+      values.termsAndConditions,
+      setSelectedNode,
+      handleSelectNode,
+      handleCloseModal,
+      handleCheckTermsAndConditions,
+      handleAcceptTermsAndConditions,
+      // modalOpen,
+      // modalClose,
+    ],
+  )
   // ------------------------
 
   const columns = useMemo(() => {
@@ -487,19 +571,27 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           button={
             <CheckoutButton
               disabled={createInstanceDisabled}
-              handleSubmit={handleSubmit}
               title={createInstanceButtonTitle}
               tooltipContent={createInstanceDisabledMessage}
               isFooter={false}
+              termsAndConditions={node?.terms_and_conditions}
+              handleRequestTermsAndConditionsAgreement={
+                handleRequestTermsAndConditionsAgreement
+              }
+              handleSubmit={handleSubmit}
             />
           }
           footerButton={
             <CheckoutButton
               disabled={createInstanceDisabled}
-              handleSubmit={handleSubmit}
               title={createInstanceButtonTitle}
               tooltipContent={createInstanceDisabledMessage}
               isFooter={true}
+              termsAndConditions={node?.terms_and_conditions}
+              handleRequestTermsAndConditionsAgreement={
+                handleRequestTermsAndConditionsAgreement
+              }
+              handleSubmit={handleSubmit}
             />
           }
         />
