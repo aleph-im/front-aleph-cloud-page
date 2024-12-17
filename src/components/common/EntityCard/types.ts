@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import { HTMLAttributeAnchorTarget } from 'react'
 import { AmountInformationProps } from '../AmountInformation/types'
 import { ComputingInformationProps } from '../ComputingInformation/types'
@@ -36,4 +37,5 @@ export type EntityCardProps = {
   storage?: number
   amount?: number
   subItems?: EntityCardItemProps[]
+  children?: ReactNode
 }

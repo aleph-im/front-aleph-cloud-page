@@ -55,13 +55,14 @@ export default function ManageConfidential() {
               <Label
                 kind="secondary"
                 variant={
-                  confidential.time < Date.now() - 1000 * 45 && status?.vm_ipv6
+                  confidential.time < Date.now() - 1000 * 45 &&
+                  status?.ipv6Parsed
                     ? 'success'
                     : 'warning'
                 }
                 tw="ml-4"
               >
-                {status?.vm_ipv6 ? (
+                {status?.ipv6Parsed ? (
                   'READY'
                 ) : (
                   <div tw="flex items-center">
@@ -154,7 +155,7 @@ export default function ManageConfidential() {
                 <div>
                   {status ? (
                     <IconText iconName="copy" onClick={handleCopyConnect}>
-                      <Text>&gt;_ ssh root@{status.vm_ipv6}</Text>
+                      <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
                     </IconText>
                   ) : (
                     <div tw="flex items-end">
@@ -176,7 +177,7 @@ export default function ManageConfidential() {
                 <div>
                   {status && (
                     <IconText iconName="copy" onClick={handleCopyIpv6}>
-                      <Text>{status.vm_ipv6}</Text>
+                      <Text>{status.ipv6Parsed}</Text>
                     </IconText>
                   )}
                 </div>

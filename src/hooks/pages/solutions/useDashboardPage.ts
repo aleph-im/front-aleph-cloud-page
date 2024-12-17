@@ -68,7 +68,7 @@ function calculateComputingAggregatedStatus({
 }) {
   return entities.reduce(
     (ac, cv) => {
-      const hasIpv6 = !!entitiesStatus[cv.id]?.data?.vm_ipv6
+      const hasIpv6 = !!entitiesStatus[cv.id]?.data?.ipv6Parsed
       const statusKey = hasIpv6
         ? 'running'
         : cv.confirmed
