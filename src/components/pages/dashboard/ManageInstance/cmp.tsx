@@ -57,6 +57,9 @@ export default function ManageInstance() {
   const typeName = EntityTypeName[instance.type]
   const volumes = instance.volumes
 
+  console.log('instance', instance)
+  console.log('termsAndConditions', termsAndConditions)
+
   return (
     <>
       <BackButtonSection handleBack={handleBack} />
@@ -379,7 +382,7 @@ export default function ManageInstance() {
                         <div>
                           <a
                             className="tp-body1 fs-16"
-                            href={termsAndConditions.url}
+                            href={`https://ipfs.aleph.im/ipfs/${termsAndConditions.cid}?filename=${termsAndConditions.name}`}
                             target="_blank"
                             referrerPolicy="no-referrer"
                           >
