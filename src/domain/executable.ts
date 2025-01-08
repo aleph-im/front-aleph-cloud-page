@@ -696,10 +696,19 @@ export abstract class ExecutableManager {
 
   protected parseRequirements(node?: CRN): HostRequirements | undefined {
     if (!node || !node.hash) return
-    return {
+
+    const requirements = {
       node: {
         node_hash: node.hash,
       },
-    }
+    } as HostRequirements
+
+    if (node.terms_and_conditions)
+      requirements.node = {
+        ...requirements.node,
+        terms_and_conditions: node.terms_and_conditions,
+      }
+
+    return requirements
   }
 }
