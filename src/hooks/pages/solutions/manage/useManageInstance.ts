@@ -11,9 +11,8 @@ import {
   UseExecutableActionsReturn,
   useExecutableActions,
 } from '@/hooks/common/useExecutableActions'
-import useFetchTermsAndConditions, {
-  TermsAndConditions,
-} from '@/hooks/common/useFetchTermsAndConditions'
+import { useAppState } from '@/contexts/appState'
+import { StoreContent } from '@aleph-sdk/message'
 
 export type ManageInstance = UseExecutableActionsReturn & {
   instance?: Instance
@@ -29,9 +28,19 @@ export type ManageInstance = UseExecutableActionsReturn & {
   handleBack: () => void
 }
 
+export type TermsAndConditions = {
+  cid: string
+  name: string
+}
+
 export function useManageInstance(): ManageInstance {
   const router = useRouter()
   const { hash } = router.query
+
+  const [state] = useAppState()
+  const {
+    manager: { messageManager },
+  } = state
 
   const { entities } = useRequestInstances({ ids: hash as string })
   const [instance] = entities || []
@@ -51,10 +60,9 @@ export function useManageInstance(): ManageInstance {
 
   const { logsDisabled, status } = executableActions
 
-  const { termsAndConditions } = useFetchTermsAndConditions({
-    termsAndConditionsMessageHash:
-      instance?.requirements?.node?.terms_and_conditions,
-  })
+  const [termsAndConditions, setTermsAndConditions] = useState<
+    TermsAndConditions | undefined
+  >()
 
   const tabs = useMemo(
     () =>
@@ -93,6 +101,34 @@ export function useManageInstance(): ManageInstance {
 
     getMapped()
   }, [sshKeyManager, instance])
+
+  useEffect(() => {
+    const fetchTermsAndConditions = async () => {
+      if (!messageManager) return setTermsAndConditions(undefined)
+      // if (!instance?.requirements?.node?.terms_and_conditions)
+      //   return setTermsAndConditions(undefined)
+
+      let storeMessageContent
+      try {
+        const { content } = await messageManager.get(
+          // instance.requirements.node.terms_and_conditions,
+          '2f4bd1e905232b9f670c69846fa4e3983ce310159545205c9a342b7d5da382e6',
+        )
+        storeMessageContent = content as StoreContent
+      } catch (e) {
+        console.error(e)
+      }
+
+      if (!storeMessageContent) return setTermsAndConditions(undefined)
+
+      setTermsAndConditions({
+        cid: storeMessageContent.item_hash,
+        name: storeMessageContent.metadata?.name as string,
+      })
+    }
+
+    fetchTermsAndConditions()
+  }, [messageManager])
 
   const handleBack = () => {
     router.push('.')
