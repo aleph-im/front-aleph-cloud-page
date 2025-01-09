@@ -131,13 +131,11 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleRequestTermsAndConditionsAgreement,
     handleAcceptTermsAndConditions,
     handleCheckTermsAndConditions,
-    handleDownloadFile,
   } = useNewInstancePage()
 
   const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
 
   // ------------------
-
   // Handle modals
   useEffect(
     () => {
@@ -193,14 +191,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                     I have read, understood, and agree to the{' '}
                     <ExternalLink
                       text="Terms & Conditions"
-                      href="#"
-                      target="_self"
-                      onClick={() =>
-                        handleDownloadFile(
-                          termsAndConditions.cid,
-                          termsAndConditions.name,
-                        )
-                      }
+                      href={termsAndConditions.url}
                       color="main0"
                       typo="body3"
                       underline

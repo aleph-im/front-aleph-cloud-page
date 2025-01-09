@@ -11,9 +11,13 @@ import {
   UseExecutableActionsReturn,
   useExecutableActions,
 } from '@/hooks/common/useExecutableActions'
+import useFetchTermsAndConditions, {
+  TermsAndConditions,
+} from '@/hooks/common/useFetchTermsAndConditions'
 
 export type ManageInstance = UseExecutableActionsReturn & {
   instance?: Instance
+  termsAndConditions?: TermsAndConditions
   mappedKeys: (SSHKey | undefined)[]
   theme: DefaultTheme
   tabs: TabsProps['tabs']
@@ -46,6 +50,11 @@ export function useManageInstance(): ManageInstance {
   })
 
   const { logsDisabled, status } = executableActions
+
+  const { termsAndConditions } = useFetchTermsAndConditions({
+    termsAndConditionsMessageHash:
+      instance?.requirements?.node?.terms_and_conditions,
+  })
 
   const tabs = useMemo(
     () =>
@@ -91,6 +100,7 @@ export function useManageInstance(): ManageInstance {
   return {
     ...executableActions,
     instance,
+    termsAndConditions,
     mappedKeys,
     theme,
     tabs,

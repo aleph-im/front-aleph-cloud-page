@@ -62,7 +62,9 @@ import {
   unsupportedStreamManualCRNSelectionDisabledMessage,
   unsupportedStreamDisabledMessage,
 } from '@/components/pages/computing/NewInstancePage/disabledMessages'
-import { StoreContent } from '@aleph-sdk/message'
+import useFetchTermsAndConditions, {
+  TermsAndConditions,
+} from '@/hooks/common/useFetchTermsAndConditions'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -96,11 +98,6 @@ export const defaultValues: Partial<NewInstanceFormState> = {
 
 export type Modal = 'node-list' | 'terms-and-conditions'
 
-export type TermsAndConditions = {
-  cid: string
-  name: string
-}
-
 export type UseNewInstancePageReturn = {
   address: string
   accountBalance: number
@@ -130,17 +127,13 @@ export type UseNewInstancePageReturn = {
   handleRequestTermsAndConditionsAgreement: () => void
   handleCheckTermsAndConditions: () => void
   handleAcceptTermsAndConditions: (e: FormEvent) => void
-  handleDownloadFile: (fileHash: string, fileName: string) => Promise<void>
   handleSubmit: (e: FormEvent) => Promise<void>
   handleCloseModal: () => void
   handleBack: () => void
 }
 
 export function useNewInstancePage(): UseNewInstancePageReturn {
-  const [state, dispatch] = useAppState()
-  const {
-    manager: { fileManager, messageManager },
-  } = state
+  const [, dispatch] = useAppState()
 
   const {
     blockchain,
@@ -159,9 +152,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const hasInitialized = useRef(false)
   const nodeRef = useRef<CRN | undefined>(undefined)
-  const [termsAndConditions, setTermsAndConditions] = useState<
-    TermsAndConditions | undefined
-  >()
   const [selectedNode, setSelectedNode] = useState<string>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
 
@@ -188,6 +178,13 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
     return specs[node.hash]?.data
   }, [specs, node])
+
+  // -------------------------
+  // Terms and conditions
+
+  const { termsAndConditions } = useFetchTermsAndConditions({
+    termsAndConditionsMessageHash: node?.terms_and_conditions,
+  })
 
   // -------------------------
   // Checkout flow
@@ -441,21 +438,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     [handleCloseModal, handleSubmit],
   )
 
-  const handleDownloadFile = useCallback(
-    async (fileHash: string, fileName: string) => {
-      const downloadedFile = await fileManager.downloadFile(fileHash)
-      const customDownloadUrl = window.URL.createObjectURL(downloadedFile)
-      const a = document.createElement('a')
-      a.href = customDownloadUrl
-      a.download = fileName
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      window.URL.revokeObjectURL(customDownloadUrl)
-    },
-    [fileManager],
-  )
-
   const handleBack = () => {
     router.push('.')
   }
@@ -509,30 +491,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setValue('streamCost', cost.totalStreamCost)
   }, [cost, setValue, formValues])
 
-  useEffect(() => {
-    const fetchTermsAndConditions = async () => {
-      if (!messageManager) return setTermsAndConditions(undefined)
-      if (!node?.terms_and_conditions) return setTermsAndConditions(undefined)
-
-      let storeMessageContent
-      try {
-        const { content } = await messageManager.get(node.terms_and_conditions)
-        storeMessageContent = content as StoreContent
-      } catch (e) {
-        console.error(e)
-      }
-
-      if (!storeMessageContent) return setTermsAndConditions(undefined)
-
-      setTermsAndConditions({
-        cid: storeMessageContent.item_hash,
-        name: storeMessageContent.metadata?.name as string,
-      })
-    }
-
-    fetchTermsAndConditions()
-  }, [messageManager, node])
-
   return {
     address,
     accountBalance,
@@ -562,7 +520,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     handleSubmit,
     handleCloseModal,
     handleBack,
-    handleDownloadFile,
     handleRequestTermsAndConditionsAgreement,
     handleCheckTermsAndConditions,
     handleAcceptTermsAndConditions,
