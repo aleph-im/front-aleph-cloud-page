@@ -240,6 +240,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       handleCloseModal,
       handleCheckTermsAndConditions,
       handleAcceptTermsAndConditions,
+      /*
+      Both modalOpen and modalClose are not included in the dependencies because there's
+      an infinite refresh loop when they are included. This is because the modalOpen
+      and modalClose functions are being redefined on every render, causing the
+      useEffect to run again and again.
+       */
       // modalOpen,
       // modalClose,
     ],
