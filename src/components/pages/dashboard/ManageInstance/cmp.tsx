@@ -11,6 +11,8 @@ import { Container, Text, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import LogsFeed from '../LogsFeed'
+import BackButton from '@/components/common/BackButton'
+import { useMemo } from 'react'
 import StreamSummary from '@/components/common/StreamSummary'
 import { blockchains } from '@/domain/connect/base'
 
@@ -41,6 +43,14 @@ export default function ManageInstance() {
     setTabId,
   } = useManageInstance()
 
+  const labelVariant = useMemo(() => {
+    if (!instance) return 'error'
+
+    return instance.time < Date.now() - 1000 * 45 && isRunning
+      ? 'success'
+      : 'warning'
+  }, [instance, isRunning])
+
   if (!instance) {
     return (
       <>
@@ -57,8 +67,90 @@ export default function ManageInstance() {
   const typeName = EntityTypeName[instance.type]
   const volumes = instance.volumes
 
-  console.log('instance', instance)
-  console.log('termsAndConditions', termsAndConditions)
+  return (
+    <>
+      <section tw="px-12 py-0! md:pt-10!">
+        <div tw=" px-0 py-0! md:pt-10! flex items-center justify-between gap-8">
+          <div tw="flex-1">
+            <BackButton handleBack={handleBack} />
+          </div>
+          <div tw="flex gap-2 items-center justify-center">
+            <Label kind="secondary" variant={labelVariant}>
+              <div tw="flex items-center justify-center gap-2">
+                <Icon name="alien-8bit" className={`text-${labelVariant}`} />
+                {isRunning ? (
+                  'RUNNING'
+                ) : (
+                  <>
+                    <div>CONFIRMING</div>
+                    <RotatingLines
+                      strokeColor={theme.color.base2}
+                      width=".8rem"
+                    />
+                  </>
+                )}
+              </div>
+            </Label>
+            <div className="tp-h7 fs-18" tw="uppercase">
+              {name}
+            </div>
+          </div>
+          <div tw="flex-1 flex justify-end items-center gap-4">
+            <Tooltip content="Stop Instance" my="bottom-center" at="top-center">
+              <Button
+                kind="functional"
+                variant="secondary"
+                size="sm"
+                onClick={handleStop}
+                disabled={stopDisabled}
+              >
+                <Icon name="stop" />
+              </Button>
+            </Tooltip>
+            <Tooltip
+              content="Reallocate Instance"
+              my="bottom-center"
+              at="top-center"
+            >
+              <Button
+                kind="functional"
+                variant="secondary"
+                size="sm"
+                onClick={handleStart}
+                disabled={startDisabled}
+              >
+                <Icon name="play" />
+              </Button>
+            </Tooltip>
+
+            <Tooltip
+              content="Reboot Instance"
+              my="bottom-center"
+              at="top-center"
+            >
+              <Button
+                kind="functional"
+                variant="secondary"
+                size="sm"
+                onClick={handleReboot}
+                disabled={rebootDisabled}
+              >
+                <Icon name="arrow-rotate-backward" />
+              </Button>
+            </Tooltip>
+            <Button
+              kind="functional"
+              variant="error"
+              size="sm"
+              onClick={handleDelete}
+            >
+              <Icon name="trash" />
+            </Button>
+          </div>
+        </div>
+      </section>
+    </>
+  )
 
   return (
     <>
