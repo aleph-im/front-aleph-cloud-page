@@ -2,7 +2,13 @@ import Link from 'next/link'
 import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
-import { Label, NoisyContainer, Tabs, Tooltip } from '@aleph-front/core'
+import {
+  Label,
+  NoisyContainer,
+  ObjectImg,
+  Tabs,
+  Tooltip,
+} from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
@@ -69,6 +75,7 @@ export default function ManageInstance() {
 
   return (
     <>
+      {/* Header */}
       <section tw="px-12 py-0! md:pt-10!">
         <div tw=" px-0 py-0! md:pt-10! flex items-center justify-between gap-8">
           <div tw="flex-1">
@@ -95,7 +102,7 @@ export default function ManageInstance() {
               {name}
             </div>
           </div>
-          <div tw="flex-1 flex justify-end items-center gap-4">
+          <div tw="flex-1 grid grid-cols-2 md:flex justify-end items-center gap-4">
             <Tooltip content="Stop Instance" my="bottom-center" at="top-center">
               <Button
                 kind="functional"
@@ -122,7 +129,6 @@ export default function ManageInstance() {
                 <Icon name="play" />
               </Button>
             </Tooltip>
-
             <Tooltip
               content="Reboot Instance"
               my="bottom-center"
@@ -138,17 +144,189 @@ export default function ManageInstance() {
                 <Icon name="arrow-rotate-backward" />
               </Button>
             </Tooltip>
-            <Button
-              kind="functional"
-              variant="error"
-              size="sm"
-              onClick={handleDelete}
+            <Tooltip
+              content="Remove Instance"
+              my="bottom-center"
+              at="top-center"
             >
-              <Icon name="trash" />
-            </Button>
+              <Button
+                kind="functional"
+                variant="error"
+                size="sm"
+                onClick={handleDelete}
+              >
+                <Icon name="trash" />
+              </Button>
+            </Tooltip>
           </div>
         </div>
       </section>
+      {/* Instance properties */}
+      <div tw="grid grid-cols-1 md:grid-cols-2 gap-4 px-12">
+        <div>
+          <div className="tp-h7 fs-18" tw="uppercase mb-2">
+            INSTANCE DETAILS
+          </div>
+          <NoisyContainer>
+            <div tw="flex gap-4">
+              <ObjectImg
+                id="Object11"
+                color="main0"
+                size="6rem"
+                tw="min-w-[7rem] min-h-[7rem]"
+              />
+              <div tw="flex flex-col gap-4">
+                <div>
+                  <div className="tp-info text-main0">ITEM HASH</div>
+                  <IconText iconName="copy" onClick={handleCopyHash}>
+                    {instance.id}
+                  </IconText>
+                </div>
+                <div tw="flex flex-wrap gap-4">
+                  <div>
+                    <div className="tp-info text-main0">CORES</div>
+                    <div>
+                      <Text>{instance.resources.vcpus} x86 64bit</Text>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="tp-info text-main0">RAM</div>
+                    <div>
+                      <Text>
+                        {convertByteUnits(instance.resources.memory, {
+                          from: 'MiB',
+                          to: 'GiB',
+                          displayUnit: true,
+                        })}
+                      </Text>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="tp-info text-main0">HDD</div>
+                    <div>
+                      <Text>
+                        {convertByteUnits(instance.size, {
+                          from: 'MiB',
+                          to: 'GiB',
+                          displayUnit: true,
+                        })}
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div className="tp-info text-main0">EXPLORER</div>
+                  <div>
+                    <a
+                      className="tp-body1 fs-16"
+                      href={instance.url}
+                      target="_blank"
+                      referrerPolicy="no-referrer"
+                    >
+                      <IconText iconName="square-up-right">
+                        <Text>{ellipseText(instance.url, 80)}</Text>
+                      </IconText>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </NoisyContainer>
+        </div>
+        <div>
+          <div className="tp-h7 fs-18" tw="uppercase mb-2">
+            CONNECTION METHODS
+          </div>
+          <NoisyContainer>
+            <div tw="flex flex-col gap-4">
+              <div>
+                <div className="tp-info text-main0">SSH COMMAND</div>
+                <div>
+                  {status ? (
+                    <>
+                      <IconText iconName="copy" onClick={handleCopyConnect}>
+                        <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
+                      </IconText>
+                    </>
+                  ) : (
+                    <div tw="flex items-end">
+                      <span tw="mr-1" className="tp-body1 fs-16 text-main2">
+                        Allocating
+                      </span>
+                      <ThreeDots
+                        width=".8rem"
+                        height="1rem"
+                        color={theme.color.main2}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <div className="tp-info text-main0">IPV6</div>
+                <div>
+                  {status ? (
+                    <>
+                      <IconText iconName="copy" onClick={handleCopyConnect}>
+                        <Text>{status.ipv6Parsed}</Text>
+                      </IconText>
+                    </>
+                  ) : (
+                    <div tw="flex items-end">
+                      <span tw="mr-1" className="tp-body1 fs-16 text-main2">
+                        Allocating
+                      </span>
+                      <ThreeDots
+                        width=".8rem"
+                        height="1rem"
+                        color={theme.color.main2}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </NoisyContainer>
+        </div>
+        <div>
+          <div className="tp-h7 fs-18" tw="uppercase mb-2">
+            SSH KEYS
+          </div>
+          <NoisyContainer>
+            <div tw="flex flex-col gap-4">
+              {mappedKeys.map(
+                (key, i) =>
+                  key && (
+                    <div key={key?.id} tw="flex gap-6">
+                      <ObjectImg
+                        id="Object9"
+                        color="main0"
+                        size="2.5rem"
+                        tw="min-w-[3rem] min-h-[3rem]"
+                      />
+                      <div>
+                        <div className="tp-info text-main0">SSH KEY NAME</div>
+                        <Link
+                          className="tp-body1 fs-16"
+                          href={'?hash=' + key.id}
+                          referrerPolicy="no-referrer"
+                        >
+                          <IconText iconName="square-up-right">
+                            <Text>{key.label}</Text>
+                          </IconText>
+                        </Link>
+                      </div>
+                      <div>
+                        <div className="tp-info text-main0">CREATED ON</div>
+                        <Text>{key.date}</Text>
+                      </div>
+                    </div>
+                  ),
+              )}
+            </div>
+          </NoisyContainer>
+        </div>
+      </div>
     </>
   )
 
