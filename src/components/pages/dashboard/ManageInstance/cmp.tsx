@@ -58,7 +58,7 @@ export default function ManageInstance() {
   } = useManageInstance()
 
   const labelVariant = useMemo(() => {
-    if (!instance) return 'error'
+    if (!instance) return 'warning'
 
     return instance.time < Date.now() - 1000 * 45 && isRunning
       ? 'success'
@@ -698,8 +698,18 @@ export default function ManageInstance() {
           >
             <Icon name="angle-left" size="1.3em" />
           </Button>
-          <div tw="w-full">
-            <LogsFeed logs={logs} />
+          <div tw="w-full flex flex-col justify-center items-center gap-3">
+            <div className="tp-h7" tw="w-full text-center">
+              LOGS
+            </div>
+            <div tw="w-full max-w-3xl">
+              Real-time logs of the of the virtual machine. Use this to debug
+              any issue with the boot of your instance and to monitor the
+              behavior of the your instance while it is running.
+            </div>
+            <div tw="w-full">
+              <LogsFeed logs={logs} />
+            </div>
           </div>
         </div>
       </StyledSliderContent>
