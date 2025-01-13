@@ -4,6 +4,7 @@ import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
 import {
   Label,
+  Logo,
   NoisyContainer,
   ObjectImg,
   Tabs,
@@ -28,6 +29,7 @@ import BackButton from '@/components/common/BackButton'
 import { useEffect, useMemo, useState } from 'react'
 import { ImmutableVolume } from '@aleph-sdk/message'
 import { useAppState } from '@/contexts/appState'
+import { Skeleton } from '@/components/common/Skeleton/cmp'
 import StreamSummary from '@/components/common/StreamSummary'
 import { blockchains } from '@/domain/connect/base'
 
@@ -127,19 +129,13 @@ export default function ManageInstance() {
   //   })
   // })
 
-  if (!instance) {
-    return (
-      <>
-        <BackButtonSection handleBack={handleBack} />
-        <Container>
-          <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </Container>
-      </>
-    )
-  }
+  const name = useMemo(() => {
+    if (!instance) return ''
 
-  const name =
-    (instance?.metadata?.name as string) || ellipseAddress(instance.id)
+    return (instance?.metadata?.name as string) || ellipseAddress(instance.id)
+  }, [instance])
+
+  console.log('instance', instance)
 
   return (
     <>
@@ -167,7 +163,7 @@ export default function ManageInstance() {
               </div>
             </Label>
             <div className="tp-h7 fs-18" tw="uppercase">
-              {name}
+              {instance ? name : <Skeleton width="20rem" />}
             </div>
           </div>
           <div tw="flex-1 flex flex-wrap md:flex-nowrap justify-end items-center gap-4">
@@ -244,29 +240,43 @@ export default function ManageInstance() {
                   size="6rem"
                   tw="min-w-[7rem] min-h-[7rem]"
                 />
-                <div tw="flex flex-col gap-4">
-                  <div>
+                <div tw="flex flex-col gap-4 w-full">
+                  <div tw="w-full">
                     <div className="tp-info text-main0">ITEM HASH</div>
-                    <IconText iconName="copy" onClick={handleCopyHash}>
-                      {instance.id}
-                    </IconText>
+                    {instance ? (
+                      <IconText iconName="copy" onClick={handleCopyHash}>
+                        {instance.id}
+                      </IconText>
+                    ) : (
+                      <Skeleton width="100%" />
+                    )}
                   </div>
                   <div tw="flex flex-wrap gap-4">
                     <div>
                       <div className="tp-info text-main0">CORES</div>
                       <div>
-                        <Text>{instance.resources.vcpus} x86 64bit</Text>
+                        <Text tw="flex items-center gap-1">
+                          {instance ? (
+                            `${instance.resources.vcpus} x86 64bit`
+                          ) : (
+                            <Skeleton width="7rem" />
+                          )}
+                        </Text>
                       </div>
                     </div>
                     <div>
                       <div className="tp-info text-main0">RAM</div>
                       <div>
                         <Text>
-                          {convertByteUnits(instance.resources.memory, {
-                            from: 'MiB',
-                            to: 'GiB',
-                            displayUnit: true,
-                          })}
+                          {instance ? (
+                            convertByteUnits(instance.resources.memory, {
+                              from: 'MiB',
+                              to: 'GiB',
+                              displayUnit: true,
+                            })
+                          ) : (
+                            <Skeleton width="4rem" />
+                          )}
                         </Text>
                       </div>
                     </div>
@@ -274,11 +284,15 @@ export default function ManageInstance() {
                       <div className="tp-info text-main0">HDD</div>
                       <div>
                         <Text>
-                          {convertByteUnits(instance.size, {
-                            from: 'MiB',
-                            to: 'GiB',
-                            displayUnit: true,
-                          })}
+                          {instance ? (
+                            convertByteUnits(instance.size, {
+                              from: 'MiB',
+                              to: 'GiB',
+                              displayUnit: true,
+                            })
+                          ) : (
+                            <Skeleton width="6rem" />
+                          )}
                         </Text>
                       </div>
                     </div>
@@ -286,16 +300,20 @@ export default function ManageInstance() {
                   <div>
                     <div className="tp-info text-main0">EXPLORER</div>
                     <div>
-                      <a
-                        className="tp-body1 fs-16"
-                        href={instance.url}
-                        target="_blank"
-                        referrerPolicy="no-referrer"
-                      >
-                        <IconText iconName="square-up-right">
-                          <Text>{ellipseText(instance.url, 80)}</Text>
-                        </IconText>
-                      </a>
+                      {instance ? (
+                        <a
+                          className="tp-body1 fs-16"
+                          href={instance.url}
+                          target="_blank"
+                          referrerPolicy="no-referrer"
+                        >
+                          <IconText iconName="square-up-right">
+                            <Text>{ellipseText(instance.url, 80)}</Text>
+                          </IconText>
+                        </a>
+                      ) : (
+                        <Skeleton width="20rem" />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -316,16 +334,7 @@ export default function ManageInstance() {
                         <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
                       </IconText>
                     ) : (
-                      <div tw="flex items-end">
-                        <span tw="mr-1" className="tp-body1 fs-16 text-main2">
-                          Allocating
-                        </span>
-                        <ThreeDots
-                          width=".8rem"
-                          height="1rem"
-                          color={theme.color.main2}
-                        />
-                      </div>
+                      <Skeleton width="20rem" />
                     )}
                   </div>
                 </div>
@@ -337,16 +346,7 @@ export default function ManageInstance() {
                         <Text>{status.ipv6Parsed}</Text>
                       </IconText>
                     ) : (
-                      <div tw="flex items-end">
-                        <span tw="mr-1" className="tp-body1 fs-16 text-main2">
-                          Allocating
-                        </span>
-                        <ThreeDots
-                          width=".8rem"
-                          height="1rem"
-                          color={theme.color.main2}
-                        />
-                      </div>
+                      <Skeleton width="10rem" />
                     )}
                   </div>
                 </div>
@@ -359,40 +359,140 @@ export default function ManageInstance() {
             </div>
             <NoisyContainer>
               <div tw="flex flex-col gap-4">
-                {mappedKeys.map(
-                  (key) =>
-                    key && (
-                      <div key={key?.id} tw="flex items-center gap-6">
-                        <ObjectImg
-                          id="Object9"
-                          color="main0"
-                          size="2.5rem"
-                          tw="min-w-[3rem] min-h-[3rem]"
-                        />
-                        <div>
-                          <div className="tp-info text-main0">SSH KEY NAME</div>
-                          <Link
-                            className="tp-body1 fs-16"
-                            href={'?hash=' + key.id}
-                            referrerPolicy="no-referrer"
-                          >
-                            <IconText iconName="square-up-right">
-                              <Text>{key.label}</Text>
-                            </IconText>
-                          </Link>
+                {mappedKeys.length ? (
+                  mappedKeys.map(
+                    (key) =>
+                      key && (
+                        <div key={key?.id} tw="flex items-center gap-6">
+                          <ObjectImg
+                            id="Object9"
+                            color="main0"
+                            size="2.5rem"
+                            tw="min-w-[3rem] min-h-[3rem]"
+                          />
+                          <div>
+                            <div className="tp-info text-main0">
+                              SSH KEY NAME
+                            </div>
+                            <Link
+                              className="tp-body1 fs-16"
+                              href={'?hash=' + key.id}
+                              referrerPolicy="no-referrer"
+                            >
+                              <IconText iconName="square-up-right">
+                                <Text>{key.label}</Text>
+                              </IconText>
+                            </Link>
+                          </div>
+                          <div>
+                            <div className="tp-info text-main0">CREATED ON</div>
+                            <Text>{key.date}</Text>
+                          </div>
                         </div>
-                        <div>
-                          <div className="tp-info text-main0">CREATED ON</div>
-                          <Text>{key.date}</Text>
-                        </div>
-                      </div>
-                    ),
+                      ),
+                  )
+                ) : (
+                  <div tw="flex items-center gap-6">
+                    <ObjectImg
+                      id="Object9"
+                      color="main0"
+                      size="2.5rem"
+                      tw="min-w-[3rem] min-h-[3rem]"
+                    />
+                    <div>
+                      <div className="tp-info text-main0">SSH KEY NAME</div>
+                      <Text>
+                        <Skeleton width="9rem" />
+                      </Text>
+                    </div>
+                    <div>
+                      <div className="tp-info text-main0">CREATED ON</div>
+                      <Text>
+                        <Skeleton width="14rem" />
+                      </Text>
+                    </div>
+                  </div>
                 )}
               </div>
             </NoisyContainer>
           </div>
+          {/* <div>
+            <div className="tp-h7 fs-18" tw="uppercase mb-2">
+              PAYMENT
+            </div>
+            <NoisyContainer>
+              <div tw="flex">
+                <div
+                  className="bg-main0 text-base0"
+                  tw="flex items-center gap-1 px-3 py-1"
+                >
+                  <Logo img="aleph" color="base0" byAleph={false} />
+                  <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
+                </div>
+              </div>
+            </NoisyContainer>
+          </div> */}
         </div>
         <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">
+          <div>
+            <div className="tp-h7 fs-18" tw="uppercase mb-2">
+              HOSTING CRN
+            </div>
+            <NoisyContainer>
+              <div tw="flex flex-col gap-4">
+                <div tw="flex gap-4">
+                  <div>
+                    <div className="tp-info text-main0">NAME</div>
+                    <div>
+                      <Text>
+                        {nodeDetails ? (
+                          nodeDetails.name
+                        ) : (
+                          <Skeleton width="7rem" />
+                        )}
+                      </Text>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="tp-info text-main0">URL</div>
+                    <div>
+                      {nodeDetails ? (
+                        <a
+                          className="tp-body1 fs-16"
+                          href={nodeDetails.url}
+                          target="_blank"
+                          referrerPolicy="no-referrer"
+                        >
+                          <IconText iconName="square-up-right">
+                            <Text>{ellipseText(nodeDetails.url, 80)}</Text>
+                          </IconText>
+                        </a>
+                      ) : (
+                        <Skeleton width="12rem" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {termsAndConditions && (
+                  <div>
+                    <div className="tp-info text-main0">ACCEPTED T&C</div>
+                    <div>
+                      <a
+                        className="tp-body1 fs-16"
+                        href={`https://ipfs.aleph.im/ipfs/${termsAndConditions.cid}?filename=${termsAndConditions.name}`}
+                        target="_blank"
+                        referrerPolicy="no-referrer"
+                      >
+                        <IconText iconName="square-up-right">
+                          <Text>{termsAndConditions.name}</Text>
+                        </IconText>
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </NoisyContainer>
+          </div>
           {immutableVolumes.length > 0 && (
             <div>
               <div className="tp-h7 fs-18" tw="uppercase mb-2">
@@ -403,296 +503,54 @@ export default function ManageInstance() {
                   {immutableVolumes.map(
                     (volume, i) =>
                       volume && (
-                        <>
+                        <div
+                          key={`linked-volume-${i}`}
+                          tw="flex items-center gap-6 min-w-fit"
+                        >
                           <div
-                            key={`linked-volume-${i}`}
-                            tw="flex items-center gap-6 min-w-fit"
+                            tw="p-3 flex items-center gap-2"
+                            className="bg-base1"
                           >
-                            <div
-                              tw="p-3 flex items-center gap-2"
-                              className="bg-base1"
-                            >
-                              <ObjectImg
-                                id="Object16"
-                                color="base2"
-                                size="2.5rem"
-                                tw="min-w-[3rem] min-h-[3rem]"
-                              />
-                              <div>
-                                <div className="tp-info">{volume.mount}</div>
-                                <Text className="fs-12">
-                                  {humanReadableSize(volume.size, 'MiB')}
-                                </Text>
-                              </div>
-                            </div>
-                            <div tw="flex flex-wrap gap-6">
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add copy hash logic')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="copy" />
-                                [WIP] copy hash
-                              </Button>
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add edit link')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="edit" />
-                                [WIP] edit
-                              </Button>
+                            <ObjectImg
+                              id="Object16"
+                              color="base2"
+                              size="2.5rem"
+                              tw="min-w-[3rem] min-h-[3rem]"
+                            />
+                            <div>
+                              <div className="tp-info">{volume.mount}</div>
+                              <Text className="fs-12">
+                                {humanReadableSize(volume.size, 'MiB')}
+                              </Text>
                             </div>
                           </div>
-                          <div
-                            key={`linked-volume-${i}`}
-                            tw="flex items-center gap-6 min-w-fit"
-                          >
-                            <div
-                              tw="p-3 flex items-center gap-2"
-                              className="bg-base1"
+                          <div tw="flex flex-wrap gap-6">
+                            <Button
+                              variant="functional"
+                              size="sm"
+                              onClick={() => {
+                                alert('TODO: add copy hash logic')
+                              }}
+                              className="bg-purple0 text-main0"
+                              tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
                             >
-                              <ObjectImg
-                                id="Object16"
-                                color="base2"
-                                size="2.5rem"
-                                tw="min-w-[3rem] min-h-[3rem]"
-                              />
-                              <div>
-                                <div className="tp-info">{volume.mount}</div>
-                                <Text className="fs-12">
-                                  {humanReadableSize(volume.size, 'MiB')}
-                                </Text>
-                              </div>
-                            </div>
-                            <div tw="flex flex-wrap gap-6">
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add copy hash logic')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="copy" />
-                                [WIP] copy hash
-                              </Button>
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add edit link')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="edit" />
-                                [WIP] edit
-                              </Button>
-                            </div>
-                          </div>
-                          <div
-                            key={`linked-volume-${i}`}
-                            tw="flex items-center gap-6 min-w-fit"
-                          >
-                            <div
-                              tw="p-3 flex items-center gap-2"
-                              className="bg-base1"
+                              <Icon name="copy" />
+                              [WIP] copy hash
+                            </Button>
+                            <Button
+                              variant="functional"
+                              size="sm"
+                              onClick={() => {
+                                alert('TODO: add edit link')
+                              }}
+                              className="bg-purple0 text-main0"
+                              tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
                             >
-                              <ObjectImg
-                                id="Object16"
-                                color="base2"
-                                size="2.5rem"
-                                tw="min-w-[3rem] min-h-[3rem]"
-                              />
-                              <div>
-                                <div className="tp-info">{volume.mount}</div>
-                                <Text className="fs-12">
-                                  {humanReadableSize(volume.size, 'MiB')}
-                                </Text>
-                              </div>
-                            </div>
-                            <div tw="flex flex-wrap gap-6">
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add copy hash logic')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="copy" />
-                                [WIP] copy hash
-                              </Button>
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add edit link')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="edit" />
-                                [WIP] edit
-                              </Button>
-                            </div>
+                              <Icon name="edit" />
+                              [WIP] edit
+                            </Button>
                           </div>
-                          <div
-                            key={`linked-volume-${i}`}
-                            tw="flex items-center gap-6 min-w-fit"
-                          >
-                            <div
-                              tw="p-3 flex items-center gap-2"
-                              className="bg-base1"
-                            >
-                              <ObjectImg
-                                id="Object16"
-                                color="base2"
-                                size="2.5rem"
-                                tw="min-w-[3rem] min-h-[3rem]"
-                              />
-                              <div>
-                                <div className="tp-info">{volume.mount}</div>
-                                <Text className="fs-12">
-                                  {humanReadableSize(volume.size, 'MiB')}
-                                </Text>
-                              </div>
-                            </div>
-                            <div tw="flex flex-wrap gap-6">
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add copy hash logic')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="copy" />
-                                [WIP] copy hash
-                              </Button>
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add edit link')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="edit" />
-                                [WIP] edit
-                              </Button>
-                            </div>
-                          </div>
-                          <div
-                            key={`linked-volume-${i}`}
-                            tw="flex items-center gap-6 min-w-fit"
-                          >
-                            <div
-                              tw="p-3 flex items-center gap-2"
-                              className="bg-base1"
-                            >
-                              <ObjectImg
-                                id="Object16"
-                                color="base2"
-                                size="2.5rem"
-                                tw="min-w-[3rem] min-h-[3rem]"
-                              />
-                              <div>
-                                <div className="tp-info">{volume.mount}</div>
-                                <Text className="fs-12">
-                                  {humanReadableSize(volume.size, 'MiB')}
-                                </Text>
-                              </div>
-                            </div>
-                            <div tw="flex flex-wrap gap-6">
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add copy hash logic')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="copy" />
-                                [WIP] copy hash
-                              </Button>
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add edit link')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="edit" />
-                                [WIP] edit
-                              </Button>
-                            </div>
-                          </div>
-                          <div
-                            key={`linked-volume-${i}`}
-                            tw="flex items-center gap-6 min-w-fit"
-                          >
-                            <div
-                              tw="p-3 flex items-center gap-2"
-                              className="bg-base1"
-                            >
-                              <ObjectImg
-                                id="Object16"
-                                color="base2"
-                                size="2.5rem"
-                                tw="min-w-[3rem] min-h-[3rem]"
-                              />
-                              <div>
-                                <div className="tp-info">{volume.mount}</div>
-                                <Text className="fs-12">
-                                  {humanReadableSize(volume.size, 'MiB')}
-                                </Text>
-                              </div>
-                            </div>
-                            <div tw="flex flex-wrap gap-6">
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add copy hash logic')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="copy" />
-                                [WIP] copy hash
-                              </Button>
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add edit link')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="edit" />
-                                [WIP] edit
-                              </Button>
-                            </div>
-                          </div>
-                        </>
+                        </div>
                       ),
                   )}
                 </div>
@@ -702,7 +560,7 @@ export default function ManageInstance() {
           {persistentVolumes.length > 0 && (
             <div>
               <div className="tp-h7 fs-18" tw="uppercase mb-2">
-                LINKED VOLUMES
+                PERSISTENT STORAGE
               </div>
               <NoisyContainer>
                 <div tw="flex gap-4">
@@ -716,146 +574,29 @@ export default function ManageInstance() {
                     {persistentVolumes.map(
                       (volume, i) =>
                         volume && (
-                          <>
-                            <div key={`linked-volume-${i}`}>
-                              <div
-                                tw="p-3 flex flex-col gap-1"
-                                className="bg-base1"
-                              >
-                                <div className="tp-info">{volume.name}</div>
-                                <div tw="flex justify-between items-center gap-4">
-                                  <Text className="fs-12">
-                                    {humanReadableSize(volume.size_mib, 'MiB')}
-                                  </Text>
-                                  <Button
-                                    variant="functional"
-                                    size="sm"
-                                    onClick={() => {
-                                      alert('TODO: add edit link')
-                                    }}
-                                    className="text-main0"
-                                  >
-                                    <Icon name="edit" />
-                                  </Button>
-                                </div>
+                          <div key={`persistent-volume-${i}`}>
+                            <div
+                              tw="p-3 flex flex-col gap-1"
+                              className="bg-base1"
+                            >
+                              <div className="tp-info">{volume.name}</div>
+                              <div tw="flex justify-between items-center gap-4">
+                                <Text className="fs-12">
+                                  {humanReadableSize(volume.size_mib, 'MiB')}
+                                </Text>
+                                <Button
+                                  variant="functional"
+                                  size="sm"
+                                  onClick={() => {
+                                    alert('TODO: add edit link')
+                                  }}
+                                  className="text-main0"
+                                >
+                                  <Icon name="edit" />
+                                </Button>
                               </div>
                             </div>
-                            <div key={`linked-volume-${i}`}>
-                              <div
-                                tw="p-3 flex flex-col gap-1"
-                                className="bg-base1"
-                              >
-                                <div className="tp-info">{volume.name}</div>
-                                <div tw="flex justify-between items-center gap-4">
-                                  <Text className="fs-12">
-                                    {humanReadableSize(volume.size_mib, 'MiB')}
-                                  </Text>
-                                  <Button
-                                    variant="functional"
-                                    size="sm"
-                                    onClick={() => {
-                                      alert('TODO: add edit link')
-                                    }}
-                                    className="text-main0"
-                                  >
-                                    <Icon name="edit" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                            <div key={`linked-volume-${i}`}>
-                              <div
-                                tw="p-3 flex flex-col gap-1"
-                                className="bg-base1"
-                              >
-                                <div className="tp-info">{volume.name}</div>
-                                <div tw="flex justify-between items-center gap-4">
-                                  <Text className="fs-12">
-                                    {humanReadableSize(volume.size_mib, 'MiB')}
-                                  </Text>
-                                  <Button
-                                    variant="functional"
-                                    size="sm"
-                                    onClick={() => {
-                                      alert('TODO: add edit link')
-                                    }}
-                                    className="text-main0"
-                                  >
-                                    <Icon name="edit" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                            <div key={`linked-volume-${i}`}>
-                              <div
-                                tw="p-3 flex flex-col gap-1"
-                                className="bg-base1"
-                              >
-                                <div className="tp-info">{volume.name}</div>
-                                <div tw="flex justify-between items-center gap-4">
-                                  <Text className="fs-12">
-                                    {humanReadableSize(volume.size_mib, 'MiB')}
-                                  </Text>
-                                  <Button
-                                    variant="functional"
-                                    size="sm"
-                                    onClick={() => {
-                                      alert('TODO: add edit link')
-                                    }}
-                                    className="text-main0"
-                                  >
-                                    <Icon name="edit" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                            <div key={`linked-volume-${i}`}>
-                              <div
-                                tw="p-3 flex flex-col gap-1"
-                                className="bg-base1"
-                              >
-                                <div className="tp-info">{volume.name}</div>
-                                <div tw="flex justify-between items-center gap-4">
-                                  <Text className="fs-12">
-                                    {humanReadableSize(volume.size_mib, 'MiB')}
-                                  </Text>
-                                  <Button
-                                    variant="functional"
-                                    size="sm"
-                                    onClick={() => {
-                                      alert('TODO: add edit link')
-                                    }}
-                                    className="text-main0"
-                                  >
-                                    <Icon name="edit" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                            <div key={`linked-volume-${i}`}>
-                              <div
-                                tw="p-3 flex flex-col gap-1"
-                                className="bg-base1"
-                              >
-                                <div className="tp-info">{volume.name}</div>
-                                <div tw="flex justify-between items-center gap-4">
-                                  <Text className="fs-12">
-                                    {humanReadableSize(volume.size_mib, 'MiB')}
-                                  </Text>
-                                  <Button
-                                    variant="functional"
-                                    size="sm"
-                                    onClick={() => {
-                                      alert('TODO: add edit link')
-                                    }}
-                                    className="text-main0"
-                                  >
-                                    <Icon name="edit" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </>
+                          </div>
                         ),
                     )}
                   </div>
@@ -890,66 +631,6 @@ export default function ManageInstance() {
               ))}
             </>
           )}
-
-          {nodeDetails && (
-            <div>
-              <div className="tp-h7 fs-18" tw="uppercase mb-2">
-                HOSTING CRN
-              </div>
-              <NoisyContainer>
-                <div tw="flex gap-4">
-                  <div>
-                    <div className="tp-info text-main0">NAME</div>
-                    <div>
-                      <Text>{nodeDetails.name}</Text>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="tp-info text-main0">URL</div>
-                    <div>
-                      <a
-                        className="tp-body1 fs-16"
-                        href={nodeDetails.url}
-                        target="_blank"
-                        referrerPolicy="no-referrer"
-                      >
-                        <IconText iconName="square-up-right">
-                          <Text>{ellipseText(nodeDetails.url, 80)}</Text>
-                        </IconText>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </NoisyContainer>
-            </div>
-          )}
-          {termsAndConditions && (
-            <div>
-              <div className="tp-h7 fs-18" tw="uppercase mb-2">
-                TERMS & CONDITIONS
-              </div>
-              <NoisyContainer>
-                <div tw="flex gap-4">
-                  <div>
-                    <div className="tp-info text-main0">ACCEPTED T&C</div>
-                    <div>
-                      <a
-                        className="tp-body1 fs-16"
-                        href={`https://ipfs.aleph.im/ipfs/${termsAndConditions.cid}?filename=${termsAndConditions.name}`}
-                        target="_blank"
-                        referrerPolicy="no-referrer"
-                      >
-                        <IconText iconName="square-up-right">
-                          <Text>{termsAndConditions.name}</Text>
-                        </IconText>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </NoisyContainer>
-            </div>
-          )}
         </div>
       </div>
     </>
@@ -970,19 +651,7 @@ export default function ManageInstance() {
 
             <div role="tabpanel" tw="mt-6">
               {tabId === 'detail' ? (
-                <>
-                  {volumes.length > 0 && (
-                    <>
-                      <Separator />
-
-                      <TextGradient type="h7" as="h2" color="main0">
-                        Linked Storage(s)
-                      </TextGradient>
-
-                      <VolumeList {...{ volumes }} />
-                    </>
-                  )}
-                </>
+                <></>
               ) : tabId === 'log' ? (
                 <>
                   <LogsFeed logs={logs} />
