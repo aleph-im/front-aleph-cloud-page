@@ -1,17 +1,14 @@
 import Link from 'next/link'
-import { RotatingLines, ThreeDots } from 'react-loader-spinner'
-import ButtonLink from '@/components/common/ButtonLink'
+import { RotatingLines } from 'react-loader-spinner'
 import IconText from '@/components/common/IconText'
 import {
   Label,
-  Logo,
   NoisyContainer,
   ObjectImg,
   Tabs,
   Tooltip,
 } from '@aleph-front/core'
-import { EntityTypeName } from '@/helpers/constants'
-import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
 import {
   convertByteUnits,
@@ -21,8 +18,7 @@ import {
   isVolumeEphemeral,
   isVolumePersistent,
 } from '@/helpers/utils'
-import { Container, Text, Separator } from '../common'
-import VolumeList from '../VolumeList'
+import { Container, Text } from '../common'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import LogsFeed from '../LogsFeed'
 import BackButton from '@/components/common/BackButton'
@@ -80,11 +76,11 @@ export default function ManageInstance() {
     return volumes.filter((volume) => isVolumePersistent(volume))
   }, [volumes])
 
-  const ephemeralVolumes = useMemo(() => {
-    if (!volumes) return []
+  // const ephemeralVolumes = useMemo(() => {
+  //   if (!volumes) return []
 
-    return volumes.filter((volume) => isVolumeEphemeral(volume))
-  }, [volumes])
+  //   return volumes.filter((volume) => isVolumeEphemeral(volume))
+  // }, [volumes])
 
   const [immutableVolumes, setImmutableVolumes] = useState<any[]>([])
 
@@ -218,6 +214,7 @@ export default function ManageInstance() {
                 variant="error"
                 size="sm"
                 onClick={handleDelete}
+                disabled={!instance}
               >
                 <Icon name="trash" />
               </Button>
@@ -242,7 +239,7 @@ export default function ManageInstance() {
                 />
                 <div tw="flex flex-col gap-4 w-full">
                   <div tw="w-full">
-                    <div className="tp-info text-main0">ITEM HASH</div>
+                    <div className="tp-info text-main0 fs-12">ITEM HASH</div>
                     {instance ? (
                       <IconText iconName="copy" onClick={handleCopyHash}>
                         {instance.id}
@@ -253,7 +250,7 @@ export default function ManageInstance() {
                   </div>
                   <div tw="flex flex-wrap gap-4">
                     <div>
-                      <div className="tp-info text-main0">CORES</div>
+                      <div className="tp-info text-main0 fs-12">CORES</div>
                       <div>
                         <Text tw="flex items-center gap-1">
                           {instance ? (
@@ -265,7 +262,7 @@ export default function ManageInstance() {
                       </div>
                     </div>
                     <div>
-                      <div className="tp-info text-main0">RAM</div>
+                      <div className="tp-info text-main0 fs-12">RAM</div>
                       <div>
                         <Text>
                           {instance ? (
@@ -281,7 +278,7 @@ export default function ManageInstance() {
                       </div>
                     </div>
                     <div>
-                      <div className="tp-info text-main0">HDD</div>
+                      <div className="tp-info text-main0 fs-12">HDD</div>
                       <div>
                         <Text>
                           {instance ? (
@@ -298,7 +295,7 @@ export default function ManageInstance() {
                     </div>
                   </div>
                   <div>
-                    <div className="tp-info text-main0">EXPLORER</div>
+                    <div className="tp-info text-main0 fs-12">EXPLORER</div>
                     <div>
                       {instance ? (
                         <a
@@ -322,33 +319,46 @@ export default function ManageInstance() {
           </div>
           <div>
             <div className="tp-h7 fs-18" tw="uppercase mb-2">
-              CONNECTION METHODS
+              LOGS
             </div>
             <NoisyContainer>
               <div tw="flex flex-col gap-4">
                 <div>
-                  <div className="tp-info text-main0">SSH COMMAND</div>
-                  <div>
-                    {status ? (
-                      <IconText iconName="copy" onClick={handleCopyConnect}>
-                        <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
-                      </IconText>
-                    ) : (
-                      <Skeleton width="20rem" />
-                    )}
-                  </div>
+                  <div className="tp-info text-main0 fs-12">INFO</div>
+                  <Text>
+                    Real-time logs of the of the virtual machine. Use this to
+                    debug any issue with the boot of your instance and to
+                    monitor the behavior of the your instance while it is
+                    running.
+                  </Text>
                 </div>
-                <div>
-                  <div className="tp-info text-main0">IPV6</div>
-                  <div>
-                    {status ? (
-                      <IconText iconName="copy" onClick={handleCopyIpv6}>
-                        <Text>{status.ipv6Parsed}</Text>
-                      </IconText>
-                    ) : (
-                      <Skeleton width="10rem" />
-                    )}
-                  </div>
+                <div tw="flex flex-wrap gap-6">
+                  <Button
+                    variant="functional"
+                    size="sm"
+                    onClick={() => {
+                      alert('TODO: add view logs')
+                    }}
+                    className="bg-purple0 text-main0"
+                    tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
+                    disabled={!instance}
+                  >
+                    <Icon name="eye" />
+                    [WIP] view
+                  </Button>
+                  <Button
+                    variant="functional"
+                    size="sm"
+                    onClick={() => {
+                      alert('TODO: add download logs')
+                    }}
+                    className="bg-purple0 text-main0"
+                    tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
+                    disabled={!instance}
+                  >
+                    <Icon name="download" />
+                    [WIP] download logs
+                  </Button>
                 </div>
               </div>
             </NoisyContainer>
@@ -371,7 +381,7 @@ export default function ManageInstance() {
                             tw="min-w-[3rem] min-h-[3rem]"
                           />
                           <div>
-                            <div className="tp-info text-main0">
+                            <div className="tp-info text-main0 fs-12">
                               SSH KEY NAME
                             </div>
                             <Link
@@ -385,7 +395,9 @@ export default function ManageInstance() {
                             </Link>
                           </div>
                           <div>
-                            <div className="tp-info text-main0">CREATED ON</div>
+                            <div className="tp-info text-main0 fs-12">
+                              CREATED ON
+                            </div>
                             <Text>{key.date}</Text>
                           </div>
                         </div>
@@ -400,13 +412,15 @@ export default function ManageInstance() {
                       tw="min-w-[3rem] min-h-[3rem]"
                     />
                     <div>
-                      <div className="tp-info text-main0">SSH KEY NAME</div>
+                      <div className="tp-info text-main0 fs-12">
+                        SSH KEY NAME
+                      </div>
                       <Text>
                         <Skeleton width="9rem" />
                       </Text>
                     </div>
                     <div>
-                      <div className="tp-info text-main0">CREATED ON</div>
+                      <div className="tp-info text-main0 fs-12">CREATED ON</div>
                       <Text>
                         <Skeleton width="14rem" />
                       </Text>
@@ -442,7 +456,7 @@ export default function ManageInstance() {
               <div tw="flex flex-col gap-4">
                 <div tw="flex gap-4">
                   <div>
-                    <div className="tp-info text-main0">NAME</div>
+                    <div className="tp-info text-main0 fs-12">NAME</div>
                     <div>
                       <Text>
                         {nodeDetails ? (
@@ -454,7 +468,7 @@ export default function ManageInstance() {
                     </div>
                   </div>
                   <div>
-                    <div className="tp-info text-main0">URL</div>
+                    <div className="tp-info text-main0 fs-12">URL</div>
                     <div>
                       {nodeDetails ? (
                         <a
@@ -475,7 +489,7 @@ export default function ManageInstance() {
                 </div>
                 {termsAndConditions && (
                   <div>
-                    <div className="tp-info text-main0">ACCEPTED T&C</div>
+                    <div className="tp-info text-main0 fs-12">ACCEPTED T&C</div>
                     <div>
                       <a
                         className="tp-body1 fs-16"
@@ -490,6 +504,39 @@ export default function ManageInstance() {
                     </div>
                   </div>
                 )}
+              </div>
+            </NoisyContainer>
+          </div>
+          <div>
+            <div className="tp-h7 fs-18" tw="uppercase mb-2">
+              CONNECTION METHODS
+            </div>
+            <NoisyContainer>
+              <div tw="flex flex-col gap-4">
+                <div>
+                  <div className="tp-info text-main0 fs-12">SSH COMMAND</div>
+                  <div>
+                    {status ? (
+                      <IconText iconName="copy" onClick={handleCopyConnect}>
+                        <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
+                      </IconText>
+                    ) : (
+                      <Skeleton width="20rem" />
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div className="tp-info text-main0 fs-12">IPV6</div>
+                  <div>
+                    {status ? (
+                      <IconText iconName="copy" onClick={handleCopyIpv6}>
+                        <Text>{status.ipv6Parsed}</Text>
+                      </IconText>
+                    ) : (
+                      <Skeleton width="10rem" />
+                    )}
+                  </div>
+                </div>
               </div>
             </NoisyContainer>
           </div>
@@ -661,12 +708,6 @@ export default function ManageInstance() {
               )}
             </div>
           </NoisyContainer>
-
-          <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/computing/instance/new">
-              Create new instance
-            </ButtonLink>
-          </div>
         </Container>
       </section>
     </>
