@@ -9,18 +9,20 @@ export type LogsFeedProps = {
 }
 
 export default function LogsFeed({ logs }: LogsFeedProps) {
+  const isLoading = !logs?.stdout && !logs?.stderr
+
   return (
     <>
       <TextGradient type="h7" as="h2" color="main0">
         Stdout
       </TextGradient>
-      <div tw="relative">
-        <SpinnerOverlay show={!logs?.stdout} color="white" />
+      <div tw="relative rounded-xl">
+        <SpinnerOverlay show={isLoading} color="white" />
 
         <TextArea
           readOnly
           name="stdout"
-          placeholder="Loading logs..."
+          placeholder={isLoading ? 'Loading logs...' : 'No Stdout logs found'}
           value={logs?.stdout}
           tw="h-[30rem]"
           variant="code"
@@ -32,13 +34,13 @@ export default function LogsFeed({ logs }: LogsFeedProps) {
       <TextGradient type="h7" as="h2" color="main0">
         Stderr
       </TextGradient>
-      <div tw="relative">
-        <SpinnerOverlay show={!logs?.stderr} color="white" />
+      <div tw="relative rounded-xl ">
+        <SpinnerOverlay show={isLoading} color="white" />
 
         <TextArea
           readOnly
           name="stderr"
-          placeholder="Loading logs..."
+          placeholder={isLoading ? 'Loading logs...' : 'No Stderr logs found'}
           value={logs?.stderr}
           tw="h-[30rem]"
           variant="code"
