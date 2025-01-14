@@ -2,11 +2,15 @@ import Link from 'next/link'
 import { RotatingLines } from 'react-loader-spinner'
 import IconText from '@/components/common/IconText'
 import {
+  ButtonProps,
+  Col,
   Label,
   NoisyContainer,
   ObjectImg,
+  Row,
   Tabs,
   Tooltip,
+  useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
 import { Button, Icon } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
@@ -27,6 +31,51 @@ import { ImmutableVolume } from '@aleph-sdk/message'
 import { useAppState } from '@/contexts/appState'
 import { Skeleton } from '@/components/common/Skeleton/cmp'
 import { StyledSliderContent } from './styles'
+
+export function FunctionalButton({ children, ...props }: ButtonProps) {
+  return (
+    <Button
+      variant="functional"
+      size="sm"
+      className="bg-purple0 text-main0"
+      tw="px-6 py-2 rounded-full flex items-center justify-center leading-none gap-x-3 font-bold"
+      {...props}
+    >
+      {children}
+    </Button>
+  )
+}
+
+export function LinkedVolumeItem({ volume }: any) {
+  const handleCopyVolumeHash = useCopyToClipboardAndNotify(volume.id)
+
+  return (
+    <div tw="flex items-center gap-6 min-w-fit">
+      <div tw="p-3 flex items-center gap-2" className="bg-base1">
+        <ObjectImg
+          id="Object16"
+          color="base2"
+          size="2.5rem"
+          tw="min-w-[3rem] min-h-[3rem]"
+        />
+        <div>
+          <div className="tp-info">{volume.mount}</div>
+          <Text className="fs-12">{humanReadableSize(volume.size, 'MiB')}</Text>
+        </div>
+      </div>
+      <div tw="flex flex-wrap gap-6">
+        <FunctionalButton onClick={handleCopyVolumeHash}>
+          <Icon name="copy" />
+          copy hash
+        </FunctionalButton>
+        <FunctionalButton as="a" href={`/storage/volume/${volume.id}`}>
+          <Icon name="edit" />
+          edit
+        </FunctionalButton>
+      </div>
+    </div>
+  )
+}
 
 export default function ManageInstance() {
   const {
@@ -129,8 +178,6 @@ export default function ManageInstance() {
     return (instance?.metadata?.name as string) || ellipseAddress(instance.id)
   }, [instance])
 
-  const [showLogs, setShowLogs] = useState(false)
-
   console.log('instance', instance)
 
   return (
@@ -223,7 +270,7 @@ export default function ManageInstance() {
         </div>
       </section>
       {/* Slider */}
-      <StyledSliderContent showLogs={showLogs}>
+      <StyledSliderContent showLogs={tabId === 'log'}>
         {/* Instance Properties */}
         <div tw="w-full flex flex-wrap gap-x-24 gap-y-9 px-12 py-6">
           <div tw="flex-1 w-1/2 min-w-[32rem] flex flex-col gap-y-9">
@@ -335,30 +382,22 @@ export default function ManageInstance() {
                     </Text>
                   </div>
                   <div tw="flex flex-wrap gap-6">
-                    <Button
-                      variant="functional"
-                      size="sm"
-                      onClick={() => setShowLogs(true)}
-                      className="bg-purple0 text-main0"
-                      tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
+                    <FunctionalButton
+                      onClick={() => setTabId('log')}
                       disabled={!instance}
                     >
                       <Icon name="eye" />
-                      [WIP] view
-                    </Button>
-                    <Button
-                      variant="functional"
-                      size="sm"
+                      view
+                    </FunctionalButton>
+                    <FunctionalButton
                       onClick={() => {
                         alert('TODO: add download logs')
                       }}
-                      className="bg-purple0 text-main0"
-                      tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
                       disabled={!instance}
                     >
                       <Icon name="download" />
                       [WIP] download logs
-                    </Button>
+                    </FunctionalButton>
                   </div>
                 </div>
               </NoisyContainer>
@@ -552,56 +591,12 @@ export default function ManageInstance() {
                 <NoisyContainer>
                   <div tw="flex flex-col gap-4">
                     {immutableVolumes.map(
-                      (volume, i) =>
+                      (volume) =>
                         volume && (
-                          <div
-                            key={`linked-volume-${i}`}
-                            tw="flex items-center gap-6 min-w-fit"
-                          >
-                            <div
-                              tw="p-3 flex items-center gap-2"
-                              className="bg-base1"
-                            >
-                              <ObjectImg
-                                id="Object16"
-                                color="base2"
-                                size="2.5rem"
-                                tw="min-w-[3rem] min-h-[3rem]"
-                              />
-                              <div>
-                                <div className="tp-info">{volume.mount}</div>
-                                <Text className="fs-12">
-                                  {humanReadableSize(volume.size, 'MiB')}
-                                </Text>
-                              </div>
-                            </div>
-                            <div tw="flex flex-wrap gap-6">
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add copy hash logic')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="copy" />
-                                [WIP] copy hash
-                              </Button>
-                              <Button
-                                variant="functional"
-                                size="sm"
-                                onClick={() => {
-                                  alert('TODO: add edit link')
-                                }}
-                                className="bg-purple0 text-main0"
-                                tw="px-6 py-2 rounded-full flex items-center justify-center gap-x-3 font-bold"
-                              >
-                                <Icon name="edit" />
-                                [WIP] edit
-                              </Button>
-                            </div>
-                          </div>
+                          <LinkedVolumeItem
+                            key={`linked-volume-${volume.id}`}
+                            volume={volume}
+                          />
                         ),
                     )}
                   </div>
@@ -635,7 +630,7 @@ export default function ManageInstance() {
                                   <Text className="fs-12">
                                     {humanReadableSize(volume.size_mib, 'MiB')}
                                   </Text>
-                                  <Button
+                                  {/* <Button
                                     variant="functional"
                                     size="sm"
                                     onClick={() => {
@@ -644,7 +639,7 @@ export default function ManageInstance() {
                                     className="text-main0"
                                   >
                                     <Icon name="edit" />
-                                  </Button>
+                                  </Button> */}
                                 </div>
                               </div>
                             </div>
@@ -659,15 +654,9 @@ export default function ManageInstance() {
         </div>
         {/* Instance Logs */}
         <div tw="w-full flex px-12 py-6 gap-8">
-          <Button
-            variant="functional"
-            size="sm"
-            className="bg-purple0 text-main0"
-            onClick={() => setShowLogs(false)}
-            tw="h-full px-6 py-2 rounded-lg flex items-center justify-center gap-x-3 font-bold"
-          >
+          <FunctionalButton onClick={() => setTabId('detail')}>
             <Icon name="angle-left" size="1.3em" />
-          </Button>
+          </FunctionalButton>
           <div tw="w-full flex flex-col justify-center items-center gap-3">
             <div className="tp-h7" tw="w-full text-center">
               LOGS
