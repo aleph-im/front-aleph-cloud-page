@@ -3,11 +3,9 @@ import { RotatingLines } from 'react-loader-spinner'
 import IconText from '@/components/common/IconText'
 import {
   ButtonProps,
-  Col,
   Label,
   NoisyContainer,
   ObjectImg,
-  Row,
   Tabs,
   Tooltip,
   useCopyToClipboardAndNotify,
@@ -26,11 +24,15 @@ import { Container, Text } from '../common'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import LogsFeed from '../LogsFeed'
 import BackButton from '@/components/common/BackButton'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ImmutableVolume } from '@aleph-sdk/message'
 import { useAppState } from '@/contexts/appState'
 import { Skeleton } from '@/components/common/Skeleton/cmp'
-import { StyledSliderContent } from './styles'
+import { StyledEntityCard, StyledSliderContent } from './styles'
+import { SidePanel } from '@/components/common/SidePanel/cmp'
+import SSHKeyDetail from '@/components/common/SSHKeyDetail'
+import { SSHKey } from '@/domain/ssh'
+import VolumeDetail from '@/components/common/VolumeDetail'
 import StreamSummary from '@/components/common/StreamSummary'
 import { blockchains } from '@/domain/connect/base'
 
@@ -48,15 +50,26 @@ export function FunctionalButton({ children, ...props }: ButtonProps) {
   )
 }
 
-export function LinkedVolumeItem({ volume }: any) {
+export function LinkedVolumeItem({ volume, onClick }: any) {
   const handleCopyVolumeHash = useCopyToClipboardAndNotify(volume.id)
 
+  const handleCopyHash = useCallback(
+    (e: any) => {
+      handleCopyVolumeHash()
+      e.preventDefault()
+    },
+    [handleCopyVolumeHash],
+  )
+
   return (
-    <div tw="flex items-center gap-6 min-w-fit">
-      <div tw="p-3 flex items-center gap-2" className="bg-base1">
+    <div tw="flex items-center gap-4">
+      <StyledEntityCard
+        // href={`/storage/volume/${volume.id}`}
+        onClick={onClick}
+      >
         <ObjectImg
           id="Object16"
-          color="base2"
+          color="main0"
           size="2.5rem"
           tw="min-w-[3rem] min-h-[3rem]"
         />
@@ -64,17 +77,16 @@ export function LinkedVolumeItem({ volume }: any) {
           <div className="tp-info">{volume.mount}</div>
           <Text className="fs-12">{humanReadableSize(volume.size, 'MiB')}</Text>
         </div>
-      </div>
-      <div tw="flex flex-wrap gap-6">
-        <FunctionalButton onClick={handleCopyVolumeHash}>
-          <Icon name="copy" />
-          copy hash
-        </FunctionalButton>
-        <FunctionalButton as="a" href={`/storage/volume/${volume.id}`}>
-          <Icon name="edit" />
-          edit
-        </FunctionalButton>
-      </div>
+        <Icon
+          name="square-up-right"
+          tw="absolute top-2 right-2"
+          className="openEntityIcon"
+        />
+      </StyledEntityCard>
+      <FunctionalButton onClick={handleCopyHash}>
+        <Icon name="copy" />
+        copy hash
+      </FunctionalButton>
     </div>
   )
 }
@@ -141,6 +153,7 @@ export default function ManageInstance() {
 
   useEffect(() => {
     if (!volumes) return
+    if (!volumeManager) return
 
     const buildVolumes = async () => {
       const rawVolumes = volumes.filter(
@@ -149,7 +162,7 @@ export default function ManageInstance() {
 
       const decoratedVolumes = await Promise.all(
         rawVolumes.map(async (rawVolume) => {
-          const extraInfo = await volumeManager?.get(rawVolume.ref)
+          const extraInfo = await volumeManager.get(rawVolume.ref)
 
           return {
             ...rawVolume,
@@ -182,6 +195,25 @@ export default function ManageInstance() {
   }, [instance])
 
   console.log('instance', instance)
+
+  const [openSidePanel, setOpenSidePanel] = useState(false)
+  const [selectedVolume, setSelectedVolume] = useState<any | undefined>()
+  const [selectedSSHKey, setSelectedSSHKey] = useState<SSHKey | undefined>()
+  const [sidePanelContentType, setSidePanelContentType] = useState<
+    'sshKey' | 'volume'
+  >()
+
+  const handleImmutableVolumeClick = useCallback((volume: any) => {
+    setSidePanelContentType('volume')
+    setSelectedVolume(volume)
+    setOpenSidePanel(true)
+  }, [])
+
+  const handleSSHKeyClick = useCallback((sshKey: SSHKey) => {
+    setSidePanelContentType('sshKey')
+    setSelectedSSHKey(sshKey)
+    setOpenSidePanel(true)
+  }, [])
 
   return (
     <>
@@ -305,7 +337,7 @@ export default function ManageInstance() {
                         <div className="tp-info text-main0 fs-12">CORES</div>
                         <div>
                           <Text tw="flex items-center gap-1">
-                            {instance ? (
+                            {instance?.resources ? (
                               `${instance.resources.vcpus} x86 64bit`
                             ) : (
                               <Skeleton width="7rem" />
@@ -317,7 +349,7 @@ export default function ManageInstance() {
                         <div className="tp-info text-main0 fs-12">RAM</div>
                         <div>
                           <Text>
-                            {instance ? (
+                            {instance?.resources ? (
                               convertByteUnits(instance.resources.memory, {
                                 from: 'MiB',
                                 to: 'GiB',
@@ -410,12 +442,18 @@ export default function ManageInstance() {
                 SSH KEYS
               </div>
               <NoisyContainer>
-                <div tw="flex flex-col gap-4">
+                <div tw="flex flex-wrap gap-4">
                   {mappedKeys.length ? (
                     mappedKeys.map(
-                      (key) =>
-                        key && (
-                          <div key={key?.id} tw="flex items-center gap-6">
+                      (sshKey) =>
+                        sshKey && (
+                          <StyledEntityCard
+                            key={sshKey?.id}
+                            // href={'?hash=' + key.id}
+                            onClick={() => {
+                              handleSSHKeyClick(sshKey)
+                            }}
+                          >
                             <ObjectImg
                               id="Object9"
                               color="main0"
@@ -426,23 +464,14 @@ export default function ManageInstance() {
                               <div className="tp-info text-main0 fs-12">
                                 SSH KEY NAME
                               </div>
-                              <Link
-                                className="tp-body1 fs-16"
-                                href={'?hash=' + key.id}
-                                referrerPolicy="no-referrer"
-                              >
-                                <IconText iconName="square-up-right">
-                                  <Text>{key.label}</Text>
-                                </IconText>
-                              </Link>
+                              <Text>{sshKey.label}</Text>
                             </div>
-                            <div>
-                              <div className="tp-info text-main0 fs-12">
-                                CREATED ON
-                              </div>
-                              <Text>{key.date}</Text>
-                            </div>
-                          </div>
+                            <Icon
+                              name="square-up-right"
+                              tw="absolute top-2 right-2"
+                              className="openEntityIcon"
+                            />
+                          </StyledEntityCard>
                         ),
                     )
                   ) : (
@@ -599,6 +628,7 @@ export default function ManageInstance() {
                           <LinkedVolumeItem
                             key={`linked-volume-${volume.id}`}
                             volume={volume}
+                            onClick={() => handleImmutableVolumeClick(volume)}
                           />
                         ),
                     )}
@@ -625,15 +655,22 @@ export default function ManageInstance() {
                           volume && (
                             <div key={`persistent-volume-${i}`}>
                               <div
-                                tw="p-3 flex flex-col gap-1"
+                                tw="flex gap-2 p-3 opacity-60"
                                 className="bg-base1"
                               >
-                                <div className="tp-info">{volume.name}</div>
-                                <div tw="flex justify-between items-center gap-4">
-                                  <Text className="fs-12">
-                                    {humanReadableSize(volume.size_mib, 'MiB')}
-                                  </Text>
-                                  {/* <Button
+                                <div tw="flex flex-col gap-1">
+                                  <div className="tp-info fs-12">
+                                    {volume.name}
+                                  </div>
+                                  <div className="tp-info">{volume.mount}</div>
+                                  <div tw="flex justify-between items-center gap-4">
+                                    <Text className="fs-12">
+                                      {humanReadableSize(
+                                        volume.size_mib,
+                                        'MiB',
+                                      )}
+                                    </Text>
+                                    {/* <Button
                                     variant="functional"
                                     size="sm"
                                     onClick={() => {
@@ -643,6 +680,7 @@ export default function ManageInstance() {
                                   >
                                     <Icon name="edit" />
                                   </Button> */}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -702,6 +740,20 @@ export default function ManageInstance() {
           </div>
         </div>
       </StyledSliderContent>
+      <SidePanel
+        title={sidePanelContentType === 'volume' ? 'Volume' : 'SSH Key'}
+        isOpen={openSidePanel}
+        onClose={() => setOpenSidePanel(false)}
+      >
+        {sidePanelContentType === 'volume' ? (
+          selectedVolume && <VolumeDetail volumeId={selectedVolume.id} />
+        ) : sidePanelContentType === 'sshKey' ? (
+          selectedSSHKey && <SSHKeyDetail sshKeyId={selectedSSHKey.id} />
+        ) : (
+          <>ERROR</>
+        )}
+      </SidePanel>
+      {/* <div tw="fixed right-0 top-0 bottom-0 z-50 w-1/2 bg-white shadow-lg"></div> */}
     </>
   )
 
