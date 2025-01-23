@@ -52,7 +52,7 @@ const CheckoutButton = React.memo(
     title = 'Create instance',
     tooltipContent,
     isFooter,
-    termsAndConditions,
+    shouldRequestTermsAndConditions,
     handleRequestTermsAndConditionsAgreement,
     handleSubmit,
   }: {
@@ -60,7 +60,7 @@ const CheckoutButton = React.memo(
     title?: string
     tooltipContent?: TooltipProps['content']
     isFooter: boolean
-    termsAndConditions?: string
+    shouldRequestTermsAndConditions?: boolean
     handleRequestTermsAndConditionsAgreement: UseNewInstancePageReturn['handleRequestTermsAndConditionsAgreement']
     handleSubmit: UseNewInstancePageReturn['handleSubmit']
   }) => {
@@ -70,14 +70,14 @@ const CheckoutButton = React.memo(
       <>
         <Button
           ref={checkoutButtonRef}
-          type={!!termsAndConditions ? 'button' : 'submit'}
+          type={shouldRequestTermsAndConditions ? 'button' : 'submit'}
           color="main0"
           kind="default"
           size="lg"
           variant="primary"
           disabled={disabled}
           onClick={
-            !!termsAndConditions
+            shouldRequestTermsAndConditions
               ? handleRequestTermsAndConditionsAgreement
               : handleSubmit
           }
@@ -121,6 +121,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     selectedNode,
     setSelectedNode,
     termsAndConditions,
+    shouldRequestTermsAndConditions,
     modalOpen,
     modalClose,
     handleManuallySelectCRN,
@@ -571,7 +572,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               title={createInstanceButtonTitle}
               tooltipContent={createInstanceDisabledMessage}
               isFooter={false}
-              termsAndConditions={node?.terms_and_conditions}
+              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement
               }
@@ -584,7 +585,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               title={createInstanceButtonTitle}
               tooltipContent={createInstanceDisabledMessage}
               isFooter={true}
-              termsAndConditions={node?.terms_and_conditions}
+              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement
               }

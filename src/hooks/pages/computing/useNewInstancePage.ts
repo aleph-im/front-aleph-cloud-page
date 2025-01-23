@@ -120,6 +120,7 @@ export type UseNewInstancePageReturn = {
   selectedNode?: string
   setSelectedNode: (hash?: string) => void
   termsAndConditions?: TermsAndConditions
+  shouldRequestTermsAndConditions: boolean
   modalOpen?: (info: ModalCardProps) => void
   modalClose?: () => void
   handleManuallySelectCRN: () => void
@@ -316,6 +317,13 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Memos
 
+  const shouldRequestTermsAndConditions = useMemo(() => {
+    return (
+      !!node?.terms_and_conditions &&
+      formValues.paymentMethod === PaymentMethod.Stream
+    )
+  }, [node, formValues.paymentMethod])
+
   const blockchainName = useMemo(() => {
     return blockchain ? blockchains[blockchain]?.name : 'Current network'
   }, [blockchain])
@@ -426,8 +434,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   }, [])
 
   const handleCheckTermsAndConditions = useCallback(() => {
-    if (formValues.termsAndConditions) setValue('termsAndConditions', undefined)
-    else setValue('termsAndConditions', node?.terms_and_conditions)
+    formValues.termsAndConditions
+      ? setValue('termsAndConditions', undefined)
+      : setValue('termsAndConditions', node?.terms_and_conditions)
   }, [formValues.termsAndConditions, node, setValue])
 
   const handleAcceptTermsAndConditions = useCallback(
@@ -513,6 +522,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     selectedNode,
     setSelectedNode,
     termsAndConditions,
+    shouldRequestTermsAndConditions,
     modalOpen,
     modalClose,
     handleManuallySelectCRN,
