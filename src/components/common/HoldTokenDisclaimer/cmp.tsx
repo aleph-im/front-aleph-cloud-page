@@ -9,7 +9,7 @@ export const HoldTokenDisclaimer = () => {
       infrastructure. If you choose to remove the tokens from your wallet, the
       allocated resources will be efficiently reclaimed. Feel free to use or
       hold the tokens according to your needs, even when not actively using
-      Aleph.im&apos;s resources.
+      Aleph Cloud&apos;s resources.
     </p>
   )
 }

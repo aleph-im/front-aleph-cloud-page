@@ -131,8 +131,8 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
 
     const ethersConfig = defaultConfig({
       metadata: {
-        name: 'Aleph.im',
-        description: 'Aleph.im: Web3 cloud solution',
+        name: 'Aleph Cloud',
+        description: 'Aleph Cloud: Web3 cloud solution',
         url: 'https://account.aleph.im',
         icons: ['https://account.aleph.im/favicon-32x32.png'],
       },
