@@ -9,6 +9,8 @@ import { StyledIcon } from './styles'
 
 export const ToggleContainer = ({
   label,
+  withSwitch = true,
+  toggleAlwaysVisible = false,
   children,
   ...rest
 }: ToggleContainerProps) => {
@@ -30,16 +32,20 @@ export const ToggleContainer = ({
   return (
     <NoisyContainer {...rest}>
       <div tw="flex justify-between items-center">
-        <Switch
-          label={label}
-          onChange={handleChangeActive}
-          checked={active}
-          className={'tp-body3 ' + (active ? ' text-main0' : '')}
-        />
+        {withSwitch ? (
+          <Switch
+            label={label as string}
+            onChange={handleChangeActive}
+            checked={active}
+            className={'tp-body3 ' + (active ? ' text-main0' : '')}
+          />
+        ) : (
+          label
+        )}
         <StyledIcon
           {...{
             $isOpen: open,
-            $isVisible: active,
+            $isVisible: active || toggleAlwaysVisible,
             onClick: handleClickOpen,
           }}
         />

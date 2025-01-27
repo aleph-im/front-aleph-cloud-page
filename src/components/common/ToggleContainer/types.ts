@@ -1,6 +1,8 @@
 import { ReactNode } from 'react'
 
 export type ToggleContainerProps = {
-  label: string
+  label: React.ReactNode
   children: ReactNode
+  withSwitch?: boolean
+  toggleAlwaysVisible?: boolean
 }
