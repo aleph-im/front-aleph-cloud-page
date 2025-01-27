@@ -19,6 +19,7 @@ import {
 } from './styles'
 import IconText from '@/components/common/IconText'
 import { useNewConfidentialPage } from './hook'
+import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
 
 export function ExternalBulletItemLink({
   href,
@@ -69,6 +70,8 @@ export default function NewConfidentialPage() {
     disabledUploadEncryptedDiskImage,
     isUploadingFile,
     uploadedFileMessage,
+    uploadEncryptedDiskImageButtonRef,
+    uploadEncryptedDiskImageButtonToolip,
     handleUploadEncryptedDiskImage,
     handleCopyEncryptedDiskImageHash,
     handleBack,
@@ -308,23 +311,35 @@ export default function NewConfidentialPage() {
                   {...encryptedDiskImageCtrl.fieldState}
                 />
                 {encryptedDiskImageFormValues.encryptedDiskImage && (
-                  <Button
-                    disabled={disabledUploadEncryptedDiskImage}
-                    type="submit"
-                    onClick={handleUploadEncryptedDiskImage}
-                    animation="icon-to-top-on-hover"
-                  >
-                    {isUploadingFile ? (
-                      <>
-                        Uploading <Icon name="spinner" tw="animate-spin" />
-                      </>
-                    ) : (
-                      <>
-                        Upload
-                        <Icon name="arrow-up" />
-                      </>
+                  <>
+                    <div ref={uploadEncryptedDiskImageButtonRef}>
+                      <Button
+                        disabled={disabledUploadEncryptedDiskImage}
+                        type="submit"
+                        onClick={handleUploadEncryptedDiskImage}
+                        animation="icon-to-top-on-hover"
+                      >
+                        {isUploadingFile ? (
+                          <>
+                            Uploading <Icon name="spinner" tw="animate-spin" />
+                          </>
+                        ) : (
+                          <>
+                            Upload
+                            <Icon name="arrow-up" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    {disabledUploadEncryptedDiskImage && (
+                      <ResponsiveTooltip
+                        my="bottom-left"
+                        at="top-right"
+                        targetRef={uploadEncryptedDiskImageButtonRef}
+                        content={uploadEncryptedDiskImageButtonToolip}
+                      />
                     )}
-                  </Button>
+                  </>
                 )}
               </StyledFileInputContainer>
 

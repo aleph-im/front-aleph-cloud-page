@@ -3,7 +3,14 @@ import { useForm } from '@/hooks/common/useForm'
 import { useCopyToClipboardAndNotify, useNotification } from '@aleph-front/core'
 import { ItemType, StoreMessage } from '@aleph-sdk/message'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useController, UseControllerReturn, useWatch } from 'react-hook-form'
 
 export type EncryptedFileDiskFormState = {
@@ -33,6 +40,8 @@ export type UseNewConfidentialPageReturn = {
   disabledUploadEncryptedDiskImage: boolean
   isUploadingFile: boolean
   uploadedFileMessage: StoreMessage | undefined
+  uploadEncryptedDiskImageButtonRef: React.RefObject<HTMLInputElement>
+  uploadEncryptedDiskImageButtonToolip: string | undefined
   handleUploadEncryptedDiskImage: (e: FormEvent) => Promise<void>
   handleCopyEncryptedDiskImageHash: () => void
   handleBack: () => void
@@ -65,6 +74,13 @@ export function useNewConfidentialPage(): UseNewConfidentialPageReturn {
     () => uploadedFileMessage?.item_hash,
     [uploadedFileMessage],
   )
+
+  const uploadEncryptedDiskImageButtonRef = useRef<HTMLInputElement>(null)
+  const uploadEncryptedDiskImageButtonToolip = useMemo(() => {
+    if (!disabledUploadEncryptedDiskImage) return
+
+    if (!account) return 'Connect your wallet'
+  }, [disabledUploadEncryptedDiskImage, account])
 
   const onSubmitEncryptedDiskImage = useCallback(
     async (state: EncryptedFileDiskFormState) => {
@@ -192,6 +208,8 @@ sudo rm -r /mnt/debian`,
     disabledUploadEncryptedDiskImage,
     isUploadingFile,
     uploadedFileMessage,
+    uploadEncryptedDiskImageButtonRef,
+    uploadEncryptedDiskImageButtonToolip,
     handleUploadEncryptedDiskImage,
     handleCopyEncryptedDiskImageHash,
     handleBack,
