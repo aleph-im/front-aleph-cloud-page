@@ -13,7 +13,7 @@ import SelectFunctionPersistence from '@/components/form/SelectFunctionPersisten
 import BorderBox from '@/components/common/BorderBox'
 import { convertByteUnits } from '@/helpers/utils'
 import Form from '@/components/form/Form'
-import ToggleContainer from '@/components/common/ToggleContainer'
+import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime'
 import NewEntityTab from '../NewEntityTab'
 import { SectionTitle } from '@/components/common/CompositeTitle'
@@ -103,15 +103,15 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
             </p>
             <div tw="px-0 my-6">
               <div tw="mb-4">
-                <ToggleContainer label="Use Custom Runtime">
+                <SwitchToggleContainer label="Use Custom Runtime">
                   <SelectCustomFunctionRuntime
                     name="runtime"
                     control={control}
                   />
-                </ToggleContainer>
+                </SwitchToggleContainer>
               </div>
               <div tw="mb-4">
-                <ToggleContainer label="Add Volume">
+                <SwitchToggleContainer label="Add Volume">
                   <TextGradient forwardedAs="h2" type="h6" color="main0">
                     Add volumes
                   </TextGradient>
@@ -130,10 +130,10 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
                     </BorderBox>
                   )}
                   <AddVolumes name="volumes" control={control} />
-                </ToggleContainer>
+                </SwitchToggleContainer>
               </div>
               <div tw="mb-4">
-                <ToggleContainer label="Add Environmental Variables">
+                <SwitchToggleContainer label="Add Environmental Variables">
                   <TextGradient forwardedAs="h2" type="h6" color="main0">
                     Add environment variables
                   </TextGradient>
@@ -145,10 +145,10 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
                     altering the source code.
                   </p>
                   <AddEnvVars name="envVars" control={control} />
-                </ToggleContainer>
+                </SwitchToggleContainer>
               </div>
               <div tw="mb-4">
-                <ToggleContainer label="Add Custom Domain">
+                <SwitchToggleContainer label="Add Custom Domain">
                   <TextGradient forwardedAs="h2" type="h6" color="main0">
                     Custom domain
                   </TextGradient>
@@ -162,7 +162,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
                     control={control}
                     entityType={EntityDomainType.Program}
                   />
-                </ToggleContainer>
+                </SwitchToggleContainer>
               </div>
             </div>
           </Container>

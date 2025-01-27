@@ -88,9 +88,7 @@ export default function NewConfidentialPage() {
       <section tw="px-0 pt-20 md:pt-10 pb-5">
         <Container>
           <ToggleContainer
-            label={<SectionTitle number={0}>Requirements</SectionTitle>}
-            withSwitch={false}
-            toggleAlwaysVisible
+            toggleTitle={<SectionTitle number={0}>Requirements</SectionTitle>}
           >
             <div tw="flex flex-wrap gap-x-24 gap-y-7">
               <div>
@@ -145,13 +143,11 @@ export default function NewConfidentialPage() {
       <section tw="px-0 pt-0 pb-5">
         <Container>
           <ToggleContainer
-            label={
+            toggleTitle={
               <SectionTitle number={1}>
                 Create encrypted disk image
               </SectionTitle>
             }
-            withSwitch={false}
-            toggleAlwaysVisible
           >
             <div tw="flex flex-col gap-6 mt-1">
               <div>
@@ -288,13 +284,11 @@ export default function NewConfidentialPage() {
       <section tw="px-0 pt-0 pb-5">
         <Container>
           <ToggleContainer
-            label={
+            toggleTitle={
               <SectionTitle number={2}>
                 Upload encrypted disk image
               </SectionTitle>
             }
-            withSwitch={false}
-            toggleAlwaysVisible
           >
             <div tw="flex flex-col gap-6 mt-1">
               <div>
@@ -365,13 +359,11 @@ export default function NewConfidentialPage() {
       <section tw="px-0 pt-0 pb-5">
         <Container>
           <ToggleContainer
-            label={
+            toggleTitle={
               <SectionTitle number={3}>
                 Create Confidential Instance
               </SectionTitle>
             }
-            withSwitch={false}
-            toggleAlwaysVisible
           >
             <div tw="flex flex-col gap-6 mt-1">
               <div>
