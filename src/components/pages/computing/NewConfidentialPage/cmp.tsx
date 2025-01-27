@@ -149,7 +149,7 @@ export default function NewConfidentialPage() {
               </SectionTitle>
             }
           >
-            <div tw="flex flex-col gap-6 mt-1">
+            <div tw="flex flex-col gap-6">
               <div>
                 <div className="tp-h7" tw="mb-2">
                   1. Retrieving the scripts
@@ -290,7 +290,7 @@ export default function NewConfidentialPage() {
               </SectionTitle>
             }
           >
-            <div tw="flex flex-col gap-6 mt-1">
+            <div tw="flex flex-col gap-6">
               <div>
                 <strong>Upload</strong> your encrypted disk image created in{' '}
                 <strong>Step 1: Create encrypted disk image</strong>
@@ -365,47 +365,27 @@ export default function NewConfidentialPage() {
               </SectionTitle>
             }
           >
-            <div tw="flex flex-col gap-6 mt-1">
+            <div tw="flex flex-col gap-6">
               <div>
-                <div className="tp-h7" tw="mb-2">
-                  1. Create the Confidential Instance
-                </div>
                 <p tw="mb-2">
-                  This command will ask you how much CPU, RAM and Disk you want
-                  to use and on which node (CRN) to deploy it.
+                  This command will ask you about how much <strong>CPU</strong>,{' '}
+                  <strong>RAM</strong> and <strong>Disk</strong> you want to use
+                  and on which <strong>node (CRN)</strong> to deploy it.
                 </p>
                 <CodeBlock
                   code={commands['createConfidentialInstanceCommand']}
                   language="bash"
                 />
-              </div>
-              <div>
-                <div className="tp-h7" tw="mb-2">
-                  2. Establish channel to your Confidential Instance
-                </div>
-                <p tw="mb-2">
-                  This command will establish a secure channel that will allow a
-                  secure communication between your machine and your
-                  Confidential Instance
+                <p tw="italic mt-2">
+                  This command handles instance creation, secure channel setup,
+                  and VM initialization all at once. To run the three steps
+                  separately{' '}
+                  <ExternalLink
+                    href="https://docs.aleph.im/computing/confidential/instance/"
+                    color="main0"
+                    text="check the docs"
+                  />
                 </p>
-                <CodeBlock
-                  code={commands['secureChannelWithInstanceCommand']}
-                  language="bash"
-                />
-              </div>
-              <div>
-                <div className="tp-h7" tw="mb-2">
-                  3. Validate and Start your Confidential Instance
-                </div>
-                <p tw="mb-2">
-                  This command will run a validation to check the authenticity
-                  of your Confidential Instance and, if everything is correct,
-                  will start it.
-                </p>
-                <CodeBlock
-                  code={commands['startInstanceCommand']}
-                  language="bash"
-                />
               </div>
             </div>
           </ToggleContainer>
