@@ -29,7 +29,7 @@ export default function NewEntityTab(props: NewEntityTabProps) {
           label: { label: 'BETA', position: 'top' },
         },
       ]}
-      tw="overflow-auto"
+      tw="overflow-hidden"
     />
   )
 }
