@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 
 export type ToggleContainerProps = {
-  label: string
+  toggleTitle: ReactNode
+  backgroundColor?: string
   children: ReactNode
 }

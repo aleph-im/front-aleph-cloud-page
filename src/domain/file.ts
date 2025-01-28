@@ -169,7 +169,12 @@ export class FileManager {
     return this.sizesMapCache
   }
 
-  async uploadFile(fileObject: File): Promise<string> {
+  async uploadFile(
+    fileObject: File,
+    storageEngine: Parameters<
+      AuthenticatedAlephHttpClient['createStore']
+    >[0]['storageEngine'] = ItemType.storage,
+  ): Promise<StoreMessage> {
     if (!this.account) throw Err.InvalidAccount
 
     // @note: Quick temporal fix to upload files
@@ -181,9 +186,10 @@ export class FileManager {
     const message = await this.sdkClient.createStore({
       channel,
       fileObject: buffer,
+      storageEngine,
     })
 
-    return message.content.item_hash
+    return message
   }
 
   static async uploadFolder(

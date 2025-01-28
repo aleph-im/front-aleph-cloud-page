@@ -11,7 +11,7 @@ import AddWebsiteFolder from '@/components/form/AddWebsiteFolder'
 import { Form } from '@/components/form/Form'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
-import ToggleContainer from '@/components/common/ToggleContainer'
+import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import AddDomains from '@/components/form/AddDomains'
 import SelectWebsiteFramework from '@/components/form/SelectWebsiteFramework'
 import { PageProps } from '@/types/types'
@@ -83,7 +83,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
             </p>
             <div tw="px-0 my-6">
               <div tw="mb-4">
-                <ToggleContainer label="Add Custom Domain">
+                <SwitchToggleContainer label="Add Custom Domain">
                   <TextGradient forwardedAs="h2" type="h6" color="main0">
                     Custom domain
                   </TextGradient>
@@ -109,7 +109,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
                     No need to do anything at this stage. You will be able to
                     link your ENS domains after deployment.
                   </p>
-                </ToggleContainer>
+                </SwitchToggleContainer>
               </div>
             </div>
           </Container>

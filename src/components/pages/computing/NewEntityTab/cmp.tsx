@@ -26,11 +26,10 @@ export default function NewEntityTab(props: NewEntityTabProps) {
         {
           id: 'confidential',
           name: 'Confidential',
-          disabled: true,
-          label: { label: 'SOON', position: 'top' },
+          label: { label: 'BETA', position: 'top' },
         },
       ]}
-      tw="overflow-auto"
+      tw="overflow-hidden"
     />
   )
 }
