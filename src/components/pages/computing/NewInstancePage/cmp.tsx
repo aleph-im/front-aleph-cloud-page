@@ -330,7 +330,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         {values.paymentMethod === PaymentMethod.Stream && (
           <section tw="px-0 pt-20 pb-6 md:py-10">
             <Container>
-              <SectionTitle number={1}>Selected instance</SectionTitle>
+              <SectionTitle number={1}>Select your node</SectionTitle>
               <p>
                 Your instance is set up with your manually selected Compute
                 Resource Node (CRN), operating under the{' '}
@@ -411,7 +411,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 paymentMethod={values.paymentMethod}
                 nodeSpecs={nodeSpecs}
               >
-                {!node && (
+                {values.paymentMethod !== PaymentMethod.Stream ? (
                   <div tw="mt-6">
                     <Button
                       ref={manuallySelectButtonRef2}
@@ -433,6 +433,15 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                       />
                     )}
                   </div>
+                ) : (
+                  !node && (
+                    <div tw="mt-6 text-center">
+                      <BorderBox $color="info">
+                        First select your node in step{' '}
+                        <strong>01/ Select your node</strong>
+                      </BorderBox>
+                    </div>
+                  )
                 )}
               </SelectInstanceSpecs>
             </div>
