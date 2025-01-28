@@ -50,7 +50,7 @@ export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
           Pay-as-you-go
         </StyledLabel>
       </div>
-      {disabledStream && (
+      {disabledStreamTooltip && (
         <ResponsiveTooltip
           my="bottom-left"
           at="top-left"

@@ -16,7 +16,7 @@ export type UseSelectPaymentMethodReturn = {
   disabledHold?: boolean
   disabledStream?: boolean
   paymentMethodCtrl: UseControllerReturn<any, any>
-  disabledStreamTooltip: React.ReactNode
+  disabledStreamTooltip?: React.ReactNode
   switchRef: React.Ref<HTMLInputElement>
   handleClickStream: () => void
   handleClickHold: () => void
