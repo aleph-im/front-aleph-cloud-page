@@ -134,7 +134,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleDownloadFile,
   } = useNewInstancePage()
 
-  const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
+  const sectionNumber = useCallback(
+    (n: number) => (values.paymentMethod === PaymentMethod.Stream ? 1 : 0) + n,
+    [values.paymentMethod],
+  )
 
   // ------------------
 
@@ -327,9 +330,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         {values.paymentMethod === PaymentMethod.Stream && (
           <section tw="px-0 pt-20 pb-6 md:py-10">
             <Container>
-              <SectionTitle number={sectionNumber(0)}>
-                Selected instance
-              </SectionTitle>
+              <SectionTitle number={1}>Selected instance</SectionTitle>
               <p>
                 Your instance is set up with your manually selected Compute
                 Resource Node (CRN), operating under the{' '}
