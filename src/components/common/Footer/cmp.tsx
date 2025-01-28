@@ -141,7 +141,7 @@ export const Footer = () => {
                 target: '_blank',
               },
               {
-                label: 'Aleph.im technology',
+                label: 'Aleph Cloud technology',
                 href: 'https://aleph.im',
                 target: '_blank',
               },
