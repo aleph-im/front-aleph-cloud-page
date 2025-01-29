@@ -436,10 +436,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 ) : (
                   !node && (
                     <div tw="mt-6 text-center">
-                      <BorderBox $color="info">
-                        First select your node in step{' '}
-                        <strong>01/ Select your node</strong>
-                      </BorderBox>
+                      First select your node in the previous step
                     </div>
                   )
                 )}
