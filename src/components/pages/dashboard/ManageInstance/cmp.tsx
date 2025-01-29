@@ -15,6 +15,7 @@ import LogsFeed from '../LogsFeed'
 export default function ManageInstance() {
   const {
     instance,
+    termsAndConditions,
     status,
     mappedKeys,
     nodeDetails,
@@ -330,6 +331,30 @@ export default function ManageInstance() {
                       </TextGradient>
 
                       <VolumeList {...{ volumes }} />
+                    </>
+                  )}
+
+                  {termsAndConditions !== undefined && (
+                    <>
+                      <Separator />
+                      <TextGradient type="h7" as="h2" color="main0">
+                        Terms & Conditions
+                      </TextGradient>
+                      <div tw="my-5">
+                        <div className="tp-info text-main0">ACCEPTED T&C</div>
+                        <div>
+                          <a
+                            className="tp-body1 fs-16"
+                            href={termsAndConditions.url}
+                            target="_blank"
+                            referrerPolicy="no-referrer"
+                          >
+                            <IconText iconName="square-up-right">
+                              <Text>{termsAndConditions.name}</Text>
+                            </IconText>
+                          </a>
+                        </div>
+                      </div>
                     </>
                   )}
                 </>

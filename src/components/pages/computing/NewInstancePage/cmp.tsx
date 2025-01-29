@@ -52,7 +52,7 @@ const CheckoutButton = React.memo(
     title = 'Create instance',
     tooltipContent,
     isFooter,
-    termsAndConditions,
+    shouldRequestTermsAndConditions,
     handleRequestTermsAndConditionsAgreement,
     handleSubmit,
   }: {
@@ -60,7 +60,7 @@ const CheckoutButton = React.memo(
     title?: string
     tooltipContent?: TooltipProps['content']
     isFooter: boolean
-    termsAndConditions?: string
+    shouldRequestTermsAndConditions?: boolean
     handleRequestTermsAndConditionsAgreement: UseNewInstancePageReturn['handleRequestTermsAndConditionsAgreement']
     handleSubmit: UseNewInstancePageReturn['handleSubmit']
   }) => {
@@ -70,14 +70,14 @@ const CheckoutButton = React.memo(
       <>
         <Button
           ref={checkoutButtonRef}
-          type={!!termsAndConditions ? 'button' : 'submit'}
+          type={shouldRequestTermsAndConditions ? 'button' : 'submit'}
           color="main0"
           kind="default"
           size="lg"
           variant="primary"
           disabled={disabled}
           onClick={
-            !!termsAndConditions
+            shouldRequestTermsAndConditions
               ? handleRequestTermsAndConditionsAgreement
               : handleSubmit
           }
@@ -121,6 +121,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     selectedNode,
     setSelectedNode,
     termsAndConditions,
+    shouldRequestTermsAndConditions,
     modalOpen,
     modalClose,
     handleManuallySelectCRN,
@@ -131,13 +132,11 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleRequestTermsAndConditionsAgreement,
     handleAcceptTermsAndConditions,
     handleCheckTermsAndConditions,
-    handleDownloadFile,
   } = useNewInstancePage()
 
   const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
 
   // ------------------
-
   // Handle modals
   useEffect(
     () => {
@@ -193,14 +192,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                     I have read, understood, and agree to the{' '}
                     <ExternalLink
                       text="Terms & Conditions"
-                      href="#"
-                      target="_self"
-                      onClick={() =>
-                        handleDownloadFile(
-                          termsAndConditions.cid,
-                          termsAndConditions.name,
-                        )
-                      }
+                      href={termsAndConditions.url}
                       color="main0"
                       typo="body3"
                       underline
@@ -249,6 +241,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       handleCloseModal,
       handleCheckTermsAndConditions,
       handleAcceptTermsAndConditions,
+      /*
+      Both modalOpen and modalClose are not included in the dependencies because there's
+      an infinite refresh loop when they are included. This is because the modalOpen
+      and modalClose functions are being redefined on every render, causing the
+      useEffect to run again and again.
+       */
       // modalOpen,
       // modalClose,
     ],
@@ -574,7 +572,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               title={createInstanceButtonTitle}
               tooltipContent={createInstanceDisabledMessage}
               isFooter={false}
-              termsAndConditions={node?.terms_and_conditions}
+              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement
               }
@@ -587,7 +585,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               title={createInstanceButtonTitle}
               tooltipContent={createInstanceDisabledMessage}
               isFooter={true}
-              termsAndConditions={node?.terms_and_conditions}
+              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement
               }
