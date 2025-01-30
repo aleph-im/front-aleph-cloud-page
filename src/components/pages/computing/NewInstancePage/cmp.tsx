@@ -134,7 +134,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleCheckTermsAndConditions,
   } = useNewInstancePage()
 
-  const sectionNumber = useCallback((n: number) => (node ? 1 : 0) + n, [node])
+  const sectionNumber = useCallback(
+    (n: number) => (values.paymentMethod === PaymentMethod.Stream ? 1 : 0) + n,
+    [values.paymentMethod],
+  )
 
   // ------------------
   // Handle modals
@@ -325,9 +328,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         {values.paymentMethod === PaymentMethod.Stream && (
           <section tw="px-0 pt-20 pb-6 md:py-10">
             <Container>
-              <SectionTitle number={sectionNumber(0)}>
-                Selected instance
-              </SectionTitle>
+              <SectionTitle number={1}>Select your node</SectionTitle>
               <p>
                 Your instance is set up with your manually selected Compute
                 Resource Node (CRN), operating under the{' '}
@@ -408,7 +409,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 paymentMethod={values.paymentMethod}
                 nodeSpecs={nodeSpecs}
               >
-                {!node && (
+                {values.paymentMethod !== PaymentMethod.Stream ? (
                   <div tw="mt-6">
                     <Button
                       ref={manuallySelectButtonRef2}
@@ -430,6 +431,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                       />
                     )}
                   </div>
+                ) : (
+                  !node && (
+                    <div tw="mt-6 text-center">
+                      First select your node in the previous step
+                    </div>
+                  )
                 )}
               </SelectInstanceSpecs>
             </div>
