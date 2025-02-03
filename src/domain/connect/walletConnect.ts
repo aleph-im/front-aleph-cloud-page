@@ -133,8 +133,8 @@ export class WalletConnectConnectionProviderManager extends BaseConnectionProvid
       metadata: {
         name: 'Aleph Cloud',
         description: 'Aleph Cloud: Web3 cloud solution',
-        url: 'https://account.aleph.im',
-        icons: ['https://account.aleph.im/favicon-32x32.png'],
+        url: 'https://account.aleph.cloud',
+        icons: ['https://account.aleph.cloud/favicon-32x32.png'],
       },
       enableEIP6963: true,
       enableInjected: true,

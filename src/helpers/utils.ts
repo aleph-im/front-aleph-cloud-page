@@ -186,7 +186,7 @@ const messageTypeWhitelist = new Set(Object.values(MessageType))
  */
 export const getExplorerURL = ({ item_hash, chain, sender, type }: Message) => {
   type = messageTypeWhitelist.has(type as MessageType) ? type : MessageType.post
-  return `https://explorer.aleph.im/address/${chain}/${sender}/message/${type}/${item_hash}`
+  return `https://explorer.aleph.cloud/address/${chain}/${sender}/message/${type}/${item_hash}`
 }
 
 export const getDate = (time: number | string): string => {
