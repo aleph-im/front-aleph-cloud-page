@@ -44,7 +44,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
     try {
       const response = await this.sdkClient.getPosts({
         addresses: [this.account.address],
-        types: [this.type],
+        types: this.type,
         channels: [this.channel],
       })
 
@@ -57,7 +57,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
   async get(id: string): Promise<SSHKey | undefined> {
     const response = await this.sdkClient.getPosts({
       addresses: [this.account.address],
-      types: [this.type],
+      types: this.type,
       channels: [this.channel],
       hashes: [id],
     })
