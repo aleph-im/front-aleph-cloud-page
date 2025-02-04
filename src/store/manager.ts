@@ -6,7 +6,6 @@ import { ProgramManager } from '@/domain/program'
 import { FileManager } from '@/domain/file'
 import { MessageManager } from '@/domain/message'
 import { DomainManager } from '@/domain/domain'
-import { IndexerManager } from '@/domain/indexer'
 import { WebsiteManager } from '@/domain/website'
 import { NodeManager } from '@/domain/node'
 import { apiServer } from '@/helpers/constants'
@@ -48,7 +47,6 @@ export type ManagerState = {
   programManager?: ProgramManager
   instanceManager?: InstanceManager
   confidentialManager?: ConfidentialManager
-  indexerManager?: IndexerManager
   websiteManager?: WebsiteManager
   voucherManager?: VoucherManager
 }
@@ -62,7 +60,6 @@ export const initialState: ManagerState = {
   volumeManager: undefined,
   programManager: undefined,
   instanceManager: undefined,
-  indexerManager: undefined,
   websiteManager: undefined,
   voucherManager: undefined,
 }
@@ -88,7 +85,6 @@ export function getManagerReducer(): ManagerReducer {
           programManager: undefined,
           instanceManager: undefined,
           confidentialManager: undefined,
-          indexerManager: undefined,
           websiteManager: undefined,
           voucherManager: undefined,
         }
@@ -131,11 +127,6 @@ export function getManagerReducer(): ManagerReducer {
           fileManager,
           nodeManager,
         )
-        const indexerManager = new IndexerManager(
-          account,
-          sdkClient,
-          programManager,
-        )
         const websiteManager = new WebsiteManager(
           account,
           sdkClient,
@@ -155,7 +146,6 @@ export function getManagerReducer(): ManagerReducer {
           programManager,
           instanceManager,
           confidentialManager,
-          indexerManager,
           websiteManager,
           voucherManager,
         }

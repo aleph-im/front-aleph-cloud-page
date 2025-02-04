@@ -13,7 +13,6 @@ export function useEntityManager(
     volumeManager,
     programManager,
     instanceManager,
-    indexerManager,
     websiteManager,
     confidentialManager,
   } = appState.manager
@@ -28,7 +27,6 @@ export function useEntityManager(
       [EntityType.Volume]: volumeManager,
       [EntityType.Instance]: instanceManager,
       [EntityType.Program]: programManager,
-      [EntityType.Indexer]: indexerManager,
       [EntityType.Website]: websiteManager,
       [EntityType.Confidential]: confidentialManager,
     }
@@ -38,7 +36,6 @@ export function useEntityManager(
     programManager,
     sshKeyManager,
     volumeManager,
-    indexerManager,
     websiteManager,
     confidentialManager,
   ])

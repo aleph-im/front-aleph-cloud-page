@@ -7,7 +7,6 @@ import {
 import { ProgramCost, ProgramCostProps, ProgramManager } from '@/domain/program'
 import { VolumeCost, VolumeCostProps, VolumeManager } from '@/domain/volume'
 import { EntityType } from '@/helpers/constants'
-import { IndexerCost, IndexerCostProps, IndexerManager } from '@/domain/indexer'
 import { WebsiteCost, WebsiteCostProps, WebsiteManager } from '@/domain/website'
 
 export type UseEntityCostProps = {
@@ -16,12 +15,11 @@ export type UseEntityCostProps = {
     | Partial<VolumeCostProps>
     | Partial<InstanceCostProps>
     | Partial<ProgramCostProps>
-    | Partial<IndexerCostProps>
     | Partial<WebsiteCostProps>
 }
 
 export type UseEntityCostReturn = {
-  cost: VolumeCost | InstanceCost | ProgramCost | IndexerCost | WebsiteCost
+  cost: VolumeCost | InstanceCost | ProgramCost | WebsiteCost
 }
 
 export function useEntityCost({ entityType, props }: UseEntityCostProps) {
@@ -40,9 +38,6 @@ export function useEntityCost({ entityType, props }: UseEntityCostProps) {
           break
         case EntityType.Program:
           result = await ProgramManager.getCost(props as ProgramCostProps)
-          break
-        case EntityType.Indexer:
-          result = await IndexerManager.getCost(props as IndexerCostProps)
           break
         case EntityType.Website:
           result = await WebsiteManager.getCost(props as WebsiteCostProps)

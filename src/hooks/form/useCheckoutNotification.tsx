@@ -162,17 +162,4 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       title: 'Sign Website Update',
       content: 'By signing this, you confirm the update of your website.',
     },
-    indexer: {
-      title: 'Sign Indexer Creation',
-      content:
-        'By signing this, you confirm the creation of your new indexer on Twentysix.cloud.',
-    },
-    indexerDel: {
-      title: 'Sign Indexer Deletion',
-      content: 'By signing this, you confirm the deletion of your indexer.',
-    },
-    indexerUp: {
-      title: 'Sign Indexer Update',
-      content: 'By signing this, you confirm the update of your indexer.',
-    },
   }

@@ -63,7 +63,6 @@ export enum EntityType {
   Instance = 'instance',
   SSHKey = 'sshKey',
   Domain = 'domain',
-  Indexer = 'indexer',
   Website = 'website',
   Confidential = 'confidential',
 }
@@ -75,7 +74,6 @@ type CheckoutAddStepType =
   | 'stream'
   | 'instance'
   | 'program'
-  | 'indexer'
   | 'website'
 
 type CheckoutDelStepType =
@@ -85,7 +83,6 @@ type CheckoutDelStepType =
   | 'streamDel'
   | 'instanceDel'
   | 'programDel'
-  | 'indexerDel'
   | 'websiteDel'
 
 type CheckoutUpStepType =
@@ -94,7 +91,6 @@ type CheckoutUpStepType =
   | 'domainUp'
   | 'instanceUp'
   | 'programUp'
-  | 'indexerUp'
   | 'websiteUp'
 
 export type CheckoutStepType =
@@ -128,7 +124,6 @@ export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.Instance]: 'Instance',
   [EntityType.SSHKey]: 'SSH Key',
   [EntityType.Domain]: 'Domain',
-  [EntityType.Indexer]: 'Indexer',
   [EntityType.Website]: 'Website',
   [EntityType.Confidential]: 'Confidential',
 }
@@ -140,7 +135,6 @@ export const EntityTypeUrlSection: Record<EntityType, string> = {
   [EntityType.Confidential]: 'computing',
   [EntityType.SSHKey]: 'settings',
   [EntityType.Domain]: 'settings',
-  [EntityType.Indexer]: 'tools',
   [EntityType.Website]: 'hosting',
 }
 
@@ -150,23 +144,8 @@ export const EntityTypeSlug: Record<EntityType, string> = {
   [EntityType.Instance]: 'instance',
   [EntityType.SSHKey]: 'ssh',
   [EntityType.Domain]: 'domain',
-  [EntityType.Indexer]: 'indexer',
   [EntityType.Website]: 'website',
   [EntityType.Confidential]: 'confidential',
-}
-
-export enum IndexerBlockchain {
-  Ethereum = 'ethereum',
-  Bsc = 'bsc',
-}
-
-const ERC20AbiUrl =
-  'https://api.etherscan.io/api?module=contract&action=getabi&address=0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
-
-export const BlockchainDefaultABIUrl: Record<IndexerBlockchain, string> = {
-  // @note: Fixed ethereum ALEPH token contract address as "generic" ERC20 ABI for all EVM compatible blockchains
-  [IndexerBlockchain.Ethereum]: ERC20AbiUrl,
-  [IndexerBlockchain.Bsc]: ERC20AbiUrl,
 }
 
 export enum PaymentMethod {
