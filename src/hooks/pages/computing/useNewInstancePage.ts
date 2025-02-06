@@ -25,10 +25,7 @@ import {
   defaultInstanceImage,
   InstanceImageField,
 } from '@/hooks/form/useSelectInstanceImage'
-import {
-  getDefaultSpecsOptions,
-  InstanceSpecsField,
-} from '@/hooks/form/useSelectInstanceSpecs'
+import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { AddInstance, InstanceManager } from '@/domain/instance'
@@ -65,6 +62,7 @@ import {
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
+import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -79,21 +77,6 @@ export type NewInstanceFormState = NameAndTagsField & {
   streamDuration: StreamDurationField
   streamCost: number
   termsAndConditions?: string
-}
-
-const defaultSpecs = {
-  ...getDefaultSpecsOptions(true, PaymentMethod.Stream)[0],
-}
-
-export const defaultValues: Partial<NewInstanceFormState> = {
-  ...defaultNameAndTags,
-  image: defaultInstanceImage,
-  specs: defaultSpecs,
-  systemVolumeSize: defaultSpecs.storage,
-  paymentMethod: PaymentMethod.Hold,
-  streamDuration: defaultStreamDuration,
-  streamCost: Number.POSITIVE_INFINITY,
-  termsAndConditions: undefined,
 }
 
 export type Modal = 'node-list' | 'terms-and-conditions'
@@ -188,6 +171,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   })
 
   // -------------------------
+  // Tiers
+
+  const { defaultTiers } = useDefaultTiers({ type: EntityType.Instance })
+
+  // -------------------------
   // Checkout flow
 
   const manager = useInstanceManager()
@@ -209,7 +197,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         if (!nodeSpecs) throw Err.InvalidCRNSpecs
         if (!state?.streamCost) throw Err.InvalidStreamCost
 
-        const [minSpecs] = getDefaultSpecsOptions(true)
+        const [minSpecs] = defaultTiers
         const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
         if (!isValid) throw Err.InvalidCRNSpecs
 
@@ -274,6 +262,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       account,
       node,
       nodeSpecs,
+      defaultTiers,
       blockchain,
       handleConnect,
       dispatch,
@@ -284,6 +273,18 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   // -------------------------
   // Setup form
+
+  const defaultValues: Partial<NewInstanceFormState> = {
+    ...defaultNameAndTags,
+    image: defaultInstanceImage,
+    specs: defaultTiers[0],
+    systemVolumeSize: defaultTiers[0]?.storage,
+    paymentMethod: PaymentMethod.Hold,
+    streamDuration: defaultStreamDuration,
+    streamCost: Number.POSITIVE_INFINITY,
+    termsAndConditions: undefined,
+  }
+
   const {
     control,
     handleSubmit,

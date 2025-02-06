@@ -4,6 +4,7 @@ import { convertByteUnits } from '@/helpers/utils'
 import { useEffect, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 import { useNodeManager } from '../common/useManager/useNodeManager'
+import { useDefaultTiers } from '../common/pricing/tiers/useDefaultTiers'
 
 export type InstanceSpecsField = ReducedCRNSpecs & {
   disabled?: boolean
@@ -27,29 +28,10 @@ export function updateSpecsStorage(
   }
 }
 
-// @note: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
-export function getDefaultSpecsOptions(
-  isPersistent = true,
-  paymentMethod: PaymentMethod = PaymentMethod.Hold,
-): InstanceSpecsField[] {
-  return [1, 2, 4, 6, 8, 12].map((cpu) =>
-    updateSpecsStorage(
-      {
-        cpu,
-        ram: convertByteUnits(cpu * 2, { from: 'GiB', to: 'MiB' }),
-        storage: 0,
-      },
-      isPersistent,
-      paymentMethod,
-    ),
-  )
-}
-
 export type UseSelectInstanceSpecsProps = {
   name?: string
   control: Control
   defaultValue?: InstanceSpecsField
-  options?: InstanceSpecsField[]
   type: EntityType.Instance | EntityType.Program
   isPersistent?: boolean
   paymentMethod?: PaymentMethod
@@ -70,21 +52,22 @@ export function useSelectInstanceSpecs({
   control,
   defaultValue,
   type,
-  options: optionsProp,
   isPersistent = false,
   paymentMethod = PaymentMethod.Hold,
   nodeSpecs,
   ...rest
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
   const manager = useNodeManager()
+  const { defaultTiers } = useDefaultTiers({ type })
 
   const options = useMemo(() => {
-    const opts =
-      optionsProp || getDefaultSpecsOptions(isPersistent, paymentMethod)
-    if (paymentMethod === PaymentMethod.Hold) return opts
+    if (paymentMethod === PaymentMethod.Hold) return defaultTiers
     if (!nodeSpecs) return []
-    return opts.filter((opt) => manager.validateMinNodeSpecs(opt, nodeSpecs))
-  }, [manager, optionsProp, isPersistent, paymentMethod, nodeSpecs])
+
+    return defaultTiers.filter((opt) =>
+      manager.validateMinNodeSpecs(opt, nodeSpecs),
+    )
+  }, [defaultTiers, paymentMethod, nodeSpecs, manager])
 
   const specsCtrl = useController({
     control,

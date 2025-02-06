@@ -1,10 +1,7 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import {
-  InstanceSpecsField,
-  getDefaultSpecsOptions,
-} from '../../form/useSelectInstanceSpecs'
+import { InstanceSpecsField } from '../../form/useSelectInstanceSpecs'
 import { VolumeField } from '../../form/useAddVolume'
 import { EnvVarField } from '../../form/useAddEnvVars'
 import {
@@ -27,6 +24,7 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
+import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -37,14 +35,6 @@ export type NewFunctionFormState = NameAndTagsField & {
   envVars?: EnvVarField[]
   domains?: DomainField[]
   paymentMethod: PaymentMethod
-}
-
-const defaultValues: Partial<NewFunctionFormState> = {
-  ...defaultNameAndTags,
-  code: { ...defaultCode } as FunctionCodeField,
-  specs: { ...getDefaultSpecsOptions(false)[0] },
-  isPersistent: false,
-  paymentMethod: PaymentMethod.Hold,
 }
 
 // @todo: Split this into reusable hooks by composition
@@ -102,6 +92,19 @@ export function useNewFunctionPage(): UseNewFunctionPage {
       }
     },
     [dispatch, manager, next, router, stop],
+  )
+
+  const { defaultTiers } = useDefaultTiers({ type: 'program' })
+
+  const defaultValues: Partial<NewFunctionFormState> = useMemo(
+    () => ({
+      ...defaultNameAndTags,
+      code: { ...defaultCode } as FunctionCodeField,
+      specs: defaultTiers[0],
+      isPersistent: false,
+      paymentMethod: PaymentMethod.Hold,
+    }),
+    [defaultTiers],
   )
 
   const {

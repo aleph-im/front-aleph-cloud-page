@@ -7,16 +7,15 @@ import {
   UseRequestCRNSpecsReturn,
   useRequestCRNSpecs,
 } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { getDefaultSpecsOptions } from '@/hooks/form/useSelectInstanceSpecs'
 import { useRequestCRNIps } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
-import { PaymentMethod } from '@/helpers/constants'
 import { CRN, StreamNotSupportedIssue } from '@/domain/node'
 import { useDebounceState, usePaginatedList } from '@aleph-front/core'
 import {
   UseSortedListReturn,
   useSortedList,
 } from '@/hooks/common/useSortedList'
+import { useDefaultTiers } from './pricing/tiers/useDefaultTiers'
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
@@ -85,10 +84,12 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
   // -----------------------------
 
+  const { defaultTiers } = useDefaultTiers({ type: 'instance' })
+
   const minSpecs = useMemo(() => {
-    const [min] = getDefaultSpecsOptions(true, PaymentMethod.Stream)
+    const [min] = defaultTiers
     return min
-  }, [])
+  }, [defaultTiers])
 
   const nodesIssues = useMemo(() => {
     if (!baseFilteredNodes) return
