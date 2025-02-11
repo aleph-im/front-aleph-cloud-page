@@ -18,6 +18,7 @@ import { StoreReducer } from './store'
 import { ConnectionAction, ConnectionActionType } from './connection'
 import { ConfidentialManager } from '@/domain/confidential'
 import { VoucherManager } from '@/domain/voucher'
+import { GpuInstanceManager } from '@/domain/gpuInstance'
 
 function createDefaultManagers(account?: Account) {
   const sdkClient = !account
@@ -46,6 +47,7 @@ export type ManagerState = {
   volumeManager?: VolumeManager
   programManager?: ProgramManager
   instanceManager?: InstanceManager
+  gpuInstanceManager?: GpuInstanceManager
   confidentialManager?: ConfidentialManager
   websiteManager?: WebsiteManager
   voucherManager?: VoucherManager
@@ -60,6 +62,8 @@ export const initialState: ManagerState = {
   volumeManager: undefined,
   programManager: undefined,
   instanceManager: undefined,
+  gpuInstanceManager: undefined,
+  confidentialManager: undefined,
   websiteManager: undefined,
   voucherManager: undefined,
 }
@@ -84,6 +88,7 @@ export function getManagerReducer(): ManagerReducer {
           volumeManager: undefined,
           programManager: undefined,
           instanceManager: undefined,
+          gpuInstanceManager: undefined,
           confidentialManager: undefined,
           websiteManager: undefined,
           voucherManager: undefined,
@@ -110,6 +115,15 @@ export function getManagerReducer(): ManagerReducer {
           nodeManager,
         )
         const instanceManager = new InstanceManager(
+          account,
+          sdkClient,
+          volumeManager,
+          domainManager,
+          sshKeyManager,
+          fileManager,
+          nodeManager,
+        )
+        const gpuInstanceManager = new GpuInstanceManager(
           account,
           sdkClient,
           volumeManager,
@@ -145,6 +159,7 @@ export function getManagerReducer(): ManagerReducer {
           volumeManager,
           programManager,
           instanceManager,
+          gpuInstanceManager,
           confidentialManager,
           websiteManager,
           voucherManager,

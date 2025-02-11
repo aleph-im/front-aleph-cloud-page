@@ -8,7 +8,8 @@ export type SelectInstanceSpecsProps = {
   name?: string
   control: Control
   options?: InstanceSpecsField[]
-  type: EntityType.Instance | EntityType.Program
+  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
+  gpuModel?: string
   isPersistent?: boolean
   paymentMethod?: PaymentMethod
   nodeSpecs?: CRNSpecs

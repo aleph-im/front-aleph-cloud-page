@@ -4,7 +4,6 @@ import Image from 'next/image'
 import {
   Button,
   TextGradient,
-  NodeVersion,
   NodeName,
   NodeScore,
   TableColumn,
@@ -28,10 +27,6 @@ import {
   apiServer,
 } from '@/helpers/constants'
 import Container from '@/components/common/CenteredContainer'
-import {
-  useNewInstancePage,
-  UseNewInstancePageReturn,
-} from '@/hooks/pages/computing/useNewInstancePage'
 import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import NewEntityTab from '../NewEntityTab'
@@ -45,6 +40,10 @@ import BackButtonSection from '@/components/common/BackButtonSection'
 import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
 import BorderBox from '@/components/common/BorderBox'
 import ExternalLink from '@/components/common/ExternalLink'
+import {
+  useNewGpuInstancePage,
+  UseNewGpuInstancePageReturn,
+} from '@/hooks/pages/computing/useNewGpuInstancePage'
 
 const CheckoutButton = React.memo(
   ({
@@ -61,8 +60,8 @@ const CheckoutButton = React.memo(
     tooltipContent?: TooltipProps['content']
     isFooter: boolean
     shouldRequestTermsAndConditions?: boolean
-    handleRequestTermsAndConditionsAgreement: UseNewInstancePageReturn['handleRequestTermsAndConditionsAgreement']
-    handleSubmit: UseNewInstancePageReturn['handleSubmit']
+    handleRequestTermsAndConditionsAgreement: UseNewGpuInstancePageReturn['handleRequestTermsAndConditionsAgreement']
+    handleSubmit: UseNewGpuInstancePageReturn['handleSubmit']
   }) => {
     const checkoutButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -98,15 +97,13 @@ const CheckoutButton = React.memo(
 )
 CheckoutButton.displayName = 'CheckoutButton'
 
-export default function NewInstancePage({ mainRef }: PageProps) {
+export default function NewGpuInstancePage({ mainRef }: PageProps) {
   const {
     address,
     accountBalance,
     blockchainName,
     streamDisabled,
     disabledStreamDisabledMessage,
-    manuallySelectCRNDisabled,
-    manuallySelectCRNDisabledMessage,
     createInstanceDisabled,
     createInstanceDisabledMessage,
     createInstanceButtonTitle,
@@ -115,7 +112,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     errors,
     node,
     nodeSpecs,
-    lastVersion,
     selectedModal,
     setSelectedModal,
     selectedNode,
@@ -132,7 +128,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleRequestTermsAndConditionsAgreement,
     handleAcceptTermsAndConditions,
     handleCheckTermsAndConditions,
-  } = useNewInstancePage()
+  } = useNewGpuInstancePage()
 
   const sectionNumber = useCallback(
     (n: number) => (values.paymentMethod === PaymentMethod.Stream ? 1 : 0) + n,
@@ -154,6 +150,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             onClose: handleCloseModal,
             content: (
               <CRNList
+                enableGpu
                 selected={selectedNode}
                 onSelectedChange={setSelectedNode}
               />
@@ -275,13 +272,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         render: (node) => <NodeScore score={node.score} />,
       },
       {
-        label: 'VERSION',
-        render: (node) => (
-          <NodeVersion
-            version={node?.version || ''}
-            lastVersion={lastVersion}
-          />
-        ),
+        label: 'GPU',
+        render: (node) => node?.selectedGpu?.model,
       },
       {
         label: '',
@@ -295,17 +287,16 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               variant="warning"
               onClick={() => setSelectedModal('node-list')}
             >
-              Change CRN
+              Change GPU
             </Button>
           </div>
         ),
       },
     ] as TableColumn<CRNSpecs>[]
-  }, [lastVersion, setSelectedModal])
+  }, [setSelectedModal])
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
   const manuallySelectButtonRef = useRef<HTMLButtonElement>(null)
-  const manuallySelectButtonRef2 = useRef<HTMLButtonElement>(null)
 
   return (
     <>
@@ -313,7 +304,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 py-0 md:py-8">
           <Container>
-            <NewEntityTab selected="instance" />
+            <NewEntityTab selected="gpu-instance" />
           </Container>
         </section>
         {createInstanceDisabledMessage && (
@@ -325,57 +316,44 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             </Container>
           </section>
         )}
-        {values.paymentMethod === PaymentMethod.Stream && (
-          <section tw="px-0 pt-20 pb-6 md:py-10">
-            <Container>
-              <SectionTitle number={1}>Select your node</SectionTitle>
-              <p>
-                Your instance is set up with your manually selected Compute
-                Resource Node (CRN), operating under the{' '}
-                <Strong>Pay-as-you-go</Strong> payment method on{' '}
-                <Strong>{blockchainName}</Strong>. This setup gives you direct
-                control over your resource allocation and costs, requiring
-                active management of your instance. To adjust your CRN or
-                explore different payment options, you can modify your selection
-                below.
-              </p>
-              <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
-                <NoisyContainer>
-                  <NodesTable
-                    columns={columns}
-                    data={nodeData}
-                    rowProps={() => ({ className: '_active' })}
-                  />
-                  <div tw="mt-6">
-                    {!node && (
-                      <>
-                        <Button
-                          ref={manuallySelectButtonRef}
-                          type="button"
-                          kind="functional"
-                          variant="warning"
-                          size="md"
-                          onClick={handleManuallySelectCRN}
-                          disabled={manuallySelectCRNDisabled}
-                        >
-                          Manually select CRN
-                        </Button>
-                        {manuallySelectCRNDisabledMessage && (
-                          <ResponsiveTooltip
-                            my="bottom-left"
-                            at="center-center"
-                            targetRef={manuallySelectButtonRef}
-                            content={manuallySelectCRNDisabledMessage}
-                          />
-                        )}
-                      </>
-                    )}
-                  </div>
-                </NoisyContainer>
-              </div>
-            </Container>
-          </section>
-        )}
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <Container>
+            <SectionTitle number={1}>Selected GPU</SectionTitle>
+            <p>
+              Your instance is configured with your manually selected GPU,
+              operating under the <Strong>Pay-as-you-go</Strong> payment method
+              on <Strong>{blockchainName}</Strong>. This setup provides direct
+              control over your resource allocation and costs, requiring active
+              management of your instance. To adjust your GPU or explore
+              different payment options, modify your selection below.
+            </p>
+            <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
+              <NoisyContainer>
+                <NodesTable
+                  columns={columns}
+                  data={nodeData}
+                  rowProps={() => ({ className: '_active' })}
+                />
+                <div tw="mt-6">
+                  {!node && (
+                    <>
+                      <Button
+                        ref={manuallySelectButtonRef}
+                        type="button"
+                        kind="functional"
+                        variant="warning"
+                        size="md"
+                        onClick={handleManuallySelectCRN}
+                      >
+                        Manually select GPU
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </NoisyContainer>
+            </div>
+          </Container>
+        </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <Container>
             <SectionTitle number={sectionNumber(1)}>
@@ -404,39 +382,16 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               <SelectInstanceSpecs
                 name="specs"
                 control={control}
-                type={EntityType.Instance}
+                type={EntityType.GpuInstance}
+                gpuModel={node?.selectedGpu?.model}
                 isPersistent
                 paymentMethod={values.paymentMethod}
                 nodeSpecs={nodeSpecs}
               >
-                {values.paymentMethod !== PaymentMethod.Stream ? (
-                  <div tw="mt-6">
-                    <Button
-                      ref={manuallySelectButtonRef2}
-                      type="button"
-                      kind="functional"
-                      variant="warning"
-                      size="md"
-                      disabled={manuallySelectCRNDisabled}
-                      onClick={handleManuallySelectCRN}
-                    >
-                      Manually select CRN
-                    </Button>
-                    {manuallySelectCRNDisabledMessage && (
-                      <ResponsiveTooltip
-                        my="bottom-left"
-                        at="center-center"
-                        targetRef={manuallySelectButtonRef2}
-                        content={manuallySelectCRNDisabledMessage}
-                      />
-                    )}
+                {!node && (
+                  <div tw="mt-6 text-center">
+                    First select your node in the previous step
                   </div>
-                ) : (
-                  !node && (
-                    <div tw="mt-6 text-center">
-                      First select your node in the previous step
-                    </div>
-                  )
                 )}
               </SelectInstanceSpecs>
             </div>
@@ -448,8 +403,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               Choose an image
             </SectionTitle>
             <p>
-              Chose a base image for your VM. It&apos;s the base system that you
-              will be able to customize.
+              Chose a base image for your GPU Instance. It&apos;s the base
+              system that you will be able to customize.
             </p>
             <div tw="px-0 mt-12 mb-6">
               <SelectInstanceImage name="image" control={control} />
@@ -493,8 +448,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               Advanced Configuration Options
             </SectionTitle>
             <p tw="mb-6">
-              Customize your instance with our Advanced Configuration Options.
-              Add volumes and custom domains to meet your specific needs.
+              Customize your GPU Instance with our Advanced Configuration
+              Options. Add volumes and custom domains to meet your specific
+              needs.
             </p>
             <div tw="px-0 my-6">
               <div tw="mb-4">

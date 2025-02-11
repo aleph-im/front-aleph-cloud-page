@@ -33,7 +33,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
+import { CRNSpecs, NodeManager } from '@/domain/node'
 import {
   defaultStreamDuration,
   StreamDurationField,
@@ -51,19 +51,18 @@ import { EVMAccount } from '@aleph-sdk/evm'
 import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
 import {
-  accountConnectionRequiredDisabledMessage,
   unsupportedHoldingDisabledMessage,
-  unsupportedManualCRNSelectionDisabledMessage,
-  unsupportedStreamManualCRNSelectionDisabledMessage,
   unsupportedStreamDisabledMessage,
-} from '@/components/pages/computing/NewInstancePage/disabledMessages'
+  holderTierNotSupportedMessage,
+} from '@/components/pages/computing/NewGpuInstancePage/disabledMessages'
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
-import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
+import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceManager'
+import { GpuInstanceManager } from '@/domain/gpuInstance'
 
-export type NewInstanceFormState = NameAndTagsField & {
+export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
   specs: InstanceSpecsField
   sshKeys: SSHKeyField[]
@@ -79,12 +78,10 @@ export type NewInstanceFormState = NameAndTagsField & {
 
 export type Modal = 'node-list' | 'terms-and-conditions'
 
-export type UseNewInstancePageReturn = {
+export type UseNewGpuInstancePageReturn = {
   address: string
   accountBalance: number
   blockchainName: string
-  manuallySelectCRNDisabled: boolean
-  manuallySelectCRNDisabledMessage?: TooltipProps['content']
   createInstanceDisabled: boolean
   createInstanceDisabledMessage?: TooltipProps['content']
   createInstanceButtonTitle?: string
@@ -92,14 +89,13 @@ export type UseNewInstancePageReturn = {
   disabledStreamDisabledMessage?: TooltipProps['content']
   values: any
   control: Control<any>
-  errors: FieldErrors<NewInstanceFormState>
+  errors: FieldErrors<NewGpuInstanceFormState>
   node?: CRNSpecs
-  lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
   selectedModal?: Modal
   setSelectedModal: (modal?: Modal) => void
   selectedNode?: CRNSpecs
-  setSelectedNode: (hash?: CRNSpecs) => void
+  setSelectedNode: (node?: CRNSpecs) => void
   termsAndConditions?: TermsAndConditions
   shouldRequestTermsAndConditions: boolean
   modalOpen?: (info: ModalCardProps) => void
@@ -114,7 +110,7 @@ export type UseNewInstancePageReturn = {
   handleBack: () => void
 }
 
-export function useNewInstancePage(): UseNewInstancePageReturn {
+export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   const [, dispatch] = useAppState()
 
   const {
@@ -130,7 +126,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const modalClose = modal?.close
 
   const router = useRouter()
-  const { crn: queryCRN } = router.query
+  const { crn: queryCRN, gpu: queryGPU } = router.query
 
   const hasInitialized = useRef(false)
   const nodeRef = useRef<CRNSpecs | undefined>(undefined)
@@ -139,18 +135,31 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   // -------------------------
   // Request CRNs specs
+
   const { specs } = useRequestCRNSpecs()
-  const { lastVersion } = useRequestCRNLastVersion()
 
   // @note: Set node depending on CRN
   const node: CRNSpecs | undefined = useMemo(() => {
     if (!specs) return
-    if (!queryCRN) return nodeRef.current
-    if (typeof queryCRN !== 'string') return nodeRef.current
+    if (!queryCRN || !queryGPU) return nodeRef.current
+    if (typeof queryCRN !== 'string' || typeof queryGPU !== 'string')
+      return nodeRef.current
 
-    nodeRef.current = specs[queryCRN]
+    if (selectedNode) {
+      nodeRef.current = selectedNode
+    } else {
+      const gpuDevice = specs[queryCRN]?.compatible_available_gpus?.find(
+        (gpu) => {
+          return gpu.model === queryGPU
+        },
+      )
+
+      if (gpuDevice)
+        nodeRef.current = { ...specs[queryCRN], selectedGpu: gpuDevice }
+    }
+
     return nodeRef.current
-  }, [specs, queryCRN])
+  }, [queryCRN, queryGPU, specs])
 
   const nodeSpecs = useMemo(() => {
     if (!node) return
@@ -169,53 +178,46 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Tiers
 
-  const { defaultTiers } = useDefaultTiers({ type: EntityType.Instance })
+  const { defaultTiers } = useDefaultTiers({ type: EntityType.GpuInstance })
 
   // -------------------------
   // Checkout flow
 
-  const manager = useInstanceManager()
+  const manager = useGpuInstanceManager()
   const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
-    async (state: NewInstanceFormState) => {
+    async (state: NewGpuInstanceFormState) => {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
+      if (!node || !node.stream_reward) throw Err.InvalidNode
+      if (!nodeSpecs) throw Err.InvalidCRNSpecs
+      if (!state?.streamCost) throw Err.InvalidStreamCost
 
-      let superfluidAccount
-      let payment: PaymentConfiguration = {
-        chain: BlockchainId.ETH,
-        type: PaymentMethod.Hold,
+      const [minSpecs] = defaultTiers
+      const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
+      if (!isValid) throw Err.InvalidCRNSpecs
+
+      if (
+        !blockchain ||
+        !isBlockchainPAYGCompatible(blockchain) ||
+        !isAccountPAYGCompatible(account)
+      ) {
+        handleConnect({ blockchain: BlockchainId.BASE })
+        throw Err.InvalidNetwork
       }
 
-      if (state.paymentMethod === PaymentMethod.Stream) {
-        if (!node || !node.stream_reward) throw Err.InvalidNode
-        if (!nodeSpecs) throw Err.InvalidCRNSpecs
-        if (!state?.streamCost) throw Err.InvalidStreamCost
+      const superfluidAccount = await createFromEVMAccount(
+        account as EVMAccount,
+      )
 
-        const [minSpecs] = defaultTiers
-        const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
-        if (!isValid) throw Err.InvalidCRNSpecs
-
-        if (
-          !blockchain ||
-          !isBlockchainPAYGCompatible(blockchain) ||
-          !isAccountPAYGCompatible(account)
-        ) {
-          handleConnect({ blockchain: BlockchainId.BASE })
-          throw Err.InvalidNetwork
-        }
-
-        superfluidAccount = await createFromEVMAccount(account as EVMAccount)
-
-        payment = {
-          chain: blockchain,
-          type: PaymentMethod.Stream,
-          sender: account.address,
-          receiver: node.stream_reward,
-          streamCost: state.streamCost,
-          streamDuration: state.streamDuration,
-        }
+      const payment = {
+        chain: blockchain,
+        type: PaymentMethod.Stream,
+        sender: account.address,
+        receiver: node.stream_reward,
+        streamCost: state.streamCost,
+        streamDuration: state.streamDuration,
       }
 
       const instance = {
@@ -270,16 +272,19 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Setup form
 
-  const defaultValues: Partial<NewInstanceFormState> = {
-    ...defaultNameAndTags,
-    image: defaultInstanceImage,
-    specs: defaultTiers[0],
-    systemVolumeSize: defaultTiers[0]?.storage,
-    paymentMethod: PaymentMethod.Hold,
-    streamDuration: defaultStreamDuration,
-    streamCost: Number.POSITIVE_INFINITY,
-    termsAndConditions: undefined,
-  }
+  const defaultValues: Partial<NewGpuInstanceFormState> = useMemo(
+    () => ({
+      ...defaultNameAndTags,
+      image: defaultInstanceImage,
+      specs: defaultTiers[0],
+      systemVolumeSize: defaultTiers[0]?.storage,
+      paymentMethod: PaymentMethod.Stream,
+      streamDuration: defaultStreamDuration,
+      streamCost: Number.POSITIVE_INFINITY,
+      termsAndConditions: undefined,
+    }),
+    [defaultTiers],
+  )
 
   const {
     control,
@@ -289,13 +294,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   } = useForm({
     defaultValues,
     onSubmit,
-    resolver: zodResolver(
-      !node ? InstanceManager.addSchema : InstanceManager.addStreamSchema,
-    ),
-    readyDeps: [],
+    resolver: zodResolver(GpuInstanceManager.addStreamSchema),
+    readyDeps: [defaultValues],
   })
 
-  const formValues = useWatch({ control }) as NewInstanceFormState
+  const formValues = useWatch({ control }) as NewGpuInstanceFormState
 
   // -------------------------
 
@@ -325,45 +328,12 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return blockchain ? blockchains[blockchain]?.name : 'Current network'
   }, [blockchain])
 
-  const disabledStreamDisabledMessage: UseNewInstancePageReturn['disabledStreamDisabledMessage'] =
-    useMemo(() => {
-      if (!account)
-        return accountConnectionRequiredDisabledMessage(
-          'enable switching payment methods',
-        )
+  const disabledStreamDisabledMessage: UseNewGpuInstancePageReturn['disabledStreamDisabledMessage'] =
+    holderTierNotSupportedMessage()
 
-      if (
-        !isAccountPAYGCompatible(account) &&
-        formValues.paymentMethod === PaymentMethod.Hold
-      )
-        return unsupportedStreamDisabledMessage(blockchainName)
-    }, [account, blockchainName, formValues.paymentMethod])
-
-  const streamDisabled = useMemo(() => {
-    return !!disabledStreamDisabledMessage
-  }, [disabledStreamDisabledMessage])
+  const streamDisabled = true
 
   const address = useMemo(() => account?.address || '', [account])
-
-  const manuallySelectCRNDisabledMessage: UseNewInstancePageReturn['manuallySelectCRNDisabledMessage'] =
-    useMemo(() => {
-      if (!account)
-        return accountConnectionRequiredDisabledMessage(
-          'manually selecting CRNs',
-        )
-
-      if (!isAccountPAYGCompatible(account))
-        return unsupportedStreamManualCRNSelectionDisabledMessage(
-          blockchainName,
-        )
-
-      if (formValues.paymentMethod === PaymentMethod.Hold)
-        return unsupportedManualCRNSelectionDisabledMessage()
-    }, [account, blockchainName, formValues.paymentMethod])
-
-  const manuallySelectCRNDisabled = useMemo(() => {
-    return !!manuallySelectCRNDisabledMessage
-  }, [manuallySelectCRNDisabledMessage])
 
   // Checks if user can afford with current balance
   const hasEnoughBalance = useMemo(() => {
@@ -373,7 +343,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
   }, [account, accountBalance, cost?.totalCost])
 
-  const createInstanceDisabledMessage: UseNewInstancePageReturn['createInstanceDisabledMessage'] =
+  const createInstanceDisabledMessage: UseNewGpuInstancePageReturn['createInstanceDisabledMessage'] =
     useMemo(() => {
       // Checks configuration for PAYG tier
       if (formValues.paymentMethod === PaymentMethod.Stream) {
@@ -388,7 +358,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       }
     }, [blockchain, blockchainName, formValues.paymentMethod])
 
-  const createInstanceButtonTitle: UseNewInstancePageReturn['createInstanceButtonTitle'] =
+  const createInstanceButtonTitle: UseNewGpuInstancePageReturn['createInstanceButtonTitle'] =
     useMemo(() => {
       if (!account) return 'Connect'
       if (!hasEnoughBalance) return 'Insufficient ALEPH'
@@ -410,13 +380,21 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
     if (!selectedNode) return
 
-    const { hash: selectedNodeHash } = selectedNode
-    const { crn: queryCRN, ...rest } = router.query
-
-    if (queryCRN === selectedNodeHash) return
+    const { crn: queryCRN, gpu: queryGPU, ...rest } = router.query
+    if (
+      queryCRN === selectedNode.hash &&
+      queryGPU === selectedNode.selectedGpu?.model
+    )
+      return
 
     Router.replace({
-      query: selectedNode ? { ...rest, crn: selectedNodeHash } : rest,
+      query: selectedNode
+        ? {
+            ...rest,
+            crn: selectedNode.hash,
+            gpu: selectedNode.selectedGpu?.model,
+          }
+        : rest,
     })
   }, [router.query, selectedNode])
 
@@ -453,31 +431,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Effects
 
-  // @note: First time the user loads the page, set payment method to Stream if CRN is present
-  useEffect(() => {
-    if (hasInitialized.current) return
-    if (!router.isReady) return
-
-    hasInitialized.current = true
-
-    if (queryCRN) setValue('paymentMethod', PaymentMethod.Stream)
-  }, [queryCRN, router.isReady, setValue])
-
-  // @note: Updates url depending on payment method
-  useEffect(() => {
-    if (!node) return
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { crn, ...rest } = Router.query
-
-    Router.replace({
-      query:
-        formValues.paymentMethod === PaymentMethod.Hold
-          ? { ...rest }
-          : { ...rest, crn: node.hash },
-    })
-  }, [node, formValues.paymentMethod])
-
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
     if (!storage) return
@@ -506,13 +459,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     createInstanceDisabled,
     createInstanceDisabledMessage,
     createInstanceButtonTitle,
-    manuallySelectCRNDisabled,
-    manuallySelectCRNDisabledMessage,
     values: formValues,
     control,
     errors,
     node,
-    lastVersion,
     nodeSpecs,
     streamDisabled,
     disabledStreamDisabledMessage,

@@ -12,7 +12,6 @@ import {
   defaultInstanceChannel,
   EntityType,
   PaymentMethod,
-  EXTRA_WEI,
 } from '@/helpers/constants'
 import { getDate, getExplorerURL } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
@@ -39,7 +38,7 @@ import {
 } from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { getHours } from '@/hooks/form/useSelectStreamDuration'
-import { CRN, NodeManager } from './node'
+import { CRN, CRNSpecs, NodeManager } from './node'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import {
   AlephHttpClient,
@@ -67,7 +66,7 @@ export type AddInstance = Omit<
     domains?: Omit<DomainField, 'ref'>[]
     payment?: PaymentConfiguration
     requirements?: HostRequirements
-    node?: CRN
+    node?: CRNSpecs
   }
 
 // @todo: Refactor
@@ -224,11 +223,6 @@ export class InstanceManager
           ),
         },
       })
-
-      await account.decreaseALEPHFlow(
-        receiver,
-        instanceCosts.totalCost + EXTRA_WEI,
-      )
     }
 
     try {
@@ -275,7 +269,7 @@ export class InstanceManager
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
 
-    const streamCostByHour = streamCost / getHours(streamDuration) + EXTRA_WEI
+    const streamCostByHour = streamCost / getHours(streamDuration)
     const alephxBalance = await account.getALEPHBalance()
     const alephxFlow = await account.getALEPHFlow(receiver)
     const totalFlow = alephxFlow.add(streamCostByHour)
@@ -358,9 +352,15 @@ export class InstanceManager
     return messages
       .filter(({ content }) => {
         if (content === undefined) return false
+        console.log('content', content)
+        console.log('content req', content.requirements?.gpu.length)
 
         // Filter out confidential VMs
-        return !content.environment?.trusted_execution
+        if (content.environment?.trusted_execution) return false
+        // Filter out GPU instances
+        if (content.requirements?.gpu?.length > 0) return false
+
+        return true
       })
       .map((message) => {
         /* const size = message.content.volumes.reduce(

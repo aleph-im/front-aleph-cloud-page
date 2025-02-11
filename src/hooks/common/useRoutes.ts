@@ -58,9 +58,8 @@ export function useRoutes(): UseRoutesReturn {
                   {
                     name: 'GPU',
                     icon: 'gpu',
-                    label: '(SOON)',
-                    disabled: true,
-                    href: '#',
+                    label: '(BETA)',
+                    href: '/computing/gpu-instance',
                   },
                   {
                     name: 'Confidentials',

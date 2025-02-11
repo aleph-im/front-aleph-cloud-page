@@ -1,90 +1,173 @@
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
-import {
-  UseRequestCRNsReturn,
-  useRequestCRNs,
-} from '@/hooks/common/useRequestEntity/useRequestCRNs'
+import { UseRequestCRNsReturn } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import {
   UseRequestCRNSpecsReturn,
   useRequestCRNSpecs,
 } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { useRequestCRNIps } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
-import { CRN, StreamNotSupportedIssue } from '@/domain/node'
-import { useDebounceState, usePaginatedList } from '@aleph-front/core'
+import { CRNSpecs, StreamNotSupportedIssue } from '@/domain/node'
+import {
+  DropdownProps,
+  useDebounceState,
+  usePaginatedList,
+} from '@aleph-front/core'
 import {
   UseSortedListReturn,
   useSortedList,
 } from '@/hooks/common/useSortedList'
 import { useDefaultTiers } from './pricing/tiers/useDefaultTiers'
+import { useRequestCRNLastVersion } from './useRequestEntity/useRequestCRNLastVersion'
+import { EntityType } from '@/helpers/constants'
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
+export type CRNListFilterOptions = {
+  gpu: string[]
+  cpu: string[]
+  ram: string[]
+  hdd: string[]
+}
+
 export type UseCRNListProps = {
-  selected?: string
-  onSelectedChange: (selected: string) => void
+  selected?: CRNSpecs
+  onSelectedChange: (selected: CRNSpecs) => void
+  enableGpu?: boolean
 }
 
 export type UseCRNListReturn = UseCRNListProps &
   UseRequestCRNsReturn &
   UseRequestCRNSpecsReturn & {
     nodesIssues?: StreamSupportedIssues
-    filteredNodes?: CRN[]
-    filter: string
-    validPAYGNodesOnly: boolean
+    filteredNodes?: CRNSpecs[]
+    filterOptions: CRNListFilterOptions
     loadItemsDisabled: boolean
     handleLoadItems: () => Promise<void>
     handleSortItems: UseSortedListReturn<any>['handleSortItems']
-    handleFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
-    handleValidPAYGNodesOnlyChange: (e: ChangeEvent<HTMLInputElement>) => void
+    nameFilter: string
+    handleNameFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
+    gpuFilter?: string
+    handleGpuFilterChange: DropdownProps['onChange']
+    cpuFilter?: string
+    handleCpuFilterChange: DropdownProps['onChange']
+    ramFilter?: string
+    handleRamFilterChange: DropdownProps['onChange']
+    hddFilter?: string
+    handleHddFilterChange: DropdownProps['onChange']
   }
 
 export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
-  const { nodes, lastVersion } = useRequestCRNs({})
+  const { enableGpu } = props
+
   const nodeManager = useNodeManager()
+  const { specs: crnSpecs, loading: loadingSpecs } = useRequestCRNSpecs()
+  const { lastVersion } = useRequestCRNLastVersion()
 
   // -----------------------------
+  // Name Filter
 
-  const [filter, setFilter] = useState('')
+  const [nameFilter, setNameFilter] = useState('')
 
-  const debouncedFilter = useDebounceState(filter, 200)
+  const debouncedFilter = useDebounceState(nameFilter, 200)
 
-  const handleFilterChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const filter = e.target.value
-    setFilter(filter)
+  const handleNameFilterChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const nameFilter = e.target.value
+      setNameFilter(nameFilter)
+    },
+    [],
+  )
+
+  // -----------------------------
+  // GPU Filter
+
+  const [gpuFilter, setGpuFilter] = useState<string>()
+
+  const handleGpuFilterChange = useCallback((value: string | string[]) => {
+    if (!value) return setGpuFilter(undefined)
+    if (typeof value !== 'string') return
+
+    const gpuFilter = value
+    setGpuFilter(gpuFilter)
+  }, [])
+
+  // -----------------------------
+  // CPU Filter
+
+  const [cpuFilter, setCpuFilter] = useState<string>()
+
+  const handleCpuFilterChange = useCallback((value: string | string[]) => {
+    if (!value) return setCpuFilter(undefined)
+    if (typeof value !== 'string') return
+
+    const cpuFilter = value
+    setCpuFilter(cpuFilter)
+  }, [])
+
+  // -----------------------------
+  // RAM Filter
+
+  const [ramFilter, setRamFilter] = useState<string>()
+
+  const handleRamFilterChange = useCallback((value: string | string[]) => {
+    if (!value) return setRamFilter(undefined)
+    if (typeof value !== 'string') return
+
+    const ramFilter = value
+    setRamFilter(ramFilter)
+  }, [])
+
+  // -----------------------------
+  // HDD Filter
+
+  const [hddFilter, setHddFilter] = useState<string>()
+
+  const handleHddFilterChange = useCallback((value: string | string[]) => {
+    if (!value) return setHddFilter(undefined)
+    if (typeof value !== 'string') return
+
+    const hddFilter = value
+    setHddFilter(hddFilter)
   }, [])
 
   // -----------------------------
 
-  const filterNodes = useCallback(
-    (query: string, nodes?: CRN[]): CRN[] | undefined => {
-      if (!nodes) return
-      if (!query) return nodes
+  const nodeList = useMemo(() => {
+    const crnSpecsList = Object.values(crnSpecs)
 
-      return nodes.filter((node) =>
-        node.name?.toLowerCase().includes(query.toLowerCase()),
+    if (!enableGpu) return crnSpecsList
+
+    const gpuList = crnSpecsList
+      .filter((node) => node.gpu_support)
+      .flatMap((node) =>
+        node.compatible_available_gpus?.flatMap((gpu) => ({
+          ...node,
+          selectedGpu: gpu,
+        })),
+      ) as CRNSpecs[]
+
+    return gpuList
+  }, [enableGpu, crnSpecs])
+
+  const filterNodes = useCallback(
+    (query: string, crnSpecs?: CRNSpecs[]): CRNSpecs[] | undefined => {
+      if (!crnSpecs) return
+      if (!query) return crnSpecs
+
+      return crnSpecs.filter((crnSpec) =>
+        crnSpec.name?.toLowerCase().includes(query.toLowerCase()),
       )
     },
     [],
   )
 
   const baseFilteredNodes = useMemo(
-    () => filterNodes(debouncedFilter, nodes),
-    [filterNodes, debouncedFilter, nodes],
+    () => filterNodes(debouncedFilter, nodeList),
+    [filterNodes, debouncedFilter, nodeList],
   )
 
   // -----------------------------
 
-  const { specs, loading: loadingSpecs } = useRequestCRNSpecs({
-    nodes: baseFilteredNodes,
-  })
-
-  const { ips, loading: loadingIps } = useRequestCRNIps({
-    nodes: baseFilteredNodes,
-  })
-
-  // -----------------------------
-
-  const { defaultTiers } = useDefaultTiers({ type: 'instance' })
+  const { defaultTiers } = useDefaultTiers({ type: EntityType.Instance })
 
   const minSpecs = useMemo(() => {
     const [min] = defaultTiers
@@ -102,10 +185,9 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
         return ac
       }
 
-      if (loadingSpecs || loadingIps) return ac
+      if (loadingSpecs) return ac
 
-      const nodeSpecs = specs[node.hash]?.data
-      const nodeIps = ips[node.hash]?.data
+      const nodeSpecs = crnSpecs[node.hash]
 
       if (!loadingSpecs) {
         const validSpecs =
@@ -117,73 +199,95 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
         }
       }
 
-      if (!loadingIps) {
-        const validIp = nodeIps && !!nodeIps.vm
-
-        if (!validIp) {
-          ac[node.hash] = StreamNotSupportedIssue.IPV6
-          return ac
-        }
+      if (!nodeSpecs.ipv6_check?.vm) {
+        ac[node.hash] = StreamNotSupportedIssue.IPV6
+        return ac
       }
 
-      if (nodeSpecs && nodeIps) {
+      if (nodeSpecs && nodeSpecs.ipv6_check) {
         ac[node.hash] = StreamNotSupportedIssue.Valid
       }
 
       return ac
     }, {} as StreamSupportedIssues)
-  }, [
-    baseFilteredNodes,
-    nodeManager,
-    loadingSpecs,
-    loadingIps,
-    specs,
-    ips,
-    minSpecs,
-  ])
+  }, [baseFilteredNodes, nodeManager, loadingSpecs, crnSpecs, minSpecs])
 
   // -----------------------------
-
-  const [validPAYGNodesOnly, setValidPAYGNodesOnly] = useState<boolean>(true)
-
-  const handleValidPAYGNodesOnlyChange = useCallback(
-    async (e: ChangeEvent<HTMLInputElement>) => {
-      const show = e.target.checked
-      setValidPAYGNodesOnly(show)
-    },
-    [],
-  )
 
   const validPAYGNodes = useMemo(() => {
     if (!baseFilteredNodes) return
     if (!nodesIssues) return baseFilteredNodes
 
-    return baseFilteredNodes.filter((node) => !nodesIssues[node.hash])
+    return baseFilteredNodes
   }, [baseFilteredNodes, nodesIssues])
 
   const filteredNodes = useMemo(() => {
-    if (!validPAYGNodesOnly) return baseFilteredNodes
-    return validPAYGNodes
-  }, [validPAYGNodesOnly, baseFilteredNodes, validPAYGNodes])
+    return validPAYGNodes?.filter((node) => {
+      if (gpuFilter) {
+        if (node.selectedGpu?.model !== gpuFilter) return false
+      }
+
+      if (cpuFilter) {
+        if (node.cpu?.count.toString() !== cpuFilter) return false
+      }
+
+      if (ramFilter) {
+        if (node.mem?.available_kB.toString() !== ramFilter) return false
+      }
+
+      if (hddFilter) {
+        if (node.disk?.available_kB.toString() !== hddFilter) return false
+      }
+
+      return true
+    })
+  }, [gpuFilter, cpuFilter, hddFilter, ramFilter, validPAYGNodes])
 
   const sortedNodes = useMemo(() => {
     if (!filteredNodes) return
 
     return filteredNodes.sort((a, b) => {
-      const issueA = nodesIssues?.[a.hash]
-      const issueB = nodesIssues?.[b.hash]
-
-      if (issueA && issueB) return 0
-      if (issueA) return 1
-      return -1
+      if (a.score > b.score) return -1
+      if (a.score < b.score) return 1
+      return 0
     })
-  }, [filteredNodes, nodesIssues])
+  }, [filteredNodes])
 
   // -----------------------------
 
   const { list: sortedFilteredNodes, handleSortItems } = useSortedList({
     list: sortedNodes,
   })
+
+  const filterOptions: CRNListFilterOptions = useMemo(() => {
+    const options: CRNListFilterOptions = {
+      gpu: [],
+      cpu: [],
+      ram: [],
+      hdd: [],
+    }
+
+    if (!sortedFilteredNodes) return options
+
+    sortedFilteredNodes.forEach((node) => {
+      const gpu = node.selectedGpu?.model
+      const cpu = node.cpu?.count.toString()
+      const ram = node.mem?.available_kB.toString()
+      const hdd = node.disk?.available_kB.toString()
+
+      if (gpu && !options.gpu.includes(gpu)) options.gpu.push(gpu)
+      if (cpu && !options.cpu.includes(cpu)) options.cpu.push(cpu)
+      if (ram && !options.ram.includes(ram)) options.ram.push(ram)
+      if (hdd && !options.hdd.includes(hdd)) options.hdd.push(hdd)
+    })
+
+    return {
+      gpu: options.gpu.sort(),
+      cpu: options.cpu.sort((a, b) => +a - +b),
+      ram: options.ram.sort((a, b) => +a - +b),
+      hdd: options.hdd.sort((a, b) => +a - +b),
+    }
+  }, [sortedFilteredNodes])
 
   const {
     list: paginatedSortedFilteredNodes,
@@ -195,22 +299,26 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     resetDeps: [baseFilteredNodes],
   })
 
-  const loading = loadingSpecs || loadingIps
-
   return {
     ...props,
-    nodes,
     lastVersion,
-    specs,
-    loading,
+    specs: crnSpecs,
+    loading: loadingSpecs,
     nodesIssues,
     filteredNodes: paginatedSortedFilteredNodes,
-    filter,
-    validPAYGNodesOnly,
+    filterOptions,
     loadItemsDisabled,
     handleLoadItems,
     handleSortItems,
-    handleFilterChange,
-    handleValidPAYGNodesOnlyChange,
+    nameFilter,
+    handleNameFilterChange,
+    gpuFilter,
+    handleGpuFilterChange,
+    cpuFilter,
+    handleCpuFilterChange,
+    ramFilter,
+    handleRamFilterChange,
+    hddFilter,
+    handleHddFilterChange,
   }
 }

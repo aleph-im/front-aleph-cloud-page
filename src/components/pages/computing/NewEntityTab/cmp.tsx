@@ -21,6 +21,10 @@ export default function NewEntityTab(props: NewEntityTabProps) {
         {
           id: 'instance',
           name: 'Instance',
+        },
+        {
+          id: 'gpu-instance',
+          name: 'GPU Instance',
           label: { label: 'BETA', position: 'top' },
         },
         {
