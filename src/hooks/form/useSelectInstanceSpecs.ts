@@ -19,7 +19,7 @@ export function updateSpecsStorage(
     ...specs,
     // @todo: Reactivate it for Stream once that it is supported on backend
     // disabled: paymentMethod !== PaymentMethod.Stream && isPersistent && specs.cpu >= 6,
-    disabled: isPersistent && specs.cpu >= 6,
+    disabled: false,
     storage: convertByteUnits(specs.cpu * 2 * (isPersistent ? 10 : 1), {
       from: 'GiB',
       to: 'MiB',
