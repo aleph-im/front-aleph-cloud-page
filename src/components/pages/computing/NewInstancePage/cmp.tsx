@@ -12,7 +12,7 @@ import {
   TooltipProps,
   Checkbox,
 } from '@aleph-front/core'
-import { CRN } from '@/domain/node'
+import { CRNSpecs } from '@/domain/node'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
@@ -278,7 +278,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         label: 'VERSION',
         render: (node) => (
           <NodeVersion
-            version={node.metricsData?.version || ''}
+            version={node?.version || ''}
             lastVersion={lastVersion}
           />
         ),
@@ -300,7 +300,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           </div>
         ),
       },
-    ] as TableColumn<CRN>[]
+    ] as TableColumn<CRNSpecs>[]
   }, [lastVersion, setSelectedModal])
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
@@ -448,8 +448,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               Choose an image
             </SectionTitle>
             <p>
-              Chose a base image for your VM. It’s the base system that you will
-              be able to customize.
+              Chose a base image for your VM. It&apos;s the base system that you
+              will be able to customize.
             </p>
             <div tw="px-0 mt-12 mb-6">
               <SelectInstanceImage name="image" control={control} />
@@ -462,10 +462,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               Configure SSH Key
             </SectionTitle>
             <p>
-              Access your cloud instances securely. Give existing key’s below
-              access to this instance or add new keys. Remember, storing private
-              keys safely is crucial for security. If you need help, our support
-              team is always ready to assist.
+              Access your cloud instances securely. Give existing key&apos;s
+              below access to this instance or add new keys. Remember, storing
+              private keys safely is crucial for security. If you need help, our
+              support team is always ready to assist.
             </p>
             <div tw="px-0 my-6">
               <AddSSHKeys name="sshKeys" control={control} />

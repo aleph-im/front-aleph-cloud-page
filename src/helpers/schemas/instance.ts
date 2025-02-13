@@ -15,9 +15,29 @@ import { NodeManager } from '@/domain/node'
 
 // CRN STREAM
 
+export const GpuDeviceSchema = z.object({
+  vendor: z.string(),
+  model: z.string(),
+  device_name: z.string(),
+  device_class: z.string(),
+  device_id: z.string(),
+  compatible: z.boolean(),
+})
+
 export const nodeSpecsSchema = z.object({
   hash: z.string(),
   name: z.string().optional(),
+  owner: z.string(),
+  reward: z.string(),
+  locked: z.boolean(),
+  time: z.number(),
+  score: z.number(),
+  score_updated: z.boolean(),
+  decentralization: z.number(),
+  performance: z.number(),
+  status: z.enum(['active', 'waiting', 'linked']),
+  parent: z.string(),
+  type: z.string(),
   cpu: z.object({
     count: z.number(),
     load_average: z.object({
@@ -50,6 +70,26 @@ export const nodeSpecsSchema = z.object({
     }),
   }),
   active: z.boolean(),
+  gpu: z
+    .object({
+      devices: z.array(GpuDeviceSchema),
+      available_devices: z.array(GpuDeviceSchema),
+    })
+    .nullable()
+    .optional(),
+  compatible_gpus: z.array(GpuDeviceSchema).nullable().optional(),
+  compatible_available_gpus: z.array(GpuDeviceSchema).nullable().optional(),
+  gpu_support: z.boolean().nullable().optional(),
+  confidential_support: z.boolean().nullable().optional(),
+  qemu_support: z.boolean().nullable().optional(),
+  ipv6_check: z
+    .object({
+      host: z.boolean(),
+      vm: z.boolean(),
+    })
+    .nullable()
+    .optional(),
+  version: z.string().nullable().optional(),
 })
 
 // SSH

@@ -12,7 +12,7 @@ import {
   TooltipProps,
   Checkbox,
 } from '@aleph-front/core'
-import { CRN } from '@/domain/node'
+import { CRNSpecs } from '@/domain/node'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
@@ -276,7 +276,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         label: 'VERSION',
         render: (node) => (
           <NodeVersion
-            version={node.metricsData?.version || ''}
+            version={node?.version || ''}
             lastVersion={lastVersion}
           />
         ),
@@ -298,7 +298,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
           </div>
         ),
       },
-    ] as TableColumn<CRN>[]
+    ] as TableColumn<CRNSpecs>[]
   }, [lastVersion, setSelectedModal])
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])

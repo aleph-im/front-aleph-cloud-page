@@ -1,6 +1,6 @@
-import { CRN, StreamNotSupportedIssue } from '@/domain/node'
+import { CRNSpecs, StreamNotSupportedIssue } from '@/domain/node'
 
-export type CRNItem = CRN & {
+export type CRNItem = CRNSpecs & {
   isActive: boolean
   isLoading: boolean
   disabled?: boolean

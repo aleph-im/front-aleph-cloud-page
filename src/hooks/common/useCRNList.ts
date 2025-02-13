@@ -1,21 +1,18 @@
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
-import {
-  UseRequestCRNsReturn,
-  useRequestCRNs,
-} from '@/hooks/common/useRequestEntity/useRequestCRNs'
+import { UseRequestCRNsReturn } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import {
   UseRequestCRNSpecsReturn,
   useRequestCRNSpecs,
 } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { useRequestCRNIps } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
-import { CRN, StreamNotSupportedIssue } from '@/domain/node'
+import { CRNSpecs, StreamNotSupportedIssue } from '@/domain/node'
 import { useDebounceState, usePaginatedList } from '@aleph-front/core'
 import {
   UseSortedListReturn,
   useSortedList,
 } from '@/hooks/common/useSortedList'
 import { useDefaultTiers } from './pricing/tiers/useDefaultTiers'
+import { useRequestCRNLastVersion } from './useRequestEntity/useRequestCRNLastVersion'
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
@@ -28,7 +25,7 @@ export type UseCRNListReturn = UseCRNListProps &
   UseRequestCRNsReturn &
   UseRequestCRNSpecsReturn & {
     nodesIssues?: StreamSupportedIssues
-    filteredNodes?: CRN[]
+    filteredNodes?: CRNSpecs[]
     filter: string
     validPAYGNodesOnly: boolean
     loadItemsDisabled: boolean
@@ -39,8 +36,9 @@ export type UseCRNListReturn = UseCRNListProps &
   }
 
 export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
-  const { nodes, lastVersion } = useRequestCRNs({})
   const nodeManager = useNodeManager()
+  const { specs: crnSpecs, loading: loadingSpecs } = useRequestCRNSpecs()
+  const { lastVersion } = useRequestCRNLastVersion()
 
   // -----------------------------
 
@@ -56,31 +54,21 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   // -----------------------------
 
   const filterNodes = useCallback(
-    (query: string, nodes?: CRN[]): CRN[] | undefined => {
-      if (!nodes) return
-      if (!query) return nodes
+    (query: string, crnSpecs?: CRNSpecs[]): CRNSpecs[] | undefined => {
+      if (!crnSpecs) return
+      if (!query) return crnSpecs
 
-      return nodes.filter((node) =>
-        node.name?.toLowerCase().includes(query.toLowerCase()),
+      return crnSpecs.filter((crnSpec) =>
+        crnSpec.name?.toLowerCase().includes(query.toLowerCase()),
       )
     },
     [],
   )
 
   const baseFilteredNodes = useMemo(
-    () => filterNodes(debouncedFilter, nodes),
-    [filterNodes, debouncedFilter, nodes],
+    () => filterNodes(debouncedFilter, Object.values(crnSpecs)),
+    [filterNodes, debouncedFilter, crnSpecs],
   )
-
-  // -----------------------------
-
-  const { specs, loading: loadingSpecs } = useRequestCRNSpecs({
-    nodes: baseFilteredNodes,
-  })
-
-  const { ips, loading: loadingIps } = useRequestCRNIps({
-    nodes: baseFilteredNodes,
-  })
 
   // -----------------------------
 
@@ -102,10 +90,9 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
         return ac
       }
 
-      if (loadingSpecs || loadingIps) return ac
+      if (loadingSpecs) return ac
 
-      const nodeSpecs = specs[node.hash]?.data
-      const nodeIps = ips[node.hash]?.data
+      const nodeSpecs = crnSpecs[node.hash]
 
       if (!loadingSpecs) {
         const validSpecs =
@@ -117,30 +104,18 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
         }
       }
 
-      if (!loadingIps) {
-        const validIp = nodeIps && !!nodeIps.vm
-
-        if (!validIp) {
-          ac[node.hash] = StreamNotSupportedIssue.IPV6
-          return ac
-        }
+      if (!nodeSpecs.ipv6_check?.vm) {
+        ac[node.hash] = StreamNotSupportedIssue.IPV6
+        return ac
       }
 
-      if (nodeSpecs && nodeIps) {
+      if (nodeSpecs && nodeSpecs.ipv6_check) {
         ac[node.hash] = StreamNotSupportedIssue.Valid
       }
 
       return ac
     }, {} as StreamSupportedIssues)
-  }, [
-    baseFilteredNodes,
-    nodeManager,
-    loadingSpecs,
-    loadingIps,
-    specs,
-    ips,
-    minSpecs,
-  ])
+  }, [baseFilteredNodes, nodeManager, loadingSpecs, crnSpecs, minSpecs])
 
   // -----------------------------
 
@@ -195,14 +170,11 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     resetDeps: [baseFilteredNodes],
   })
 
-  const loading = loadingSpecs || loadingIps
-
   return {
     ...props,
-    nodes,
     lastVersion,
-    specs,
-    loading,
+    specs: crnSpecs,
+    loading: loadingSpecs,
     nodesIssues,
     filteredNodes: paginatedSortedFilteredNodes,
     filter,

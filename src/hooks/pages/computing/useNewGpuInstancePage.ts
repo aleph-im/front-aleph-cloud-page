@@ -33,9 +33,8 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
-import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { CRN, CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
+import { CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
 import {
   defaultStreamDuration,
   StreamDurationField,
@@ -53,10 +52,7 @@ import { EVMAccount } from '@aleph-sdk/evm'
 import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
 import {
-  accountConnectionRequiredDisabledMessage,
   unsupportedHoldingDisabledMessage,
-  unsupportedManualCRNSelectionDisabledMessage,
-  unsupportedStreamManualCRNSelectionDisabledMessage,
   unsupportedStreamDisabledMessage,
   holderTierNotSupportedMessage,
 } from '@/components/pages/computing/NewGpuInstancePage/disabledMessages'
@@ -64,6 +60,7 @@ import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
+import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -94,7 +91,7 @@ export type UseNewGpuInstancePageReturn = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewGpuInstanceFormState>
-  node?: CRN
+  node?: CRNSpecs
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
   selectedModal?: Modal
@@ -134,32 +131,31 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   const { crn: queryCRN } = router.query
 
   const hasInitialized = useRef(false)
-  const nodeRef = useRef<CRN | undefined>(undefined)
+  const nodeRef = useRef<CRNSpecs | undefined>(undefined)
   const [selectedNode, setSelectedNode] = useState<string>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
 
   // -------------------------
   // Request CRNs specs
 
-  const { nodes, lastVersion } = useRequestCRNs({})
+  const { specs } = useRequestCRNSpecs()
+  const { lastVersion } = useRequestCRNLastVersion()
 
   // @note: Set node depending on CRN
-  const node: CRN | undefined = useMemo(() => {
-    if (!nodes) return
+  const node: CRNSpecs | undefined = useMemo(() => {
+    if (!specs) return
     if (!queryCRN) return nodeRef.current
+    if (typeof queryCRN !== 'string') return nodeRef.current
 
-    nodeRef.current = nodes.find((node) => node.hash === queryCRN)
+    nodeRef.current = specs[queryCRN]
     return nodeRef.current
-  }, [queryCRN, nodes])
-
-  const userNodes = useMemo(() => (node ? [node] : undefined), [node])
-  const { specs } = useRequestCRNSpecs({ nodes: userNodes })
+  }, [queryCRN, specs])
 
   const nodeSpecs = useMemo(() => {
     if (!node) return
     if (!specs) return
 
-    return specs[node.hash]?.data
+    return specs[node.hash]
   }, [specs, node])
 
   // -------------------------

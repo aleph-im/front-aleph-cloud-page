@@ -33,9 +33,8 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
-import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { CRN, CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
+import { CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
 import {
   defaultStreamDuration,
   StreamDurationField,
@@ -63,6 +62,7 @@ import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
+import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -95,7 +95,7 @@ export type UseNewInstancePageReturn = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
-  node?: CRN
+  node?: CRNSpecs
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
   selectedModal?: Modal
@@ -135,32 +135,30 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const { crn: queryCRN } = router.query
 
   const hasInitialized = useRef(false)
-  const nodeRef = useRef<CRN | undefined>(undefined)
+  const nodeRef = useRef<CRNSpecs | undefined>(undefined)
   const [selectedNode, setSelectedNode] = useState<string>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
 
   // -------------------------
   // Request CRNs specs
-
-  const { nodes, lastVersion } = useRequestCRNs({})
+  const { specs } = useRequestCRNSpecs()
+  const { lastVersion } = useRequestCRNLastVersion()
 
   // @note: Set node depending on CRN
-  const node: CRN | undefined = useMemo(() => {
-    if (!nodes) return
+  const node: CRNSpecs | undefined = useMemo(() => {
+    if (!specs) return
     if (!queryCRN) return nodeRef.current
+    if (typeof queryCRN !== 'string') return nodeRef.current
 
-    nodeRef.current = nodes.find((node) => node.hash === queryCRN)
+    nodeRef.current = specs[queryCRN]
     return nodeRef.current
-  }, [queryCRN, nodes])
-
-  const userNodes = useMemo(() => (node ? [node] : undefined), [node])
-  const { specs } = useRequestCRNSpecs({ nodes: userNodes })
+  }, [specs, queryCRN])
 
   const nodeSpecs = useMemo(() => {
     if (!node) return
     if (!specs) return
 
-    return specs[node.hash]?.data
+    return specs[node.hash]
   }, [specs, node])
 
   // -------------------------

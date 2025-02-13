@@ -70,11 +70,11 @@ export default function CRNList(props: CRNListProps) {
         label: 'CPU',
         width: '10%',
         sortable: true,
-        sortBy: (node) => specs[node.hash]?.data?.cpu.count || 0,
+        sortBy: (node) => specs[node.hash]?.cpu.count || 0,
         render: (node) => (
           <div tw="whitespace-nowrap">
-            {specs[node.hash]?.data
-              ? `${specs[node.hash]?.data?.cpu.count} x86 64bit`
+            {specs[node.hash]
+              ? `${specs[node.hash]?.cpu.count} x86 64bit`
               : 'n/a'}
           </div>
         ),
@@ -83,10 +83,10 @@ export default function CRNList(props: CRNListProps) {
         label: 'RAM',
         width: '10%',
         sortable: true,
-        sortBy: (node) => specs[node.hash]?.data?.mem.available_kB || 0,
+        sortBy: (node) => specs[node.hash]?.mem.available_kB || 0,
         render: (node) => (
           <div tw="whitespace-nowrap">
-            {humanReadableSize(specs[node.hash]?.data?.mem.available_kB, 'KiB')}
+            {humanReadableSize(specs[node.hash]?.mem.available_kB, 'KiB')}
           </div>
         ),
       },
@@ -94,13 +94,10 @@ export default function CRNList(props: CRNListProps) {
         label: 'HDD',
         width: '10%',
         sortable: true,
-        sortBy: (node) => specs[node.hash]?.data?.disk.available_kB || 0,
+        sortBy: (node) => specs[node.hash]?.disk.available_kB || 0,
         render: (node) => (
           <div tw="whitespace-nowrap">
-            {humanReadableSize(
-              specs[node.hash]?.data?.disk.available_kB,
-              'KiB',
-            )}
+            {humanReadableSize(specs[node.hash]?.disk.available_kB, 'KiB')}
           </div>
         ),
       },
@@ -108,10 +105,10 @@ export default function CRNList(props: CRNListProps) {
         label: 'VERSION',
         width: '20%',
         sortable: true,
-        sortBy: (node) => node.metricsData?.version,
+        sortBy: (node) => node?.version,
         render: (node) => (
           <NodeVersion
-            version={node.metricsData?.version || ''}
+            version={node?.version || ''}
             lastVersion={lastVersion}
           />
         ),
