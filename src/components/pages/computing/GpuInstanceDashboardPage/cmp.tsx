@@ -2,7 +2,7 @@ import React from 'react'
 import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
-import InstancesTabContent from '../../dashboard/InstancesTabContent'
+import GpuInstancesTabContent from '../../dashboard/GpuInstancesTabContent'
 import VolumesTabContent from '../../dashboard/VolumesTabContent'
 import DomainsTabContent from '../../dashboard/DomainsTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
@@ -27,7 +27,7 @@ export default function GpuInstanceDashboardPage() {
           <>
             {!!gpuInstances?.length && (
               <Container $variant="xl" tw="my-10">
-                <InstancesTabContent data={gpuInstances} />
+                <GpuInstancesTabContent data={gpuInstances} />
               </Container>
             )}
             <DashboardCardWithSideImage
