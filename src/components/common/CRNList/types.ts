@@ -8,6 +8,7 @@ export type CRNItem = CRNSpecs & {
 }
 
 export type CRNListProps = {
-  selected?: string
-  onSelectedChange: (selected: string) => void
+  enableGpu?: boolean
+  selected?: CRNSpecs
+  onSelectedChange: (selected: CRNSpecs) => void
 }

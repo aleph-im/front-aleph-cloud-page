@@ -34,7 +34,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useEntityCost } from '@/hooks/common/useEntityCost'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
+import { CRNSpecs, NodeManager } from '@/domain/node'
 import {
   defaultStreamDuration,
   StreamDurationField,
@@ -60,7 +60,6 @@ import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
-import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -92,12 +91,11 @@ export type UseNewGpuInstancePageReturn = {
   control: Control<any>
   errors: FieldErrors<NewGpuInstanceFormState>
   node?: CRNSpecs
-  lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
   selectedModal?: Modal
   setSelectedModal: (modal?: Modal) => void
-  selectedNode?: string
-  setSelectedNode: (hash?: string) => void
+  selectedNode?: CRNSpecs
+  setSelectedNode: (node?: CRNSpecs) => void
   termsAndConditions?: TermsAndConditions
   shouldRequestTermsAndConditions: boolean
   modalOpen?: (info: ModalCardProps) => void
@@ -128,28 +126,40 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   const modalClose = modal?.close
 
   const router = useRouter()
-  const { crn: queryCRN } = router.query
+  const { crn: queryCRN, gpu: queryGPU } = router.query
 
   const hasInitialized = useRef(false)
   const nodeRef = useRef<CRNSpecs | undefined>(undefined)
-  const [selectedNode, setSelectedNode] = useState<string>()
+  const [selectedNode, setSelectedNode] = useState<CRNSpecs>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
 
   // -------------------------
   // Request CRNs specs
 
   const { specs } = useRequestCRNSpecs()
-  const { lastVersion } = useRequestCRNLastVersion()
 
   // @note: Set node depending on CRN
   const node: CRNSpecs | undefined = useMemo(() => {
     if (!specs) return
-    if (!queryCRN) return nodeRef.current
-    if (typeof queryCRN !== 'string') return nodeRef.current
+    if (!queryCRN || !queryGPU) return nodeRef.current
+    if (typeof queryCRN !== 'string' || typeof queryGPU !== 'string')
+      return nodeRef.current
 
-    nodeRef.current = specs[queryCRN]
+    if (selectedNode) {
+      nodeRef.current = selectedNode
+    } else {
+      const gpuDevice = specs[queryCRN]?.compatible_available_gpus?.find(
+        (gpu) => {
+          return gpu.model === queryGPU
+        },
+      )
+
+      if (gpuDevice)
+        nodeRef.current = { ...specs[queryCRN], selectedGpu: gpuDevice }
+    }
+
     return nodeRef.current
-  }, [queryCRN, specs])
+  }, [queryCRN, queryGPU, specs])
 
   const nodeSpecs = useMemo(() => {
     if (!node) return
@@ -376,11 +386,21 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
 
     if (!selectedNode) return
 
-    const { crn: queryCRN, ...rest } = router.query
-    if (queryCRN === selectedNode) return
+    const { crn: queryCRN, gpu: queryGPU, ...rest } = router.query
+    if (
+      queryCRN === selectedNode.hash &&
+      queryGPU === selectedNode.selectedGpu?.model
+    )
+      return
 
     Router.replace({
-      query: selectedNode ? { ...rest, crn: selectedNode } : rest,
+      query: selectedNode
+        ? {
+            ...rest,
+            crn: selectedNode.hash,
+            gpu: selectedNode.selectedGpu?.model,
+          }
+        : rest,
     })
   }, [router.query, selectedNode])
 
@@ -417,31 +437,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // -------------------------
   // Effects
 
-  // @note: First time the user loads the page, set payment method to Stream if CRN is present
-  useEffect(() => {
-    if (hasInitialized.current) return
-    if (!router.isReady) return
-
-    hasInitialized.current = true
-
-    if (queryCRN) setValue('paymentMethod', PaymentMethod.Stream)
-  }, [queryCRN, router.isReady, setValue])
-
-  // @note: Updates url depending on payment method
-  useEffect(() => {
-    if (!node) return
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { crn, ...rest } = Router.query
-
-    Router.replace({
-      query:
-        formValues.paymentMethod === PaymentMethod.Hold
-          ? { ...rest }
-          : { ...rest, crn: node.hash },
-    })
-  }, [node, formValues.paymentMethod])
-
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
     if (!storage) return
@@ -474,7 +469,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     control,
     errors,
     node,
-    lastVersion,
     nodeSpecs,
     streamDisabled,
     disabledStreamDisabledMessage,

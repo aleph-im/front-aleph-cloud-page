@@ -4,7 +4,6 @@ import Image from 'next/image'
 import {
   Button,
   TextGradient,
-  NodeVersion,
   NodeName,
   NodeScore,
   TableColumn,
@@ -113,7 +112,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
     errors,
     node,
     nodeSpecs,
-    lastVersion,
     selectedModal,
     setSelectedModal,
     selectedNode,
@@ -152,6 +150,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             onClose: handleCloseModal,
             content: (
               <CRNList
+                enableGpu
                 selected={selectedNode}
                 onSelectedChange={setSelectedNode}
               />
@@ -273,13 +272,8 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         render: (node) => <NodeScore score={node.score} />,
       },
       {
-        label: 'VERSION',
-        render: (node) => (
-          <NodeVersion
-            version={node?.version || ''}
-            lastVersion={lastVersion}
-          />
-        ),
+        label: 'GPU',
+        render: (node) => node?.selectedGpu?.model,
       },
       {
         label: '',
@@ -293,13 +287,13 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
               variant="warning"
               onClick={() => setSelectedModal('node-list')}
             >
-              Change CRN
+              Change GPU
             </Button>
           </div>
         ),
       },
     ] as TableColumn<CRNSpecs>[]
-  }, [lastVersion, setSelectedModal])
+  }, [setSelectedModal])
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
   const manuallySelectButtonRef = useRef<HTMLButtonElement>(null)

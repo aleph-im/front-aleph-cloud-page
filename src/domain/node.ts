@@ -295,6 +295,7 @@ export type CRNSpecs = BaseNode &
       host: boolean
       vm: boolean
     }
+    selectedGpu?: GPUDevice
   }
 
 export type CRNBenchmark = {
@@ -339,9 +340,9 @@ export class NodeManager {
     nodeSpecs: CRNSpecs,
   ): boolean {
     return (
-      minSpecs.cpu <= nodeSpecs.cpu.count &&
-      minSpecs.ram <= (nodeSpecs.mem.available_kB || 0) / 1024 &&
-      minSpecs.storage <= (nodeSpecs.disk.available_kB || 0) / 1024
+      minSpecs.cpu <= nodeSpecs.cpu?.count &&
+      minSpecs.ram <= (nodeSpecs.mem?.available_kB || 0) / 1024 &&
+      minSpecs.storage <= (nodeSpecs.disk?.available_kB || 0) / 1024
     )
   }
 

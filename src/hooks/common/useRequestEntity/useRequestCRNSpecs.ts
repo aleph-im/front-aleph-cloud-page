@@ -7,6 +7,27 @@ export type UseRequestCRNSpecsReturn = {
   loading: boolean
 }
 
+const gpus = [
+  {
+    vendor: 'NVIDIA',
+    model: 'RTX 4000 ADA',
+    device_name: 'AD104GL [RTX 4000 SFF Ada Generation]',
+    device_class: '0300',
+    pci_host: '01:00.0',
+    device_id: '10de:27b0',
+    compatible: true,
+  },
+  {
+    vendor: 'NVIDIA',
+    model: 'H100',
+    device_name: 'AD104GL [RTX 4000 SFF Ada Generation]',
+    device_class: '0300',
+    pci_host: '01:00.0',
+    device_id: '10de:27b1',
+    compatible: true,
+  },
+]
+
 export function useRequestCRNSpecs(): UseRequestCRNSpecsReturn {
   const nodeManager = useNodeManager()
 
@@ -18,10 +39,26 @@ export function useRequestCRNSpecs(): UseRequestCRNSpecsReturn {
       const crnSpecs = await nodeManager.getAllCRNsSpecs()
 
       crnSpecs.forEach((spec) => {
-        setSpecs((prev) => ({
-          ...prev,
-          [spec.hash]: spec,
-        }))
+        if (
+          [
+            'ab5366bb2d2d9b4e51e6caf4f633a69b200316edd3a6137b245a62ed631dec79',
+            'fa5e90818bf50f358b642ed31361d83a0c6e94a1e07b055764d7e82789437f82',
+          ].includes(spec.hash)
+        ) {
+          setSpecs((prev) => ({
+            ...prev,
+            [spec.hash]: {
+              ...spec,
+              gpu_support: true,
+              compatible_available_gpus: gpus,
+            },
+          }))
+        } else {
+          setSpecs((prev) => ({
+            ...prev,
+            [spec.hash]: spec,
+          }))
+        }
       })
 
       setLoading(false)

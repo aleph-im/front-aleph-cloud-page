@@ -21,8 +21,9 @@ import { useRequestCRNLastVersion } from './useRequestEntity/useRequestCRNLastVe
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
 export type UseCRNListProps = {
-  selected?: string
-  onSelectedChange: (selected: string) => void
+  selected?: CRNSpecs
+  onSelectedChange: (selected: CRNSpecs) => void
+  enableGpu?: boolean
 }
 
 export type UseCRNListReturn = UseCRNListProps &
@@ -45,6 +46,8 @@ export type UseCRNListReturn = UseCRNListProps &
   }
 
 export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
+  const { enableGpu } = props
+
   const nodeManager = useNodeManager()
   const { specs: crnSpecs, loading: loadingSpecs } = useRequestCRNSpecs()
   const { lastVersion } = useRequestCRNLastVersion()
@@ -105,6 +108,29 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
   // -----------------------------
 
+  const nodeList = useMemo(() => {
+    if (!enableGpu) return crnSpecs
+
+    console.log(
+      'gpuNodes',
+      Object.values(crnSpecs).filter((node) => node.gpu_support),
+    )
+
+    let gpuNodes: Record<string, CRNSpecs> = {}
+
+    Object.values(crnSpecs)
+      .filter((node) => node.gpu_support)
+      .forEach((node) => {
+        node.compatible_available_gpus?.forEach((gpu) => {
+          gpuNodes = { ...gpuNodes, [node.hash]: { ...node, selectedGpu: gpu } }
+        })
+      })
+
+    console.log('formatted gpuNodes', gpuNodes)
+
+    return gpuNodes
+  }, [enableGpu, crnSpecs])
+
   const filterNodes = useCallback(
     (query: string, crnSpecs?: CRNSpecs[]): CRNSpecs[] | undefined => {
       if (!crnSpecs) return
@@ -118,8 +144,8 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   )
 
   const baseFilteredNodes = useMemo(
-    () => filterNodes(debouncedFilter, Object.values(crnSpecs)),
-    [filterNodes, debouncedFilter, crnSpecs],
+    () => filterNodes(debouncedFilter, Object.values(nodeList)),
+    [filterNodes, debouncedFilter, nodeList],
   )
 
   // -----------------------------
@@ -175,21 +201,21 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     if (!baseFilteredNodes) return
     if (!nodesIssues) return baseFilteredNodes
 
-    return baseFilteredNodes.filter((node) => !nodesIssues[node.hash])
+    return baseFilteredNodes
   }, [baseFilteredNodes, nodesIssues])
 
   const filteredNodes = useMemo(() => {
     return validPAYGNodes?.filter((node) => {
       if (cpuFilter) {
-        if (node.cpu.count.toString() !== cpuFilter) return false
+        if (node.cpu?.count.toString() !== cpuFilter) return false
       }
 
       if (ramFilter) {
-        if (node.mem.available_kB.toString() !== ramFilter) return false
+        if (node.mem?.available_kB.toString() !== ramFilter) return false
       }
 
       if (hddFilter) {
-        if (node.disk.available_kB.toString() !== hddFilter) return false
+        if (node.disk?.available_kB.toString() !== hddFilter) return false
       }
 
       return true
@@ -222,13 +248,13 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     if (!sortedFilteredNodes) return options
 
     sortedFilteredNodes.forEach((node) => {
-      const cpu = node.cpu.count.toString()
-      const ram = node.mem.available_kB.toString()
-      const hdd = node.disk.available_kB.toString()
+      const cpu = node.cpu?.count.toString()
+      const ram = node.mem?.available_kB.toString()
+      const hdd = node.disk?.available_kB.toString()
 
-      if (!options.cpu.includes(cpu)) options.cpu.push(cpu)
-      if (!options.ram.includes(ram)) options.ram.push(ram)
-      if (!options.hdd.includes(hdd)) options.hdd.push(hdd)
+      if (cpu && !options.cpu.includes(cpu)) options.cpu.push(cpu)
+      if (ram && !options.ram.includes(ram)) options.ram.push(ram)
+      if (hdd && !options.hdd.includes(hdd)) options.hdd.push(hdd)
     })
 
     return {
