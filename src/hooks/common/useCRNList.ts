@@ -131,21 +131,20 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   // -----------------------------
 
   const nodeList = useMemo(() => {
-    if (!enableGpu) return crnSpecs
+    const crnSpecsList = Object.values(crnSpecs)
 
-    let gpuNodes: Record<string, CRNSpecs> = {}
+    if (!enableGpu) return crnSpecsList
 
-    Object.values(crnSpecs)
+    const gpuList = crnSpecsList
       .filter((node) => node.gpu_support)
-      .forEach((node) => {
-        node.compatible_available_gpus?.forEach((gpu) => {
-          gpuNodes = { ...gpuNodes, [node.hash]: { ...node, selectedGpu: gpu } }
-        })
-      })
+      .flatMap((node) =>
+        node.compatible_available_gpus?.flatMap((gpu) => ({
+          ...node,
+          selectedGpu: gpu,
+        })),
+      ) as CRNSpecs[]
 
-    console.log('formatted gpuNodes', gpuNodes)
-
-    return gpuNodes
+    return gpuList
   }, [enableGpu, crnSpecs])
 
   const filterNodes = useCallback(
@@ -161,7 +160,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   )
 
   const baseFilteredNodes = useMemo(
-    () => filterNodes(debouncedFilter, Object.values(nodeList)),
+    () => filterNodes(debouncedFilter, nodeList),
     [filterNodes, debouncedFilter, nodeList],
   )
 
