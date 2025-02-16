@@ -20,6 +20,13 @@ import { useRequestCRNLastVersion } from './useRequestEntity/useRequestCRNLastVe
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
+export type CRNListFilterOptions = {
+  gpu: string[]
+  cpu: string[]
+  ram: string[]
+  hdd: string[]
+}
+
 export type UseCRNListProps = {
   selected?: CRNSpecs
   onSelectedChange: (selected: CRNSpecs) => void
@@ -31,12 +38,14 @@ export type UseCRNListReturn = UseCRNListProps &
   UseRequestCRNSpecsReturn & {
     nodesIssues?: StreamSupportedIssues
     filteredNodes?: CRNSpecs[]
-    filterOptions: { cpu: string[]; ram: string[]; hdd: string[] }
+    filterOptions: CRNListFilterOptions
     loadItemsDisabled: boolean
     handleLoadItems: () => Promise<void>
     handleSortItems: UseSortedListReturn<any>['handleSortItems']
     nameFilter: string
     handleNameFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
+    gpuFilter?: string
+    handleGpuFilterChange: DropdownProps['onChange']
     cpuFilter?: string
     handleCpuFilterChange: DropdownProps['onChange']
     ramFilter?: string
@@ -66,6 +75,19 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     },
     [],
   )
+
+  // -----------------------------
+  // GPU Filter
+
+  const [gpuFilter, setGpuFilter] = useState<string>()
+
+  const handleGpuFilterChange = useCallback((value: string | string[]) => {
+    if (!value) return setGpuFilter(undefined)
+    if (typeof value !== 'string') return
+
+    const gpuFilter = value
+    setGpuFilter(gpuFilter)
+  }, [])
 
   // -----------------------------
   // CPU Filter
@@ -201,6 +223,10 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
   const filteredNodes = useMemo(() => {
     return validPAYGNodes?.filter((node) => {
+      if (gpuFilter) {
+        if (node.selectedGpu?.model !== gpuFilter) return false
+      }
+
       if (cpuFilter) {
         if (node.cpu?.count.toString() !== cpuFilter) return false
       }
@@ -215,7 +241,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
       return true
     })
-  }, [cpuFilter, hddFilter, ramFilter, validPAYGNodes])
+  }, [gpuFilter, cpuFilter, hddFilter, ramFilter, validPAYGNodes])
 
   const sortedNodes = useMemo(() => {
     if (!filteredNodes) return
@@ -233,8 +259,9 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     list: sortedNodes,
   })
 
-  const filterOptions = useMemo(() => {
-    const options: { cpu: string[]; ram: string[]; hdd: string[] } = {
+  const filterOptions: CRNListFilterOptions = useMemo(() => {
+    const options: CRNListFilterOptions = {
+      gpu: [],
       cpu: [],
       ram: [],
       hdd: [],
@@ -243,16 +270,20 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     if (!sortedFilteredNodes) return options
 
     sortedFilteredNodes.forEach((node) => {
+      const gpu = node.selectedGpu?.model
+      console.log('gpu', gpu)
       const cpu = node.cpu?.count.toString()
       const ram = node.mem?.available_kB.toString()
       const hdd = node.disk?.available_kB.toString()
 
+      if (gpu && !options.gpu.includes(gpu)) options.gpu.push(gpu)
       if (cpu && !options.cpu.includes(cpu)) options.cpu.push(cpu)
       if (ram && !options.ram.includes(ram)) options.ram.push(ram)
       if (hdd && !options.hdd.includes(hdd)) options.hdd.push(hdd)
     })
 
     return {
+      gpu: options.gpu.sort(),
       cpu: options.cpu.sort((a, b) => +a - +b),
       ram: options.ram.sort((a, b) => +a - +b),
       hdd: options.hdd.sort((a, b) => +a - +b),
@@ -282,6 +313,8 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     handleSortItems,
     nameFilter,
     handleNameFilterChange,
+    gpuFilter,
+    handleGpuFilterChange,
     cpuFilter,
     handleCpuFilterChange,
     ramFilter,

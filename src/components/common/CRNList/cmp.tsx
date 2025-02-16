@@ -36,6 +36,8 @@ export default function CRNList(props: CRNListProps) {
     handleSortItems,
     nameFilter,
     handleNameFilterChange,
+    gpuFilter,
+    handleGpuFilterChange,
     cpuFilter,
     handleCpuFilterChange,
     ramFilter,
@@ -254,6 +256,22 @@ export default function CRNList(props: CRNListProps) {
           </div>
         </div>
         <div tw="w-full flex flex-wrap gap-x-6 gap-y-4 mb-6">
+          {enableGpu && (
+            <div tw="flex-1">
+              <Dropdown
+                placeholder="GPU"
+                label="GPU"
+                value={gpuFilter}
+                onChange={handleGpuFilterChange}
+              >
+                {filterOptions.gpu.map((option) => (
+                  <DropdownOption key={option} value={option}>
+                    {option}
+                  </DropdownOption>
+                ))}
+              </Dropdown>
+            </div>
+          )}
           <div tw="flex-1">
             <Dropdown
               placeholder="CPU"
