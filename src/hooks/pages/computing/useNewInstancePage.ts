@@ -100,8 +100,8 @@ export type UseNewInstancePageReturn = {
   nodeSpecs?: CRNSpecs
   selectedModal?: Modal
   setSelectedModal: (modal?: Modal) => void
-  selectedNode?: string
-  setSelectedNode: (hash?: string) => void
+  selectedNode?: CRNSpecs
+  setSelectedNode: (hash?: CRNSpecs) => void
   termsAndConditions?: TermsAndConditions
   shouldRequestTermsAndConditions: boolean
   modalOpen?: (info: ModalCardProps) => void
@@ -136,7 +136,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const hasInitialized = useRef(false)
   const nodeRef = useRef<CRNSpecs | undefined>(undefined)
-  const [selectedNode, setSelectedNode] = useState<string>()
+  const [selectedNode, setSelectedNode] = useState<CRNSpecs>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
 
   // -------------------------
@@ -412,11 +412,13 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
     if (!selectedNode) return
 
+    const { hash: selectedNodeHash } = selectedNode
     const { crn: queryCRN, ...rest } = router.query
-    if (queryCRN === selectedNode) return
+
+    if (queryCRN === selectedNodeHash) return
 
     Router.replace({
-      query: selectedNode ? { ...rest, crn: selectedNode } : rest,
+      query: selectedNode ? { ...rest, crn: selectedNodeHash } : rest,
     })
   }, [router.query, selectedNode])
 

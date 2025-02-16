@@ -24,7 +24,7 @@ import { CRNItem, CRNListProps } from './types'
 
 export default function CRNList(props: CRNListProps) {
   const {
-    enableGpu,
+    enableGpu = false,
     selected,
     lastVersion,
     specs,

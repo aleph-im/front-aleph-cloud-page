@@ -111,11 +111,6 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   const nodeList = useMemo(() => {
     if (!enableGpu) return crnSpecs
 
-    console.log(
-      'gpuNodes',
-      Object.values(crnSpecs).filter((node) => node.gpu_support),
-    )
-
     let gpuNodes: Record<string, CRNSpecs> = {}
 
     Object.values(crnSpecs)

@@ -15,7 +15,7 @@ import { NodeManager } from '@/domain/node'
 
 // CRN STREAM
 
-export const GpuDeviceSchema = z.object({
+export const gpuDeviceSchema = z.object({
   vendor: z.string(),
   model: z.string(),
   device_name: z.string(),
@@ -72,24 +72,23 @@ export const nodeSpecsSchema = z.object({
   active: z.boolean(),
   gpu: z
     .object({
-      devices: z.array(GpuDeviceSchema),
-      available_devices: z.array(GpuDeviceSchema),
+      devices: z.array(gpuDeviceSchema).optional(),
+      available_devices: z.array(gpuDeviceSchema).optional(),
     })
-    .nullable()
     .optional(),
-  compatible_gpus: z.array(GpuDeviceSchema).nullable().optional(),
-  compatible_available_gpus: z.array(GpuDeviceSchema).nullable().optional(),
-  gpu_support: z.boolean().nullable().optional(),
-  confidential_support: z.boolean().nullable().optional(),
-  qemu_support: z.boolean().nullable().optional(),
+  compatible_gpus: z.array(gpuDeviceSchema).optional(),
+  compatible_available_gpus: z.array(gpuDeviceSchema).optional(),
+  gpu_support: z.boolean().optional(),
+  confidential_support: z.boolean().optional(),
+  qemu_support: z.boolean().optional(),
   ipv6_check: z
     .object({
       host: z.boolean(),
       vm: z.boolean(),
     })
-    .nullable()
     .optional(),
-  version: z.string().nullable().optional(),
+  version: z.string().optional(),
+  selectedGpu: gpuDeviceSchema.optional(),
 })
 
 // SSH
@@ -145,8 +144,9 @@ export const instanceStreamSchema = instanceSchema
     }),
   )
   .refine(
-    ({ nodeSpecs, specs }) =>
-      NodeManager.validateMinNodeSpecs(specs, nodeSpecs),
+    ({ nodeSpecs, specs }) => {
+      return NodeManager.validateMinNodeSpecs(specs, nodeSpecs)
+    },
     {
       message: 'Insufficient node specs',
       path: ['specs'],

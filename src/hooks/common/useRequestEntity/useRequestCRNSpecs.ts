@@ -62,7 +62,6 @@ export function useRequestCRNSpecs(): UseRequestCRNSpecsReturn {
       })
 
       setLoading(false)
-      console.log('crnSpecs', crnSpecs)
     }
 
     load()

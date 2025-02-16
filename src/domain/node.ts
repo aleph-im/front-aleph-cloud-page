@@ -281,8 +281,8 @@ export type CRNSpecs = BaseNode &
       }
     }
     gpu?: {
-      devices: GPUDevice[]
-      available_devices: GPUDevice[]
+      devices?: GPUDevice[]
+      available_devices?: GPUDevice[]
     }
     active: boolean
     version?: string
