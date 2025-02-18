@@ -261,7 +261,7 @@ export type WebsitePayment = {
 
 export type WebsiteCostProps = {
   website?: WebsiteFolderField
-  payment: WebsitePayment
+  payment?: WebsitePayment
 }
 
 export type WebsiteCost = {

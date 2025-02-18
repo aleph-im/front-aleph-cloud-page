@@ -35,7 +35,11 @@ import { AddInstance, InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
-import { useEntityCost } from '@/hooks/common/useEntityCost'
+import {
+  useEntityCost,
+  UseEntityCostReturn,
+  UseInstanceCostProps,
+} from '@/hooks/common/useEntityCost'
 import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRN, CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
@@ -112,6 +116,7 @@ export type UseNewInstancePageReturn = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
+  cost: UseEntityCostReturn
   node?: CRN
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
@@ -304,15 +309,28 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const { storage } = formValues.specs
   const { systemVolumeSize } = formValues
-  const { cost } = useEntityCost({
-    entityType: EntityType.Instance,
-    props: {
-      specs: formValues.specs,
-      volumes: formValues.volumes,
-      streamDuration: formValues.streamDuration,
-      paymentMethod: formValues.paymentMethod,
-    },
-  })
+
+  const costProps: UseInstanceCostProps = useMemo(
+    () => ({
+      entityType: EntityType.Instance,
+      props: {
+        specs: formValues.specs,
+        volumes: formValues.volumes,
+        domains: formValues.domains,
+        streamDuration: formValues.streamDuration,
+        paymentMethod: formValues.paymentMethod,
+        isPersistent: true,
+        image: formValues.image,
+        name: formValues.name || 'MOCK',
+        sshKeys: formValues.sshKeys || [
+          { key: 'MOCK', isNew: true, isSelected: true },
+        ],
+      },
+    }),
+    [formValues],
+  )
+
+  const cost = useEntityCost(costProps)
 
   // -------------------------
   // Memos
@@ -373,8 +391,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     if (!account) return false
     if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') return true
 
-    return accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
-  }, [account, accountBalance, cost?.totalCost])
+    return accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
+  }, [account, accountBalance, cost?.cost])
 
   const createInstanceDisabledMessage: UseNewInstancePageReturn['createInstanceDisabledMessage'] =
     useMemo(() => {
@@ -495,9 +513,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // @note: Set streamCost
   useEffect(() => {
     if (!cost) return
-    if (formValues.streamCost === cost.totalStreamCost) return
+    if (cost.paymentMethod !== PaymentMethod.Stream) return
+    if (formValues.streamCost === cost.cost) return
 
-    setValue('streamCost', cost.totalStreamCost)
+    setValue('streamCost', cost.cost)
   }, [cost, setValue, formValues])
 
   return {
@@ -512,6 +531,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     values: formValues,
     control,
     errors,
+    cost,
     node,
     lastVersion,
     nodeSpecs,

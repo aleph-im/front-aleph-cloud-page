@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import {
   InstanceSpecsField,
@@ -19,7 +19,10 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CustomFunctionRuntimeField } from '@/domain/runtime'
-import { useEntityCost } from '@/hooks/common/useEntityCost'
+import {
+  useEntityCost,
+  UseProgramCostProps,
+} from '@/hooks/common/useEntityCost'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import {
   stepsCatalog,
@@ -56,6 +59,7 @@ export type UseNewFunctionPage = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewFunctionFormState>
+  costProps: UseProgramCostProps
   handleSubmit: (e: FormEvent) => Promise<void>
   handleBack: () => void
 }
@@ -116,14 +120,22 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as NewFunctionFormState
 
-  const { cost } = useEntityCost({
-    entityType: EntityType.Program,
-    props: {
-      specs: values.specs,
-      isPersistent: values.isPersistent,
-      volumes: values.volumes,
-    },
-  })
+  const costProps: UseProgramCostProps = useMemo(
+    () => ({
+      entityType: EntityType.Program,
+      props: {
+        specs: values.specs,
+        isPersistent: values.isPersistent,
+        volumes: values.volumes,
+        domains: values.domains,
+        paymentMethod: values.paymentMethod,
+      },
+    }),
+    [values],
+  )
+
+  const { cost } = useEntityCost(costProps)
+  console.log('function cost', cost)
 
   const canAfford =
     accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
@@ -143,6 +155,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     values,
     control,
     errors,
+    costProps,
     handleSubmit,
     handleBack,
   }

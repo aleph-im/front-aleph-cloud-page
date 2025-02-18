@@ -17,6 +17,7 @@ export default function NewIndexerPage() {
     accountBalance,
     isCreateButtonDisabled,
     errors,
+    costProps,
     holdingRequirementsProps,
     handleSubmit,
   } = useNewIndexerPage()
@@ -69,7 +70,7 @@ export default function NewIndexerPage() {
       </section>
       <CheckoutSummary
         address={address}
-        type={EntityType.Program}
+        costProps={costProps}
         unlockedAmount={accountBalance}
         paymentMethod={PaymentMethod.Hold}
         {...holdingRequirementsProps}

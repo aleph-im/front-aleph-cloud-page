@@ -28,6 +28,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
     values,
     control,
     errors,
+    costProps,
     handleSubmit,
     handleBack,
   } = useNewFunctionPage()
@@ -171,11 +172,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         <CheckoutSummary
           control={control}
           address={address}
-          type={EntityType.Program}
-          isPersistent={values.isPersistent}
-          specs={values.specs}
-          volumes={values.volumes}
-          domains={values.domains}
+          costProps={costProps}
           unlockedAmount={accountBalance}
           paymentMethod={values.paymentMethod}
           mainRef={mainRef}

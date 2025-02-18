@@ -5,6 +5,8 @@ import {
   InstanceContent,
   InstancePublishConfiguration,
   MachineVolume,
+  MessageCostLine,
+  MessageCostType,
   MessageType,
   PaymentType,
 } from '@aleph-sdk/message'
@@ -13,15 +15,14 @@ import {
   EntityType,
   PaymentMethod,
   EXTRA_WEI,
+  EntityTypeName,
 } from '@/helpers/constants'
-import { getDate, getExplorerURL } from '@/helpers/utils'
+import { convertByteUnits, getDate, getExplorerURL } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
 import {
   ExecutableManager,
-  ExecutableCost,
-  ExecutableCostProps,
   PaymentConfiguration,
   ExecutableStatus,
 } from './executable'
@@ -46,6 +47,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
+import { CostSummary } from './cost'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -81,9 +83,9 @@ export type Instance = InstanceContent & {
   confirmed?: boolean
 }
 
-export type InstanceCostProps = Omit<ExecutableCostProps, 'type'>
+export type InstanceCostProps = AddInstance
 
-export type InstanceCost = ExecutableCost
+export type InstanceCost = CostSummary
 
 export type InstanceCRNNetworking = {
   ipv4: string
@@ -94,20 +96,9 @@ export type InstanceStatus = ExecutableStatus
 
 export class InstanceManager
   extends ExecutableManager
-  implements EntityManager<Instance, AddInstance>
-{
+  implements EntityManager<Instance, AddInstance> {
   static addSchema = instanceSchema
   static addStreamSchema = instanceStreamSchema
-
-  /**
-   * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
-   */
-  static getCost = (props: InstanceCostProps): Promise<InstanceCost> => {
-    return ExecutableManager.getExecutableCost({
-      ...props,
-      type: EntityType.Instance,
-    })
-  }
 
   constructor(
     protected account: Account,
@@ -213,7 +204,7 @@ export class InstanceManager
       const { receiver } = instance.payment
       if (!receiver) throw Err.ReceiverReward
 
-      const instanceCosts = await InstanceManager.getCost({
+      const instanceCosts = await this.getCost({
         paymentMethod: PaymentMethod.Stream,
         specs: {
           cpu: instance.resources.vcpus,
@@ -265,123 +256,6 @@ export class InstanceManager
     return steps
   }
 
-  protected async *addPAYGStreamSteps(
-    newInstance: AddInstance,
-    account?: SuperfluidAccount,
-  ): AsyncGenerator<void, void, void> {
-    if (newInstance.payment?.type !== PaymentMethod.Stream) return
-    if (!account) throw Err.ConnectYourWallet
-    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
-
-    const { streamCost, streamDuration, receiver } = newInstance.payment
-
-    const streamCostByHour = streamCost / getHours(streamDuration) + EXTRA_WEI
-    const alephxBalance = await account.getALEPHBalance()
-    const alephxFlow = await account.getALEPHFlow(receiver)
-    const totalFlow = alephxFlow.add(streamCostByHour)
-
-    if (totalFlow.greaterThan(1)) throw Err.MaxFlowRate
-
-    const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
-    const totalRequiredAleph = usedAlephInDuration.add(streamCost)
-
-    if (alephxBalance.lt(totalRequiredAleph))
-      throw Err.InsufficientBalance(
-        totalRequiredAleph.sub(alephxBalance).toNumber(),
-      )
-
-    yield
-    await account.increaseALEPHFlow(receiver, streamCostByHour)
-  }
-
-  protected async *parseInstanceSteps(
-    newInstance: AddInstance,
-  ): AsyncGenerator<void, InstancePublishConfiguration, void> {
-    const schema = !newInstance.node
-      ? InstanceManager.addSchema
-      : InstanceManager.addStreamSchema
-
-    newInstance = await schema.parseAsync(newInstance)
-
-    const { account, channel } = this
-
-    const { envVars, specs, image, sshKeys, name, tags, node } = newInstance
-
-    const variables = this.parseEnvVars(envVars)
-    const resources = this.parseSpecs(specs)
-    const metadata = this.parseMetadata(name, tags)
-    const requirements = this.parseRequirements(node)
-    const payment = this.parsePayment(newInstance.payment)
-    const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
-    const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
-
-    return {
-      account,
-      channel,
-      variables,
-      resources,
-      metadata,
-      image,
-      authorized_keys,
-      volumes,
-      payment,
-      requirements,
-    }
-  }
-
-  protected async *parseVolumesSteps(
-    volumes?: VolumeField | VolumeField[],
-  ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
-    if (!volumes) return
-    volumes = Array.isArray(volumes) ? volumes : [volumes]
-
-    return yield* super.parseVolumesSteps(volumes)
-  }
-
-  protected async *parseSSHKeysSteps(
-    sshKeys?: SSHKeyField[],
-  ): AsyncGenerator<void, string[] | undefined, void> {
-    // @note: Create new keys before instance
-    const newKeys = this.parseNewSSHKeys(sshKeys)
-    yield* this.sshKeyManager.addSteps(newKeys, false)
-
-    return sshKeys?.filter((key) => key.isSelected).map(({ key }) => key)
-  }
-
-  protected parseNewSSHKeys(sshKeys?: SSHKeyField[]): SSHKeyField[] {
-    return sshKeys?.filter((key) => key.isNew && key.isSelected) || []
-  }
-
-  protected async parseMessages(messages: any[]): Promise<Instance[]> {
-    /* const sizesMap = await this.fileManager.getSizesMap() */
-
-    return messages
-      .filter(({ content }) => {
-        if (content === undefined) return false
-
-        // Filter out confidential VMs
-        return !content.environment?.trusted_execution
-      })
-      .map((message) => {
-        /* const size = message.content.volumes.reduce(
-          (ac: number, cv: MachineVolume) =>
-            ac + ('size_mib' in cv ? cv.size_mib : sizesMap[cv.ref]),
-          0,
-        ) */
-
-        return {
-          id: message.item_hash,
-          ...message.content,
-          name: message.content.metadata?.name || 'Unnamed instance',
-          type: EntityType.Instance,
-          url: getExplorerURL(message),
-          date: getDate(message.time),
-          size: message.content.rootfs?.size_mib || 0,
-          confirmed: !!message.confirmed,
-        }
-      })
-  }
-
   async getDelSteps(
     instancesOrIds: string | Instance | (string | Instance)[],
   ): Promise<CheckoutStepType[]> {
@@ -421,5 +295,193 @@ export class InstanceManager
     } catch (err) {
       throw Err.RequestFailed(err)
     }
+  }
+
+  async getTotalCostByHash(hash: string): Promise<number> {
+    const costs = await this.sdkClient.instanceClient.getCost(hash)
+    return Number(costs.cost)
+  }
+
+  async getCost(newInstance: InstanceCostProps): Promise<InstanceCost> {
+    const totalStreamCost = Number.POSITIVE_INFINITY
+    let totalCost = Number.POSITIVE_INFINITY
+    const paymentMethod = newInstance.payment?.type || PaymentMethod.Hold
+
+    const emptyCost: InstanceCost = {
+      cost: totalCost,
+      paymentMethod,
+      lines: [],
+    }
+
+    let parsedInstance: InstancePublishConfiguration
+
+    try {
+      const steps = this.parseInstanceSteps(newInstance, true)
+
+      while (true) {
+        const { value, done } = await steps.next()
+        parsedInstance = value as any
+        if (done) break
+      }
+    } catch (e) {
+      console.error(e)
+      return emptyCost
+    }
+
+    const costs = await this.sdkClient.instanceClient.getEstimatedCost(parsedInstance)
+    console.log(costs)
+
+    totalCost = Number(costs.cost)
+
+    const lines = this.getExecutableCostLines({
+      type: EntityType.Instance,
+      ...parsedInstance
+    }, costs)
+
+    return {
+      cost: totalCost,
+      paymentMethod,
+      lines: [...lines],
+    }
+
+    // const streamCostPerHour =
+    //   paymentMethod === PaymentMethod.Stream && streamDuration
+    //     ? getHours(streamDuration)
+    //     : Number.POSITIVE_INFINITY
+
+    // const totalStreamCost = totalCost * streamCostPerHour
+
+    // return {
+    //   computeTotalCost,
+    //   perVolumeCost,
+    //   volumeTotalCost,
+    //   totalCost,
+    //   totalStreamCost,
+    // }
+  }
+
+  protected async *addPAYGStreamSteps(
+    newInstance: AddInstance,
+    account?: SuperfluidAccount,
+  ): AsyncGenerator<void, void, void> {
+    if (newInstance.payment?.type !== PaymentMethod.Stream) return
+    if (!account) throw Err.ConnectYourWallet
+    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
+
+    const { streamCost, streamDuration, receiver } = newInstance.payment
+
+    const streamCostByHour = streamCost / getHours(streamDuration) + EXTRA_WEI
+    const alephxBalance = await account.getALEPHBalance()
+    const alephxFlow = await account.getALEPHFlow(receiver)
+    const totalFlow = alephxFlow.add(streamCostByHour)
+
+    if (totalFlow.greaterThan(1)) throw Err.MaxFlowRate
+
+    const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
+    const totalRequiredAleph = usedAlephInDuration.add(streamCost)
+
+    if (alephxBalance.lt(totalRequiredAleph))
+      throw Err.InsufficientBalance(
+        totalRequiredAleph.sub(alephxBalance).toNumber(),
+      )
+
+    yield
+    await account.increaseALEPHFlow(receiver, streamCostByHour)
+  }
+
+  protected async *parseInstanceSteps(
+    newInstance: AddInstance,
+    estimateCost = false,
+  ): AsyncGenerator<void, InstancePublishConfiguration, void> {
+    const schema = !newInstance.node
+      ? InstanceManager.addSchema
+      : InstanceManager.addStreamSchema
+
+    newInstance = await schema.parseAsync(newInstance)
+
+    const { account, channel } = this
+
+    const { envVars, specs, image, sshKeys, name, tags, node } = newInstance
+
+    const variables = this.parseEnvVars(envVars)
+    const resources = this.parseSpecs(specs)
+    const metadata = this.parseMetadata(name, tags)
+    const requirements = this.parseRequirements(node)
+    const payment = this.parsePayment(newInstance.payment)
+    const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys, estimateCost)
+    const volumes = yield* this.parseVolumesSteps(
+      newInstance.volumes,
+      estimateCost,
+    )
+
+    return {
+      account,
+      channel,
+      variables,
+      resources,
+      metadata,
+      image,
+      authorized_keys,
+      volumes,
+      payment,
+      requirements,
+    }
+  }
+
+  protected async *parseVolumesSteps(
+    volumes?: VolumeField | VolumeField[],
+    estimateCost?: boolean,
+  ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
+    if (!volumes) return
+    volumes = Array.isArray(volumes) ? volumes : [volumes]
+
+    return yield* super.parseVolumesSteps(volumes, estimateCost)
+  }
+
+  protected async *parseSSHKeysSteps(
+    sshKeys?: SSHKeyField[],
+    estimateCost?: boolean,
+  ): AsyncGenerator<void, string[] | undefined, void> {
+    if (!estimateCost) {
+      // @note: Create new keys before instance
+      const newKeys = this.parseNewSSHKeys(sshKeys)
+      yield* this.sshKeyManager.addSteps(newKeys, false)
+    }
+
+    return sshKeys?.filter((key) => key.isSelected).map(({ key }) => key)
+  }
+
+  protected parseNewSSHKeys(sshKeys?: SSHKeyField[]): SSHKeyField[] {
+    return sshKeys?.filter((key) => key.isNew && key.isSelected) || []
+  }
+
+  protected async parseMessages(messages: any[]): Promise<Instance[]> {
+    /* const sizesMap = await this.fileManager.getSizesMap() */
+
+    return messages
+      .filter(({ content }) => {
+        if (content === undefined) return false
+
+        // Filter out confidential VMs
+        return !content.environment?.trusted_execution
+      })
+      .map((message) => {
+        /* const size = message.content.volumes.reduce(
+            (ac: number, cv: MachineVolume) =>
+              ac + ('size_mib' in cv ? cv.size_mib : sizesMap[cv.ref]),
+            0,
+          ) */
+
+        return {
+          id: message.item_hash,
+          ...message.content,
+          name: message.content.metadata?.name || 'Unnamed instance',
+          type: EntityType.Instance,
+          url: getExplorerURL(message),
+          date: getDate(message.time),
+          size: message.content.rootfs?.size_mib || 0,
+          confirmed: !!message.confirmed,
+        }
+      })
   }
 }

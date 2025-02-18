@@ -1,5 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { NameAndTagsField } from '../../form/useAddNameAndTags'
 import { useForm } from '@/hooks/common/useForm'
@@ -10,7 +10,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { IndexerBlockchainNetworkField } from '@/hooks/form/useAddIndexerBlockchainNetworks'
 import { IndexerTokenAccountField } from '@/hooks/form/useAddIndexerTokenAccounts'
 import { EntityType, IndexerBlockchain } from '@/helpers/constants'
-import { useEntityCost } from '@/hooks/common/useEntityCost'
+import {
+  useEntityCost,
+  UseIndexerCostProps,
+} from '@/hooks/common/useEntityCost'
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 
@@ -46,6 +49,7 @@ export type UseNewIndexerPage = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewIndexerFormState>
+  costProps: UseIndexerCostProps
   holdingRequirementsProps: Record<string, unknown>
   handleSubmit: (e: FormEvent) => Promise<void>
 }
@@ -90,14 +94,19 @@ export function useNewIndexerPage(): UseNewIndexerPage {
   const holdingRequirementsProps = IndexerManager.getStaticProgramConfig()
   const { specs, isPersistent, volumes } = holdingRequirementsProps
 
-  const { cost } = useEntityCost({
-    entityType: EntityType.Indexer,
-    props: {
-      specs,
-      isPersistent,
-      volumes,
-    },
-  })
+  const costProps: UseIndexerCostProps = useMemo(
+    () => ({
+      entityType: EntityType.Indexer,
+      props: {
+        specs,
+        isPersistent,
+        volumes,
+      },
+    }),
+    [specs, isPersistent, volumes],
+  )
+
+  const { cost } = useEntityCost(costProps)
 
   const canAfford =
     accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
@@ -113,6 +122,7 @@ export function useNewIndexerPage(): UseNewIndexerPage {
     values,
     control,
     errors,
+    costProps,
     holdingRequirementsProps,
     handleSubmit,
   }

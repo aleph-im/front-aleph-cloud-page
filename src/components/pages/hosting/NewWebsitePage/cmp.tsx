@@ -20,11 +20,11 @@ import BackButtonSection from '@/components/common/BackButtonSection'
 export default function NewWebsitePage({ mainRef }: PageProps) {
   const {
     control,
-    values,
     address,
     accountBalance,
     isCreateButtonDisabled,
     errors,
+    costProps,
     handleSubmit,
     handleBack,
   } = useNewWebsitePage()
@@ -118,9 +118,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         <CheckoutSummary
           control={control}
           address={address}
-          type={EntityType.Website}
-          website={values.website}
-          domains={values.domains}
+          costProps={costProps}
           unlockedAmount={accountBalance}
           paymentMethod={PaymentMethod.Hold}
           mainRef={mainRef}

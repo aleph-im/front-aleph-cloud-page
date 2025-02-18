@@ -1,4 +1,5 @@
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import React from 'react'
+import { PaymentMethod } from '@/helpers/constants'
 import { useNewVolumePage } from '@/hooks/pages/storage/useNewVolumePage'
 import { Button } from '@aleph-front/core'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
@@ -6,22 +7,19 @@ import Container from '@/components/common/CenteredContainer'
 import { AddNewVolume } from '@/components/form/AddVolume'
 import { Form } from '@/components/form/Form'
 import { SectionTitle } from '@/components/common/CompositeTitle'
-import { useMemo } from 'react'
 import BackButtonSection from '@/components/common/BackButtonSection'
 
-export default function NewVolumePage() {
+export function NewVolumePage() {
   const {
     control,
-    values,
     address,
     accountBalance,
     isCreateButtonDisabled,
     errors,
+    costProps,
     handleSubmit,
     handleBack,
   } = useNewVolumePage()
-
-  const volumes = useMemo(() => [values], [values])
 
   return (
     <>
@@ -35,8 +33,7 @@ export default function NewVolumePage() {
         </section>
         <CheckoutSummary
           address={address}
-          type={EntityType.Volume}
-          volumes={volumes}
+          costProps={costProps}
           unlockedAmount={accountBalance}
           paymentMethod={PaymentMethod.Hold}
           description={
@@ -63,3 +60,5 @@ export default function NewVolumePage() {
     </>
   )
 }
+
+export default React.memo(NewVolumePage)
