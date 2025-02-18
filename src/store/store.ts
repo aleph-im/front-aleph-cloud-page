@@ -9,6 +9,7 @@ import { Website } from '@/domain/website'
 import { ManagerState, getManagerReducer } from './manager'
 import { Confidential } from '@/domain/confidential'
 import { AuthorizationState, getAuthorizationReducer } from './authorization'
+import { GpuInstance } from '@/domain/gpuInstance'
 
 export type StoreSubstate = Record<string, unknown>
 
@@ -55,6 +56,7 @@ export type StoreState = {
   ssh: EntityState<SSHKey>
   domain: EntityState<Domain>
   instance: EntityState<Instance>
+  gpuInstance: EntityState<GpuInstance>
   confidential: EntityState<Confidential>
   program: EntityState<Program>
   volume: EntityState<Volume>
@@ -62,6 +64,7 @@ export type StoreState = {
 
   programVolume: EntityState<Volume>
   instanceVolume: EntityState<Volume>
+  gpuInstanceVolume: EntityState<Volume>
   confidentialVolume: EntityState<Volume>
 }
 
@@ -72,6 +75,7 @@ export const storeReducer = mergeReducers<StoreState>({
   ssh: getEntityReducer<SSHKey>('ssh', 'id'),
   domain: getEntityReducer<Domain>('domain', 'id'),
   instance: getEntityReducer<Instance>('instance', 'id'),
+  gpuInstance: getEntityReducer<GpuInstance>('gpuInstance', 'id'),
   confidential: getEntityReducer<Confidential>('confidential', 'id'),
   program: getEntityReducer<Program>('program', 'id'),
   volume: getEntityReducer<Volume>('volume', 'id'),
@@ -80,6 +84,7 @@ export const storeReducer = mergeReducers<StoreState>({
   // @note: refactor this entities
   programVolume: getEntityReducer<Volume>('programVolume', 'id'),
   instanceVolume: getEntityReducer<Volume>('instanceVolume', 'id'),
+  gpuInstanceVolume: getEntityReducer<Volume>('gpuInstanceVolume', 'id'),
   confidentialVolume: getEntityReducer<Volume>('confidentialVolume', 'id'),
 })
 

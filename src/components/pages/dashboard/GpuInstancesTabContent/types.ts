@@ -1,5 +1,5 @@
-import { Instance } from '@/domain/instance'
+import { GpuInstance } from '@/domain/gpuInstance'
 
 export type GpuInstancesTabContentProps = {
-  data: Instance[]
+  data: GpuInstance[]
 }

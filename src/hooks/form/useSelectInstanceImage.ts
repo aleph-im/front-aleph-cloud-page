@@ -3,12 +3,12 @@ import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 export type InstanceImageField = string
 
-export const defaultInstanceImage = InstanceImageId.Debian11
+export const defaultInstanceImage = InstanceImageId.Debian12
 
 export const defaultInstanceImageOptions = [
-  InstanceImages[InstanceImageId.Debian11],
   InstanceImages[InstanceImageId.Debian12],
   InstanceImages[InstanceImageId.Ubuntu22],
+  InstanceImages[InstanceImageId.Ubuntu24],
 ]
 
 export type UseSelectInstanceImageProps = {

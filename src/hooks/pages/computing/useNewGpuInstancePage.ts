@@ -14,7 +14,6 @@ import {
   isBlockchainSupported as isBlockchainPAYGCompatible,
 } from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
-import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   defaultNameAndTags,
   NameAndTagsField,
@@ -61,13 +60,13 @@ import useFetchTermsAndConditions, {
 } from '@/hooks/common/useFetchTermsAndConditions'
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
 import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceManager'
+import { GpuInstanceManager } from '@/domain/gpuInstance'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
   specs: InstanceSpecsField
   sshKeys: SSHKeyField[]
   volumes?: VolumeField[]
-  envVars?: EnvVarField[]
   domains?: DomainField[]
   systemVolumeSize: number
   nodeSpecs?: CRNSpecs
@@ -295,9 +294,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   } = useForm({
     defaultValues,
     onSubmit,
-    resolver: zodResolver(
-      !node ? InstanceManager.addSchema : InstanceManager.addStreamSchema,
-    ),
+    resolver: zodResolver(GpuInstanceManager.addStreamSchema),
     readyDeps: [defaultValues],
   })
 

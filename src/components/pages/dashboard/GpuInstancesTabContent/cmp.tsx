@@ -68,7 +68,7 @@ export const GpuInstancesTabContent = React.memo(
                         <ButtonLink
                           kind="functional"
                           variant="secondary"
-                          href={`/computing/instance/${row.id}`}
+                          href={`/computing/gpu-instance/${row.id}`}
                         >
                           <Icon name="angle-right" size="lg" />
                         </ButtonLink>

@@ -107,7 +107,7 @@ export class ConfidentialManager
       .filter(({ content }) => {
         if (content === undefined) return false
 
-        // Filter out normal instances (non-confidential VMs)
+        // Filter confidential VMs
         return content.environment?.trusted_execution
       })
       .map((message) => {

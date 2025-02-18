@@ -494,8 +494,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             </SectionTitle>
             <p tw="mb-6">
               Customize your instance with our Advanced Configuration Options.
-              Add volumes, SSH keys, environment variables, and custom domains
-              to meet your specific needs.
+              Add volumes and custom domains to meet your specific needs.
             </p>
             <div tw="px-0 my-6">
               <div tw="mb-4">
@@ -508,21 +507,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                     control={control}
                     systemVolumeSize={values.systemVolumeSize}
                   />
-                </SwitchToggleContainer>
-              </div>
-              <div tw="mb-4">
-                <SwitchToggleContainer label="Add Environmental Variables">
-                  <TextGradient forwardedAs="h2" type="h6" color="main0">
-                    Add environment variables
-                  </TextGradient>
-                  <p tw="mb-6">
-                    Define key-value pairs that act as configuration settings
-                    for your web3 instance. Environment variables offer a
-                    convenient way to store information, manage configurations,
-                    and modify your application&apos;s behaviour without
-                    altering the source code.
-                  </p>
-                  <AddEnvVars name="envVars" control={control} />
                 </SwitchToggleContainer>
               </div>
               <div tw="mb-4">

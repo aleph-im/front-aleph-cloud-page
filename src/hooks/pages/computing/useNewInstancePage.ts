@@ -14,7 +14,6 @@ import {
   isBlockchainSupported as isBlockchainPAYGCompatible,
 } from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
-import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   defaultNameAndTags,
   NameAndTagsField,
@@ -69,7 +68,6 @@ export type NewInstanceFormState = NameAndTagsField & {
   specs: InstanceSpecsField
   sshKeys: SSHKeyField[]
   volumes?: VolumeField[]
-  envVars?: EnvVarField[]
   domains?: DomainField[]
   systemVolumeSize: number
   nodeSpecs?: CRNSpecs

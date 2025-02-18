@@ -10,13 +10,13 @@ import {
 } from '@aleph-sdk/message'
 import {
   CheckoutStepType,
+  communityWalletAddress,
   defaultGpuInstanceChannel,
-  defaultInstanceChannel,
   EntityType,
   EXTRA_WEI,
   PaymentMethod,
 } from '@/helpers/constants'
-import { floorTo18Decimals, getDate, getExplorerURL } from '@/helpers/utils'
+import { getDate, getExplorerURL } from '@/helpers/utils'
 import {
   ExecutableCost,
   ExecutableCostProps,
@@ -165,14 +165,11 @@ export class GpuInstanceManager
 
     const { totalCost } = instanceCosts
 
-    await account.decreaseALEPHFlow(
-      receiver,
-      this.calculateReceiverFlow(totalCost) + EXTRA_WEI,
-    )
+    await account.decreaseALEPHFlow(receiver, this.calculateReceiverFlow(0.84))
 
     await account.decreaseALEPHFlow(
-      receiver,
-      this.calculateCommunityFlow(totalCost) + EXTRA_WEI,
+      communityWalletAddress,
+      this.calculateCommunityFlow(0.84),
     )
 
     try {
@@ -268,14 +265,10 @@ export class GpuInstanceManager
   protected async parseMessages(messages: any[]): Promise<GpuInstance[]> {
     return messages
       .filter(({ content }) => {
-        console.log('content', content)
         if (content === undefined) return false
 
-        // Filter out confidential instances
-        if (content.environment?.trusted_execution) return false
-
         // Filter GPU Instances
-        return content.requirements?.gpu?.length > 0
+        return content.requirements?.gpu?.length
       })
       .map((message) => {
         return {
@@ -325,7 +318,7 @@ export class GpuInstanceManager
     const alephxBalance = await account.getALEPHBalance()
     const recieverAlephxFlow = await account.getALEPHFlow(receiver)
     const communityAlephxFlow = await account.getALEPHFlow(
-      '0x5aBd3258C5492fD378EBC2e0017416E199e5Da56',
+      communityWalletAddress,
     )
 
     const receiverTotalFlow = recieverAlephxFlow.add(streamCostByHourToReceiver)
@@ -352,7 +345,7 @@ export class GpuInstanceManager
     console.log('streamCostByHourToReceiver', streamCostByHourToReceiver)
 
     await account.increaseALEPHFlow(
-      '0x5aBd3258C5492fD378EBC2e0017416E199e5Da56',
+      communityWalletAddress,
       streamCostByHourToCommunity,
     )
     await account.increaseALEPHFlow(receiver, streamCostByHourToReceiver)
