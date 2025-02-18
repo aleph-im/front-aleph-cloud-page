@@ -652,6 +652,8 @@ export abstract class ExecutableManager {
     entityProps: ExecutableCostProps,
     costs: MessageCost,
   ): CostLine[] {
+    if (!costs) return []
+
     const detailMap = costs.detail.reduce(
       (ac, cv) => {
         ac[cv.type] = cv

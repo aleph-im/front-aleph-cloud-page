@@ -11,6 +11,7 @@ import {
 } from '@aleph-sdk/client'
 import {
   EntityType,
+  PaymentMethod,
   defaultProgramChannel,
   defaultVMURL,
   programStorageURL,
@@ -246,11 +247,62 @@ export class ProgramManager
     }
   }
 
-  async getCost(props: ProgramCostProps): Promise<ProgramCost> {
-    return super.getExecutableCostLines({
-      ...props,
-      type: EntityType.Program,
-    })
+  async getCost(newProgram: ProgramCostProps): Promise<ProgramCost> {
+    const totalStreamCost = Number.POSITIVE_INFINITY
+    let totalCost = Number.POSITIVE_INFINITY
+    const paymentMethod = newProgram.payment?.type || PaymentMethod.Hold
+
+    const emptyCost: ProgramCost = {
+      cost: totalCost,
+      paymentMethod,
+      lines: [],
+    }
+
+    let parsedProgram: ProgramPublishConfiguration
+
+    console.log('generating parsedProgram')
+    try {
+      const steps = this.parseProgramSteps(newProgram, true)
+
+      while (true) {
+        const { value, done } = await steps.next()
+        console.log('value', value)
+        parsedProgram = value as any
+        if (done) break
+      }
+    } catch (e) {
+      console.error(e)
+      return emptyCost
+    }
+
+    console.log('parsedProgram', parsedProgram)
+    const costs =
+      await this.sdkClient.programClient.getEstimatedCost(parsedProgram)
+
+    console.log('costs', costs)
+
+    totalCost = Number(costs.cost)
+
+    const lines = this.getExecutableCostLines(
+      {
+        type: EntityType.Program,
+        isPersistent: newProgram.isPersistent,
+        ...parsedProgram,
+      },
+      costs,
+    )
+
+    return {
+      cost: this.parseCost(paymentMethod, totalCost),
+      paymentMethod,
+      lines: [...lines],
+    }
+
+    ///
+    // return super.getExecutableCostLines({
+    //   ...props,
+    //   type: EntityType.Program,
+    // })
   }
 
   protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {

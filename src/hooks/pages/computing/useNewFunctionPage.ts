@@ -21,6 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { CustomFunctionRuntimeField } from '@/domain/runtime'
 import {
   useEntityCost,
+  UseEntityCostReturn,
   UseProgramCostProps,
 } from '@/hooks/common/useEntityCost'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
@@ -59,7 +60,7 @@ export type UseNewFunctionPage = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewFunctionFormState>
-  costProps: UseProgramCostProps
+  cost: UseEntityCostReturn
   handleSubmit: (e: FormEvent) => Promise<void>
   handleBack: () => void
 }
@@ -136,11 +137,10 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     [values],
   )
 
-  const { cost } = useEntityCost(costProps)
+  const cost = useEntityCost(costProps)
   console.log('function cost', cost)
 
-  const canAfford =
-    accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+  const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
@@ -157,7 +157,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     values,
     control,
     errors,
-    costProps,
+    cost,
     handleSubmit,
     handleBack,
   }
