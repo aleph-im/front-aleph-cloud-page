@@ -1,5 +1,5 @@
 import { Account } from '@aleph-sdk/account'
-import { MessageType, StoreContent } from '@aleph-sdk/message'
+import { MessageCostLine, MessageType, StoreContent } from '@aleph-sdk/message'
 import Err from '@/helpers/errors'
 import {
   EntityType,
@@ -8,7 +8,12 @@ import {
   defaultVolumeChannel,
   programStorageURL,
 } from '@/helpers/constants'
-import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
+import {
+  downloadBlob,
+  getDate,
+  getExplorerURL,
+  humanReadableSize,
+} from '@/helpers/utils'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
 import { EntityManager, EntityManagerFetchOptions } from './types'
@@ -21,7 +26,7 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
-import { CostSummary } from './cost'
+import { CostLine, CostSummary } from './cost'
 
 export const mockVolumeRef =
   'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe'
@@ -301,14 +306,15 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     }
   }
 
-  async getCost({ volume }: VolumeCostProps): Promise<VolumeCost> {
-    const totalStreamCost = Number.POSITIVE_INFINITY
+  async getCost(props: VolumeCostProps): Promise<VolumeCost> {
     let totalCost = Number.POSITIVE_INFINITY
 
+    const { volume, paymentMethod = PaymentMethod.Hold } = props
+
     const emptyCost = {
-      totalCost,
-      totalStreamCost,
-      perVolumeCost: [],
+      paymentMethod,
+      cost: totalCost,
+      lines: [],
     }
 
     if (!volume) return emptyCost
@@ -318,7 +324,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
     if (!newVolume || !newVolume.file) return emptyCost
 
-    const costs = await this.sdkClient.storeClient.getCost({
+    const costs = await this.sdkClient.storeClient.getEstimatedCost({
       account: this.account,
       fileObject: newVolume.file,
     })
@@ -337,10 +343,31 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
     console.log(costs, perVolumeCost)
 
+    const lines = this.getCostLines(newVolume, paymentMethod, costs.detail)
+
+    console.log('lines', lines)
     return {
-      perVolumeCost,
-      totalCost,
-      totalStreamCost,
+      paymentMethod,
+      cost: totalCost,
+      lines,
     }
+  }
+
+  protected getCostLines(
+    volume: AddNewVolume,
+    paymentMethod: PaymentMethod,
+    costDetailLines: MessageCostLine[],
+  ): CostLine[] {
+    return costDetailLines.map((line) => ({
+      id: volume.file?.name || '',
+      name: line.name,
+      detail: volume?.file?.size
+        ? humanReadableSize(volume.file.size)
+        : 'Unknown size',
+      cost:
+        paymentMethod === PaymentMethod.Hold
+          ? +line.cost_hold
+          : +line.cost_stream,
+    }))
   }
 }

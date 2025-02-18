@@ -7,7 +7,11 @@ import { NewVolumeStandaloneField } from '@/hooks/form/useAddVolume'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEntityCost, UseEntityCostReturn, UseVolumeCostProps } from '@/hooks/common/useEntityCost'
+import {
+  useEntityCost,
+  UseEntityCostReturn,
+  UseVolumeCostProps,
+} from '@/hooks/common/useEntityCost'
 import { EntityType } from '@/helpers/constants'
 import {
   stepsCatalog,
@@ -99,8 +103,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
 
   const cost = useEntityCost(costProps)
 
-  const canAfford =
-    accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
+  const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false

@@ -16,7 +16,7 @@ export function NewVolumePage() {
     accountBalance,
     isCreateButtonDisabled,
     errors,
-    costProps,
+    cost,
     handleSubmit,
     handleBack,
   } = useNewVolumePage()
@@ -33,7 +33,7 @@ export function NewVolumePage() {
         </section>
         <CheckoutSummary
           address={address}
-          costProps={costProps}
+          cost={cost}
           unlockedAmount={accountBalance}
           paymentMethod={PaymentMethod.Hold}
           description={

@@ -124,11 +124,13 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     () => ({
       entityType: EntityType.Program,
       props: {
+        name: values.name || 'MOCK',
         specs: values.specs,
         isPersistent: values.isPersistent,
         volumes: values.volumes,
         domains: values.domains,
         paymentMethod: values.paymentMethod,
+        code: values.code,
       },
     }),
     [values],
