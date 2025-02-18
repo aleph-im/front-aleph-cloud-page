@@ -2,9 +2,14 @@ import { Buffer } from 'buffer'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   BaseExecutableContent,
+  CostEstimationMachineVolume,
   HostRequirements,
   MachineResources,
   MachineVolume,
+  MAXIMUM_DISK_SIZE,
+  MessageCost,
+  MessageCostLine,
+  MessageCostType,
   Payment,
   PaymentType,
   PaymentType as SDKPaymentType,
@@ -12,8 +17,7 @@ import {
 import {
   AddExistingVolume,
   AddPersistentVolume,
-  VolumeCost,
-  VolumeCostProps,
+  mockVolumeRef,
   VolumeManager,
   VolumeType,
 } from './volume'
@@ -25,12 +29,10 @@ import { Domain, DomainManager } from './domain'
 import {
   CheckoutStepType,
   EntityType,
+  EntityTypeName,
   PaymentMethod,
 } from '@/helpers/constants'
-import {
-  getHours,
-  StreamDurationField,
-} from '@/hooks/form/useSelectStreamDuration'
+import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
@@ -39,31 +41,10 @@ import Err from '@/helpers/errors'
 import { BlockchainId } from './connect/base'
 import { CRN, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
-import { sleep } from '@aleph-front/core'
+import { convertByteUnits, humanReadableSize, sleep } from '@aleph-front/core'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import { isBlockchainPAYGCompatible } from './blockchain'
-
-type ExecutableCapabilitiesProps = {
-  internetAccess?: boolean
-  blockchainRPC?: boolean
-  enableSnapshots?: boolean
-}
-
-export type ExecutableCostProps = VolumeCostProps & {
-  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
-  isPersistent?: boolean
-  paymentMethod?: PaymentMethod
-  specs?: InstanceSpecsField
-  capabilities?: ExecutableCapabilitiesProps
-  streamDuration?: StreamDurationField
-}
-
-export type ExecutableCost = Omit<VolumeCost, 'totalCost'> & {
-  computeTotalCost: number
-  volumeTotalCost: number
-  totalCost: number
-  totalStreamCost: number
-}
+import { CostLine } from './cost'
 
 export type HoldPaymentConfiguration = {
   chain: BlockchainId
@@ -141,77 +122,22 @@ export type AuthPubKeyToken = {
 
 export const KEYPAIR_TTL = 1000 * 60 * 60 * 2
 
+export type ExecutableCostProps = (
+  | {
+      type: EntityType.Instance | EntityType.GpuInstance
+    }
+  | {
+      type: EntityType.Program
+      isPersistent: boolean
+    }
+) & {
+  resources?: Partial<MachineResources>
+  domains?: Domain[]
+  volumes?: CostEstimationMachineVolume[]
+}
+
 export abstract class ExecutableManager {
   protected static cachedPubKeyToken?: AuthPubKeyToken
-
-  /**
-   * Calculates the amount of tokens required to deploy a function
-   * https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
-   */
-  static async getExecutableCost({
-    type,
-    isPersistent,
-    specs,
-    streamDuration = {
-      duration: 1,
-      unit: 'h',
-    },
-    paymentMethod = PaymentMethod.Hold,
-    capabilities = {},
-    volumes = [],
-  }: ExecutableCostProps): Promise<ExecutableCost> {
-    if (!specs)
-      return {
-        computeTotalCost: 0,
-        volumeTotalCost: 0,
-        perVolumeCost: [],
-        totalCost: 0,
-        totalStreamCost: 0,
-      }
-
-    isPersistent = type === EntityType.Instance ? true : isPersistent
-
-    const basePrice =
-      paymentMethod === PaymentMethod.Hold
-        ? isPersistent
-          ? 1_000
-          : 200
-        : 0.055
-
-    const capabilitiesCost = Object.values(capabilities).reduce(
-      (ac, cv) => ac + Number(cv),
-      1, // @note: baseAlephAPI always included,
-    )
-
-    const computeTotalCost = basePrice * specs.cpu * capabilitiesCost
-
-    const sizeDiscount = type === EntityType.Instance ? 0 : specs.storage
-
-    const { perVolumeCost, totalCost: volumeTotalCost } =
-      await VolumeManager.getCost({
-        volumes,
-        sizeDiscount,
-        paymentMethod,
-        streamDuration,
-      })
-
-    const totalCost = volumeTotalCost + computeTotalCost
-
-    const streamCostPerHour =
-      paymentMethod === PaymentMethod.Stream && streamDuration
-        ? getHours(streamDuration)
-        : Number.POSITIVE_INFINITY
-
-    const totalStreamCost = totalCost * streamCostPerHour
-
-    return {
-      computeTotalCost,
-      perVolumeCost,
-      volumeTotalCost,
-      totalCost,
-      totalStreamCost,
-    }
-  }
 
   constructor(
     protected account: Account,
@@ -605,6 +531,7 @@ export abstract class ExecutableManager {
 
   protected async *parseVolumesSteps(
     volumes?: VolumeField | VolumeField[],
+    estimateCost?: boolean,
   ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
     if (!volumes) return
 
@@ -612,22 +539,27 @@ export abstract class ExecutableManager {
     if (volumes.length === 0) return
 
     // @note: Create new volumes before and cast them to ExistingVolume type
-    const messages = yield* this.volumeManager.addSteps(volumes)
+    const messages = !estimateCost
+      ? yield* this.volumeManager.addSteps(volumes)
+      : []
 
     const parsedVolumes: (AddExistingVolume | AddPersistentVolume)[] =
-      volumes.map((volume, i) => {
-        if (volume.volumeType === VolumeType.New) {
+      await Promise.all(
+        volumes.map(async (volume, i) => {
+          if (volume.volumeType !== VolumeType.New) return volume
+
+          const refHash = messages[i]?.id || mockVolumeRef
+          const estimated_size_mib = await VolumeManager.getVolumeSize(volume)
+
           return {
             ...volume,
             volumeType: VolumeType.Existing,
-            refHash: messages[i].id,
+            refHash,
+            estimated_size_mib,
           } as AddExistingVolume
-        }
+        }),
+      )
 
-        return volume
-      })
-
-    // @todo: Fix SDK types (mount is not an string[], remove is_read_only fn)
     return parsedVolumes.map((volume) => {
       if (volume.volumeType === VolumeType.Persistent) {
         const { mountPath: mount, size: size_mib, name } = volume
@@ -644,10 +576,10 @@ export abstract class ExecutableManager {
         refHash: ref,
         mountPath: mount,
         useLatest: use_latest = false,
+        estimated_size_mib,
       } = volume
-
-      return { ref, mount, use_latest }
-    }) as unknown as MachineVolume[]
+      return { mount, ref, use_latest, estimated_size_mib }
+    }) as MachineVolume[]
   }
 
   protected parseSpecs(
@@ -714,5 +646,136 @@ export abstract class ExecutableManager {
       }
 
     return requirements
+  }
+
+  protected getExecutableCostLines(
+    entityProps: ExecutableCostProps,
+    costs: MessageCost,
+  ): CostLine[] {
+    if (!costs) return []
+
+    const detailMap = costs.detail.reduce(
+      (ac, cv) => {
+        ac[cv.type] = cv
+        return ac
+      },
+      {} as Record<MessageCostType, MessageCostLine>,
+    )
+
+    // Execution
+
+    const { vcpus: cpu = 0, memory: ram = 0 } = entityProps.resources || {}
+
+    const cpuStr = `${cpu}x86-64bit`
+
+    const ramStr = `.${convertByteUnits(ram, {
+      from: 'MiB',
+      to: 'GiB',
+      displayUnit: false,
+    })}GB-RAM`
+
+    const rootfsVolume =
+      detailMap[MessageCostType.EXECUTION_INSTANCE_VOLUME_ROOTFS]
+    const storage = rootfsVolume
+      ? ram * 10 > MAXIMUM_DISK_SIZE
+        ? MAXIMUM_DISK_SIZE
+        : ram * 10
+      : undefined
+
+    const storageStr = !storage
+      ? ''
+      : `.${convertByteUnits(storage, {
+          from: 'MiB',
+          to: 'GiB',
+          displayUnit: false,
+        })}GB-HDD`
+
+    const detail = `${cpuStr}${ramStr}${storageStr}`
+
+    const paymentMethod =
+      costs.payment_type === PaymentType.hold
+        ? PaymentMethod.Hold
+        : PaymentMethod.Stream
+
+    const costProp =
+      paymentMethod === PaymentMethod.Hold ? 'cost_hold' : 'cost_stream'
+
+    const executionLines = [
+      {
+        id: MessageCostType.EXECUTION,
+        name: EntityTypeName[entityProps.type].toUpperCase(),
+        detail,
+        cost: this.parseCost(
+          paymentMethod,
+          Number(detailMap[MessageCostType.EXECUTION][costProp]),
+        ),
+      },
+    ]
+    console.log('executionLines', executionLines)
+
+    // Volumes
+
+    const volumesMap = (entityProps.volumes || []).reduce(
+      (ac, cv) => {
+        ac[cv.mount] = cv
+        return ac
+      },
+      {} as Record<string, CostEstimationMachineVolume>,
+    )
+
+    const volumesLines = costs.detail
+      .filter(
+        (detail) =>
+          detail.type === MessageCostType.EXECUTION_VOLUME_INMUTABLE ||
+          detail.type === MessageCostType.EXECUTION_VOLUME_PERSISTENT,
+      )
+      .map((detail) => {
+        const [, mount] = detail.name.split(':')
+        const vol = volumesMap[mount]
+        const size = 'size_mib' in vol ? vol.size_mib : vol.estimated_size_mib
+        const label = 'size_mib' in vol ? 'PERSISTENT' : 'VOLUME'
+
+        return {
+          id: `${detail.type}|${detail.name}`,
+          name: 'STORAGE',
+          label,
+          detail: humanReadableSize(size, 'MiB'),
+          cost: this.parseCost(paymentMethod, Number(detail[costProp])),
+        }
+      })
+
+    // Persistent
+
+    const programTypeLines =
+      entityProps.type === EntityType.Program
+        ? [
+            {
+              id: 'PROGRAM_TYPE',
+              name: 'TYPE',
+              detail: entityProps.isPersistent ? 'persistent' : 'on-demand',
+              cost: this.parseCost(paymentMethod, 0),
+            },
+          ]
+        : []
+
+    // Domains
+
+    const domainsLines = (entityProps.domains || []).map((domain) => ({
+      id: 'DOMAIN',
+      name: 'CUSTOM DOMAIN',
+      detail: domain.name,
+      cost: this.parseCost(paymentMethod, 0),
+    }))
+
+    return [
+      ...executionLines,
+      ...volumesLines,
+      ...programTypeLines,
+      ...domainsLines,
+    ]
+  }
+
+  protected parseCost(paymentMethod: PaymentMethod, cost: number) {
+    return paymentMethod === PaymentMethod.Hold ? cost : cost * 3600
   }
 }

@@ -20,7 +20,7 @@ export const websiteFrameworkSchema = z.enum([
 ])
 
 export const websiteFolderSchema = z
-  .custom<File>(
+  .custom<File[]>(
     (val) =>
       Array.isArray(val)
         ? val.every((v) => v instanceof File)

@@ -1,4 +1,4 @@
-import { FormEvent, useCallback } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
@@ -9,7 +9,11 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
-import { useEntityCost } from '@/hooks/common/useEntityCost'
+import {
+  useEntityCost,
+  UseEntityCostReturn,
+  UseWebsiteCostProps,
+} from '@/hooks/common/useEntityCost'
 import {
   NameAndTagsField,
   defaultNameAndTags,
@@ -43,6 +47,7 @@ export type UseNewWebsitePagePageReturn = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewWebsiteFormState>
+  cost: UseEntityCostReturn
   handleSubmit: (e: FormEvent) => Promise<void>
   handleBack: () => void
 }
@@ -102,16 +107,21 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
 
   const values = useWatch({ control }) as NewWebsiteFormState
 
-  const { cost } = useEntityCost({
-    entityType: EntityType.Website,
-    props: {
-      website: values.website,
-      payment: values.payment,
-    },
-  })
+  const costProps: UseWebsiteCostProps = useMemo(
+    () => ({
+      entityType: EntityType.Website,
+      props: {
+        website: values.website,
+        payment: values.payment,
+        domains: values.domains,
+      },
+    }),
+    [values],
+  )
 
-  const canAfford =
-    accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+  const cost = useEntityCost(costProps)
+
+  const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford || !values.framework || !values.name
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
@@ -128,6 +138,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     values,
     control,
     errors,
+    cost,
     handleSubmit,
     handleBack,
   }

@@ -11,6 +11,7 @@ import {
 } from '@aleph-sdk/client'
 import {
   EntityType,
+  PaymentMethod,
   defaultProgramChannel,
   defaultVMURL,
   programStorageURL,
@@ -18,12 +19,7 @@ import {
 import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
 import { MachineVolume, MessageType, StoreMessage } from '@aleph-sdk/message'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import {
-  ExecutableManager,
-  ExecutableCost,
-  ExecutableCostProps,
-  PaymentConfiguration,
-} from './executable'
+import { ExecutableManager, PaymentConfiguration } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { CustomFunctionRuntimeField } from './runtime'
 import { FileManager } from './file'
@@ -40,6 +36,7 @@ import { FunctionLangId, FunctionLanguage } from './lang'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
 import { NodeManager } from './node'
+import { CostSummary } from './cost'
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -78,11 +75,9 @@ export type Program = Omit<ProgramContent, 'type'> & {
   confirmed?: boolean
 }
 
-export type ProgramCostProps = Omit<ExecutableCostProps, 'type'> & {
-  isPersistent: boolean
-}
+export type ProgramCostProps = AddProgram
 
-export type ProgramCost = ExecutableCost
+export type ProgramCost = CostSummary
 
 export type ParsedCodeType = {
   encoding: Encoding
@@ -103,16 +98,6 @@ export class ProgramManager
   implements EntityManager<Program, AddProgram>
 {
   static addSchema = functionSchema
-
-  /**
-   * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
-   */
-  static async getCost(props: ProgramCostProps): Promise<ProgramCost> {
-    return ExecutableManager.getExecutableCost({
-      ...props,
-      type: EntityType.Program,
-    })
-  }
 
   constructor(
     protected account: Account,
@@ -262,6 +247,64 @@ export class ProgramManager
     }
   }
 
+  async getCost(newProgram: ProgramCostProps): Promise<ProgramCost> {
+    const totalStreamCost = Number.POSITIVE_INFINITY
+    let totalCost = Number.POSITIVE_INFINITY
+    const paymentMethod = newProgram.payment?.type || PaymentMethod.Hold
+
+    const emptyCost: ProgramCost = {
+      cost: totalCost,
+      paymentMethod,
+      lines: [],
+    }
+
+    let parsedProgram: ProgramPublishConfiguration
+
+    console.log('generating parsedProgram')
+    try {
+      const steps = this.parseProgramSteps(newProgram, true)
+
+      while (true) {
+        const { value, done } = await steps.next()
+        console.log('value', value)
+        parsedProgram = value as any
+        if (done) break
+      }
+    } catch (e) {
+      console.error(e)
+      return emptyCost
+    }
+
+    console.log('parsedProgram', parsedProgram)
+    const costs =
+      await this.sdkClient.programClient.getEstimatedCost(parsedProgram)
+
+    console.log('costs', costs)
+
+    totalCost = Number(costs.cost)
+
+    const lines = this.getExecutableCostLines(
+      {
+        type: EntityType.Program,
+        isPersistent: newProgram.isPersistent,
+        ...parsedProgram,
+      },
+      costs,
+    )
+
+    return {
+      cost: this.parseCost(paymentMethod, totalCost),
+      paymentMethod,
+      lines: [...lines],
+    }
+
+    ///
+    // return super.getExecutableCostLines({
+    //   ...props,
+    //   type: EntityType.Program,
+    // })
+  }
+
   protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {
     if (code.type === 'text') {
       const jsZip = new JSZip()
@@ -304,6 +347,7 @@ export class ProgramManager
 
   protected async *parseProgramSteps(
     newProgram: AddProgram,
+    calculateCost = false,
   ): AsyncGenerator<void, ProgramPublishConfiguration, void> {
     newProgram = await ProgramManager.addSchema.parseAsync(newProgram)
 

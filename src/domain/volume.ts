@@ -1,5 +1,5 @@
 import { Account } from '@aleph-sdk/account'
-import { MessageType, StoreContent } from '@aleph-sdk/message'
+import { MessageCostLine, MessageType, StoreContent } from '@aleph-sdk/message'
 import Err from '@/helpers/errors'
 import {
   EntityType,
@@ -8,7 +8,12 @@ import {
   defaultVolumeChannel,
   programStorageURL,
 } from '@/helpers/constants'
-import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
+import {
+  downloadBlob,
+  getDate,
+  getExplorerURL,
+  humanReadableSize,
+} from '@/helpers/utils'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { FileManager } from './file'
 import { EntityManager, EntityManagerFetchOptions } from './types'
@@ -16,12 +21,15 @@ import {
   newIsolatedVolumeSchema,
   newIsolatedVolumesSchema,
 } from '@/helpers/schemas/volume'
-import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+import { CostLine, CostSummary } from './cost'
+
+export const mockVolumeRef =
+  'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe'
 
 export { VolumeType }
 
@@ -39,6 +47,7 @@ export type AddExistingVolume = {
   refHash: string
   useLatest: boolean
   size?: number
+  estimated_size_mib?: number
 }
 
 export type AddPersistentVolume = {
@@ -89,26 +98,11 @@ export type PersistentVolume = BaseVolume & {
 export type Volume = NewVolume | ExistingVolume | PersistentVolume
 
 export type VolumeCostProps = {
+  volume?: Volume | AddVolume
   paymentMethod?: PaymentMethod
-  volumes?: (Volume | AddVolume)[]
-  sizeDiscount?: number
-  streamDuration?: StreamDurationField
 }
 
-export type PerVolumeCostItem = {
-  size: number
-  price: number
-  discount: number
-  cost: number
-}
-
-export type PerVolumeCost = PerVolumeCostItem[]
-
-export type VolumeCost = {
-  perVolumeCost: PerVolumeCost
-  totalCost: number
-  totalStreamCost: number
-}
+export type VolumeCost = CostSummary
 
 export class VolumeManager implements EntityManager<Volume, AddVolume> {
   static addSchema = newIsolatedVolumeSchema
@@ -127,106 +121,6 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     }
 
     return volume.size || 0
-  }
-
-  /**
-   * Returns the size of a volume in mb
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static getStorageVolumeMiBPrice(volume: Volume | AddVolume): number {
-    // @todo: Right now we are not taking into account storage costs of the additional
-    // volumes (they are considered included as part of the free storage tiers)
-    return 0
-
-    // if (volume.volumeType !== VolumeType.New) return 0
-    // return 1 / 3
-  }
-
-  /**
-   * Returns the size of a volume in mb
-   */
-  static getExecutionVolumeMiBPrice(
-    volume: Volume | AddVolume,
-    paymentMethod: PaymentMethod,
-  ): number {
-    return paymentMethod === PaymentMethod.Hold ? 1 / 20 : 0.001 / 1024
-  }
-
-  // @note: The algorithm for calculating the cost per volume is as follows:
-  // 1. Calculate the storage allowance for the function, the more compute units, the more storage allowance
-  // 2. For each volume, subtract the storage allowance from the volume size
-  // 3. If there is more storage than allowance left, the additional storage is charged at ~20~ 1/3 tokens per mb
-  static async getPerVolumeCost({
-    volumes = [],
-    sizeDiscount = 0,
-    paymentMethod = PaymentMethod.Hold,
-  }: VolumeCostProps): Promise<PerVolumeCost> {
-    return Promise.all(
-      volumes.map(async (volume) => {
-        const size = await this.getVolumeSize(volume)
-        const mibStoragePrice = this.getStorageVolumeMiBPrice(volume)
-        const mibExecutionPrice = this.getExecutionVolumeMiBPrice(
-          volume,
-          paymentMethod,
-        )
-
-        if (size === Number.POSITIVE_INFINITY) {
-          sizeDiscount = 0
-
-          return {
-            size,
-            price: Number.POSITIVE_INFINITY,
-            discount: 0,
-            cost: Number.POSITIVE_INFINITY,
-          }
-        }
-
-        let newSize = size
-
-        if (sizeDiscount > 0) {
-          if (newSize <= sizeDiscount) {
-            sizeDiscount -= newSize
-            newSize = 0
-          } else {
-            newSize -= sizeDiscount
-            sizeDiscount = 0
-          }
-        }
-
-        // @todo: Check extra price calculation (on the medium article it is 20ALEPH per 1MB / scheduler code checks 1/3ALEPH per 1MB)
-        // @note: medium article =>  https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
-        // @note: code is law => https://github.com/aleph-im/aleph-vm-scheduler/blob/master/scheduler/balance.py#L82
-        // const cost = newSize * 20
-        const discount = size > 0 ? 1 - newSize / size : 0
-        const price = size * mibStoragePrice + size * mibExecutionPrice
-        const cost = size * mibStoragePrice + newSize * mibExecutionPrice
-
-        return {
-          size,
-          price,
-          discount,
-          cost,
-        }
-      }, [] as PerVolumeCost),
-    )
-  }
-
-  static async getCost(props: VolumeCostProps): Promise<VolumeCost> {
-    const perVolumeCost = await this.getPerVolumeCost(props)
-
-    const totalCost = Object.values(perVolumeCost).reduce(
-      (ac, cv) => ac + cv.cost,
-      0,
-    )
-
-    // @todo: fix this
-    const totalStreamCost = Number.POSITIVE_INFINITY
-
-    return {
-      perVolumeCost,
-      totalCost,
-      totalStreamCost,
-    }
   }
 
   constructor(
@@ -410,5 +304,70 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     } catch (err) {
       throw Err.RequestFailed(err)
     }
+  }
+
+  async getCost(props: VolumeCostProps): Promise<VolumeCost> {
+    let totalCost = Number.POSITIVE_INFINITY
+
+    const { volume, paymentMethod = PaymentMethod.Hold } = props
+
+    const emptyCost = {
+      paymentMethod,
+      cost: totalCost,
+      lines: [],
+    }
+
+    if (!volume) return emptyCost
+
+    const volumes = [volume]
+    const [newVolume] = await this.parseNewVolumes(volumes)
+
+    if (!newVolume || !newVolume.file) return emptyCost
+
+    const costs = await this.sdkClient.storeClient.getEstimatedCost({
+      account: this.account,
+      fileObject: newVolume.file,
+    })
+
+    totalCost = Number(costs.cost)
+    const sizeMib = newVolume.file.size / 1024 / 1024
+
+    const perVolumeCost = [
+      {
+        size: sizeMib,
+        price: totalCost / sizeMib,
+        discount: 0,
+        cost: totalCost,
+      },
+    ]
+
+    console.log(costs, perVolumeCost)
+
+    const lines = this.getCostLines(newVolume, paymentMethod, costs.detail)
+
+    console.log('lines', lines)
+    return {
+      paymentMethod,
+      cost: totalCost,
+      lines,
+    }
+  }
+
+  protected getCostLines(
+    volume: AddNewVolume,
+    paymentMethod: PaymentMethod,
+    costDetailLines: MessageCostLine[],
+  ): CostLine[] {
+    return costDetailLines.map((line) => ({
+      id: volume.file?.name || '',
+      name: line.name,
+      detail: volume?.file?.size
+        ? humanReadableSize(volume.file.size)
+        : 'Unknown size',
+      cost:
+        paymentMethod === PaymentMethod.Hold
+          ? +line.cost_hold
+          : +line.cost_stream,
+    }))
   }
 }

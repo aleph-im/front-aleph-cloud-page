@@ -5,7 +5,7 @@ import { ipfsCIDSchema } from '@/helpers/schemas/base'
 import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 
 export type WebsiteFolderField = {
-  folder?: File
+  folder?: File[]
   cid?: string
 }
 

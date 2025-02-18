@@ -113,6 +113,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     values,
     control,
     errors,
+    cost,
     node,
     nodeSpecs,
     lastVersion,
@@ -535,11 +536,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         <CheckoutSummary
           control={control}
           address={address}
-          type={EntityType.Instance}
-          isPersistent={true}
-          specs={values.specs}
-          volumes={values.volumes}
-          domains={values.domains}
+          cost={cost}
           receiverAddress={node?.reward}
           unlockedAmount={accountBalance}
           paymentMethod={values.paymentMethod}

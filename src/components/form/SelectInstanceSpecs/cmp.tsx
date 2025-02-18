@@ -15,7 +15,8 @@ import { SelectInstanceSpecsProps, SpecsDetail } from './types'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import Price from '@/components/common/Price'
 import Table from '@/components/common/Table'
-import { ExecutableManager } from '@/domain/executable'
+import { PriceType } from '@/domain/cost'
+import { useCostManager } from '@/hooks/common/useManager/useCostManager'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { specsCtrl, options, type, isPersistent, paymentMethod } =
@@ -110,27 +111,45 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const [prices, setPrices] = useState<number[]>([])
   const { cpu } = specsCtrl.field.value
 
+  const costManager = useCostManager()
+
+  const priceType: PriceType = useMemo(() => {
+    return type === EntityType.Program
+      ? isPersistent
+        ? PriceType.ProgramPersistent
+        : PriceType.Program
+      : PriceType.Instance
+  }, [type, isPersistent])
+
+  // @note: This is a quick fix for getting prices from aggregate.
+  // @todo: Refactor toget options from price aggregate too
   useEffect(() => {
     async function load(): Promise<void> {
+      if (!costManager) return
+
       const loadedData = await Promise.all(
         options.map(async (specs) => {
-          const { computeTotalCost } =
-            await ExecutableManager.getExecutableCost({
-              type,
-              specs,
-              isPersistent,
-              paymentMethod,
-            })
+          const pricesAggregate = await costManager.getPricesAggregate()
+          const prices = pricesAggregate[priceType]
+
+          const computeUnitPrice =
+            prices.price.compute_unit[
+              paymentMethod === PaymentMethod.Hold ? 'holding' : 'payg'
+            ]
+
+          const computeTotalCost = specs.cpu * Number(computeUnitPrice)
 
           return computeTotalCost
         }),
       )
 
+      if (!loadedData) return
+
       setPrices(loadedData)
     }
 
     load()
-  }, [isPersistent, options, paymentMethod, type])
+  }, [costManager, options, paymentMethod, priceType])
 
   const data = useMemo(() => {
     return options.map((specs, i) => {

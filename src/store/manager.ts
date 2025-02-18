@@ -19,6 +19,7 @@ import { ConnectionAction, ConnectionActionType } from './connection'
 import { ConfidentialManager } from '@/domain/confidential'
 import { VoucherManager } from '@/domain/voucher'
 import { GpuInstanceManager } from '@/domain/gpuInstance'
+import { CostManager } from '@/domain/cost'
 
 function createDefaultManagers(account?: Account) {
   const sdkClient = !account
@@ -51,6 +52,7 @@ export type ManagerState = {
   confidentialManager?: ConfidentialManager
   websiteManager?: WebsiteManager
   voucherManager?: VoucherManager
+  costManager?: CostManager
 }
 
 export const initialState: ManagerState = {
@@ -66,6 +68,7 @@ export const initialState: ManagerState = {
   confidentialManager: undefined,
   websiteManager: undefined,
   voucherManager: undefined,
+  costManager: undefined,
 }
 
 export type ManagerAction = ConnectionAction
@@ -92,6 +95,7 @@ export function getManagerReducer(): ManagerReducer {
           confidentialManager: undefined,
           websiteManager: undefined,
           voucherManager: undefined,
+          costManager: undefined,
         }
       }
 
@@ -148,6 +152,7 @@ export function getManagerReducer(): ManagerReducer {
           domainManager,
         )
         const voucherManager = new VoucherManager(account, sdkClient)
+        const costManager = new CostManager(sdkClient)
 
         return {
           ...state,
@@ -163,6 +168,7 @@ export function getManagerReducer(): ManagerReducer {
           confidentialManager,
           websiteManager,
           voucherManager,
+          costManager,
         }
       }
 
