@@ -75,7 +75,7 @@ export type PriceTypeObject = {
 }
 
 export const PRICE_AGGREGATE_ADDRESS =
-  '0xA07B1214bAe0D5ccAA25449C3149c0aC83658874'
+  '0xFba561a84A537fCaa567bb7A2257e7142701ae2A'
 export const PRICE_AGGREGATE_KEY = 'pricing'
 
 export class CostManager {

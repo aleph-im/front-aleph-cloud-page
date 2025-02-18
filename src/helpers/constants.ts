@@ -10,8 +10,8 @@ export const postType = 'corechan-operation'
 // export const apiServer = 'https://api2.aleph.im'
 // export const wsServer = 'wss://api2.aleph.im'
 
-export const apiServer = 'http://localhost:4024'
-export const wsServer = 'ws://localhost:4024'
+export const apiServer = 'http://51.159.223.120:4024'
+export const wsServer = 'wss://51.159.223.120:4024'
 
 export const mbPerAleph = 3
 

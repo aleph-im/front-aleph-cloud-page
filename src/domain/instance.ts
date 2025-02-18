@@ -96,7 +96,8 @@ export type InstanceStatus = ExecutableStatus
 
 export class InstanceManager
   extends ExecutableManager
-  implements EntityManager<Instance, AddInstance> {
+  implements EntityManager<Instance, AddInstance>
+{
   static addSchema = instanceSchema
   static addStreamSchema = instanceStreamSchema
 
@@ -315,11 +316,13 @@ export class InstanceManager
 
     let parsedInstance: InstancePublishConfiguration
 
+    console.log('generating parsedInstance')
     try {
       const steps = this.parseInstanceSteps(newInstance, true)
 
       while (true) {
         const { value, done } = await steps.next()
+        console.log('value', value)
         parsedInstance = value as any
         if (done) break
       }
@@ -328,18 +331,23 @@ export class InstanceManager
       return emptyCost
     }
 
-    const costs = await this.sdkClient.instanceClient.getEstimatedCost(parsedInstance)
-    console.log(costs)
+    console.log('parsedInstance', parsedInstance)
+    const costs =
+      await this.sdkClient.instanceClient.getEstimatedCost(parsedInstance)
+    console.log('costs', costs)
 
     totalCost = Number(costs.cost)
 
-    const lines = this.getExecutableCostLines({
-      type: EntityType.Instance,
-      ...parsedInstance
-    }, costs)
+    const lines = this.getExecutableCostLines(
+      {
+        type: EntityType.Instance,
+        ...parsedInstance,
+      },
+      costs,
+    )
 
     return {
-      cost: totalCost,
+      cost: this.parseCost(paymentMethod, totalCost),
       paymentMethod,
       lines: [...lines],
     }

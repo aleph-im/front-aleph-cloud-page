@@ -310,6 +310,22 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const { storage } = formValues.specs
   const { systemVolumeSize } = formValues
 
+  const payment: PaymentConfiguration = useMemo(() => {
+    return formValues.paymentMethod === PaymentMethod.Stream
+      ? ({
+          chain: blockchain,
+          type: PaymentMethod.Stream,
+          sender: account?.address,
+          receiver: node?.stream_reward,
+          streamCost: formValues?.streamCost,
+          streamDuration: formValues?.streamDuration,
+        } as PaymentConfiguration)
+      : ({
+          chain: blockchain,
+          type: PaymentMethod.Hold,
+        } as PaymentConfiguration)
+  }, [formValues, blockchain, account, node])
+
   const costProps: UseInstanceCostProps = useMemo(
     () => ({
       entityType: EntityType.Instance,
@@ -319,6 +335,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         domains: formValues.domains,
         streamDuration: formValues.streamDuration,
         paymentMethod: formValues.paymentMethod,
+        payment,
         isPersistent: true,
         image: formValues.image,
         name: formValues.name || 'MOCK',
@@ -327,9 +344,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         ],
       },
     }),
-    [formValues],
+    [payment, formValues],
   )
 
+  console.log('cost props', costProps)
   const cost = useEntityCost(costProps)
 
   // -------------------------
