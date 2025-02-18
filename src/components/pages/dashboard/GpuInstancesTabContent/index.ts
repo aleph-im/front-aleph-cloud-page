@@ -1,2 +1,2 @@
 export { default } from './cmp'
-export type { InstancesTabContentProps } from './types'
+export type { GpuInstancesTabContentProps } from './types'

@@ -382,7 +382,8 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
               <SelectInstanceSpecs
                 name="specs"
                 control={control}
-                type={EntityType.Instance}
+                type={EntityType.GpuInstance}
+                gpuModel={node?.selectedGpu?.model}
                 isPersistent
                 paymentMethod={values.paymentMethod}
                 nodeSpecs={nodeSpecs}

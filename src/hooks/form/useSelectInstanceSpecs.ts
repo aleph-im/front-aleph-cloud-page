@@ -32,7 +32,8 @@ export type UseSelectInstanceSpecsProps = {
   name?: string
   control: Control
   defaultValue?: InstanceSpecsField
-  type: EntityType.Instance | EntityType.Program
+  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
+  gpuModel?: string
   isPersistent?: boolean
   paymentMethod?: PaymentMethod
   nodeSpecs?: CRNSpecs
@@ -41,7 +42,7 @@ export type UseSelectInstanceSpecsProps = {
 export type UseSelectInstanceSpecsReturn = {
   specsCtrl: UseControllerReturn<any, any>
   options: InstanceSpecsField[]
-  type: EntityType.Instance | EntityType.Program
+  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
   isPersistent: boolean
   paymentMethod: PaymentMethod
   nodeSpecs?: CRNSpecs
@@ -52,13 +53,14 @@ export function useSelectInstanceSpecs({
   control,
   defaultValue,
   type,
+  gpuModel,
   isPersistent = false,
   paymentMethod = PaymentMethod.Hold,
   nodeSpecs,
   ...rest
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
   const manager = useNodeManager()
-  const { defaultTiers } = useDefaultTiers({ type })
+  const { defaultTiers } = useDefaultTiers({ type, gpuModel })
 
   const options = useMemo(() => {
     if (paymentMethod === PaymentMethod.Hold) return defaultTiers

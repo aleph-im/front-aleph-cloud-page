@@ -1,5 +1,6 @@
 import {
   apiServer,
+  crnListProgramUrl,
   defaultAccountChannel,
   scoringAddress,
 } from '@/helpers/constants'
@@ -384,12 +385,9 @@ export class NodeManager {
   }
 
   async getAllCRNsSpecs(): Promise<CRNSpecs[]> {
-    const url =
-      'https://ovh.staging.aleph.sh/vm/bec08b08bb9f9685880f3aeb9c1533951ad56abef2a39c97f5a93683bdaa5e30/crns.json'
-
     try {
       const response = await fetchAndCache(
-        url,
+        crnListProgramUrl,
         `all_crn_specs`,
         3_600,
         (res: { crns: any[]; last_refresh: string }) => {

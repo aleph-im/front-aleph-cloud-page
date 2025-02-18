@@ -94,7 +94,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     [dispatch, manager, next, router, stop],
   )
 
-  const { defaultTiers } = useDefaultTiers({ type: 'program' })
+  const { defaultTiers } = useDefaultTiers({ type: EntityType.Program })
 
   const defaultValues: Partial<NewFunctionFormState> = useMemo(
     () => ({

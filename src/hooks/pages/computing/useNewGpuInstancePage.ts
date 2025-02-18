@@ -60,6 +60,7 @@ import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
+import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceManager'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -178,53 +179,46 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // -------------------------
   // Tiers
 
-  const { defaultTiers } = useDefaultTiers({ type: EntityType.Instance })
+  const { defaultTiers } = useDefaultTiers({ type: EntityType.GpuInstance })
 
   // -------------------------
   // Checkout flow
 
-  const manager = useInstanceManager()
+  const manager = useGpuInstanceManager()
   const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewGpuInstanceFormState) => {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
+      if (!node || !node.stream_reward) throw Err.InvalidNode
+      if (!nodeSpecs) throw Err.InvalidCRNSpecs
+      if (!state?.streamCost) throw Err.InvalidStreamCost
 
-      let superfluidAccount
-      let payment: PaymentConfiguration = {
-        chain: BlockchainId.ETH,
-        type: PaymentMethod.Hold,
+      const [minSpecs] = defaultTiers
+      const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
+      if (!isValid) throw Err.InvalidCRNSpecs
+
+      if (
+        !blockchain ||
+        !isBlockchainPAYGCompatible(blockchain) ||
+        !isAccountPAYGCompatible(account)
+      ) {
+        handleConnect({ blockchain: BlockchainId.BASE })
+        throw Err.InvalidNetwork
       }
 
-      if (state.paymentMethod === PaymentMethod.Stream) {
-        if (!node || !node.stream_reward) throw Err.InvalidNode
-        if (!nodeSpecs) throw Err.InvalidCRNSpecs
-        if (!state?.streamCost) throw Err.InvalidStreamCost
+      const superfluidAccount = await createFromEVMAccount(
+        account as EVMAccount,
+      )
 
-        const [minSpecs] = defaultTiers
-        const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
-        if (!isValid) throw Err.InvalidCRNSpecs
-
-        if (
-          !blockchain ||
-          !isBlockchainPAYGCompatible(blockchain) ||
-          !isAccountPAYGCompatible(account)
-        ) {
-          handleConnect({ blockchain: BlockchainId.BASE })
-          throw Err.InvalidNetwork
-        }
-
-        superfluidAccount = await createFromEVMAccount(account as EVMAccount)
-
-        payment = {
-          chain: blockchain,
-          type: PaymentMethod.Stream,
-          sender: account.address,
-          receiver: node.stream_reward,
-          streamCost: state.streamCost,
-          streamDuration: state.streamDuration,
-        }
+      const payment = {
+        chain: blockchain,
+        type: PaymentMethod.Stream,
+        sender: account.address,
+        receiver: node.stream_reward,
+        streamCost: state.streamCost,
+        streamDuration: state.streamDuration,
       }
 
       const instance = {
@@ -279,16 +273,19 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // -------------------------
   // Setup form
 
-  const defaultValues: Partial<NewGpuInstanceFormState> = {
-    ...defaultNameAndTags,
-    image: defaultInstanceImage,
-    specs: defaultTiers[0],
-    systemVolumeSize: defaultTiers[0]?.storage,
-    paymentMethod: PaymentMethod.Stream,
-    streamDuration: defaultStreamDuration,
-    streamCost: Number.POSITIVE_INFINITY,
-    termsAndConditions: undefined,
-  }
+  const defaultValues: Partial<NewGpuInstanceFormState> = useMemo(
+    () => ({
+      ...defaultNameAndTags,
+      image: defaultInstanceImage,
+      specs: defaultTiers[0],
+      systemVolumeSize: defaultTiers[0]?.storage,
+      paymentMethod: PaymentMethod.Stream,
+      streamDuration: defaultStreamDuration,
+      streamCost: Number.POSITIVE_INFINITY,
+      termsAndConditions: undefined,
+    }),
+    [defaultTiers],
+  )
 
   const {
     control,
@@ -301,7 +298,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     resolver: zodResolver(
       !node ? InstanceManager.addSchema : InstanceManager.addStreamSchema,
     ),
-    readyDeps: [],
+    readyDeps: [defaultValues],
   })
 
   const formValues = useWatch({ control }) as NewGpuInstanceFormState

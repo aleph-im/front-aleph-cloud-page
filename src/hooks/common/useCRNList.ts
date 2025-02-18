@@ -17,6 +17,7 @@ import {
 } from '@/hooks/common/useSortedList'
 import { useDefaultTiers } from './pricing/tiers/useDefaultTiers'
 import { useRequestCRNLastVersion } from './useRequestEntity/useRequestCRNLastVersion'
+import { EntityType } from '@/helpers/constants'
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
@@ -166,7 +167,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
   // -----------------------------
 
-  const { defaultTiers } = useDefaultTiers({ type: 'instance' })
+  const { defaultTiers } = useDefaultTiers({ type: EntityType.Instance })
 
   const minSpecs = useMemo(() => {
     const [min] = defaultTiers
@@ -270,7 +271,6 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
     sortedFilteredNodes.forEach((node) => {
       const gpu = node.selectedGpu?.model
-      console.log('gpu', gpu)
       const cpu = node.cpu?.count.toString()
       const ram = node.mem?.available_kB.toString()
       const hdd = node.disk?.available_kB.toString()

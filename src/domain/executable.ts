@@ -50,7 +50,7 @@ type ExecutableCapabilitiesProps = {
 }
 
 export type ExecutableCostProps = VolumeCostProps & {
-  type: EntityType.Instance | EntityType.Program
+  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
   isPersistent?: boolean
   paymentMethod?: PaymentMethod
   specs?: InstanceSpecsField
@@ -84,7 +84,7 @@ export type PaymentConfiguration =
   | StreamPaymentConfiguration
 
 export type Executable = {
-  type: EntityType.Instance | EntityType.Program
+  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
   id: string // hash
   payment?: BaseExecutableContent['payment']
   //@todo: Add `trusted_execution` field in FunctionEnvironment in ts sdk

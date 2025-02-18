@@ -36,7 +36,7 @@ export const nodeSpecsSchema = z.object({
   decentralization: z.number(),
   performance: z.number(),
   status: z.enum(['active', 'waiting', 'linked']),
-  parent: z.string(),
+  parent: z.string().nullable(),
   type: z.string(),
   cpu: z.object({
     count: z.number(),

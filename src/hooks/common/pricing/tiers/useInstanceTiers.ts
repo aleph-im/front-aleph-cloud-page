@@ -1,5 +1,5 @@
 import { CRNSpecs, ReducedCRNSpecs } from '@/domain/node'
-import { PaymentMethod } from '@/helpers/constants'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { useMemo } from 'react'
 import { useNodeManager } from '../../useManager/useNodeManager'
 import { useDefaultTiers } from './useDefaultTiers'
@@ -22,7 +22,7 @@ export function useInstanceTiers({
   nodeSpecs,
 }: UseInstanceTiersProps): UseInstanceTiersReturn {
   const manager = useNodeManager()
-  const { defaultTiers } = useDefaultTiers({ type: 'instance' })
+  const { defaultTiers } = useDefaultTiers({ type: EntityType.Instance })
 
   const instanceTiers = useMemo(() => {
     if (paymentMethod === PaymentMethod.Hold) return defaultTiers

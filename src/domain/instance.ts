@@ -39,7 +39,7 @@ import {
 } from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { getHours } from '@/hooks/form/useSelectStreamDuration'
-import { CRN, NodeManager } from './node'
+import { CRN, CRNSpecs, NodeManager } from './node'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import {
   AlephHttpClient,
@@ -67,7 +67,7 @@ export type AddInstance = Omit<
     domains?: Omit<DomainField, 'ref'>[]
     payment?: PaymentConfiguration
     requirements?: HostRequirements
-    node?: CRN
+    node?: CRNSpecs
   }
 
 // @todo: Refactor
@@ -224,11 +224,6 @@ export class InstanceManager
           ),
         },
       })
-
-      await account.decreaseALEPHFlow(
-        receiver,
-        instanceCosts.totalCost + EXTRA_WEI,
-      )
     }
 
     try {
