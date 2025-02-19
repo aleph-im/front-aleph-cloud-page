@@ -11,6 +11,7 @@ import {
 import {
   defaultInstanceChannel,
   EntityType,
+  EXTRA_WEI,
   PaymentMethod,
 } from '@/helpers/constants'
 import { getDate, getExplorerURL } from '@/helpers/utils'
@@ -208,7 +209,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
         instance.id,
       )
 
-      await this.decreaseFlow(account, receiver, instanceCosts)
+      await this.decreaseFlow(account, receiver, instanceCosts + EXTRA_WEI)
     }
 
     try {
@@ -355,7 +356,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       )
 
     yield
-    await account.increaseALEPHFlow(receiver, streamCostByHour)
+    await account.increaseALEPHFlow(receiver, streamCostByHour + EXTRA_WEI)
   }
 
   protected async parseInstanceForCostEstimation(

@@ -141,7 +141,6 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   )
 
   const cost = useEntityCost(costProps)
-  console.log('function cost', cost)
 
   const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford

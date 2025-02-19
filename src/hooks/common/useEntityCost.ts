@@ -67,8 +67,6 @@ export function useEntityCost({
     async function load() {
       let result: CostSummary = emptyCost
 
-      console.log('LOAD COSTS', entityType, props)
-
       switch (entityType) {
         case EntityType.Volume:
           if (volumeManager) result = await volumeManager.getCost(props)
@@ -87,8 +85,6 @@ export function useEntityCost({
           if (websiteManager) result = await websiteManager.getCost(props)
           break
       }
-
-      console.log('LOAD COSTS', result)
 
       setCost(result)
     }

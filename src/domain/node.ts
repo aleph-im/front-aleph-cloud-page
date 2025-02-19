@@ -289,7 +289,7 @@ export type CRNSpecs = BaseNode &
     version?: string
     compatible_gpus?: GPUDevice[]
     compatible_available_gpus?: GPUDevice[]
-    gpu_support?: boolean
+    gpu_support?: boolean | null
     confidential_support?: boolean
     qemu_support?: boolean
     ipv6_check?: {

@@ -10,6 +10,7 @@ import {
   communityWalletAddress,
   defaultGpuInstanceChannel,
   EntityType,
+  EXTRA_WEI,
   PaymentMethod,
 } from '@/helpers/constants'
 import { ExecutableStatus } from './executable'
@@ -68,24 +69,14 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
     receiver: string,
     cost: number,
   ): Promise<void> {
-    console.log('receiver', account, receiver, this.calculateReceiverFlow(cost))
-    try {
-      await account.decreaseALEPHFlow(
-        receiver,
-        this.calculateReceiverFlow(cost),
-      )
-    } catch (e) {
-      console.log('error', e)
-    }
-
-    console.log(
-      'comm',
-      communityWalletAddress,
-      this.calculateCommunityFlow(cost),
+    await account.decreaseALEPHFlow(
+      receiver,
+      this.calculateReceiverFlow(cost) + EXTRA_WEI,
     )
+
     await account.decreaseALEPHFlow(
       communityWalletAddress,
-      this.calculateCommunityFlow(cost),
+      this.calculateCommunityFlow(cost) + EXTRA_WEI,
     )
   }
 
@@ -138,9 +129,12 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
     // Split the stream cost between the community wallet (20%) and the receiver (80%)
     await account.increaseALEPHFlow(
       communityWalletAddress,
-      streamCostByHourToCommunity,
+      streamCostByHourToCommunity + EXTRA_WEI,
     )
-    await account.increaseALEPHFlow(receiver, streamCostByHourToReceiver)
+    await account.increaseALEPHFlow(
+      receiver,
+      streamCostByHourToReceiver + EXTRA_WEI,
+    )
   }
 
   protected override parseRequirements(
