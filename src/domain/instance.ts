@@ -5,8 +5,6 @@ import {
   InstanceContent,
   InstancePublishConfiguration,
   MachineVolume,
-  MessageCostLine,
-  MessageCostType,
   MessageType,
   PaymentType,
 } from '@aleph-sdk/message'
@@ -15,9 +13,8 @@ import {
   EntityType,
   PaymentMethod,
   EXTRA_WEI,
-  EntityTypeName,
 } from '@/helpers/constants'
-import { convertByteUnits, getDate, getExplorerURL } from '@/helpers/utils'
+import { getDate, getExplorerURL } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
@@ -217,10 +214,7 @@ export class InstanceManager
         },
       })
 
-      await account.decreaseALEPHFlow(
-        receiver,
-        instanceCosts.totalCost + EXTRA_WEI,
-      )
+      await account.decreaseALEPHFlow(receiver, instanceCosts.cost + EXTRA_WEI)
     }
 
     try {

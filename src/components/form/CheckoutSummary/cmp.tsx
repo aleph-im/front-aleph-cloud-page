@@ -10,7 +10,7 @@ import {
   CheckoutSummaryVolumeLineProps,
   CheckoutSummaryWebsiteLineProps,
 } from './types'
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import React from 'react'
 import { PaymentMethod } from '@/helpers/constants'
 import { VolumeManager, VolumeType } from '@/domain/volume'
@@ -162,7 +162,6 @@ const CheckoutSummaryWebsiteLine = ({
 }
 CheckoutSummaryWebsiteLine.displayName = 'CheckoutSummaryWebsiteLine'
 
-
 // ------------------------------------------
 
 // @todo: Refactor: Split in different components
@@ -273,15 +272,10 @@ export const CheckoutSummary = ({
                   <StyledHoldingSummaryLine key={line.id}>
                     <div>
                       {line.name}
-                      {line.label && <Label tw="ml-2" >
-                        {line.label}
-                      </Label>
-                      }
+                      {line.label && <Label tw="ml-2">{line.label}</Label>}
                     </div>
                     {/* <div className="text-main0 tp-body2">{line.detail}</div> */}
-                    <div>{line.detail}
-
-                    </div>
+                    <div>{line.detail}</div>
                     <div>
                       <span className="text-main0 tp-body3">
                         {line.cost > 0 ? (
@@ -293,13 +287,15 @@ export const CheckoutSummary = ({
                                 : undefined
                             }
                           />
-                        ) : ('-')}
+                        ) : (
+                          '-'
+                        )}
                       </span>
                     </div>
                   </StyledHoldingSummaryLine>
                 ))}
 
-                {/* 
+                {/*
                 {type === EntityType.Website && costProps.props.website && (
                   <CheckoutSummaryWebsiteLineMemo
                     {...{

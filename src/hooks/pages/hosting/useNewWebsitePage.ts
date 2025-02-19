@@ -11,6 +11,7 @@ import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
 import {
   useEntityCost,
+  UseEntityCostReturn,
   UseWebsiteCostProps,
 } from '@/hooks/common/useEntityCost'
 import {
@@ -46,7 +47,7 @@ export type UseNewWebsitePagePageReturn = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewWebsiteFormState>
-  costProps: UseWebsiteCostProps
+  cost: UseEntityCostReturn
   handleSubmit: (e: FormEvent) => Promise<void>
   handleBack: () => void
 }
@@ -118,10 +119,9 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     [values],
   )
 
-  const { cost } = useEntityCost(costProps)
+  const cost = useEntityCost(costProps)
 
-  const canAfford =
-    accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+  const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford || !values.framework || !values.name
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
@@ -138,7 +138,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     values,
     control,
     errors,
-    costProps,
+    cost,
     handleSubmit,
     handleBack,
   }

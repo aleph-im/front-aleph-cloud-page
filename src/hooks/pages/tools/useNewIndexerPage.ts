@@ -106,10 +106,9 @@ export function useNewIndexerPage(): UseNewIndexerPage {
     [specs, isPersistent, volumes],
   )
 
-  const { cost } = useEntityCost(costProps)
+  const cost = useEntityCost(costProps)
 
-  const canAfford =
-    accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+  const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false

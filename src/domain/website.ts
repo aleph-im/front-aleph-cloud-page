@@ -16,14 +16,15 @@ import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
 import { FileManager } from './file'
 import { Volume, VolumeManager } from './volume'
 import { Domain, DomainManager } from './domain'
-import { getDate } from '@/helpers/utils'
+import { getDate, humanReadableSize } from '@/helpers/utils'
 import Err from '@/helpers/errors'
-import { ItemType } from '@aleph-sdk/message'
+import { ItemType, MessageCostLine } from '@aleph-sdk/message'
 import { Blockchain } from '@aleph-sdk/core'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+import { CostLine, CostSummary } from './cost'
 
 export { WebsiteFrameworkId }
 
@@ -264,10 +265,7 @@ export type WebsiteCostProps = {
   payment?: WebsitePayment
 }
 
-export type WebsiteCost = {
-  totalCost: number
-  totalStreamCost: number
-}
+export type WebsiteCost = CostSummary
 
 export type AddWebsite = NameAndTagsField &
   WebsiteFrameworkField & {
@@ -326,19 +324,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     props: AddWebsite | WebsiteCostProps,
   ): number {
     return 0
-  }
-
-  static async getCost(props: WebsiteCostProps): Promise<WebsiteCost> {
-    const size = await this.getWebsiteSize(props)
-    const fixedCost = 50
-    const mibStoragePrice = this.getStorageWebsiteMiBPrice(props)
-    const mibExecutionPrice = this.getExecutionWebsiteMiBPrice(props)
-    return {
-      totalCost: props.website?.folder
-        ? fixedCost + size * mibStoragePrice + size * mibExecutionPrice
-        : 0,
-      totalStreamCost: 0,
-    }
   }
 
   constructor(
@@ -636,6 +621,59 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         )
       }
     }
+  }
+
+  async getCost(props: WebsiteCostProps): Promise<WebsiteCost> {
+    let totalCost = Number.POSITIVE_INFINITY
+
+    const { website, payment } = props
+
+    const paymentMethod = payment?.type || PaymentMethod.Hold
+
+    const emptyCost = {
+      paymentMethod,
+      cost: totalCost,
+      lines: [],
+    }
+
+    if (!website) return emptyCost
+    if (!website.folder) return emptyCost
+
+    const fileObject = new Blob(website.folder)
+
+    const costs = await this.sdkClient.storeClient.getEstimatedCost({
+      account: this.account,
+      fileObject,
+    })
+
+    totalCost = Number(costs.cost)
+
+    console.log(costs)
+
+    const lines = this.getCostLines(fileObject, paymentMethod, costs.detail)
+
+    return {
+      paymentMethod,
+      cost: totalCost,
+      lines,
+    }
+  }
+
+  protected getCostLines(
+    fileObject: Blob,
+    paymentMethod: PaymentMethod,
+    costDetailLines: MessageCostLine[],
+  ): CostLine[] {
+    fileObject.name
+    return costDetailLines.map((line) => ({
+      id: 'New website folder',
+      name: line.name,
+      detail: humanReadableSize(fileObject.size),
+      cost:
+        paymentMethod === PaymentMethod.Hold
+          ? +line.cost_hold
+          : +line.cost_stream,
+    }))
   }
 
   protected async parseNewWebsite(website: AddWebsite): Promise<AddWebsite> {

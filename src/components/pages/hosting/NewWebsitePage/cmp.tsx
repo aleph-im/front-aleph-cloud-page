@@ -24,7 +24,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
     accountBalance,
     isCreateButtonDisabled,
     errors,
-    costProps,
+    cost,
     handleSubmit,
     handleBack,
   } = useNewWebsitePage()
@@ -118,7 +118,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         <CheckoutSummary
           control={control}
           address={address}
-          costProps={costProps}
+          cost={cost}
           unlockedAmount={accountBalance}
           paymentMethod={PaymentMethod.Hold}
           mainRef={mainRef}

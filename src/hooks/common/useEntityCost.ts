@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { InstanceCostProps } from '@/domain/instance'
 import { ProgramCostProps } from '@/domain/program'
 import { VolumeCostProps } from '@/domain/volume'
-import { EntityType } from '@/helpers/constants'
-import { IndexerCostProps, IndexerManager } from '@/domain/indexer'
-import { WebsiteCostProps, WebsiteManager } from '@/domain/website'
+import { EntityType, PaymentMethod } from '@/helpers/constants'
+import { IndexerCostProps } from '@/domain/indexer'
+import { WebsiteCostProps } from '@/domain/website'
 import { useVolumeManager } from './useManager/useVolumeManager'
 import { useProgramManager } from './useManager/useProgramManager'
 import { useInstanceManager } from './useManager/useInstanceManager'
 import { CostSummary } from '@/domain/cost'
+import { useWebsiteManager } from './useManager/useWebsiteManager'
 
 export type UseVolumeCostProps = {
   entityType: EntityType.Volume
@@ -48,15 +49,21 @@ export function useEntityCost({
   entityType,
   props,
 }: UseEntityCostProps): UseEntityCostReturn {
-  const [cost, setCost] = useState<UseEntityCostReturn>()
+  const emptyCost = {
+    paymentMethod: PaymentMethod.Hold,
+    cost: Number.POSITIVE_INFINITY,
+    lines: [],
+  }
+  const [cost, setCost] = useState<UseEntityCostReturn>(emptyCost)
 
   const volumeManager = useVolumeManager()
   const instanceManager = useInstanceManager()
   const programManager = useProgramManager()
+  const websiteManager = useWebsiteManager()
 
   useEffect(() => {
     async function load() {
-      let result
+      let result: CostSummary = emptyCost
 
       switch (entityType) {
         case EntityType.Volume:
@@ -68,14 +75,9 @@ export function useEntityCost({
         case EntityType.Program:
           if (programManager) result = await programManager.getCost(props)
           break
-        case EntityType.Indexer:
-          result = await IndexerManager.getCost(props)
-          break
         case EntityType.Website:
-          result = await WebsiteManager.getCost(props)
+          if (websiteManager) result = await websiteManager.getCost(props)
           break
-        default:
-          result = undefined
       }
 
       console.log('LOAD COSTS', result)
