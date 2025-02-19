@@ -78,7 +78,7 @@ export const nodeSpecsSchema = z.object({
     .optional(),
   compatible_gpus: z.array(gpuDeviceSchema).optional(),
   compatible_available_gpus: z.array(gpuDeviceSchema).optional(),
-  gpu_support: z.boolean().optional(),
+  gpu_support: z.boolean().optional().nullable(),
   confidential_support: z.boolean().optional(),
   qemu_support: z.boolean().optional(),
   ipv6_check: z

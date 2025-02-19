@@ -90,6 +90,7 @@ export type ParsedCodeType = {
   | {
       file: Blob | Buffer
       programRef?: undefined
+      estimated_size_mib: number
     }
 )
 
@@ -251,26 +252,8 @@ export class ProgramManager
     let totalCost = Number.POSITIVE_INFINITY
     const paymentMethod = newProgram.payment?.type || PaymentMethod.Hold
 
-    const emptyCost: ProgramCost = {
-      cost: totalCost,
-      paymentMethod,
-      lines: [],
-    }
-
-    let parsedProgram: ProgramPublishConfiguration
-
-    try {
-      const steps = this.parseProgramSteps(newProgram)
-
-      while (true) {
-        const { value, done } = await steps.next()
-        parsedProgram = value as any
-        if (done) break
-      }
-    } catch (e) {
-      console.error(e)
-      return emptyCost
-    }
+    const parsedProgram: ProgramPublishConfiguration =
+      await this.parseProgramForCostEstimation(newProgram)
 
     const costs =
       await this.sdkClient.programClient.getEstimatedCost(parsedProgram)
@@ -304,6 +287,7 @@ export class ProgramManager
         entrypoint: 'main:app',
         file: zip as File,
         encoding: Encoding.zip,
+        estimated_size_mib: zip.size,
       }
     } else if (code.type === 'file') {
       if (!code.file) throw Err.InvalidCodeFile
@@ -323,6 +307,7 @@ export class ProgramManager
         entrypoint: code.entrypoint,
         file: code.file,
         encoding,
+        estimated_size_mib: code.file.size,
       }
     } else if (code.type === 'ref') {
       return {
@@ -343,7 +328,7 @@ export class ProgramManager
     const { memory, vcpus } = this.parseSpecs(specs)
     const runtime = this.parseRuntime(newProgram)
     const payment = this.parsePayment(newProgram.payment)
-    const volumesSteps = this.parseVolumesSteps(newProgram.volumes)
+    const volumesSteps = this.parseVolumesSteps(newProgram.volumes, true)
     const code = await this.parseCode(newProgram.code)
 
     let volumes: MachineVolume[] = []

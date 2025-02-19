@@ -537,6 +537,7 @@ export abstract class ExecutableManager<T extends Executable> {
     if (volumes.length === 0) return
 
     // @note: Create new volumes before and cast them to ExistingVolume type
+    console.log('estimateCost', estimateCost)
     const messages = !estimateCost
       ? yield* this.volumeManager.addSteps(volumes)
       : []
