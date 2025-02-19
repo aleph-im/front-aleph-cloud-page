@@ -7,7 +7,6 @@ import {
   requiredStringSchema,
   requiredRestrictedStringSchema,
 } from './base'
-import { convertByteUnits } from '../utils'
 import { domainSchema } from './domain'
 import { newIsolatedVolumeSchema } from './volume'
 

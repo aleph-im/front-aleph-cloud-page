@@ -25,13 +25,16 @@ import {
   InstanceImageField,
 } from '@/hooks/form/useSelectInstanceImage'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
-import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { AddInstance, InstanceManager } from '@/domain/instance'
+import { AddInstance } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
-import { useEntityCost } from '@/hooks/common/useEntityCost'
+import {
+  useEntityCost,
+  UseEntityCostReturn,
+  UseGpuInstanceCostProps,
+} from '@/hooks/common/useEntityCost'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRNSpecs, NodeManager } from '@/domain/node'
 import {
@@ -90,6 +93,7 @@ export type UseNewGpuInstancePageReturn = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewGpuInstanceFormState>
+  cost: UseEntityCostReturn
   node?: CRNSpecs
   nodeSpecs?: CRNSpecs
   selectedModal?: Modal
@@ -128,7 +132,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   const router = useRouter()
   const { crn: queryCRN, gpu: queryGPU } = router.query
 
-  const hasInitialized = useRef(false)
   const nodeRef = useRef<CRNSpecs | undefined>(undefined)
   const [selectedNode, setSelectedNode] = useState<CRNSpecs>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
@@ -159,7 +162,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     }
 
     return nodeRef.current
-  }, [queryCRN, queryGPU, specs])
+  }, [queryCRN, queryGPU, selectedNode, specs])
 
   const nodeSpecs = useMemo(() => {
     if (!node) return
@@ -304,16 +307,41 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
 
   const { storage } = formValues.specs
   const { systemVolumeSize } = formValues
-  const { cost } = useEntityCost({
-    entityType: EntityType.Instance,
-    props: {
-      specs: formValues.specs,
-      volumes: formValues.volumes,
-      streamDuration: formValues.streamDuration,
-      paymentMethod: formValues.paymentMethod,
-    },
-  })
 
+  const payment: PaymentConfiguration = useMemo(() => {
+    return {
+      chain: blockchain,
+      type: PaymentMethod.Stream,
+      sender: account?.address,
+      receiver: node?.stream_reward,
+      streamCost: formValues?.streamCost || 1,
+      streamDuration: formValues?.streamDuration,
+    } as PaymentConfiguration
+  }, [formValues, blockchain, account, node])
+
+  const costProps: UseGpuInstanceCostProps = useMemo(
+    () => ({
+      entityType: EntityType.GpuInstance,
+      props: {
+        node,
+        specs: formValues.specs,
+        volumes: formValues.volumes,
+        domains: formValues.domains,
+        streamDuration: formValues.streamDuration,
+        paymentMethod: formValues.paymentMethod,
+        payment,
+        isPersistent: true,
+        image: formValues.image,
+        name: formValues.name || 'MOCK',
+        sshKeys: formValues.sshKeys || [
+          { key: 'MOCK', isNew: true, isSelected: true },
+        ],
+      },
+    }),
+    [node, payment, formValues],
+  )
+
+  const cost = useEntityCost(costProps)
   // -------------------------
   // Memos
 
@@ -340,8 +368,8 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     if (!account) return false
     if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') return true
 
-    return accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
-  }, [account, accountBalance, cost?.totalCost])
+    return accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
+  }, [account, accountBalance, cost?.cost])
 
   const createInstanceDisabledMessage: UseNewGpuInstancePageReturn['createInstanceDisabledMessage'] =
     useMemo(() => {
@@ -447,9 +475,9 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // @note: Set streamCost
   useEffect(() => {
     if (!cost) return
-    if (formValues.streamCost === cost.totalStreamCost) return
+    if (formValues.streamCost === cost.cost) return
 
-    setValue('streamCost', cost.totalStreamCost)
+    setValue('streamCost', cost.cost)
   }, [cost, setValue, formValues])
 
   return {
@@ -462,6 +490,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     values: formValues,
     control,
     errors,
+    cost,
     node,
     nodeSpecs,
     streamDisabled,

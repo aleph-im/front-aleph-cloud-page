@@ -34,10 +34,11 @@ export function useEntityManager(
     }
   }, [
     domainManager,
-    instanceManager,
-    programManager,
     sshKeyManager,
     volumeManager,
+    instanceManager,
+    gpuInstanceManager,
+    programManager,
     websiteManager,
     confidentialManager,
   ])

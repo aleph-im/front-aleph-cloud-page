@@ -23,7 +23,7 @@ export const pricingAggregateAddress =
 export const pricingAggregateKey = 'pricing'
 
 export const crnListProgramUrl =
-  'https://ovh.staging.aleph.sh/vm/bec08b08bb9f9685880f3aeb9c1533951ad56abef2a39c97f5a93683bdaa5e30/crns.json'
+  'https://dchq.staging.aleph.sh/vm/bec08b08bb9f9685880f3aeb9c1533951ad56abef2a39c97f5a93683bdaa5e30/crns.json'
 
 export const websiteUrl = 'https://www.twentysix.cloud'
 

@@ -29,10 +29,6 @@ export function useGpuInstanceDashboardPage(): UseGpuInstanceDashboardPageReturn
 
   const [tabId, setTabId] = useState('gpuInstances')
 
-  console.log('gpuInstances', gpuInstances)
-  console.log('volumes', volumes)
-  console.log('domains', domains)
-
   const tabs: TabsProps['tabs'] = useMemo(() => {
     return [
       {
@@ -53,7 +49,7 @@ export function useGpuInstanceDashboardPage(): UseGpuInstanceDashboardPageReturn
         disabled: !domains.length,
       },
     ]
-  }, [gpuInstances])
+  }, [domains, gpuInstances, volumes])
 
   return {
     gpuInstances,

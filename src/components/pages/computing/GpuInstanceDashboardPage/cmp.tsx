@@ -3,8 +3,6 @@ import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import GpuInstancesTabContent from '../../dashboard/GpuInstancesTabContent'
-import VolumesTabContent from '../../dashboard/VolumesTabContent'
-import DomainsTabContent from '../../dashboard/DomainsTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 import { useGpuInstanceDashboardPage } from '@/hooks/pages/computing/useGpuInstanceDashboardPage'
 

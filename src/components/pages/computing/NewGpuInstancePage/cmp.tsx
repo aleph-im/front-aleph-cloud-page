@@ -15,7 +15,6 @@ import { CRNSpecs } from '@/domain/node'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
-import AddEnvVars from '@/components/form/AddEnvVars'
 import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
@@ -110,6 +109,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
     values,
     control,
     errors,
+    cost,
     node,
     nodeSpecs,
     selectedModal,
@@ -491,11 +491,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         <CheckoutSummary
           control={control}
           address={address}
-          type={EntityType.Instance}
-          isPersistent={true}
-          specs={values.specs}
-          volumes={values.volumes}
-          domains={values.domains}
+          cost={cost}
           receiverAddress={node?.reward}
           unlockedAmount={accountBalance}
           paymentMethod={values.paymentMethod}

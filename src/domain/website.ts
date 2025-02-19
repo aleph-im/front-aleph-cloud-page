@@ -648,8 +648,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
 
     totalCost = Number(costs.cost)
 
-    console.log(costs)
-
     const lines = this.getCostLines(fileObject, paymentMethod, costs.detail)
 
     return {

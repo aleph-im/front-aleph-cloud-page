@@ -136,7 +136,7 @@ export type ExecutableCostProps = (
   volumes?: CostEstimationMachineVolume[]
 }
 
-export abstract class ExecutableManager {
+export abstract class ExecutableManager<T extends Executable> {
   protected static cachedPubKeyToken?: AuthPubKeyToken
 
   constructor(
@@ -148,17 +148,15 @@ export abstract class ExecutableManager {
   ) {}
 
   abstract getDelSteps(
-    executableOrIds: string | Executable | (string | Executable)[],
+    executableOrIds: string | T | (string | T)[],
   ): Promise<CheckoutStepType[]>
 
   abstract delSteps(
-    executableOrIds: string | Executable | (string | Executable)[],
+    executableOrIds: string | T | (string | T)[],
     account?: SuperfluidAccount,
   ): AsyncGenerator<void>
 
-  async checkStatus(
-    executable: Executable,
-  ): Promise<ExecutableStatus | undefined> {
+  async checkStatus(executable: T): Promise<ExecutableStatus | undefined> {
     const node = await this.getAllocationCRN(executable)
     if (!node) return
 
@@ -188,7 +186,7 @@ export abstract class ExecutableManager {
     }
   }
 
-  async getAllocationCRN(executable: Executable): Promise<CRN | undefined> {
+  async getAllocationCRN(executable: T): Promise<CRN | undefined> {
     if (executable.payment?.type === PaymentType.superfluid) {
       const { receiver } = executable.payment
       if (!receiver) return
@@ -711,7 +709,6 @@ export abstract class ExecutableManager {
         ),
       },
     ]
-    console.log('executionLines', executionLines)
 
     // Volumes
 
@@ -775,7 +772,10 @@ export abstract class ExecutableManager {
     ]
   }
 
-  protected parseCost(paymentMethod: PaymentMethod, cost: number) {
+  protected parseCost(
+    paymentMethod: PaymentMethod | PaymentType,
+    cost: number,
+  ) {
     return paymentMethod === PaymentMethod.Hold ? cost : cost * 3600
   }
 }

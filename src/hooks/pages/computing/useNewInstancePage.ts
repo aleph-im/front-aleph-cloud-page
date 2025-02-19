@@ -36,7 +36,6 @@ import {
   UseEntityCostReturn,
   UseInstanceCostProps,
 } from '@/hooks/common/useEntityCost'
-import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
 import {
@@ -99,7 +98,7 @@ export type UseNewInstancePageReturn = {
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
   cost: UseEntityCostReturn
-  node?: CRN
+  node?: CRNSpecs
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
   selectedModal?: Modal
@@ -315,7 +314,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
           type: PaymentMethod.Stream,
           sender: account?.address,
           receiver: node?.stream_reward,
-          streamCost: formValues?.streamCost,
+          streamCost: formValues?.streamCost || 1,
           streamDuration: formValues?.streamDuration,
         } as PaymentConfiguration)
       : ({
@@ -328,6 +327,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     () => ({
       entityType: EntityType.Instance,
       props: {
+        node,
         specs: formValues.specs,
         volumes: formValues.volumes,
         domains: formValues.domains,
@@ -342,10 +342,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         ],
       },
     }),
-    [payment, formValues],
+    [node, payment, formValues],
   )
 
-  console.log('cost props', costProps)
   const cost = useEntityCost(costProps)
 
   // -------------------------

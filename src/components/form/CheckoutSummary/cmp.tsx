@@ -185,7 +185,6 @@ export const CheckoutSummary = ({
   })
   const nftVoucherBalance = useNFTVoucherBalance()
 
-  const priceDuration = paymentMethod === PaymentMethod.Stream ? 'h' : undefined
   const disabledHold =
     disablePaymentMethod && paymentMethod !== PaymentMethod.Hold
   const disabledStream =
@@ -201,8 +200,6 @@ export const CheckoutSummary = ({
       disabledStreamTooltip={disabledStreamTooltip}
     />
   )
-
-  console.log('{cost?.lines}', cost?.lines)
 
   return (
     <>
@@ -396,13 +393,5 @@ export const CheckoutSummary = ({
     </>
   )
 }
-
-const CheckoutSummaryVolumeLineMemo = memo(
-  CheckoutSummaryVolumeLine,
-) as typeof CheckoutSummaryVolumeLine
-
-const CheckoutSummaryWebsiteLineMemo = memo(
-  CheckoutSummaryWebsiteLine,
-) as typeof CheckoutSummaryWebsiteLine
 
 export default memo(CheckoutSummary) as typeof CheckoutSummary

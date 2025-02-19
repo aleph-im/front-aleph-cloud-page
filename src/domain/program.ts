@@ -94,7 +94,7 @@ export type ParsedCodeType = {
 )
 
 export class ProgramManager
-  extends ExecutableManager
+  extends ExecutableManager<Program>
   implements EntityManager<Program, AddProgram>
 {
   static addSchema = functionSchema
@@ -248,7 +248,6 @@ export class ProgramManager
   }
 
   async getCost(newProgram: ProgramCostProps): Promise<ProgramCost> {
-    const totalStreamCost = Number.POSITIVE_INFINITY
     let totalCost = Number.POSITIVE_INFINITY
     const paymentMethod = newProgram.payment?.type || PaymentMethod.Hold
 
@@ -260,13 +259,11 @@ export class ProgramManager
 
     let parsedProgram: ProgramPublishConfiguration
 
-    console.log('generating parsedProgram')
     try {
-      const steps = this.parseProgramSteps(newProgram, true)
+      const steps = this.parseProgramSteps(newProgram)
 
       while (true) {
         const { value, done } = await steps.next()
-        console.log('value', value)
         parsedProgram = value as any
         if (done) break
       }
@@ -275,11 +272,8 @@ export class ProgramManager
       return emptyCost
     }
 
-    console.log('parsedProgram', parsedProgram)
     const costs =
       await this.sdkClient.programClient.getEstimatedCost(parsedProgram)
-
-    console.log('costs', costs)
 
     totalCost = Number(costs.cost)
 
@@ -297,12 +291,6 @@ export class ProgramManager
       paymentMethod,
       lines: [...lines],
     }
-
-    ///
-    // return super.getExecutableCostLines({
-    //   ...props,
-    //   type: EntityType.Program,
-    // })
   }
 
   protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {
@@ -345,9 +333,41 @@ export class ProgramManager
     } else throw Err.InvalidCodeType
   }
 
+  protected async parseProgramForCostEstimation(
+    newProgram: AddProgram,
+  ): Promise<ProgramPublishConfiguration> {
+    const { account, channel } = this
+
+    const { isPersistent, specs } = newProgram
+
+    const { memory, vcpus } = this.parseSpecs(specs)
+    const runtime = this.parseRuntime(newProgram)
+    const payment = this.parsePayment(newProgram.payment)
+    const volumesSteps = this.parseVolumesSteps(newProgram.volumes)
+    const code = await this.parseCode(newProgram.code)
+
+    let volumes: MachineVolume[] = []
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for await (const volumeStep of volumesSteps) {
+      // Do nothing. Consume iterator
+      volumes = volumeStep as unknown as MachineVolume[]
+    }
+
+    return {
+      account,
+      channel,
+      runtime,
+      isPersistent,
+      memory,
+      vcpus,
+      volumes,
+      ...code,
+      payment,
+    }
+  }
+
   protected async *parseProgramSteps(
     newProgram: AddProgram,
-    calculateCost = false,
   ): AsyncGenerator<void, ProgramPublishConfiguration, void> {
     newProgram = await ProgramManager.addSchema.parseAsync(newProgram)
 

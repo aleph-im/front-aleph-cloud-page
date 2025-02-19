@@ -330,22 +330,9 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     })
 
     totalCost = Number(costs.cost)
-    const sizeMib = newVolume.file.size / 1024 / 1024
-
-    const perVolumeCost = [
-      {
-        size: sizeMib,
-        price: totalCost / sizeMib,
-        discount: 0,
-        cost: totalCost,
-      },
-    ]
-
-    console.log(costs, perVolumeCost)
 
     const lines = this.getCostLines(newVolume, paymentMethod, costs.detail)
 
-    console.log('lines', lines)
     return {
       paymentMethod,
       cost: totalCost,

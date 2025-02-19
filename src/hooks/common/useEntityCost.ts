@@ -9,10 +9,17 @@ import { useProgramManager } from './useManager/useProgramManager'
 import { useInstanceManager } from './useManager/useInstanceManager'
 import { CostSummary } from '@/domain/cost'
 import { useWebsiteManager } from './useManager/useWebsiteManager'
+import { GpuInstanceCostProps } from '@/domain/gpuInstance'
+import { useGpuInstanceManager } from './useManager/useGpuInstanceManager'
 
 export type UseVolumeCostProps = {
   entityType: EntityType.Volume
   props: VolumeCostProps
+}
+
+export type UseGpuInstanceCostProps = {
+  entityType: EntityType.GpuInstance
+  props: GpuInstanceCostProps
 }
 
 export type UseInstanceCostProps = {
@@ -33,6 +40,7 @@ export type UseWebsiteCostProps = {
 export type UseEntityCostProps =
   | UseVolumeCostProps
   | UseInstanceCostProps
+  | UseGpuInstanceCostProps
   | UseProgramCostProps
   | UseWebsiteCostProps
 
@@ -51,6 +59,7 @@ export function useEntityCost({
 
   const volumeManager = useVolumeManager()
   const instanceManager = useInstanceManager()
+  const gpuInstanceManager = useGpuInstanceManager()
   const programManager = useProgramManager()
   const websiteManager = useWebsiteManager()
 
@@ -58,12 +67,18 @@ export function useEntityCost({
     async function load() {
       let result: CostSummary = emptyCost
 
+      console.log('LOAD COSTS', entityType, props)
+
       switch (entityType) {
         case EntityType.Volume:
           if (volumeManager) result = await volumeManager.getCost(props)
           break
         case EntityType.Instance:
           if (instanceManager) result = await instanceManager.getCost(props)
+          break
+        case EntityType.GpuInstance:
+          if (gpuInstanceManager)
+            result = await gpuInstanceManager.getCost(props)
           break
         case EntityType.Program:
           if (programManager) result = await programManager.getCost(props)
