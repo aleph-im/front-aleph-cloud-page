@@ -218,7 +218,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     if (!baseFilteredNodes) return
     if (!nodesIssues) return baseFilteredNodes
 
-    return baseFilteredNodes
+    return baseFilteredNodes.filter((node) => !nodesIssues[node.hash])
   }, [baseFilteredNodes, nodesIssues])
 
   const filteredNodes = useMemo(() => {
