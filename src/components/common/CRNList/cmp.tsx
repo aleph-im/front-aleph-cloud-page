@@ -2,7 +2,8 @@ import { KeyboardEvent, useCallback, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import {
   Button,
-  Checkbox,
+  Dropdown,
+  DropdownOption,
   Icon,
   NodeName,
   NodeScore,
@@ -10,7 +11,6 @@ import {
   NoisyContainer,
   TableColumn,
   TextInput,
-  Tooltip,
 } from '@aleph-front/core'
 import { apiServer } from '@/helpers/constants'
 import { useCRNList } from '@/hooks/common/useCRNList'
@@ -21,232 +21,173 @@ import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import Price from '@/components/common/Price'
 import { CRNItem, CRNListProps } from './types'
-import { StreamNotSupportedIssue } from '@/domain/node'
 
 export default function CRNList(props: CRNListProps) {
   const {
+    enableGpu = false,
     selected,
     lastVersion,
     specs,
     nodesIssues,
-    filter,
     filteredNodes,
-    validPAYGNodesOnly,
+    filterOptions,
     loadItemsDisabled,
     handleLoadItems,
     handleSortItems,
-    handleFilterChange,
-    handleValidPAYGNodesOnlyChange,
+    nameFilter,
+    handleNameFilterChange,
+    gpuFilter,
+    handleGpuFilterChange,
+    cpuFilter,
+    handleCpuFilterChange,
+    ramFilter,
+    handleRamFilterChange,
+    hddFilter,
+    handleHddFilterChange,
     onSelectedChange,
   } = useCRNList(props)
 
   const theme = useTheme()
 
   const columns = useMemo(() => {
-    return [
-      {
-        label: 'SCORE',
-        width: '10%',
-        sortable: true,
-        sortBy: (node) => node.score,
-        render: (node) => <NodeScore score={node.score} />,
-      },
-      {
-        label: 'NAME',
-        width: '20%',
-        sortable: true,
-        sortBy: (node) => node.name,
-        render: (node) => (
-          <NodeName
-            hash={node.hash}
-            name={node.name}
-            picture={node.picture}
-            ImageCmp={Image}
-            apiServer={apiServer}
-          />
-        ),
-      },
-      {
-        label: 'CPU',
-        width: '10%',
-        sortable: true,
-        sortBy: (node) => specs[node.hash]?.data?.cpu.count || 0,
-        render: (node) => (
-          <div tw="whitespace-nowrap">
-            {specs[node.hash]?.data
-              ? `${specs[node.hash]?.data?.cpu.count} x86 64bit`
-              : 'n/a'}
-          </div>
-        ),
-      },
-      {
-        label: 'RAM',
-        width: '10%',
-        sortable: true,
-        sortBy: (node) => specs[node.hash]?.data?.mem.available_kB || 0,
-        render: (node) => (
-          <div tw="whitespace-nowrap">
-            {humanReadableSize(specs[node.hash]?.data?.mem.available_kB, 'KiB')}
-          </div>
-        ),
-      },
-      {
-        label: 'HDD',
-        width: '10%',
-        sortable: true,
-        sortBy: (node) => specs[node.hash]?.data?.disk.available_kB || 0,
-        render: (node) => (
-          <div tw="whitespace-nowrap">
-            {humanReadableSize(
-              specs[node.hash]?.data?.disk.available_kB,
-              'KiB',
-            )}
-          </div>
-        ),
-      },
-      {
-        label: 'VERSION',
-        width: '20%',
-        sortable: true,
-        sortBy: (node) => node.metricsData?.version,
-        render: (node) => (
-          <NodeVersion
-            version={node.metricsData?.version || ''}
-            lastVersion={lastVersion}
-          />
-        ),
-      },
-      {
-        label: 'PRICE',
-        width: '20%',
-        sortable: true,
-        sortBy: () => 0.11,
-        render: () => (
-          <div tw="flex items-center gap-1 whitespace-nowrap">
-            <Price value={0.11} /> per unit / h
-          </div>
-        ),
-      },
-      {
-        label: '',
-        align: 'right',
-        width: '100%',
-        cellProps: () => ({ css: { opacity: '1 !important' } }),
-        render: (node) => {
-          return (
-            <div tw="flex gap-3 justify-end">
-              {node.issue ? (
-                <Tooltip
-                  my="bottom-right"
-                  at="top-left"
-                  content={
-                    <div className="tp-body1 fs-12">
-                      <div className="tp-body3 fs-16">
-                        Why are some nodes unavailable?
-                      </div>
-                      <div>
-                        A node may be grayed out and not selectable for the
-                        following reasons:
-                      </div>
-                      <ul tw="my-4 pl-6 list-disc">
-                        {node.issue === StreamNotSupportedIssue.IPV6 && (
-                          <li>
-                            <strong>IPv6 Egress Issue:</strong> The node&apos;s
-                            compute resource (CRN) is unable to establish an
-                            IPv6 egress connection.
-                          </li>
-                        )}
-                        {node.issue === StreamNotSupportedIssue.MinSpecs && (
-                          <li>
-                            <strong>Minimum Specifications:</strong> The node
-                            does not meet the required minimum hardware or
-                            software specifications.
-                          </li>
-                        )}
-                        {node.issue === StreamNotSupportedIssue.Version && (
-                          <li>
-                            <strong>Version Compatibility:</strong> Only nodes
-                            with version 0.4.0 or higher are eligible for
-                            selection.
-                          </li>
-                        )}
-                        {node.issue ===
-                          StreamNotSupportedIssue.RewardAddress && (
-                          <li>
-                            <strong>Stream Reward Configuration:</strong> The
-                            node lacks a configured stream reward address, which
-                            is necessary for operation.
-                          </li>
-                        )}
-                        {node.issue ===
-                          StreamNotSupportedIssue.MismatchRewardAddress && (
-                          <li>
-                            <strong>Stream Reward Address Mismatch:</strong> The
-                            stream reward address registered by the node
-                            operator and the one specified in the target CRN
-                            configuration do not match.
-                          </li>
-                        )}
-                      </ul>
-                      <div>
-                        Please select from the available nodes that meet all the
-                        necessary criteria for a smooth and efficient setup.
-                      </div>
-                    </div>
-                  }
-                >
-                  <Icon
-                    name="exclamation-circle"
-                    color={theme.color.text}
-                    tw="px-5 cursor-help"
-                  />
-                </Tooltip>
-              ) : node.isLoading ? (
-                <Button
-                  size="md"
-                  color="main2"
-                  tw="w-16!"
-                  className="check-button"
-                  disabled
-                >
-                  <RotatingLines strokeColor={theme.color.main0} width="1em" />
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    color="main0"
-                    variant="tertiary"
-                    kind="default"
-                    size="md"
-                    type="button"
-                    onClick={(e) => e.preventDefault()}
-                    tabIndex={-1}
-                    className="check-button"
-                    style={{
-                      visibility: node.isActive ? 'visible' : 'hidden',
-                      opacity: node.isActive ? '1' : '0',
-                      transition: 'all ease-in-out 500ms 0ms',
-                      transitionProperty: 'opacity visibility',
-                    }}
-                  >
-                    <Icon name="check" size="lg" />
-                  </Button>
-                </>
-              )}
-            </div>
-          )
+    const gpuColumn = enableGpu
+      ? ({
+          label: 'GPU',
+          width: '10%',
+          sortable: true,
+          sortBy: (node) => node.selectedGpu?.model,
+          render: (node) => (
+            <div tw="whitespace-nowrap">{node.selectedGpu?.model}</div>
+          ),
+        } as TableColumn<CRNItem>)
+      : undefined
+
+    return (
+      [
+        {
+          label: 'SCORE',
+          width: '10%',
+          sortable: true,
+          sortBy: (node) => node.score,
+          render: (node) => <NodeScore score={node.score} />,
         },
-      },
-    ] as TableColumn<CRNItem>[]
-  }, [specs, lastVersion, theme])
+        {
+          label: 'NAME',
+          width: '20%',
+          sortable: true,
+          sortBy: (node) => node.name,
+          render: (node) => (
+            <NodeName
+              hash={node.hash}
+              name={node.name}
+              picture={node.picture}
+              ImageCmp={Image}
+              apiServer={apiServer}
+            />
+          ),
+        },
+        gpuColumn,
+        {
+          label: 'CPU',
+          width: '10%',
+          sortable: true,
+          sortBy: (node) => specs[node.hash]?.cpu?.count || 0,
+          render: (node) => (
+            <div tw="whitespace-nowrap">
+              {specs[node.hash]
+                ? `${specs[node.hash]?.cpu?.count} x86 64bit`
+                : 'n/a'}
+            </div>
+          ),
+        },
+        {
+          label: 'RAM',
+          width: '10%',
+          sortable: true,
+          sortBy: (node) => specs[node.hash]?.mem?.available_kB || 0,
+          render: (node) => (
+            <div tw="whitespace-nowrap">
+              {humanReadableSize(specs[node.hash]?.mem?.available_kB, 'KiB')}
+            </div>
+          ),
+        },
+        {
+          label: 'HDD',
+          width: '10%',
+          sortable: true,
+          sortBy: (node) => specs[node.hash]?.disk?.available_kB || 0,
+          render: (node) => (
+            <div tw="whitespace-nowrap">
+              {humanReadableSize(specs[node.hash]?.disk?.available_kB, 'KiB')}
+            </div>
+          ),
+        },
+        {
+          label: 'VERSION',
+          width: '20%',
+          sortable: true,
+          sortBy: (node) => node?.version,
+          render: (node) => (
+            <NodeVersion
+              version={node?.version || ''}
+              lastVersion={lastVersion}
+            />
+          ),
+        },
+        {
+          label: 'PRICE',
+          width: '20%',
+          sortable: true,
+          sortBy: () => 0.11,
+          render: () => (
+            <div tw="flex items-center gap-1 whitespace-nowrap">
+              <Price value={0.11} /> per unit / h
+            </div>
+          ),
+        },
+        {
+          label: '',
+          align: 'right',
+          width: '100%',
+          cellProps: () => ({ css: { opacity: '1 !important' } }),
+          render: (node) => {
+            return (
+              <div tw="flex gap-3 justify-end">
+                <Button
+                  color="main0"
+                  variant="tertiary"
+                  kind="default"
+                  size="md"
+                  type="button"
+                  onClick={(e) => e.preventDefault()}
+                  tabIndex={-1}
+                  className="check-button"
+                  style={{
+                    visibility: node.isActive ? 'visible' : 'hidden',
+                    opacity: node.isActive ? '1' : '0',
+                    transition: 'all ease-in-out 500ms 0ms',
+                    transitionProperty: 'opacity visibility',
+                  }}
+                >
+                  <Icon name="check" size="lg" />
+                </Button>
+              </div>
+            )
+          },
+        },
+      ] as TableColumn<CRNItem>[]
+    ).filter((c) => c !== undefined)
+  }, [enableGpu, specs, lastVersion])
 
   const data: CRNItem[] = useMemo(() => {
     if (!filteredNodes) return []
 
     return filteredNodes.map((node) => {
-      const { hash } = node
+      const { hash, selectedGpu } = node
 
-      const isActive = hash === selected
+      const isActive =
+        `${hash}-${selectedGpu?.device_id}` ===
+        `${selected?.hash}-${selected?.selectedGpu?.device_id}`
       const issue = nodesIssues?.[hash]
       const isLoading = issue === undefined
       const disabled = !isLoading && !!issue
@@ -271,7 +212,7 @@ export default function CRNList(props: CRNListProps) {
         if (row.disabled) return
         if (row.isLoading) return
 
-        onSelectedChange(row.hash)
+        onSelectedChange(row)
       },
       onKeyDown: (e: KeyboardEvent) => {
         if (e.code !== 'Space' && e.code !== 'Enter') return
@@ -279,7 +220,8 @@ export default function CRNList(props: CRNListProps) {
         if (row.isLoading) return
 
         e.preventDefault()
-        onSelectedChange(row.hash)
+
+        onSelectedChange(row)
       },
     }),
     [onSelectedChange],
@@ -304,20 +246,73 @@ export default function CRNList(props: CRNListProps) {
         <div tw="flex mb-8 gap-10 justify-between flex-wrap flex-col md:flex-row items-stretch md:items-center">
           <div tw="flex-1">
             <TextInput
-              value={filter}
+              value={nameFilter}
+              label="Search CRN"
               name="filter-crn"
               placeholder="Search CRN"
-              onChange={handleFilterChange}
+              onChange={handleNameFilterChange}
               icon={<Icon name="search" />}
             />
           </div>
-          <div>
-            <Checkbox
-              label="Ready for PAYG"
-              checked={validPAYGNodesOnly}
-              onChange={handleValidPAYGNodesOnlyChange}
-              size="xs"
-            />
+        </div>
+        <div tw="w-full flex flex-wrap gap-x-6 gap-y-4 mb-6">
+          {enableGpu && (
+            <div tw="flex-1">
+              <Dropdown
+                placeholder="GPU"
+                label="GPU"
+                value={gpuFilter}
+                onChange={handleGpuFilterChange}
+              >
+                {filterOptions.gpu.map((option) => (
+                  <DropdownOption key={option} value={option}>
+                    {option}
+                  </DropdownOption>
+                ))}
+              </Dropdown>
+            </div>
+          )}
+          <div tw="flex-1">
+            <Dropdown
+              placeholder="CPU"
+              label="CPU"
+              value={cpuFilter}
+              onChange={handleCpuFilterChange}
+            >
+              {filterOptions.cpu.map((option) => (
+                <DropdownOption key={option} value={option}>
+                  {option}
+                </DropdownOption>
+              ))}
+            </Dropdown>
+          </div>
+          <div tw="flex-1">
+            <Dropdown
+              placeholder="RAM"
+              label="RAM"
+              value={ramFilter}
+              onChange={handleRamFilterChange}
+            >
+              {filterOptions.ram.map((option) => (
+                <DropdownOption key={option} value={option}>
+                  {humanReadableSize(+option, 'KiB')}
+                </DropdownOption>
+              ))}
+            </Dropdown>
+          </div>
+          <div tw="flex-1">
+            <Dropdown
+              placeholder="HDD"
+              label="HDD"
+              value={hddFilter}
+              onChange={handleHddFilterChange}
+            >
+              {filterOptions.hdd.map((option) => (
+                <DropdownOption key={option} value={option}>
+                  {humanReadableSize(+option, 'KiB')}
+                </DropdownOption>
+              ))}
+            </Dropdown>
           </div>
         </div>
         <div

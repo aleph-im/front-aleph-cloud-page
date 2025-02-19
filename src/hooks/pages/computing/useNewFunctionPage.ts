@@ -1,10 +1,7 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import {
-  InstanceSpecsField,
-  getDefaultSpecsOptions,
-} from '../../form/useSelectInstanceSpecs'
+import { InstanceSpecsField } from '../../form/useSelectInstanceSpecs'
 import { VolumeField } from '../../form/useAddVolume'
 import { EnvVarField } from '../../form/useAddEnvVars'
 import {
@@ -19,7 +16,11 @@ import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CustomFunctionRuntimeField } from '@/domain/runtime'
-import { useEntityCost } from '@/hooks/common/useEntityCost'
+import {
+  useEntityCost,
+  UseEntityCostReturn,
+  UseProgramCostProps,
+} from '@/hooks/common/useEntityCost'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import {
   stepsCatalog,
@@ -27,6 +28,7 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
+import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -39,14 +41,6 @@ export type NewFunctionFormState = NameAndTagsField & {
   paymentMethod: PaymentMethod
 }
 
-const defaultValues: Partial<NewFunctionFormState> = {
-  ...defaultNameAndTags,
-  code: { ...defaultCode } as FunctionCodeField,
-  specs: { ...getDefaultSpecsOptions(false)[0] },
-  isPersistent: false,
-  paymentMethod: PaymentMethod.Hold,
-}
-
 // @todo: Split this into reusable hooks by composition
 
 export type UseNewFunctionPage = {
@@ -56,6 +50,7 @@ export type UseNewFunctionPage = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewFunctionFormState>
+  cost: UseEntityCostReturn
   handleSubmit: (e: FormEvent) => Promise<void>
   handleBack: () => void
 }
@@ -104,6 +99,19 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     [dispatch, manager, next, router, stop],
   )
 
+  const { defaultTiers } = useDefaultTiers({ type: EntityType.Program })
+
+  const defaultValues: Partial<NewFunctionFormState> = useMemo(
+    () => ({
+      ...defaultNameAndTags,
+      code: { ...defaultCode } as FunctionCodeField,
+      specs: defaultTiers[0],
+      isPersistent: false,
+      paymentMethod: PaymentMethod.Hold,
+    }),
+    [defaultTiers],
+  )
+
   const {
     control,
     handleSubmit,
@@ -116,17 +124,25 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as NewFunctionFormState
 
-  const { cost } = useEntityCost({
-    entityType: EntityType.Program,
-    props: {
-      specs: values.specs,
-      isPersistent: values.isPersistent,
-      volumes: values.volumes,
-    },
-  })
+  const costProps: UseProgramCostProps = useMemo(
+    () => ({
+      entityType: EntityType.Program,
+      props: {
+        name: values.name || 'MOCK',
+        specs: values.specs,
+        isPersistent: values.isPersistent,
+        volumes: values.volumes,
+        domains: values.domains,
+        paymentMethod: values.paymentMethod,
+        code: values.code,
+      },
+    }),
+    [values],
+  )
 
-  const canAfford =
-    accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
+  const cost = useEntityCost(costProps)
+
+  const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
   let isCreateButtonDisabled = !canAfford
   if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
     isCreateButtonDisabled = false
@@ -143,6 +159,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     values,
     control,
     errors,
+    cost,
     handleSubmit,
     handleBack,
   }

@@ -1,7 +1,11 @@
 import Router from 'next/router'
 import { useCallback } from 'react'
 
-export type NewEntityTabId = 'instance' | 'function' | 'confidential'
+export type NewEntityTabId =
+  | 'instance'
+  | 'function'
+  | 'gpu-instance'
+  | 'confidential'
 
 export type UseNewEntityTabProps = {
   selected: NewEntityTabId

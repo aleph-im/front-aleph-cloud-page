@@ -14,7 +14,6 @@ import {
   isBlockchainSupported as isBlockchainPAYGCompatible,
 } from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
-import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   defaultNameAndTags,
   NameAndTagsField,
@@ -25,20 +24,20 @@ import {
   defaultInstanceImage,
   InstanceImageField,
 } from '@/hooks/form/useSelectInstanceImage'
-import {
-  getDefaultSpecsOptions,
-  InstanceSpecsField,
-} from '@/hooks/form/useSelectInstanceSpecs'
+import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { AddInstance, InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
-import { useEntityCost } from '@/hooks/common/useEntityCost'
-import { useRequestCRNs } from '@/hooks/common/useRequestEntity/useRequestCRNs'
+import {
+  useEntityCost,
+  UseEntityCostReturn,
+  UseInstanceCostProps,
+} from '@/hooks/common/useEntityCost'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { CRN, CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
+import { CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
 import {
   defaultStreamDuration,
   StreamDurationField,
@@ -65,13 +64,14 @@ import {
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
+import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
+import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
   specs: InstanceSpecsField
   sshKeys: SSHKeyField[]
   volumes?: VolumeField[]
-  envVars?: EnvVarField[]
   domains?: DomainField[]
   systemVolumeSize: number
   nodeSpecs?: CRNSpecs
@@ -79,21 +79,6 @@ export type NewInstanceFormState = NameAndTagsField & {
   streamDuration: StreamDurationField
   streamCost: number
   termsAndConditions?: string
-}
-
-const defaultSpecs = {
-  ...getDefaultSpecsOptions(true, PaymentMethod.Stream)[0],
-}
-
-export const defaultValues: Partial<NewInstanceFormState> = {
-  ...defaultNameAndTags,
-  image: defaultInstanceImage,
-  specs: defaultSpecs,
-  systemVolumeSize: defaultSpecs.storage,
-  paymentMethod: PaymentMethod.Hold,
-  streamDuration: defaultStreamDuration,
-  streamCost: Number.POSITIVE_INFINITY,
-  termsAndConditions: undefined,
 }
 
 export type Modal = 'node-list' | 'terms-and-conditions'
@@ -112,13 +97,14 @@ export type UseNewInstancePageReturn = {
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
-  node?: CRN
+  cost: UseEntityCostReturn
+  node?: CRNSpecs
   lastVersion?: NodeLastVersions
   nodeSpecs?: CRNSpecs
   selectedModal?: Modal
   setSelectedModal: (modal?: Modal) => void
-  selectedNode?: string
-  setSelectedNode: (hash?: string) => void
+  selectedNode?: CRNSpecs
+  setSelectedNode: (hash?: CRNSpecs) => void
   termsAndConditions?: TermsAndConditions
   shouldRequestTermsAndConditions: boolean
   modalOpen?: (info: ModalCardProps) => void
@@ -152,32 +138,30 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const { crn: queryCRN } = router.query
 
   const hasInitialized = useRef(false)
-  const nodeRef = useRef<CRN | undefined>(undefined)
-  const [selectedNode, setSelectedNode] = useState<string>()
+  const nodeRef = useRef<CRNSpecs | undefined>(undefined)
+  const [selectedNode, setSelectedNode] = useState<CRNSpecs>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
 
   // -------------------------
   // Request CRNs specs
-
-  const { nodes, lastVersion } = useRequestCRNs({})
+  const { specs } = useRequestCRNSpecs()
+  const { lastVersion } = useRequestCRNLastVersion()
 
   // @note: Set node depending on CRN
-  const node: CRN | undefined = useMemo(() => {
-    if (!nodes) return
+  const node: CRNSpecs | undefined = useMemo(() => {
+    if (!specs) return
     if (!queryCRN) return nodeRef.current
+    if (typeof queryCRN !== 'string') return nodeRef.current
 
-    nodeRef.current = nodes.find((node) => node.hash === queryCRN)
+    nodeRef.current = specs[queryCRN]
     return nodeRef.current
-  }, [queryCRN, nodes])
-
-  const userNodes = useMemo(() => (node ? [node] : undefined), [node])
-  const { specs } = useRequestCRNSpecs({ nodes: userNodes })
+  }, [specs, queryCRN])
 
   const nodeSpecs = useMemo(() => {
     if (!node) return
     if (!specs) return
 
-    return specs[node.hash]?.data
+    return specs[node.hash]
   }, [specs, node])
 
   // -------------------------
@@ -186,6 +170,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const { termsAndConditions } = useFetchTermsAndConditions({
     termsAndConditionsMessageHash: node?.terms_and_conditions,
   })
+
+  // -------------------------
+  // Tiers
+
+  const { defaultTiers } = useDefaultTiers({ type: EntityType.Instance })
 
   // -------------------------
   // Checkout flow
@@ -209,7 +198,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         if (!nodeSpecs) throw Err.InvalidCRNSpecs
         if (!state?.streamCost) throw Err.InvalidStreamCost
 
-        const [minSpecs] = getDefaultSpecsOptions(true)
+        const [minSpecs] = defaultTiers
         const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
         if (!isValid) throw Err.InvalidCRNSpecs
 
@@ -274,6 +263,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       account,
       node,
       nodeSpecs,
+      defaultTiers,
       blockchain,
       handleConnect,
       dispatch,
@@ -284,6 +274,18 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   // -------------------------
   // Setup form
+
+  const defaultValues: Partial<NewInstanceFormState> = {
+    ...defaultNameAndTags,
+    image: defaultInstanceImage,
+    specs: defaultTiers[0],
+    systemVolumeSize: defaultTiers[0]?.storage,
+    paymentMethod: PaymentMethod.Hold,
+    streamDuration: defaultStreamDuration,
+    streamCost: Number.POSITIVE_INFINITY,
+    termsAndConditions: undefined,
+  }
+
   const {
     control,
     handleSubmit,
@@ -304,15 +306,46 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const { storage } = formValues.specs
   const { systemVolumeSize } = formValues
-  const { cost } = useEntityCost({
-    entityType: EntityType.Instance,
-    props: {
-      specs: formValues.specs,
-      volumes: formValues.volumes,
-      streamDuration: formValues.streamDuration,
-      paymentMethod: formValues.paymentMethod,
-    },
-  })
+
+  const payment: PaymentConfiguration = useMemo(() => {
+    return formValues.paymentMethod === PaymentMethod.Stream
+      ? ({
+          chain: blockchain,
+          type: PaymentMethod.Stream,
+          sender: account?.address,
+          receiver: node?.stream_reward,
+          streamCost: formValues?.streamCost || 1,
+          streamDuration: formValues?.streamDuration,
+        } as PaymentConfiguration)
+      : ({
+          chain: blockchain,
+          type: PaymentMethod.Hold,
+        } as PaymentConfiguration)
+  }, [formValues, blockchain, account, node])
+
+  const costProps: UseInstanceCostProps = useMemo(
+    () => ({
+      entityType: EntityType.Instance,
+      props: {
+        node,
+        specs: formValues.specs,
+        volumes: formValues.volumes,
+        domains: formValues.domains,
+        streamDuration: formValues.streamDuration,
+        paymentMethod: formValues.paymentMethod,
+        payment,
+        isPersistent: true,
+        image: formValues.image,
+        name: formValues.name || 'MOCK',
+        sshKeys: formValues.sshKeys || [
+          { key: 'MOCK', isNew: true, isSelected: true },
+        ],
+      },
+    }),
+    [node, payment, formValues],
+  )
+
+  const cost = useEntityCost(costProps)
 
   // -------------------------
   // Memos
@@ -373,8 +406,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     if (!account) return false
     if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') return true
 
-    return accountBalance >= (cost?.totalCost || Number.MAX_SAFE_INTEGER)
-  }, [account, accountBalance, cost?.totalCost])
+    return accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
+  }, [account, accountBalance, cost?.cost])
 
   const createInstanceDisabledMessage: UseNewInstancePageReturn['createInstanceDisabledMessage'] =
     useMemo(() => {
@@ -413,11 +446,13 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
     if (!selectedNode) return
 
+    const { hash: selectedNodeHash } = selectedNode
     const { crn: queryCRN, ...rest } = router.query
-    if (queryCRN === selectedNode) return
+
+    if (queryCRN === selectedNodeHash) return
 
     Router.replace({
-      query: selectedNode ? { ...rest, crn: selectedNode } : rest,
+      query: selectedNode ? { ...rest, crn: selectedNodeHash } : rest,
     })
   }, [router.query, selectedNode])
 
@@ -495,9 +530,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // @note: Set streamCost
   useEffect(() => {
     if (!cost) return
-    if (formValues.streamCost === cost.totalStreamCost) return
+    if (cost.paymentMethod !== PaymentMethod.Stream) return
+    if (formValues.streamCost === cost.cost) return
 
-    setValue('streamCost', cost.totalStreamCost)
+    setValue('streamCost', cost.cost)
   }, [cost, setValue, formValues])
 
   return {
@@ -512,6 +548,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     values: formValues,
     control,
     errors,
+    cost,
     node,
     lastVersion,
     nodeSpecs,

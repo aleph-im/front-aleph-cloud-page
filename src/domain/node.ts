@@ -1,5 +1,6 @@
 import {
   apiServer,
+  crnListProgramUrl,
   defaultAccountChannel,
   scoringAddress,
 } from '@/helpers/constants'
@@ -71,9 +72,6 @@ export type CRN = BaseNode & {
 
   parent: string | null
   type: string | 'compute'
-  scoreData?: CRNScore
-  metricsData?: CRNMetrics
-  parentData?: CCN
   stream_reward?: string
   terms_and_conditions?: string
 }
@@ -241,42 +239,65 @@ export type CRNConfig = {
   }
 }
 
-export type CRNSpecs = {
-  hash: string
-  name?: string
-  cpu: {
-    count: number
-    load_average: {
-      load1: number
-      load5: number
-      load15: number
-    }
-    core_frequencies: {
-      min: number
-      max: number
-    }
-  }
-  mem: {
-    total_kB: number
-    available_kB: number
-  }
-  disk: {
-    total_kB: number
-    available_kB: number
-  }
-  period: {
-    start_timestamp: string
-    duration_seconds: number
-  }
-  properties: {
-    cpu: {
-      architecture: string
-      vendor: string
-      features?: string[]
-    }
-  }
-  active: boolean
+export type GPUDevice = {
+  vendor: string
+  model: string
+  device_name: string
+  device_class: string
+  device_id: string
+  compatible: boolean
 }
+
+export type CRNSpecs = BaseNode &
+  CRN & {
+    cpu: {
+      count: number
+      load_average: {
+        load1: number
+        load5: number
+        load15: number
+      }
+      core_frequencies: {
+        min: number
+        max: number
+      }
+    }
+    mem: {
+      total_kB: number
+      available_kB: number
+    }
+    disk: {
+      total_kB: number
+      available_kB: number
+    }
+    period: {
+      start_timestamp: string
+      duration_seconds: number
+    }
+    properties: {
+      cpu: {
+        architecture: string
+        vendor: string
+        features?: string[]
+      }
+    }
+    gpu?: {
+      devices?: GPUDevice[]
+      available_devices?: GPUDevice[]
+    }
+    active: boolean
+    version?: string
+    compatible_gpus?: GPUDevice[]
+    compatible_available_gpus?: GPUDevice[]
+    gpu_support?: boolean | null
+    confidential_support?: boolean
+    qemu_support?: boolean
+    ipv6_check?: {
+      host: boolean
+      vm: boolean
+    }
+    selectedGpu?: GPUDevice
+  }
 
 export type CRNBenchmark = {
   hash: string
@@ -297,13 +318,6 @@ export type CRNBenchmark = {
 }
 
 // ---------- @todo: refactor into npm package
-
-export type CRNIps = {
-  hash: string
-  name?: string
-  host: boolean
-  vm: boolean
-}
 
 export enum StreamNotSupportedIssue {
   Valid = 0,
@@ -327,9 +341,9 @@ export class NodeManager {
     nodeSpecs: CRNSpecs,
   ): boolean {
     return (
-      minSpecs.cpu <= nodeSpecs.cpu.count &&
-      minSpecs.ram <= (nodeSpecs.mem.available_kB || 0) / 1024 &&
-      minSpecs.storage <= (nodeSpecs.disk.available_kB || 0) / 1024
+      minSpecs.cpu <= nodeSpecs.cpu?.count &&
+      minSpecs.ram <= (nodeSpecs.mem?.available_kB || 0) / 1024 &&
+      minSpecs.storage <= (nodeSpecs.disk?.available_kB || 0) / 1024
     )
   }
 
@@ -362,16 +376,43 @@ export class NodeManager {
 
     crns = this.parseResourceNodes(crns)
 
-    crns = await this.parseScores(crns, true)
-    crns = await this.parseMetrics(crns, true)
-
     ccns = await this.parseScores(ccns, false)
     ccns = await this.parseMetrics(ccns, false)
 
     this.linkChildrenNodes(ccns, crns)
-    this.linkParentNodes(crns, ccns)
 
     return { ccns, crns, timestamp }
+  }
+
+  async getAllCRNsSpecs(): Promise<CRNSpecs[]> {
+    try {
+      const response = await fetchAndCache(
+        crnListProgramUrl,
+        `all_crn_specs`,
+        3_600,
+        (res: { crns: any[]; last_refresh: string }) => {
+          if (res.crns === undefined) throw Err.InvalidResponse
+
+          const formattedCrns: CRNSpecs[] = res.crns.map((crn) => {
+            const { system_usage, ...rest } = crn
+            return {
+              ...system_usage,
+              ...rest,
+            }
+          })
+
+          return {
+            ...res,
+            crns: formattedCrns,
+          }
+        },
+      )
+
+      return response.crns
+    } catch (e) {
+      console.error(e)
+      return []
+    }
   }
 
   // @todo: move this to domain package
@@ -442,36 +483,6 @@ export class NodeManager {
       if (!retries) return
       await sleep(100 * 2)
       return this.getCRNConfig(node, retries - 1)
-    }
-  }
-
-  async getCRNips(node: CRN, retries = 2): Promise<CRNIps | undefined> {
-    if (!node.address) return
-    const nodeUrl = NodeManager.normalizeUrl(node.address)
-
-    const url = `${nodeUrl}/status/check/ipv6`
-    const { success } = urlSchema.safeParse(url)
-    if (!success) return
-
-    try {
-      return await fetchAndCache(
-        url,
-        `crn_ips_${node.hash}_1`,
-        3_600,
-        (res: CRNIps) => {
-          if (res.vm === undefined) throw Err.InvalidResponse
-
-          return {
-            ...res,
-            hash: node.hash,
-            name: node.name,
-          }
-        },
-      )
-    } catch (e) {
-      if (!retries) return
-      await sleep(100 * 2)
-      return this.getCRNips(node, retries - 1)
     }
   }
 
@@ -553,12 +564,12 @@ export class NodeManager {
     )
   }
 
-  getNodeVersionNumber(node: CRN): number {
-    if (!node.metricsData?.version) return 0
-    return getVersionNumber(node.metricsData?.version)
+  getNodeVersionNumber(node: CRNSpecs): number {
+    if (!node?.version) return 0
+    return getVersionNumber(node?.version)
   }
 
-  isStreamPaymentNotSupported(node: CRN): StreamNotSupportedIssue {
+  isStreamPaymentNotSupported(node: CRNSpecs): StreamNotSupportedIssue {
     if (!extractValidEthAddress(node.stream_reward))
       return StreamNotSupportedIssue.RewardAddress
 
@@ -607,25 +618,6 @@ export class NodeManager {
       if (!crnsData) return
 
       ccn.crnsData = crnsData
-    })
-  }
-
-  protected linkParentNodes(crns: CRN[], ccns: CCN[]): void {
-    const ccnsMap = ccns.reduce(
-      (ac, cu) => {
-        ac[cu.hash] = cu
-        return ac
-      },
-      {} as Record<string, CCN>,
-    )
-
-    crns.forEach((crn) => {
-      if (!crn.parent) return
-
-      const parentData = ccnsMap[crn.parent]
-      if (!parentData) return
-
-      crn.parentData = parentData
     })
   }
 

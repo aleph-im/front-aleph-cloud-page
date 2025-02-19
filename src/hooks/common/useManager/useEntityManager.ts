@@ -13,7 +13,7 @@ export function useEntityManager(
     volumeManager,
     programManager,
     instanceManager,
-    indexerManager,
+    gpuInstanceManager,
     websiteManager,
     confidentialManager,
   } = appState.manager
@@ -27,18 +27,18 @@ export function useEntityManager(
       [EntityType.SSHKey]: sshKeyManager,
       [EntityType.Volume]: volumeManager,
       [EntityType.Instance]: instanceManager,
+      [EntityType.GpuInstance]: gpuInstanceManager,
       [EntityType.Program]: programManager,
-      [EntityType.Indexer]: indexerManager,
       [EntityType.Website]: websiteManager,
       [EntityType.Confidential]: confidentialManager,
     }
   }, [
     domainManager,
-    instanceManager,
-    programManager,
     sshKeyManager,
     volumeManager,
-    indexerManager,
+    instanceManager,
+    gpuInstanceManager,
+    programManager,
     websiteManager,
     confidentialManager,
   ])

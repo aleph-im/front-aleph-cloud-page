@@ -4,7 +4,6 @@ import { useNewFunctionPage } from '@/hooks/pages/computing/useNewFunctionPage'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
-import AddEnvVars from '@/components/form/AddEnvVars'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import Container from '@/components/common/CenteredContainer'
@@ -28,6 +27,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
     values,
     control,
     errors,
+    cost,
     handleSubmit,
     handleBack,
   } = useNewFunctionPage()
@@ -98,8 +98,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
             </SectionTitle>
             <p tw="mb-6">
               Customize your function with our Advanced Configuration Options.
-              Add volumes, environment variables, and custom domains to meet
-              your specific needs.
+              Add volumes and custom domains to meet your specific needs.
             </p>
             <div tw="px-0 my-6">
               <div tw="mb-4">
@@ -133,21 +132,6 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
                 </SwitchToggleContainer>
               </div>
               <div tw="mb-4">
-                <SwitchToggleContainer label="Add Environmental Variables">
-                  <TextGradient forwardedAs="h2" type="h6" color="main0">
-                    Add environment variables
-                  </TextGradient>
-                  <p tw="mb-6">
-                    Define key-value pairs that act as configuration settings
-                    for your web3 function. Environment variables offer a
-                    convenient way to store information, manage configurations,
-                    and modify your application&apos;s behaviour without
-                    altering the source code.
-                  </p>
-                  <AddEnvVars name="envVars" control={control} />
-                </SwitchToggleContainer>
-              </div>
-              <div tw="mb-4">
                 <SwitchToggleContainer label="Add Custom Domain">
                   <TextGradient forwardedAs="h2" type="h6" color="main0">
                     Custom domain
@@ -171,11 +155,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         <CheckoutSummary
           control={control}
           address={address}
-          type={EntityType.Program}
-          isPersistent={values.isPersistent}
-          specs={values.specs}
-          volumes={values.volumes}
-          domains={values.domains}
+          cost={cost}
           unlockedAmount={accountBalance}
           paymentMethod={values.paymentMethod}
           mainRef={mainRef}

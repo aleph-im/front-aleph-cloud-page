@@ -4,7 +4,7 @@ import { ExecutableManager } from '@/domain/executable'
 
 export type UseExecutableStatusProps = {
   executable: Executable | undefined
-  manager?: ExecutableManager
+  manager?: ExecutableManager<any>
 }
 
 export type UseExecutableStatusReturn = ExecutableStatus | undefined

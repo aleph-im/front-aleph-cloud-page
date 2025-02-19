@@ -1,69 +1,34 @@
 import { useEffect, useState } from 'react'
-import { CRN, CRNSpecs } from '@/domain/node'
-import { RequestState } from '@aleph-front/core'
+import { CRNSpecs } from '@/domain/node'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
-export type UseRequestCRNSpecsProps = {
-  nodes?: CRN[]
-}
-
 export type UseRequestCRNSpecsReturn = {
-  specs: Record<string, RequestState<CRNSpecs>>
+  specs: Record<string, CRNSpecs>
   loading: boolean
 }
 
-export function useRequestCRNSpecs({
-  nodes,
-}: UseRequestCRNSpecsProps): UseRequestCRNSpecsReturn {
+export function useRequestCRNSpecs(): UseRequestCRNSpecsReturn {
   const nodeManager = useNodeManager()
 
-  const [specs, setSpecs] = useState<Record<string, RequestState<CRNSpecs>>>({})
+  const [specs, setSpecs] = useState<Record<string, CRNSpecs>>({})
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     async function load() {
-      if (!nodes) return
+      const crnSpecs = await nodeManager.getAllCRNsSpecs()
 
-      await Promise.allSettled(
-        nodes.map(async (node) => {
-          if (nodeManager.isStreamPaymentNotSupported(node)) return
-          if (specs[node.hash]) return
-
-          setSpecs((prev) => ({
-            ...prev,
-            [node.hash]: {
-              loading: true,
-              data: undefined,
-              error: undefined,
-            },
-          }))
-
-          const nodeSpecs = await nodeManager.getCRNspecs(node)
-
-          setSpecs((prev) => ({
-            ...prev,
-            [node.hash]: {
-              data: nodeSpecs,
-              loading: false,
-              error: undefined,
-            },
-          }))
-        }),
-      )
+      crnSpecs.forEach((spec) => {
+        setSpecs((prev) => ({
+          ...prev,
+          [spec.hash]: spec,
+        }))
+      })
 
       setLoading(false)
     }
 
     load()
-  }, [nodeManager, nodes, specs])
-
-  // const { data: nodeSpecs } = useLocalRequest({
-  //   doRequest: () => nodeManager.getCRNSpecs(nodes || []),
-  //   onSuccess: () => null,
-  //   flushData: true,
-  //   triggerOnMount: true,
-  //   triggerDeps: [nodes],
-  // })
+  }, [nodeManager])
 
   return {
     specs,

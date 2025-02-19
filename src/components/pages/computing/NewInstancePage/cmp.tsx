@@ -12,11 +12,10 @@ import {
   TooltipProps,
   Checkbox,
 } from '@aleph-front/core'
-import { CRN } from '@/domain/node'
+import { CRNSpecs } from '@/domain/node'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
-import AddEnvVars from '@/components/form/AddEnvVars'
 import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
@@ -113,6 +112,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     values,
     control,
     errors,
+    cost,
     node,
     nodeSpecs,
     lastVersion,
@@ -278,7 +278,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         label: 'VERSION',
         render: (node) => (
           <NodeVersion
-            version={node.metricsData?.version || ''}
+            version={node?.version || ''}
             lastVersion={lastVersion}
           />
         ),
@@ -300,7 +300,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           </div>
         ),
       },
-    ] as TableColumn<CRN>[]
+    ] as TableColumn<CRNSpecs>[]
   }, [lastVersion, setSelectedModal])
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
@@ -448,8 +448,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               Choose an image
             </SectionTitle>
             <p>
-              Chose a base image for your VM. It’s the base system that you will
-              be able to customize.
+              Chose a base image for your VM. It&apos;s the base system that you
+              will be able to customize.
             </p>
             <div tw="px-0 mt-12 mb-6">
               <SelectInstanceImage name="image" control={control} />
@@ -462,10 +462,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               Configure SSH Key
             </SectionTitle>
             <p>
-              Access your cloud instances securely. Give existing key’s below
-              access to this instance or add new keys. Remember, storing private
-              keys safely is crucial for security. If you need help, our support
-              team is always ready to assist.
+              Access your cloud instances securely. Give existing key&apos;s
+              below access to this instance or add new keys. Remember, storing
+              private keys safely is crucial for security. If you need help, our
+              support team is always ready to assist.
             </p>
             <div tw="px-0 my-6">
               <AddSSHKeys name="sshKeys" control={control} />
@@ -494,8 +494,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             </SectionTitle>
             <p tw="mb-6">
               Customize your instance with our Advanced Configuration Options.
-              Add volumes, SSH keys, environment variables, and custom domains
-              to meet your specific needs.
+              Add volumes and custom domains to meet your specific needs.
             </p>
             <div tw="px-0 my-6">
               <div tw="mb-4">
@@ -508,21 +507,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                     control={control}
                     systemVolumeSize={values.systemVolumeSize}
                   />
-                </SwitchToggleContainer>
-              </div>
-              <div tw="mb-4">
-                <SwitchToggleContainer label="Add Environmental Variables">
-                  <TextGradient forwardedAs="h2" type="h6" color="main0">
-                    Add environment variables
-                  </TextGradient>
-                  <p tw="mb-6">
-                    Define key-value pairs that act as configuration settings
-                    for your web3 instance. Environment variables offer a
-                    convenient way to store information, manage configurations,
-                    and modify your application&apos;s behaviour without
-                    altering the source code.
-                  </p>
-                  <AddEnvVars name="envVars" control={control} />
                 </SwitchToggleContainer>
               </div>
               <div tw="mb-4">
@@ -551,11 +535,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         <CheckoutSummary
           control={control}
           address={address}
-          type={EntityType.Instance}
-          isPersistent={true}
-          specs={values.specs}
-          volumes={values.volumes}
-          domains={values.domains}
+          cost={cost}
           receiverAddress={node?.reward}
           unlockedAmount={accountBalance}
           paymentMethod={values.paymentMethod}

@@ -64,4 +64,9 @@ export default {
   InstanceStartupFailed: (id: string, error: string) =>
     new Error(`Failed to start instance on CRN ${id}: ${error}`),
   MissingVolumeData: new Error('Missing volume data'),
+  MissingNodeData: new Error('Missing node data'),
+  UnsuportedGPUModel: (gpuModel: string) =>
+    new Error(`Unsupported GPU model: ${gpuModel}`),
+  UnsupportedPaymentMethod: (paymentMethod?: string) =>
+    new Error(`Unsupported payment method. ${paymentMethod}`),
 }

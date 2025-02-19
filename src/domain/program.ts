@@ -11,6 +11,7 @@ import {
 } from '@aleph-sdk/client'
 import {
   EntityType,
+  PaymentMethod,
   defaultProgramChannel,
   defaultVMURL,
   programStorageURL,
@@ -18,12 +19,7 @@ import {
 import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
 import { MachineVolume, MessageType, StoreMessage } from '@aleph-sdk/message'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import {
-  ExecutableManager,
-  ExecutableCost,
-  ExecutableCostProps,
-  PaymentConfiguration,
-} from './executable'
+import { ExecutableManager, PaymentConfiguration } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { CustomFunctionRuntimeField } from './runtime'
 import { FileManager } from './file'
@@ -40,6 +36,7 @@ import { FunctionLangId, FunctionLanguage } from './lang'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
 import { NodeManager } from './node'
+import { CostSummary } from './cost'
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -78,11 +75,9 @@ export type Program = Omit<ProgramContent, 'type'> & {
   confirmed?: boolean
 }
 
-export type ProgramCostProps = Omit<ExecutableCostProps, 'type'> & {
-  isPersistent: boolean
-}
+export type ProgramCostProps = AddProgram
 
-export type ProgramCost = ExecutableCost
+export type ProgramCost = CostSummary
 
 export type ParsedCodeType = {
   encoding: Encoding
@@ -99,20 +94,10 @@ export type ParsedCodeType = {
 )
 
 export class ProgramManager
-  extends ExecutableManager
+  extends ExecutableManager<Program>
   implements EntityManager<Program, AddProgram>
 {
   static addSchema = functionSchema
-
-  /**
-   * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
-   */
-  static async getCost(props: ProgramCostProps): Promise<ProgramCost> {
-    return ExecutableManager.getExecutableCost({
-      ...props,
-      type: EntityType.Program,
-    })
-  }
 
   constructor(
     protected account: Account,
@@ -262,6 +247,34 @@ export class ProgramManager
     }
   }
 
+  async getCost(newProgram: ProgramCostProps): Promise<ProgramCost> {
+    let totalCost = Number.POSITIVE_INFINITY
+    const paymentMethod = newProgram.payment?.type || PaymentMethod.Hold
+
+    const parsedProgram: ProgramPublishConfiguration =
+      await this.parseProgramForCostEstimation(newProgram)
+
+    const costs =
+      await this.sdkClient.programClient.getEstimatedCost(parsedProgram)
+
+    totalCost = Number(costs.cost)
+
+    const lines = this.getExecutableCostLines(
+      {
+        type: EntityType.Program,
+        isPersistent: newProgram.isPersistent,
+        ...parsedProgram,
+      },
+      costs,
+    )
+
+    return {
+      cost: this.parseCost(paymentMethod, totalCost),
+      paymentMethod,
+      lines: [...lines],
+    }
+  }
+
   protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {
     if (code.type === 'text') {
       const jsZip = new JSZip()
@@ -300,6 +313,45 @@ export class ProgramManager
         programRef: code.programRef,
       }
     } else throw Err.InvalidCodeType
+  }
+
+  protected async parseProgramForCostEstimation(
+    newProgram: AddProgram,
+  ): Promise<ProgramPublishConfiguration> {
+    const { account, channel } = this
+
+    const { isPersistent, specs } = newProgram
+
+    const { memory, vcpus } = this.parseSpecs(specs)
+    const runtime = this.parseRuntime(newProgram)
+    const payment = this.parsePayment(newProgram.payment)
+    const volumesSteps = this.parseVolumesSteps(newProgram.volumes, true)
+    // @fix: FAKE CODE TO MAKE IT WORK WITH THE ESTIMATES
+    const code = {
+      encoding: Encoding.zip,
+      entrypoint: 'main:app',
+      programRef:
+        '79f19811f8e843f37ff7535f634b89504da3d8f03e1f0af109d1791cf6add7af',
+    }
+
+    let volumes: MachineVolume[] = []
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for await (const volumeStep of volumesSteps) {
+      // Do nothing. Consume iterator
+      volumes = volumeStep as unknown as MachineVolume[]
+    }
+
+    return {
+      account,
+      channel,
+      runtime,
+      isPersistent,
+      memory,
+      vcpus,
+      volumes,
+      ...code,
+      payment,
+    }
   }
 
   protected async *parseProgramSteps(

@@ -15,9 +15,29 @@ import { NodeManager } from '@/domain/node'
 
 // CRN STREAM
 
+export const gpuDeviceSchema = z.object({
+  vendor: z.string(),
+  model: z.string(),
+  device_name: z.string(),
+  device_class: z.string(),
+  device_id: z.string(),
+  compatible: z.boolean(),
+})
+
 export const nodeSpecsSchema = z.object({
   hash: z.string(),
   name: z.string().optional(),
+  owner: z.string(),
+  reward: z.string(),
+  locked: z.boolean(),
+  time: z.number(),
+  score: z.number(),
+  score_updated: z.boolean(),
+  decentralization: z.number(),
+  performance: z.number(),
+  status: z.enum(['active', 'waiting', 'linked']),
+  parent: z.string().nullable(),
+  type: z.string(),
   cpu: z.object({
     count: z.number(),
     load_average: z.object({
@@ -50,6 +70,25 @@ export const nodeSpecsSchema = z.object({
     }),
   }),
   active: z.boolean(),
+  gpu: z
+    .object({
+      devices: z.array(gpuDeviceSchema).optional(),
+      available_devices: z.array(gpuDeviceSchema).optional(),
+    })
+    .optional(),
+  compatible_gpus: z.array(gpuDeviceSchema).optional(),
+  compatible_available_gpus: z.array(gpuDeviceSchema).optional(),
+  gpu_support: z.boolean().optional().nullable(),
+  confidential_support: z.boolean().optional(),
+  qemu_support: z.boolean().optional(),
+  ipv6_check: z
+    .object({
+      host: z.boolean(),
+      vm: z.boolean(),
+    })
+    .optional(),
+  version: z.string().optional(),
+  selectedGpu: gpuDeviceSchema.optional(),
 })
 
 // SSH
@@ -105,8 +144,9 @@ export const instanceStreamSchema = instanceSchema
     }),
   )
   .refine(
-    ({ nodeSpecs, specs }) =>
-      NodeManager.validateMinNodeSpecs(specs, nodeSpecs),
+    ({ nodeSpecs, specs }) => {
+      return NodeManager.validateMinNodeSpecs(specs, nodeSpecs)
+    },
     {
       message: 'Insufficient node specs',
       path: ['specs'],

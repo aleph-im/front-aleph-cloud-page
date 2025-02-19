@@ -7,7 +7,6 @@ import {
   requiredStringSchema,
   requiredRestrictedStringSchema,
 } from './base'
-import { convertByteUnits } from '../utils'
 import { domainSchema } from './domain'
 import { newIsolatedVolumeSchema } from './volume'
 
@@ -66,27 +65,19 @@ export const addRestrictedNameAndTagsSchema = z.object({
   tags: z.array(z.string().trim()).optional(),
 })
 
-export const addSpecsSchema = z
-  .object({
-    cpu: z.union([
-      z.literal(1),
-      z.literal(2),
-      z.literal(4),
-      z.literal(6),
-      z.literal(8),
-      z.literal(12),
-    ]),
-    ram: z.number().gt(0),
-    storage: z.number().gt(0),
-  })
-  .refine(
-    ({ cpu, ram }) =>
-      ram === convertByteUnits(cpu * 2, { from: 'GiB', to: 'MiB' }),
-    { message: 'Invalid specs' },
-  )
-  .refine(
-    ({ cpu, storage }) =>
-      storage === convertByteUnits(cpu * 20, { from: 'GiB', to: 'MiB' }) ||
-      storage === convertByteUnits(cpu * 2, { from: 'GiB', to: 'MiB' }),
-    { message: 'Invalid specs' },
-  )
+export const addSpecsSchema = z.object({
+  cpu: z.number().gt(0),
+  ram: z.number().gt(0),
+  storage: z.number().gt(0),
+})
+// .refine(
+//   ({ cpu, ram }) =>
+//     ram === convertByteUnits(cpu * 2, { from: 'GiB', to: 'MiB' }),
+//   { message: 'Invalid specs' },
+// )
+// .refine(
+//   ({ cpu, storage }) =>
+//     storage === convertByteUnits(cpu * 20, { from: 'GiB', to: 'MiB' }) ||
+//     storage === convertByteUnits(cpu * 2, { from: 'GiB', to: 'MiB' }),
+//   { message: 'Invalid specs' },
+// )

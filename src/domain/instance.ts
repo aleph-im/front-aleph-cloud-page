@@ -11,8 +11,8 @@ import {
 import {
   defaultInstanceChannel,
   EntityType,
-  PaymentMethod,
   EXTRA_WEI,
+  PaymentMethod,
 } from '@/helpers/constants'
 import { getDate, getExplorerURL } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
@@ -20,8 +20,6 @@ import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
 import {
   ExecutableManager,
-  ExecutableCost,
-  ExecutableCostProps,
   PaymentConfiguration,
   ExecutableStatus,
 } from './executable'
@@ -39,13 +37,14 @@ import {
 } from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
 import { getHours } from '@/hooks/form/useSelectStreamDuration'
-import { CRN, NodeManager } from './node'
+import { CRNSpecs, NodeManager } from './node'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
+import { CostSummary } from './cost'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -67,7 +66,7 @@ export type AddInstance = Omit<
     domains?: Omit<DomainField, 'ref'>[]
     payment?: PaymentConfiguration
     requirements?: HostRequirements
-    node?: CRN
+    node?: CRNSpecs
   }
 
 // @todo: Refactor
@@ -81,9 +80,9 @@ export type Instance = InstanceContent & {
   confirmed?: boolean
 }
 
-export type InstanceCostProps = Omit<ExecutableCostProps, 'type'>
+export type InstanceCostProps = AddInstance
 
-export type InstanceCost = ExecutableCost
+export type InstanceCost = CostSummary
 
 export type InstanceCRNNetworking = {
   ipv4: string
@@ -92,22 +91,16 @@ export type InstanceCRNNetworking = {
 
 export type InstanceStatus = ExecutableStatus
 
-export class InstanceManager
-  extends ExecutableManager
-  implements EntityManager<Instance, AddInstance>
+export type InstanceEntity = Omit<Instance, 'type'> & {
+  type: EntityType.Instance | EntityType.GpuInstance
+}
+
+export class InstanceManager<T extends InstanceEntity = Instance>
+  extends ExecutableManager<T>
+  implements EntityManager<T, AddInstance>
 {
   static addSchema = instanceSchema
   static addStreamSchema = instanceStreamSchema
-
-  /**
-   * Reference: https://medium.com/aleph-im/aleph-im-tokenomics-update-nov-2022-fd1027762d99
-   */
-  static getCost = (props: InstanceCostProps): Promise<InstanceCost> => {
-    return ExecutableManager.getExecutableCost({
-      ...props,
-      type: EntityType.Instance,
-    })
-  }
 
   constructor(
     protected account: Account,
@@ -122,7 +115,7 @@ export class InstanceManager
     super(account, volumeManager, domainManager, nodeManager, sdkClient)
   }
 
-  async getAll(): Promise<Instance[]> {
+  async getAll(): Promise<T[]> {
     try {
       const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
@@ -136,17 +129,14 @@ export class InstanceManager
     }
   }
 
-  async get(id: string): Promise<Instance | undefined> {
+  async get(id: string): Promise<T | undefined> {
     const message = await this.sdkClient.getMessage(id)
 
     const [entity] = await this.parseMessages([message])
     return entity
   }
 
-  async add(
-    newInstance: AddInstance,
-    account?: SuperfluidAccount,
-  ): Promise<Instance> {
+  async add(newInstance: AddInstance, account?: SuperfluidAccount): Promise<T> {
     const steps = this.addSteps(newInstance, account)
 
     while (true) {
@@ -158,7 +148,7 @@ export class InstanceManager
   async *addSteps(
     newInstance: AddInstance,
     account?: SuperfluidAccount,
-  ): AsyncGenerator<void, Instance, void> {
+  ): AsyncGenerator<void, T, void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 
@@ -193,11 +183,12 @@ export class InstanceManager
     }
   }
 
+  // TODO: Check if message and flow exists
   async del(
-    instanceOrId: string | Instance,
+    instanceOrId: string | T,
     account?: SuperfluidAccount,
   ): Promise<void> {
-    let instance: Instance | undefined
+    let instance: T | undefined
 
     if (typeof instanceOrId !== 'string') {
       instance = instanceOrId
@@ -213,22 +204,12 @@ export class InstanceManager
       const { receiver } = instance.payment
       if (!receiver) throw Err.ReceiverReward
 
-      const instanceCosts = await InstanceManager.getCost({
-        paymentMethod: PaymentMethod.Stream,
-        specs: {
-          cpu: instance.resources.vcpus,
-          ram: instance.resources.memory,
-          storage: instance.volumes.reduce(
-            (ac, cv) => ac + ('size_mib' in cv ? cv.size_mib : 0),
-            0,
-          ),
-        },
-      })
-
-      await account.decreaseALEPHFlow(
-        receiver,
-        instanceCosts.totalCost + EXTRA_WEI,
+      const instanceCosts = await this.getTotalCostByHash(
+        instance.payment?.type,
+        instance.id,
       )
+
+      await this.decreaseFlow(account, receiver, instanceCosts + EXTRA_WEI)
     }
 
     try {
@@ -242,6 +223,14 @@ export class InstanceManager
     } catch (err) {
       throw Err.RequestFailed(err)
     }
+  }
+
+  protected async decreaseFlow(
+    account: SuperfluidAccount,
+    receiver: string,
+    cost: number,
+  ): Promise<void> {
+    await account.decreaseALEPHFlow(receiver, cost)
   }
 
   async getAddSteps(newInstance: AddInstance): Promise<CheckoutStepType[]> {
@@ -265,6 +254,82 @@ export class InstanceManager
     return steps
   }
 
+  async getDelSteps(
+    instancesOrIds: string | T | (string | T)[],
+  ): Promise<CheckoutStepType[]> {
+    const steps: CheckoutStepType[] = []
+    instancesOrIds = Array.isArray(instancesOrIds)
+      ? instancesOrIds
+      : [instancesOrIds]
+    instancesOrIds.forEach((instance) => {
+      if (
+        typeof instance !== 'string' &&
+        instance.payment?.type === PaymentType.superfluid &&
+        instance.payment?.receiver
+      )
+        steps.push('streamDel')
+      steps.push('instanceDel')
+    })
+    return steps
+  }
+
+  async *delSteps(
+    instancesOrIds: string | T | (string | T)[],
+    account?: SuperfluidAccount,
+  ): AsyncGenerator<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    instancesOrIds = Array.isArray(instancesOrIds)
+      ? instancesOrIds
+      : [instancesOrIds]
+    if (instancesOrIds.length === 0) return
+
+    try {
+      for (const instanceOrId of instancesOrIds) {
+        yield
+        await this.del(instanceOrId, account)
+      }
+    } catch (err) {
+      throw Err.RequestFailed(err)
+    }
+  }
+
+  async getTotalCostByHash(
+    paymentMethod: PaymentMethod | PaymentType,
+    hash: string,
+  ): Promise<number> {
+    const costs = await this.sdkClient.instanceClient.getCost(hash)
+    return this.parseCost(paymentMethod, Number(costs.cost))
+  }
+
+  async getCost(newInstance: InstanceCostProps): Promise<InstanceCost> {
+    let totalCost = Number.POSITIVE_INFINITY
+    const paymentMethod = newInstance.payment?.type || PaymentMethod.Hold
+
+    const parsedInstance: InstancePublishConfiguration =
+      await this.parseInstanceForCostEstimation(newInstance)
+
+    const costs =
+      await this.sdkClient.instanceClient.getEstimatedCost(parsedInstance)
+
+    totalCost = Number(costs.cost)
+
+    const lines = this.getExecutableCostLines(
+      {
+        type: EntityType.Instance,
+        ...parsedInstance,
+      },
+      costs,
+    )
+
+    return {
+      cost: this.parseCost(paymentMethod, totalCost),
+      paymentMethod,
+      lines: [...lines],
+    }
+  }
+
   protected async *addPAYGStreamSteps(
     newInstance: AddInstance,
     account?: SuperfluidAccount,
@@ -275,7 +340,7 @@ export class InstanceManager
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
 
-    const streamCostByHour = streamCost / getHours(streamDuration) + EXTRA_WEI
+    const streamCostByHour = streamCost / getHours(streamDuration)
     const alephxBalance = await account.getALEPHBalance()
     const alephxFlow = await account.getALEPHFlow(receiver)
     const totalFlow = alephxFlow.add(streamCostByHour)
@@ -291,7 +356,37 @@ export class InstanceManager
       )
 
     yield
-    await account.increaseALEPHFlow(receiver, streamCostByHour)
+    await account.increaseALEPHFlow(receiver, streamCostByHour + EXTRA_WEI)
+  }
+
+  protected async parseInstanceForCostEstimation(
+    newInstance: AddInstance,
+  ): Promise<InstancePublishConfiguration> {
+    const { account, channel } = this
+
+    const { specs, image, node } = newInstance
+
+    const resources = this.parseSpecs(specs)
+    const requirements = this.parseRequirements(node)
+    const payment = this.parsePayment(newInstance.payment)
+    const volumesSteps = this.parseVolumesSteps(newInstance.volumes, true)
+
+    let volumes: MachineVolume[] = []
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for await (const volumeStep of volumesSteps) {
+      // Do nothing. Consume iterator
+      volumes = volumeStep as unknown as MachineVolume[]
+    }
+
+    return {
+      account,
+      channel,
+      resources,
+      image,
+      volumes,
+      payment,
+      requirements,
+    }
   }
 
   protected async *parseInstanceSteps(
@@ -313,7 +408,7 @@ export class InstanceManager
     const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
     const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
-    const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
+    const volumes = yield* this.parseVolumesSteps(newInstance.volumes, false)
 
     return {
       account,
@@ -331,11 +426,12 @@ export class InstanceManager
 
   protected async *parseVolumesSteps(
     volumes?: VolumeField | VolumeField[],
+    estimateCost?: boolean,
   ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
     if (!volumes) return
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
-    return yield* super.parseVolumesSteps(volumes)
+    return yield* super.parseVolumesSteps(volumes, estimateCost)
   }
 
   protected async *parseSSHKeysSteps(
@@ -352,74 +448,29 @@ export class InstanceManager
     return sshKeys?.filter((key) => key.isNew && key.isSelected) || []
   }
 
-  protected async parseMessages(messages: any[]): Promise<Instance[]> {
-    /* const sizesMap = await this.fileManager.getSizesMap() */
-
-    return messages
-      .filter(({ content }) => {
-        if (content === undefined) return false
-
-        // Filter out confidential VMs
-        return !content.environment?.trusted_execution
-      })
-      .map((message) => {
-        /* const size = message.content.volumes.reduce(
-          (ac: number, cv: MachineVolume) =>
-            ac + ('size_mib' in cv ? cv.size_mib : sizesMap[cv.ref]),
-          0,
-        ) */
-
-        return {
-          id: message.item_hash,
-          ...message.content,
-          name: message.content.metadata?.name || 'Unnamed instance',
-          type: EntityType.Instance,
-          url: getExplorerURL(message),
-          date: getDate(message.time),
-          size: message.content.rootfs?.size_mib || 0,
-          confirmed: !!message.confirmed,
-        }
-      })
-  }
-
-  async getDelSteps(
-    instancesOrIds: string | Instance | (string | Instance)[],
-  ): Promise<CheckoutStepType[]> {
-    const steps: CheckoutStepType[] = []
-    instancesOrIds = Array.isArray(instancesOrIds)
-      ? instancesOrIds
-      : [instancesOrIds]
-    instancesOrIds.forEach((instance) => {
-      if (
-        typeof instance !== 'string' &&
-        instance.payment?.type === PaymentType.superfluid &&
-        instance.payment?.receiver
-      )
-        steps.push('streamDel')
-      steps.push('instanceDel')
-    })
-    return steps
-  }
-
-  async *delSteps(
-    instancesOrIds: string | Instance | (string | Instance)[],
-    account?: SuperfluidAccount,
-  ): AsyncGenerator<void> {
-    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
-      throw Err.InvalidAccount
-
-    instancesOrIds = Array.isArray(instancesOrIds)
-      ? instancesOrIds
-      : [instancesOrIds]
-    if (instancesOrIds.length === 0) return
-
-    try {
-      for (const instanceOrId of instancesOrIds) {
-        yield
-        await this.del(instanceOrId, account)
+  protected async parseMessages(messages: any[]): Promise<T[]> {
+    return messages.filter(this.parseMessagesFilter).map((message) => {
+      return {
+        id: message.item_hash,
+        ...message.content,
+        name: message.content.metadata?.name || 'Unnamed instance',
+        type: EntityType.Instance,
+        url: getExplorerURL(message),
+        date: getDate(message.time),
+        size: message.content.rootfs?.size_mib || 0,
+        confirmed: !!message.confirmed,
       }
-    } catch (err) {
-      throw Err.RequestFailed(err)
-    }
+    })
+  }
+
+  protected parseMessagesFilter({ content }: any): boolean {
+    if (content === undefined) return false
+
+    // Filter out confidential VMs
+    if (content.environment?.trusted_execution) return false
+    // Filter out GPU instances
+    if (content.requirements?.gpu?.length > 0) return false
+
+    return true
   }
 }

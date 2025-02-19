@@ -504,3 +504,30 @@ export function extractValidEthAddress(address?: string): string {
   }
   return ''
 }
+
+// Converts a snake_case or kebab-case string to camelCase
+export function toCamelCase(str: string): string {
+  return str.replace(/([-_][a-z])/gi, (group) =>
+    group.toUpperCase().replace('-', '').replace('_', ''),
+  )
+}
+
+// Recursively convert all object keys (and sub-objects) to camelCase
+export function convertKeysToCamelCase(data: any): any {
+  if (Array.isArray(data)) {
+    return data.map((item) => convertKeysToCamelCase(item))
+  }
+
+  if (data !== null && typeof data === 'object') {
+    return Object.keys(data).reduce(
+      (acc, key) => {
+        const camelKey = toCamelCase(key)
+        acc[camelKey] = convertKeysToCamelCase(data[key])
+        return acc
+      },
+      {} as Record<string, unknown>,
+    )
+  }
+
+  return data
+}
