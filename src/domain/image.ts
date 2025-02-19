@@ -25,7 +25,7 @@ export const InstanceImages: Record<InstanceImageId, InstanceImage> = {
     dist: 'ubuntu',
   },
   [InstanceImageId.Ubuntu24]: {
-    id: InstanceImageId.Ubuntu22,
+    id: InstanceImageId.Ubuntu24,
     name: 'Ubuntu 24.04 LTS',
     dist: 'ubuntu',
   },
