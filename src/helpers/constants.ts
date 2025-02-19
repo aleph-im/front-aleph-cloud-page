@@ -19,7 +19,7 @@ export const senderAddress = '0x3a5CC6aBd06B601f4654035d125F9DD2FC992C25'
 export const erc20Address = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
 export const splTokenAddress = '3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x'
 export const pricingAggregateAddress =
-  '0xA07B1214bAe0D5ccAA25449C3149c0aC83658874'
+  '0xFba561a84A537fCaa567bb7A2257e7142701ae2A'
 export const pricingAggregateKey = 'pricing'
 
 export const crnListProgramUrl =

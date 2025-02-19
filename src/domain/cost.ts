@@ -1,4 +1,9 @@
-import { PaymentMethod } from '@/helpers/constants'
+import {
+  PaymentMethod,
+  pricingAggregateAddress,
+  pricingAggregateKey,
+} from '@/helpers/constants'
+import { convertKeysToCamelCase } from '@/helpers/utils'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
@@ -43,13 +48,13 @@ export type CostSummary = {
 
 export enum PriceType {
   Instance = 'instance',
-  InstanceConfidential = 'instance_confidential',
-  InstanceGpuPremium = 'instance_gpu_premium',
-  InstanceGpuStandard = 'instance_gpu_standard',
+  InstanceConfidential = 'instanceConfidential',
+  InstanceGpuPremium = 'instanceGpuPremium',
+  InstanceGpuStandard = 'instanceGpuStandard',
   Program = 'program',
-  ProgramPersistent = 'program_persistent',
+  ProgramPersistent = 'programPersistent',
   Storage = 'storage',
-  Web3Hosting = 'web3_hosting',
+  Web3Hosting = 'web3Hosting',
 }
 
 export type PriceTypeObject = {
@@ -65,28 +70,29 @@ export type PriceTypeObject = {
   }
   tiers: {
     id: string
-    compute_units: number
+    computeUnits: number
+    model: string
   }[]
-  compute_unit: {
+  computeUnit: {
     vcpus: number
-    disk_mib: number
-    memory_mib: number
+    diskMib: number
+    memoryMib: number
   }
 }
 
-export const PRICE_AGGREGATE_ADDRESS =
-  '0xFba561a84A537fCaa567bb7A2257e7142701ae2A'
-export const PRICE_AGGREGATE_KEY = 'pricing'
+export type PricingAggregate = Record<PriceType, PriceTypeObject>
 
 export class CostManager {
   constructor(
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
   ) {}
 
-  async getPricesAggregate(): Promise<Record<string, PriceTypeObject>> {
-    return this.sdkClient.fetchAggregate(
-      PRICE_AGGREGATE_ADDRESS,
-      PRICE_AGGREGATE_KEY,
+  async getPricesAggregate(): Promise<PricingAggregate> {
+    const response = await this.sdkClient.fetchAggregate(
+      pricingAggregateAddress,
+      pricingAggregateKey,
     )
+
+    return convertKeysToCamelCase(response)
   }
 }

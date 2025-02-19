@@ -1,77 +1,6 @@
-import {
-  apiServer,
-  pricingAggregateAddress,
-  pricingAggregateKey,
-} from '@/helpers/constants'
-import { convertKeysToCamelCase } from '@/helpers/utils'
-import { AlephHttpClient } from '@aleph-sdk/client'
 import { useEffect, useState } from 'react'
-
-export type EntityTier = {
-  id: string
-  computeUnits: number
-}
-
-export type GpuTier = EntityTier & {
-  vram: number
-  model: string
-}
-
-export type ComputeUnitSpecs = {
-  vcpus: number
-  diskMib: number
-  memoryMib: number
-}
-
-export type PaymentMethodsPrice = {
-  holding?: string
-  payg?: string
-}
-
-export type Price = {
-  fixed?: number
-  storage?: PaymentMethodsPrice
-  computeUnit?: PaymentMethodsPrice
-}
-
-export type PricingAggregate = {
-  program: {
-    price: Price
-    tiers: EntityTier[]
-    computeUnit: ComputeUnitSpecs
-  }
-  programPersistent: {
-    price: Price
-    tiers: EntityTier[]
-    computeUnit: ComputeUnitSpecs
-  }
-  instance: {
-    price: Price
-    tiers: EntityTier[]
-    computeUnit: ComputeUnitSpecs
-  }
-  instanceGpuStandard: {
-    price: Price
-    tiers: GpuTier[]
-    computeUnit: ComputeUnitSpecs
-  }
-  instanceGpuPremium: {
-    price: Price
-    tiers: GpuTier[]
-    computeUnit: ComputeUnitSpecs
-  }
-  instanceConfidential: {
-    price: Price
-    tiers: EntityTier[]
-    computeUnit: ComputeUnitSpecs
-  }
-  storage: {
-    price: Price
-  }
-  web3Hosting: {
-    price: Price
-  }
-}
+import { useCostManager } from '../useManager/useCostManager'
+import { PricingAggregate } from '@/domain/cost'
 
 export type UseFetchPricingAggregateReturn = {
   loading: boolean
@@ -86,24 +15,19 @@ export default function useFetchPricingAggregate(): UseFetchPricingAggregateRetu
     PricingAggregate | undefined
   >()
 
+  const costManager = useCostManager()
+
   useEffect(() => {
     const fetchPricingAggregate = async () => {
+      if (!costManager) return
+
       try {
         setLoading(true)
 
-        const sdkClient = new AlephHttpClient(apiServer)
-
-        const response = await sdkClient.fetchAggregate(
-          pricingAggregateAddress,
-          pricingAggregateKey,
-        )
-
+        const response = await costManager.getPricesAggregate()
         if (!response) return setPricingAggregate(undefined)
 
-        const parsedPricingAggregate: PricingAggregate =
-          convertKeysToCamelCase(response)
-
-        setPricingAggregate(parsedPricingAggregate)
+        setPricingAggregate(response)
       } catch (e) {
         console.error(e)
         setError(e)
@@ -113,7 +37,7 @@ export default function useFetchPricingAggregate(): UseFetchPricingAggregateRetu
     }
 
     fetchPricingAggregate()
-  }, [])
+  }, [costManager])
 
   return {
     loading,

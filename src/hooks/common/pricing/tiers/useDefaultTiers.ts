@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import useFetchPricingAggregate from '../useFetchPricingAggregate'
 import { EntityType } from '@/helpers/constants'
 import Err from '@/helpers/errors'
+import { PriceType } from '@/domain/cost'
 
 export type Tier = ReducedCRNSpecs & {
   disabled?: boolean
@@ -44,11 +45,12 @@ export function useDefaultTiers({
 
       const tiers: Tier[] = []
 
-      pricingAggregate.instanceGpuStandard.tiers.forEach((tier) => {
+      pricingAggregate[PriceType.InstanceGpuStandard].tiers.forEach((tier) => {
         const { model, computeUnits } = tier
 
         if (model === gpuModel) {
-          const { computeUnit } = pricingAggregate.instanceGpuStandard
+          const { computeUnit } =
+            pricingAggregate[PriceType.InstanceGpuStandard]
 
           tiers.push({
             cpu: computeUnit.vcpus * computeUnits,
@@ -59,11 +61,11 @@ export function useDefaultTiers({
         }
       })
 
-      pricingAggregate.instanceGpuPremium.tiers.forEach((tier) => {
+      pricingAggregate[PriceType.InstanceGpuPremium].tiers.forEach((tier) => {
         const { model, computeUnits } = tier
 
         if (model === gpuModel) {
-          const { computeUnit } = pricingAggregate.instanceGpuPremium
+          const { computeUnit } = pricingAggregate[PriceType.InstanceGpuPremium]
 
           tiers.push({
             cpu: computeUnit.vcpus * computeUnits,
