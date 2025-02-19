@@ -63,7 +63,7 @@ export type PriceTypeObject = {
       payg: string
       holding: string
     }
-    compute_unit: {
+    computeUnit: {
       payg: string
       holding: string
     }

@@ -90,7 +90,6 @@ export type ParsedCodeType = {
   | {
       file: Blob | Buffer
       programRef?: undefined
-      estimated_size_mib: number
     }
 )
 
@@ -287,7 +286,6 @@ export class ProgramManager
         entrypoint: 'main:app',
         file: zip as File,
         encoding: Encoding.zip,
-        estimated_size_mib: zip.size,
       }
     } else if (code.type === 'file') {
       if (!code.file) throw Err.InvalidCodeFile
@@ -307,7 +305,6 @@ export class ProgramManager
         entrypoint: code.entrypoint,
         file: code.file,
         encoding,
-        estimated_size_mib: code.file.size,
       }
     } else if (code.type === 'ref') {
       return {
@@ -329,7 +326,13 @@ export class ProgramManager
     const runtime = this.parseRuntime(newProgram)
     const payment = this.parsePayment(newProgram.payment)
     const volumesSteps = this.parseVolumesSteps(newProgram.volumes, true)
-    const code = await this.parseCode(newProgram.code)
+    // @fix: FAKE CODE TO MAKE IT WORK WITH THE ESTIMATES
+    const code = {
+      encoding: Encoding.zip,
+      entrypoint: 'main:app',
+      programRef:
+        '79f19811f8e843f37ff7535f634b89504da3d8f03e1f0af109d1791cf6add7af',
+    }
 
     let volumes: MachineVolume[] = []
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

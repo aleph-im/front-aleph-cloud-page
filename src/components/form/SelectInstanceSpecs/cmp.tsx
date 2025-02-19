@@ -133,7 +133,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
           const prices = pricesAggregate[priceType]
 
           const computeUnitPrice =
-            prices.price.compute_unit[
+            prices.price.computeUnit[
               paymentMethod === PaymentMethod.Hold ? 'holding' : 'payg'
             ]
 
