@@ -33,7 +33,7 @@ import { EVMAccount } from '@aleph-sdk/evm'
 
 export type UseExecutableActionsProps = {
   executable: Executable
-  manager?: ExecutableManager
+  manager?: ExecutableManager<any>
   subscribeLogs?: boolean
 }
 

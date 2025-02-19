@@ -37,7 +37,7 @@ export type Confidential = InstanceContent & {
 }
 
 export class ConfidentialManager
-  extends ExecutableManager
+  extends ExecutableManager<Confidential>
   implements EntityManager<Confidential, unknown>
 {
   static addSchema = instanceSchema
