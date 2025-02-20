@@ -34,13 +34,15 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
   static addManySchema = sshKeysSchema
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected type = defaultSSHPostType,
     protected channel = defaultSSHChannel,
   ) {}
 
   async getAll(): Promise<SSHKey[]> {
+    if (!this.account) return []
+
     try {
       const response = await this.sdkClient.getPosts({
         addresses: [this.account.address],
@@ -55,6 +57,8 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
   }
 
   async get(id: string): Promise<SSHKey | undefined> {
+    if (!this.account) return
+
     const response = await this.sdkClient.getPosts({
       addresses: [this.account.address],
       types: this.type,

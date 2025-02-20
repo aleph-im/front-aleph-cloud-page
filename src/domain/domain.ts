@@ -67,13 +67,15 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   static addManySchema = domainsSchema
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected key = defaultDomainAggregateKey,
     protected channel = defaultDomainChannel,
   ) {}
 
   async getAll(): Promise<Domain[]> {
+    if (!this.account) return []
+
     try {
       const response: Record<string, unknown> =
         await this.sdkClient.fetchAggregate(this.account.address, this.key)
@@ -207,6 +209,8 @@ export class DomainManager implements EntityManager<Domain, AddDomain> {
   }
 
   async checkStatus(domain: Domain): Promise<DomainStatus> {
+    if (!this.account) throw Err.InvalidAccount
+
     const query = await fetch(`https://api.dns.public.aleph.sh/domain/check`, {
       method: 'POST',
       headers: {

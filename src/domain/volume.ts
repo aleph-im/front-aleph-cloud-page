@@ -124,7 +124,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected fileManager: FileManager,
     protected channel = defaultVolumeChannel,
@@ -134,7 +134,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     ids,
     page,
     pagination,
-    addresses = !ids ? [this.account.address] : undefined,
+    addresses = !ids && this.account ? [this.account.address] : undefined,
     channels = !ids ? [this.channel] : undefined,
   }: EntityManagerFetchOptions = {}): Promise<Volume[]> {
     try {
