@@ -1,13 +1,10 @@
-import {
-  PaymentMethod,
-  pricingAggregateAddress,
-  pricingAggregateKey,
-} from '@/helpers/constants'
+import { PaymentMethod } from '@/helpers/constants'
 import { convertKeysToCamelCase } from '@/helpers/utils'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+import { GPUDevice } from './node'
 
 // type ExecutableCapabilitiesProps = {
 //   internetAccess?: boolean
@@ -82,15 +79,33 @@ export type PriceTypeObject = {
 
 export type PricingAggregate = Record<PriceType, PriceTypeObject>
 
+export type SettingsAggregate = {
+  compatibleGpus: GPUDevice[]
+  communityWalletAddress: string
+  communityWalletTimestamp: number
+}
+
 export class CostManager {
   constructor(
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
   ) {}
 
+  protected static readonly aggregateSourceAddress =
+    '0xFba561a84A537fCaa567bb7A2257e7142701ae2A'
+
+  async getSettingsAggregate(): Promise<SettingsAggregate> {
+    const response = await this.sdkClient.fetchAggregate(
+      CostManager.aggregateSourceAddress,
+      'settings',
+    )
+
+    return convertKeysToCamelCase(response)
+  }
+
   async getPricesAggregate(): Promise<PricingAggregate> {
     const response = await this.sdkClient.fetchAggregate(
-      pricingAggregateAddress,
-      pricingAggregateKey,
+      CostManager.aggregateSourceAddress,
+      'pricing',
     )
 
     return convertKeysToCamelCase(response)

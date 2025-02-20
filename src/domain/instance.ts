@@ -9,7 +9,6 @@ import {
   PaymentType,
 } from '@aleph-sdk/message'
 import {
-  communityWalletAddress,
   defaultInstanceChannel,
   EntityType,
   EXTRA_WEI,
@@ -45,7 +44,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
-import { CostSummary } from './cost'
+import { CostManager, CostSummary } from './cost'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -111,6 +110,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     protected sshKeyManager: SSHKeyManager,
     protected fileManager: FileManager,
     protected nodeManager: NodeManager,
+    protected costManager: CostManager,
     protected channel = defaultInstanceChannel,
   ) {
     super(account, volumeManager, domainManager, nodeManager, sdkClient)
@@ -205,20 +205,29 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       const { receiver } = instance.payment
       if (!receiver) throw Err.ReceiverReward
 
+      const { communityWalletAddress, communityWalletTimestamp } =
+        await this.costManager.getSettingsAggregate()
+
       const instanceCosts = await this.getTotalCostByHash(
         instance.payment?.type,
         instance.id,
       )
 
-      await account.decreaseALEPHFlow(
-        receiver,
-        this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
-      )
+      if (instance.time >= communityWalletTimestamp) {
+        // Instances created after split of flows between receiver and community wallet
+        await account.decreaseALEPHFlow(
+          receiver,
+          this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
+        )
 
-      await account.decreaseALEPHFlow(
-        communityWalletAddress,
-        this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
-      )
+        await account.decreaseALEPHFlow(
+          communityWalletAddress,
+          this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
+        )
+      } else {
+        // Instances created before split of flows between receiver and community wallet
+        await account.decreaseALEPHFlow(receiver, instanceCosts + EXTRA_WEI)
+      }
     }
 
     try {
@@ -340,6 +349,9 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
+
+    const { communityWalletAddress } =
+      await this.costManager.getSettingsAggregate()
 
     const costByHour = streamCost / getHours(streamDuration)
     const streamCostByHourToReceiver = this.calculateReceiverFlow(costByHour)

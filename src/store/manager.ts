@@ -30,10 +30,13 @@ function createDefaultManagers(account?: Account) {
 
   const nodeManager = new NodeManager(fileManager, sdkClient, account)
 
+  const costManager = new CostManager(sdkClient)
+
   return {
     sdkClient,
     fileManager,
     nodeManager,
+    costManager,
   }
 }
 
@@ -79,12 +82,14 @@ export function getManagerReducer(): ManagerReducer {
   return (state = initialState, action) => {
     switch (action.type) {
       case ConnectionActionType.CONNECTION_DISCONNECT: {
-        const { nodeManager, fileManager } = createDefaultManagers()
+        const { nodeManager, fileManager, costManager } =
+          createDefaultManagers()
 
         return {
           ...state,
           nodeManager,
           fileManager,
+          costManager,
           messageManager: undefined,
           sshKeyManager: undefined,
           domainManager: undefined,
@@ -95,14 +100,13 @@ export function getManagerReducer(): ManagerReducer {
           confidentialManager: undefined,
           websiteManager: undefined,
           voucherManager: undefined,
-          costManager: undefined,
         }
       }
 
       case ConnectionActionType.CONNECTION_UPDATE: {
         const { account } = action.payload
 
-        const { nodeManager, fileManager, sdkClient } =
+        const { nodeManager, fileManager, costManager, sdkClient } =
           createDefaultManagers(account)
 
         const messageManager = new MessageManager(account, sdkClient)
@@ -126,6 +130,7 @@ export function getManagerReducer(): ManagerReducer {
           sshKeyManager,
           fileManager,
           nodeManager,
+          costManager,
         )
         const gpuInstanceManager = new GpuInstanceManager(
           account,
@@ -135,6 +140,7 @@ export function getManagerReducer(): ManagerReducer {
           sshKeyManager,
           fileManager,
           nodeManager,
+          costManager,
         )
         const confidentialManager = new ConfidentialManager(
           account,
@@ -152,7 +158,6 @@ export function getManagerReducer(): ManagerReducer {
           domainManager,
         )
         const voucherManager = new VoucherManager(account, sdkClient)
-        const costManager = new CostManager(sdkClient)
 
         return {
           ...state,

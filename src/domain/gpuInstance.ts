@@ -13,7 +13,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import { AddInstance, Instance, InstanceManager } from './instance'
-import { CostSummary } from './cost'
+import { CostManager, CostSummary } from './cost'
 
 export type GpuInstanceCostProps = AddInstance
 export type GpuInstanceCost = CostSummary
@@ -34,6 +34,7 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
     protected sshKeyManager: SSHKeyManager,
     protected fileManager: FileManager,
     protected nodeManager: NodeManager,
+    protected costManager: CostManager,
     protected channel = defaultGpuInstanceChannel,
   ) {
     super(
@@ -44,6 +45,7 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
       sshKeyManager,
       fileManager,
       nodeManager,
+      costManager,
       channel,
     )
   }
