@@ -36,7 +36,7 @@ export class VoucherManager {
   private metadataCache: Map<Voucher['metadataId'], VoucherMetadata>
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
   ) {
     this.metadataCache = new Map()
@@ -58,6 +58,8 @@ export class VoucherManager {
   }
 
   private async fetchSolanaVouchers(): Promise<Voucher[]> {
+    if (!this.account) return []
+
     const vouchers: Voucher[] = []
     const apiUrl = 'https://api.claim.twentysix.cloud/v1/registry/sol'
 
@@ -89,6 +91,8 @@ export class VoucherManager {
   }
 
   private async fetchEVMVouchers(): Promise<Voucher[]> {
+    if (!this.account) return []
+
     const vouchers: Voucher[] = []
     const { content } = await this.sdkClient.getPost({
       types: 'vouchers-update',

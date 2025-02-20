@@ -27,7 +27,7 @@ export type GpuInstance = Omit<Instance, 'type'> & {
 
 export class GpuInstanceManager extends InstanceManager<GpuInstance> {
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,

@@ -112,7 +112,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   static addStreamSchema = instanceStreamSchema
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
@@ -126,6 +126,8 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   }
 
   async getAll(): Promise<T[]> {
+    if (!this.account) return []
+
     try {
       const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
@@ -540,6 +542,8 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   protected async *parseInstanceSteps(
     newInstance: AddInstance,
   ): AsyncGenerator<void, InstancePublishConfiguration, void> {
+    if (!this.account) throw Err.InvalidAccount
+
     const schema = !newInstance.node
       ? InstanceManager.addSchema
       : InstanceManager.addStreamSchema

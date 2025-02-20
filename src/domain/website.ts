@@ -327,7 +327,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
@@ -336,6 +336,8 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   ) {}
 
   async getAll(): Promise<Website[]> {
+    if (!this.account) return []
+
     try {
       const response: Record<string, unknown> =
         await this.sdkClient.fetchAggregate(this.account.address, this.key)

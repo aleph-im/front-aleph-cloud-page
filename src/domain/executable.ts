@@ -157,7 +157,7 @@ export abstract class ExecutableManager<T extends Executable> {
   protected static cachedPubKeyToken?: AuthPubKeyToken
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
     protected nodeManager: NodeManager,
@@ -312,6 +312,8 @@ export abstract class ExecutableManager<T extends Executable> {
     keyPair?: KeyPair,
     domain?: string,
   ): Promise<AuthPubKeyToken> {
+    if (!this.account) throw Err.InvalidAccount
+
     // @todo: Improve this by caching on local storage
     const { cachedPubKeyToken } = ExecutableManager
 

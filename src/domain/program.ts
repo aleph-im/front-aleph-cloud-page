@@ -100,7 +100,7 @@ export class ProgramManager
   static addSchema = functionSchema
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
@@ -113,6 +113,8 @@ export class ProgramManager
   }
 
   async getAll(): Promise<Program[]> {
+    if (!this.account) return []
+
     try {
       const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
@@ -365,6 +367,8 @@ export class ProgramManager
   protected async *parseProgramSteps(
     newProgram: AddProgram,
   ): AsyncGenerator<void, ProgramPublishConfiguration, void> {
+    if (!this.account) throw Err.InvalidAccount
+
     newProgram = await ProgramManager.addSchema.parseAsync(newProgram)
 
     const { account, channel } = this
