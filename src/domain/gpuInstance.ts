@@ -1,18 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Account } from '@aleph-sdk/account'
-import {
-  GpuProperties,
-  HostRequirements,
-  Payment,
-  PaymentType,
-} from '@aleph-sdk/message'
-import {
-  communityWalletAddress,
-  defaultGpuInstanceChannel,
-  EntityType,
-  EXTRA_WEI,
-  PaymentMethod,
-} from '@/helpers/constants'
+import { HostRequirements, Payment, PaymentType } from '@aleph-sdk/message'
+import { defaultGpuInstanceChannel, EntityType } from '@/helpers/constants'
 import { ExecutableStatus } from './executable'
 import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
@@ -24,12 +13,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import { AddInstance, Instance, InstanceManager } from './instance'
-import { SuperfluidAccount } from '@aleph-sdk/superfluid'
-import Err from '@/helpers/errors'
-import { getHours } from '@/hooks/form/useSelectStreamDuration'
-import { CostSummary } from './cost'
-
-export type GpuInstanceStatus = ExecutableStatus | undefined
+import { CostManager, CostSummary } from './cost'
 
 export type GpuInstanceCostProps = AddInstance
 export type GpuInstanceCost = CostSummary
@@ -50,6 +34,7 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
     protected sshKeyManager: SSHKeyManager,
     protected fileManager: FileManager,
     protected nodeManager: NodeManager,
+    protected costManager: CostManager,
     protected channel = defaultGpuInstanceChannel,
   ) {
     super(
@@ -60,23 +45,8 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
       sshKeyManager,
       fileManager,
       nodeManager,
+      costManager,
       channel,
-    )
-  }
-
-  protected override async decreaseFlow(
-    account: SuperfluidAccount,
-    receiver: string,
-    cost: number,
-  ): Promise<void> {
-    await account.decreaseALEPHFlow(
-      receiver,
-      this.calculateReceiverFlow(cost) + EXTRA_WEI,
-    )
-
-    await account.decreaseALEPHFlow(
-      communityWalletAddress,
-      this.calculateCommunityFlow(cost) + EXTRA_WEI,
     )
   }
 
@@ -84,57 +54,6 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
     if (content === undefined) return false
 
     return content.requirements?.gpu?.length
-  }
-
-  protected override async *addPAYGStreamSteps(
-    newInstance: AddInstance,
-    account?: SuperfluidAccount,
-  ): AsyncGenerator<void, void, void> {
-    if (newInstance.payment?.type !== PaymentMethod.Stream)
-      throw Err.UnsupportedPaymentMethod(newInstance.payment?.type)
-    if (!account) throw Err.ConnectYourWallet
-    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
-
-    const { streamCost, streamDuration, receiver } = newInstance.payment
-
-    const costByHour = streamCost / getHours(streamDuration)
-    const streamCostByHourToReceiver = this.calculateReceiverFlow(costByHour)
-    const streamCostByHourToCommunity = this.calculateCommunityFlow(costByHour)
-
-    const alephxBalance = await account.getALEPHBalance()
-    const recieverAlephxFlow = await account.getALEPHFlow(receiver)
-    const communityAlephxFlow = await account.getALEPHFlow(
-      communityWalletAddress,
-    )
-
-    const receiverTotalFlow = recieverAlephxFlow.add(streamCostByHourToReceiver)
-    const communityTotalFlow = communityAlephxFlow.add(
-      streamCostByHourToCommunity,
-    )
-
-    if (receiverTotalFlow.greaterThan(1) || communityTotalFlow.greaterThan(1))
-      throw Err.MaxFlowRate
-
-    const totalAlephxFlow = recieverAlephxFlow.add(communityAlephxFlow)
-    const usedAlephInDuration = totalAlephxFlow.mul(getHours(streamDuration))
-    const totalRequiredAleph = usedAlephInDuration.add(streamCost)
-
-    if (alephxBalance.lt(totalRequiredAleph))
-      throw Err.InsufficientBalance(
-        totalRequiredAleph.sub(alephxBalance).toNumber(),
-      )
-
-    yield
-
-    // Split the stream cost between the community wallet (20%) and the receiver (80%)
-    await account.increaseALEPHFlow(
-      communityWalletAddress,
-      streamCostByHourToCommunity + EXTRA_WEI,
-    )
-    await account.increaseALEPHFlow(
-      receiver,
-      streamCostByHourToReceiver + EXTRA_WEI,
-    )
   }
 
   protected override parseRequirements(
@@ -159,13 +78,5 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
         },
       ],
     }
-  }
-
-  protected calculateCommunityFlow(streamCost: number): number {
-    return streamCost * 0.2
-  }
-
-  protected calculateReceiverFlow(streamCost: number): number {
-    return streamCost * 0.8
   }
 }
