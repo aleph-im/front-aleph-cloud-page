@@ -9,6 +9,7 @@ import {
   PaymentType,
 } from '@aleph-sdk/message'
 import {
+  communityWalletAddress,
   defaultInstanceChannel,
   EntityType,
   EXTRA_WEI,
@@ -209,7 +210,15 @@ export class InstanceManager<T extends InstanceEntity = Instance>
         instance.id,
       )
 
-      await this.decreaseFlow(account, receiver, instanceCosts + EXTRA_WEI)
+      await account.decreaseALEPHFlow(
+        receiver,
+        this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
+      )
+
+      await account.decreaseALEPHFlow(
+        communityWalletAddress,
+        this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
+      )
     }
 
     try {
@@ -223,14 +232,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     } catch (err) {
       throw Err.RequestFailed(err)
     }
-  }
-
-  protected async decreaseFlow(
-    account: SuperfluidAccount,
-    receiver: string,
-    cost: number,
-  ): Promise<void> {
-    await account.decreaseALEPHFlow(receiver, cost)
   }
 
   async getAddSteps(newInstance: AddInstance): Promise<CheckoutStepType[]> {
@@ -340,14 +341,26 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
 
-    const streamCostByHour = streamCost / getHours(streamDuration)
+    const costByHour = streamCost / getHours(streamDuration)
+    const streamCostByHourToReceiver = this.calculateReceiverFlow(costByHour)
+    const streamCostByHourToCommunity = this.calculateCommunityFlow(costByHour)
+
     const alephxBalance = await account.getALEPHBalance()
-    const alephxFlow = await account.getALEPHFlow(receiver)
-    const totalFlow = alephxFlow.add(streamCostByHour)
+    const recieverAlephxFlow = await account.getALEPHFlow(receiver)
+    const communityAlephxFlow = await account.getALEPHFlow(
+      communityWalletAddress,
+    )
 
-    if (totalFlow.greaterThan(1)) throw Err.MaxFlowRate
+    const receiverTotalFlow = recieverAlephxFlow.add(streamCostByHourToReceiver)
+    const communityTotalFlow = communityAlephxFlow.add(
+      streamCostByHourToCommunity,
+    )
 
-    const usedAlephInDuration = alephxFlow.mul(getHours(streamDuration))
+    if (receiverTotalFlow.greaterThan(1) || communityTotalFlow.greaterThan(1))
+      throw Err.MaxFlowRate
+
+    const totalAlephxFlow = recieverAlephxFlow.add(communityAlephxFlow)
+    const usedAlephInDuration = totalAlephxFlow.mul(getHours(streamDuration))
     const totalRequiredAleph = usedAlephInDuration.add(streamCost)
 
     if (alephxBalance.lt(totalRequiredAleph))
@@ -356,7 +369,16 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       )
 
     yield
-    await account.increaseALEPHFlow(receiver, streamCostByHour + EXTRA_WEI)
+
+    // Split the stream cost between the community wallet (20%) and the receiver (80%)
+    await account.increaseALEPHFlow(
+      communityWalletAddress,
+      streamCostByHourToCommunity + EXTRA_WEI,
+    )
+    await account.increaseALEPHFlow(
+      receiver,
+      streamCostByHourToReceiver + EXTRA_WEI,
+    )
   }
 
   protected async parseInstanceForCostEstimation(
@@ -472,5 +494,13 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     if (content.requirements?.gpu?.length > 0) return false
 
     return true
+  }
+
+  protected calculateCommunityFlow(streamCost: number): number {
+    return streamCost * 0.2
+  }
+
+  protected calculateReceiverFlow(streamCost: number): number {
+    return streamCost * 0.8
   }
 }
