@@ -19,7 +19,10 @@ import {
   NameAndTagsField,
 } from '@/hooks/form/useAddNameAndTags'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
-import { VolumeField } from '@/hooks/form/useAddVolume'
+import {
+  InstanceSystemVolumeField,
+  VolumeField,
+} from '@/hooks/form/useAddVolume'
 import {
   defaultInstanceImage,
   InstanceImageField,
@@ -64,6 +67,7 @@ import useFetchTermsAndConditions, {
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
 import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceManager'
 import { GpuInstanceManager } from '@/domain/gpuInstance'
+import usePrevious from '@/hooks/common/usePrevious'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -71,7 +75,7 @@ export type NewGpuInstanceFormState = NameAndTagsField & {
   sshKeys: SSHKeyField[]
   volumes?: VolumeField[]
   domains?: DomainField[]
-  systemVolumeSize: number
+  systemVolume: InstanceSystemVolumeField
   nodeSpecs?: CRNSpecs
   paymentMethod: PaymentMethod
   streamDuration: StreamDurationField
@@ -280,7 +284,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
       ...defaultNameAndTags,
       image: defaultInstanceImage,
       specs: defaultTiers[0],
-      systemVolumeSize: defaultTiers[0]?.storage,
+      systemVolume: { size: defaultTiers[0]?.storage },
       paymentMethod: PaymentMethod.Stream,
       streamDuration: defaultStreamDuration,
       streamCost: Number.POSITIVE_INFINITY,
@@ -306,7 +310,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // -------------------------
 
   const { storage } = formValues.specs
-  const { systemVolumeSize } = formValues
+  const { size: systemVolumeSize } = formValues.systemVolume
 
   const payment: PaymentConfiguration = useMemo(() => {
     return {
@@ -332,6 +336,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
         payment,
         isPersistent: true,
         image: formValues.image,
+        systemVolume: formValues.systemVolume,
         name: formValues.name || 'MOCK',
         sshKeys: formValues.sshKeys || [
           { key: 'MOCK', isNew: true, isSelected: true },
@@ -459,13 +464,20 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // -------------------------
   // Effects
 
+  const prevStorage = usePrevious(storage)
+
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
     if (!storage) return
-    if (systemVolumeSize === storage) return
+    if (storage === prevStorage) return
 
-    setValue('systemVolumeSize', storage)
-  }, [storage, setValue, systemVolumeSize])
+    const newSize =
+      systemVolumeSize === prevStorage
+        ? storage
+        : Math.max(storage, systemVolumeSize)
+
+    setValue('systemVolume.size', newSize)
+  }, [storage, prevStorage, setValue, systemVolumeSize])
 
   // @note: Set nodeSpecs
   useEffect(() => {

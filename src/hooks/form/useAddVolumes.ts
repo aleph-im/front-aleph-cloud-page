@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import {
+  InstanceSystemVolumeField,
   NewVolumeField,
   VolumeField,
   defaultVolume as defaultStandaloneVolume,
@@ -9,14 +10,14 @@ import { Control, useFieldArray } from 'react-hook-form'
 export type UseAddVolumesProps = {
   name?: string
   control: Control
-  systemVolumeSize?: number
+  systemVolume?: InstanceSystemVolumeField
 }
 
 export type UseAddVolumesReturn = {
   name: string
   control: Control
   fields: (VolumeField & { id: string })[]
-  systemVolumeSize?: number
+  systemVolume?: InstanceSystemVolumeField
   handleAdd: () => void
   handleRemove: (index?: number) => void
 }
@@ -30,6 +31,7 @@ export const defaultVolume: NewVolumeField = {
 export function useAddVolumes({
   name = 'volumes',
   control,
+  systemVolume,
   ...rest
 }: UseAddVolumesProps): UseAddVolumesReturn {
   const volumesCtrl = useFieldArray({
@@ -49,6 +51,7 @@ export function useAddVolumes({
     name,
     control,
     fields,
+    systemVolume,
     ...rest,
     handleAdd,
     handleRemove,

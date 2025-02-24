@@ -1,4 +1,5 @@
 import { Control } from 'react-hook-form'
+import { InstanceSystemVolumeField } from '@/hooks/form/useAddVolume'
 
 export type RemoveVolumeProps = {
   onRemove: () => void
@@ -7,5 +8,5 @@ export type RemoveVolumeProps = {
 export type AddVolumesProps = {
   name?: string
   control: Control
-  systemVolumeSize?: number
+  systemVolume?: InstanceSystemVolumeField
 } & Partial<RemoveVolumeProps>
