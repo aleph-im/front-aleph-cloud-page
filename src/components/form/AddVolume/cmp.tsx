@@ -20,9 +20,9 @@ import {
   useAddExistingVolumeProps,
   useAddNewVolumeProps,
   useAddPersistentVolumeProps,
+  useAddInstanceSystemVolumeProps,
 } from '@/hooks/form/useAddVolume'
 import { VolumeType } from '@/domain/volume'
-import { convertByteUnits } from '@/helpers/utils'
 
 const RemoveVolume = memo(({ onRemove: handleRemove }: RemoveVolumeProps) => {
   return (
@@ -216,58 +216,52 @@ AddPersistentVolume.displayName = 'AddPersistentVolume'
 
 // -------------------------------------------------
 
-export const InstanceSystemVolume = memo(
-  ({ size }: InstanceSystemVolumeProps) => {
-    const sizeValue = convertByteUnits(size, {
-      from: 'MiB',
-      to: 'GiB',
-      displayUnit: false,
-    })
+export const InstanceSystemVolume = memo((props: InstanceSystemVolumeProps) => {
+  const { sizeCtrl } = useAddInstanceSystemVolumeProps(props)
 
-    return (
-      <>
-        <p tw="mb-6">
-          This system volume is included with your setup. You can easily expand
-          your storage capacity to meet your application&apos;s requirements by
-          adding additional volumes below.
-        </p>
+  return (
+    <>
+      <p tw="mb-6">
+        This system volume is included with your setup. You can easily expand
+        your storage capacity to meet your application&apos;s requirements by
+        adding additional volumes below.
+      </p>
+      <div>
         <div>
-          <div>
-            <TextInput
-              name="system_volume_name"
-              required
-              label="Volume name"
-              placeholder="Redis volume"
-              value="System Volume"
-              dataView
-            />
-          </div>
-          <div tw="mt-4">
-            <TextInput
-              name="system_volume_mount"
-              required
-              label="Mount"
-              placeholder="/mount/opt"
-              value="/"
-              dataView
-            />
-          </div>
-          <div tw="mt-4">
-            <TextInput
-              name="system_volume_size"
-              required
-              type="number"
-              label="Size (GB)"
-              placeholder="0"
-              value={sizeValue}
-              dataView
-            />
-          </div>
+          <TextInput
+            name="system_volume_name"
+            required
+            label="Volume name"
+            placeholder="Redis volume"
+            value="System Volume"
+            dataView
+          />
         </div>
-      </>
-    )
-  },
-)
+        <div tw="mt-4">
+          <TextInput
+            name="system_volume_mount"
+            required
+            label="Mount"
+            placeholder="/mount/opt"
+            value="/"
+            dataView
+          />
+        </div>
+        <div tw="mt-4">
+          <TextInput
+            {...sizeCtrl.field}
+            {...sizeCtrl.fieldState}
+            name="system_volume_size"
+            required
+            type="number"
+            label="Size (GB)"
+            placeholder="0"
+          />
+        </div>
+      </div>
+    </>
+  )
+})
 InstanceSystemVolume.displayName = 'InstanceSystemVolume'
 
 // -------------------------------------------------

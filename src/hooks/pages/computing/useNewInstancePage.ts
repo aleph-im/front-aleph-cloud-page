@@ -19,7 +19,10 @@ import {
   NameAndTagsField,
 } from '@/hooks/form/useAddNameAndTags'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
-import { VolumeField } from '@/hooks/form/useAddVolume'
+import {
+  InstanceSystemVolumeField,
+  VolumeField,
+} from '@/hooks/form/useAddVolume'
 import {
   defaultInstanceImage,
   InstanceImageField,
@@ -66,6 +69,7 @@ import useFetchTermsAndConditions, {
 } from '@/hooks/common/useFetchTermsAndConditions'
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
 import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
+import usePrevious from '@/hooks/common/usePrevious'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -73,7 +77,7 @@ export type NewInstanceFormState = NameAndTagsField & {
   sshKeys: SSHKeyField[]
   volumes?: VolumeField[]
   domains?: DomainField[]
-  systemVolumeSize: number
+  systemVolume: InstanceSystemVolumeField
   nodeSpecs?: CRNSpecs
   paymentMethod: PaymentMethod
   streamDuration: StreamDurationField
@@ -184,6 +188,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const onSubmit = useCallback(
     async (state: NewInstanceFormState) => {
+      console.log(state)
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
 
@@ -279,7 +284,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     ...defaultNameAndTags,
     image: defaultInstanceImage,
     specs: defaultTiers[0],
-    systemVolumeSize: defaultTiers[0]?.storage,
+    systemVolume: { size: defaultTiers[0]?.storage },
     paymentMethod: PaymentMethod.Hold,
     streamDuration: defaultStreamDuration,
     streamCost: Number.POSITIVE_INFINITY,
@@ -305,7 +310,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
 
   const { storage } = formValues.specs
-  const { systemVolumeSize } = formValues
+  const { size: systemVolumeSize } = formValues.systemVolume
 
   const payment: PaymentConfiguration = useMemo(() => {
     return formValues.paymentMethod === PaymentMethod.Stream
@@ -336,6 +341,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         payment,
         isPersistent: true,
         image: formValues.image,
+        systemVolume: formValues.systemVolume,
         name: formValues.name || 'MOCK',
         sshKeys: formValues.sshKeys || [
           { key: 'MOCK', isNew: true, isSelected: true },
@@ -514,13 +520,20 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     })
   }, [node, formValues.paymentMethod])
 
+  const prevStorage = usePrevious(storage)
+
   // @note: Change default System fake volume size when the specs changes
   useEffect(() => {
     if (!storage) return
-    if (systemVolumeSize === storage) return
+    if (storage === prevStorage) return
 
-    setValue('systemVolumeSize', storage)
-  }, [storage, setValue, systemVolumeSize])
+    const newSize =
+      systemVolumeSize === prevStorage
+        ? storage
+        : Math.max(storage, systemVolumeSize)
+
+    setValue('systemVolume.size', newSize)
+  }, [storage, prevStorage, setValue, systemVolumeSize])
 
   // @note: Set nodeSpecs
   useEffect(() => {
