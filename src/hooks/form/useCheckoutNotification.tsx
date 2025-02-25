@@ -73,6 +73,11 @@ export function useCheckoutNotification({
 
 export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
   {
+    reserve: {
+      title: 'Sign CRN resources reservation',
+      content:
+        'By signing this, you are doing a reservation of hardware resources on the selected CRN until the instance is correctly allocated.',
+    },
     stream: {
       title: 'Sign PAYG Activation',
       content:
