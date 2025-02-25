@@ -4,6 +4,7 @@ import {
   BaseExecutableContent,
   CostEstimationMachineVolume,
   HostRequirements,
+  InstancePublishConfiguration,
   MachineResources,
   MachineVolume,
   MAXIMUM_DISK_SIZE,
@@ -233,6 +234,54 @@ export abstract class ExecutableManager<T extends Executable> {
       parent: null,
       type: 'compute',
     }
+  }
+
+  async reserveCRNResources(
+    node: CRN,
+    instanceConfig: InstancePublishConfiguration,
+  ): Promise<void> {
+    if (!node.address) throw Err.InvalidCRNAddress
+
+    const nodeUrl = NodeManager.normalizeUrl(node.address)
+    const url = new URL(`${nodeUrl}/control/allocation/reserve_ressources`)
+    const { hostname: domain, pathname: path } = url
+
+    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
+
+    const signedOperationToken = await this.getAuthOperationToken(
+      keyPair.privateKey,
+      domain,
+      path,
+    )
+
+    const message =
+      await this.sdkClient.instanceClient.getCostComputableMessage(
+        instanceConfig,
+      )
+
+    let errorMsg = ''
+
+    try {
+      const req = await fetch(url.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-SignedOperation': JSON.stringify(signedOperationToken),
+          'X-SignedPubKey': JSON.stringify(pubKeyHeader),
+        },
+        body: JSON.stringify({ message }),
+        mode: 'cors',
+      })
+
+      const resp = await req.json()
+      if (resp.success) return
+
+      // errorMsg = resp.errors[instanceId]
+    } catch (e) {
+      errorMsg = (e as Error).message
+    }
+
+    throw Err.InstanceStartupFailed(node.hash, errorMsg)
   }
 
   async notifyCRNAllocation(

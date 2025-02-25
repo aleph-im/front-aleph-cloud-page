@@ -154,29 +154,26 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       throw Err.InvalidAccount
 
     try {
-      yield* this.addPAYGStreamSteps(newInstance, account)
-
       const instanceMessage = yield* this.parseInstanceSteps(newInstance)
 
-      yield
+      // @note: Reserve CRN resources before creating PAYG superfluid flows
+      yield* this.addPAYGReservationSteps(newInstance, instanceMessage)
 
+      // @note: Send the instance creation message to the network
+      yield
       const response = await this.sdkClient.createInstance({
         ...instanceMessage,
       })
-
       const [entity] = await this.parseMessages([response])
+
+      // @note: Create PAYG superfluid flows
+      yield* this.addPAYGStreamSteps(newInstance, account)
 
       // @note: Add the domain link
       yield* this.parseDomainsSteps(entity.id, newInstance.domains)
 
       // @note: Notify the CRN if it is a targeted stream
-      if (
-        newInstance.payment?.type === PaymentMethod.Stream &&
-        newInstance.node
-      ) {
-        yield
-        await this.notifyCRNAllocation(newInstance.node, entity.id, false)
-      }
+      yield* this.addPAYGAllocationSteps(newInstance, entity)
 
       return entity
     } catch (err) {
@@ -247,8 +244,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const steps: CheckoutStepType[] = []
     const { sshKeys, volumes = [], domains = [] } = newInstance
 
-    if (newInstance.payment?.type === PaymentMethod.Stream) steps.push('stream')
-
     const newKeys = this.parseNewSSHKeys(sshKeys)
     // @note: Aggregate all signatures in 1 step
     if (newKeys.length > 0) steps.push('ssh')
@@ -256,7 +251,12 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     // @note: Aggregate all signatures in 1 step
     if (volumes.length > 0) steps.push('volume')
 
+    if (newInstance.payment?.type === PaymentMethod.Stream)
+      steps.push('reserve')
+
     steps.push('instance')
+
+    if (newInstance.payment?.type === PaymentMethod.Stream) steps.push('stream')
 
     // @note: Aggregate all signatures in 1 step
     if (domains.length > 0) steps.push('domain')
@@ -345,8 +345,8 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     account?: SuperfluidAccount,
   ): AsyncGenerator<void, void, void> {
     if (newInstance.payment?.type !== PaymentMethod.Stream) return
-    if (!account) throw Err.ConnectYourWallet
     if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
+    if (!account) throw Err.ConnectYourWallet
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
 
@@ -393,6 +393,28 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     )
   }
 
+  protected async *addPAYGReservationSteps(
+    newInstance: AddInstance,
+    instanceMessage: InstancePublishConfiguration,
+  ): AsyncGenerator<void, void, void> {
+    if (newInstance.payment?.type !== PaymentMethod.Stream) return
+    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
+
+    yield
+    await this.reserveCRNResources(newInstance.node, instanceMessage)
+  }
+
+  protected async *addPAYGAllocationSteps(
+    newInstance: AddInstance,
+    entity: InstanceEntity,
+  ): AsyncGenerator<void, void, void> {
+    if (newInstance.payment?.type !== PaymentMethod.Stream) return
+    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
+
+    yield
+    await this.notifyCRNAllocation(newInstance.node, entity.id, false)
+  }
+
   protected async parseInstanceForCostEstimation(
     newInstance: AddInstance,
   ): Promise<InstancePublishConfiguration> {
@@ -416,7 +438,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       account,
       channel,
       resources,
-      image,
+      rootfs: { parent: { ref: image } },
       volumes,
       payment,
       requirements,
@@ -450,7 +472,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       variables,
       resources,
       metadata,
-      image,
+      rootfs: { parent: { ref: image } },
       authorized_keys,
       volumes,
       payment,
