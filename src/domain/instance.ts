@@ -232,13 +232,17 @@ export class InstanceManager<T extends InstanceEntity = Instance>
             ],
       )
 
-      const errors: PromiseRejectedResult[] = results
-        .filter((result) => result.status === 'rejected')
+      const errors: Error[] = results
+        .filter(
+          (result): result is PromiseRejectedResult =>
+            result.status === 'rejected',
+        )
         .filter(({ reason }) => reason.message !== 'No flow to decrease flow')
+        .map(({ reason }) => new Error(reason.message))
 
       if (errors.length) {
         const [firstError] = errors
-        throw new Error(firstError.reason.message)
+        throw firstError
       }
     }
 
