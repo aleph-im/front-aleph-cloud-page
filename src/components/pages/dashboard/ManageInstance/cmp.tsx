@@ -4,6 +4,7 @@ import IconText from '@/components/common/IconText'
 import {
   ButtonProps,
   Label,
+  Logo,
   NoisyContainer,
   ObjectImg,
   Tabs,
@@ -69,16 +70,16 @@ export function LinkedVolumeItem({ volume, onClick }: any) {
       >
         <ObjectImg
           id="Object16"
-          color="main0"
+          color="base2"
           size="2.5rem"
           tw="min-w-[3rem] min-h-[3rem]"
         />
-        <div>
+        <div tw="flex flex-col items-start">
           <div className="tp-info">{volume.mount}</div>
           <Text className="fs-12">{humanReadableSize(volume.size, 'MiB')}</Text>
         </div>
         <Icon
-          name="square-up-right"
+          name="eye"
           tw="absolute top-2 right-2"
           className="openEntityIcon"
         />
@@ -148,7 +149,7 @@ export default function ManageInstance() {
 
   const [state] = useAppState()
   const {
-    manager: { volumeManager },
+    manager: { volumeManager, instanceManager },
   } = state
 
   useEffect(() => {
@@ -195,6 +196,23 @@ export default function ManageInstance() {
   }, [instance])
 
   console.log('instance', instance)
+
+  const [cost, setCost] = useState<number>()
+
+  useEffect(() => {
+    const fetchCost = async () => {
+      if (!instance?.payment) return
+
+      const fetchedCost = await instanceManager?.getTotalCostByHash(
+        instance.payment.type,
+        instance.id,
+      )
+
+      setCost(fetchedCost)
+    }
+
+    fetchCost()
+  }, [instance, instanceManager])
 
   const [openSidePanel, setOpenSidePanel] = useState(false)
   const [selectedVolume, setSelectedVolume] = useState<any | undefined>()
@@ -310,7 +328,7 @@ export default function ManageInstance() {
         <div tw="w-full flex flex-wrap gap-x-24 gap-y-9 px-12 py-6">
           <div tw="flex-1 w-1/2 min-w-[32rem] flex flex-col gap-y-9">
             <div>
-              <div className="tp-h7 fs-18" tw="uppercase mb-2">
+              <div className="tp-h7 fs-24" tw="uppercase mb-2">
                 INSTANCE DETAILS
               </div>
               <NoisyContainer>
@@ -402,7 +420,7 @@ export default function ManageInstance() {
               </NoisyContainer>
             </div>
             <div>
-              <div className="tp-h7 fs-18" tw="uppercase mb-2">
+              <div className="tp-h7 fs-24" tw="uppercase mb-2">
                 LOGS
               </div>
               <NoisyContainer>
@@ -438,7 +456,7 @@ export default function ManageInstance() {
               </NoisyContainer>
             </div>
             <div>
-              <div className="tp-h7 fs-18" tw="uppercase mb-2">
+              <div className="tp-h7 fs-24" tw="uppercase mb-2">
                 SSH KEYS
               </div>
               <NoisyContainer>
@@ -454,9 +472,10 @@ export default function ManageInstance() {
                               handleSSHKeyClick(sshKey)
                             }}
                           >
+                            {/* TODO: Change object to key image */}
                             <ObjectImg
                               id="Object9"
-                              color="main0"
+                              color="base2"
                               size="2.5rem"
                               tw="min-w-[3rem] min-h-[3rem]"
                             />
@@ -467,7 +486,7 @@ export default function ManageInstance() {
                               <Text>{sshKey.label}</Text>
                             </div>
                             <Icon
-                              name="square-up-right"
+                              name="eye"
                               tw="absolute top-2 right-2"
                               className="openEntityIcon"
                             />
@@ -503,26 +522,29 @@ export default function ManageInstance() {
                 </div>
               </NoisyContainer>
             </div>
-            {/* <div>
-            <div className="tp-h7 fs-18" tw="uppercase mb-2">
-              PAYMENT
-            </div>
-            <NoisyContainer>
-              <div tw="flex">
-                <div
-                  className="bg-main0 text-base0"
-                  tw="flex items-center gap-1 px-3 py-1"
-                >
-                  <Logo img="aleph" color="base0" byAleph={false} />
-                  <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
-                </div>
+            <div>
+              <div className="tp-h7 fs-24" tw="uppercase mb-2">
+                PAYMENT
               </div>
-            </NoisyContainer>
-          </div> */}
+              <NoisyContainer>
+                <div tw="flex items-center gap-4">
+                  <div
+                    className="bg-main0 text-base0"
+                    tw="flex items-center gap-1 px-3 py-1"
+                  >
+                    <Logo img="aleph" color="base0" byAleph={false} />
+                    <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
+                  </div>
+                  <p className="text-base2 fs-18" tw="font-bold">
+                    {cost}
+                  </p>
+                </div>
+              </NoisyContainer>
+            </div>
           </div>
           <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">
             <div>
-              <div className="tp-h7 fs-18" tw="uppercase mb-2">
+              <div className="tp-h7 fs-24" tw="uppercase mb-2">
                 HOSTING CRN
               </div>
               <NoisyContainer>
@@ -583,7 +605,7 @@ export default function ManageInstance() {
               </NoisyContainer>
             </div>
             <div>
-              <div className="tp-h7 fs-18" tw="uppercase mb-2">
+              <div className="tp-h7 fs-24" tw="uppercase mb-2">
                 CONNECTION METHODS
               </div>
               <NoisyContainer>
@@ -617,7 +639,7 @@ export default function ManageInstance() {
             </div>
             {immutableVolumes.length > 0 && (
               <div>
-                <div className="tp-h7 fs-18" tw="uppercase mb-2">
+                <div className="tp-h7 fs-24" tw="uppercase mb-2">
                   LINKED VOLUMES
                 </div>
                 <NoisyContainer>
@@ -638,7 +660,7 @@ export default function ManageInstance() {
             )}
             {persistentVolumes.length > 0 && (
               <div>
-                <div className="tp-h7 fs-18" tw="uppercase mb-2">
+                <div className="tp-h7 fs-24" tw="uppercase mb-2">
                   PERSISTENT STORAGE
                 </div>
                 <NoisyContainer>
@@ -754,36 +776,6 @@ export default function ManageInstance() {
         )}
       </SidePanel>
       {/* <div tw="fixed right-0 top-0 bottom-0 z-50 w-1/2 bg-white shadow-lg"></div> */}
-    </>
-  )
-
-  return (
-    <>
-      <BackButtonSection handleBack={handleBack} />
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
-          <NoisyContainer>
-            <Tabs
-              selected={tabId}
-              align="left"
-              onTabChange={setTabId}
-              tabs={tabs}
-            />
-
-            <div role="tabpanel" tw="mt-6">
-              {tabId === 'detail' ? (
-                <></>
-              ) : tabId === 'log' ? (
-                <>
-                  <LogsFeed logs={logs} />
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
-          </NoisyContainer>
-        </Container>
-      </section>
     </>
   )
 }
