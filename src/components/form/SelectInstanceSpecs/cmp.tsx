@@ -109,7 +109,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   // ------------------------------------------
 
   const [prices, setPrices] = useState<number[]>([])
-  const { cpu } = specsCtrl.field.value
+  const cpu = specsCtrl.field.value?.cpu
 
   const costManager = useCostManager()
 

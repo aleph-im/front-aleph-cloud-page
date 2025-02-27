@@ -52,7 +52,7 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
 
   protected override parseMessagesFilter({ content }: any): boolean {
     if (content === undefined) return false
-
+    return true
     return content.requirements?.gpu?.length
   }
 
