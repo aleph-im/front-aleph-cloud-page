@@ -320,7 +320,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     } as PaymentConfiguration
   }, [formValues, blockchain, account, node])
 
-  console.log('formValues', formValues)
   const costProps: UseGpuInstanceCostProps = useMemo(
     () => ({
       entityType: EntityType.GpuInstance,
