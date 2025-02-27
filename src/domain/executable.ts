@@ -583,8 +583,8 @@ export abstract class ExecutableManager<T extends Executable> {
 
   protected parseSpecs(
     specs: InstanceSpecsField,
-  ): Omit<MachineResources, 'seconds'> | object {
-    if (!specs) return {}
+  ): Omit<MachineResources, 'seconds'> | undefined {
+    if (!specs) return
 
     return {
       vcpus: specs.cpu,
