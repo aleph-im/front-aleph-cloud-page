@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNotification } from '@aleph-front/core'
+import { useLocalRequest, useNotification } from '@aleph-front/core'
 import { CRN, NodeManager } from '@/domain/node'
 import {
   Executable,
   ExecutableManager,
   ExecutableOperations,
   ExecutableStatus,
+  StreamPaymentDetails,
 } from '@/domain/executable'
 import Err from '@/helpers/errors'
 import { PaymentType } from '@aleph-sdk/message'
@@ -32,20 +33,25 @@ import { isAccountPAYGCompatible } from '@/domain/account'
 import { EVMAccount } from '@aleph-sdk/evm'
 
 export type UseExecutableActionsProps = {
-  executable: Executable
+  executable?: Executable
   manager?: ExecutableManager<any>
   subscribeLogs?: boolean
 }
 
 export type UseExecutableActionsReturn = {
   logs: UseRequestExecutableLogsFeedReturn
-  nodeDetails?: { name: string; url: string }
+  nodeDetails?: {
+    name: string
+    url: string
+  }
+  streamDetails?: StreamPaymentDetails
   status?: ExecutableStatus
   isRunning: boolean
   stopDisabled: boolean
   startDisabled: boolean
   rebootDisabled: boolean
   logsDisabled: boolean
+  blockchain?: BlockchainId
   handleStop: () => void
   handleStart: () => void
   handleReboot: () => void
@@ -259,15 +265,33 @@ export function useExecutableActions({
 
   // ------------------------------
 
+  const { data: streamDetails } = useLocalRequest({
+    doRequest: async () => {
+      if (!manager) return
+      if (!executable) return
+      if (!account) return
+
+      return manager.getStreamPaymentDetails(executable, account)
+    },
+    onSuccess: () => null,
+    flushData: true,
+    triggerOnMount: true,
+    triggerDeps: [executable?.id, account?.address, blockchain],
+  })
+
+  // ------------------------------
+
   return {
     logs,
     nodeDetails,
+    streamDetails,
     status,
     isRunning,
     stopDisabled,
     startDisabled,
     rebootDisabled,
     logsDisabled: !logs,
+    blockchain,
     handleStop,
     handleStart,
     handleReboot,
