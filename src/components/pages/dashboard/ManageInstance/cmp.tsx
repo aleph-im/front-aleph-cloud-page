@@ -11,6 +11,8 @@ import { Container, Text, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import LogsFeed from '../LogsFeed'
+import StreamSummary from '@/components/common/StreamSummary'
+import { blockchains } from '@/domain/connect/base'
 
 export default function ManageInstance() {
   const {
@@ -19,6 +21,8 @@ export default function ManageInstance() {
     status,
     mappedKeys,
     nodeDetails,
+    streamDetails,
+    blockchain,
     isRunning,
     stopDisabled,
     startDisabled,
@@ -288,6 +292,39 @@ export default function ManageInstance() {
                       )}
                     </div>
                   </div>
+
+                  {streamDetails && (
+                    <>
+                      <Separator />
+
+                      <TextGradient type="h7" as="h2" color="main0">
+                        Active streams
+                      </TextGradient>
+
+                      {streamDetails.blockchain !== blockchain ? (
+                        <div tw="my-5">
+                          Connect to{' '}
+                          <strong className="text-main0">
+                            {blockchains[streamDetails.blockchain].name}
+                          </strong>{' '}
+                          network to see the active streams
+                        </div>
+                      ) : (
+                        !streamDetails.streams.length && (
+                          <div tw="my-5">There are no active streams</div>
+                        )
+                      )}
+
+                      {streamDetails.streams.map((stream) => (
+                        <div
+                          key={`${stream.sender}:${stream.receiver}`}
+                          tw="my-5"
+                        >
+                          <StreamSummary {...stream} />
+                        </div>
+                      ))}
+                    </>
+                  )}
 
                   {nodeDetails && (
                     <>

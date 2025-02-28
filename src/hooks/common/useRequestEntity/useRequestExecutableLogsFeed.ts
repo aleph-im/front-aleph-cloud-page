@@ -4,7 +4,7 @@ import { useInstanceManager } from '../useManager/useInstanceManager'
 import { useDebounceState } from '@aleph-front/core'
 
 export type UseRequestExecutableLogsFeedProps = {
-  vmId: string
+  vmId?: string
   nodeUrl: string
   tail?: number
   subscribe?: boolean

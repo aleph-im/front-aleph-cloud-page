@@ -192,6 +192,12 @@ export class ProgramManager
     return downloadBlob(blob, `VM_${program.id.slice(-12)}.zip`)
   }
 
+  async getStreamPaymentDetails(): Promise<undefined> {
+    // @note: Do not throw an error, just do nothing
+    // @todo: Move this method to the Executable base classs
+    return undefined
+  }
+
   async getAddSteps(newInstance: AddProgram): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
     const { domains = [] } = newInstance
