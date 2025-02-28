@@ -1,5 +1,6 @@
 import {
   ExistingVolumeField,
+  InstanceSystemVolumeField,
   NewVolumeField,
   PersistentVolumeField,
   VolumeField,
@@ -33,7 +34,9 @@ export type AddPersistentVolumeProps = AddVolumeCommonProps & {
 }
 
 export type InstanceSystemVolumeProps = {
-  size: number
+  name?: string
+  control: Control
+  defaultValue?: InstanceSystemVolumeField
 }
 
 // ---------

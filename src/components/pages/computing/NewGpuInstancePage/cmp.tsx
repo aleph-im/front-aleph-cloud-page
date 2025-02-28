@@ -461,7 +461,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
                   <AddVolumes
                     name="volumes"
                     control={control}
-                    systemVolumeSize={values.systemVolumeSize}
+                    systemVolume={values.systemVolume}
                   />
                 </SwitchToggleContainer>
               </div>
