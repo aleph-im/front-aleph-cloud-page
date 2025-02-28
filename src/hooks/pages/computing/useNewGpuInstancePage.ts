@@ -305,7 +305,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
 
   // -------------------------
 
-  const storage = formValues.specs?.storage
+  const { storage } = formValues.specs || {}
 
   const { systemVolumeSize } = formValues
 

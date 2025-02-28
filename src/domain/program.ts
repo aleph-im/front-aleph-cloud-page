@@ -368,9 +368,7 @@ export class ProgramManager
 
     const variables = this.parseEnvVars(envVars)
 
-    const parsedSpecs = this.parseSpecs(specs)
-    const memory = parsedSpecs?.memory
-    const vcpus = parsedSpecs?.vcpus
+    const { memory, vcpus } = this.parseSpecs(specs) || {}
 
     const metadata = this.parseMetadata(name, tags, newProgram.metadata)
     const runtime = this.parseRuntime(newProgram)
