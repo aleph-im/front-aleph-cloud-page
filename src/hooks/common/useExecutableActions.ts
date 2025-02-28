@@ -231,10 +231,31 @@ export function useExecutableActions({
 
       await router.replace('/')
     } catch (e) {
+      console.error(e)
+
+      const text = (e as Error).message
+      const cause = (e as Error)?.cause as string | Error | undefined
+      const detail = typeof cause === 'string' ? cause : cause?.message
+
+      noti?.add({
+        variant: 'error',
+        title: 'Error',
+        text,
+        detail,
+      })
     } finally {
       await stop()
     }
-  }, [dispatch, handleEnsureNetwork, executable, manager, next, router, stop])
+  }, [
+    dispatch,
+    handleEnsureNetwork,
+    executable,
+    manager,
+    next,
+    router,
+    stop,
+    noti,
+  ])
 
   // ------------------------------
 

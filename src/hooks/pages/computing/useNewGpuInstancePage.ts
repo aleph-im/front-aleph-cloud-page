@@ -283,7 +283,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     () => ({
       ...defaultNameAndTags,
       image: defaultInstanceImage,
-      specs: defaultTiers[0],
+      specs: undefined,
       systemVolume: { size: defaultTiers[0]?.storage },
       paymentMethod: PaymentMethod.Stream,
       streamDuration: defaultStreamDuration,
@@ -309,7 +309,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
 
   // -------------------------
 
-  const { storage } = formValues.specs
+  const { storage } = formValues.specs || {}
   const { size: systemVolumeSize } = formValues.systemVolume
 
   const payment: PaymentConfiguration = useMemo(() => {
