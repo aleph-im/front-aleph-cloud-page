@@ -322,7 +322,10 @@ export class ProgramManager
 
     const { isPersistent, specs } = newProgram
 
-    const { memory, vcpus } = this.parseSpecs(specs)
+    const parsedSpecs = this.parseSpecs(specs)
+    const memory = parsedSpecs?.memory
+    const vcpus = parsedSpecs?.vcpus
+
     const runtime = this.parseRuntime(newProgram)
     const payment = this.parsePayment(newProgram.payment)
     const volumesSteps = this.parseVolumesSteps(newProgram.volumes, true)
@@ -364,7 +367,9 @@ export class ProgramManager
     const { name, tags, isPersistent, envVars, specs } = newProgram
 
     const variables = this.parseEnvVars(envVars)
-    const { memory, vcpus } = this.parseSpecs(specs)
+
+    const { memory, vcpus } = this.parseSpecs(specs) || {}
+
     const metadata = this.parseMetadata(name, tags, newProgram.metadata)
     const runtime = this.parseRuntime(newProgram)
     const payment = this.parsePayment(newProgram.payment)
