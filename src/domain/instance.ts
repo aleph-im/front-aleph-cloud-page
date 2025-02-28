@@ -210,20 +210,36 @@ export class InstanceManager<T extends InstanceEntity = Instance>
         instance.id,
       )
 
-      if (instance.time >= communityWalletTimestamp) {
-        // Instances created after split of flows between receiver and community wallet
-        await account.decreaseALEPHFlow(
-          receiver,
-          this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
-        )
+      const results = await Promise.allSettled(
+        instance.time >= communityWalletTimestamp
+          ? [
+              // @note: Instances created after split of flows between receiver and community wallet
+              account.decreaseALEPHFlow(
+                receiver,
+                this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
+              ),
+              account.decreaseALEPHFlow(
+                communityWalletAddress,
+                this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
+              ),
+            ]
+          : [
+              // @note: Instances created before split of flows between receiver and community wallet
+              account.decreaseALEPHFlow(receiver, instanceCosts + EXTRA_WEI),
+            ],
+      )
 
-        await account.decreaseALEPHFlow(
-          communityWalletAddress,
-          this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
+      const errors: Error[] = results
+        .filter(
+          (result): result is PromiseRejectedResult =>
+            result.status === 'rejected',
         )
-      } else {
-        // Instances created before split of flows between receiver and community wallet
-        await account.decreaseALEPHFlow(receiver, instanceCosts + EXTRA_WEI)
+        .filter(({ reason }) => reason.message !== 'No flow to decrease flow')
+        .map(({ reason }) => new Error(reason.message))
+
+      if (errors.length) {
+        const [firstError] = errors
+        throw firstError
       }
     }
 

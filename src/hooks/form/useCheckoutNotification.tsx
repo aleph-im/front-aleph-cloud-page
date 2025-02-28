@@ -19,6 +19,8 @@ export type UseCheckoutNotificationProps = {
 export type UseCheckoutNotificationReturn = {
   next: (newSteps?: UseCheckoutNotificationSteps) => Promise<void>
   stop: () => Promise<void>
+  // @todo: Export types form core
+  noti?: any
 }
 
 export function useCheckoutNotification({
@@ -68,6 +70,7 @@ export function useCheckoutNotification({
   return {
     next: handleNext,
     stop: handleStop,
+    noti,
   }
 }
 
