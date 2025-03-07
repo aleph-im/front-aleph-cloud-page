@@ -31,6 +31,7 @@ import {
 } from '@/domain/blockchain'
 import { isAccountPAYGCompatible } from '@/domain/account'
 import { EVMAccount } from '@aleph-sdk/evm'
+import { StaticEVMAccount } from '@/domain/connect/staticEVMAccount'
 
 export type UseExecutableActionsProps = {
   executable?: Executable
@@ -51,7 +52,6 @@ export type UseExecutableActionsReturn = {
   startDisabled: boolean
   rebootDisabled: boolean
   logsDisabled: boolean
-  blockchain?: BlockchainId
   handleStop: () => void
   handleStart: () => void
   handleReboot: () => void
@@ -269,14 +269,26 @@ export function useExecutableActions({
     doRequest: async () => {
       if (!manager) return
       if (!executable) return
-      if (!account) return
 
-      return manager.getStreamPaymentDetails(executable, account)
+      const address = executable?.address
+      const blockchain = executable?.payment?.chain as BlockchainId
+
+      if (!address) return
+      if (!blockchain) return
+
+      // @todo: Refactor this in the sdk
+      const evmAccount = new StaticEVMAccount(address, blockchain)
+
+      return manager.getStreamPaymentDetails(executable, evmAccount)
     },
     onSuccess: () => null,
     flushData: true,
     triggerOnMount: true,
-    triggerDeps: [executable?.id, account?.address, blockchain],
+    triggerDeps: [
+      executable?.id,
+      executable?.address,
+      executable?.payment?.chain,
+    ],
   })
 
   // ------------------------------
@@ -291,7 +303,6 @@ export function useExecutableActions({
     startDisabled,
     rebootDisabled,
     logsDisabled: !logs,
-    blockchain,
     handleStop,
     handleStart,
     handleReboot,

@@ -365,7 +365,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
         ? accountOrSuperfluidAccount
         : await createFromEVMAccount(
             accountOrSuperfluidAccount as EVMAccount,
-          ).catch(() => undefined)
+          ).catch((e) => console.error(e))
 
     const blockchain = instance.payment.chain as BlockchainId
     const streams: StreamPaymentDetail[] = []

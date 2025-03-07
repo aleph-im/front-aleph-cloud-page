@@ -64,7 +64,7 @@ export type PaymentConfiguration =
   | HoldPaymentConfiguration
   | StreamPaymentConfiguration
 
-export type Executable = {
+export type Executable = BaseExecutableContent & {
   type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
   id: string // hash
   payment?: BaseExecutableContent['payment']

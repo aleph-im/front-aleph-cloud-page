@@ -22,7 +22,6 @@ export default function ManageGpuInstance() {
     mappedKeys,
     nodeDetails,
     streamDetails,
-    blockchain,
     isRunning,
     stopDisabled,
     startDisabled,
@@ -334,18 +333,16 @@ export default function ManageGpuInstance() {
                         Active streams
                       </TextGradient>
 
-                      {streamDetails.blockchain !== blockchain ? (
+                      {!streamDetails.streams.length ? (
+                        <div tw="my-5">There are no active streams</div>
+                      ) : (
                         <div tw="my-5">
-                          Connect to{' '}
+                          {streamDetails.streams.length} active streams in{' '}
                           <strong className="text-main0">
                             {blockchains[streamDetails.blockchain].name}
                           </strong>{' '}
-                          network to see the active streams
+                          network
                         </div>
-                      ) : (
-                        !streamDetails.streams.length && (
-                          <div tw="my-5">There are no active streams</div>
-                        )
                       )}
 
                       {streamDetails.streams.map((stream) => (
