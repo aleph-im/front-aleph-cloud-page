@@ -27,6 +27,10 @@ export type PersistentVolumeField = {
   size: number
 }
 
+export type InstanceSystemVolumeField = {
+  size: number
+}
+
 export const defaultVolume: NewVolumeStandaloneField = {
   volumeType: VolumeType.New,
 }
@@ -226,6 +230,53 @@ export function useAddPersistentVolumeProps({
     sizeValue,
     sizeHandleChange,
     handleRemove,
+  }
+}
+
+// -------------
+
+export type UseAddInstanceSystemVolumeProps = {
+  control: Control
+  defaultValue?: InstanceSystemVolumeField
+}
+
+export type UseAddInstanceSystemVolumeReturn = {
+  sizeCtrl: UseControllerReturn<any, any>
+}
+
+export function useAddInstanceSystemVolumeProps({
+  control,
+  defaultValue,
+}: UseAddInstanceSystemVolumeProps): UseAddInstanceSystemVolumeReturn {
+  const sizeCtrl = useController({
+    control,
+    name: `systemVolume.size`,
+    defaultValue,
+  })
+
+  const { value, onChange } = sizeCtrl.field
+
+  sizeCtrl.field.onChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const val = Number(e.target.value)
+      const size = convertByteUnits(val, {
+        from: 'GiB',
+        to: 'MiB',
+        displayUnit: false,
+      })
+      onChange(size)
+    },
+    [onChange],
+  )
+
+  sizeCtrl.field.value = useMemo(() => {
+    return value
+      ? convertByteUnits(value, { from: 'MiB', to: 'GiB', displayUnit: false })
+      : undefined
+  }, [value])
+
+  return {
+    sizeCtrl,
   }
 }
 

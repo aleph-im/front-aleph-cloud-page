@@ -2,9 +2,8 @@ import {
   ellipseAddress,
   convertByteUnits,
   humanReadableSize,
-  ellipseText,
 } from '@/helpers/utils'
-import { Label, StyledArrowIcon, StyledHoldingSummaryLine } from './styles'
+import { Label, StyledHoldingSummaryLine } from './styles'
 import {
   CheckoutSummaryProps,
   CheckoutSummaryVolumeLineProps,
@@ -16,7 +15,7 @@ import { PaymentMethod } from '@/helpers/constants'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import InfoTooltipButton from '../../common/InfoTooltipButton'
 import Container from '@/components/common/CenteredContainer'
-import { TextGradient, TextInput } from '@aleph-front/core'
+import { TextGradient } from '@aleph-front/core'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import Price from '@/components/common/Price'
 import CheckoutSummaryFooter from '../CheckoutSummaryFooter'
@@ -24,6 +23,7 @@ import { AddWebsite, WebsiteManager } from '@/domain/website'
 import { useConnection } from '@/hooks/common/useConnection'
 import { Blockchain } from '@aleph-sdk/core'
 import { useNFTVoucherBalance } from '@/hooks/common/useNFTVoucherBalance'
+import StreamSummary from '@/components/common/StreamSummary'
 
 const CheckoutSummaryVolumeLine = ({
   volume,
@@ -350,40 +350,14 @@ export const CheckoutSummary = ({
             </div>
 
             {paymentMethod === PaymentMethod.Stream && receiverAddress && (
-              <div className="bg-purple0" tw="p-6">
-                <TextGradient forwardedAs="h3" type="h7" tw="mb-6">
-                  Review the transaction
-                </TextGradient>
-                <div tw="w-full flex flex-col md:flex-row items-stretch md:items-end gap-0 md:gap-6">
-                  <div tw="flex-1">
-                    <TextInput
-                      tabIndex={-1}
-                      name="sender"
-                      label="Sender"
-                      value={ellipseText(address, 12, 10)}
-                      dataView
-                    />
-                  </div>
-                  <div tw="self-center md:self-end rotate-90 md:rotate-0 pl-9 md:pl-0">
-                    <StyledArrowIcon />
-                  </div>
-                  <div tw="flex-1">
-                    <TextInput
-                      tabIndex={-1}
-                      name="receiver"
-                      label="Receiver"
-                      value={ellipseText(receiverAddress, 12, 10)}
-                      dataView
-                    />
-                  </div>
-                </div>
-                <div
-                  className="text-main0 tp-body2 fs-12"
-                  tw="text-center mt-6"
-                >
-                  Balance: <Price value={cost?.cost} /> per hour
-                </div>
-              </div>
+              <StreamSummary
+                {...{
+                  title: 'Review the transaction',
+                  sender: address,
+                  receiver: receiverAddress,
+                  flow: cost?.cost || 0,
+                }}
+              />
             )}
 
             {buttonNode && <div tw="mt-16 text-center">{buttonNode}</div>}

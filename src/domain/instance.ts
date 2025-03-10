@@ -1,5 +1,5 @@
 import { Account } from '@aleph-sdk/account'
-import { SuperfluidAccount } from '@aleph-sdk/superfluid'
+import { createFromEVMAccount, SuperfluidAccount } from '@aleph-sdk/superfluid'
 import {
   HostRequirements,
   InstanceContent,
@@ -7,6 +7,7 @@ import {
   MachineVolume,
   MessageType,
   PaymentType,
+  RootfsVolumeConfiguration,
 } from '@aleph-sdk/message'
 import {
   defaultInstanceChannel,
@@ -22,8 +23,13 @@ import {
   ExecutableManager,
   PaymentConfiguration,
   ExecutableStatus,
+  StreamPaymentDetails,
+  StreamPaymentDetail,
 } from './executable'
-import { VolumeField } from '@/hooks/form/useAddVolume'
+import {
+  InstanceSystemVolumeField,
+  VolumeField,
+} from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
 import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
@@ -45,6 +51,8 @@ import {
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
 import { CostManager, CostSummary } from './cost'
+import { EVMAccount } from '@aleph-sdk/evm'
+import { BlockchainId } from './connect/base'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -56,12 +64,14 @@ export type AddInstance = Omit<
   | 'volumes'
   | 'payment'
   | 'requirements'
+  | 'rootfs'
 > &
   NameAndTagsField & {
     image: InstanceImageField
     specs: InstanceSpecsField
     sshKeys: SSHKeyField[]
     volumes?: VolumeField[]
+    systemVolume: InstanceSystemVolumeField
     envVars?: EnvVarField[]
     domains?: Omit<DomainField, 'ref'>[]
     payment?: PaymentConfiguration
@@ -186,16 +196,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     instanceOrId: string | T,
     account?: SuperfluidAccount,
   ): Promise<void> {
-    let instance: T | undefined
-
-    if (typeof instanceOrId !== 'string') {
-      instance = instanceOrId
-      instanceOrId = instance.id
-    } else {
-      instance = await this.get(instanceOrId)
-    }
-
-    if (!instance) throw Err.InstanceNotFound
+    const instance = await this.ensureInstance(instanceOrId)
 
     if (instance.payment?.type === PaymentType.superfluid) {
       if (!account) throw Err.ConnectYourPaymentWallet
@@ -249,7 +250,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
       await this.sdkClient.forget({
         channel: this.channel,
-        hashes: [instanceOrId],
+        hashes: [instance.id],
       })
     } catch (err) {
       throw Err.RequestFailed(err)
@@ -356,6 +357,95 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     }
   }
 
+  async getStreamPaymentDetails(
+    instanceOrId: string | T,
+    accountOrSuperfluidAccount?: Account | SuperfluidAccount,
+  ): Promise<StreamPaymentDetails | undefined> {
+    const instance = await this.ensureInstance(instanceOrId)
+    if (instance.payment?.type !== PaymentType.superfluid) return
+
+    if (!accountOrSuperfluidAccount) throw Err.ConnectYourPaymentWallet
+
+    const account =
+      accountOrSuperfluidAccount instanceof SuperfluidAccount
+        ? accountOrSuperfluidAccount
+        : await createFromEVMAccount(
+            accountOrSuperfluidAccount as EVMAccount,
+          ).catch((e) => console.error(e))
+
+    const blockchain = instance.payment.chain as BlockchainId
+    const streams: StreamPaymentDetail[] = []
+
+    // @todo: Refactor this
+    // @note: Handled in the UI (connect with "chain" to see the streams)
+    if (!account) {
+      return { blockchain, streams }
+    }
+
+    const { receiver } = instance.payment
+    if (!receiver) throw Err.ReceiverReward
+
+    const { communityWalletAddress, communityWalletTimestamp } =
+      await this.costManager.getSettingsAggregate()
+
+    const instanceCosts = await this.getTotalCostByHash(
+      instance.payment?.type,
+      instance.id,
+    )
+
+    const mainFlow = await account.getALEPHFlow(receiver).catch(() => undefined)
+    const isMainFlowActive = mainFlow && mainFlow.gt(0)
+    const sender = account.address
+
+    if (instance.time >= communityWalletTimestamp) {
+      const communityFlow = await account
+        .getALEPHFlow(communityWalletAddress)
+        .catch(() => undefined)
+
+      const isCommunityFlowActive = communityFlow && communityFlow.gt(0)
+
+      if (isMainFlowActive) {
+        streams.push({
+          sender,
+          receiver,
+          flow: this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
+        })
+      }
+
+      if (isCommunityFlowActive) {
+        streams.push({
+          sender,
+          receiver: communityWalletAddress,
+          flow: this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
+        })
+      }
+    } else {
+      if (isMainFlowActive) {
+        streams.push({
+          sender,
+          receiver,
+          flow: instanceCosts + EXTRA_WEI,
+        })
+      }
+    }
+
+    return { blockchain, streams }
+  }
+
+  protected async ensureInstance(instanceOrId: string | T): Promise<T> {
+    let instance: T | undefined
+
+    if (typeof instanceOrId !== 'string') {
+      instance = instanceOrId
+      instanceOrId = instance.id
+    } else {
+      instance = await this.get(instanceOrId)
+    }
+
+    if (!instance) throw Err.InstanceNotFound
+    return instance
+  }
+
   protected async *addPAYGStreamSteps(
     newInstance: AddInstance,
     account?: SuperfluidAccount,
@@ -436,8 +526,9 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   ): Promise<InstancePublishConfiguration> {
     const { account, channel } = this
 
-    const { specs, image, node } = newInstance
+    const { specs, image, node, systemVolume } = newInstance
 
+    const rootfs = this.parseRootfs(image, systemVolume)
     const resources = this.parseSpecs(specs)
     const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
@@ -454,10 +545,20 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       account,
       channel,
       resources,
-      rootfs: { parent: { ref: image } },
+      rootfs,
       volumes,
       payment,
       requirements,
+    }
+  }
+
+  protected parseRootfs(
+    image: InstanceImageField,
+    systemVolume: InstanceSystemVolumeField,
+  ): RootfsVolumeConfiguration {
+    return {
+      parent: { ref: image },
+      size_mib: systemVolume.size,
     }
   }
 
@@ -472,8 +573,10 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
     const { account, channel } = this
 
-    const { envVars, specs, image, sshKeys, name, tags, node } = newInstance
+    const { envVars, specs, image, sshKeys, name, tags, node, systemVolume } =
+      newInstance
 
+    const rootfs = this.parseRootfs(image, systemVolume)
     const variables = this.parseEnvVars(envVars)
     const resources = this.parseSpecs(specs)
     const metadata = this.parseMetadata(name, tags)
@@ -488,7 +591,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       variables,
       resources,
       metadata,
-      rootfs: { parent: { ref: image } },
+      rootfs,
       authorized_keys,
       volumes,
       payment,

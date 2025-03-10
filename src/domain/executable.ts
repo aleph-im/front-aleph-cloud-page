@@ -65,7 +65,7 @@ export type PaymentConfiguration =
   | HoldPaymentConfiguration
   | StreamPaymentConfiguration
 
-export type Executable = {
+export type Executable = BaseExecutableContent & {
   type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
   id: string // hash
   payment?: BaseExecutableContent['payment']
@@ -137,6 +137,16 @@ export type ExecutableCostProps = (
   volumes?: CostEstimationMachineVolume[]
 }
 
+export type StreamPaymentDetail = {
+  sender: string
+  receiver: string
+  flow: number
+}
+export type StreamPaymentDetails = {
+  blockchain: BlockchainId
+  streams: StreamPaymentDetail[]
+}
+
 export abstract class ExecutableManager<T extends Executable> {
   protected static cachedPubKeyToken?: AuthPubKeyToken
 
@@ -156,6 +166,11 @@ export abstract class ExecutableManager<T extends Executable> {
     executableOrIds: string | T | (string | T)[],
     account?: SuperfluidAccount,
   ): AsyncGenerator<void>
+
+  abstract getStreamPaymentDetails(
+    executableOrIds: string | T | (string | T)[],
+    account?: Account,
+  ): Promise<StreamPaymentDetails | undefined>
 
   async checkStatus(executable: T): Promise<ExecutableStatus | undefined> {
     const node = await this.getAllocationCRN(executable)

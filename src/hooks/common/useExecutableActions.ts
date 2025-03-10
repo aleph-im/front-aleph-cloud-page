@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNotification } from '@aleph-front/core'
+import { useLocalRequest, useNotification } from '@aleph-front/core'
 import { CRN, NodeManager } from '@/domain/node'
 import {
   Executable,
   ExecutableManager,
   ExecutableOperations,
   ExecutableStatus,
+  StreamPaymentDetails,
 } from '@/domain/executable'
 import Err from '@/helpers/errors'
 import { PaymentType } from '@aleph-sdk/message'
@@ -30,16 +31,21 @@ import {
 } from '@/domain/blockchain'
 import { isAccountPAYGCompatible } from '@/domain/account'
 import { EVMAccount } from '@aleph-sdk/evm'
+import { StaticEVMAccount } from '@/domain/connect/staticEVMAccount'
 
 export type UseExecutableActionsProps = {
-  executable: Executable
+  executable?: Executable
   manager?: ExecutableManager<any>
   subscribeLogs?: boolean
 }
 
 export type UseExecutableActionsReturn = {
   logs: UseRequestExecutableLogsFeedReturn
-  nodeDetails?: { name: string; url: string }
+  nodeDetails?: {
+    name: string
+    url: string
+  }
+  streamDetails?: StreamPaymentDetails
   status?: ExecutableStatus
   isRunning: boolean
   stopDisabled: boolean
@@ -259,9 +265,38 @@ export function useExecutableActions({
 
   // ------------------------------
 
+  const { data: streamDetails } = useLocalRequest({
+    doRequest: async () => {
+      if (!manager) return
+      if (!executable) return
+
+      const address = executable?.address
+      const blockchain = executable?.payment?.chain as BlockchainId
+
+      if (!address) return
+      if (!blockchain) return
+
+      // @todo: Refactor this in the sdk
+      const evmAccount = new StaticEVMAccount(address, blockchain)
+
+      return manager.getStreamPaymentDetails(executable, evmAccount)
+    },
+    onSuccess: () => null,
+    flushData: true,
+    triggerOnMount: true,
+    triggerDeps: [
+      executable?.id,
+      executable?.address,
+      executable?.payment?.chain,
+    ],
+  })
+
+  // ------------------------------
+
   return {
     logs,
     nodeDetails,
+    streamDetails,
     status,
     isRunning,
     stopDisabled,

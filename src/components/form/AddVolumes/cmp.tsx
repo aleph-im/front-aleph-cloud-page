@@ -7,16 +7,22 @@ import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 import { InstanceSystemVolume } from '../AddVolume/cmp'
 
 export const AddVolumes = React.memo((props: AddVolumesProps) => {
-  const { name, control, fields, systemVolumeSize, handleAdd, handleRemove } =
+  const { name, control, fields, systemVolume, handleAdd, handleRemove } =
     useAddVolumes(props)
 
   return (
     <>
       <div tw="flex flex-col gap-6">
-        {systemVolumeSize && (
+        {systemVolume && (
           <div className="bg-base1" tw="p-6">
             <div tw="px-0 pb-3">
-              <InstanceSystemVolume size={systemVolumeSize} />
+              <InstanceSystemVolume
+                {...{
+                  name,
+                  control,
+                  defaultValue: systemVolume,
+                }}
+              />
             </div>
           </div>
         )}
