@@ -1,39 +1,36 @@
-import Link from 'next/link'
 import { RotatingLines } from 'react-loader-spinner'
-import IconText from '@/components/common/IconText'
 import {
   ButtonProps,
   Label,
   Logo,
   NoisyContainer,
-  ObjectImg,
-  Tabs,
   Tooltip,
-  useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
 import { Button, Icon } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
 import {
-  convertByteUnits,
   ellipseAddress,
-  ellipseText,
-  humanReadableSize,
   isVolumeEphemeral,
   isVolumePersistent,
 } from '@/helpers/utils'
-import { Container, Text } from '../common'
-import BackButtonSection from '@/components/common/BackButtonSection'
+import { Text } from '../common'
 import LogsFeed from '../LogsFeed'
 import BackButton from '@/components/common/BackButton'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ImmutableVolume } from '@aleph-sdk/message'
 import { useAppState } from '@/contexts/appState'
 import { Skeleton } from '@/components/common/Skeleton/cmp'
-import { StyledEntityCard, StyledSliderContent } from './styles'
+import { StyledSliderContent } from './styles'
 import { SidePanel } from '@/components/common/SidePanel/cmp'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
 import { SSHKey } from '@/domain/ssh'
 import VolumeDetail from '@/components/common/VolumeDetail'
+import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
+import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
+import EntityConnectionMethods from '@/components/common/entityData/EntityConnectionMethods'
+import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolumes'
+import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
+import InstanceDetails from '@/components/common/entityData/InstanceDetails'
 import StreamSummary from '@/components/common/StreamSummary'
 import { blockchains } from '@/domain/connect/base'
 
@@ -51,51 +48,9 @@ export function FunctionalButton({ children, ...props }: ButtonProps) {
   )
 }
 
-export function LinkedVolumeItem({ volume, onClick }: any) {
-  const handleCopyVolumeHash = useCopyToClipboardAndNotify(volume.id)
-
-  const handleCopyHash = useCallback(
-    (e: any) => {
-      handleCopyVolumeHash()
-      e.preventDefault()
-    },
-    [handleCopyVolumeHash],
-  )
-
-  return (
-    <div tw="flex items-center gap-4">
-      <StyledEntityCard
-        // href={`/storage/volume/${volume.id}`}
-        onClick={onClick}
-      >
-        <ObjectImg
-          id="Object16"
-          color="base2"
-          size="2.5rem"
-          tw="min-w-[3rem] min-h-[3rem]"
-        />
-        <div tw="flex flex-col items-start">
-          <div className="tp-info">{volume.mount}</div>
-          <Text className="fs-12">{humanReadableSize(volume.size, 'MiB')}</Text>
-        </div>
-        <Icon
-          name="eye"
-          tw="absolute top-2 right-2"
-          className="openEntityIcon"
-        />
-      </StyledEntityCard>
-      <FunctionalButton onClick={handleCopyHash}>
-        <Icon name="copy" />
-        copy hash
-      </FunctionalButton>
-    </div>
-  )
-}
-
 export default function ManageInstance() {
   const {
     instance,
-    termsAndConditions,
     status,
     mappedKeys,
     nodeDetails,
@@ -105,15 +60,11 @@ export default function ManageInstance() {
     startDisabled,
     rebootDisabled,
     logs,
-    tabs,
     tabId,
     theme,
     handleStop,
     handleStart,
     handleReboot,
-    handleCopyHash,
-    handleCopyConnect,
-    handleCopyIpv6,
     handleDelete,
     handleBack,
     setTabId,
@@ -178,24 +129,11 @@ export default function ManageInstance() {
     buildVolumes()
   }, [volumes, volumeManager])
 
-  // const handleCopyVolumeHash = (hash: string) => {
-
-  // immutableVolumes.forEach((volume) => {
-  //   if (!volumeManager) return
-
-  //   volumeManager.get(volume.ref).then((v) => {
-  //     console.log('fetched volume', v)
-  //     console.log('mount path', v?.mountPath)
-  //   })
-  // })
-
   const name = useMemo(() => {
     if (!instance) return ''
 
     return (instance?.metadata?.name as string) || ellipseAddress(instance.id)
   }, [instance])
-
-  console.log('instance', instance)
 
   const [cost, setCost] = useState<number>()
 
@@ -328,96 +266,7 @@ export default function ManageInstance() {
         <div tw="w-full flex flex-wrap gap-x-24 gap-y-9 px-12 py-6">
           <div tw="flex-1 w-1/2 min-w-[32rem] flex flex-col gap-y-9">
             <div>
-              <div className="tp-h7 fs-24" tw="uppercase mb-2">
-                INSTANCE DETAILS
-              </div>
-              <NoisyContainer>
-                <div tw="flex gap-4">
-                  <ObjectImg
-                    id="Object11"
-                    color="main0"
-                    size="6rem"
-                    tw="min-w-[7rem] min-h-[7rem]"
-                  />
-                  <div tw="flex flex-col gap-4 w-full">
-                    <div tw="w-full">
-                      <div className="tp-info text-main0 fs-12">ITEM HASH</div>
-                      {instance ? (
-                        <IconText iconName="copy" onClick={handleCopyHash}>
-                          {instance.id}
-                        </IconText>
-                      ) : (
-                        <Skeleton width="100%" />
-                      )}
-                    </div>
-                    <div tw="flex flex-wrap gap-4">
-                      <div>
-                        <div className="tp-info text-main0 fs-12">CORES</div>
-                        <div>
-                          <Text tw="flex items-center gap-1">
-                            {instance?.resources ? (
-                              `${instance.resources.vcpus} x86 64bit`
-                            ) : (
-                              <Skeleton width="7rem" />
-                            )}
-                          </Text>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="tp-info text-main0 fs-12">RAM</div>
-                        <div>
-                          <Text>
-                            {instance?.resources ? (
-                              convertByteUnits(instance.resources.memory, {
-                                from: 'MiB',
-                                to: 'GiB',
-                                displayUnit: true,
-                              })
-                            ) : (
-                              <Skeleton width="4rem" />
-                            )}
-                          </Text>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="tp-info text-main0 fs-12">HDD</div>
-                        <div>
-                          <Text>
-                            {instance ? (
-                              convertByteUnits(instance.size, {
-                                from: 'MiB',
-                                to: 'GiB',
-                                displayUnit: true,
-                              })
-                            ) : (
-                              <Skeleton width="6rem" />
-                            )}
-                          </Text>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="tp-info text-main0 fs-12">EXPLORER</div>
-                      <div>
-                        {instance ? (
-                          <a
-                            className="tp-body1 fs-16"
-                            href={instance.url}
-                            target="_blank"
-                            referrerPolicy="no-referrer"
-                          >
-                            <IconText iconName="square-up-right">
-                              <Text>{ellipseText(instance.url, 80)}</Text>
-                            </IconText>
-                          </a>
-                        ) : (
-                          <Skeleton width="20rem" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </NoisyContainer>
+              <InstanceDetails instance={instance} />
             </div>
             <div>
               <div className="tp-h7 fs-24" tw="uppercase mb-2">
@@ -456,71 +305,10 @@ export default function ManageInstance() {
               </NoisyContainer>
             </div>
             <div>
-              <div className="tp-h7 fs-24" tw="uppercase mb-2">
-                SSH KEYS
-              </div>
-              <NoisyContainer>
-                <div tw="flex flex-wrap gap-4">
-                  {mappedKeys.length ? (
-                    mappedKeys.map(
-                      (sshKey) =>
-                        sshKey && (
-                          <StyledEntityCard
-                            key={sshKey?.id}
-                            // href={'?hash=' + key.id}
-                            onClick={() => {
-                              handleSSHKeyClick(sshKey)
-                            }}
-                          >
-                            {/* TODO: Change object to key image */}
-                            <ObjectImg
-                              id="Object9"
-                              color="base2"
-                              size="2.5rem"
-                              tw="min-w-[3rem] min-h-[3rem]"
-                            />
-                            <div>
-                              <div className="tp-info text-main0 fs-12">
-                                SSH KEY NAME
-                              </div>
-                              <Text>{sshKey.label}</Text>
-                            </div>
-                            <Icon
-                              name="eye"
-                              tw="absolute top-2 right-2"
-                              className="openEntityIcon"
-                            />
-                          </StyledEntityCard>
-                        ),
-                    )
-                  ) : (
-                    <div tw="flex items-center gap-6">
-                      <ObjectImg
-                        id="Object9"
-                        color="main0"
-                        size="2.5rem"
-                        tw="min-w-[3rem] min-h-[3rem]"
-                      />
-                      <div>
-                        <div className="tp-info text-main0 fs-12">
-                          SSH KEY NAME
-                        </div>
-                        <Text>
-                          <Skeleton width="9rem" />
-                        </Text>
-                      </div>
-                      <div>
-                        <div className="tp-info text-main0 fs-12">
-                          CREATED ON
-                        </div>
-                        <Text>
-                          <Skeleton width="14rem" />
-                        </Text>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </NoisyContainer>
+              <EntitySSHKeys
+                sshKeys={mappedKeys}
+                onSSHKeyClick={handleSSHKeyClick}
+              />
             </div>
             <div>
               <div className="tp-h7 fs-24" tw="uppercase mb-2">
@@ -544,174 +332,57 @@ export default function ManageInstance() {
           </div>
           <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">
             <div>
-              <div className="tp-h7 fs-24" tw="uppercase mb-2">
-                HOSTING CRN
-              </div>
-              <NoisyContainer>
-                <div tw="flex flex-col gap-4">
-                  <div tw="flex gap-4">
-                    <div>
-                      <div className="tp-info text-main0 fs-12">NAME</div>
-                      <div>
-                        <Text>
-                          {nodeDetails ? (
-                            nodeDetails.name
-                          ) : (
-                            <Skeleton width="7rem" />
-                          )}
-                        </Text>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="tp-info text-main0 fs-12">URL</div>
-                      <div>
-                        {nodeDetails ? (
-                          <a
-                            className="tp-body1 fs-16"
-                            href={nodeDetails.url}
-                            target="_blank"
-                            referrerPolicy="no-referrer"
-                          >
-                            <IconText iconName="square-up-right">
-                              <Text>{ellipseText(nodeDetails.url, 80)}</Text>
-                            </IconText>
-                          </a>
-                        ) : (
-                          <Skeleton width="12rem" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  {termsAndConditions && (
-                    <div>
-                      <div className="tp-info text-main0 fs-12">
-                        ACCEPTED T&C
-                      </div>
-                      <div>
-                        <a
-                          className="tp-body1 fs-16"
-                          href={`https://ipfs.aleph.im/ipfs/${termsAndConditions.cid}?filename=${termsAndConditions.name}`}
-                          target="_blank"
-                          referrerPolicy="no-referrer"
-                        >
-                          <IconText iconName="square-up-right">
-                            <Text>{termsAndConditions.name}</Text>
-                          </IconText>
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </NoisyContainer>
+              <EntityHostingCRN
+                nodeDetails={nodeDetails}
+                termsAndConditionsHash={
+                  instance?.requirements?.node?.terms_and_conditions
+                }
+              />
             </div>
             <div>
-              <div className="tp-h7 fs-24" tw="uppercase mb-2">
-                CONNECTION METHODS
-              </div>
-              <NoisyContainer>
-                <div tw="flex flex-col gap-4">
-                  <div>
-                    <div className="tp-info text-main0 fs-12">SSH COMMAND</div>
-                    <div>
-                      {status ? (
-                        <IconText iconName="copy" onClick={handleCopyConnect}>
-                          <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
-                        </IconText>
-                      ) : (
-                        <Skeleton width="20rem" />
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="tp-info text-main0 fs-12">IPV6</div>
-                    <div>
-                      {status ? (
-                        <IconText iconName="copy" onClick={handleCopyIpv6}>
-                          <Text>{status.ipv6Parsed}</Text>
-                        </IconText>
-                      ) : (
-                        <Skeleton width="10rem" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </NoisyContainer>
+              <EntityConnectionMethods executableStatus={status} />
             </div>
             {immutableVolumes.length > 0 && (
               <div>
-                <div className="tp-h7 fs-24" tw="uppercase mb-2">
-                  LINKED VOLUMES
-                </div>
-                <NoisyContainer>
-                  <div tw="flex flex-col gap-4">
-                    {immutableVolumes.map(
-                      (volume) =>
-                        volume && (
-                          <LinkedVolumeItem
-                            key={`linked-volume-${volume.id}`}
-                            volume={volume}
-                            onClick={() => handleImmutableVolumeClick(volume)}
-                          />
-                        ),
-                    )}
-                  </div>
-                </NoisyContainer>
+                <EntityLinkedVolumes
+                  linkedVolumes={immutableVolumes}
+                  onImmutableVolumeClick={handleImmutableVolumeClick}
+                />
               </div>
             )}
             {persistentVolumes.length > 0 && (
               <div>
-                <div className="tp-h7 fs-24" tw="uppercase mb-2">
-                  PERSISTENT STORAGE
-                </div>
-                <NoisyContainer>
-                  <div tw="flex gap-4">
-                    <ObjectImg
-                      id="Object16"
-                      color="main0"
-                      size="3rem"
-                      tw="min-w-[4rem] min-h-[4rem]"
-                    />
-                    <div tw="flex flex-wrap gap-4">
-                      {persistentVolumes.map(
-                        (volume, i) =>
-                          volume && (
-                            <div key={`persistent-volume-${i}`}>
-                              <div
-                                tw="flex gap-2 p-3 opacity-60"
-                                className="bg-base1"
-                              >
-                                <div tw="flex flex-col gap-1">
-                                  <div className="tp-info fs-12">
-                                    {volume.name}
-                                  </div>
-                                  <div className="tp-info">{volume.mount}</div>
-                                  <div tw="flex justify-between items-center gap-4">
-                                    <Text className="fs-12">
-                                      {humanReadableSize(
-                                        volume.size_mib,
-                                        'MiB',
-                                      )}
-                                    </Text>
-                                    {/* <Button
-                                    variant="functional"
-                                    size="sm"
-                                    onClick={() => {
-                                      alert('TODO: add edit link')
-                                    }}
-                                    className="text-main0"
-                                  >
-                                    <Icon name="edit" />
-                                  </Button> */}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ),
-                      )}
-                    </div>
-                  </div>
-                </NoisyContainer>
+                <EntityPersistentStorage
+                  persistentVolumes={persistentVolumes}
+                />
               </div>
+            )}
+            {streamDetails && (
+              <>
+                <Separator />
+
+                <TextGradient type="h7" as="h2" color="main0">
+                  Active streams
+                </TextGradient>
+
+                {!streamDetails.streams.length ? (
+                  <div tw="my-5">There are no active streams</div>
+                ) : (
+                  <div tw="my-5">
+                    {streamDetails.streams.length} active streams in{' '}
+                    <strong className="text-main0">
+                      {blockchains[streamDetails.blockchain].name}
+                    </strong>{' '}
+                    network
+                  </div>
+                )}
+
+                {streamDetails.streams.map((stream) => (
+                  <div key={`${stream.sender}:${stream.receiver}`} tw="my-5">
+                    <StreamSummary {...stream} />
+                  </div>
+                ))}
+              </>
             )}
             {streamDetails && (
               <>
