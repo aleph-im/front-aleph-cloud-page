@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { RefinementCtx, z } from 'zod'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import { messageHashSchema, paymentMethodSchema } from './base'
 import {
@@ -114,11 +114,15 @@ export const streamDurationSchema = z.object({
   unit: streamDurationUnitSchema,
 })
 
+export const systemVolumeSchema = z.object({
+  size: z.number().gt(0),
+})
+
 // INSTANCE
 
 export const instanceImageSchema = messageHashSchema
 
-export const instanceSchema = z
+export const instanceBaseSchema = z
   .object({
     paymentMethod: paymentMethodSchema,
     image: instanceImageSchema,
@@ -128,14 +132,18 @@ export const instanceSchema = z
     envVars: addEnvVarsSchema.optional(),
     domains: addDomainsSchema.optional(),
     metadata: metadataSchema.optional(),
-    systemVolumeSize: z.number().optional(),
+    systemVolume: systemVolumeSchema,
     payment: z.any().optional(),
     node: z.any().optional(),
     termsAndConditions: z.string().optional(),
   })
   .merge(addNameAndTagsSchema)
 
-export const instanceStreamSchema = instanceSchema
+export const instanceSchema = instanceBaseSchema.superRefine(
+  checkMinInstanceSystemVolumeSize,
+)
+
+export const instanceStreamSchema = instanceBaseSchema
   .merge(
     z.object({
       nodeSpecs: nodeSpecsSchema,
@@ -152,34 +160,58 @@ export const instanceStreamSchema = instanceSchema
       path: ['specs'],
     },
   )
-  .superRefine(async ({ nodeSpecs, specs, volumes = [] }, ctx) => {
-    let available = nodeSpecs.disk.available_kB / 1024
+  .superRefine(checkMinCRNRequirements)
+  .superRefine(checkMinInstanceSystemVolumeSize)
 
-    for (const [i, volume] of Object.entries(volumes)) {
-      const size = await VolumeManager.getVolumeSize(volume)
-      available -= size
+// REFINEMENTS
 
-      if (available < 0) {
-        const path =
-          volume.volumeType === VolumeType.Persistent
-            ? [`volumes.${i}.size`]
-            : volume.volumeType === VolumeType.Existing
-              ? [`volumes.${i}.refHash`]
-              : [`volumes.${i}.mountPath`]
+async function checkMinCRNRequirements(
+  { nodeSpecs, specs, volumes = [] }: any,
+  ctx: RefinementCtx,
+) {
+  let available = nodeSpecs.disk.available_kB / 1024
 
-        ctx.addIssue({
-          fatal: true,
-          code: z.ZodIssueCode.custom,
-          message: `${
-            nodeSpecs.name || 'The selected CRN'
-          } supports a maximum of ${humanReadableSize(
-            nodeSpecs.disk.available_kB / 1024 - specs.storage,
-            'MiB',
-          )} of additional storage.`,
-          path,
-        })
+  for (const [i, volume] of Object.entries<any>(volumes)) {
+    const size = await VolumeManager.getVolumeSize(volume)
+    available -= size
 
-        return z.NEVER
-      }
+    if (available < 0) {
+      const path =
+        volume.volumeType === VolumeType.Persistent
+          ? [`volumes.${i}.size`]
+          : volume.volumeType === VolumeType.Existing
+            ? [`volumes.${i}.refHash`]
+            : [`volumes.${i}.mountPath`]
+
+      ctx.addIssue({
+        fatal: true,
+        code: z.ZodIssueCode.custom,
+        message: `${
+          nodeSpecs.name || 'The selected CRN'
+        } supports a maximum of ${humanReadableSize(
+          nodeSpecs.disk.available_kB / 1024 - specs.storage,
+          'MiB',
+        )} of additional storage.`,
+        path,
+      })
+
+      return z.NEVER
     }
-  })
+  }
+}
+
+async function checkMinInstanceSystemVolumeSize(
+  { specs, systemVolume }: any,
+  ctx: RefinementCtx,
+) {
+  if (systemVolume.size < specs.storage) {
+    ctx.addIssue({
+      fatal: true,
+      code: z.ZodIssueCode.custom,
+      message: `System Volume size must be greater than ${humanReadableSize(specs.storage, 'MiB')}, or a lower tier should be selected instead`,
+      path: ['systemVolume.size'],
+    })
+
+    return z.NEVER
+  }
+}

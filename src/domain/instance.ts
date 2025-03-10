@@ -7,6 +7,7 @@ import {
   MachineVolume,
   MessageType,
   PaymentType,
+  RootfsVolumeConfiguration,
 } from '@aleph-sdk/message'
 import {
   defaultInstanceChannel,
@@ -25,7 +26,10 @@ import {
   StreamPaymentDetails,
   StreamPaymentDetail,
 } from './executable'
-import { VolumeField } from '@/hooks/form/useAddVolume'
+import {
+  InstanceSystemVolumeField,
+  VolumeField,
+} from '@/hooks/form/useAddVolume'
 import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
 import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
@@ -60,12 +64,14 @@ export type AddInstance = Omit<
   | 'volumes'
   | 'payment'
   | 'requirements'
+  | 'rootfs'
 > &
   NameAndTagsField & {
     image: InstanceImageField
     specs: InstanceSpecsField
     sshKeys: SSHKeyField[]
     volumes?: VolumeField[]
+    systemVolume: InstanceSystemVolumeField
     envVars?: EnvVarField[]
     domains?: Omit<DomainField, 'ref'>[]
     payment?: PaymentConfiguration
@@ -498,8 +504,9 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   ): Promise<InstancePublishConfiguration> {
     const { account, channel } = this
 
-    const { specs, image, node } = newInstance
+    const { specs, image, node, systemVolume } = newInstance
 
+    const rootfs = this.parseRootfs(image, systemVolume)
     const resources = this.parseSpecs(specs)
     const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
@@ -516,10 +523,20 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       account,
       channel,
       resources,
-      image,
+      rootfs,
       volumes,
       payment,
       requirements,
+    }
+  }
+
+  protected parseRootfs(
+    image: InstanceImageField,
+    systemVolume: InstanceSystemVolumeField,
+  ): RootfsVolumeConfiguration {
+    return {
+      parent: { ref: image },
+      size_mib: systemVolume.size,
     }
   }
 
@@ -534,8 +551,10 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
     const { account, channel } = this
 
-    const { envVars, specs, image, sshKeys, name, tags, node } = newInstance
+    const { envVars, specs, image, sshKeys, name, tags, node, systemVolume } =
+      newInstance
 
+    const rootfs = this.parseRootfs(image, systemVolume)
     const variables = this.parseEnvVars(envVars)
     const resources = this.parseSpecs(specs)
     const metadata = this.parseMetadata(name, tags)
@@ -550,7 +569,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       variables,
       resources,
       metadata,
-      image,
+      rootfs,
       authorized_keys,
       volumes,
       payment,
