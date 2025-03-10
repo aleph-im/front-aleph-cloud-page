@@ -39,13 +39,14 @@ export type UseExecutableActionsProps = {
   subscribeLogs?: boolean
 }
 
+export type NodeDetails = {
+  name: string
+  url: string
+}
+
 export type UseExecutableActionsReturn = {
   logs: UseRequestExecutableLogsFeedReturn
-  nodeDetails?: {
-    name: string
-    url: string
-  }
-  streamDetails?: StreamPaymentDetails
+  nodeDetails?: NodeDetails
   status?: ExecutableStatus
   isRunning: boolean
   stopDisabled: boolean
