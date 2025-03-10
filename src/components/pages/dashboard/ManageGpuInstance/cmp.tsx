@@ -11,6 +11,8 @@ import VolumeList from '../VolumeList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import LogsFeed from '../LogsFeed'
 import { useManageGpuInstance } from '@/hooks/pages/solutions/manage/useManageGpuInstance'
+import StreamSummary from '@/components/common/StreamSummary'
+import { blockchains } from '@/domain/connect/base'
 
 export default function ManageGpuInstance() {
   const {
@@ -19,6 +21,7 @@ export default function ManageGpuInstance() {
     status,
     mappedKeys,
     nodeDetails,
+    streamDetails,
     isRunning,
     stopDisabled,
     startDisabled,
@@ -319,6 +322,37 @@ export default function ManageGpuInstance() {
                           </a>
                         </div>
                       </div>
+                    </>
+                  )}
+
+                  {streamDetails && (
+                    <>
+                      <Separator />
+
+                      <TextGradient type="h7" as="h2" color="main0">
+                        Active streams
+                      </TextGradient>
+
+                      {!streamDetails.streams.length ? (
+                        <div tw="my-5">There are no active streams</div>
+                      ) : (
+                        <div tw="my-5">
+                          {streamDetails.streams.length} active streams in{' '}
+                          <strong className="text-main0">
+                            {blockchains[streamDetails.blockchain].name}
+                          </strong>{' '}
+                          network
+                        </div>
+                      )}
+
+                      {streamDetails.streams.map((stream) => (
+                        <div
+                          key={`${stream.sender}:${stream.receiver}`}
+                          tw="my-5"
+                        >
+                          <StreamSummary {...stream} />
+                        </div>
+                      ))}
                     </>
                   )}
 

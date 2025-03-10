@@ -82,6 +82,12 @@ export class ConfidentialManager
     throw new Error('Method not implemented.')
   }
 
+  async getStreamPaymentDetails(): Promise<undefined> {
+    // @note: Do not throw an error, just do nothing
+    // @todo: Move this method to the Executable base classs
+    return undefined
+  }
+
   async getAll(): Promise<Confidential[]> {
     try {
       const response = await this.sdkClient.getMessages({
