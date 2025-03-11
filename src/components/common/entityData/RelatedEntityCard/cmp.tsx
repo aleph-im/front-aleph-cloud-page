@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
+import { Icon } from '@aleph-front/core'
 import { RelatedEntityCardProps } from './types'
 import { StyledRelatedEntityCard } from './styles'
-import { Icon } from '@aleph-front/core'
 
 export const RelatedEntityCard = ({
   children,

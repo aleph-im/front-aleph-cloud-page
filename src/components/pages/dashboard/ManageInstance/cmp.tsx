@@ -4,6 +4,7 @@ import {
   Label,
   Logo,
   NoisyContainer,
+  TextGradient,
   Tooltip,
 } from '@aleph-front/core'
 import { Button, Icon } from '@aleph-front/core'
@@ -13,26 +14,29 @@ import {
   isVolumeEphemeral,
   isVolumePersistent,
 } from '@/helpers/utils'
-import { Text } from '../common'
-import LogsFeed from '../LogsFeed'
+import { Separator } from '../common'
 import BackButton from '@/components/common/BackButton'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ImmutableVolume } from '@aleph-sdk/message'
 import { useAppState } from '@/contexts/appState'
 import { Skeleton } from '@/components/common/Skeleton/cmp'
-import { StyledSliderContent } from './styles'
 import { SidePanel } from '@/components/common/SidePanel/cmp'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
 import { SSHKey } from '@/domain/ssh'
 import VolumeDetail from '@/components/common/VolumeDetail'
-import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
-import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
-import EntityConnectionMethods from '@/components/common/entityData/EntityConnectionMethods'
-import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolumes'
-import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
-import InstanceDetails from '@/components/common/entityData/InstanceDetails'
+import EntitySSHKeys from '@/components/common/EntityData/EntitySSHKeys'
+import EntityHostingCRN from '@/components/common/EntityData/EntityHostingCRN'
+import EntityConnectionMethods from '@/components/common/EntityData/EntityConnectionMethods'
+import EntityLinkedVolumes from '@/components/common/EntityData/EntityLinkedVolumes'
+import EntityPersistentStorage from '@/components/common/EntityData/EntityPersistentStorage'
+import InstanceDetails from '@/components/common/EntityData/InstanceDetails'
 import StreamSummary from '@/components/common/StreamSummary'
 import { blockchains } from '@/domain/connect/base'
+import {
+  EntityLogsContent,
+  EntityLogsControl,
+} from '@/components/common/EntityData/EntityLogs'
+import { Slide, Slider } from '@/components/common/Slider/cmp'
 
 export function FunctionalButton({ children, ...props }: ButtonProps) {
   return (
@@ -152,6 +156,10 @@ export default function ManageInstance() {
     fetchCost()
   }, [instance, instanceManager])
 
+  const sliderActiveIndex = useMemo(() => {
+    return tabId === 'log' ? 1 : 0
+  }, [tabId])
+
   const [openSidePanel, setOpenSidePanel] = useState(false)
   const [selectedVolume, setSelectedVolume] = useState<any | undefined>()
   const [selectedSSHKey, setSelectedSSHKey] = useState<SSHKey | undefined>()
@@ -261,178 +269,116 @@ export default function ManageInstance() {
         </div>
       </section>
       {/* Slider */}
-      <StyledSliderContent showLogs={tabId === 'log'}>
+      <Slider activeIndex={sliderActiveIndex}>
         {/* Instance Properties */}
-        <div tw="w-full flex flex-wrap gap-x-24 gap-y-9 px-12 py-6">
-          <div tw="flex-1 w-1/2 min-w-[32rem] flex flex-col gap-y-9">
-            <div>
-              <InstanceDetails instance={instance} />
-            </div>
-            <div>
-              <div className="tp-h7 fs-24" tw="uppercase mb-2">
-                LOGS
-              </div>
-              <NoisyContainer>
-                <div tw="flex flex-col gap-4">
-                  <div>
-                    <div className="tp-info text-main0 fs-12">INFO</div>
-                    <Text>
-                      Real-time logs of the of the virtual machine. Use this to
-                      debug any issue with the boot of your instance and to
-                      monitor the behavior of the your instance while it is
-                      running.
-                    </Text>
-                  </div>
-                  <div tw="flex flex-wrap gap-6">
-                    <FunctionalButton
-                      onClick={() => setTabId('log')}
-                      disabled={!instance}
-                    >
-                      <Icon name="eye" />
-                      view
-                    </FunctionalButton>
-                    <FunctionalButton
-                      onClick={() => {
-                        alert('TODO: add download logs')
-                      }}
-                      disabled={!instance}
-                    >
-                      <Icon name="download" />
-                      [WIP] download logs
-                    </FunctionalButton>
-                  </div>
-                </div>
-              </NoisyContainer>
-            </div>
-            <div>
-              <EntitySSHKeys
-                sshKeys={mappedKeys}
-                onSSHKeyClick={handleSSHKeyClick}
-              />
-            </div>
-            <div>
-              <div className="tp-h7 fs-24" tw="uppercase mb-2">
-                PAYMENT
-              </div>
-              <NoisyContainer>
-                <div tw="flex items-center gap-4">
-                  <div
-                    className="bg-main0 text-base0"
-                    tw="flex items-center gap-1 px-3 py-1"
-                  >
-                    <Logo img="aleph" color="base0" byAleph={false} />
-                    <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
-                  </div>
-                  <p className="text-base2 fs-18" tw="font-bold">
-                    {cost}
-                  </p>
-                </div>
-              </NoisyContainer>
-            </div>
-          </div>
-          <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">
-            <div>
-              <EntityHostingCRN
-                nodeDetails={nodeDetails}
-                termsAndConditionsHash={
-                  instance?.requirements?.node?.terms_and_conditions
-                }
-              />
-            </div>
-            <div>
-              <EntityConnectionMethods executableStatus={status} />
-            </div>
-            {immutableVolumes.length > 0 && (
+        <Slide>
+          <div tw="w-full flex flex-wrap gap-x-24 gap-y-9 px-12 py-6 transition-transform duration-1000">
+            <div tw="flex-1 w-1/2 min-w-[32rem] flex flex-col gap-y-9">
               <div>
-                <EntityLinkedVolumes
-                  linkedVolumes={immutableVolumes}
-                  onImmutableVolumeClick={handleImmutableVolumeClick}
+                <InstanceDetails instance={instance} />
+              </div>
+              <div>
+                <EntityLogsControl
+                  onViewLogs={() => setTabId('log')}
+                  onDownloadLogs={() => alert('TODO: add download logs')}
+                  disabled={!instance}
                 />
               </div>
-            )}
-            {persistentVolumes.length > 0 && (
               <div>
-                <EntityPersistentStorage
-                  persistentVolumes={persistentVolumes}
+                <EntitySSHKeys
+                  sshKeys={mappedKeys}
+                  onSSHKeyClick={handleSSHKeyClick}
                 />
               </div>
-            )}
-            {streamDetails && (
-              <>
-                <Separator />
-
-                <TextGradient type="h7" as="h2" color="main0">
-                  Active streams
-                </TextGradient>
-
-                {!streamDetails.streams.length ? (
-                  <div tw="my-5">There are no active streams</div>
-                ) : (
-                  <div tw="my-5">
-                    {streamDetails.streams.length} active streams in{' '}
-                    <strong className="text-main0">
-                      {blockchains[streamDetails.blockchain].name}
-                    </strong>{' '}
-                    network
+              <div>
+                <div className="tp-h7 fs-24" tw="uppercase mb-2">
+                  PAYMENT
+                </div>
+                <NoisyContainer>
+                  <div tw="flex items-center gap-4">
+                    <div
+                      className="bg-main0 text-base0"
+                      tw="flex items-center gap-1 px-3 py-1"
+                    >
+                      <Logo img="aleph" color="base0" byAleph={false} />
+                      <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
+                    </div>
+                    <p className="text-base2 fs-18" tw="font-bold">
+                      {cost}
+                    </p>
                   </div>
-                )}
+                </NoisyContainer>
+              </div>
+            </div>
+            <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">
+              <div>
+                <EntityHostingCRN
+                  nodeDetails={nodeDetails}
+                  termsAndConditionsHash={
+                    instance?.requirements?.node?.terms_and_conditions
+                  }
+                />
+              </div>
+              <div>
+                <EntityConnectionMethods executableStatus={status} />
+              </div>
+              {immutableVolumes.length > 0 && (
+                <div>
+                  <EntityLinkedVolumes
+                    linkedVolumes={immutableVolumes}
+                    onImmutableVolumeClick={handleImmutableVolumeClick}
+                  />
+                </div>
+              )}
+              {persistentVolumes.length > 0 && (
+                <div>
+                  <EntityPersistentStorage
+                    persistentVolumes={persistentVolumes}
+                  />
+                </div>
+              )}
+              {streamDetails && (
+                <>
+                  <Separator />
 
-                {streamDetails.streams.map((stream) => (
-                  <div key={`${stream.sender}:${stream.receiver}`} tw="my-5">
-                    <StreamSummary {...stream} />
-                  </div>
-                ))}
-              </>
-            )}
-            {streamDetails && (
-              <>
-                <Separator />
+                  <TextGradient type="h7" as="h2" color="main0">
+                    Active streams
+                  </TextGradient>
 
-                <TextGradient type="h7" as="h2" color="main0">
-                  Active streams
-                </TextGradient>
+                  {!streamDetails.streams.length ? (
+                    <div tw="my-5">There are no active streams</div>
+                  ) : (
+                    <div tw="my-5">
+                      {streamDetails.streams.length} active streams in{' '}
+                      <strong className="text-main0">
+                        {blockchains[streamDetails.blockchain].name}
+                      </strong>{' '}
+                      network
+                    </div>
+                  )}
 
-                {!streamDetails.streams.length ? (
-                  <div tw="my-5">There are no active streams</div>
-                ) : (
-                  <div tw="my-5">
-                    {streamDetails.streams.length} active streams in{' '}
-                    <strong className="text-main0">
-                      {blockchains[streamDetails.blockchain].name}
-                    </strong>{' '}
-                    network
-                  </div>
-                )}
-
-                {streamDetails.streams.map((stream) => (
-                  <div key={`${stream.sender}:${stream.receiver}`} tw="my-5">
-                    <StreamSummary {...stream} />
-                  </div>
-                ))}
-              </>
-            )}
+                  {streamDetails.streams.map((stream) => (
+                    <div key={`${stream.sender}:${stream.receiver}`} tw="my-5">
+                      <StreamSummary {...stream} />
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </Slide>
         {/* Instance Logs */}
-        <div tw="w-full flex px-12 py-6 gap-8">
-          <FunctionalButton onClick={() => setTabId('detail')}>
-            <Icon name="angle-left" size="1.3em" />
-          </FunctionalButton>
-          <div tw="w-full flex flex-col justify-center items-center gap-3">
-            <div className="tp-h7" tw="w-full text-center">
-              LOGS
-            </div>
-            <div tw="w-full max-w-3xl">
-              Real-time logs of the of the virtual machine. Use this to debug
-              any issue with the boot of your instance and to monitor the
-              behavior of the your instance while it is running.
-            </div>
-            <div tw="w-full">
-              <LogsFeed logs={logs} />
+        <Slide>
+          <div tw="w-full flex px-12 py-6 gap-8">
+            <FunctionalButton onClick={() => setTabId('detail')}>
+              <Icon name="angle-left" size="1.3em" />
+            </FunctionalButton>
+            <div tw="w-full flex flex-col justify-center items-center gap-3">
+              <EntityLogsContent logs={logs} />
             </div>
           </div>
-        </div>
-      </StyledSliderContent>
+        </Slide>
+      </Slider>
       <SidePanel
         title={sidePanelContentType === 'volume' ? 'Volume' : 'SSH Key'}
         isOpen={openSidePanel}
