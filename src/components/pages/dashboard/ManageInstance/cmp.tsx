@@ -31,7 +31,7 @@ import EntityLinkedVolumes from '@/components/common/EntityData/EntityLinkedVolu
 import EntityPersistentStorage from '@/components/common/EntityData/EntityPersistentStorage'
 import InstanceDetails from '@/components/common/EntityData/InstanceDetails'
 import StreamSummary from '@/components/common/StreamSummary'
-import { blockchains } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
 import {
   EntityLogsContent,
   EntityLogsControl,
@@ -58,7 +58,16 @@ export default function ManageInstance() {
     status,
     mappedKeys,
     nodeDetails,
-    streamDetails,
+    streamDetails = {
+      blockchain: BlockchainId.ETH,
+      streams: [
+        {
+          sender: '0xFa2206BEd6daD6d84bb0126f752FD22FEBC6a87f',
+          receiver: '0x5f78199cd833c1dc1735bee4a7416caaE58Facca',
+          flow: 0.004,
+        },
+      ],
+    },
     isRunning,
     stopDisabled,
     startDisabled,
