@@ -186,8 +186,8 @@ export default function CRNList(props: CRNListProps) {
       const { hash, selectedGpu } = node
 
       const isActive =
-        `${hash}-${selectedGpu?.device_id}` ===
-        `${selected?.hash}-${selected?.selectedGpu?.device_id}`
+        `${hash}-${selectedGpu?.device_id}-${selectedGpu?.pci_host}` ===
+        `${selected?.hash}-${selected?.selectedGpu?.device_id}-${selected?.selectedGpu?.pci_host}`
       const issue = nodesIssues?.[hash]
       const isLoading = issue === undefined
       const disabled = !isLoading && !!issue
