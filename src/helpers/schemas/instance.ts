@@ -21,6 +21,7 @@ export const gpuDeviceSchema = z.object({
   device_name: z.string(),
   device_class: z.string(),
   device_id: z.string(),
+  pci_host: z.string(),
   compatible: z.boolean(),
 })
 
