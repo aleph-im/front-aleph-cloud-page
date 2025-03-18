@@ -474,7 +474,10 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       streamCostByHourToCommunity,
     )
 
-    if (receiverTotalFlow.greaterThan(1) || communityTotalFlow.greaterThan(1))
+    if (
+      receiverTotalFlow.greaterThan(100) ||
+      communityTotalFlow.greaterThan(100)
+    )
       throw Err.MaxFlowRate
 
     const totalAlephxFlow = recieverAlephxFlow.add(communityAlephxFlow)
