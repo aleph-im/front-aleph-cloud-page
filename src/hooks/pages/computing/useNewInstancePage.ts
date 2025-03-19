@@ -70,6 +70,7 @@ import useFetchTermsAndConditions, {
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
 import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
 import usePrevious from '@/hooks/common/usePrevious'
+import { useCanAfford } from '@/hooks/common/useCanAfford'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -407,13 +408,17 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return !!manuallySelectCRNDisabledMessage
   }, [manuallySelectCRNDisabledMessage])
 
+  const { canAfford, isCreateButtonDisabled } = useCanAfford({
+    cost,
+    accountBalance,
+  })
+
   // Checks if user can afford with current balance
   const hasEnoughBalance = useMemo(() => {
     if (!account) return false
-    if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') return true
-
-    return accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
-  }, [account, accountBalance, cost?.cost])
+    if (!isCreateButtonDisabled) return true
+    return canAfford
+  }, [account, canAfford, isCreateButtonDisabled])
 
   const createInstanceDisabledMessage: UseNewInstancePageReturn['createInstanceDisabledMessage'] =
     useMemo(() => {

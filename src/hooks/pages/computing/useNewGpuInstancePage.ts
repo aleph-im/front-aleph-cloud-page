@@ -68,6 +68,7 @@ import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
 import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceManager'
 import { GpuInstanceManager } from '@/domain/gpuInstance'
 import usePrevious from '@/hooks/common/usePrevious'
+import { useCanAfford } from '@/hooks/common/useCanAfford'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -368,13 +369,17 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
 
   const address = useMemo(() => account?.address || '', [account])
 
+  const { canAfford, isCreateButtonDisabled } = useCanAfford({
+    cost,
+    accountBalance,
+  })
+
   // Checks if user can afford with current balance
   const hasEnoughBalance = useMemo(() => {
     if (!account) return false
-    if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') return true
-
-    return accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
-  }, [account, accountBalance, cost?.cost])
+    if (!isCreateButtonDisabled) return true
+    return canAfford
+  }, [account, canAfford, isCreateButtonDisabled])
 
   const createInstanceDisabledMessage: UseNewGpuInstancePageReturn['createInstanceDisabledMessage'] =
     useMemo(() => {

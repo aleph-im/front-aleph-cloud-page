@@ -26,6 +26,7 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 import { BlockchainId } from '@/domain/connect/base'
+import { useCanAfford } from '@/hooks/common/useCanAfford'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {
@@ -121,11 +122,10 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
 
   const cost = useEntityCost(costProps)
 
-  const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
-  let isCreateButtonDisabled = !canAfford || !values.framework || !values.name
-  if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
-    isCreateButtonDisabled = false
-  }
+  const { isCreateButtonDisabled } = useCanAfford({
+    cost,
+    accountBalance,
+  })
 
   const handleBack = () => {
     router.push('.')
