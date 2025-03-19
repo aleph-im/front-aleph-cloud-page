@@ -265,30 +265,26 @@ export function useExecutableActions({
 
   // ------------------------------
 
+  const paymentAddress = executable?.address
+  const paymentBlockchain = executable?.payment?.chain as BlockchainId
+
   const { data: streamDetails } = useLocalRequest({
     doRequest: async () => {
       if (!manager) return
       if (!executable) return
-
-      const address = executable?.address
-      const blockchain = executable?.payment?.chain as BlockchainId
-
-      if (!address) return
-      if (!blockchain) return
+      if (!isPAYG) return
+      if (!paymentAddress) return
+      if (!paymentBlockchain) return
 
       // @todo: Refactor this in the sdk
-      const evmAccount = new StaticEVMAccount(address, blockchain)
+      const evmAccount = new StaticEVMAccount(paymentAddress, paymentBlockchain)
 
       return manager.getStreamPaymentDetails(executable, evmAccount)
     },
     onSuccess: () => null,
     flushData: true,
     triggerOnMount: true,
-    triggerDeps: [
-      executable?.id,
-      executable?.address,
-      executable?.payment?.chain,
-    ],
+    triggerDeps: [executable?.id, isPAYG, paymentAddress, paymentBlockchain],
   })
 
   // ------------------------------
