@@ -531,3 +531,20 @@ export function convertKeysToCamelCase(data: any): any {
 
   return data
 }
+
+export async function consumeIterator<S, R>(
+  iterator: AsyncGenerator<S, R, void>,
+) {
+  let result
+
+  while (!result) {
+    const { value, done } = await iterator.next()
+
+    if (done) {
+      result = value
+      break
+    }
+  }
+
+  return result
+}

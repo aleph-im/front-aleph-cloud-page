@@ -15,7 +15,7 @@ import {
   EXTRA_WEI,
   PaymentMethod,
 } from '@/helpers/constants'
-import { getDate, getExplorerURL } from '@/helpers/utils'
+import { consumeIterator, getDate, getExplorerURL } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
@@ -514,13 +514,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
     const volumesSteps = this.parseVolumesSteps(newInstance.volumes, true)
-
-    let volumes: MachineVolume[] = []
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for await (const volumeStep of volumesSteps) {
-      // Do nothing. Consume iterator
-      volumes = volumeStep as unknown as MachineVolume[]
-    }
+    const volumes = (await consumeIterator(volumesSteps)) || []
 
     return {
       account,

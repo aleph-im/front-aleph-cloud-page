@@ -16,7 +16,12 @@ import {
   defaultVMURL,
   programStorageURL,
 } from '@/helpers/constants'
-import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
+import {
+  consumeIterator,
+  downloadBlob,
+  getDate,
+  getExplorerURL,
+} from '@/helpers/utils'
 import { MachineVolume, MessageType, StoreMessage } from '@aleph-sdk/message'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { ExecutableManager, PaymentConfiguration } from './executable'
@@ -335,19 +340,14 @@ export class ProgramManager
     const runtime = this.parseRuntime(newProgram)
     const payment = this.parsePayment(newProgram.payment)
     const volumesSteps = this.parseVolumesSteps(newProgram.volumes, true)
+    const volumes = (await consumeIterator(volumesSteps)) || []
+
     // @fix: FAKE CODE TO MAKE IT WORK WITH THE ESTIMATES
     const code = {
       encoding: Encoding.zip,
       entrypoint: 'main:app',
       programRef:
         '79f19811f8e843f37ff7535f634b89504da3d8f03e1f0af109d1791cf6add7af',
-    }
-
-    let volumes: MachineVolume[] = []
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for await (const volumeStep of volumesSteps) {
-      // Do nothing. Consume iterator
-      volumes = volumeStep as unknown as MachineVolume[]
     }
 
     return {
