@@ -9,6 +9,7 @@ import { ExecutableStatus } from '@/domain/executable'
 import { useAttachedVolumes } from '@/hooks/common/useAttachedVolumes'
 import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
 import { useConfidentialManager } from '@/hooks/common/useManager/useConfidentialManager'
+import { GpuInstance } from '@/domain/gpuInstance'
 
 export type AmountAggregatedStatus = {
   amount: number
@@ -30,9 +31,9 @@ export type InstancesAggregatedStatus = {
   total: ComputingAggregatedStatus
 }
 
-export type ConfidentialsAggregatedStatus = {
-  total: ComputingAggregatedStatus
-}
+export type GupInstancesAggregatedStatus = InstancesAggregatedStatus
+
+export type ConfidentialsAggregatedStatus = InstancesAggregatedStatus
 
 export type ProgramsAggregatedStatus = {
   persistent: ComputingAggregatedStatus
@@ -53,6 +54,7 @@ export type VolumesAggregatedStatus = {
 export type UseDashboardPageReturn = {
   programAggregatedStatus: ProgramsAggregatedStatus
   instanceAggregatedStatus: InstancesAggregatedStatus
+  gpuInstanceAggregatedStatus: GupInstancesAggregatedStatus
   confidentialsAggregatedStatus: ConfidentialsAggregatedStatus
   volumesAggregatedStatus: VolumesAggregatedStatus
   websitesAggregatedStatus: WebsitesAggregatedStatus
@@ -63,7 +65,7 @@ function calculateComputingAggregatedStatus({
   entities,
   entitiesStatus,
 }: {
-  entities: Program[] | Instance[]
+  entities: Program[] | Instance[] | GpuInstance[]
   entitiesStatus: Record<string, RequestState<ExecutableStatus>>
 }) {
   return entities.reduce(
@@ -93,8 +95,14 @@ export function useDashboardPage(): UseDashboardPageReturn {
 
   const { confidentials: confidentialsAuthz } = useAuthorization()
 
-  const { programs, instances, confidentials, websites, volumes } =
-    useAccountEntities()
+  const {
+    programs,
+    instances,
+    gpuInstances,
+    confidentials,
+    websites,
+    volumes,
+  } = useAccountEntities()
 
   const { status: programsStatus } = useRequestExecutableStatus({
     entities: programs,
@@ -102,6 +110,10 @@ export function useDashboardPage(): UseDashboardPageReturn {
 
   const { status: instancesStatus } = useRequestExecutableStatus({
     entities: instances,
+  })
+
+  const { status: gpuInstancesStatus } = useRequestExecutableStatus({
+    entities: gpuInstances,
   })
 
   const { status: confidentialsStatus } = useRequestExecutableStatus({
@@ -135,6 +147,15 @@ export function useDashboardPage(): UseDashboardPageReturn {
     }
   }, [instancesStatus, instances])
 
+  const gpuInstanceAggregatedStatus = useMemo(() => {
+    return {
+      total: calculateComputingAggregatedStatus({
+        entities: gpuInstances,
+        entitiesStatus: gpuInstancesStatus,
+      }),
+    }
+  }, [gpuInstancesStatus, gpuInstances])
+
   // @todo: Check if this is correct
   const confidentialsAggregatedStatus = useMemo(() => {
     return {
@@ -156,6 +177,7 @@ export function useDashboardPage(): UseDashboardPageReturn {
   return {
     programAggregatedStatus,
     instanceAggregatedStatus,
+    gpuInstanceAggregatedStatus,
     confidentialsAggregatedStatus,
     volumesAggregatedStatus,
     websitesAggregatedStatus,
