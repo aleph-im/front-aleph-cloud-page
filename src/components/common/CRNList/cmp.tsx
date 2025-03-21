@@ -135,17 +135,17 @@ export default function CRNList(props: CRNListProps) {
             />
           ),
         },
-        {
-          label: 'PRICE',
-          width: '20%',
-          sortable: true,
-          sortBy: () => 0.11,
-          render: () => (
-            <div tw="flex items-center gap-1 whitespace-nowrap">
-              <Price value={0.11} /> per unit / h
-            </div>
-          ),
-        },
+        // {
+        //   label: 'PRICE',
+        //   width: '20%',
+        //   sortable: true,
+        //   sortBy: () => 0.11,
+        //   render: () => (
+        //     <div tw="flex items-center gap-1 whitespace-nowrap">
+        //       <Price value={0.11} /> per unit / h
+        //     </div>
+        //   ),
+        // },
         {
           label: '',
           align: 'right',

@@ -4,7 +4,6 @@ import {
   HostRequirements,
   InstanceContent,
   InstancePublishConfiguration,
-  MachineVolume,
   MessageType,
   PaymentType,
   RootfsVolumeConfiguration,
@@ -15,7 +14,7 @@ import {
   EXTRA_WEI,
   PaymentMethod,
 } from '@/helpers/constants'
-import { consumeIterator, getDate, getExplorerURL } from '@/helpers/utils'
+import { getDate, getExplorerURL } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
@@ -512,9 +511,10 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const rootfs = this.parseRootfs(image, systemVolume)
     const resources = this.parseSpecs(specs)
     const requirements = this.parseRequirements(node)
-    const payment = this.parsePayment(newInstance.payment)
-    const volumesSteps = this.parseVolumesSteps(newInstance.volumes, true)
-    const volumes = (await consumeIterator(volumesSteps)) || []
+    const payment = this.parsePaymentForCostEstimation(newInstance.payment)
+    const volumes = await this.parseVolumesForCostEstimation(
+      newInstance.volumes,
+    )
 
     return {
       account,
@@ -558,7 +558,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
     const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
-    const volumes = yield* this.parseVolumesSteps(newInstance.volumes, false)
+    const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
 
     return {
       account,
@@ -572,16 +572,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       payment,
       requirements,
     }
-  }
-
-  protected async *parseVolumesSteps(
-    volumes?: VolumeField | VolumeField[],
-    estimateCost?: boolean,
-  ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
-    if (!volumes) return
-    volumes = Array.isArray(volumes) ? volumes : [volumes]
-
-    return yield* super.parseVolumesSteps(volumes, estimateCost)
   }
 
   protected async *parseSSHKeysSteps(

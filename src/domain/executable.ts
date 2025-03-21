@@ -13,17 +13,24 @@ import {
   Payment,
   PaymentType,
   PaymentType as SDKPaymentType,
+  VolumePersistence,
 } from '@aleph-sdk/message'
 import {
   AddExistingVolume,
   AddPersistentVolume,
+  mockVolumeMountPath,
+  mockVolumeName,
   mockVolumeRef,
   VolumeManager,
   VolumeType,
 } from './volume'
 import { Account } from '@aleph-sdk/account'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
-import { VolumeField } from '@/hooks/form/useAddVolume'
+import {
+  NewVolumeField,
+  NewVolumeStandaloneField,
+  VolumeField,
+} from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { Domain, DomainManager } from './domain'
 import {
@@ -542,9 +549,53 @@ export abstract class ExecutableManager<T extends Executable> {
     return yield* this.domainManager.addSteps(parsedDomains, 'ignore')
   }
 
+  protected async parseVolumesForCostEstimation(
+    volumes?: VolumeField | VolumeField[],
+  ): Promise<MachineVolume[] | undefined> {
+    if (!volumes) return
+
+    volumes = Array.isArray(volumes) ? volumes : [volumes]
+    if (volumes.length === 0) return
+
+    return await Promise.all(
+      volumes.map(async (volume) => {
+        switch (volume.volumeType) {
+          case VolumeType.New: {
+            const vol = volume as NewVolumeField
+            const estimated_size_mib = await VolumeManager.getVolumeSize(volume)
+
+            return {
+              ref: mockVolumeRef,
+              use_latest: vol.useLatest || false,
+              mount: vol.mountPath || mockVolumeMountPath,
+              estimated_size_mib,
+            }
+          }
+          case VolumeType.Existing: {
+            const estimated_size_mib = await VolumeManager.getVolumeSize(volume)
+
+            return {
+              ref: volume.refHash || mockVolumeRef,
+              use_latest: volume.useLatest || false,
+              mount: volume.mountPath || mockVolumeMountPath,
+              estimated_size_mib,
+            }
+          }
+          case VolumeType.Persistent: {
+            return {
+              persistence: VolumePersistence.host,
+              name: volume.name || mockVolumeName,
+              mount: volume.mountPath || mockVolumeMountPath,
+              size_mib: volume.size || 0,
+            }
+          }
+        }
+      }),
+    )
+  }
+
   protected async *parseVolumesSteps(
     volumes?: VolumeField | VolumeField[],
-    estimateCost?: boolean,
   ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
     if (!volumes) return
 
@@ -552,10 +603,7 @@ export abstract class ExecutableManager<T extends Executable> {
     if (volumes.length === 0) return
 
     // @note: Create new volumes before and cast them to ExistingVolume type
-    console.log('estimateCost', estimateCost)
-    const messages = !estimateCost
-      ? yield* this.volumeManager.addSteps(volumes)
-      : []
+    const messages = yield* this.volumeManager.addSteps(volumes)
 
     const parsedVolumes: (AddExistingVolume | AddPersistentVolume)[] =
       await Promise.all(
@@ -579,7 +627,7 @@ export abstract class ExecutableManager<T extends Executable> {
         const { mountPath: mount, size: size_mib, name } = volume
 
         return {
-          persistence: 'host',
+          persistence: VolumePersistence.host,
           mount,
           size_mib,
           name,
@@ -621,6 +669,23 @@ export abstract class ExecutableManager<T extends Executable> {
     return {
       ...metadata,
       ...out,
+    }
+  }
+
+  protected parsePaymentForCostEstimation(
+    payment?: PaymentConfiguration,
+  ): Payment {
+    if (payment?.type === PaymentMethod.Stream) {
+      return {
+        chain: payment.chain,
+        type: SDKPaymentType.superfluid,
+        receiver: payment.receiver,
+      }
+    } else {
+      return {
+        chain: payment?.chain || BlockchainId.ETH,
+        type: SDKPaymentType.hold,
+      }
     }
   }
 

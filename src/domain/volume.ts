@@ -31,6 +31,10 @@ import { CostLine, CostSummary } from './cost'
 export const mockVolumeRef =
   'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe'
 
+export const mockVolumeMountPath = '/mocked-mount-path'
+
+export const mockVolumeName = 'mock-name'
+
 export { VolumeType }
 
 export type AddNewVolume = {
