@@ -31,12 +31,13 @@ import EntityLinkedVolumes from '@/components/common/EntityData/EntityLinkedVolu
 import EntityPersistentStorage from '@/components/common/EntityData/EntityPersistentStorage'
 import InstanceDetails from '@/components/common/EntityData/InstanceDetails'
 import StreamSummary from '@/components/common/StreamSummary'
-import { blockchains } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
 import {
   EntityLogsContent,
   EntityLogsControl,
 } from '@/components/common/EntityData/EntityLogs'
 import { Slide, Slider } from '@/components/common/Slider/cmp'
+import EntityPayment from '@/components/common/entityData/EntityPayment'
 
 export function FunctionalButton({ children, ...props }: ButtonProps) {
   return (
@@ -58,7 +59,16 @@ export default function ManageInstance() {
     status,
     mappedKeys,
     nodeDetails,
-    streamDetails,
+    streamDetails = {
+      blockchain: BlockchainId.ETH,
+      streams: [
+        {
+          sender: '0xFa2206BEd6daD6d84bb0126f752FD22FEBC6a87f',
+          receiver: '0x5f78199cd833c1dc1735bee4a7416caaE58Facca',
+          flow: 0.004,
+        },
+      ],
+    },
     isRunning,
     stopDisabled,
     startDisabled,
@@ -291,23 +301,7 @@ export default function ManageInstance() {
                 />
               </div>
               <div>
-                <div className="tp-h7 fs-24" tw="uppercase mb-2">
-                  PAYMENT
-                </div>
-                <NoisyContainer>
-                  <div tw="flex items-center gap-4">
-                    <div
-                      className="bg-main0 text-base0"
-                      tw="flex items-center gap-1 px-3 py-1"
-                    >
-                      <Logo img="aleph" color="base0" byAleph={false} />
-                      <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
-                    </div>
-                    <p className="text-base2 fs-18" tw="font-bold">
-                      {cost}
-                    </p>
-                  </div>
-                </NoisyContainer>
+                <EntityPayment cost={cost} />
               </div>
             </div>
             <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">

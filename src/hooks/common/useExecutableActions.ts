@@ -53,6 +53,7 @@ export type UseExecutableActionsReturn = {
   startDisabled: boolean
   rebootDisabled: boolean
   logsDisabled: boolean
+  streamDetails?: StreamPaymentDetails
   handleStop: () => void
   handleStart: () => void
   handleReboot: () => void
