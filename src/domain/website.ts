@@ -25,6 +25,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import { CostLine, CostSummary } from './cost'
+import { mockAccount } from './account'
 
 export { WebsiteFrameworkId }
 
@@ -643,8 +644,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
 
     const fileObject = new Blob(website.folder)
 
+    const { account = mockAccount } = this
+
     const costs = await this.sdkClient.storeClient.getEstimatedCost({
-      account: this.account,
+      account,
       fileObject,
     })
 

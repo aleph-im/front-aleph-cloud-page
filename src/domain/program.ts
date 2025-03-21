@@ -37,6 +37,11 @@ import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
 import { NodeManager } from './node'
 import { CostSummary } from './cost'
+import { mockAccount } from './account'
+
+export const mockProgramRef =
+  '79f19811f8e843f37ff7535f634b89504da3d8f03e1f0af109d1791cf6add7af'
+export const mockEntrypoint = 'main:app'
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -289,9 +294,8 @@ export class ProgramManager
     // @todo: calculate estimated_size_mib for code volume
     return {
       encoding: Encoding.zip,
-      entrypoint: 'main:app',
-      programRef:
-        '79f19811f8e843f37ff7535f634b89504da3d8f03e1f0af109d1791cf6add7af',
+      entrypoint: code.entrypoint || mockEntrypoint,
+      programRef: mockProgramRef,
     }
   }
 
@@ -338,8 +342,7 @@ export class ProgramManager
   protected async parseProgramForCostEstimation(
     newProgram: AddProgram,
   ): Promise<ProgramPublishConfiguration> {
-    const { account, channel } = this
-
+    const { account = mockAccount, channel } = this
     const { isPersistent, specs } = newProgram
 
     const parsedSpecs = this.parseSpecs(specs)

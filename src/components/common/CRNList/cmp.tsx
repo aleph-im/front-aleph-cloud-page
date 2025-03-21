@@ -19,7 +19,6 @@ import { humanReadableSize } from '@/helpers/utils'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
-import Price from '@/components/common/Price'
 import { CRNItem, CRNListProps } from './types'
 
 export default function CRNList(props: CRNListProps) {

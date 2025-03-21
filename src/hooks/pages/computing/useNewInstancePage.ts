@@ -189,7 +189,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const onSubmit = useCallback(
     async (state: NewInstanceFormState) => {
-      console.log(state)
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
 

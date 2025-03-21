@@ -52,6 +52,7 @@ import Err from '@/helpers/errors'
 import { CostManager, CostSummary } from './cost'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { BlockchainId } from './connect/base'
+import { mockAccount } from './account'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -506,8 +507,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   protected async parseInstanceForCostEstimation(
     newInstance: AddInstance,
   ): Promise<InstancePublishConfiguration> {
-    const { account, channel } = this
-
+    const { account = mockAccount, channel } = this
     const { specs, image, node, systemVolume } = newInstance
 
     const rootfs = this.parseRootfs(image, systemVolume)

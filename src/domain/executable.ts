@@ -26,11 +26,7 @@ import {
 } from './volume'
 import { Account } from '@aleph-sdk/account'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
-import {
-  NewVolumeField,
-  NewVolumeStandaloneField,
-  VolumeField,
-} from '@/hooks/form/useAddVolume'
+import { NewVolumeField, VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { Domain, DomainManager } from './domain'
 import {

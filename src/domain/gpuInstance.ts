@@ -61,7 +61,6 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
   ): HostRequirements | undefined {
     const requirements = super.parseRequirements(node)
 
-    console.log('parsing requirements', node, requirements)
     if (!node) return requirements
 
     const { selectedGpu } = node
