@@ -175,16 +175,6 @@ export abstract class ExecutableManager<T extends Executable> {
     const node = await this.getAllocationCRN(executable)
     if (!node) return
 
-    return {
-      hash: executable.id,
-      ipv4: '172.16.4.0/24',
-      ipv6: '2a01:4f8:162:303:1:63fa:f8b5:db10/124',
-      ipv6Parsed: this.formatVMIPv6Address(
-        '2a01:4f8:162:303:1:63fa:f8b5:db10/124',
-      ),
-      node: node,
-    }
-
     const { address } = node
     if (!address) throw Err.InvalidCRNAddress
 
@@ -212,31 +202,6 @@ export abstract class ExecutableManager<T extends Executable> {
   }
 
   async getAllocationCRN(executable: T): Promise<CRN | undefined> {
-    return {
-      hash: 'e9423d9f9fd27cdc9c4c27d5cf3120ef573eece260d44e6df76b3c27569a3154',
-      name: 'Nergame GPU 02',
-      time: 1734453024.6,
-      type: 'compute',
-      owner: '0xA07B1214bAe0D5ccAA25449C3149c0aC83658874',
-      score: 0,
-      banner: '',
-      locked: false,
-      parent: null,
-      reward: '0xA07B1214bAe0D5ccAA25449C3149c0aC83658874',
-      status: 'waiting',
-      address: 'https://gpu-test-02.nergame.app/',
-      manager: '',
-      picture: '',
-      authorized: [],
-      description: "This is a test CRN, please don't use it",
-      performance: 0.8286876917392401,
-      score_updated: true,
-      stream_reward: '0xA07B1214bAe0D5ccAA25449C3149c0aC83658874',
-      decentralization: 0.8283948716057791,
-      registration_url: '',
-      terms_and_conditions:
-        'a5e9c41304c53cef9764c87e66f70e822934e2111ee0eb33a063102af8a06180',
-    }
     if (executable.payment?.type === PaymentType.superfluid) {
       const { receiver } = executable.payment
       if (!receiver) return
