@@ -55,11 +55,11 @@ export function FunctionalButton({ children, ...props }: ButtonProps) {
 
 export default function ManageInstance() {
   const {
-    instance,
+    instance: originalInstance,
     status,
     mappedKeys,
     nodeDetails,
-    streamDetails = {
+    C: originalStreamDetails = {
       blockchain: BlockchainId.ETH,
       streams: [
         {
@@ -83,6 +83,44 @@ export default function ManageInstance() {
     handleBack,
     setTabId,
   } = useManageInstance()
+
+  // Mock data for testing stream payment UI
+  // Set this to true to test with mock data
+  const useMockData = true
+
+  // Create a mock instance with stream payment type
+  const mockInstance = useMockData
+    ? {
+        ...originalInstance,
+        payment: {
+          type: 'stream',
+          amount: 0,
+        },
+        // Set instance creation time to 3 days ago
+        time: Date.now() - 3 * 24 * 60 * 60 * 1000,
+      }
+    : originalInstance
+
+  // Use the mock or original instance
+  const instance = mockInstance
+
+  // Enhanced stream details for testing
+  const streamDetails = useMemo(
+    () =>
+      useMockData
+        ? {
+            blockchain: BlockchainId.ETH,
+            streams: [
+              {
+                sender: '0xFa2206BEd6daD6d84bb0126f752FD22FEBC6a87f',
+                receiver: '0x5f78199cd833c1dc1735bee4a7416caaE58Facca',
+                flow: 0.025, // 0.025 ALEPH per hour
+              },
+            ],
+          }
+        : originalStreamDetails,
+    [originalStreamDetails, useMockData],
+  )
 
   const labelVariant = useMemo(() => {
     if (!instance) return 'warning'
@@ -155,16 +193,23 @@ export default function ManageInstance() {
     const fetchCost = async () => {
       if (!instance?.payment) return
 
-      const fetchedCost = await instanceManager?.getTotalCostByHash(
-        instance.payment.type,
-        instance.id,
-      )
-
-      setCost(fetchedCost)
+      // For mock stream data, calculate the cost based on time and hourly rate
+      if (useMockData && instance.payment.type === 'stream') {
+        const runningTimeHours = (Date.now() - instance.time) / (1000 * 60 * 60)
+        const hourlyRate = streamDetails.streams[0].flow
+        const mockTotalCost = hourlyRate * runningTimeHours
+        setCost(mockTotalCost)
+      } else {
+        const fetchedCost = await instanceManager?.getTotalCostByHash(
+          instance.payment.type,
+          instance.id,
+        )
+        setCost(fetchedCost)
+      }
     }
 
     fetchCost()
-  }, [instance, instanceManager])
+  }, [instance, instanceManager, useMockData, streamDetails])
 
   const sliderActiveIndex = useMemo(() => {
     return tabId === 'log' ? 1 : 0
@@ -301,7 +346,25 @@ export default function ManageInstance() {
                 />
               </div>
               <div>
-                <EntityPayment cost={cost} />
+                {instance?.payment?.type === 'stream' ? (
+                  <EntityPayment
+                    paymentType="stream"
+                    costPerHour={streamDetails?.streams?.[0]?.flow}
+                    runningTime={
+                      instance?.time
+                        ? Math.floor((Date.now() - instance.time) / 1000)
+                        : undefined
+                    }
+                    totalSpent={cost}
+                    startTime={instance?.time}
+                  />
+                ) : (
+                  <EntityPayment
+                    paymentType="holding"
+                    cost={cost}
+                    startTime={instance?.time}
+                  />
+                )}
               </div>
             </div>
             <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">
