@@ -51,7 +51,6 @@ import {
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
 import { CostManager, CostSummary } from './cost'
-import { Blockchain } from '@aleph-sdk/core'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { BlockchainId } from './connect/base'
 

@@ -9,7 +9,7 @@ import {
 } from '@/helpers/utils'
 import BackButton from '@/components/common/BackButton'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ImmutableVolume, PaymentType } from '@aleph-sdk/message'
+import { ImmutableVolume } from '@aleph-sdk/message'
 import { useAppState } from '@/contexts/appState'
 import { Skeleton } from '@/components/common/Skeleton/cmp'
 import { SidePanel } from '@/components/common/SidePanel/cmp'
@@ -49,7 +49,6 @@ export default function ManageInstance() {
     status,
     mappedKeys,
     nodeDetails,
-    streamDetails,
     isRunning,
     stopDisabled,
     startDisabled,
@@ -95,7 +94,7 @@ export default function ManageInstance() {
 
   const [state] = useAppState()
   const {
-    manager: { volumeManager, instanceManager },
+    manager: { volumeManager },
   } = state
 
   useEffect(() => {
@@ -130,21 +129,7 @@ export default function ManageInstance() {
     return (instance?.metadata?.name as string) || ellipseAddress(instance.id)
   }, [instance])
 
-  const [cost, setCost] = useState<number>()
-
-  useEffect(() => {
-    const fetchCost = async () => {
-      if (!instance?.payment) return
-
-      const fetchedCost = await instanceManager?.getTotalCostByHash(
-        instance.payment.type,
-        instance.id,
-      )
-      setCost(fetchedCost)
-    }
-
-    fetchCost()
-  }, [instance, instanceManager])
+  // Cost calculation now handled inside EntityPayment component
 
   const sliderActiveIndex = useMemo(() => {
     return tabId === 'log' ? 1 : 0
@@ -168,9 +153,6 @@ export default function ManageInstance() {
     setSelectedSSHKey(sshKey)
     setOpenSidePanel(true)
   }, [])
-
-  console.log('instance', instance)
-  console.log('streamDetails', streamDetails)
 
   return (
     <>
@@ -284,27 +266,7 @@ export default function ManageInstance() {
                 />
               </div>
               <div>
-                {instance?.payment?.type === PaymentType.superfluid ? (
-                  <EntityPayment
-                    paymentType={PaymentType.superfluid}
-                    cost={cost}
-                    runningTime={
-                      instance?.time
-                        ? Math.floor(Date.now() - instance.time * 1000) / 1000
-                        : undefined
-                    }
-                    totalSpent={cost}
-                    startTime={instance?.time}
-                    blockchain={instance.payment.chain}
-                  />
-                ) : (
-                  <EntityPayment
-                    paymentType={PaymentType.hold}
-                    cost={cost}
-                    startTime={instance?.time}
-                    blockchain={instance?.payment?.chain}
-                  />
-                )}
+                <EntityPayment instance={instance} />
               </div>
             </div>
             <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">

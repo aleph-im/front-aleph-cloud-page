@@ -4,17 +4,24 @@ import { EntityPaymentProps } from './types'
 import { Text } from '@/components/pages/dashboard/common'
 import { blockchains } from '@/domain/connect/base'
 import { PaymentType } from '@aleph-sdk/message'
+import { useEntityPayment } from './hook'
 
 export const EntityPayment = ({
-  cost,
+  instance,
   paymentType,
-  runningTime,
-  startTime,
-  blockchain,
 }: EntityPaymentProps) => {
+  const {
+    cost,
+    paymentType: finalPaymentType,
+    runningTime,
+    startTime,
+    blockchain,
+    loading,
+  } = useEntityPayment({ instance, paymentType })
+
   const isPAYG = useMemo(
-    () => paymentType === PaymentType.superfluid,
-    [paymentType],
+    () => finalPaymentType === PaymentType.superfluid,
+    [finalPaymentType],
   )
 
   // Use the appropriate cost value based on payment type
@@ -96,7 +103,7 @@ export const EntityPayment = ({
               <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
             </div>
             <p className="text-base2 fs-18" tw="font-bold">
-              {totalSpent}
+              {loading ? 'Loading...' : totalSpent}
             </p>
           </div>
 
