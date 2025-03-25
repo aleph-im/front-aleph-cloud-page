@@ -39,9 +39,14 @@ export const urlSchema = requiredStringSchema.regex(
   { message: 'Invalid url format' },
 )
 
-export const linuxPathSchema = requiredStringSchema.regex(/^(\/[^\/ ]*)+\/?$/, {
-  message: 'Invalid path format',
-})
+export const linuxPathSchema = requiredStringSchema
+  .regex(/^(\/[^\/ ]*)+\/?$/, {
+    message: 'Invalid path format',
+  })
+  .regex(/^(\/[a-zA-Z0-9_-]*)+\/?$/, {
+    message:
+      'Mount path can only contain alphanumeric characters, underscores, and dashes',
+  })
 
 export const ethereumAddressSchema = requiredStringSchema.regex(
   /^0x[a-fA-F0-9]{40}$/,
