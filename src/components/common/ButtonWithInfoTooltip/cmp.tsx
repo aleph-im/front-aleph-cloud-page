@@ -49,12 +49,12 @@ export const ButtonWithInfoTooltip = forwardRef<
           size={size}
           {...buttonProps}
         >
-          <span className="flex items-center gap-3">
+          <>
             {children}
             {disabled && tooltipContent && (
               <InfoIcon name="info-circle" buttonSize={size} />
             )}
-          </span>
+          </>
         </Button>
 
         {renderTooltip && disabled && tooltipContent && (
