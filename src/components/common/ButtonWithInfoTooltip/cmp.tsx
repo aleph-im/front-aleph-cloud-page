@@ -1,6 +1,7 @@
-import React, { forwardRef, useEffect, useRef, useState, useMemo } from 'react'
-import { Button, ButtonProps, Icon } from '@aleph-front/core'
+import React, { forwardRef, useEffect, useRef, useState } from 'react'
+import { Button, ButtonProps } from '@aleph-front/core'
 import ResponsiveTooltip from '../ResponsiveTooltip'
+import { InfoIcon } from './styles'
 
 export type ButtonWithInfoTooltipProps = ButtonProps & {
   tooltipContent?: React.ReactNode
@@ -36,24 +37,6 @@ export const ButtonWithInfoTooltip = forwardRef<
       setRenderTooltip(true)
     }, [])
 
-    // Determine icon size based on button size
-    const iconSize = useMemo(() => {
-      switch (size) {
-        case 'xs':
-          return 'xs'
-        case 'sm':
-          return 'sm'
-        case 'md':
-          return 'md'
-        case 'lg':
-          return 'md' // Slightly larger relative to button
-        case 'xl':
-          return 'lg'
-        default:
-          return 'md'
-      }
-    }, [size])
-
     // Create a ref if one wasn't provided
     const buttonRef = useRef<HTMLButtonElement>(null)
     const targetRef = (ref as React.RefObject<HTMLButtonElement>) || buttonRef
@@ -69,11 +52,7 @@ export const ButtonWithInfoTooltip = forwardRef<
           <span className="flex items-center gap-3">
             {children}
             {disabled && tooltipContent && (
-              <Icon
-                name="info-circle"
-                size={iconSize}
-                style={{ opacity: 0.8 }}
-              />
+              <InfoIcon name="info-circle" buttonSize={size} />
             )}
           </span>
         </Button>
