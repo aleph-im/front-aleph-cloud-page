@@ -72,8 +72,8 @@ export function useEntityCost({
   // Create a string representation of the props to detect changes
   const propsString = useMemo(() => JSON.stringify(props), [props])
 
-  // Debounce the string representation with a 2000ms (2 second) delay
-  const debouncedPropsString = useDebounceState(propsString, 2000)
+  // Debounce the string representation with a 1000ms (1 second) delay
+  const debouncedPropsString = useDebounceState(propsString, 1000)
 
   // Parse the debounced props string back to an object when it changes
   const debouncedProps = useMemo(() => {
