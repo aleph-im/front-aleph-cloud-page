@@ -82,15 +82,32 @@ export function useSelectInstanceSpecs({
   // Auto select first available tier when CRN node is selected in PAYG mode
   useEffect(() => {
     // Only apply for PAYG payment method when we have valid options and node specs
-    if (paymentMethod === PaymentMethod.Stream && nodeSpecs && options.length > 0) {
+    if (
+      paymentMethod === PaymentMethod.Stream &&
+      nodeSpecs &&
+      options.length > 0
+    ) {
       // If no tier is selected yet or the current selected tier is not compatible
       // with the selected node, auto-select the first available tier
-      if (!value || (nodeSpecs && !manager.validateMinNodeSpecs(value, nodeSpecs))) {
+      if (
+        !value ||
+        (nodeSpecs && !manager.validateMinNodeSpecs(value, nodeSpecs))
+      ) {
         const firstAvailableTier = options[0]
-        onChange(updateSpecsStorage(firstAvailableTier, isPersistent, paymentMethod))
+        onChange(
+          updateSpecsStorage(firstAvailableTier, isPersistent, paymentMethod),
+        )
       }
     }
-  }, [options, nodeSpecs, paymentMethod, isPersistent, value, onChange, manager])
+  }, [
+    options,
+    nodeSpecs,
+    paymentMethod,
+    isPersistent,
+    value,
+    onChange,
+    manager,
+  ])
 
   useEffect(() => {
     if (!value) return
