@@ -73,29 +73,46 @@ export function useEntityCost({
   const propsString = useMemo(() => JSON.stringify(props), [props])
 
   // Debounce the string representation with a 2000ms (2 second) delay
-  // This will delay the API call without creating new objects
   const debouncedPropsString = useDebounceState(propsString, 2000)
 
+  // Parse the debounced props string back to an object when it changes
+  const debouncedProps = useMemo(() => {
+    try {
+      return JSON.parse(debouncedPropsString)
+    } catch (e) {
+      // Return empty object if parsing fails (e.g., on first render with empty string)
+      return {}
+    }
+  }, [debouncedPropsString])
+
+  // Only make the API call when the debounced props change
   useEffect(() => {
+    // Skip initial render or invalid props
+    if (!debouncedProps || Object.keys(debouncedProps).length === 0) return
+
     async function load() {
       let result: CostSummary = emptyCost
 
       switch (entityType) {
         case EntityType.Volume:
-          if (volumeManager) result = await volumeManager.getCost(props)
+          if (volumeManager)
+            result = await volumeManager.getCost(debouncedProps)
           break
         case EntityType.Instance:
-          if (instanceManager) result = await instanceManager.getCost(props)
+          if (instanceManager)
+            result = await instanceManager.getCost(debouncedProps)
           break
         case EntityType.GpuInstance:
           if (gpuInstanceManager)
-            result = await gpuInstanceManager.getCost(props)
+            result = await gpuInstanceManager.getCost(debouncedProps)
           break
         case EntityType.Program:
-          if (programManager) result = await programManager.getCost(props)
+          if (programManager)
+            result = await programManager.getCost(debouncedProps)
           break
         case EntityType.Website:
-          if (websiteManager) result = await websiteManager.getCost(props)
+          if (websiteManager)
+            result = await websiteManager.getCost(debouncedProps)
           break
       }
 
@@ -105,8 +122,7 @@ export function useEntityCost({
     load()
   }, [
     entityType,
-    debouncedPropsString, // Only depend on the debounced string
-    props, // Original props for use in the API call
+    debouncedProps, // Use the parsed debounced props object
     emptyCost,
     volumeManager,
     instanceManager,
