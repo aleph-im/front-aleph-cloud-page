@@ -1,9 +1,9 @@
 import React, { memo } from 'react'
 import { Icon, NoisyContainer, ObjectImg } from '@aleph-front/core'
-import { EntitySSHKeysProps } from './types'
 import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/dashboard/common'
 import RelatedEntityCard from '../RelatedEntityCard'
+import { EntitySSHKeysProps } from './types'
 
 export const EntitySSHKeys = ({
   sshKeys,

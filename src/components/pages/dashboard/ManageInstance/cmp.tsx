@@ -1,12 +1,5 @@
 import { RotatingLines } from 'react-loader-spinner'
-import {
-  ButtonProps,
-  Label,
-  Logo,
-  NoisyContainer,
-  TextGradient,
-  Tooltip,
-} from '@aleph-front/core'
+import { ButtonProps, Label, Tooltip } from '@aleph-front/core'
 import { Button, Icon } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
 import {
@@ -14,7 +7,6 @@ import {
   isVolumeEphemeral,
   isVolumePersistent,
 } from '@/helpers/utils'
-import { Separator } from '../common'
 import BackButton from '@/components/common/BackButton'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ImmutableVolume, PaymentType } from '@aleph-sdk/message'
@@ -24,20 +16,18 @@ import { SidePanel } from '@/components/common/SidePanel/cmp'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
 import { SSHKey } from '@/domain/ssh'
 import VolumeDetail from '@/components/common/VolumeDetail'
-import EntitySSHKeys from '@/components/common/EntityData/EntitySSHKeys'
-import EntityHostingCRN from '@/components/common/EntityData/EntityHostingCRN'
-import EntityConnectionMethods from '@/components/common/EntityData/EntityConnectionMethods'
-import EntityLinkedVolumes from '@/components/common/EntityData/EntityLinkedVolumes'
-import EntityPersistentStorage from '@/components/common/EntityData/EntityPersistentStorage'
-import InstanceDetails from '@/components/common/EntityData/InstanceDetails'
-import StreamSummary from '@/components/common/StreamSummary'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { Slide, Slider } from '@/components/common/Slider/cmp'
+import EntityPayment from '@/components/common/entityData/EntityPayment'
+import InstanceDetails from '@/components/common/entityData/InstanceDetails'
 import {
   EntityLogsContent,
   EntityLogsControl,
-} from '@/components/common/EntityData/EntityLogs'
-import { Slide, Slider } from '@/components/common/Slider/cmp'
-import EntityPayment from '@/components/common/entityData/EntityPayment'
+} from '@/components/common/entityData/EntityLogs'
+import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
+import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolumes'
+import EntityConnectionMethods from '@/components/common/entityData/EntityConnectionMethods'
+import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
+import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
 
 export function FunctionalButton({ children, ...props }: ButtonProps) {
   return (
