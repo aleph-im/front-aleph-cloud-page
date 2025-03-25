@@ -11,6 +11,7 @@ import {
   TooltipProps,
   Checkbox,
 } from '@aleph-front/core'
+import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { CRNSpecs } from '@/domain/node'
 import SelectInstanceImage from '@/components/form/SelectInstanceImage'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
@@ -36,7 +37,6 @@ import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
 import CRNList from '../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
-import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
 import BorderBox from '@/components/common/BorderBox'
 import ExternalLink from '@/components/common/ExternalLink'
 import {
@@ -65,32 +65,27 @@ const CheckoutButton = React.memo(
     const checkoutButtonRef = useRef<HTMLButtonElement>(null)
 
     return (
-      <>
-        <Button
-          ref={checkoutButtonRef}
-          type={shouldRequestTermsAndConditions ? 'button' : 'submit'}
-          color="main0"
-          kind="default"
-          size="lg"
-          variant="primary"
-          disabled={disabled}
-          onClick={
-            shouldRequestTermsAndConditions
-              ? handleRequestTermsAndConditionsAgreement
-              : handleSubmit
-          }
-        >
-          {title}
-        </Button>
-        {tooltipContent && (
-          <ResponsiveTooltip
-            my={isFooter ? 'bottom-right' : 'bottom-center'}
-            at={isFooter ? 'top-right' : 'top-center'}
-            targetRef={checkoutButtonRef}
-            content={tooltipContent}
-          />
-        )}
-      </>
+      <ButtonWithInfoTooltip
+        ref={checkoutButtonRef}
+        type={shouldRequestTermsAndConditions ? 'button' : 'submit'}
+        color="main0"
+        kind="default"
+        size="lg"
+        variant="primary"
+        disabled={disabled}
+        tooltipContent={tooltipContent}
+        tooltipPosition={{
+          my: isFooter ? 'bottom-right' : 'bottom-center',
+          at: isFooter ? 'top-right' : 'top-center',
+        }}
+        onClick={
+          shouldRequestTermsAndConditions
+            ? handleRequestTermsAndConditionsAgreement
+            : handleSubmit
+        }
+      >
+        {title}
+      </ButtonWithInfoTooltip>
     )
   },
 )
@@ -337,7 +332,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
                 <div tw="mt-6">
                   {!node && (
                     <>
-                      <Button
+                      <ButtonWithInfoTooltip
                         ref={manuallySelectButtonRef}
                         type="button"
                         kind="functional"
@@ -346,7 +341,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
                         onClick={handleManuallySelectCRN}
                       >
                         Manually select GPU
-                      </Button>
+                      </ButtonWithInfoTooltip>
                     </>
                   )}
                 </div>
