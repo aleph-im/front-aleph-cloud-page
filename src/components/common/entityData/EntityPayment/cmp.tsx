@@ -1,90 +1,26 @@
-import React, { memo, useMemo } from 'react'
+import React, { memo } from 'react'
 import { Logo, NoisyContainer } from '@aleph-front/core'
 import { EntityPaymentProps } from './types'
 import { Text } from '@/components/pages/dashboard/common'
-import { blockchains } from '@/domain/connect/base'
-import { PaymentType } from '@aleph-sdk/message'
 import { useEntityPayment } from './hook'
 
+/**
+ * Component to display payment information for an entity
+ * All logic is handled in the useEntityPayment hook
+ */
 export const EntityPayment = ({
   instance,
   paymentType,
 }: EntityPaymentProps) => {
   const {
-    cost,
-    paymentType: finalPaymentType,
-    runningTime,
-    startTime,
-    blockchain,
+    isPAYG,
+    totalSpent,
+    formattedBlockchain,
+    formattedFlowRate,
+    formattedStartDate,
+    formattedDuration,
     loading,
   } = useEntityPayment({ instance, paymentType })
-
-  const isPAYG = useMemo(
-    () => finalPaymentType === PaymentType.superfluid,
-    [finalPaymentType],
-  )
-
-  // Use the appropriate cost value based on payment type
-  const totalSpent = useMemo(() => {
-    if (!cost) return 'N/A'
-    if (!isPAYG) return cost
-    if (!runningTime) return 'N/A'
-
-    const runningTimeInHours = (runningTime % (3600 * 24)) / 3600
-    return (cost * runningTimeInHours).toFixed(6)
-  }, [cost, isPAYG, runningTime])
-
-  // Format Blockchain name
-  const formattedBlockchain = useMemo(() => {
-    if (!blockchain) return 'N/A'
-
-    return blockchains[blockchain].name
-  }, [blockchain])
-
-  // Format flow rate to show daily cost
-  const formattedFlowRate = useMemo(() => {
-    if (!isPAYG) return 'N/A'
-    if (!cost) return 'N/A'
-
-    const dailyRate = cost * 24
-    return `~${dailyRate.toFixed(4)}/day`
-  }, [cost, isPAYG])
-
-  // Format start date in the required format
-  const formattedStartDate = useMemo(() => {
-    if (!startTime) return 'N/A'
-
-    const date = new Date(startTime * 1000)
-    return date.toLocaleString('en-US', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    })
-  }, [startTime])
-
-  // Helper function to format time duration for display in detailed format
-  const formattedDuration = useMemo(() => {
-    if (!runningTime) return 'N/A'
-
-    const days = Math.floor(runningTime / (3600 * 24))
-    const hours = Math.floor((runningTime % (3600 * 24)) / 3600)
-    const minutes = Math.floor((runningTime % 3600) / 60)
-    const secs = Math.floor(runningTime % 60)
-
-    const formattedHours = hours.toString().padStart(2, '0')
-    const formattedMinutes = minutes.toString().padStart(2, '0')
-    const formattedSeconds = secs.toString().padStart(2, '0')
-
-    if (days > 0) {
-      return `${days} ${days === 1 ? 'Day' : 'Days'} ${formattedHours}:${formattedMinutes}:${formattedSeconds}`
-    } else {
-      return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
-    }
-  }, [runningTime])
 
   return (
     <>
@@ -144,6 +80,7 @@ export const EntityPayment = ({
     </>
   )
 }
+
 EntityPayment.displayName = 'EntityPayment'
 
 export default memo(EntityPayment) as typeof EntityPayment

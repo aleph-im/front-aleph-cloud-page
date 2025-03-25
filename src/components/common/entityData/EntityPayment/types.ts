@@ -7,7 +7,8 @@ export type EntityPaymentProps = {
   paymentType?: PaymentType
 }
 
-export type UseEntityPaymentReturn = {
+// Raw data returned from the hook
+export type PaymentData = {
   cost?: number
   paymentType: PaymentType
   runningTime?: number // in seconds
@@ -16,3 +17,16 @@ export type UseEntityPaymentReturn = {
   blockchain?: Blockchain
   loading: boolean
 }
+
+// Formatted data for display
+export type FormattedPaymentData = {
+  isPAYG: boolean
+  totalSpent: string
+  formattedBlockchain: string
+  formattedFlowRate: string
+  formattedStartDate: string
+  formattedDuration: string
+  loading: boolean
+}
+
+export type UseEntityPaymentReturn = FormattedPaymentData
