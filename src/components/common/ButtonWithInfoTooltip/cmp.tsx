@@ -1,14 +1,11 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import { Button, ButtonProps } from '@aleph-front/core'
+import { Button, ButtonProps, TooltipProps } from '@aleph-front/core'
 import ResponsiveTooltip from '../ResponsiveTooltip'
 import { InfoIcon } from './styles'
 
 export type ButtonWithInfoTooltipProps = ButtonProps & {
   tooltipContent?: React.ReactNode
-  tooltipPosition?: {
-    my?: string
-    at?: string
-  }
+  tooltipPosition?: Pick<TooltipProps, 'my' | 'at'>
 }
 
 /**
