@@ -6,6 +6,7 @@ import {
   optionalStringSchema,
   requiredStringSchema,
   requiredRestrictedStringSchema,
+  requiredVolumeNameSchema,
 } from './base'
 import { domainSchema } from './domain'
 import { newIsolatedVolumeSchema } from './volume'
@@ -28,7 +29,7 @@ export const existingVolumeSchema = z.object({
 
 export const persistentVolumeSchema = z.object({
   volumeType: z.literal(VolumeType.Persistent),
-  name: requiredStringSchema,
+  name: requiredVolumeNameSchema,
   mountPath: linuxPathSchema,
   size: z.number().gt(0),
 })
