@@ -78,4 +78,24 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
       ],
     }
   }
+
+  protected override async parseInstanceForCostEstimation(
+    newInstance: AddInstance,
+  ): Promise<any> {
+    // Get the base instance configuration from the parent class
+    const baseInstanceConfig = await super.parseInstanceForCostEstimation(
+      newInstance,
+    )
+
+    // Add GPU requirements if a node with GPU is selected
+    if (newInstance.node?.selectedGpu) {
+      const gpuRequirements = this.parseRequirements(newInstance.node)
+      return {
+        ...baseInstanceConfig,
+        requirements: gpuRequirements,
+      }
+    }
+
+    return baseInstanceConfig
+  }
 }
