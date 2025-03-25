@@ -17,7 +17,7 @@ import {
 import { Separator } from '../common'
 import BackButton from '@/components/common/BackButton'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ImmutableVolume } from '@aleph-sdk/message'
+import { ImmutableVolume, PaymentType } from '@aleph-sdk/message'
 import { useAppState } from '@/contexts/appState'
 import { Skeleton } from '@/components/common/Skeleton/cmp'
 import { SidePanel } from '@/components/common/SidePanel/cmp'
@@ -59,16 +59,7 @@ export default function ManageInstance() {
     status,
     mappedKeys,
     nodeDetails,
-    streamDetails = {
-      blockchain: BlockchainId.ETH,
-      streams: [
-        {
-          sender: '0xFa2206BEd6daD6d84bb0126f752FD22FEBC6a87f',
-          receiver: '0x5f78199cd833c1dc1735bee4a7416caaE58Facca',
-          flow: 0.004,
-        },
-      ],
-    },
+    streamDetails,
     isRunning,
     stopDisabled,
     startDisabled,
@@ -188,6 +179,9 @@ export default function ManageInstance() {
     setOpenSidePanel(true)
   }, [])
 
+  console.log('instance', instance)
+  console.log('streamDetails', streamDetails)
+
   return (
     <>
       {/* Header */}
@@ -300,23 +294,25 @@ export default function ManageInstance() {
                 />
               </div>
               <div>
-                {instance?.payment?.type === 'stream' ? (
+                {instance?.payment?.type === PaymentType.superfluid ? (
                   <EntityPayment
-                    paymentType="stream"
-                    costPerHour={streamDetails?.streams?.[0]?.flow}
+                    paymentType={PaymentType.superfluid}
+                    cost={cost}
                     runningTime={
                       instance?.time
-                        ? Math.floor((Date.now() - instance.time) / 1000)
+                        ? Math.floor(Date.now() - instance.time * 1000) / 1000
                         : undefined
                     }
                     totalSpent={cost}
                     startTime={instance?.time}
+                    blockchain={instance.payment.chain}
                   />
                 ) : (
                   <EntityPayment
-                    paymentType="holding"
+                    paymentType={PaymentType.hold}
                     cost={cost}
                     startTime={instance?.time}
+                    blockchain={instance?.payment?.chain}
                   />
                 )}
               </div>
@@ -347,33 +343,6 @@ export default function ManageInstance() {
                     persistentVolumes={persistentVolumes}
                   />
                 </div>
-              )}
-              {streamDetails && (
-                <>
-                  <Separator />
-
-                  <TextGradient type="h7" as="h2" color="main0">
-                    Active streams
-                  </TextGradient>
-
-                  {!streamDetails.streams.length ? (
-                    <div tw="my-5">There are no active streams</div>
-                  ) : (
-                    <div tw="my-5">
-                      {streamDetails.streams.length} active streams in{' '}
-                      <strong className="text-main0">
-                        {blockchains[streamDetails.blockchain].name}
-                      </strong>{' '}
-                      network
-                    </div>
-                  )}
-
-                  {streamDetails.streams.map((stream) => (
-                    <div key={`${stream.sender}:${stream.receiver}`} tw="my-5">
-                      <StreamSummary {...stream} />
-                    </div>
-                  ))}
-                </>
               )}
             </div>
           </div>

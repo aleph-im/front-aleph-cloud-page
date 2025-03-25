@@ -1,63 +1,83 @@
-import React, { memo } from 'react'
-import { Icon, Logo, NoisyContainer } from '@aleph-front/core'
+import React, { memo, useMemo } from 'react'
+import { Logo, NoisyContainer } from '@aleph-front/core'
 import { EntityPaymentProps } from './types'
-import Price from '@/components/common/Price'
 import { Text } from '@/components/pages/dashboard/common'
-
-// Helper function to format time duration for display in detailed format
-const formatDetailedDuration = (seconds?: number): string => {
-  if (!seconds) return 'N/A'
-
-  const days = Math.floor(seconds / (3600 * 24))
-  const hours = Math.floor((seconds % (3600 * 24)) / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = Math.floor(seconds % 60)
-
-  const formattedHours = hours.toString().padStart(2, '0')
-  const formattedMinutes = minutes.toString().padStart(2, '0')
-  const formattedSeconds = secs.toString().padStart(2, '0')
-
-  if (days > 0) {
-    return `${days} ${days === 1 ? 'Day' : 'Days'} ${formattedHours}:${formattedMinutes}:${formattedSeconds}`
-  } else {
-    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
-  }
-}
-
-// Format start date in the required format
-const formatStartDate = (timestamp?: number): string => {
-  if (!timestamp) return 'N/A'
-
-  const date = new Date(timestamp)
-  return date.toLocaleString('en-US', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  })
-}
-
-// Format flow rate to show daily cost
-const formatFlowRate = (hourlyRate?: number): string => {
-  if (!hourlyRate) return 'N/A'
-
-  const dailyRate = hourlyRate * 24
-  return `~ ${dailyRate.toFixed(4)}/day`
-}
+import { blockchains } from '@/domain/connect/base'
+import { PaymentType } from '@aleph-sdk/message'
 
 export const EntityPayment = ({
   cost,
-  paymentType = 'holding',
-  costPerHour,
+  paymentType,
   runningTime,
-  totalSpent,
   startTime,
+  blockchain,
 }: EntityPaymentProps) => {
+  const isPAYG = useMemo(
+    () => paymentType === PaymentType.superfluid,
+    [paymentType],
+  )
+
   // Use the appropriate cost value based on payment type
-  const displayCost = paymentType === 'holding' ? cost : totalSpent?.toFixed(6)
+  const totalSpent = useMemo(() => {
+    if (!cost) return 'N/A'
+    if (!isPAYG) return cost
+    if (!runningTime) return 'N/A'
+
+    const runningTimeInHours = (runningTime % (3600 * 24)) / 3600
+    return (cost * runningTimeInHours).toFixed(6)
+  }, [cost, isPAYG, runningTime])
+
+  // Format Blockchain name
+  const formattedBlockchain = useMemo(() => {
+    if (!blockchain) return 'N/A'
+
+    return blockchains[blockchain].name
+  }, [blockchain])
+
+  // Format flow rate to show daily cost
+  const formattedFlowRate = useMemo(() => {
+    if (!isPAYG) return 'N/A'
+    if (!cost) return 'N/A'
+
+    const dailyRate = cost * 24
+    return `~${dailyRate.toFixed(4)}/day`
+  }, [cost, isPAYG])
+
+  // Format start date in the required format
+  const formattedStartDate = useMemo(() => {
+    if (!startTime) return 'N/A'
+
+    const date = new Date(startTime * 1000)
+    return date.toLocaleString('en-US', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    })
+  }, [startTime])
+
+  // Helper function to format time duration for display in detailed format
+  const formattedDuration = useMemo(() => {
+    if (!runningTime) return 'N/A'
+
+    const days = Math.floor(runningTime / (3600 * 24))
+    const hours = Math.floor((runningTime % (3600 * 24)) / 3600)
+    const minutes = Math.floor((runningTime % 3600) / 60)
+    const secs = Math.floor(runningTime % 60)
+
+    const formattedHours = hours.toString().padStart(2, '0')
+    const formattedMinutes = minutes.toString().padStart(2, '0')
+    const formattedSeconds = secs.toString().padStart(2, '0')
+
+    if (days > 0) {
+      return `${days} ${days === 1 ? 'Day' : 'Days'} ${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+    } else {
+      return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+    }
+  }, [runningTime])
 
   return (
     <>
@@ -76,34 +96,38 @@ export const EntityPayment = ({
               <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
             </div>
             <p className="text-base2 fs-18" tw="font-bold">
-              {displayCost ? displayCost : 'N/A'}
+              {totalSpent}
             </p>
           </div>
 
           {/* Payment type row */}
-          <div>
-            <div className="tp-info text-main0 fs-12">TYPE</div>
-            <Text>
-              {paymentType === 'holding' ? 'Holding' : 'Pay as you go'}
-            </Text>
+          <div tw="flex flex-wrap gap-6">
+            <div>
+              <div className="tp-info text-main0 fs-12">TYPE</div>
+              <Text>{isPAYG ? 'Pay as you go' : 'Holding'}</Text>
+            </div>
+            <div>
+              <div className="tp-info text-main0 fs-12">BLOCKCHAIN</div>
+              <Text>{formattedBlockchain}</Text>
+            </div>
           </div>
 
           {/* Start date, flow rate, and time elapsed */}
           <div tw="flex flex-wrap gap-6">
             <div>
               <div className="tp-info text-main0 fs-12">START DATE</div>
-              <Text>{formatStartDate(startTime)}</Text>
+              <Text>{formattedStartDate}</Text>
             </div>
 
-            {paymentType === 'stream' && (
+            {isPAYG && (
               <>
                 <div>
                   <div className="tp-info text-main0 fs-12">FLOW RATE</div>
-                  <Text>{formatFlowRate(costPerHour)}</Text>
+                  <Text>{formattedFlowRate}</Text>
                 </div>
                 <div>
                   <div className="tp-info text-main0 fs-12">TIME ELAPSED</div>
-                  <Text>{formatDetailedDuration(runningTime)}</Text>
+                  <Text>{formattedDuration}</Text>
                 </div>
               </>
             )}
