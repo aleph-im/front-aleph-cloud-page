@@ -10,6 +10,12 @@ npm run lint         # Run ESLint
 npm run lint:fix     # Run ESLint with auto-fix
 ```
 
+## Automation Instructions
+
+- Always run `npm run lint:fix` after making code changes to ensure proper formatting
+- Check for TypeScript errors manually using the TypeScript compiler
+- Always verify changes by running the application with `npm run dev` before committing
+
 ## Code Style
 - **TypeScript**: Strict typing, explicit return types
 - **Components**: PascalCase, atomic folder structure (index.ts, cmp.tsx, types.ts, styles.tsx)
