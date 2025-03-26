@@ -9,15 +9,10 @@ export type Tier = ReducedCRNSpecs & {
   disabled?: boolean
 }
 
-export type UseDefaultTiersProps =
-  | {
-      type: EntityType.Instance | EntityType.Program
-      gpuModel?: undefined
-    }
-  | {
-      type: EntityType.GpuInstance
-      gpuModel?: string
-    }
+export type UseDefaultTiersProps = {
+  type: EntityType.Instance | EntityType.Program | EntityType.GpuInstance
+  gpuModel?: string
+}
 
 export type UseDefaultTiersReturn = {
   defaultTiers: Tier[]
@@ -33,10 +28,11 @@ export const DEFAULT_TIERS: {
   gpuInstance: [{ cpu: 3, ram: 3 * 6144, storage: 3 * 61440, disabled: false }],
 }
 
-export function useDefaultTiers({
-  type,
-  gpuModel,
-}: UseDefaultTiersProps): UseDefaultTiersReturn {
+export function useDefaultTiers(
+  props: UseDefaultTiersProps,
+): UseDefaultTiersReturn {
+  const { type, gpuModel } = props
+
   const { loading: loadingPricingAggregate, pricingAggregate } =
     useFetchPricingAggregate()
 
