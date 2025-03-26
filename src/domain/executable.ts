@@ -787,24 +787,21 @@ export abstract class ExecutableManager<T extends Executable> {
 
     // Calculate the correct cost, including rootfs volume if applicable
     let executionCost = Number(detailMap[MessageCostType.EXECUTION][costProp])
-    
+
     // If we have a rootfs volume cost, add it to the execution cost
     if (rootfsVolume) {
       executionCost += Number(rootfsVolume[costProp])
     }
-    
+
     const executionLines = [
       {
         id: MessageCostType.EXECUTION,
         name: EntityTypeName[entityProps.type].toUpperCase(),
         detail,
-        cost: this.parseCost(
-          paymentMethod,
-          executionCost
-        ),
+        cost: this.parseCost(paymentMethod, executionCost),
       },
     ]
-    
+
     // Add volume discount line if it exists
     const volumeDiscount = detailMap[MessageCostType.EXECUTION_VOLUME_DISCOUNT]
     if (volumeDiscount) {
@@ -814,7 +811,7 @@ export abstract class ExecutableManager<T extends Executable> {
         detail: 'Applied discount for bundled storage',
         cost: this.parseCost(
           paymentMethod,
-          -Math.abs(Number(volumeDiscount[costProp])) // Ensure it's always negative
+          -Math.abs(Number(volumeDiscount[costProp])), // Ensure it's always negative
         ),
       })
     }

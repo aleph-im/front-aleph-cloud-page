@@ -117,10 +117,11 @@ export const streamDurationSchema = z.object({
 })
 
 export const systemVolumeSchema = z.object({
-  size: z.number()
+  size: z
+    .number()
     .gt(0, { message: 'System volume size must be greater than 0' })
-    .lte(MAXIMUM_DISK_SIZE, { 
-      message: `System volume size cannot exceed ${MAXIMUM_DISK_SIZE} MiB (${Math.round(MAXIMUM_DISK_SIZE/1024)} GiB)` 
+    .lte(MAXIMUM_DISK_SIZE, {
+      message: `System volume size cannot exceed ${MAXIMUM_DISK_SIZE} MiB (${Math.round(MAXIMUM_DISK_SIZE / 1024)} GiB)`,
     }),
 })
 
