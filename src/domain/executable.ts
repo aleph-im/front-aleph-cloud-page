@@ -128,6 +128,9 @@ export const KEYPAIR_TTL = 1000 * 60 * 60 * 2
 export type ExecutableCostProps = (
   | {
       type: EntityType.Instance | EntityType.GpuInstance
+      rootfs?: {
+        size_mib?: number
+      }
     }
   | {
       type: EntityType.Program
@@ -755,11 +758,14 @@ export abstract class ExecutableManager<T extends Executable> {
 
     const rootfsVolume =
       detailMap[MessageCostType.EXECUTION_INSTANCE_VOLUME_ROOTFS]
-    const storage = rootfsVolume
-      ? ram * 10 > MAXIMUM_DISK_SIZE
-        ? MAXIMUM_DISK_SIZE
-        : ram * 10
-      : undefined
+
+    // Use the actual system volume size from rootfs
+    const storage =
+      rootfsVolume &&
+      entityProps.type !== EntityType.Program &&
+      entityProps.rootfs?.size_mib
+        ? entityProps.rootfs.size_mib
+        : undefined
 
     const storageStr = !storage
       ? ''
@@ -779,17 +785,36 @@ export abstract class ExecutableManager<T extends Executable> {
     const costProp =
       paymentMethod === PaymentMethod.Hold ? 'cost_hold' : 'cost_stream'
 
+    // Calculate the correct cost, including rootfs volume if applicable
+    let executionCost = Number(detailMap[MessageCostType.EXECUTION][costProp])
+
+    // If we have a rootfs volume cost, add it to the execution cost
+    if (rootfsVolume) {
+      executionCost += Number(rootfsVolume[costProp])
+    }
+
     const executionLines = [
       {
         id: MessageCostType.EXECUTION,
         name: EntityTypeName[entityProps.type].toUpperCase(),
         detail,
-        cost: this.parseCost(
-          paymentMethod,
-          Number(detailMap[MessageCostType.EXECUTION][costProp]),
-        ),
+        cost: this.parseCost(paymentMethod, executionCost),
       },
     ]
+
+    // Add volume discount line if it exists
+    const volumeDiscount = detailMap[MessageCostType.EXECUTION_VOLUME_DISCOUNT]
+    if (volumeDiscount) {
+      executionLines.push({
+        id: MessageCostType.EXECUTION_VOLUME_DISCOUNT,
+        name: 'VOLUME DISCOUNT',
+        detail: 'Applied discount for bundled storage',
+        cost: this.parseCost(
+          paymentMethod,
+          -Math.abs(Number(volumeDiscount[costProp])), // Ensure it's always negative
+        ),
+      })
+    }
 
     // Volumes
 
