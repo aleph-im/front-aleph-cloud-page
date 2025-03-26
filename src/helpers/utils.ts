@@ -173,10 +173,15 @@ export const humanReadableCurrency = (value?: number, decimals = 2) => {
   if (value === Number.POSITIVE_INFINITY) return 'n/a'
   if (value === undefined) return 'n/a'
   if (value === 0) return value
-  if (value < 1_000) return value.toFixed(decimals)
-  else if (value < 10 ** 6) return (value / 1_000).toFixed(decimals) + 'K'
-  else if (value < 10 ** 9) return (value / 10 ** 6).toFixed(decimals) + 'M'
-  else return (value / 10 ** 9).toFixed(decimals) + 'B'
+  
+  const isNegative = value < 0
+  const absValue = Math.abs(value)
+  const prefix = isNegative ? '-' : ''
+  
+  if (absValue < 1_000) return prefix + absValue.toFixed(decimals)
+  else if (absValue < 10 ** 6) return prefix + (absValue / 1_000).toFixed(decimals) + 'K'
+  else if (absValue < 10 ** 9) return prefix + (absValue / 10 ** 6).toFixed(decimals) + 'M'
+  else return prefix + (absValue / 10 ** 9).toFixed(decimals) + 'B'
 }
 
 const messageTypeWhitelist = new Set(Object.values(MessageType))

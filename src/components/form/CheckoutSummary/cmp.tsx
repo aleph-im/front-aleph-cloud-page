@@ -275,7 +275,7 @@ export const CheckoutSummary = ({
                     <div>{line.detail}</div>
                     <div>
                       <span className="text-main0 tp-body3">
-                        {line.cost > 0 ? (
+                        {line.cost !== 0 ? (
                           <Price
                             value={line.cost}
                             duration={

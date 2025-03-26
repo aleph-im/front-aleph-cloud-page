@@ -814,7 +814,7 @@ export abstract class ExecutableManager<T extends Executable> {
         detail: 'Applied discount for bundled storage',
         cost: this.parseCost(
           paymentMethod,
-          Number(volumeDiscount[costProp])
+          -Math.abs(Number(volumeDiscount[costProp])) // Ensure it's always negative
         ),
       })
     }
