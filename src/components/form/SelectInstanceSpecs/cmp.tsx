@@ -17,6 +17,7 @@ import Price from '@/components/common/Price'
 import Table from '@/components/common/Table'
 import { PriceType } from '@/domain/cost'
 import { useCostManager } from '@/hooks/common/useManager/useCostManager'
+import { useGpuPricingType } from '@/hooks/common/useGpuPricingType'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { specsCtrl, options, type, isPersistent, paymentMethod } =
@@ -113,18 +114,25 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
 
   const costManager = useCostManager()
 
+  // Use the GPU device from nodeSpecs to determine if it's premium or standard
+  const { nodeSpecs } = props
+  const gpuDevice = nodeSpecs?.selectedGpu
+  
+  // Use the useGpuPricingType hook to determine the correct pricing type for GPU instances
+  const { priceType: gpuPriceType } = useGpuPricingType({ gpuDevice })
+  
   const priceType: PriceType = useMemo(() => {
     if (type === EntityType.Program) {
       return isPersistent ? PriceType.ProgramPersistent : PriceType.Program
     }
 
     if (type === EntityType.GpuInstance) {
-      // Use GPU specific pricing
-      return PriceType.InstanceGpuStandard
+      // Use the price type determined by the useGpuPricingType hook
+      return gpuPriceType
     }
 
     return PriceType.Instance
-  }, [type, isPersistent])
+  }, [type, isPersistent, gpuPriceType])
 
   // @note: This is a quick fix for getting prices from aggregate.
   // @todo: Refactor toget options from price aggregate too
