@@ -6,7 +6,6 @@ import {
   HostRequirements,
   MachineResources,
   MachineVolume,
-  MAXIMUM_DISK_SIZE,
   MessageCost,
   MessageCostLine,
   MessageCostType,
