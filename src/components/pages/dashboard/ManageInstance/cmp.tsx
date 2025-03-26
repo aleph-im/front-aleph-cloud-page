@@ -2,19 +2,10 @@ import { RotatingLines } from 'react-loader-spinner'
 import { ButtonProps, Label, Tooltip } from '@aleph-front/core'
 import { Button, Icon } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
-import {
-  ellipseAddress,
-  isVolumeEphemeral,
-  isVolumePersistent,
-} from '@/helpers/utils'
 import BackButton from '@/components/common/BackButton'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ImmutableVolume } from '@aleph-sdk/message'
-import { useAppState } from '@/contexts/appState'
 import { Skeleton } from '@/components/common/Skeleton/cmp'
 import { SidePanel } from '@/components/common/SidePanel/cmp'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
-import { SSHKey } from '@/domain/ssh'
 import VolumeDetail from '@/components/common/VolumeDetail'
 import { Slide, Slider } from '@/components/common/Slider/cmp'
 import EntityPayment from '@/components/common/entityData/EntityPayment'
@@ -29,6 +20,9 @@ import EntityConnectionMethods from '@/components/common/entityData/EntityConnec
 import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
 import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
 
+/**
+ * Button component with functional styling
+ */
 export function FunctionalButton({ children, ...props }: ButtonProps) {
   return (
     <Button
@@ -43,117 +37,56 @@ export function FunctionalButton({ children, ...props }: ButtonProps) {
   )
 }
 
+/**
+ * ManageInstance component - purely presentational
+ * All business logic is in the useManageInstance hook
+ */
 export default function ManageInstance() {
   const {
+    // Basic data
     instance,
+    name,
+    labelVariant,
+
+    // Status data
     status,
-    mappedKeys,
-    nodeDetails,
     isRunning,
-    stopDisabled,
-    startDisabled,
-    rebootDisabled,
-    logs,
-    tabId,
-    theme,
+
+    // Volumes data
+    immutableVolumes,
+    persistentVolumes,
+
+    // Action handlers
     handleStop,
     handleStart,
     handleReboot,
     handleDelete,
     handleBack,
+
+    // UI state
+    mappedKeys,
     setTabId,
+    theme,
+    logs,
+    sliderActiveIndex,
+
+    // Side panel
+    sidePanel,
+    handleImmutableVolumeClick,
+    handleSSHKeyClick,
+    closeSidePanel,
+
+    // Button states
+    stopDisabled,
+    startDisabled,
+    rebootDisabled,
+
+    // Payment data
     paymentData,
+
+    // Node details
+    nodeDetails,
   } = useManageInstance()
-
-  const labelVariant = useMemo(() => {
-    if (!instance) return 'warning'
-
-    return instance.time < Date.now() - 1000 * 45 && isRunning
-      ? 'success'
-      : 'warning'
-  }, [instance, isRunning])
-
-  const volumes = useMemo(() => {
-    if (!instance) return []
-
-    return instance.volumes
-  }, [instance])
-
-  const persistentVolumes = useMemo(() => {
-    if (!volumes) return []
-
-    return volumes.filter((volume) => isVolumePersistent(volume))
-  }, [volumes])
-
-  // const ephemeralVolumes = useMemo(() => {
-  //   if (!volumes) return []
-
-  //   return volumes.filter((volume) => isVolumeEphemeral(volume))
-  // }, [volumes])
-
-  const [immutableVolumes, setImmutableVolumes] = useState<any[]>([])
-
-  const [state] = useAppState()
-  const {
-    manager: { volumeManager },
-  } = state
-
-  useEffect(() => {
-    if (!volumes) return
-    if (!volumeManager) return
-
-    const buildVolumes = async () => {
-      const rawVolumes = volumes.filter(
-        (volume) => !isVolumePersistent(volume) && !isVolumeEphemeral(volume),
-      ) as ImmutableVolume[]
-
-      const decoratedVolumes = await Promise.all(
-        rawVolumes.map(async (rawVolume) => {
-          const extraInfo = await volumeManager.get(rawVolume.ref)
-
-          return {
-            ...rawVolume,
-            ...extraInfo,
-          }
-        }),
-      )
-
-      setImmutableVolumes(decoratedVolumes)
-    }
-
-    buildVolumes()
-  }, [volumes, volumeManager])
-
-  const name = useMemo(() => {
-    if (!instance) return ''
-
-    return (instance?.metadata?.name as string) || ellipseAddress(instance.id)
-  }, [instance])
-
-  // Cost calculation now handled inside EntityPayment component
-
-  const sliderActiveIndex = useMemo(() => {
-    return tabId === 'log' ? 1 : 0
-  }, [tabId])
-
-  const [openSidePanel, setOpenSidePanel] = useState(false)
-  const [selectedVolume, setSelectedVolume] = useState<any | undefined>()
-  const [selectedSSHKey, setSelectedSSHKey] = useState<SSHKey | undefined>()
-  const [sidePanelContentType, setSidePanelContentType] = useState<
-    'sshKey' | 'volume'
-  >()
-
-  const handleImmutableVolumeClick = useCallback((volume: any) => {
-    setSidePanelContentType('volume')
-    setSelectedVolume(volume)
-    setOpenSidePanel(true)
-  }, [])
-
-  const handleSSHKeyClick = useCallback((sshKey: SSHKey) => {
-    setSidePanelContentType('sshKey')
-    setSelectedSSHKey(sshKey)
-    setOpenSidePanel(true)
-  }, [])
 
   return (
     <>
@@ -244,6 +177,7 @@ export default function ManageInstance() {
           </div>
         </div>
       </section>
+
       {/* Slider */}
       <Slider activeIndex={sliderActiveIndex}>
         {/* Instance Properties */}
@@ -307,6 +241,7 @@ export default function ManageInstance() {
             </div>
           </div>
         </Slide>
+
         {/* Instance Logs */}
         <Slide>
           <div tw="w-full flex px-12 py-6 gap-8">
@@ -319,20 +254,25 @@ export default function ManageInstance() {
           </div>
         </Slide>
       </Slider>
+
+      {/* Side Panel */}
       <SidePanel
-        title={sidePanelContentType === 'volume' ? 'Volume' : 'SSH Key'}
-        isOpen={openSidePanel}
-        onClose={() => setOpenSidePanel(false)}
+        title={sidePanel.type === 'volume' ? 'Volume' : 'SSH Key'}
+        isOpen={sidePanel.isOpen}
+        onClose={closeSidePanel}
       >
-        {sidePanelContentType === 'volume' ? (
-          selectedVolume && <VolumeDetail volumeId={selectedVolume.id} />
-        ) : sidePanelContentType === 'sshKey' ? (
-          selectedSSHKey && <SSHKeyDetail sshKeyId={selectedSSHKey.id} />
+        {sidePanel.type === 'volume' ? (
+          sidePanel.selectedVolume && (
+            <VolumeDetail volumeId={sidePanel.selectedVolume.id} />
+          )
+        ) : sidePanel.type === 'sshKey' ? (
+          sidePanel.selectedSSHKey && (
+            <SSHKeyDetail sshKeyId={sidePanel.selectedSSHKey.id} />
+          )
         ) : (
           <>ERROR</>
         )}
       </SidePanel>
-      {/* <div tw="fixed right-0 top-0 bottom-0 z-50 w-1/2 bg-white shadow-lg"></div> */}
     </>
   )
 }
