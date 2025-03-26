@@ -115,12 +115,16 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const costManager = useCostManager()
 
   // Use the GPU device from nodeSpecs to determine if it's premium or standard
-  const { nodeSpecs } = props
+  const { nodeSpecs } = props || {}
   const gpuDevice = nodeSpecs?.selectedGpu
-  
+
   // Use the useGpuPricingType hook to determine the correct pricing type for GPU instances
-  const { priceType: gpuPriceType } = useGpuPricingType({ gpuDevice })
-  
+  // Default to standard pricing if no GPU device is available
+  const { priceType: gpuPriceType = PriceType.InstanceGpuStandard } =
+    useGpuPricingType({
+      gpuDevice,
+    })
+
   const priceType: PriceType = useMemo(() => {
     if (type === EntityType.Program) {
       return isPersistent ? PriceType.ProgramPersistent : PriceType.Program

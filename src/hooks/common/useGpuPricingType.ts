@@ -24,12 +24,21 @@ export function useGpuPricingType({
   const costManager = useCostManager()
 
   // Fetch settings aggregate to check if the GPU is premium
-  const { data: settingsAggregate, loading, error } = useLocalRequest({
-    doRequest: () => costManager?.getSettingsAggregate(),
+  const {
+    data: settingsAggregate,
+    loading,
+    error,
+  } = useLocalRequest({
+    doRequest: () => {
+      return costManager
+        ? costManager.getSettingsAggregate()
+        : Promise.resolve(undefined)
+    },
     onSuccess: () => null,
+    onError: () => null, // Add error handling to prevent build failures
     flushData: true,
     triggerOnMount: true,
-    triggerDeps: [costManager, gpuDevice],
+    triggerDeps: [costManager],
   })
 
   // Determine if the GPU is premium and set the appropriate price type
@@ -40,13 +49,11 @@ export function useGpuPricingType({
 
     // Check if the selected GPU is in the list of premium GPUs
     const isPremiumGpu = settingsAggregate.compatibleGpus?.some(
-      (gpu) => 
-        gpu.model === gpuDevice.model && 
-        gpu.vendor === gpuDevice.vendor
+      (gpu) => gpu.model === gpuDevice.model && gpu.vendor === gpuDevice.vendor,
     )
 
-    return isPremiumGpu 
-      ? PriceType.InstanceGpuPremium 
+    return isPremiumGpu
+      ? PriceType.InstanceGpuPremium
       : PriceType.InstanceGpuStandard
   }, [gpuDevice, settingsAggregate])
 

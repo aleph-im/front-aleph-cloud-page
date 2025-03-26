@@ -333,8 +333,10 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   }
 
   async getCost(
-    newInstance: InstanceCostProps, 
-    entityType: EntityType = EntityType.Instance
+    newInstance: InstanceCostProps,
+    entityType:
+      | EntityType.Instance
+      | EntityType.GpuInstance = EntityType.Instance,
   ): Promise<InstanceCost> {
     let totalCost = Number.POSITIVE_INFINITY
     const paymentMethod = newInstance.payment?.type || PaymentMethod.Hold

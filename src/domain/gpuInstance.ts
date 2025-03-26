@@ -49,10 +49,12 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
       channel,
     )
   }
-  
+
   // Override getCost to pass the correct entity type
-  async override getCost(newInstance: InstanceCostProps): Promise<InstanceCost> {
-    return super.getCost(newInstance, EntityType.GpuInstance);
+  override async getCost(
+    newInstance: GpuInstanceCostProps,
+  ): Promise<GpuInstanceCost> {
+    return super.getCost(newInstance, EntityType.GpuInstance)
   }
 
   protected override parseMessagesFilter({ content }: any): boolean {
