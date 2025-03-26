@@ -332,7 +332,10 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     return this.parseCost(paymentMethod, Number(costs.cost))
   }
 
-  async getCost(newInstance: InstanceCostProps): Promise<InstanceCost> {
+  async getCost(
+    newInstance: InstanceCostProps, 
+    entityType: EntityType = EntityType.Instance
+  ): Promise<InstanceCost> {
     let totalCost = Number.POSITIVE_INFINITY
     const paymentMethod = newInstance.payment?.type || PaymentMethod.Hold
 
@@ -346,7 +349,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
     const lines = this.getExecutableCostLines(
       {
-        type: EntityType.Instance,
+        type: entityType,
         ...parsedInstance,
       },
       costs,

@@ -114,11 +114,16 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const costManager = useCostManager()
 
   const priceType: PriceType = useMemo(() => {
-    return type === EntityType.Program
-      ? isPersistent
-        ? PriceType.ProgramPersistent
-        : PriceType.Program
-      : PriceType.Instance
+    if (type === EntityType.Program) {
+      return isPersistent ? PriceType.ProgramPersistent : PriceType.Program
+    }
+
+    if (type === EntityType.GpuInstance) {
+      // Use GPU specific pricing
+      return PriceType.InstanceGpuStandard
+    }
+
+    return PriceType.Instance
   }, [type, isPersistent])
 
   // @note: This is a quick fix for getting prices from aggregate.
