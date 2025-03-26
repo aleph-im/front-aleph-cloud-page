@@ -1,6 +1,7 @@
 import { RefinementCtx, z } from 'zod'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import { messageHashSchema, paymentMethodSchema } from './base'
+import { MAXIMUM_DISK_SIZE } from '@aleph-sdk/message'
 import {
   addSpecsSchema,
   addVolumesSchema,
@@ -116,7 +117,11 @@ export const streamDurationSchema = z.object({
 })
 
 export const systemVolumeSchema = z.object({
-  size: z.number().gt(0),
+  size: z.number()
+    .gt(0, { message: 'System volume size must be greater than 0' })
+    .lte(MAXIMUM_DISK_SIZE, { 
+      message: `System volume size cannot exceed ${MAXIMUM_DISK_SIZE} MiB (${Math.round(MAXIMUM_DISK_SIZE/1024)} GiB)` 
+    }),
 })
 
 // INSTANCE
