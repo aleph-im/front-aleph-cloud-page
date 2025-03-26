@@ -17,7 +17,8 @@ export const requiredRestrictedStringSchema = requiredStringSchema.regex(
 export const requiredVolumeNameSchema = requiredStringSchema.regex(
   /^[a-zA-Z0-9_-]+$/,
   {
-    message: 'Invalid volume name format (only a-zA-Z0-9_- are allowed)',
+    message:
+      'Volume name can only contain letters, numbers, underscores, and dashes',
   },
 )
 
