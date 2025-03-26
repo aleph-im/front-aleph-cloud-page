@@ -1,24 +1,17 @@
 import { Blockchain } from '@aleph-sdk/core'
 import { PaymentType } from '@aleph-sdk/message'
-import { Instance } from '@/domain/instance'
 
+// Props for the EntityPayment component - raw data to be formatted by the hook
 export type EntityPaymentProps = {
-  instance?: Instance
-  paymentType?: PaymentType
-}
-
-// Raw data returned from the hook
-export type PaymentData = {
   cost?: number
   paymentType: PaymentType
   runningTime?: number // in seconds
-  totalSpent?: number
   startTime?: number // timestamp in milliseconds
   blockchain?: Blockchain
-  loading: boolean
+  loading?: boolean
 }
 
-// Formatted data for display
+// Formatted data returned by the hook for display
 export type FormattedPaymentData = {
   isPAYG: boolean
   totalSpent: string

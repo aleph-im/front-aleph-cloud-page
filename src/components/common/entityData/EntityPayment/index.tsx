@@ -1,3 +1,7 @@
 export { default } from './cmp'
 export { useEntityPayment } from './hook'
-export type { EntityPaymentProps, UseEntityPaymentReturn } from './types'
+export type {
+  EntityPaymentProps,
+  FormattedPaymentData,
+  UseEntityPaymentReturn,
+} from './types'

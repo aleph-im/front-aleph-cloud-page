@@ -5,13 +5,10 @@ import { Text } from '@/components/pages/dashboard/common'
 import { useEntityPayment } from './hook'
 
 /**
- * Component to display payment information for an entity
- * All logic is handled in the useEntityPayment hook
+ * Component to display payment information
+ * Takes raw data as props and uses the hook for formatting
  */
-export const EntityPayment = ({
-  instance,
-  paymentType,
-}: EntityPaymentProps) => {
+export const EntityPayment = (props: EntityPaymentProps) => {
   const {
     isPAYG,
     totalSpent,
@@ -20,7 +17,7 @@ export const EntityPayment = ({
     formattedStartDate,
     formattedDuration,
     loading,
-  } = useEntityPayment({ instance, paymentType })
+  } = useEntityPayment(props)
 
   return (
     <>
