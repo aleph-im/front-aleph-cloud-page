@@ -67,7 +67,7 @@ import {
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
-import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
+import { useDefaultTiers } from '@/hooks/common/pricing/useDefaultTiers'
 import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
 import usePrevious from '@/hooks/common/usePrevious'
 import { useCanAfford } from '@/hooks/common/useCanAfford'

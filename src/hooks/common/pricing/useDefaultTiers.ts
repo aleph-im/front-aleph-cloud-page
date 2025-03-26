@@ -1,6 +1,6 @@
 import { ReducedCRNSpecs } from '@/domain/node'
 import { useMemo } from 'react'
-import useFetchPricingAggregate from '../useFetchPricingAggregate'
+import useFetchPricingAggregate from './useFetchPricingAggregate'
 import { EntityType } from '@/helpers/constants'
 import Err from '@/helpers/errors'
 import { PriceType } from '@/domain/cost'
@@ -9,10 +9,15 @@ export type Tier = ReducedCRNSpecs & {
   disabled?: boolean
 }
 
-export type UseDefaultTiersProps = {
-  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
-  gpuModel?: string
-}
+export type UseDefaultTiersProps =
+  | {
+      type: EntityType.Instance | EntityType.Program
+      gpuModel?: undefined
+    }
+  | {
+      type: EntityType.GpuInstance
+      gpuModel?: string
+    }
 
 export type UseDefaultTiersReturn = {
   defaultTiers: Tier[]
@@ -25,7 +30,7 @@ export const DEFAULT_TIERS: {
 } = {
   program: [{ cpu: 1, ram: 2048, storage: 20480, disabled: false }],
   instance: [{ cpu: 1, ram: 2048, storage: 20480, disabled: false }],
-  gpuInstance: [{ cpu: 1, ram: 2048, storage: 20480, disabled: false }],
+  gpuInstance: [{ cpu: 3, ram: 3 * 6144, storage: 3 * 61440, disabled: false }],
 }
 
 export function useDefaultTiers({
@@ -36,6 +41,7 @@ export function useDefaultTiers({
     useFetchPricingAggregate()
 
   const defaultTiers = useMemo(() => {
+    // @todo: Refactor and show a loading spinner state instead
     if (loadingPricingAggregate) return DEFAULT_TIERS[type]
     if (!pricingAggregate) return DEFAULT_TIERS[type]
 
