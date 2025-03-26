@@ -5,22 +5,22 @@ type InfoIconProps = IconProps & {
   buttonSize?: string
 }
 
-export const InfoIcon = styled(Icon)<InfoIconProps>`
-  opacity: 0.8;
-
-  ${({ buttonSize }) => {
+export const InfoIcon = styled(Icon).attrs<InfoIconProps>(({ buttonSize }) => ({
+  size: (() => {
     switch (buttonSize) {
       case 'xs':
-        return 'font-size: 0.75rem;' // xs
+        return 'xs' // xs
       case 'sm':
-        return 'font-size: 0.875rem;' // sm
+        return 'sm' // sm
       case 'lg':
-        return 'font-size: 1.25rem;' // md-lg
+        return 'md-lg' // md-lg
       case 'xl':
-        return 'font-size: 1.5rem;' // lg
+        return 'lg' // lg
       case 'md':
       default:
-        return 'font-size: 1rem;' // md
+        return 'md' // md
     }
-  }}
+  })(),
+}))<InfoIconProps>`
+  opacity: 0.8;
 `
