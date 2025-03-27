@@ -369,12 +369,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const disabledStreamDisabledMessage: UseNewInstancePageReturn['disabledStreamDisabledMessage'] =
     useMemo(() => {
-      if (
-        account &&
-        !isAccountPAYGCompatible(account) &&
-        formValues.paymentMethod === PaymentMethod.Hold
-      )
-        return unsupportedStreamDisabledMessage(blockchainName)
+      // No longer disable payment method switching based on account compatibility
+      // We'll just display warnings and disable the submit button instead
       return undefined
     }, [account, blockchainName, formValues.paymentMethod])
 
