@@ -865,6 +865,62 @@ export abstract class ExecutableManager<T extends Executable> {
       {} as Record<string, CostEstimationMachineVolume>,
     )
 
+    // Program-specific volume costs
+    const programVolumeLines: CostLine[] = []
+    if (entityProps.type === EntityType.Program) {
+      // Add program code volume cost
+      const codeVolumeCostDetail =
+        detailMap[MessageCostType.EXECUTION_PROGRAM_VOLUME_CODE]
+      if (codeVolumeCostDetail) {
+        let volumeCost = Number(codeVolumeCostDetail[costProp])
+
+        // Apply discount if available
+        if (remainingDiscountAmount > 0) {
+          if (remainingDiscountAmount >= volumeCost) {
+            remainingDiscountAmount -= volumeCost
+            volumeCost = 0
+          } else {
+            volumeCost -= remainingDiscountAmount
+            remainingDiscountAmount = 0
+          }
+        }
+
+        programVolumeLines.push({
+          id: MessageCostType.EXECUTION_PROGRAM_VOLUME_CODE,
+          name: 'STORAGE',
+          label: 'CODE',
+          detail: 'Code volume',
+          cost: this.parseCost(paymentMethod, volumeCost),
+        })
+      }
+
+      // Add program runtime volume cost
+      const runtimeVolumeCostDetail =
+        detailMap[MessageCostType.EXECUTION_PROGRAM_VOLUME_RUNTIME]
+      if (runtimeVolumeCostDetail) {
+        let volumeCost = Number(runtimeVolumeCostDetail[costProp])
+
+        // Apply discount if available
+        if (remainingDiscountAmount > 0) {
+          if (remainingDiscountAmount >= volumeCost) {
+            remainingDiscountAmount -= volumeCost
+            volumeCost = 0
+          } else {
+            volumeCost -= remainingDiscountAmount
+            remainingDiscountAmount = 0
+          }
+        }
+
+        programVolumeLines.push({
+          id: MessageCostType.EXECUTION_PROGRAM_VOLUME_RUNTIME,
+          name: 'STORAGE',
+          label: 'RUNTIME',
+          detail: 'Runtime volume',
+          cost: this.parseCost(paymentMethod, volumeCost),
+        })
+      }
+    }
+
     const volumesLines: CostLine[] = costs.detail
       .filter(
         (detail) =>
@@ -931,6 +987,7 @@ export abstract class ExecutableManager<T extends Executable> {
 
     return [
       ...executionLines,
+      ...programVolumeLines,
       ...volumesLines,
       ...programTypeLines,
       ...domainsLines,
