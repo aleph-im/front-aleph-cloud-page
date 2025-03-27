@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
+import usePrevious from './usePrevious'
 import { InstanceCostProps } from '@/domain/instance'
 import { ProgramCostProps } from '@/domain/program'
 import { VolumeCostProps } from '@/domain/volume'
@@ -69,26 +70,28 @@ export function useEntityCost({
   const programManager = useProgramManager()
   const websiteManager = useWebsiteManager()
 
-  // Create a string representation of the props to detect changes
+  // Create a string representation of the props for change detection only
   const propsString = useMemo(() => JSON.stringify(props), [props])
-
+  
   // Debounce the string representation with a 1000ms (1 second) delay
   const debouncedPropsString = useDebounceState(propsString, 1000)
-
-  // Parse the debounced props string back to an object when it changes
+  
+  // Store previous debounced string to detect changes
+  const prevDebouncedPropsString = usePrevious(debouncedPropsString)
+  
+  // Return the original props only when the debounced string changes
   const debouncedProps = useMemo(() => {
-    try {
-      return JSON.parse(debouncedPropsString)
-    } catch (e) {
-      // Return empty object if parsing fails (e.g., on first render with empty string)
-      return {}
+    // Check if the debounced string has changed
+    if (debouncedPropsString !== prevDebouncedPropsString && debouncedPropsString) {
+      return props; // Return the original props (with File instances intact)
     }
-  }, [debouncedPropsString])
+    return undefined; // Return undefined when no change is detected
+  }, [debouncedPropsString, prevDebouncedPropsString, props])
 
   // Only make the API call when the debounced props change
   useEffect(() => {
-    // Skip initial render or invalid props
-    if (!debouncedProps || Object.keys(debouncedProps).length === 0) return
+    // Skip if debouncedProps is null (no change detected)
+    if (!debouncedProps) return
 
     async function load() {
       let result: CostSummary = emptyCost
