@@ -759,16 +759,15 @@ export abstract class ExecutableManager<T extends Executable> {
       detailMap[MessageCostType.EXECUTION_INSTANCE_VOLUME_ROOTFS]
 
     // Use the actual system volume size from rootfs
-    const storage =
-      rootfsVolume &&
-      entityProps.type !== EntityType.Program &&
-      entityProps.rootfs?.size_mib
-        ? entityProps.rootfs.size_mib
-        : undefined
+    const storage = rootfsVolume ? entityProps.rootfs.size_mib : undefined
 
-    const storageStr = !storage
+    // For VM instances, display the full storage size in detail for now
+    // We'll adjust this later after we calculate the discount
+    let displayStorage = storage
+
+    const storageStr = !displayStorage
       ? ''
-      : `.${convertByteUnits(storage, {
+      : `.${convertByteUnits(displayStorage, {
           from: 'MiB',
           to: 'GiB',
           displayUnit: false,
@@ -784,25 +783,20 @@ export abstract class ExecutableManager<T extends Executable> {
     const costProp =
       paymentMethod === PaymentMethod.Hold ? 'cost_hold' : 'cost_stream'
 
-    // Calculate the correct cost, including rootfs volume if applicable
-    const executionCost = Number(detailMap[MessageCostType.EXECUTION][costProp])
+    // Calculate the base execution cost
+    const baseExecutionCost = Number(
+      detailMap[MessageCostType.EXECUTION][costProp],
+    )
+    let totalExecutionCost = baseExecutionCost
 
     // Check if volume discount exists
     const volumeDiscount = detailMap[MessageCostType.EXECUTION_VOLUME_DISCOUNT]
+    // Make sure the discount amount is positive (original amount is negative)
     const discountAmount = volumeDiscount
       ? Math.abs(Number(volumeDiscount[costProp]))
       : 0
 
-    const executionLines: CostLine[] = [
-      {
-        id: MessageCostType.EXECUTION,
-        name: EntityTypeName[entityProps.type].toUpperCase(),
-        detail,
-        cost: this.parseCost(paymentMethod, executionCost),
-      },
-    ]
-
-    // For instances and GPU instances, handle system volume and discount
+    // For instances and GPU instances, handle the rootfs volume and apply discount
     if (
       entityProps.type === EntityType.Instance ||
       entityProps.type === EntityType.GpuInstance
@@ -811,23 +805,61 @@ export abstract class ExecutableManager<T extends Executable> {
       if (rootfsVolume) {
         const rootfsCost = Number(rootfsVolume[costProp])
 
-        // Apply the discount directly to the execution cost
-        if (volumeDiscount) {
-          executionLines[0].cost -= this.parseCost(
-            paymentMethod,
-            discountAmount,
-          )
-        }
+        // For VM instances, add the rootfs cost to the execution cost and apply discount
+        totalExecutionCost += rootfsCost
 
-        // Check if the rootfs volume cost exceeds the discount
-        // If so, add the extra cost as a separate line
-        if (rootfsCost > discountAmount) {
-          const extraStorageCost = rootfsCost - discountAmount
+        // Apply the discount to the execution cost
+        if (volumeDiscount) {
+          totalExecutionCost -= discountAmount
+
+          // Now that we have the discount, adjust the display storage size to show in detail
+          if (storage) {
+            // Calculate the discounted storage based on the cost percentage
+            // Use the percentage that is covered by the discount
+            const percentCovered = Math.min(1, discountAmount / rootfsCost) // Cap at 100%
+            displayStorage = Math.ceil(storage * percentCovered)
+          }
+        }
+      }
+    }
+
+    // Create the execution line with the adjusted cost
+    const executionLines: CostLine[] = [
+      {
+        id: MessageCostType.EXECUTION,
+        name: EntityTypeName[entityProps.type].toUpperCase(),
+        detail,
+        cost: this.parseCost(paymentMethod, totalExecutionCost),
+      },
+    ]
+
+    // For instances and GPU instances, add extra storage line if needed
+    if (
+      (entityProps.type === EntityType.Instance ||
+        entityProps.type === EntityType.GpuInstance) &&
+      rootfsVolume
+    ) {
+      const rootfsCost = Number(rootfsVolume[costProp])
+      if (rootfsCost > discountAmount) {
+        // Calculate the extra storage size based on cost percentage
+        const totalStorage = storage || 0
+
+        // If we know the total cost and discount, we can calculate
+        // the percentage of the storage that's covered by the discount
+        const percentCovered = discountAmount / rootfsCost
+        const discountedStorage = Math.floor(totalStorage * percentCovered)
+        const extraStorage = totalStorage - discountedStorage
+
+        // Calculate the cost for just this extra storage
+        const extraStorageCost = rootfsCost - discountAmount
+
+        // Only add the extra line if there's actual extra storage
+        if (extraStorage > 0) {
           executionLines.push({
             id: MessageCostType.EXECUTION_INSTANCE_VOLUME_ROOTFS,
             name: 'STORAGE',
             label: 'SYSTEM',
-            detail: humanReadableSize(storage || 0, 'MiB'),
+            detail: humanReadableSize(extraStorage, 'MiB'),
             cost: this.parseCost(paymentMethod, extraStorageCost),
           })
         }
