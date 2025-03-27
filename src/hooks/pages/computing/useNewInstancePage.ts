@@ -367,16 +367,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return blockchain ? blockchains[blockchain]?.name : 'Current network'
   }, [blockchain])
 
-  const disabledStreamDisabledMessage: UseNewInstancePageReturn['disabledStreamDisabledMessage'] =
-    useMemo(() => {
-      // No longer disable payment method switching based on account compatibility
-      // We'll just display warnings and disable the submit button instead
-      return undefined
-    }, [account, blockchainName, formValues.paymentMethod])
-
-  const streamDisabled = useMemo(() => {
-    return !!disabledStreamDisabledMessage
-  }, [disabledStreamDisabledMessage])
+  // No longer disable payment method switching - allow switching regardless of connection state
+  const disabledStreamDisabledMessage = undefined
+  const streamDisabled = false
 
   const address = useMemo(() => account?.address || '', [account])
 
