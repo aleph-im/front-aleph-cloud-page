@@ -8,6 +8,7 @@ export const EntityLogsControl = ({
   onViewLogs,
   onDownloadLogs,
   disabled = false,
+  downloadingLogs = false,
 }: EntityLogsControlProps) => {
   return (
     <>
@@ -29,9 +30,15 @@ export const EntityLogsControl = ({
               <Icon name="eye" />
               view
             </FunctionalButton>
-            <FunctionalButton onClick={onDownloadLogs} disabled={disabled}>
-              <Icon name="download" />
-              [WIP] download logs
+            <FunctionalButton
+              onClick={onDownloadLogs}
+              disabled={disabled || downloadingLogs}
+            >
+              <Icon
+                name={downloadingLogs ? 'spinner' : 'download'}
+                spin={downloadingLogs}
+              />
+              {downloadingLogs ? 'downloading...' : 'download logs'}
             </FunctionalButton>
           </div>
         </div>

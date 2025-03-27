@@ -84,6 +84,10 @@ export default function ManageInstance() {
     // Payment data
     paymentData,
 
+    // Logs
+    handleDownloadLogs,
+    isDownloadingLogs,
+
     // Node details
     nodeDetails,
   } = useManageInstance()
@@ -190,7 +194,8 @@ export default function ManageInstance() {
               <div>
                 <EntityLogsControl
                   onViewLogs={() => setTabId('log')}
-                  onDownloadLogs={() => alert('TODO: add download logs')}
+                  onDownloadLogs={handleDownloadLogs}
+                  downloadingLogs={isDownloadingLogs}
                   disabled={!instance}
                 />
               </div>
