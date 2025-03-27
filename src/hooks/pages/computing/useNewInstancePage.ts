@@ -369,16 +369,13 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const disabledStreamDisabledMessage: UseNewInstancePageReturn['disabledStreamDisabledMessage'] =
     useMemo(() => {
-      if (!account)
-        return accountConnectionRequiredDisabledMessage(
-          'enable switching payment methods',
-        )
-
       if (
+        account &&
         !isAccountPAYGCompatible(account) &&
         formValues.paymentMethod === PaymentMethod.Hold
       )
         return unsupportedStreamDisabledMessage(blockchainName)
+      return undefined
     }, [account, blockchainName, formValues.paymentMethod])
 
   const streamDisabled = useMemo(() => {
