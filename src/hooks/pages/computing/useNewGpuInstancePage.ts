@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { usePaymentMethod } from '@/hooks/common/usePaymentMethod'
 import Router, { useRouter } from 'next/router'
 import {
   createFromEVMAccount,

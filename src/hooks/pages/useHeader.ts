@@ -14,6 +14,7 @@ import {
 import { UseRoutesReturn, useRoutes } from '../common/useRoutes'
 import { useConnection } from '../common/useConnection'
 import { BlockchainId, ProviderId, blockchains } from '@/domain/connect/base'
+import { usePaymentMethod } from '../common/usePaymentMethod'
 
 export type UseHeaderReturn = UseRoutesReturn & {
   accountAddress?: string
@@ -39,6 +40,7 @@ export function useHeader(): UseHeaderReturn {
       manager: { voucherManager },
     },
   ] = useAppState()
+  const { fetchBalance } = usePaymentMethod()
 
   const { handleConnect: connect, handleDisconnect: disconnect } =
     useConnection({ triggerOnMount: true })
@@ -173,6 +175,13 @@ export function useHeader(): UseHeaderReturn {
   const handleDisconnect = useCallback(async () => {
     disconnect()
   }, [disconnect])
+
+  // Fetch balance when account changes
+  useEffect(() => {
+    if (account) {
+      fetchBalance()
+    }
+  }, [account, fetchBalance])
 
   const selectedNetwork = useMemo(() => {
     if (!blockchain) return

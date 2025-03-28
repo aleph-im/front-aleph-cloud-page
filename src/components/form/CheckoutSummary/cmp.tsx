@@ -24,6 +24,7 @@ import { useConnection } from '@/hooks/common/useConnection'
 import { Blockchain } from '@aleph-sdk/core'
 import { useNFTVoucherBalance } from '@/hooks/common/useNFTVoucherBalance'
 import StreamSummary from '@/components/common/StreamSummary'
+import { usePaymentMethod } from '@/hooks/common/usePaymentMethod'
 
 const CheckoutSummaryVolumeLine = ({
   volume,

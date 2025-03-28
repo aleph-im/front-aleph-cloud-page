@@ -1,6 +1,7 @@
 import { PaymentMethod } from '@/helpers/constants'
-import { ChangeEvent, useCallback, useRef } from 'react'
+import { ChangeEvent, useCallback, useEffect, useRef } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
+import { usePaymentMethod } from '@/hooks/common/usePaymentMethod'
 
 export type UseSelectPaymentMethodProps = {
   name?: string

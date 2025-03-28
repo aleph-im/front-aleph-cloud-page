@@ -5,12 +5,14 @@ import {
   defaultBlockchainProviders,
   ProviderId,
 } from '@/domain/connect/base'
+import { PaymentMethod } from '@/helpers/constants'
 
 export type ConnectionState = {
   account?: Account
   balance?: number
   blockchain?: BlockchainId
   provider?: ProviderId
+  paymentMethod: PaymentMethod
 }
 
 export const initialState: ConnectionState = {
@@ -18,6 +20,7 @@ export const initialState: ConnectionState = {
   provider: undefined,
   account: undefined,
   balance: undefined,
+  paymentMethod: PaymentMethod.Hold,
 }
 
 export enum ConnectionActionType {
@@ -25,6 +28,7 @@ export enum ConnectionActionType {
   CONNECTION_DISCONNECT = 'CONNECTION_DISCONNECT',
   CONNECTION_UPDATE = 'CONNECTION_UPDATE',
   CONNECTION_SET_BALANCE = 'CONNECTION_SET_BALANCE',
+  CONNECTION_SET_PAYMENT_METHOD = 'CONNECTION_SET_PAYMENT_METHOD',
 }
 
 export class ConnectionConnectAction {
@@ -68,11 +72,21 @@ export class ConnectionSetBalanceAction {
   ) {}
 }
 
+export class ConnectionSetPaymentMethodAction {
+  readonly type = ConnectionActionType.CONNECTION_SET_PAYMENT_METHOD
+  constructor(
+    public payload: {
+      paymentMethod: PaymentMethod
+    },
+  ) {}
+}
+
 export type ConnectionAction =
   | ConnectionConnectAction
   | ConnectionDisconnectAction
   | ConnectionUpdateAction
   | ConnectionSetBalanceAction
+  | ConnectionSetPaymentMethodAction
 
 export type ConnectionReducer = StoreReducer<ConnectionState, ConnectionAction>
 
@@ -123,6 +137,13 @@ export function getConnectionReducer(): ConnectionReducer {
         }
       }
       case ConnectionActionType.CONNECTION_SET_BALANCE: {
+        return {
+          ...state,
+          ...action.payload,
+        }
+      }
+      
+      case ConnectionActionType.CONNECTION_SET_PAYMENT_METHOD: {
         return {
           ...state,
           ...action.payload,
