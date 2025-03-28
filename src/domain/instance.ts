@@ -193,67 +193,79 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     }
   }
 
-  // TODO: Check if message and flow exists
-  async del(
+  async delStreams(
     instanceOrId: string | T,
     account?: SuperfluidAccount,
   ): Promise<void> {
     const instance = await this.ensureInstance(instanceOrId)
+    if (instance.payment?.type !== PaymentType.superfluid) return
 
-    if (instance.payment?.type === PaymentType.superfluid) {
-      if (!account) throw Err.ConnectYourPaymentWallet
-      const { receiver } = instance.payment
-      if (!receiver) throw Err.ReceiverReward
+    if (!account) throw Err.ConnectYourPaymentWallet
+    const { receiver } = instance.payment
+    if (!receiver) throw Err.ReceiverReward
 
-      const { communityWalletAddress, communityWalletTimestamp } =
-        await this.costManager.getSettingsAggregate()
+    const { communityWalletAddress, communityWalletTimestamp } =
+      await this.costManager.getSettingsAggregate()
 
-      const instanceCosts = await this.getTotalCostByHash(
-        instance.payment?.type,
-        instance.id,
+    const instanceCosts = await this.getTotalCostByHash(
+      instance.payment?.type,
+      instance.id,
+    )
+
+    const results = await Promise.allSettled(
+      instance.time >= communityWalletTimestamp
+        ? [
+            // @note: Instances created after split of flows between receiver and community wallet
+            account.decreaseALEPHFlow(
+              receiver,
+              this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
+            ),
+            account.decreaseALEPHFlow(
+              communityWalletAddress,
+              this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
+            ),
+          ]
+        : [
+            // @note: Instances created before split of flows between receiver and community wallet
+            account.decreaseALEPHFlow(receiver, instanceCosts + EXTRA_WEI),
+          ],
+    )
+
+    const errors: Error[] = results
+      .filter(
+        (result): result is PromiseRejectedResult =>
+          result.status === 'rejected',
       )
+      .filter(({ reason }) => reason.message !== 'No flow to decrease flow')
+      .map(({ reason }) => new Error(reason.message))
 
-      const results = await Promise.allSettled(
-        instance.time >= communityWalletTimestamp
-          ? [
-              // @note: Instances created after split of flows between receiver and community wallet
-              account.decreaseALEPHFlow(
-                receiver,
-                this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
-              ),
-              account.decreaseALEPHFlow(
-                communityWalletAddress,
-                this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
-              ),
-            ]
-          : [
-              // @note: Instances created before split of flows between receiver and community wallet
-              account.decreaseALEPHFlow(receiver, instanceCosts + EXTRA_WEI),
-            ],
-      )
-
-      const errors: Error[] = results
-        .filter(
-          (result): result is PromiseRejectedResult =>
-            result.status === 'rejected',
-        )
-        .filter(({ reason }) => reason.message !== 'No flow to decrease flow')
-        .map(({ reason }) => new Error(reason.message))
-
-      if (errors.length) {
-        const [firstError] = errors
-        throw firstError
-      }
+    if (errors.length) {
+      const [firstError] = errors
+      throw firstError
     }
+  }
 
+  async delInstance(instanceOrId: string | T): Promise<void> {
+    const instance = await this.ensureInstance(instanceOrId)
+
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    await this.sdkClient.forget({
+      channel: this.channel,
+      hashes: [instance.id],
+    })
+  }
+
+  async del(
+    instanceOrId: string | T,
+    account?: SuperfluidAccount,
+  ): Promise<void> {
     try {
-      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
-        throw Err.InvalidAccount
+      const instance = await this.ensureInstance(instanceOrId)
 
-      await this.sdkClient.forget({
-        channel: this.channel,
-        hashes: [instance.id],
-      })
+      await this.delStreams(instance, account)
+      await this.delInstance(instance)
     } catch (err) {
       throw Err.RequestFailed(err)
     }
@@ -270,15 +282,22 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     // @note: Aggregate all signatures in 1 step
     if (volumes.length > 0) steps.push('volume')
 
-    if (newInstance.payment?.type === PaymentMethod.Stream)
+    if (newInstance.payment?.type === PaymentMethod.Stream) {
       steps.push('reserve')
+    }
 
     steps.push('instance')
 
-    if (newInstance.payment?.type === PaymentMethod.Stream) steps.push('stream')
+    if (newInstance.payment?.type === PaymentMethod.Stream) {
+      steps.push('stream')
+    }
 
     // @note: Aggregate all signatures in 1 step
     if (domains.length > 0) steps.push('domain')
+
+    if (newInstance.payment?.type === PaymentMethod.Stream) {
+      steps.push('allocate')
+    }
 
     return steps
   }
@@ -287,18 +306,23 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     instancesOrIds: string | T | (string | T)[],
   ): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
+
     instancesOrIds = Array.isArray(instancesOrIds)
       ? instancesOrIds
       : [instancesOrIds]
-    instancesOrIds.forEach((instance) => {
-      if (
-        typeof instance !== 'string' &&
-        instance.payment?.type === PaymentType.superfluid &&
-        instance.payment?.receiver
-      )
-        steps.push('streamDel')
-      steps.push('instanceDel')
-    })
+
+    await Promise.all(
+      instancesOrIds.map(async (instanceOrId) => {
+        const instance = await this.ensureInstance(instanceOrId)
+
+        if (instance.payment?.type === PaymentType.superfluid) {
+          steps.push('streamDel')
+        }
+
+        steps.push('instanceDel')
+      }),
+    )
+
     return steps
   }
 
@@ -316,8 +340,15 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
     try {
       for (const instanceOrId of instancesOrIds) {
+        const instance = await this.ensureInstance(instanceOrId)
+
+        if (instance.payment?.type === PaymentType.superfluid) {
+          yield
+          await this.delStreams(instance, account)
+        }
+
         yield
-        await this.del(instanceOrId, account)
+        await this.delInstance(instance)
       }
     } catch (err) {
       throw Err.RequestFailed(err)
@@ -528,7 +559,10 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
 
     yield
-    await this.notifyCRNAllocation(newInstance.node, entity.id, false)
+    await this.notifyCRNAllocation(newInstance.node, entity.id, {
+      attemps: 10,
+      await: 2000,
+    })
   }
 
   protected async parseInstanceForCostEstimation(

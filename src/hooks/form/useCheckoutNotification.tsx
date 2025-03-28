@@ -170,4 +170,9 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       title: 'Sign Website Update',
       content: 'By signing this, you confirm the update of your website.',
     },
+    allocate: {
+      title: 'Allocate the instance',
+      content:
+        'Notifiying the selected CRN for allocating the instance. It can take a while',
+    },
   }

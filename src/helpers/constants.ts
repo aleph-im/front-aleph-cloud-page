@@ -83,6 +83,7 @@ type CheckoutAddStepType =
   | 'program'
   | 'website'
   | 'reserve'
+  | 'allocate'
 
 type CheckoutDelStepType =
   | 'sshDel'
