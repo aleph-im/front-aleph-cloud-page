@@ -64,7 +64,7 @@ import {
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
-import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
+import { useDefaultTiers } from '@/hooks/common/pricing/useDefaultTiers'
 import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceManager'
 import { GpuInstanceManager } from '@/domain/gpuInstance'
 import usePrevious from '@/hooks/common/usePrevious'
@@ -186,7 +186,10 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // -------------------------
   // Tiers
 
-  const { defaultTiers } = useDefaultTiers({ type: EntityType.GpuInstance })
+  const { defaultTiers } = useDefaultTiers({
+    type: EntityType.GpuInstance,
+    gpuModel: selectedNode?.selectedGpu?.model,
+  })
 
   // -------------------------
   // Checkout flow
