@@ -268,7 +268,7 @@ export abstract class ExecutableManager<T extends Executable> {
     if (!node.address) throw Err.InvalidCRNAddress
 
     const nodeUrl = NodeManager.normalizeUrl(node.address)
-    const url = new URL(`${nodeUrl}/control/allocation/reserve_ressources`)
+    const url = new URL(`${nodeUrl}/control/reserve_ressources`)
     const { hostname: domain, pathname: path } = url
 
     const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
