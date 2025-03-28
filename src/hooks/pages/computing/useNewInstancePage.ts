@@ -127,7 +127,8 @@ export type UseNewInstancePageReturn = {
 
 export function useNewInstancePage(): UseNewInstancePageReturn {
   const [, dispatch] = useAppState()
-  const { paymentMethod: globalPaymentMethod, setPaymentMethod } = usePaymentMethod()
+  const { paymentMethod: globalPaymentMethod, setPaymentMethod } =
+    usePaymentMethod()
 
   const {
     blockchain,
@@ -547,7 +548,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     if (formValues.paymentMethod !== globalPaymentMethod) {
       setValue('paymentMethod', globalPaymentMethod)
     }
-  }, [globalPaymentMethod, setValue])
+  }, [globalPaymentMethod, setValue, formValues.paymentMethod])
 
   // Update global state when form changes
   useEffect(() => {

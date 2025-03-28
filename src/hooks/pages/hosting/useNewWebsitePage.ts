@@ -37,7 +37,9 @@ export type NewWebsiteFormState = NameAndTagsField &
     ens?: string[]
   }
 
-export const getDefaultValues = (paymentMethod: PaymentMethod): Partial<NewWebsiteFormState> => ({
+export const getDefaultValues = (
+  paymentMethod: PaymentMethod,
+): Partial<NewWebsiteFormState> => ({
   ...defaultNameAndTags,
   payment: { chain: BlockchainId.ETH, type: paymentMethod },
 })
@@ -58,7 +60,8 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
   const { account, balance: accountBalance = 0 } = appState.connection
-  const { paymentMethod: globalPaymentMethod, setPaymentMethod } = usePaymentMethod()
+  const { paymentMethod: globalPaymentMethod, setPaymentMethod } =
+    usePaymentMethod()
 
   const manager = useWebsiteManager()
   const { next, stop } = useCheckoutNotification({})
@@ -102,7 +105,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     control,
     handleSubmit,
     formState: { errors },
-    setValue
+    setValue,
   } = useForm({
     defaultValues: getDefaultValues(globalPaymentMethod),
     onSubmit,
@@ -110,7 +113,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   })
 
   const values = useWatch({ control }) as NewWebsiteFormState
-  
+
   // Sync form payment method with global payment method (both ways)
   useEffect(() => {
     // Update local form when global state changes (only on mount or global change)

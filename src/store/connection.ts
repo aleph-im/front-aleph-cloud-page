@@ -142,7 +142,7 @@ export function getConnectionReducer(): ConnectionReducer {
           ...action.payload,
         }
       }
-      
+
       case ConnectionActionType.CONNECTION_SET_PAYMENT_METHOD: {
         return {
           ...state,

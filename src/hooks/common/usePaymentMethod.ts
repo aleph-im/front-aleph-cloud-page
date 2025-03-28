@@ -2,7 +2,10 @@ import { useCallback, useEffect } from 'react'
 import { useAppState } from '@/contexts/appState'
 import { PaymentMethod } from '@/helpers/constants'
 import { useRouter } from 'next/router'
-import { ConnectionSetPaymentMethodAction, ConnectionSetBalanceAction } from '@/store/connection'
+import {
+  ConnectionSetPaymentMethodAction,
+  ConnectionSetBalanceAction,
+} from '@/store/connection'
 import { getAddressBalance } from '@/helpers/utils'
 import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
 import { EVMAccount } from '@aleph-sdk/evm'
@@ -47,9 +50,14 @@ export function usePaymentMethod(): UsePaymentMethodReturn {
     let balance: number | undefined
 
     try {
-      if (paymentMethod === PaymentMethod.Stream && isAccountSupported(account)) {
+      if (
+        paymentMethod === PaymentMethod.Stream &&
+        isAccountSupported(account)
+      ) {
         // For Stream payment method, fetch balance from RPC node
-        const superfluidAccount = await createFromEVMAccount(account as EVMAccount)
+        const superfluidAccount = await createFromEVMAccount(
+          account as EVMAccount,
+        )
         const superfluidBalance = await superfluidAccount.getALEPHBalance()
         balance = superfluidBalance.toNumber()
       } else {
@@ -72,7 +80,7 @@ export function usePaymentMethod(): UsePaymentMethodReturn {
   // Auto-switch to "hold" when not in payment form
   useEffect(() => {
     const isPaymentForm = pathname.includes('/new') || pathname.endsWith('/new')
-    
+
     if (!isPaymentForm && paymentMethod === PaymentMethod.Stream) {
       setPaymentMethod(PaymentMethod.Hold)
     }
@@ -88,6 +96,6 @@ export function usePaymentMethod(): UsePaymentMethodReturn {
   return {
     paymentMethod,
     setPaymentMethod,
-    fetchBalance
+    fetchBalance,
   }
 }

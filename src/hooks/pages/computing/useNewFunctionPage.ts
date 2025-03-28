@@ -61,7 +61,8 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
   const { account, balance: accountBalance = 0 } = appState.connection
-  const { paymentMethod: globalPaymentMethod, setPaymentMethod } = usePaymentMethod()
+  const { paymentMethod: globalPaymentMethod, setPaymentMethod } =
+    usePaymentMethod()
 
   const manager = useProgramManager()
   const { next, stop } = useCheckoutNotification()
@@ -119,7 +120,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     control,
     handleSubmit,
     formState: { errors },
-    setValue
+    setValue,
   } = useForm({
     defaultValues,
     onSubmit,
@@ -127,14 +128,14 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   })
   // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as NewFunctionFormState
-  
+
   // Sync form payment method with global payment method (both ways)
   useEffect(() => {
     // Update local form when global state changes (only on mount or global change)
     if (values.paymentMethod !== globalPaymentMethod) {
       setValue('paymentMethod', globalPaymentMethod)
     }
-  }, [globalPaymentMethod, setValue])
+  }, [globalPaymentMethod, setValue, values.paymentMethod])
 
   // Update global state when form changes
   useEffect(() => {
