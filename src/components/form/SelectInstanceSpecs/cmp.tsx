@@ -92,7 +92,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
       },
     ] as TableColumn<SpecsDetail>[]
 
-    if (type === EntityType.Instance) {
+    if (type === EntityType.Instance || type === EntityType.GpuInstance) {
       cols.splice(2, 0, {
         label: 'HDD',
         align: 'right',

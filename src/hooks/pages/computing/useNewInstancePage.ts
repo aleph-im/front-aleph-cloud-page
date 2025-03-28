@@ -67,7 +67,7 @@ import {
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
-import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
+import { useDefaultTiers } from '@/hooks/common/pricing/useDefaultTiers'
 import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
 import usePrevious from '@/hooks/common/usePrevious'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
@@ -367,23 +367,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return blockchain ? blockchains[blockchain]?.name : 'Current network'
   }, [blockchain])
 
-  const disabledStreamDisabledMessage: UseNewInstancePageReturn['disabledStreamDisabledMessage'] =
-    useMemo(() => {
-      if (!account)
-        return accountConnectionRequiredDisabledMessage(
-          'enable switching payment methods',
-        )
-
-      if (
-        !isAccountPAYGCompatible(account) &&
-        formValues.paymentMethod === PaymentMethod.Hold
-      )
-        return unsupportedStreamDisabledMessage(blockchainName)
-    }, [account, blockchainName, formValues.paymentMethod])
-
-  const streamDisabled = useMemo(() => {
-    return !!disabledStreamDisabledMessage
-  }, [disabledStreamDisabledMessage])
+  // No longer disable payment method switching - allow switching regardless of connection state
+  const disabledStreamDisabledMessage = undefined
+  const streamDisabled = false
 
   const address = useMemo(() => account?.address || '', [account])
 

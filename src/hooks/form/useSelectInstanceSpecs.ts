@@ -4,7 +4,7 @@ import { convertByteUnits } from '@/helpers/utils'
 import { useEffect, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 import { useNodeManager } from '../common/useManager/useNodeManager'
-import { useDefaultTiers } from '../common/pricing/tiers/useDefaultTiers'
+import { useDefaultTiers } from '../common/pricing/useDefaultTiers'
 
 export type InstanceSpecsField = ReducedCRNSpecs & {
   disabled?: boolean

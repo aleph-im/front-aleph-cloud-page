@@ -1,6 +1,6 @@
 import { ReducedCRNSpecs } from '@/domain/node'
 import { useMemo } from 'react'
-import useFetchPricingAggregate from '../useFetchPricingAggregate'
+import useFetchPricingAggregate from './useFetchPricingAggregate'
 import { EntityType } from '@/helpers/constants'
 import Err from '@/helpers/errors'
 import { PriceType } from '@/domain/cost'
@@ -10,7 +10,7 @@ export type Tier = ReducedCRNSpecs & {
 }
 
 export type UseDefaultTiersProps = {
-  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
+  type: EntityType.Instance | EntityType.Program | EntityType.GpuInstance
   gpuModel?: string
 }
 
@@ -25,17 +25,19 @@ export const DEFAULT_TIERS: {
 } = {
   program: [{ cpu: 1, ram: 2048, storage: 20480, disabled: false }],
   instance: [{ cpu: 1, ram: 2048, storage: 20480, disabled: false }],
-  gpuInstance: [{ cpu: 1, ram: 2048, storage: 20480, disabled: false }],
+  gpuInstance: [{ cpu: 3, ram: 3 * 6144, storage: 3 * 61440, disabled: false }],
 }
 
-export function useDefaultTiers({
-  type,
-  gpuModel,
-}: UseDefaultTiersProps): UseDefaultTiersReturn {
+export function useDefaultTiers(
+  props: UseDefaultTiersProps,
+): UseDefaultTiersReturn {
+  const { type, gpuModel } = props
+
   const { loading: loadingPricingAggregate, pricingAggregate } =
     useFetchPricingAggregate()
 
   const defaultTiers = useMemo(() => {
+    // @todo: Refactor and show a loading spinner state instead
     if (loadingPricingAggregate) return DEFAULT_TIERS[type]
     if (!pricingAggregate) return DEFAULT_TIERS[type]
 

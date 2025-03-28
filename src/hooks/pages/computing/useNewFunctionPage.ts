@@ -28,7 +28,7 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
-import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
+import { useDefaultTiers } from '@/hooks/common/pricing/useDefaultTiers'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
 
 export type NewFunctionFormState = NameAndTagsField & {
