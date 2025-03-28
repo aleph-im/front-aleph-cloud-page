@@ -14,6 +14,7 @@ import {
 import { UseRoutesReturn, useRoutes } from '../common/useRoutes'
 import { useConnection } from '../common/useConnection'
 import { BlockchainId, ProviderId, blockchains } from '@/domain/connect/base'
+import { usePaymentMethod } from '../common/usePaymentMethod'
 
 export type UseHeaderReturn = UseRoutesReturn & {
   accountAddress?: string
@@ -33,15 +34,19 @@ export type UseHeaderReturn = UseRoutesReturn & {
 }
 
 export function useHeader(): UseHeaderReturn {
-  const [
-    {
-      connection: { provider, blockchain, account, balance: accountBalance },
-      manager: { voucherManager },
-    },
-  ] = useAppState()
+  const [state] = useAppState()
+  const {
+    provider,
+    blockchain,
+    account,
+    balance: accountBalance,
+  } = state.connection
+  const { voucherManager } = state.manager
 
   const { handleConnect: connect, handleDisconnect: disconnect } =
     useConnection({ triggerOnMount: true })
+
+  usePaymentMethod({ triggerOnMount: true })
 
   const { routes } = useRoutes()
   const router = useRouter()

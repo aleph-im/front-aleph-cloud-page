@@ -1,5 +1,6 @@
-import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useMemo } from 'react'
+import { useAppState } from '@/contexts/appState'
+import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 import { useRouter } from 'next/router'
 import { InstanceSpecsField } from '../../form/useSelectInstanceSpecs'
 import { VolumeField } from '../../form/useAddVolume'
@@ -117,6 +118,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     defaultValues,
     onSubmit,
@@ -151,6 +153,12 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const handleBack = () => {
     router.push('.')
   }
+
+  // Sync form payment method with global state
+  useSyncPaymentMethod({
+    formPaymentMethod: values.paymentMethod,
+    setValue,
+  })
 
   return {
     address: account?.address || '',

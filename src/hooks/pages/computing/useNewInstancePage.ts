@@ -7,6 +7,8 @@ import {
   useRef,
   useState,
 } from 'react'
+import { usePaymentMethod } from '@/hooks/common/usePaymentMethod'
+import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 import Router, { useRouter } from 'next/router'
 import {
   createFromEVMAccount,
@@ -126,6 +128,7 @@ export type UseNewInstancePageReturn = {
 
 export function useNewInstancePage(): UseNewInstancePageReturn {
   const [, dispatch] = useAppState()
+  const { paymentMethod: globalPaymentMethod } = usePaymentMethod()
 
   const {
     blockchain,
@@ -280,16 +283,19 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Setup form
 
-  const defaultValues: Partial<NewInstanceFormState> = {
-    ...defaultNameAndTags,
-    image: defaultInstanceImage,
-    specs: defaultTiers[0],
-    systemVolume: { size: defaultTiers[0]?.storage },
-    paymentMethod: PaymentMethod.Hold,
-    streamDuration: defaultStreamDuration,
-    streamCost: Number.POSITIVE_INFINITY,
-    termsAndConditions: undefined,
-  }
+  const defaultValues: Partial<NewInstanceFormState> = useMemo(
+    () => ({
+      ...defaultNameAndTags,
+      image: defaultInstanceImage,
+      specs: defaultTiers[0],
+      systemVolume: { size: defaultTiers[0]?.storage },
+      paymentMethod: globalPaymentMethod,
+      streamDuration: defaultStreamDuration,
+      streamCost: Number.POSITIVE_INFINITY,
+      termsAndConditions: undefined,
+    }),
+    [defaultTiers, globalPaymentMethod],
+  )
 
   const {
     control,
@@ -538,6 +544,12 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
     setValue('streamCost', cost.cost)
   }, [cost, setValue, formValues])
+
+  // Sync form payment method with global state
+  useSyncPaymentMethod({
+    formPaymentMethod: formValues.paymentMethod,
+    setValue,
+  })
 
   return {
     address,

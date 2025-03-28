@@ -9,7 +9,7 @@ import {
   StoreMessage,
 } from '@aleph-sdk/message'
 import { MachineVolume } from '@aleph-sdk/message'
-import { EntityType, apiServer } from './constants'
+import { EntityType, PaymentMethod, apiServer } from './constants'
 import { SSHKey } from '../domain/ssh'
 import { Instance } from '../domain/instance'
 import { Volume } from '@/domain/volume'
@@ -18,6 +18,9 @@ import { Domain } from '@/domain/domain'
 import { Website } from '@/domain/website'
 import { CID } from 'multiformats'
 import Err from './errors'
+import { Account } from '@aleph-sdk/account'
+import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
+import { EVMAccount } from '@aleph-sdk/evm'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -68,6 +71,32 @@ export const getAddressBalance = async (address: string) => {
   } catch (error) {
     throw Err.RequestFailed(error)
   }
+}
+
+export async function getAccountBalance(
+  account: Account,
+  paymentMethod: PaymentMethod,
+) {
+  let balance: number
+
+  if (paymentMethod === PaymentMethod.Stream && isAccountSupported(account)) {
+    try {
+      // For Stream payment method, fetch balance from RPC node
+      const superfluidAccount = await createFromEVMAccount(
+        account as EVMAccount,
+      )
+      const superfluidBalance = await superfluidAccount.getALEPHBalance()
+      balance = superfluidBalance.toNumber()
+    } catch (e) {
+      console.error(e)
+      balance = 0
+    }
+  } else {
+    // For Hold payment method, fetch balance from pyaleph API
+    balance = await getAddressBalance(account.address)
+  }
+
+  return balance
 }
 
 export function round(num: number, decimals = 2) {
