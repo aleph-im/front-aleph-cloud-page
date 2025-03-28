@@ -43,7 +43,12 @@ import Err from '@/helpers/errors'
 import { BlockchainId } from './connect/base'
 import { CRN, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
-import { convertByteUnits, humanReadableSize, sleep } from '@aleph-front/core'
+import {
+  convertByteUnits,
+  humanReadableSize,
+  round,
+  sleep,
+} from '@aleph-front/core'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import { isBlockchainPAYGCompatible } from './blockchain'
 import { CostLine } from './cost'
@@ -743,6 +748,14 @@ export abstract class ExecutableManager<T extends Executable> {
       {} as Record<MessageCostType, MessageCostLine>,
     )
 
+    const paymentMethod =
+      costs.payment_type === PaymentType.hold
+        ? PaymentMethod.Hold
+        : PaymentMethod.Stream
+
+    const costProp =
+      paymentMethod === PaymentMethod.Hold ? 'cost_hold' : 'cost_stream'
+
     // Execution
 
     const { vcpus: cpu = 0, memory: ram = 0 } = entityProps.resources || {}
@@ -755,20 +768,63 @@ export abstract class ExecutableManager<T extends Executable> {
       displayUnit: false,
     })}GB-RAM`
 
-    const rootfsVolume =
+    const baseExecutionCostAmount = Number(
+      detailMap[MessageCostType.EXECUTION][costProp],
+    )
+
+    const rootfsVolumeCostDetail =
       detailMap[MessageCostType.EXECUTION_INSTANCE_VOLUME_ROOTFS]
 
-    // Use the actual system volume size from rootfs
-    const storage =
-      rootfsVolume &&
-      entityProps.type !== EntityType.Program &&
-      entityProps.rootfs?.size_mib
-        ? entityProps.rootfs.size_mib
-        : undefined
+    const rootfsVolumeCostAmount = rootfsVolumeCostDetail
+      ? Number(rootfsVolumeCostDetail[costProp])
+      : 0
 
-    const storageStr = !storage
+    const volumeDiscountCostDetail =
+      detailMap[MessageCostType.EXECUTION_VOLUME_DISCOUNT]
+
+    const volumeDiscountCostAmount = volumeDiscountCostDetail
+      ? Math.abs(Number(volumeDiscountCostDetail[costProp]))
+      : 0
+
+    let remainingDiscountAmount = volumeDiscountCostAmount
+
+    const rootfsVolumeSize =
+      (rootfsVolumeCostDetail &&
+        entityProps.type !== EntityType.Program &&
+        entityProps?.rootfs?.size_mib) ||
+      0
+
+    let totalExecutionCost = baseExecutionCostAmount
+    let totalExecutionStorageSize = rootfsVolumeSize
+
+    let extraExecutionStorageCost = 0
+    let extraExecutionStorageSize = 0
+
+    if (rootfsVolumeCostDetail) {
+      const percentExtra =
+        1 -
+        Math.min(round(remainingDiscountAmount / rootfsVolumeCostAmount, 18), 1)
+
+      const extraCost = round(rootfsVolumeCostAmount * percentExtra, 18)
+      const extraStorage = round(rootfsVolumeSize * percentExtra, 0)
+      const coveredStorage = rootfsVolumeSize - extraStorage
+
+      totalExecutionCost = baseExecutionCostAmount // + (rootfsVolumeCostAmount - extraCost - remainingDiscountAmount)
+      extraExecutionStorageCost = extraCost
+
+      totalExecutionStorageSize = coveredStorage
+      extraExecutionStorageSize = extraStorage
+
+      remainingDiscountAmount = Math.max(
+        remainingDiscountAmount - rootfsVolumeCostAmount,
+        0,
+      )
+    }
+
+    // Now create the storage display string after we have the final displayStorage value
+    const storageStr = !totalExecutionStorageSize
       ? ''
-      : `.${convertByteUnits(storage, {
+      : `.${convertByteUnits(totalExecutionStorageSize, {
           from: 'MiB',
           to: 'GiB',
           displayUnit: false,
@@ -776,42 +832,26 @@ export abstract class ExecutableManager<T extends Executable> {
 
     const detail = `${cpuStr}${ramStr}${storageStr}`
 
-    const paymentMethod =
-      costs.payment_type === PaymentType.hold
-        ? PaymentMethod.Hold
-        : PaymentMethod.Stream
-
-    const costProp =
-      paymentMethod === PaymentMethod.Hold ? 'cost_hold' : 'cost_stream'
-
-    // Calculate the correct cost, including rootfs volume if applicable
-    let executionCost = Number(detailMap[MessageCostType.EXECUTION][costProp])
-
-    // If we have a rootfs volume cost, add it to the execution cost
-    if (rootfsVolume) {
-      executionCost += Number(rootfsVolume[costProp])
-    }
-
-    const executionLines = [
+    // Create the execution line with the adjusted cost
+    const executionLines: CostLine[] = [
       {
         id: MessageCostType.EXECUTION,
         name: EntityTypeName[entityProps.type].toUpperCase(),
         detail,
-        cost: this.parseCost(paymentMethod, executionCost),
+        cost: this.parseCost(paymentMethod, totalExecutionCost),
       },
     ]
 
-    // Add volume discount line if it exists
-    const volumeDiscount = detailMap[MessageCostType.EXECUTION_VOLUME_DISCOUNT]
-    if (volumeDiscount) {
+    // For instances and GPU instances, add extra storage line if needed
+    // For programs, we don't apply discount to execution cost
+    // The discount will be applied to attached volumes in the volumesLines section
+    if (extraExecutionStorageCost) {
       executionLines.push({
-        id: MessageCostType.EXECUTION_VOLUME_DISCOUNT,
-        name: 'VOLUME DISCOUNT',
-        detail: 'Applied discount for bundled storage',
-        cost: this.parseCost(
-          paymentMethod,
-          -Math.abs(Number(volumeDiscount[costProp])), // Ensure it's always negative
-        ),
+        id: MessageCostType.EXECUTION_INSTANCE_VOLUME_ROOTFS,
+        name: 'STORAGE',
+        label: 'SYSTEM',
+        detail: humanReadableSize(extraExecutionStorageSize, 'MiB'),
+        cost: this.parseCost(paymentMethod, extraExecutionStorageCost),
       })
     }
 
@@ -825,7 +865,63 @@ export abstract class ExecutableManager<T extends Executable> {
       {} as Record<string, CostEstimationMachineVolume>,
     )
 
-    const volumesLines = costs.detail
+    // Program-specific volume costs
+    const programVolumeLines: CostLine[] = []
+    if (entityProps.type === EntityType.Program) {
+      // Add program code volume cost
+      const codeVolumeCostDetail =
+        detailMap[MessageCostType.EXECUTION_PROGRAM_VOLUME_CODE]
+      if (codeVolumeCostDetail) {
+        let volumeCost = Number(codeVolumeCostDetail[costProp])
+
+        // Apply discount if available
+        if (remainingDiscountAmount > 0) {
+          if (remainingDiscountAmount >= volumeCost) {
+            remainingDiscountAmount -= volumeCost
+            volumeCost = 0
+          } else {
+            volumeCost -= remainingDiscountAmount
+            remainingDiscountAmount = 0
+          }
+        }
+
+        programVolumeLines.push({
+          id: MessageCostType.EXECUTION_PROGRAM_VOLUME_CODE,
+          name: 'STORAGE',
+          label: 'CODE',
+          detail: 'Code volume',
+          cost: this.parseCost(paymentMethod, volumeCost),
+        })
+      }
+
+      // Add program runtime volume cost
+      const runtimeVolumeCostDetail =
+        detailMap[MessageCostType.EXECUTION_PROGRAM_VOLUME_RUNTIME]
+      if (runtimeVolumeCostDetail) {
+        let volumeCost = Number(runtimeVolumeCostDetail[costProp])
+
+        // Apply discount if available
+        if (remainingDiscountAmount > 0) {
+          if (remainingDiscountAmount >= volumeCost) {
+            remainingDiscountAmount -= volumeCost
+            volumeCost = 0
+          } else {
+            volumeCost -= remainingDiscountAmount
+            remainingDiscountAmount = 0
+          }
+        }
+
+        programVolumeLines.push({
+          id: MessageCostType.EXECUTION_PROGRAM_VOLUME_RUNTIME,
+          name: 'STORAGE',
+          label: 'RUNTIME',
+          detail: 'Runtime volume',
+          cost: this.parseCost(paymentMethod, volumeCost),
+        })
+      }
+    }
+
+    const volumesLines: CostLine[] = costs.detail
       .filter(
         (detail) =>
           detail.type === MessageCostType.EXECUTION_VOLUME_INMUTABLE ||
@@ -837,18 +933,36 @@ export abstract class ExecutableManager<T extends Executable> {
         const size = 'size_mib' in vol ? vol.size_mib : vol.estimated_size_mib
         const label = 'size_mib' in vol ? 'PERSISTENT' : 'VOLUME'
 
+        let volumeCost = Number(detail[costProp])
+
+        // Apply discount for programs
+        if (
+          entityProps.type === EntityType.Program &&
+          remainingDiscountAmount > 0
+        ) {
+          // If the discount is larger than the volume cost, apply the whole volume cost as discount
+          if (remainingDiscountAmount >= volumeCost) {
+            remainingDiscountAmount -= volumeCost
+            volumeCost = 0
+          } else {
+            // Otherwise, apply partial discount
+            volumeCost -= remainingDiscountAmount
+            remainingDiscountAmount = 0
+          }
+        }
+
         return {
           id: `${detail.type}|${detail.name}`,
           name: 'STORAGE',
           label,
           detail: humanReadableSize(size, 'MiB'),
-          cost: this.parseCost(paymentMethod, Number(detail[costProp])),
+          cost: this.parseCost(paymentMethod, volumeCost),
         }
       })
 
     // Persistent
 
-    const programTypeLines =
+    const programTypeLines: CostLine[] =
       entityProps.type === EntityType.Program
         ? [
             {
@@ -862,15 +976,18 @@ export abstract class ExecutableManager<T extends Executable> {
 
     // Domains
 
-    const domainsLines = (entityProps.domains || []).map((domain) => ({
-      id: 'DOMAIN',
-      name: 'CUSTOM DOMAIN',
-      detail: domain.name,
-      cost: this.parseCost(paymentMethod, 0),
-    }))
+    const domainsLines: CostLine[] = (entityProps.domains || []).map(
+      (domain) => ({
+        id: 'DOMAIN',
+        name: 'CUSTOM DOMAIN',
+        detail: domain.name,
+        cost: this.parseCost(paymentMethod, 0),
+      }),
+    )
 
     return [
       ...executionLines,
+      ...programVolumeLines,
       ...volumesLines,
       ...programTypeLines,
       ...domainsLines,
