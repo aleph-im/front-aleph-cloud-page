@@ -3,9 +3,8 @@ import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { useAppState } from '@/contexts/appState'
-import { usePaymentMethod } from '@/hooks/common/usePaymentMethod'
 import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
-import { WebsiteManager, WebsitePayment } from '@/domain/website'
+import { AddWebsite, WebsiteManager, WebsitePayment } from '@/domain/website'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -27,23 +26,21 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
-import { BlockchainId } from '@/domain/connect/base'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
+import { BlockchainId } from '@/domain/connect/base'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {
     website: WebsiteFolderField
-    payment: WebsitePayment
     domains?: Omit<DomainField, 'ref'>[]
     ens?: string[]
+    paymentMethod: PaymentMethod
   }
 
-export const getDefaultValues = (
-  paymentMethod: PaymentMethod,
-): Partial<NewWebsiteFormState> => ({
+export const defaultValues: Partial<NewWebsiteFormState> = {
   ...defaultNameAndTags,
-  payment: { chain: BlockchainId.ETH, type: paymentMethod },
-})
+  paymentMethod: PaymentMethod.Hold,
+}
 
 export type UseNewWebsitePagePageReturn = {
   address: string
@@ -61,7 +58,6 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
   const { account, balance: accountBalance = 0 } = appState.connection
-  const { paymentMethod: globalPaymentMethod } = usePaymentMethod()
 
   const manager = useWebsiteManager()
   const { next, stop } = useCheckoutNotification({})
@@ -70,10 +66,21 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     async (state: NewWebsiteFormState) => {
       if (!manager) throw Err.ConnectYourWallet
 
-      const iSteps = await manager.getAddSteps(state)
+      // @todo: Refactor this
+      const payment: WebsitePayment = {
+        chain: BlockchainId.ETH,
+        type: PaymentMethod.Hold,
+      }
+
+      const website = {
+        ...state,
+        payment,
+      } as AddWebsite
+
+      const iSteps = await manager.getAddSteps(website)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = manager.addSteps(state)
+      const steps = manager.addSteps(website)
 
       try {
         let accountWebsite
@@ -107,27 +114,19 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     formState: { errors },
     setValue,
   } = useForm({
-    defaultValues: getDefaultValues(globalPaymentMethod),
+    defaultValues,
     onSubmit,
     resolver: zodResolver(WebsiteManager.addSchema),
   })
 
   const values = useWatch({ control }) as NewWebsiteFormState
 
-  // Sync form payment method with global state - special case for nested field
-  useSyncPaymentMethod({
-    formPaymentMethod: values.payment?.type,
-    setValue: (_, value) =>
-      setValue('payment', { ...values.payment, type: value }),
-    fieldName: 'payment.type',
-  })
-
   const costProps: UseWebsiteCostProps = useMemo(
     () => ({
       entityType: EntityType.Website,
       props: {
         website: values.website,
-        payment: values.payment,
+        paymentMethod: values.paymentMethod,
         domains: values.domains,
       },
     }),
@@ -144,6 +143,12 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   const handleBack = () => {
     router.push('.')
   }
+
+  // Sync form payment method with global state - special case for nested field
+  useSyncPaymentMethod({
+    formPaymentMethod: values.paymentMethod,
+    setValue,
+  })
 
   return {
     address: account?.address || '',

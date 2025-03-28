@@ -1,30 +1,21 @@
 import EventEmitter from 'events'
 import { Blockchain as BlockchainId } from '@aleph-sdk/core'
 import { Account } from '@aleph-sdk/account'
-import {
-  getAccountFromProvider as getETHAccount,
-  ETHAccount,
-} from '@aleph-sdk/ethereum'
-import {
-  getAccountFromProvider as getSOLAccount,
-  SOLAccount,
-} from '@aleph-sdk/solana'
+import { getAccountFromProvider as getETHAccount } from '@aleph-sdk/ethereum'
+import { getAccountFromProvider as getSOLAccount } from '@aleph-sdk/solana'
 import { getAccountFromProvider as getAVAXAccount } from '@aleph-sdk/avalanche'
 import { getAccountFromProvider as getBASEAccount } from '@aleph-sdk/base'
-import {
-  createFromEVMAccount,
-  isAccountSupported as isAccountPAYGCompatible,
-} from '@aleph-sdk/superfluid'
-import { Mutex, getAddressBalance, sleep } from '@/helpers/utils'
+import { Mutex, getAccountBalance, sleep } from '@/helpers/utils'
 import { MetaMaskInpageProvider } from '@metamask/providers'
 import type {
   Provider as EthersProvider,
   CombinedProvider,
 } from '@web3modal/scaffold-utils/ethers'
 import Err from '@/helpers/errors'
-import { EVMAccount, findChainDataByChainId } from '@aleph-sdk/evm'
+import { findChainDataByChainId } from '@aleph-sdk/evm'
 import { MetamaskErrorCodes } from './constants'
 import { WindowPhantomProvider as PhantomProvider } from '@/types/types'
+import { PaymentMethod } from '@/helpers/constants'
 
 export { BlockchainId }
 
@@ -280,23 +271,7 @@ export abstract class BaseConnectionProviderManager {
   }
 
   async getBalance(account: Account): Promise<number> {
-    if (isAccountPAYGCompatible(account)) {
-      try {
-        const superfluidAccount = await createFromEVMAccount(
-          account as EVMAccount,
-        )
-        const balance = await superfluidAccount.getALEPHBalance()
-        return balance.toNumber()
-      } catch (e) {
-        console.error(e)
-        return 0
-      }
-    }
-    if (account instanceof ETHAccount || account instanceof SOLAccount) {
-      return getAddressBalance(account.address)
-    }
-
-    throw Err.ChainNotYetSupported
+    return getAccountBalance(account, PaymentMethod.Hold)
   }
 
   private async getPreviousBlockchain(): Promise<BlockchainId | undefined> {

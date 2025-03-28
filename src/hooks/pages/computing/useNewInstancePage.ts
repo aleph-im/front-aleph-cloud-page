@@ -283,16 +283,19 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Setup form
 
-  const defaultValues: Partial<NewInstanceFormState> = {
-    ...defaultNameAndTags,
-    image: defaultInstanceImage,
-    specs: defaultTiers[0],
-    systemVolume: { size: defaultTiers[0]?.storage },
-    paymentMethod: globalPaymentMethod,
-    streamDuration: defaultStreamDuration,
-    streamCost: Number.POSITIVE_INFINITY,
-    termsAndConditions: undefined,
-  }
+  const defaultValues: Partial<NewInstanceFormState> = useMemo(
+    () => ({
+      ...defaultNameAndTags,
+      image: defaultInstanceImage,
+      specs: defaultTiers[0],
+      systemVolume: { size: defaultTiers[0]?.storage },
+      paymentMethod: globalPaymentMethod,
+      streamDuration: defaultStreamDuration,
+      streamCost: Number.POSITIVE_INFINITY,
+      termsAndConditions: undefined,
+    }),
+    [defaultTiers, globalPaymentMethod],
+  )
 
   const {
     control,

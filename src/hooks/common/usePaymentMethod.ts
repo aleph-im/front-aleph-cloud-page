@@ -3,12 +3,14 @@ import { useAppState } from '@/contexts/appState'
 import { PaymentMethod } from '@/helpers/constants'
 import { useRouter } from 'next/router'
 import {
-  ConnectionSetPaymentMethodAction,
   ConnectionSetBalanceAction,
+  ConnectionSetPaymentMethodAction,
 } from '@/store/connection'
-import { getAddressBalance } from '@/helpers/utils'
-import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
-import { EVMAccount } from '@aleph-sdk/evm'
+import { getAccountBalance } from '@/helpers/utils'
+
+export type UsePaymentMethodProps = {
+  triggerOnMount?: boolean
+}
 
 export type UsePaymentMethodReturn = {
   paymentMethod: PaymentMethod
@@ -24,9 +26,11 @@ export type UsePaymentMethodReturn = {
  * 3. Automatically set payment method to "hold" when not in payment form
  * 4. Update the balance based on the selected payment method
  */
-export function usePaymentMethod(): UsePaymentMethodReturn {
+export function usePaymentMethod({
+  triggerOnMount = false,
+}: UsePaymentMethodProps = {}): UsePaymentMethodReturn {
   const [state, dispatch] = useAppState()
-  const { paymentMethod } = state.connection
+  const { paymentMethod, account } = state.connection
   const router = useRouter()
   const { pathname } = router
 
@@ -44,38 +48,18 @@ export function usePaymentMethod(): UsePaymentMethodReturn {
 
   // Fetch balance based on the current payment method
   const fetchBalance = useCallback(async () => {
-    const { account } = state.connection
     if (!account) return
 
-    let balance: number | undefined
-
     try {
-      if (
-        paymentMethod === PaymentMethod.Stream &&
-        isAccountSupported(account)
-      ) {
-        // For Stream payment method, fetch balance from RPC node
-        const superfluidAccount = await createFromEVMAccount(
-          account as EVMAccount,
-        )
-        const superfluidBalance = await superfluidAccount.getALEPHBalance()
-        balance = superfluidBalance.toNumber()
-      } else {
-        // For Hold payment method, fetch balance from pyaleph API
-        balance = await getAddressBalance(account.address)
-      }
+      const balance = await getAccountBalance(account, paymentMethod)
 
       if (balance !== undefined) {
-        dispatch(
-          new ConnectionSetBalanceAction({
-            balance,
-          }),
-        )
+        dispatch(new ConnectionSetBalanceAction({ balance }))
       }
     } catch (error) {
       console.error('Error fetching balance:', error)
     }
-  }, [dispatch, paymentMethod, state.connection])
+  }, [account, paymentMethod, dispatch])
 
   // Auto-switch to "hold" when not in payment form
   useEffect(() => {
@@ -86,12 +70,12 @@ export function usePaymentMethod(): UsePaymentMethodReturn {
     }
   }, [pathname, paymentMethod, setPaymentMethod])
 
-  // Update balance when payment method changes or account changes
+  // Fetch balance when account changes
   useEffect(() => {
-    if (state.connection.account) {
-      fetchBalance()
-    }
-  }, [fetchBalance, paymentMethod, state.connection.account])
+    if (!triggerOnMount) return
+    if (!account) return
+    fetchBalance()
+  }, [account, paymentMethod, fetchBalance, triggerOnMount])
 
   return {
     paymentMethod,

@@ -1,6 +1,5 @@
-import { useAppState } from '@/contexts/appState'
 import { FormEvent, useCallback, useMemo } from 'react'
-import { usePaymentMethod } from '@/hooks/common/usePaymentMethod'
+import { useAppState } from '@/contexts/appState'
 import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 import { useRouter } from 'next/router'
 import { InstanceSpecsField } from '../../form/useSelectInstanceSpecs'
@@ -62,7 +61,6 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
   const { account, balance: accountBalance = 0 } = appState.connection
-  const { paymentMethod: globalPaymentMethod } = usePaymentMethod()
 
   const manager = useProgramManager()
   const { next, stop } = useCheckoutNotification()
@@ -111,9 +109,9 @@ export function useNewFunctionPage(): UseNewFunctionPage {
       code: { ...defaultCode } as FunctionCodeField,
       specs: defaultTiers[0],
       isPersistent: false,
-      paymentMethod: globalPaymentMethod,
+      paymentMethod: PaymentMethod.Hold,
     }),
-    [defaultTiers, globalPaymentMethod],
+    [defaultTiers],
   )
 
   const {
@@ -128,12 +126,6 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   })
   // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as NewFunctionFormState
-
-  // Sync form payment method with global state
-  useSyncPaymentMethod({
-    formPaymentMethod: values.paymentMethod,
-    setValue,
-  })
 
   const costProps: UseProgramCostProps = useMemo(
     () => ({
@@ -161,6 +153,12 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const handleBack = () => {
     router.push('.')
   }
+
+  // Sync form payment method with global state
+  useSyncPaymentMethod({
+    formPaymentMethod: values.paymentMethod,
+    setValue,
+  })
 
   return {
     address: account?.address || '',

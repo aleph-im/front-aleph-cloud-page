@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import { PaymentMethod } from '@/helpers/constants'
 import { usePaymentMethod } from './usePaymentMethod'
@@ -32,17 +32,25 @@ export function useSyncPaymentMethod({
   const { paymentMethod: globalPaymentMethod, setPaymentMethod } =
     usePaymentMethod()
 
-  // Update form when global state changes
-  useEffect(() => {
-    if (formPaymentMethod !== globalPaymentMethod) {
-      setValue(fieldName, globalPaymentMethod)
-    }
-  }, [globalPaymentMethod, setValue, formPaymentMethod, fieldName])
+  // Using a ref to track if we initiated the change to prevent loops
+  const isUpdatingRef = useRef<boolean>(false)
 
   // Update global state when form changes
   useEffect(() => {
-    if (globalPaymentMethod !== formPaymentMethod) {
-      setPaymentMethod(formPaymentMethod)
-    }
-  }, [formPaymentMethod, globalPaymentMethod, setPaymentMethod])
+    if (isUpdatingRef.current) return
+    isUpdatingRef.current = true
+
+    console.log('Update global state when form changes', formPaymentMethod)
+    setPaymentMethod(formPaymentMethod)
+
+    setTimeout(() => (isUpdatingRef.current = false), 0)
+  }, [formPaymentMethod, setPaymentMethod])
+
+  // Update form when global state changes
+  useEffect(() => {
+    if (isUpdatingRef.current) return
+
+    console.log('Update form when global state changes', globalPaymentMethod)
+    setValue(fieldName, globalPaymentMethod)
+  }, [fieldName, globalPaymentMethod, setValue])
 }
