@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react'
 import { usePaymentMethod } from '@/hooks/common/usePaymentMethod'
+import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 import Router, { useRouter } from 'next/router'
 import {
   createFromEVMAccount,
@@ -127,8 +128,7 @@ export type UseNewInstancePageReturn = {
 
 export function useNewInstancePage(): UseNewInstancePageReturn {
   const [, dispatch] = useAppState()
-  const { paymentMethod: globalPaymentMethod, setPaymentMethod } =
-    usePaymentMethod()
+  const { paymentMethod: globalPaymentMethod } = usePaymentMethod()
 
   const {
     blockchain,
@@ -542,20 +542,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setValue('streamCost', cost.cost)
   }, [cost, setValue, formValues])
 
-  // Sync form payment method with global payment method (both ways)
-  useEffect(() => {
-    // Update local form when global state changes (only on mount or global change)
-    if (formValues.paymentMethod !== globalPaymentMethod) {
-      setValue('paymentMethod', globalPaymentMethod)
-    }
-  }, [globalPaymentMethod, setValue, formValues.paymentMethod])
-
-  // Update global state when form changes
-  useEffect(() => {
-    if (globalPaymentMethod !== formValues.paymentMethod) {
-      setPaymentMethod(formValues.paymentMethod)
-    }
-  }, [formValues.paymentMethod, globalPaymentMethod, setPaymentMethod])
+  // Sync form payment method with global state
+  useSyncPaymentMethod({
+    formPaymentMethod: formValues.paymentMethod,
+    setValue,
+  })
 
   return {
     address,

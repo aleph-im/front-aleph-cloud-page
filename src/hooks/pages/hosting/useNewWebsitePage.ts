@@ -1,9 +1,10 @@
-import { FormEvent, useCallback, useEffect, useMemo } from 'react'
+import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { useAppState } from '@/contexts/appState'
 import { usePaymentMethod } from '@/hooks/common/usePaymentMethod'
+import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 import { WebsiteManager, WebsitePayment } from '@/domain/website'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
@@ -60,8 +61,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
   const { account, balance: accountBalance = 0 } = appState.connection
-  const { paymentMethod: globalPaymentMethod, setPaymentMethod } =
-    usePaymentMethod()
+  const { paymentMethod: globalPaymentMethod } = usePaymentMethod()
 
   const manager = useWebsiteManager()
   const { next, stop } = useCheckoutNotification({})
@@ -114,20 +114,13 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
 
   const values = useWatch({ control }) as NewWebsiteFormState
 
-  // Sync form payment method with global payment method (both ways)
-  useEffect(() => {
-    // Update local form when global state changes (only on mount or global change)
-    if (values.payment?.type !== globalPaymentMethod) {
-      setValue('payment', { ...values.payment, type: globalPaymentMethod })
-    }
-  }, [globalPaymentMethod, setValue, values.payment])
-
-  // Update global state when form changes
-  useEffect(() => {
-    if (globalPaymentMethod !== values.payment?.type) {
-      setPaymentMethod(values.payment?.type)
-    }
-  }, [values.payment?.type, globalPaymentMethod, setPaymentMethod])
+  // Sync form payment method with global state - special case for nested field
+  useSyncPaymentMethod({
+    formPaymentMethod: values.payment?.type,
+    setValue: (_, value) =>
+      setValue('payment', { ...values.payment, type: value }),
+    fieldName: 'payment.type',
+  })
 
   const costProps: UseWebsiteCostProps = useMemo(
     () => ({
