@@ -19,6 +19,7 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
+import { useCanAfford } from '@/hooks/common/useCanAfford'
 
 export type NewVolumeFormState = NewVolumeStandaloneField
 
@@ -103,11 +104,10 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
 
   const cost = useEntityCost(costProps)
 
-  const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
-  let isCreateButtonDisabled = !canAfford
-  if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
-    isCreateButtonDisabled = false
-  }
+  const { isCreateButtonDisabled } = useCanAfford({
+    cost,
+    accountBalance,
+  })
 
   const handleBack = () => {
     router.push('/storage/')

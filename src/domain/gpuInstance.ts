@@ -27,7 +27,7 @@ export type GpuInstance = Omit<Instance, 'type'> & {
 
 export class GpuInstanceManager extends InstanceManager<GpuInstance> {
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
@@ -50,6 +50,13 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
     )
   }
 
+  // Override getCost to pass the correct entity type
+  override async getCost(
+    newInstance: GpuInstanceCostProps,
+  ): Promise<GpuInstanceCost> {
+    return super.getCost(newInstance, EntityType.GpuInstance)
+  }
+
   protected override parseMessagesFilter({ content }: any): boolean {
     if (content === undefined) return false
 
@@ -61,7 +68,6 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
   ): HostRequirements | undefined {
     const requirements = super.parseRequirements(node)
 
-    console.log('parsing requirements', node, requirements)
     if (!node) return requirements
 
     const { selectedGpu } = node

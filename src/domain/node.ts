@@ -246,6 +246,7 @@ export type GPUDevice = {
   device_class: string
   device_id: string
   compatible: boolean
+  pci_host: string
 }
 
 export type CRNSpecs = BaseNode &

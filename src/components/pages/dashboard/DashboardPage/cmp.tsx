@@ -15,6 +15,7 @@ import {
 export default function DashboardPage() {
   const {
     instanceAggregatedStatus,
+    gpuInstanceAggregatedStatus,
     programAggregatedStatus,
     confidentialsAggregatedStatus,
     volumesAggregatedStatus,
@@ -161,6 +162,26 @@ export default function DashboardPage() {
                 information={{
                   type: 'computing',
                   data: instanceAggregatedStatus.total,
+                }}
+              />
+            </EntityCardWrapper>
+            <EntityCardWrapper>
+              <EntityCard
+                type={
+                  gpuInstanceAggregatedStatus.total.amount
+                    ? 'active'
+                    : 'introduction'
+                }
+                isBeta
+                title="GPU instances"
+                img="Object11"
+                description="Power your workloads with high-performance GPU computing. Ideal for AI, ML, rendering, and complex simulations. Scale effortlessly and take full control over your GPU resources."
+                introductionButtonText="Create your GPU Instance"
+                dashboardPath="/computing/gpu-instance"
+                createPath="/computing/gpu-instance/new"
+                information={{
+                  type: 'computing',
+                  data: gpuInstanceAggregatedStatus.total,
                 }}
               />
             </EntityCardWrapper>

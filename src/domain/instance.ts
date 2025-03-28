@@ -4,7 +4,6 @@ import {
   HostRequirements,
   InstanceContent,
   InstancePublishConfiguration,
-  MachineVolume,
   MessageType,
   PaymentType,
   RootfsVolumeConfiguration,
@@ -53,6 +52,7 @@ import Err from '@/helpers/errors'
 import { CostManager, CostSummary } from './cost'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { BlockchainId } from './connect/base'
+import { mockAccount } from './account'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -113,7 +113,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   static addStreamSchema = instanceStreamSchema
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
@@ -127,6 +127,8 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   }
 
   async getAll(): Promise<T[]> {
+    if (!this.account) return []
+
     try {
       const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
@@ -330,7 +332,12 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     return this.parseCost(paymentMethod, Number(costs.cost))
   }
 
-  async getCost(newInstance: InstanceCostProps): Promise<InstanceCost> {
+  async getCost(
+    newInstance: InstanceCostProps,
+    entityType:
+      | EntityType.Instance
+      | EntityType.GpuInstance = EntityType.Instance,
+  ): Promise<InstanceCost> {
     let totalCost = Number.POSITIVE_INFINITY
     const paymentMethod = newInstance.payment?.type || PaymentMethod.Hold
 
@@ -344,7 +351,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
     const lines = this.getExecutableCostLines(
       {
-        type: EntityType.Instance,
+        type: entityType,
         ...parsedInstance,
       },
       costs,
@@ -474,7 +481,10 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       streamCostByHourToCommunity,
     )
 
-    if (receiverTotalFlow.greaterThan(1) || communityTotalFlow.greaterThan(1))
+    if (
+      receiverTotalFlow.greaterThan(100) ||
+      communityTotalFlow.greaterThan(100)
+    )
       throw Err.MaxFlowRate
 
     const totalAlephxFlow = recieverAlephxFlow.add(communityAlephxFlow)
@@ -524,22 +534,16 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   protected async parseInstanceForCostEstimation(
     newInstance: AddInstance,
   ): Promise<InstancePublishConfiguration> {
-    const { account, channel } = this
-
+    const { account = mockAccount, channel } = this
     const { specs, image, node, systemVolume } = newInstance
 
     const rootfs = this.parseRootfs(image, systemVolume)
     const resources = this.parseSpecs(specs)
     const requirements = this.parseRequirements(node)
-    const payment = this.parsePayment(newInstance.payment)
-    const volumesSteps = this.parseVolumesSteps(newInstance.volumes, true)
-
-    let volumes: MachineVolume[] = []
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for await (const volumeStep of volumesSteps) {
-      // Do nothing. Consume iterator
-      volumes = volumeStep as unknown as MachineVolume[]
-    }
+    const payment = this.parsePaymentForCostEstimation(newInstance.payment)
+    const volumes = await this.parseVolumesForCostEstimation(
+      newInstance.volumes,
+    )
 
     return {
       account,
@@ -565,6 +569,8 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   protected async *parseInstanceSteps(
     newInstance: AddInstance,
   ): AsyncGenerator<void, InstancePublishConfiguration, void> {
+    if (!this.account) throw Err.InvalidAccount
+
     const schema = !newInstance.node
       ? InstanceManager.addSchema
       : InstanceManager.addStreamSchema
@@ -583,7 +589,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
     const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
-    const volumes = yield* this.parseVolumesSteps(newInstance.volumes, false)
+    const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
 
     return {
       account,
@@ -597,16 +603,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       payment,
       requirements,
     }
-  }
-
-  protected async *parseVolumesSteps(
-    volumes?: VolumeField | VolumeField[],
-    estimateCost?: boolean,
-  ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
-    if (!volumes) return
-    volumes = Array.isArray(volumes) ? volumes : [volumes]
-
-    return yield* super.parseVolumesSteps(volumes, estimateCost)
   }
 
   protected async *parseSSHKeysSteps(

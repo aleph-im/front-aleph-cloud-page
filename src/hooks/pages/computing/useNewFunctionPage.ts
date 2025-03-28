@@ -29,6 +29,7 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 import { useDefaultTiers } from '@/hooks/common/pricing/tiers/useDefaultTiers'
+import { useCanAfford } from '@/hooks/common/useCanAfford'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -142,11 +143,10 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
   const cost = useEntityCost(costProps)
 
-  const canAfford = accountBalance >= (cost?.cost || Number.MAX_SAFE_INTEGER)
-  let isCreateButtonDisabled = !canAfford
-  if (process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true') {
-    isCreateButtonDisabled = false
-  }
+  const { isCreateButtonDisabled } = useCanAfford({
+    cost,
+    accountBalance,
+  })
 
   const handleBack = () => {
     router.push('.')

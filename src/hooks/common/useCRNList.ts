@@ -59,8 +59,18 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   const { enableGpu } = props
 
   const nodeManager = useNodeManager()
-  const { specs: crnSpecs, loading: loadingSpecs } = useRequestCRNSpecs()
-  const { lastVersion } = useRequestCRNLastVersion()
+  const { specs: crnSpecs, loading: isLoadingSpecs } = useRequestCRNSpecs()
+  const { lastVersion, loading: isLoadingLastVersion } =
+    useRequestCRNLastVersion()
+  const [isLoadingList, setIsLoadingList] = useState(true)
+
+  // -----------------------------
+  // Loading CRN List
+
+  const loading = useMemo(
+    () => isLoadingSpecs || isLoadingLastVersion || isLoadingList,
+    [isLoadingLastVersion, isLoadingList, isLoadingSpecs],
+  )
 
   // -----------------------------
   // Name Filter
@@ -185,11 +195,11 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
         return ac
       }
 
-      if (loadingSpecs) return ac
+      if (isLoadingSpecs) return ac
 
       const nodeSpecs = crnSpecs[node.hash]
 
-      if (!loadingSpecs) {
+      if (!isLoadingSpecs) {
         const validSpecs =
           nodeSpecs && nodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
 
@@ -210,7 +220,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
       return ac
     }, {} as StreamSupportedIssues)
-  }, [baseFilteredNodes, nodeManager, loadingSpecs, crnSpecs, minSpecs])
+  }, [baseFilteredNodes, nodeManager, isLoadingSpecs, crnSpecs, minSpecs])
 
   // -----------------------------
 
@@ -222,25 +232,31 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   }, [baseFilteredNodes, nodesIssues])
 
   const filteredNodes = useMemo(() => {
-    return validPAYGNodes?.filter((node) => {
-      if (gpuFilter) {
-        if (node.selectedGpu?.model !== gpuFilter) return false
-      }
+    try {
+      return validPAYGNodes?.filter((node) => {
+        if (gpuFilter) {
+          if (node.selectedGpu?.model !== gpuFilter) return false
+        }
 
-      if (cpuFilter) {
-        if (node.cpu?.count.toString() !== cpuFilter) return false
-      }
+        if (cpuFilter) {
+          if (node.cpu?.count.toString() !== cpuFilter) return false
+        }
 
-      if (ramFilter) {
-        if (node.mem?.available_kB.toString() !== ramFilter) return false
-      }
+        if (ramFilter) {
+          if (node.mem?.available_kB.toString() !== ramFilter) return false
+        }
 
-      if (hddFilter) {
-        if (node.disk?.available_kB.toString() !== hddFilter) return false
-      }
+        if (hddFilter) {
+          if (node.disk?.available_kB.toString() !== hddFilter) return false
+        }
 
-      return true
-    })
+        return true
+      })
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoadingList(false)
+    }
   }, [gpuFilter, cpuFilter, hddFilter, ramFilter, validPAYGNodes])
 
   const sortedNodes = useMemo(() => {
@@ -303,7 +319,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     ...props,
     lastVersion,
     specs: crnSpecs,
-    loading: loadingSpecs,
+    loading,
     nodesIssues,
     filteredNodes: paginatedSortedFilteredNodes,
     filterOptions,

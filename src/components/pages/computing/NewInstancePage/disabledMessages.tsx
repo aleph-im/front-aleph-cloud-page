@@ -46,7 +46,7 @@ export function unsupportedStreamDisabledMessage(
   blockchainName: string,
 ): TooltipProps['content'] {
   return tooltipContent({
-    title: `Payment Method not supported`,
+    title: `Selected chain not supported`,
     description: (
       <>
         {blockchainName} supports only the Holder tier payment method. To use

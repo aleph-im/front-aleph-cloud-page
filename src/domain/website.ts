@@ -25,6 +25,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import { CostLine, CostSummary } from './cost'
+import { mockAccount } from './account'
 
 export { WebsiteFrameworkId }
 
@@ -327,7 +328,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
@@ -336,6 +337,8 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   ) {}
 
   async getAll(): Promise<Website[]> {
+    if (!this.account) return []
+
     try {
       const response: Record<string, unknown> =
         await this.sdkClient.fetchAggregate(this.account.address, this.key)
@@ -641,8 +644,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
 
     const fileObject = new Blob(website.folder)
 
+    const { account = mockAccount } = this
+
     const costs = await this.sdkClient.storeClient.getEstimatedCost({
-      account: this.account,
+      account,
       fileObject,
     })
 

@@ -19,7 +19,6 @@ import { humanReadableSize } from '@/helpers/utils'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
-import Price from '@/components/common/Price'
 import { CRNItem, CRNListProps } from './types'
 
 export default function CRNList(props: CRNListProps) {
@@ -31,6 +30,7 @@ export default function CRNList(props: CRNListProps) {
     nodesIssues,
     filteredNodes,
     filterOptions,
+    loading,
     loadItemsDisabled,
     handleLoadItems,
     handleSortItems,
@@ -134,17 +134,17 @@ export default function CRNList(props: CRNListProps) {
             />
           ),
         },
-        {
-          label: 'PRICE',
-          width: '20%',
-          sortable: true,
-          sortBy: () => 0.11,
-          render: () => (
-            <div tw="flex items-center gap-1 whitespace-nowrap">
-              <Price value={0.11} /> per unit / h
-            </div>
-          ),
-        },
+        // {
+        //   label: 'PRICE',
+        //   width: '20%',
+        //   sortable: true,
+        //   sortBy: () => 0.11,
+        //   render: () => (
+        //     <div tw="flex items-center gap-1 whitespace-nowrap">
+        //       <Price value={0.11} /> per unit / h
+        //     </div>
+        //   ),
+        // },
         {
           label: '',
           align: 'right',
@@ -186,8 +186,8 @@ export default function CRNList(props: CRNListProps) {
       const { hash, selectedGpu } = node
 
       const isActive =
-        `${hash}-${selectedGpu?.device_id}` ===
-        `${selected?.hash}-${selected?.selectedGpu?.device_id}`
+        `${hash}-${selectedGpu?.device_id}-${selectedGpu?.pci_host}` ===
+        `${selected?.hash}-${selected?.selectedGpu?.device_id}-${selected?.selectedGpu?.pci_host}`
       const issue = nodesIssues?.[hash]
       const isLoading = issue === undefined
       const disabled = !isLoading && !!issue
@@ -239,100 +239,97 @@ export default function CRNList(props: CRNListProps) {
   const infiniteScrollContainerRef = useRef<HTMLDivElement>(null)
 
   return (
-    <>
-      <SpinnerOverlay show={!filteredNodes} />
-
-      <NoisyContainer tw="h-full w-full">
-        <div tw="flex mb-8 gap-10 justify-between flex-wrap flex-col md:flex-row items-stretch md:items-center">
-          <div tw="flex-1">
-            <TextInput
-              value={nameFilter}
-              label="Search CRN"
-              name="filter-crn"
-              placeholder="Search CRN"
-              onChange={handleNameFilterChange}
-              icon={<Icon name="search" />}
-            />
-          </div>
+    <NoisyContainer tw="h-full w-full">
+      <SpinnerOverlay show={loading} />
+      <div tw="flex mb-8 gap-10 justify-between flex-wrap flex-col md:flex-row items-stretch md:items-center">
+        <div tw="flex-1">
+          <TextInput
+            value={nameFilter}
+            label="Search CRN"
+            name="filter-crn"
+            placeholder="Search CRN"
+            onChange={handleNameFilterChange}
+            icon={<Icon name="search" />}
+          />
         </div>
-        <div tw="w-full flex flex-wrap gap-x-6 gap-y-4 mb-6">
-          {enableGpu && (
-            <div tw="flex-1">
-              <Dropdown
-                placeholder="GPU"
-                label="GPU"
-                value={gpuFilter}
-                onChange={handleGpuFilterChange}
-              >
-                {filterOptions.gpu.map((option) => (
-                  <DropdownOption key={option} value={option}>
-                    {option}
-                  </DropdownOption>
-                ))}
-              </Dropdown>
-            </div>
-          )}
+      </div>
+      <div tw="w-full flex flex-wrap gap-x-6 gap-y-4 mb-6">
+        {enableGpu && (
           <div tw="flex-1">
             <Dropdown
-              placeholder="CPU"
-              label="CPU"
-              value={cpuFilter}
-              onChange={handleCpuFilterChange}
+              placeholder="GPU"
+              label="GPU"
+              value={gpuFilter}
+              onChange={handleGpuFilterChange}
             >
-              {filterOptions.cpu.map((option) => (
+              {filterOptions.gpu.map((option) => (
                 <DropdownOption key={option} value={option}>
                   {option}
                 </DropdownOption>
               ))}
             </Dropdown>
           </div>
-          <div tw="flex-1">
-            <Dropdown
-              placeholder="RAM"
-              label="RAM"
-              value={ramFilter}
-              onChange={handleRamFilterChange}
-            >
-              {filterOptions.ram.map((option) => (
-                <DropdownOption key={option} value={option}>
-                  {humanReadableSize(+option, 'KiB')}
-                </DropdownOption>
-              ))}
-            </Dropdown>
-          </div>
-          <div tw="flex-1">
-            <Dropdown
-              placeholder="HDD"
-              label="HDD"
-              value={hddFilter}
-              onChange={handleHddFilterChange}
-            >
-              {filterOptions.hdd.map((option) => (
-                <DropdownOption key={option} value={option}>
-                  {humanReadableSize(+option, 'KiB')}
-                </DropdownOption>
-              ))}
-            </Dropdown>
-          </div>
+        )}
+        <div tw="flex-1">
+          <Dropdown
+            placeholder="CPU"
+            label="CPU"
+            value={cpuFilter}
+            onChange={handleCpuFilterChange}
+          >
+            {filterOptions.cpu.map((option) => (
+              <DropdownOption key={option} value={option}>
+                {option}
+              </DropdownOption>
+            ))}
+          </Dropdown>
         </div>
-        <div
-          tw="min-h-[20rem] h-full overflow-auto"
-          ref={infiniteScrollContainerRef}
-        >
-          <NodesTable
-            {...{
-              columns,
-              data,
-              infiniteScroll: !loadItemsDisabled,
-              infiniteScrollContainerRef,
-              onLoadMore: handleLoadItems,
-              onSort: handleSortItems,
-              rowProps: handleRowProps,
-              loadingPlaceholder,
-            }}
-          />
+        <div tw="flex-1">
+          <Dropdown
+            placeholder="RAM"
+            label="RAM"
+            value={ramFilter}
+            onChange={handleRamFilterChange}
+          >
+            {filterOptions.ram.map((option) => (
+              <DropdownOption key={option} value={option}>
+                {humanReadableSize(+option, 'KiB')}
+              </DropdownOption>
+            ))}
+          </Dropdown>
         </div>
-      </NoisyContainer>
-    </>
+        <div tw="flex-1">
+          <Dropdown
+            placeholder="HDD"
+            label="HDD"
+            value={hddFilter}
+            onChange={handleHddFilterChange}
+          >
+            {filterOptions.hdd.map((option) => (
+              <DropdownOption key={option} value={option}>
+                {humanReadableSize(+option, 'KiB')}
+              </DropdownOption>
+            ))}
+          </Dropdown>
+        </div>
+      </div>
+      <div
+        tw="min-h-[20rem] h-full overflow-auto"
+        ref={infiniteScrollContainerRef}
+      >
+        <NodesTable
+          {...{
+            columns,
+            data,
+            infiniteScroll: !loadItemsDisabled,
+            infiniteScrollContainerRef,
+            onLoadMore: handleLoadItems,
+            onSort: handleSortItems,
+            rowProps: handleRowProps,
+            loadingPlaceholder,
+          }}
+        />
+      </div>
+    </NoisyContainer>
   )
 }

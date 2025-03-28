@@ -13,10 +13,13 @@ import { useRequestWebsites } from './useRequestEntity/useRequestWebsites'
 import { useAppState } from '@/contexts/appState'
 import { useRequestConfidentials } from './useRequestEntity/useRequestConfidentials'
 import { Confidential } from '@/domain/confidential'
+import { useRequestGpuInstances } from './useRequestEntity/useRequestGpuInstances'
+import { GpuInstance } from '@/domain/gpuInstance'
 
 export type UseAccountEntitiesReturn = {
   programs: Program[]
   instances: Instance[]
+  gpuInstances: GpuInstance[]
   confidentials: Confidential[]
   volumes: Volume[]
   sshKeys: SSHKey[]
@@ -33,6 +36,9 @@ export function useAccountEntities(): UseAccountEntitiesReturn {
   const { entities: volumes = [] } = useRequestVolumes({ triggerDeps })
   const { entities: programs = [] } = useRequestPrograms({ triggerDeps })
   const { entities: instances = [] } = useRequestInstances({ triggerDeps })
+  const { entities: gpuInstances = [] } = useRequestGpuInstances({
+    triggerDeps,
+  })
   const { entities: confidentials = [] } = useRequestConfidentials({
     triggerDeps,
   })
@@ -44,6 +50,7 @@ export function useAccountEntities(): UseAccountEntitiesReturn {
     programs,
     volumes,
     instances,
+    gpuInstances,
     confidentials,
     sshKeys,
     domains,

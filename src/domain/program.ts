@@ -37,6 +37,11 @@ import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import Err from '@/helpers/errors'
 import { NodeManager } from './node'
 import { CostSummary } from './cost'
+import { mockAccount } from './account'
+
+export const mockProgramRef =
+  '79f19811f8e843f37ff7535f634b89504da3d8f03e1f0af109d1791cf6add7af'
+export const mockEntrypoint = 'main:app'
 
 export type AddProgram = Omit<
   ProgramPublishConfiguration,
@@ -100,7 +105,7 @@ export class ProgramManager
   static addSchema = functionSchema
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
@@ -113,6 +118,8 @@ export class ProgramManager
   }
 
   async getAll(): Promise<Program[]> {
+    if (!this.account) return []
+
     try {
       const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
@@ -281,6 +288,17 @@ export class ProgramManager
     }
   }
 
+  protected async parseCodeForCostEstimation(
+    code: FunctionCodeField,
+  ): Promise<ParsedCodeType> {
+    // @todo: calculate estimated_size_mib for code volume
+    return {
+      encoding: Encoding.zip,
+      entrypoint: code.entrypoint || mockEntrypoint,
+      programRef: mockProgramRef,
+    }
+  }
+
   protected async parseCode(code: FunctionCodeField): Promise<ParsedCodeType> {
     if (code.type === 'text') {
       const jsZip = new JSZip()
@@ -324,8 +342,7 @@ export class ProgramManager
   protected async parseProgramForCostEstimation(
     newProgram: AddProgram,
   ): Promise<ProgramPublishConfiguration> {
-    const { account, channel } = this
-
+    const { account = mockAccount, channel } = this
     const { isPersistent, specs } = newProgram
 
     const parsedSpecs = this.parseSpecs(specs)
@@ -333,22 +350,9 @@ export class ProgramManager
     const vcpus = parsedSpecs?.vcpus
 
     const runtime = this.parseRuntime(newProgram)
-    const payment = this.parsePayment(newProgram.payment)
-    const volumesSteps = this.parseVolumesSteps(newProgram.volumes, true)
-    // @fix: FAKE CODE TO MAKE IT WORK WITH THE ESTIMATES
-    const code = {
-      encoding: Encoding.zip,
-      entrypoint: 'main:app',
-      programRef:
-        '79f19811f8e843f37ff7535f634b89504da3d8f03e1f0af109d1791cf6add7af',
-    }
-
-    let volumes: MachineVolume[] = []
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for await (const volumeStep of volumesSteps) {
-      // Do nothing. Consume iterator
-      volumes = volumeStep as unknown as MachineVolume[]
-    }
+    const payment = this.parsePaymentForCostEstimation(newProgram.payment)
+    const volumes = await this.parseVolumesForCostEstimation(newProgram.volumes)
+    const code = await this.parseCodeForCostEstimation(newProgram.code)
 
     return {
       account,
@@ -366,6 +370,8 @@ export class ProgramManager
   protected async *parseProgramSteps(
     newProgram: AddProgram,
   ): AsyncGenerator<void, ProgramPublishConfiguration, void> {
+    if (!this.account) throw Err.InvalidAccount
+
     newProgram = await ProgramManager.addSchema.parseAsync(newProgram)
 
     const { account, channel } = this
