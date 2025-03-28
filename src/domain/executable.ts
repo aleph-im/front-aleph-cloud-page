@@ -4,6 +4,7 @@ import {
   BaseExecutableContent,
   CostEstimationMachineVolume,
   HostRequirements,
+  InstancePublishConfiguration,
   MachineResources,
   MachineVolume,
   MessageCost,
@@ -260,16 +261,74 @@ export abstract class ExecutableManager<T extends Executable> {
     }
   }
 
+  async reserveCRNResources(
+    node: CRN,
+    instanceConfig: InstancePublishConfiguration,
+  ): Promise<void> {
+    if (!node.address) throw Err.InvalidCRNAddress
+
+    const nodeUrl = NodeManager.normalizeUrl(node.address)
+    const url = new URL(`${nodeUrl}/control/reserve_resources`)
+    const { hostname: domain, pathname: path } = url
+
+    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
+
+    const signedOperationToken = await this.getAuthOperationToken(
+      keyPair.privateKey,
+      domain,
+      path,
+    )
+
+    const message =
+      await this.sdkClient.instanceClient.getCostComputableMessage(
+        instanceConfig,
+      )
+
+    let errorMsg = ''
+
+    try {
+      const req = await fetch(url.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-SignedOperation': JSON.stringify(signedOperationToken),
+          'X-SignedPubKey': JSON.stringify(pubKeyHeader),
+        },
+        body: message.item_content,
+        mode: 'cors',
+      })
+
+      const resp = await req.json()
+
+      /*
+        expires: "2025-03-28 11:21:21.744592+00:00"
+        status: "reserved"
+      */
+      if (resp.status === 'reserved') return
+      // errorMsg = resp.errors[instanceId]
+    } catch (e) {
+      errorMsg = (e as Error).message
+    }
+
+    throw Err.InstanceStartupFailed(node.hash, errorMsg)
+  }
+
   async notifyCRNAllocation(
     node: CRN,
     instanceId: string,
-    retry = true,
+    retry: {
+      attemps: number
+      await: number
+    } = {
+      attemps: 5,
+      await: 1000,
+    },
   ): Promise<void> {
     if (!node.address) throw Err.InvalidCRNAddress
 
     let errorMsg = ''
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < retry.attemps; i++) {
       try {
         const nodeUrl = NodeManager.normalizeUrl(node.address)
 
@@ -289,8 +348,8 @@ export abstract class ExecutableManager<T extends Executable> {
       } catch (e) {
         errorMsg = (e as Error).message
       } finally {
-        if (!retry) break
-        await sleep(1000)
+        if (!retry.attemps) break
+        await sleep(retry.await)
       }
     }
 
