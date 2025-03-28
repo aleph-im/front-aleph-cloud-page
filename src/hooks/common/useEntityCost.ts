@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import usePrevious from './usePrevious'
 import { InstanceCostProps } from '@/domain/instance'
 import { ProgramCostProps } from '@/domain/program'
 import { VolumeCostProps } from '@/domain/volume'
@@ -47,10 +48,7 @@ export type UseEntityCostProps =
 
 export type UseEntityCostReturn = CostSummary
 
-export function useEntityCost({
-  entityType,
-  props,
-}: UseEntityCostProps): UseEntityCostReturn {
+export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
   // Use useMemo to prevent the object from being recreated on every render
   const emptyCost = useMemo(
     () => ({
@@ -69,50 +67,51 @@ export function useEntityCost({
   const programManager = useProgramManager()
   const websiteManager = useWebsiteManager()
 
-  // Create a string representation of the props to detect changes
+  // Create a string representation of the props for change detection only
   const propsString = useMemo(() => JSON.stringify(props), [props])
 
   // Debounce the string representation with a 1000ms (1 second) delay
   const debouncedPropsString = useDebounceState(propsString, 1000)
 
-  // Parse the debounced props string back to an object when it changes
+  // Store previous debounced string to detect changes
+  const prevDebouncedPropsString = usePrevious(debouncedPropsString)
+
+  // Return the original props only when the debounced string changes
   const debouncedProps = useMemo(() => {
-    try {
-      return JSON.parse(debouncedPropsString)
-    } catch (e) {
-      // Return empty object if parsing fails (e.g., on first render with empty string)
-      return {}
+    // Check if the debounced string has changed
+    if (
+      debouncedPropsString !== prevDebouncedPropsString &&
+      debouncedPropsString
+    ) {
+      return { ...props } // Return the original props (with File instances intact)
     }
-  }, [debouncedPropsString])
+  }, [debouncedPropsString, prevDebouncedPropsString, props])
 
   // Only make the API call when the debounced props change
   useEffect(() => {
-    // Skip initial render or invalid props
-    if (!debouncedProps || Object.keys(debouncedProps).length === 0) return
-
     async function load() {
+      // Skip if debouncedProps is undefined (no change detected)
+      if (!debouncedProps) return
+
       let result: CostSummary = emptyCost
+      const { entityType, props } = debouncedProps
 
       switch (entityType) {
         case EntityType.Volume:
-          if (volumeManager)
-            result = await volumeManager.getCost(debouncedProps)
+          if (volumeManager) result = await volumeManager.getCost(props)
           break
         case EntityType.Instance:
-          if (instanceManager)
-            result = await instanceManager.getCost(debouncedProps)
+          if (instanceManager) result = await instanceManager.getCost(props)
           break
         case EntityType.GpuInstance:
           if (gpuInstanceManager)
-            result = await gpuInstanceManager.getCost(debouncedProps)
+            result = await gpuInstanceManager.getCost(props)
           break
         case EntityType.Program:
-          if (programManager)
-            result = await programManager.getCost(debouncedProps)
+          if (programManager) result = await programManager.getCost(props)
           break
         case EntityType.Website:
-          if (websiteManager)
-            result = await websiteManager.getCost(debouncedProps)
+          if (websiteManager) result = await websiteManager.getCost(props)
           break
       }
 
@@ -121,8 +120,7 @@ export function useEntityCost({
 
     load()
   }, [
-    entityType,
-    debouncedProps, // Use the parsed debounced props object
+    debouncedProps,
     emptyCost,
     volumeManager,
     instanceManager,
