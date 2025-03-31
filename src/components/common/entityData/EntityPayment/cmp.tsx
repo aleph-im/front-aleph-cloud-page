@@ -4,7 +4,8 @@ import { EntityPaymentProps, PaymentData } from './types'
 import { Text } from '@/components/pages/dashboard/common'
 import { useFormatPayment } from './hook'
 import Skeleton from '../../Skeleton'
-import { PaymentType } from '@aleph-sdk/message'
+import IconText from '../../IconText'
+import { ellipseAddress } from '@/helpers/utils'
 
 /**
  * Individual payment card component
@@ -12,14 +13,16 @@ import { PaymentType } from '@aleph-sdk/message'
  */
 const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
   const {
-    isPAYG,
+    isStream,
     totalSpent,
     formattedBlockchain,
     formattedFlowRate,
     formattedStartDate,
     formattedDuration,
     loading,
+    receiverAddress,
     receiverType,
+    handleCopyReceiverAddress,
   } = useFormatPayment(paymentData)
 
   return (
@@ -40,14 +43,14 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
         </div>
 
         {/* Payment type row */}
-        <div tw="flex flex-wrap gap-6">
+        <div tw="flex flex-wrap gap-x-6 gap-y-4">
           <div>
             <div className="tp-info text-main0 fs-12">TYPE</div>
             <Text>
               {loading ? (
                 <Skeleton width="5rem" />
-              ) : isPAYG ? (
-                'Pay as you go'
+              ) : isStream ? (
+                'Stream'
               ) : (
                 'Holding'
               )}
@@ -69,10 +72,18 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
               <Text>{receiverType}</Text>
             </div>
           )}
+          {receiverAddress && (
+            <div>
+              <div className="tp-info text-main0 fs-12">RECEIVER ADDRESS</div>
+              <IconText iconName="copy" onClick={handleCopyReceiverAddress}>
+                {ellipseAddress(receiverAddress)}
+              </IconText>
+            </div>
+          )}
         </div>
 
         {/* Start date, flow rate, and time elapsed */}
-        <div tw="flex flex-wrap gap-6">
+        <div tw="flex flex-wrap gap-x-6 gap-y-4">
           <div>
             <div className="tp-info text-main0 fs-12">START DATE</div>
             <Text>
@@ -84,7 +95,7 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
             </Text>
           </div>
 
-          {isPAYG && (
+          {isStream && (
             <>
               <div>
                 <div className="tp-info text-main0 fs-12">FLOW RATE</div>
@@ -119,10 +130,6 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
  * Takes an array of payment data objects and renders a card for each one
  */
 export const EntityPayment = ({ payments }: EntityPaymentProps) => {
-  if (!payments || payments.length === 0) {
-    return null
-  }
-
   return (
     <>
       <div className="tp-h7 fs-24" tw="uppercase mb-2">

@@ -63,7 +63,7 @@ export type ManageInstance = UseExecutableActionsReturn & {
   handleDownloadLogs: () => void
 
   // Payment data
-  allPayments: PaymentData[]
+  paymentData: PaymentData[]
 }
 
 export function useManageInstance(): ManageInstance {
@@ -212,74 +212,51 @@ export function useManageInstance(): ManageInstance {
       : undefined
   }, [instance?.time])
 
-  // Create base payment data
-  const mainPayment: HoldingPaymentData | StreamPaymentData = useMemo(() => {
-    const isStreamPayment = instance?.payment?.type === PaymentType.superfluid
-
-    if (isStreamPayment) {
-      return {
-        cost,
-        paymentType: PaymentType.superfluid,
-        runningTime,
-        startTime: instance?.time,
-        blockchain: instance?.payment?.chain,
-        loading,
-        receiver: instance?.payment?.receiver || '',
-      } as StreamPaymentData
+  // Create payment data array based on payment type
+  const paymentData: PaymentData[] = useMemo(() => {
+    switch (instance?.payment?.type) {
+      case PaymentType.hold:
+        return [
+          {
+            cost,
+            paymentType: PaymentType.hold,
+            runningTime,
+            startTime: instance.time,
+            blockchain: instance.payment.chain,
+            loading,
+          } as HoldingPaymentData,
+        ]
+      case PaymentType.superfluid:
+        if (streamDetails?.streams?.length) {
+          return streamDetails.streams.map(
+            (stream) =>
+              ({
+                cost: stream.flow,
+                paymentType: PaymentType.superfluid,
+                runningTime,
+                startTime: instance?.time,
+                blockchain: instance?.payment?.chain,
+                loading: false,
+                receiver: stream.receiver,
+              }) as StreamPaymentData,
+          )
+        }
+      default:
+        return [
+          {
+            paymentType: PaymentType.hold,
+            loading: true,
+          } as PaymentData,
+        ]
     }
-
-    return {
-      cost,
-      paymentType: PaymentType.hold,
-      runningTime,
-      startTime: instance?.time,
-      blockchain: instance?.payment?.chain,
-      loading,
-    } as HoldingPaymentData
   }, [
     cost,
-    instance?.payment?.type,
-    instance?.payment?.receiver,
+    instance?.payment,
     runningTime,
     instance?.time,
-    instance?.payment?.chain,
+    streamDetails?.streams,
     loading,
   ])
-
-  // Check if we have streams
-  const hasStreams = useMemo(
-    () => !!streamDetails?.streams?.length,
-    [streamDetails],
-  )
-
-  // Create payment data for all streams
-  const streamPayments: StreamPaymentData[] = useMemo(() => {
-    if (!hasStreams || !streamDetails?.streams) return []
-
-    return streamDetails.streams.map((stream) => ({
-      cost: stream.flow / 3600, // Convert back from hourly rate to per-second rate
-      paymentType: PaymentType.superfluid,
-      runningTime,
-      startTime: instance?.time,
-      blockchain: instance?.payment?.chain,
-      loading: false,
-      receiver: stream.receiver,
-    }))
-  }, [
-    streamDetails?.streams,
-    runningTime,
-    instance?.time,
-    instance?.payment?.chain,
-    hasStreams,
-  ])
-
-  // Combine main payment and stream payments into a single array
-  const allPayments: PaymentData[] = useMemo(() => {
-    if (hasStreams) {
-      return [mainPayment, ...streamPayments]
-    }
-    return [mainPayment]
-  }, [mainPayment, streamPayments, hasStreams])
 
   // Side panel handlers
   const handleImmutableVolumeClick = useCallback((volume: any) => {
@@ -427,7 +404,7 @@ export function useManageInstance(): ManageInstance {
     handleBack,
     handleDownloadLogs,
     isDownloadingLogs,
-    allPayments,
+    paymentData,
     labelVariant,
     volumes,
     immutableVolumes,

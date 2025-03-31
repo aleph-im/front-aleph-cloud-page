@@ -32,14 +32,16 @@ export interface EntityPaymentProps {
 
 // Formatted data returned by the hook for display
 export interface FormattedPaymentData {
-  isPAYG: boolean
+  isStream: boolean
   totalSpent?: string
   formattedBlockchain?: string
   formattedFlowRate?: string
   formattedStartDate?: string
   formattedDuration?: string
   loading: boolean
+  receiverAddress?: string
   receiverType?: string // To display whether it's a node or community stream
+  handleCopyReceiverAddress: () => void
 }
 
 export type UseEntityPaymentReturn = FormattedPaymentData

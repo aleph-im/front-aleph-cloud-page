@@ -82,7 +82,7 @@ export default function ManageInstance() {
     rebootDisabled,
 
     // Payment data
-    allPayments,
+    paymentData,
 
     // Logs
     handleDownloadLogs,
@@ -206,7 +206,7 @@ export default function ManageInstance() {
                 />
               </div>
               <div>
-                <EntityPayment payments={allPayments} />
+                <EntityPayment payments={paymentData} />
               </div>
             </div>
             <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">
