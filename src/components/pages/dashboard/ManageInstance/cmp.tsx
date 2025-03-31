@@ -100,7 +100,7 @@ export default function ManageInstance() {
           <div tw="flex-1">
             <BackButton handleBack={handleBack} />
           </div>
-          <div tw="flex gap-2 items-center justify-center">
+          <div tw="flex flex-col md:flex-row text-center gap-2 items-center justify-center">
             <Label kind="secondary" variant={labelVariant}>
               <div tw="flex items-center justify-center gap-2">
                 <Icon name="alien-8bit" className={`text-${labelVariant}`} />
@@ -187,7 +187,7 @@ export default function ManageInstance() {
         {/* Instance Properties */}
         <Slide>
           <div tw="w-full flex flex-wrap gap-x-24 gap-y-9 px-12 py-6 transition-transform duration-1000">
-            <div tw="flex-1 w-1/2 min-w-[32rem] flex flex-col gap-y-9">
+            <div tw="flex-1 w-1/2 flex flex-col gap-y-9">
               <div>
                 <InstanceDetails instance={instance} />
               </div>
