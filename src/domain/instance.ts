@@ -169,7 +169,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       const instanceMessage = yield* this.parseInstanceSteps(newInstance)
 
       // @note: Reserve CRN resources before creating PAYG superfluid flows
-      yield* this.addPAYGReservationSteps(newInstance, instanceMessage)
+      // yield* this.addPAYGReservationSteps(newInstance, instanceMessage)
 
       // @note: Send the instance creation message to the network
       yield
@@ -282,9 +282,9 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     // @note: Aggregate all signatures in 1 step
     if (volumes.length > 0) steps.push('volume')
 
-    if (newInstance.payment?.type === PaymentMethod.Stream) {
-      steps.push('reserve')
-    }
+    // if (newInstance.payment?.type === PaymentMethod.Stream) {
+    //   steps.push('reserve')
+    // }
 
     steps.push('instance')
 
