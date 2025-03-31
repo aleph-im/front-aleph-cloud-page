@@ -14,11 +14,11 @@ export type EntityPaymentProps = {
 // Formatted data returned by the hook for display
 export type FormattedPaymentData = {
   isPAYG: boolean
-  totalSpent: string
-  formattedBlockchain: string
-  formattedFlowRate: string
-  formattedStartDate: string
-  formattedDuration: string
+  totalSpent?: string
+  formattedBlockchain?: string
+  formattedFlowRate?: string
+  formattedStartDate?: string
+  formattedDuration?: string
   loading: boolean
 }
 

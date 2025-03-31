@@ -3,6 +3,7 @@ import { Logo, NoisyContainer } from '@aleph-front/core'
 import { EntityPaymentProps } from './types'
 import { Text } from '@/components/pages/dashboard/common'
 import { useEntityPayment } from './hook'
+import Skeleton from '../../Skeleton'
 
 /**
  * Component to display payment information
@@ -36,7 +37,7 @@ export const EntityPayment = (props: EntityPaymentProps) => {
               <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
             </div>
             <p className="text-base2 fs-18" tw="font-bold">
-              {loading ? 'Loading...' : totalSpent}
+              {totalSpent ? totalSpent : <Skeleton width="5rem" />}
             </p>
           </div>
 
@@ -44,11 +45,25 @@ export const EntityPayment = (props: EntityPaymentProps) => {
           <div tw="flex flex-wrap gap-6">
             <div>
               <div className="tp-info text-main0 fs-12">TYPE</div>
-              <Text>{isPAYG ? 'Pay as you go' : 'Holding'}</Text>
+              <Text>
+                {loading ? (
+                  <Skeleton width="5rem" />
+                ) : isPAYG ? (
+                  'Pay as you go'
+                ) : (
+                  'Holding'
+                )}
+              </Text>
             </div>
             <div>
               <div className="tp-info text-main0 fs-12">BLOCKCHAIN</div>
-              <Text>{formattedBlockchain}</Text>
+              <Text>
+                {formattedBlockchain ? (
+                  formattedBlockchain
+                ) : (
+                  <Skeleton width="3rem" />
+                )}
+              </Text>
             </div>
           </div>
 
@@ -56,18 +71,36 @@ export const EntityPayment = (props: EntityPaymentProps) => {
           <div tw="flex flex-wrap gap-6">
             <div>
               <div className="tp-info text-main0 fs-12">START DATE</div>
-              <Text>{formattedStartDate}</Text>
+              <Text>
+                {formattedStartDate ? (
+                  formattedStartDate
+                ) : (
+                  <Skeleton width="8rem" />
+                )}
+              </Text>
             </div>
 
             {isPAYG && (
               <>
                 <div>
                   <div className="tp-info text-main0 fs-12">FLOW RATE</div>
-                  <Text>{formattedFlowRate}</Text>
+                  <Text>
+                    {formattedFlowRate ? (
+                      formattedFlowRate
+                    ) : (
+                      <Skeleton width="5rem" />
+                    )}
+                  </Text>
                 </div>
                 <div>
                   <div className="tp-info text-main0 fs-12">TIME ELAPSED</div>
-                  <Text>{formattedDuration}</Text>
+                  <Text>
+                    {formattedDuration ? (
+                      formattedDuration
+                    ) : (
+                      <Skeleton width="4rem" />
+                    )}
+                  </Text>
                 </div>
               </>
             )}

@@ -26,7 +26,6 @@ export function useEntityPayment({
   blockchain,
   loading = false,
 }: EntityPaymentProps): UseEntityPaymentReturn {
-  console.log('cost', cost)
   // Determine if payment is pay-as-you-go
   const isPAYG = useMemo(
     () => paymentType === PaymentType.superfluid,
@@ -35,9 +34,9 @@ export function useEntityPayment({
 
   // Format total spent amount using the time components for PAYG type
   const totalSpent = useMemo(() => {
-    if (!cost) return 'N/A'
+    if (!cost) return
     if (!isPAYG) return cost.toString()
-    if (!runningTime) return 'N/A'
+    if (!runningTime) return
 
     // Use only the remainder (hours, minutes, seconds) from runningTime
     const { days, hours, minutes } = getTimeComponents(runningTime)
@@ -50,14 +49,14 @@ export function useEntityPayment({
 
   // Format blockchain name
   const formattedBlockchain = useMemo(() => {
-    if (!blockchain) return 'N/A'
+    if (!blockchain) return
     return blockchains[blockchain].name
   }, [blockchain])
 
   // Format flow rate to show daily cost
   const formattedFlowRate = useMemo(() => {
-    if (!isPAYG) return 'N/A'
-    if (!cost) return 'N/A'
+    if (!isPAYG) return
+    if (!cost) return
 
     const dailyRate = cost * 24
     console.log('dailyRate', dailyRate)
@@ -66,7 +65,7 @@ export function useEntityPayment({
 
   // Format start date
   const formattedStartDate = useMemo(() => {
-    if (!startTime) return 'N/A'
+    if (!startTime) return
 
     const date = new Date(startTime * 1000)
     return date.toLocaleString('en-US', {
@@ -82,7 +81,7 @@ export function useEntityPayment({
 
   // Format duration display using the same helper
   const formattedDuration = useMemo(() => {
-    if (!runningTime) return 'N/A'
+    if (!runningTime) return
 
     const { days, hours, minutes, seconds } = getTimeComponents(runningTime)
     const formattedHours = hours.toString().padStart(2, '0')
