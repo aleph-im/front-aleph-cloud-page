@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
+import usePrevious from './usePrevious'
 import { InstanceCostProps } from '@/domain/instance'
 import { ProgramCostProps } from '@/domain/program'
 import { VolumeCostProps } from '@/domain/volume'
@@ -11,6 +12,7 @@ import { CostSummary } from '@/domain/cost'
 import { useWebsiteManager } from './useManager/useWebsiteManager'
 import { GpuInstanceCostProps } from '@/domain/gpuInstance'
 import { useGpuInstanceManager } from './useManager/useGpuInstanceManager'
+import { useDebounceState } from '@aleph-front/core'
 
 export type UseVolumeCostProps = {
   entityType: EntityType.Volume
@@ -46,15 +48,17 @@ export type UseEntityCostProps =
 
 export type UseEntityCostReturn = CostSummary
 
-export function useEntityCost({
-  entityType,
-  props,
-}: UseEntityCostProps): UseEntityCostReturn {
-  const emptyCost = {
-    paymentMethod: PaymentMethod.Hold,
-    cost: Number.POSITIVE_INFINITY,
-    lines: [],
-  }
+export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
+  // Use useMemo to prevent the object from being recreated on every render
+  const emptyCost = useMemo(
+    () => ({
+      paymentMethod: PaymentMethod.Hold,
+      cost: Number.POSITIVE_INFINITY,
+      lines: [],
+    }),
+    [],
+  )
+
   const [cost, setCost] = useState<UseEntityCostReturn>(emptyCost)
 
   const volumeManager = useVolumeManager()
@@ -63,9 +67,34 @@ export function useEntityCost({
   const programManager = useProgramManager()
   const websiteManager = useWebsiteManager()
 
+  // Create a string representation of the props for change detection only
+  const propsString = useMemo(() => JSON.stringify(props), [props])
+
+  // Debounce the string representation with a 1000ms (1 second) delay
+  const debouncedPropsString = useDebounceState(propsString, 1000)
+
+  // Store previous debounced string to detect changes
+  const prevDebouncedPropsString = usePrevious(debouncedPropsString)
+
+  // Return the original props only when the debounced string changes
+  const debouncedProps = useMemo(() => {
+    // Check if the debounced string has changed
+    if (
+      debouncedPropsString !== prevDebouncedPropsString &&
+      debouncedPropsString
+    ) {
+      return { ...props } // Return the original props (with File instances intact)
+    }
+  }, [debouncedPropsString, prevDebouncedPropsString, props])
+
+  // Only make the API call when the debounced props change
   useEffect(() => {
     async function load() {
+      // Skip if debouncedProps is undefined (no change detected)
+      if (!debouncedProps) return
+
       let result: CostSummary = emptyCost
+      const { entityType, props } = debouncedProps
 
       switch (entityType) {
         case EntityType.Volume:
@@ -90,8 +119,15 @@ export function useEntityCost({
     }
 
     load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entityType, ...Object.values(props)])
+  }, [
+    debouncedProps,
+    emptyCost,
+    volumeManager,
+    instanceManager,
+    gpuInstanceManager,
+    programManager,
+    websiteManager,
+  ])
 
   return cost
 }

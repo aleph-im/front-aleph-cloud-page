@@ -1,13 +1,14 @@
 import React from 'react'
 import { PaymentMethod } from '@/helpers/constants'
 import { useNewVolumePage } from '@/hooks/pages/storage/useNewVolumePage'
-import { Button } from '@aleph-front/core'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import Container from '@/components/common/CenteredContainer'
 import { AddNewVolume } from '@/components/form/AddVolume'
 import { Form } from '@/components/form/Form'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import BackButtonSection from '@/components/common/BackButtonSection'
+import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
+import { insufficientFundsDisabledMessage } from './disabledMessages'
 
 export function NewVolumePage() {
   const {
@@ -44,16 +45,25 @@ export function NewVolumePage() {
             </>
           }
           button={
-            <Button
+            <ButtonWithInfoTooltip
               type="submit"
               color="main0"
               kind="default"
               size="lg"
               variant="primary"
               disabled={isCreateButtonDisabled}
+              tooltipContent={
+                isCreateButtonDisabled
+                  ? insufficientFundsDisabledMessage()
+                  : undefined
+              }
+              tooltipPosition={{
+                my: 'bottom-center',
+                at: 'top-center',
+              }}
             >
               Create volume
-            </Button>
+            </ButtonWithInfoTooltip>
           }
         />
       </Form>

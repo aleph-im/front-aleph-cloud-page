@@ -4,26 +4,29 @@ import {
   BaseExecutableContent,
   CostEstimationMachineVolume,
   HostRequirements,
+  InstancePublishConfiguration,
   MachineResources,
   MachineVolume,
-  MAXIMUM_DISK_SIZE,
   MessageCost,
   MessageCostLine,
   MessageCostType,
   Payment,
   PaymentType,
   PaymentType as SDKPaymentType,
+  VolumePersistence,
 } from '@aleph-sdk/message'
 import {
   AddExistingVolume,
   AddPersistentVolume,
+  mockVolumeMountPath,
+  mockVolumeName,
   mockVolumeRef,
   VolumeManager,
   VolumeType,
 } from './volume'
 import { Account } from '@aleph-sdk/account'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
-import { VolumeField } from '@/hooks/form/useAddVolume'
+import { NewVolumeField, VolumeField } from '@/hooks/form/useAddVolume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { Domain, DomainManager } from './domain'
 import {
@@ -41,7 +44,12 @@ import Err from '@/helpers/errors'
 import { BlockchainId } from './connect/base'
 import { CRN, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
-import { convertByteUnits, humanReadableSize, sleep } from '@aleph-front/core'
+import {
+  convertByteUnits,
+  humanReadableSize,
+  round,
+  sleep,
+} from '@aleph-front/core'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import { isBlockchainPAYGCompatible } from './blockchain'
 import { CostLine } from './cost'
@@ -125,6 +133,9 @@ export const KEYPAIR_TTL = 1000 * 60 * 60 * 2
 export type ExecutableCostProps = (
   | {
       type: EntityType.Instance | EntityType.GpuInstance
+      rootfs?: {
+        size_mib?: number
+      }
     }
   | {
       type: EntityType.Program
@@ -150,7 +161,7 @@ export abstract class ExecutableManager<T extends Executable> {
   protected static cachedPubKeyToken?: AuthPubKeyToken
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
     protected nodeManager: NodeManager,
@@ -250,16 +261,74 @@ export abstract class ExecutableManager<T extends Executable> {
     }
   }
 
+  async reserveCRNResources(
+    node: CRN,
+    instanceConfig: InstancePublishConfiguration,
+  ): Promise<void> {
+    if (!node.address) throw Err.InvalidCRNAddress
+
+    const nodeUrl = NodeManager.normalizeUrl(node.address)
+    const url = new URL(`${nodeUrl}/control/reserve_resources`)
+    const { hostname: domain, pathname: path } = url
+
+    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
+
+    const signedOperationToken = await this.getAuthOperationToken(
+      keyPair.privateKey,
+      domain,
+      path,
+    )
+
+    const message =
+      await this.sdkClient.instanceClient.getCostComputableMessage(
+        instanceConfig,
+      )
+
+    let errorMsg = ''
+
+    try {
+      const req = await fetch(url.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-SignedOperation': JSON.stringify(signedOperationToken),
+          'X-SignedPubKey': JSON.stringify(pubKeyHeader),
+        },
+        body: message.item_content,
+        mode: 'cors',
+      })
+
+      const resp = await req.json()
+
+      /*
+        expires: "2025-03-28 11:21:21.744592+00:00"
+        status: "reserved"
+      */
+      if (resp.status === 'reserved') return
+      // errorMsg = resp.errors[instanceId]
+    } catch (e) {
+      errorMsg = (e as Error).message
+    }
+
+    throw Err.InstanceStartupFailed(node.hash, errorMsg)
+  }
+
   async notifyCRNAllocation(
     node: CRN,
     instanceId: string,
-    retry = true,
+    retry: {
+      attemps: number
+      await: number
+    } = {
+      attemps: 5,
+      await: 1000,
+    },
   ): Promise<void> {
     if (!node.address) throw Err.InvalidCRNAddress
 
     let errorMsg = ''
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < retry.attemps; i++) {
       try {
         const nodeUrl = NodeManager.normalizeUrl(node.address)
 
@@ -279,8 +348,8 @@ export abstract class ExecutableManager<T extends Executable> {
       } catch (e) {
         errorMsg = (e as Error).message
       } finally {
-        if (!retry) break
-        await sleep(1000)
+        if (!retry.attemps) break
+        await sleep(retry.await)
       }
     }
 
@@ -305,6 +374,8 @@ export abstract class ExecutableManager<T extends Executable> {
     keyPair?: KeyPair,
     domain?: string,
   ): Promise<AuthPubKeyToken> {
+    if (!this.account) throw Err.InvalidAccount
+
     // @todo: Improve this by caching on local storage
     const { cachedPubKeyToken } = ExecutableManager
 
@@ -542,9 +613,53 @@ export abstract class ExecutableManager<T extends Executable> {
     return yield* this.domainManager.addSteps(parsedDomains, 'ignore')
   }
 
+  protected async parseVolumesForCostEstimation(
+    volumes?: VolumeField | VolumeField[],
+  ): Promise<MachineVolume[] | undefined> {
+    if (!volumes) return
+
+    volumes = Array.isArray(volumes) ? volumes : [volumes]
+    if (volumes.length === 0) return
+
+    return await Promise.all(
+      volumes.map(async (volume) => {
+        switch (volume.volumeType) {
+          case VolumeType.New: {
+            const vol = volume as NewVolumeField
+            const estimated_size_mib = await VolumeManager.getVolumeSize(volume)
+
+            return {
+              ref: mockVolumeRef,
+              use_latest: vol.useLatest || false,
+              mount: vol.mountPath || mockVolumeMountPath,
+              estimated_size_mib,
+            }
+          }
+          case VolumeType.Existing: {
+            const estimated_size_mib = await VolumeManager.getVolumeSize(volume)
+
+            return {
+              ref: volume.refHash || mockVolumeRef,
+              use_latest: volume.useLatest || false,
+              mount: volume.mountPath || mockVolumeMountPath,
+              estimated_size_mib,
+            }
+          }
+          case VolumeType.Persistent: {
+            return {
+              persistence: VolumePersistence.host,
+              name: volume.name || mockVolumeName,
+              mount: volume.mountPath || mockVolumeMountPath,
+              size_mib: volume.size || 0,
+            }
+          }
+        }
+      }),
+    )
+  }
+
   protected async *parseVolumesSteps(
     volumes?: VolumeField | VolumeField[],
-    estimateCost?: boolean,
   ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
     if (!volumes) return
 
@@ -552,10 +667,7 @@ export abstract class ExecutableManager<T extends Executable> {
     if (volumes.length === 0) return
 
     // @note: Create new volumes before and cast them to ExistingVolume type
-    console.log('estimateCost', estimateCost)
-    const messages = !estimateCost
-      ? yield* this.volumeManager.addSteps(volumes)
-      : []
+    const messages = yield* this.volumeManager.addSteps(volumes)
 
     const parsedVolumes: (AddExistingVolume | AddPersistentVolume)[] =
       await Promise.all(
@@ -579,7 +691,7 @@ export abstract class ExecutableManager<T extends Executable> {
         const { mountPath: mount, size: size_mib, name } = volume
 
         return {
-          persistence: 'host',
+          persistence: VolumePersistence.host,
           mount,
           size_mib,
           name,
@@ -621,6 +733,23 @@ export abstract class ExecutableManager<T extends Executable> {
     return {
       ...metadata,
       ...out,
+    }
+  }
+
+  protected parsePaymentForCostEstimation(
+    payment?: PaymentConfiguration,
+  ): Payment {
+    if (payment?.type === PaymentMethod.Stream) {
+      return {
+        chain: payment.chain,
+        type: SDKPaymentType.superfluid,
+        receiver: payment.receiver,
+      }
+    } else {
+      return {
+        chain: payment?.chain || BlockchainId.ETH,
+        type: SDKPaymentType.hold,
+      }
     }
   }
 
@@ -678,6 +807,14 @@ export abstract class ExecutableManager<T extends Executable> {
       {} as Record<MessageCostType, MessageCostLine>,
     )
 
+    const paymentMethod =
+      costs.payment_type === PaymentType.hold
+        ? PaymentMethod.Hold
+        : PaymentMethod.Stream
+
+    const costProp =
+      paymentMethod === PaymentMethod.Hold ? 'cost_hold' : 'cost_stream'
+
     // Execution
 
     const { vcpus: cpu = 0, memory: ram = 0 } = entityProps.resources || {}
@@ -690,17 +827,63 @@ export abstract class ExecutableManager<T extends Executable> {
       displayUnit: false,
     })}GB-RAM`
 
-    const rootfsVolume =
-      detailMap[MessageCostType.EXECUTION_INSTANCE_VOLUME_ROOTFS]
-    const storage = rootfsVolume
-      ? ram * 10 > MAXIMUM_DISK_SIZE
-        ? MAXIMUM_DISK_SIZE
-        : ram * 10
-      : undefined
+    const baseExecutionCostAmount = Number(
+      detailMap[MessageCostType.EXECUTION][costProp],
+    )
 
-    const storageStr = !storage
+    const rootfsVolumeCostDetail =
+      detailMap[MessageCostType.EXECUTION_INSTANCE_VOLUME_ROOTFS]
+
+    const rootfsVolumeCostAmount = rootfsVolumeCostDetail
+      ? Number(rootfsVolumeCostDetail[costProp])
+      : 0
+
+    const volumeDiscountCostDetail =
+      detailMap[MessageCostType.EXECUTION_VOLUME_DISCOUNT]
+
+    const volumeDiscountCostAmount = volumeDiscountCostDetail
+      ? Math.abs(Number(volumeDiscountCostDetail[costProp]))
+      : 0
+
+    let remainingDiscountAmount = volumeDiscountCostAmount
+
+    const rootfsVolumeSize =
+      (rootfsVolumeCostDetail &&
+        entityProps.type !== EntityType.Program &&
+        entityProps?.rootfs?.size_mib) ||
+      0
+
+    let totalExecutionCost = baseExecutionCostAmount
+    let totalExecutionStorageSize = rootfsVolumeSize
+
+    let extraExecutionStorageCost = 0
+    let extraExecutionStorageSize = 0
+
+    if (rootfsVolumeCostDetail) {
+      const percentExtra =
+        1 -
+        Math.min(round(remainingDiscountAmount / rootfsVolumeCostAmount, 18), 1)
+
+      const extraCost = round(rootfsVolumeCostAmount * percentExtra, 18)
+      const extraStorage = round(rootfsVolumeSize * percentExtra, 0)
+      const coveredStorage = rootfsVolumeSize - extraStorage
+
+      totalExecutionCost = baseExecutionCostAmount // + (rootfsVolumeCostAmount - extraCost - remainingDiscountAmount)
+      extraExecutionStorageCost = extraCost
+
+      totalExecutionStorageSize = coveredStorage
+      extraExecutionStorageSize = extraStorage
+
+      remainingDiscountAmount = Math.max(
+        remainingDiscountAmount - rootfsVolumeCostAmount,
+        0,
+      )
+    }
+
+    // Now create the storage display string after we have the final displayStorage value
+    const storageStr = !totalExecutionStorageSize
       ? ''
-      : `.${convertByteUnits(storage, {
+      : `.${convertByteUnits(totalExecutionStorageSize, {
           from: 'MiB',
           to: 'GiB',
           displayUnit: false,
@@ -708,25 +891,28 @@ export abstract class ExecutableManager<T extends Executable> {
 
     const detail = `${cpuStr}${ramStr}${storageStr}`
 
-    const paymentMethod =
-      costs.payment_type === PaymentType.hold
-        ? PaymentMethod.Hold
-        : PaymentMethod.Stream
-
-    const costProp =
-      paymentMethod === PaymentMethod.Hold ? 'cost_hold' : 'cost_stream'
-
-    const executionLines = [
+    // Create the execution line with the adjusted cost
+    const executionLines: CostLine[] = [
       {
         id: MessageCostType.EXECUTION,
         name: EntityTypeName[entityProps.type].toUpperCase(),
         detail,
-        cost: this.parseCost(
-          paymentMethod,
-          Number(detailMap[MessageCostType.EXECUTION][costProp]),
-        ),
+        cost: this.parseCost(paymentMethod, totalExecutionCost),
       },
     ]
+
+    // For instances and GPU instances, add extra storage line if needed
+    // For programs, we don't apply discount to execution cost
+    // The discount will be applied to attached volumes in the volumesLines section
+    if (extraExecutionStorageCost) {
+      executionLines.push({
+        id: MessageCostType.EXECUTION_INSTANCE_VOLUME_ROOTFS,
+        name: 'STORAGE',
+        label: 'SYSTEM',
+        detail: humanReadableSize(extraExecutionStorageSize, 'MiB'),
+        cost: this.parseCost(paymentMethod, extraExecutionStorageCost),
+      })
+    }
 
     // Volumes
 
@@ -738,7 +924,63 @@ export abstract class ExecutableManager<T extends Executable> {
       {} as Record<string, CostEstimationMachineVolume>,
     )
 
-    const volumesLines = costs.detail
+    // Program-specific volume costs
+    const programVolumeLines: CostLine[] = []
+    if (entityProps.type === EntityType.Program) {
+      // Add program code volume cost
+      const codeVolumeCostDetail =
+        detailMap[MessageCostType.EXECUTION_PROGRAM_VOLUME_CODE]
+      if (codeVolumeCostDetail) {
+        let volumeCost = Number(codeVolumeCostDetail[costProp])
+
+        // Apply discount if available
+        if (remainingDiscountAmount > 0) {
+          if (remainingDiscountAmount >= volumeCost) {
+            remainingDiscountAmount -= volumeCost
+            volumeCost = 0
+          } else {
+            volumeCost -= remainingDiscountAmount
+            remainingDiscountAmount = 0
+          }
+        }
+
+        programVolumeLines.push({
+          id: MessageCostType.EXECUTION_PROGRAM_VOLUME_CODE,
+          name: 'STORAGE',
+          label: 'CODE',
+          detail: 'Code volume',
+          cost: this.parseCost(paymentMethod, volumeCost),
+        })
+      }
+
+      // Add program runtime volume cost
+      const runtimeVolumeCostDetail =
+        detailMap[MessageCostType.EXECUTION_PROGRAM_VOLUME_RUNTIME]
+      if (runtimeVolumeCostDetail) {
+        let volumeCost = Number(runtimeVolumeCostDetail[costProp])
+
+        // Apply discount if available
+        if (remainingDiscountAmount > 0) {
+          if (remainingDiscountAmount >= volumeCost) {
+            remainingDiscountAmount -= volumeCost
+            volumeCost = 0
+          } else {
+            volumeCost -= remainingDiscountAmount
+            remainingDiscountAmount = 0
+          }
+        }
+
+        programVolumeLines.push({
+          id: MessageCostType.EXECUTION_PROGRAM_VOLUME_RUNTIME,
+          name: 'STORAGE',
+          label: 'RUNTIME',
+          detail: 'Runtime volume',
+          cost: this.parseCost(paymentMethod, volumeCost),
+        })
+      }
+    }
+
+    const volumesLines: CostLine[] = costs.detail
       .filter(
         (detail) =>
           detail.type === MessageCostType.EXECUTION_VOLUME_INMUTABLE ||
@@ -750,18 +992,36 @@ export abstract class ExecutableManager<T extends Executable> {
         const size = 'size_mib' in vol ? vol.size_mib : vol.estimated_size_mib
         const label = 'size_mib' in vol ? 'PERSISTENT' : 'VOLUME'
 
+        let volumeCost = Number(detail[costProp])
+
+        // Apply discount for programs
+        if (
+          entityProps.type === EntityType.Program &&
+          remainingDiscountAmount > 0
+        ) {
+          // If the discount is larger than the volume cost, apply the whole volume cost as discount
+          if (remainingDiscountAmount >= volumeCost) {
+            remainingDiscountAmount -= volumeCost
+            volumeCost = 0
+          } else {
+            // Otherwise, apply partial discount
+            volumeCost -= remainingDiscountAmount
+            remainingDiscountAmount = 0
+          }
+        }
+
         return {
           id: `${detail.type}|${detail.name}`,
           name: 'STORAGE',
           label,
           detail: humanReadableSize(size, 'MiB'),
-          cost: this.parseCost(paymentMethod, Number(detail[costProp])),
+          cost: this.parseCost(paymentMethod, volumeCost),
         }
       })
 
     // Persistent
 
-    const programTypeLines =
+    const programTypeLines: CostLine[] =
       entityProps.type === EntityType.Program
         ? [
             {
@@ -775,15 +1035,18 @@ export abstract class ExecutableManager<T extends Executable> {
 
     // Domains
 
-    const domainsLines = (entityProps.domains || []).map((domain) => ({
-      id: 'DOMAIN',
-      name: 'CUSTOM DOMAIN',
-      detail: domain.name,
-      cost: this.parseCost(paymentMethod, 0),
-    }))
+    const domainsLines: CostLine[] = (entityProps.domains || []).map(
+      (domain) => ({
+        id: 'DOMAIN',
+        name: 'CUSTOM DOMAIN',
+        detail: domain.name,
+        cost: this.parseCost(paymentMethod, 0),
+      }),
+    )
 
     return [
       ...executionLines,
+      ...programVolumeLines,
       ...volumesLines,
       ...programTypeLines,
       ...domainsLines,

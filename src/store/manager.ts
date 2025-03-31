@@ -27,20 +27,92 @@ function createDefaultManagers(account?: Account) {
     : new AuthenticatedAlephHttpClient(account, apiServer)
 
   const fileManager = new FileManager(sdkClient, account)
-
   const nodeManager = new NodeManager(fileManager, sdkClient, account)
-
   const costManager = new CostManager(sdkClient)
+  const messageManager = new MessageManager(account, sdkClient)
+  const sshKeyManager = new SSHKeyManager(account, sdkClient)
+  const domainManager = new DomainManager(account, sdkClient)
+  const volumeManager = new VolumeManager(account, sdkClient, fileManager)
+
+  const instanceManager = new InstanceManager(
+    account,
+    sdkClient,
+    volumeManager,
+    domainManager,
+    sshKeyManager,
+    fileManager,
+    nodeManager,
+    costManager,
+  )
+  const programManager = new ProgramManager(
+    account,
+    sdkClient,
+    volumeManager,
+    domainManager,
+    messageManager,
+    fileManager,
+    nodeManager,
+  )
+  const gpuInstanceManager = new GpuInstanceManager(
+    account,
+    sdkClient,
+    volumeManager,
+    domainManager,
+    sshKeyManager,
+    fileManager,
+    nodeManager,
+    costManager,
+  )
+  const confidentialManager = new ConfidentialManager(
+    account,
+    sdkClient,
+    volumeManager,
+    domainManager,
+    sshKeyManager,
+    fileManager,
+    nodeManager,
+  )
+  const websiteManager = new WebsiteManager(
+    account,
+    sdkClient,
+    volumeManager,
+    domainManager,
+  )
+  const voucherManager = new VoucherManager(account, sdkClient)
 
   return {
     sdkClient,
     fileManager,
     nodeManager,
     costManager,
+    messageManager,
+    sshKeyManager,
+    domainManager,
+    volumeManager,
+    instanceManager,
+    programManager,
+    gpuInstanceManager,
+    confidentialManager,
+    websiteManager,
+    voucherManager,
   }
 }
 
-const { fileManager, nodeManager } = createDefaultManagers()
+const {
+  fileManager,
+  nodeManager,
+  costManager,
+  messageManager,
+  sshKeyManager,
+  domainManager,
+  volumeManager,
+  instanceManager,
+  programManager,
+  gpuInstanceManager,
+  confidentialManager,
+  websiteManager,
+  voucherManager,
+} = createDefaultManagers()
 
 export type ManagerState = {
   nodeManager: NodeManager
@@ -61,17 +133,17 @@ export type ManagerState = {
 export const initialState: ManagerState = {
   nodeManager,
   fileManager,
-  messageManager: undefined,
-  sshKeyManager: undefined,
-  domainManager: undefined,
-  volumeManager: undefined,
-  programManager: undefined,
-  instanceManager: undefined,
-  gpuInstanceManager: undefined,
-  confidentialManager: undefined,
-  websiteManager: undefined,
-  voucherManager: undefined,
-  costManager: undefined,
+  costManager,
+  messageManager,
+  sshKeyManager,
+  domainManager,
+  volumeManager,
+  programManager,
+  instanceManager,
+  gpuInstanceManager,
+  confidentialManager,
+  websiteManager,
+  voucherManager,
 }
 
 export type ManagerAction = ConnectionAction
@@ -82,82 +154,58 @@ export function getManagerReducer(): ManagerReducer {
   return (state = initialState, action) => {
     switch (action.type) {
       case ConnectionActionType.CONNECTION_DISCONNECT: {
-        const { nodeManager, fileManager, costManager } =
-          createDefaultManagers()
+        const {
+          nodeManager,
+          fileManager,
+          costManager,
+          messageManager,
+          sshKeyManager,
+          domainManager,
+          volumeManager,
+          instanceManager,
+          programManager,
+          gpuInstanceManager,
+          confidentialManager,
+          websiteManager,
+          voucherManager,
+        } = createDefaultManagers()
 
         return {
           ...state,
           nodeManager,
           fileManager,
           costManager,
-          messageManager: undefined,
-          sshKeyManager: undefined,
-          domainManager: undefined,
-          volumeManager: undefined,
-          programManager: undefined,
-          instanceManager: undefined,
-          gpuInstanceManager: undefined,
-          confidentialManager: undefined,
-          websiteManager: undefined,
-          voucherManager: undefined,
+          messageManager,
+          sshKeyManager,
+          domainManager,
+          volumeManager,
+          programManager,
+          instanceManager,
+          gpuInstanceManager,
+          confidentialManager,
+          websiteManager,
+          voucherManager,
         }
       }
 
       case ConnectionActionType.CONNECTION_UPDATE: {
         const { account } = action.payload
 
-        const { nodeManager, fileManager, costManager, sdkClient } =
-          createDefaultManagers(account)
-
-        const messageManager = new MessageManager(account, sdkClient)
-        const sshKeyManager = new SSHKeyManager(account, sdkClient)
-        const domainManager = new DomainManager(account, sdkClient)
-        const volumeManager = new VolumeManager(account, sdkClient, fileManager)
-        const programManager = new ProgramManager(
-          account,
-          sdkClient,
-          volumeManager,
-          domainManager,
+        const {
+          nodeManager,
+          fileManager,
+          costManager,
           messageManager,
-          fileManager,
-          nodeManager,
-        )
-        const instanceManager = new InstanceManager(
-          account,
-          sdkClient,
-          volumeManager,
-          domainManager,
           sshKeyManager,
-          fileManager,
-          nodeManager,
-          costManager,
-        )
-        const gpuInstanceManager = new GpuInstanceManager(
-          account,
-          sdkClient,
-          volumeManager,
           domainManager,
-          sshKeyManager,
-          fileManager,
-          nodeManager,
-          costManager,
-        )
-        const confidentialManager = new ConfidentialManager(
-          account,
-          sdkClient,
           volumeManager,
-          domainManager,
-          sshKeyManager,
-          fileManager,
-          nodeManager,
-        )
-        const websiteManager = new WebsiteManager(
-          account,
-          sdkClient,
-          volumeManager,
-          domainManager,
-        )
-        const voucherManager = new VoucherManager(account, sdkClient)
+          instanceManager,
+          programManager,
+          gpuInstanceManager,
+          confidentialManager,
+          websiteManager,
+          voucherManager,
+        } = createDefaultManagers(account)
 
         return {
           ...state,

@@ -9,7 +9,7 @@ import Err from '@/helpers/errors'
 
 export class MessageManager {
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected channel = defaultConsoleChannel,
   ) {}

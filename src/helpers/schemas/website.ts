@@ -1,12 +1,7 @@
 import { z } from 'zod'
 import { addDomainsSchema, addRestrictedNameAndTagsSchema } from './execution'
 import { WebsiteFrameworkId } from '@/domain/website'
-import {
-  blockchainSchema,
-  ipfsCIDSchema,
-  paymentMethodSchema,
-  domainNameSchema,
-} from './base'
+import { ipfsCIDSchema, paymentMethodSchema, domainNameSchema } from './base'
 
 export const websiteFrameworkSchema = z.enum([
   WebsiteFrameworkId.none,
@@ -38,11 +33,6 @@ export const websiteDataSchema = z.object({
 
 export { ipfsCIDSchema }
 
-export const websitePaymentSchema = z.object({
-  type: paymentMethodSchema,
-  chain: blockchainSchema,
-})
-
 export const historySchema = z.record(ipfsCIDSchema)
 
 export const ensSchema = z.array(domainNameSchema)
@@ -50,7 +40,8 @@ export const ensSchema = z.array(domainNameSchema)
 export const websiteSchema = z
   .object({
     framework: websiteFrameworkSchema,
-    payment: websitePaymentSchema,
+    paymentMethod: paymentMethodSchema,
+    payment: z.any().optional(),
     website: websiteDataSchema,
     domains: addDomainsSchema.optional(),
     ens: ensSchema.optional(),

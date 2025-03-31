@@ -4,7 +4,6 @@ import {
   HostRequirements,
   InstanceContent,
   InstancePublishConfiguration,
-  MachineVolume,
   MessageType,
   PaymentType,
   RootfsVolumeConfiguration,
@@ -15,7 +14,7 @@ import {
   EXTRA_WEI,
   PaymentMethod,
 } from '@/helpers/constants'
-import { consumeIterator, getDate, getExplorerURL } from '@/helpers/utils'
+import { getDate, getExplorerURL } from '@/helpers/utils'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
@@ -53,6 +52,7 @@ import Err from '@/helpers/errors'
 import { CostManager, CostSummary } from './cost'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { BlockchainId } from './connect/base'
+import { mockAccount } from './account'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -113,7 +113,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   static addStreamSchema = instanceStreamSchema
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
@@ -127,6 +127,8 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   }
 
   async getAll(): Promise<T[]> {
+    if (!this.account) return []
+
     try {
       const response = await this.sdkClient.getMessages({
         addresses: [this.account.address],
@@ -241,29 +243,26 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       throw Err.InvalidAccount
 
     try {
-      yield* this.addPAYGStreamSteps(newInstance, account)
-
       const instanceMessage = yield* this.parseInstanceSteps(newInstance)
 
-      yield
+      // @note: Reserve CRN resources before creating PAYG superfluid flows
+      // yield* this.addPAYGReservationSteps(newInstance, instanceMessage)
 
+      // @note: Send the instance creation message to the network
+      yield
       const response = await this.sdkClient.createInstance({
         ...instanceMessage,
       })
-
       const [entity] = await this.parseMessages([response])
+
+      // @note: Create PAYG superfluid flows
+      yield* this.addPAYGStreamSteps(newInstance, account)
 
       // @note: Add the domain link
       yield* this.parseDomainsSteps(entity.id, newInstance.domains)
 
       // @note: Notify the CRN if it is a targeted stream
-      if (
-        newInstance.payment?.type === PaymentMethod.Stream &&
-        newInstance.node
-      ) {
-        yield
-        await this.notifyCRNAllocation(newInstance.node, entity.id, false)
-      }
+      yield* this.addPAYGAllocationSteps(newInstance, entity)
 
       return entity
     } catch (err) {
@@ -271,67 +270,79 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     }
   }
 
-  // TODO: Check if message and flow exists
-  async del(
+  async delStreams(
     instanceOrId: string | T,
     account?: SuperfluidAccount,
   ): Promise<void> {
     const instance = await this.ensureInstance(instanceOrId)
+    if (instance.payment?.type !== PaymentType.superfluid) return
 
-    if (instance.payment?.type === PaymentType.superfluid) {
-      if (!account) throw Err.ConnectYourPaymentWallet
-      const { receiver } = instance.payment
-      if (!receiver) throw Err.ReceiverReward
+    if (!account) throw Err.ConnectYourPaymentWallet
+    const { receiver } = instance.payment
+    if (!receiver) throw Err.ReceiverReward
 
-      const { communityWalletAddress, communityWalletTimestamp } =
-        await this.costManager.getSettingsAggregate()
+    const { communityWalletAddress, communityWalletTimestamp } =
+      await this.costManager.getSettingsAggregate()
 
-      const instanceCosts = await this.getTotalCostByHash(
-        instance.payment?.type,
-        instance.id,
+    const instanceCosts = await this.getTotalCostByHash(
+      instance.payment?.type,
+      instance.id,
+    )
+
+    const results = await Promise.allSettled(
+      instance.time >= communityWalletTimestamp
+        ? [
+            // @note: Instances created after split of flows between receiver and community wallet
+            account.decreaseALEPHFlow(
+              receiver,
+              this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
+            ),
+            account.decreaseALEPHFlow(
+              communityWalletAddress,
+              this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
+            ),
+          ]
+        : [
+            // @note: Instances created before split of flows between receiver and community wallet
+            account.decreaseALEPHFlow(receiver, instanceCosts + EXTRA_WEI),
+          ],
+    )
+
+    const errors: Error[] = results
+      .filter(
+        (result): result is PromiseRejectedResult =>
+          result.status === 'rejected',
       )
+      .filter(({ reason }) => reason.message !== 'No flow to decrease flow')
+      .map(({ reason }) => new Error(reason.message))
 
-      const results = await Promise.allSettled(
-        instance.time >= communityWalletTimestamp
-          ? [
-              // @note: Instances created after split of flows between receiver and community wallet
-              account.decreaseALEPHFlow(
-                receiver,
-                this.calculateReceiverFlow(instanceCosts) + EXTRA_WEI,
-              ),
-              account.decreaseALEPHFlow(
-                communityWalletAddress,
-                this.calculateCommunityFlow(instanceCosts) + EXTRA_WEI,
-              ),
-            ]
-          : [
-              // @note: Instances created before split of flows between receiver and community wallet
-              account.decreaseALEPHFlow(receiver, instanceCosts + EXTRA_WEI),
-            ],
-      )
-
-      const errors: Error[] = results
-        .filter(
-          (result): result is PromiseRejectedResult =>
-            result.status === 'rejected',
-        )
-        .filter(({ reason }) => reason.message !== 'No flow to decrease flow')
-        .map(({ reason }) => new Error(reason.message))
-
-      if (errors.length) {
-        const [firstError] = errors
-        throw firstError
-      }
+    if (errors.length) {
+      const [firstError] = errors
+      throw firstError
     }
+  }
 
+  async delInstance(instanceOrId: string | T): Promise<void> {
+    const instance = await this.ensureInstance(instanceOrId)
+
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    await this.sdkClient.forget({
+      channel: this.channel,
+      hashes: [instance.id],
+    })
+  }
+
+  async del(
+    instanceOrId: string | T,
+    account?: SuperfluidAccount,
+  ): Promise<void> {
     try {
-      if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
-        throw Err.InvalidAccount
+      const instance = await this.ensureInstance(instanceOrId)
 
-      await this.sdkClient.forget({
-        channel: this.channel,
-        hashes: [instance.id],
-      })
+      await this.delStreams(instance, account)
+      await this.delInstance(instance)
     } catch (err) {
       throw Err.RequestFailed(err)
     }
@@ -341,8 +352,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const steps: CheckoutStepType[] = []
     const { sshKeys, volumes = [], domains = [] } = newInstance
 
-    if (newInstance.payment?.type === PaymentMethod.Stream) steps.push('stream')
-
     const newKeys = this.parseNewSSHKeys(sshKeys)
     // @note: Aggregate all signatures in 1 step
     if (newKeys.length > 0) steps.push('ssh')
@@ -350,10 +359,22 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     // @note: Aggregate all signatures in 1 step
     if (volumes.length > 0) steps.push('volume')
 
+    // if (newInstance.payment?.type === PaymentMethod.Stream) {
+    //   steps.push('reserve')
+    // }
+
     steps.push('instance')
+
+    if (newInstance.payment?.type === PaymentMethod.Stream) {
+      steps.push('stream')
+    }
 
     // @note: Aggregate all signatures in 1 step
     if (domains.length > 0) steps.push('domain')
+
+    if (newInstance.payment?.type === PaymentMethod.Stream) {
+      steps.push('allocate')
+    }
 
     return steps
   }
@@ -362,18 +383,23 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     instancesOrIds: string | T | (string | T)[],
   ): Promise<CheckoutStepType[]> {
     const steps: CheckoutStepType[] = []
+
     instancesOrIds = Array.isArray(instancesOrIds)
       ? instancesOrIds
       : [instancesOrIds]
-    instancesOrIds.forEach((instance) => {
-      if (
-        typeof instance !== 'string' &&
-        instance.payment?.type === PaymentType.superfluid &&
-        instance.payment?.receiver
-      )
-        steps.push('streamDel')
-      steps.push('instanceDel')
-    })
+
+    await Promise.all(
+      instancesOrIds.map(async (instanceOrId) => {
+        const instance = await this.ensureInstance(instanceOrId)
+
+        if (instance.payment?.type === PaymentType.superfluid) {
+          steps.push('streamDel')
+        }
+
+        steps.push('instanceDel')
+      }),
+    )
+
     return steps
   }
 
@@ -391,8 +417,15 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
     try {
       for (const instanceOrId of instancesOrIds) {
+        const instance = await this.ensureInstance(instanceOrId)
+
+        if (instance.payment?.type === PaymentType.superfluid) {
+          yield
+          await this.delStreams(instance, account)
+        }
+
         yield
-        await this.del(instanceOrId, account)
+        await this.delInstance(instance)
       }
     } catch (err) {
       throw Err.RequestFailed(err)
@@ -407,7 +440,12 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     return this.parseCost(paymentMethod, Number(costs.cost))
   }
 
-  async getCost(newInstance: InstanceCostProps): Promise<InstanceCost> {
+  async getCost(
+    newInstance: InstanceCostProps,
+    entityType:
+      | EntityType.Instance
+      | EntityType.GpuInstance = EntityType.Instance,
+  ): Promise<InstanceCost> {
     let totalCost = Number.POSITIVE_INFINITY
     const paymentMethod = newInstance.payment?.type || PaymentMethod.Hold
 
@@ -421,7 +459,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
     const lines = this.getExecutableCostLines(
       {
-        type: EntityType.Instance,
+        type: entityType,
         ...parsedInstance,
       },
       costs,
@@ -528,8 +566,8 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     account?: SuperfluidAccount,
   ): AsyncGenerator<void, void, void> {
     if (newInstance.payment?.type !== PaymentMethod.Stream) return
-    if (!account) throw Err.ConnectYourWallet
     if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
+    if (!account) throw Err.ConnectYourWallet
 
     const { streamCost, streamDuration, receiver } = newInstance.payment
 
@@ -579,19 +617,44 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     )
   }
 
+  protected async *addPAYGReservationSteps(
+    newInstance: AddInstance,
+    instanceMessage: InstancePublishConfiguration,
+  ): AsyncGenerator<void, void, void> {
+    if (newInstance.payment?.type !== PaymentMethod.Stream) return
+    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
+
+    yield
+    await this.reserveCRNResources(newInstance.node, instanceMessage)
+  }
+
+  protected async *addPAYGAllocationSteps(
+    newInstance: AddInstance,
+    entity: InstanceEntity,
+  ): AsyncGenerator<void, void, void> {
+    if (newInstance.payment?.type !== PaymentMethod.Stream) return
+    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
+
+    yield
+    await this.notifyCRNAllocation(newInstance.node, entity.id, {
+      attemps: 10,
+      await: 2000,
+    })
+  }
+
   protected async parseInstanceForCostEstimation(
     newInstance: AddInstance,
   ): Promise<InstancePublishConfiguration> {
-    const { account, channel } = this
-
+    const { account = mockAccount, channel } = this
     const { specs, image, node, systemVolume } = newInstance
 
     const rootfs = this.parseRootfs(image, systemVolume)
     const resources = this.parseSpecs(specs)
     const requirements = this.parseRequirements(node)
-    const payment = this.parsePayment(newInstance.payment)
-    const volumesSteps = this.parseVolumesSteps(newInstance.volumes, true)
-    const volumes = (await consumeIterator(volumesSteps)) || []
+    const payment = this.parsePaymentForCostEstimation(newInstance.payment)
+    const volumes = await this.parseVolumesForCostEstimation(
+      newInstance.volumes,
+    )
 
     return {
       account,
@@ -617,6 +680,8 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   protected async *parseInstanceSteps(
     newInstance: AddInstance,
   ): AsyncGenerator<void, InstancePublishConfiguration, void> {
+    if (!this.account) throw Err.InvalidAccount
+
     const schema = !newInstance.node
       ? InstanceManager.addSchema
       : InstanceManager.addStreamSchema
@@ -635,7 +700,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
     const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
-    const volumes = yield* this.parseVolumesSteps(newInstance.volumes, false)
+    const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
 
     return {
       account,
@@ -649,16 +714,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       payment,
       requirements,
     }
-  }
-
-  protected async *parseVolumesSteps(
-    volumes?: VolumeField | VolumeField[],
-    estimateCost?: boolean,
-  ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
-    if (!volumes) return
-    volumes = Array.isArray(volumes) ? volumes : [volumes]
-
-    return yield* super.parseVolumesSteps(volumes, estimateCost)
   }
 
   protected async *parseSSHKeysSteps(

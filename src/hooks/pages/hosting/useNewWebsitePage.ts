@@ -3,7 +3,8 @@ import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { useAppState } from '@/contexts/appState'
-import { WebsiteManager, WebsitePayment } from '@/domain/website'
+import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
+import { AddWebsite, WebsiteManager, WebsitePayment } from '@/domain/website'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -25,20 +26,20 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
-import { BlockchainId } from '@/domain/connect/base'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
+import { BlockchainId } from '@/domain/connect/base'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {
     website: WebsiteFolderField
-    payment: WebsitePayment
     domains?: Omit<DomainField, 'ref'>[]
     ens?: string[]
+    paymentMethod: PaymentMethod
   }
 
 export const defaultValues: Partial<NewWebsiteFormState> = {
   ...defaultNameAndTags,
-  payment: { chain: BlockchainId.ETH, type: PaymentMethod.Hold },
+  paymentMethod: PaymentMethod.Hold,
 }
 
 export type UseNewWebsitePagePageReturn = {
@@ -65,10 +66,21 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     async (state: NewWebsiteFormState) => {
       if (!manager) throw Err.ConnectYourWallet
 
-      const iSteps = await manager.getAddSteps(state)
+      // @todo: Refactor this
+      const payment: WebsitePayment = {
+        chain: BlockchainId.ETH,
+        type: PaymentMethod.Hold,
+      }
+
+      const website = {
+        ...state,
+        payment,
+      } as AddWebsite
+
+      const iSteps = await manager.getAddSteps(website)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = manager.addSteps(state)
+      const steps = manager.addSteps(website)
 
       try {
         let accountWebsite
@@ -100,6 +112,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     defaultValues,
     onSubmit,
@@ -113,7 +126,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
       entityType: EntityType.Website,
       props: {
         website: values.website,
-        payment: values.payment,
+        paymentMethod: values.paymentMethod,
         domains: values.domains,
       },
     }),
@@ -130,6 +143,12 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   const handleBack = () => {
     router.push('.')
   }
+
+  // Sync form payment method with global state - special case for nested field
+  useSyncPaymentMethod({
+    formPaymentMethod: values.paymentMethod,
+    setValue,
+  })
 
   return {
     address: account?.address || '',

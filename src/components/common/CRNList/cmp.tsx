@@ -19,7 +19,6 @@ import { humanReadableSize } from '@/helpers/utils'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
-import Price from '@/components/common/Price'
 import { CRNItem, CRNListProps } from './types'
 
 export default function CRNList(props: CRNListProps) {
@@ -54,7 +53,7 @@ export default function CRNList(props: CRNListProps) {
     const gpuColumn = enableGpu
       ? ({
           label: 'GPU',
-          width: '10%',
+          width: '15%',
           sortable: true,
           sortBy: (node) => node.selectedGpu?.model,
           render: (node) => (
@@ -74,7 +73,7 @@ export default function CRNList(props: CRNListProps) {
         },
         {
           label: 'NAME',
-          width: '20%',
+          width: '25%',
           sortable: true,
           sortBy: (node) => node.name,
           render: (node) => (
@@ -90,7 +89,7 @@ export default function CRNList(props: CRNListProps) {
         gpuColumn,
         {
           label: 'CPU',
-          width: '10%',
+          width: '15%',
           sortable: true,
           sortBy: (node) => specs[node.hash]?.cpu?.count || 0,
           render: (node) => (
@@ -103,7 +102,7 @@ export default function CRNList(props: CRNListProps) {
         },
         {
           label: 'RAM',
-          width: '10%',
+          width: '15%',
           sortable: true,
           sortBy: (node) => specs[node.hash]?.mem?.available_kB || 0,
           render: (node) => (
@@ -114,7 +113,7 @@ export default function CRNList(props: CRNListProps) {
         },
         {
           label: 'HDD',
-          width: '10%',
+          width: '15%',
           sortable: true,
           sortBy: (node) => specs[node.hash]?.disk?.available_kB || 0,
           render: (node) => (
@@ -125,7 +124,7 @@ export default function CRNList(props: CRNListProps) {
         },
         {
           label: 'VERSION',
-          width: '20%',
+          width: '15%',
           sortable: true,
           sortBy: (node) => node?.version,
           render: (node) => (
@@ -135,21 +134,21 @@ export default function CRNList(props: CRNListProps) {
             />
           ),
         },
-        {
-          label: 'PRICE',
-          width: '20%',
-          sortable: true,
-          sortBy: () => 0.11,
-          render: () => (
-            <div tw="flex items-center gap-1 whitespace-nowrap">
-              <Price value={0.11} /> per unit / h
-            </div>
-          ),
-        },
+        // {
+        //   label: 'PRICE',
+        //   width: '20%',
+        //   sortable: true,
+        //   sortBy: () => 0.11,
+        //   render: () => (
+        //     <div tw="flex items-center gap-1 whitespace-nowrap">
+        //       <Price value={0.11} /> per unit / h
+        //     </div>
+        //   ),
+        // },
         {
           label: '',
           align: 'right',
-          width: '100%',
+          width: '5%',
           cellProps: () => ({ css: { opacity: '1 !important' } }),
           render: (node) => {
             return (

@@ -9,7 +9,7 @@ import {
   StoreMessage,
 } from '@aleph-sdk/message'
 import { MachineVolume } from '@aleph-sdk/message'
-import { EntityType, apiServer } from './constants'
+import { EntityType, PaymentMethod, apiServer } from './constants'
 import { SSHKey } from '../domain/ssh'
 import { Instance } from '../domain/instance'
 import { Volume } from '@/domain/volume'
@@ -18,6 +18,9 @@ import { Domain } from '@/domain/domain'
 import { Website } from '@/domain/website'
 import { CID } from 'multiformats'
 import Err from './errors'
+import { Account } from '@aleph-sdk/account'
+import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
+import { EVMAccount } from '@aleph-sdk/evm'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -68,6 +71,32 @@ export const getAddressBalance = async (address: string) => {
   } catch (error) {
     throw Err.RequestFailed(error)
   }
+}
+
+export async function getAccountBalance(
+  account: Account,
+  paymentMethod: PaymentMethod,
+) {
+  let balance: number
+
+  if (paymentMethod === PaymentMethod.Stream && isAccountSupported(account)) {
+    try {
+      // For Stream payment method, fetch balance from RPC node
+      const superfluidAccount = await createFromEVMAccount(
+        account as EVMAccount,
+      )
+      const superfluidBalance = await superfluidAccount.getALEPHBalance()
+      balance = superfluidBalance.toNumber()
+    } catch (e) {
+      console.error(e)
+      balance = 0
+    }
+  } else {
+    // For Hold payment method, fetch balance from pyaleph API
+    balance = await getAddressBalance(account.address)
+  }
+
+  return balance
 }
 
 export function round(num: number, decimals = 2) {
@@ -173,10 +202,17 @@ export const humanReadableCurrency = (value?: number, decimals = 2) => {
   if (value === Number.POSITIVE_INFINITY) return 'n/a'
   if (value === undefined) return 'n/a'
   if (value === 0) return value
-  if (value < 1_000) return value.toFixed(decimals)
-  else if (value < 10 ** 6) return (value / 1_000).toFixed(decimals) + 'K'
-  else if (value < 10 ** 9) return (value / 10 ** 6).toFixed(decimals) + 'M'
-  else return (value / 10 ** 9).toFixed(decimals) + 'B'
+
+  const isNegative = value < 0
+  const absValue = Math.abs(value)
+  const prefix = isNegative ? '-' : ''
+
+  if (absValue < 1_000) return prefix + absValue.toFixed(decimals)
+  else if (absValue < 10 ** 6)
+    return prefix + (absValue / 1_000).toFixed(decimals) + 'K'
+  else if (absValue < 10 ** 9)
+    return prefix + (absValue / 10 ** 6).toFixed(decimals) + 'M'
+  else return prefix + (absValue / 10 ** 9).toFixed(decimals) + 'B'
 }
 
 const messageTypeWhitelist = new Set(Object.values(MessageType))

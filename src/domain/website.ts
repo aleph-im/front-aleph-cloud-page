@@ -25,6 +25,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import { CostLine, CostSummary } from './cost'
+import { mockAccount } from './account'
 
 export { WebsiteFrameworkId }
 
@@ -262,7 +263,7 @@ export type WebsitePayment = {
 
 export type WebsiteCostProps = {
   website?: WebsiteFolderField
-  payment?: WebsitePayment
+  paymentMethod?: PaymentMethod
 }
 
 export type WebsiteCost = CostSummary
@@ -270,7 +271,7 @@ export type WebsiteCost = CostSummary
 export type AddWebsite = NameAndTagsField &
   WebsiteFrameworkField & {
     website: WebsiteFolderField
-    payment: WebsitePayment
+    payment?: WebsitePayment
     domains?: Omit<DomainField, 'ref'>[]
     ens?: string[]
   }
@@ -312,22 +313,8 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     return FileManager.getFolderSize(props.website?.folder)
   }
 
-  static getStorageWebsiteMiBPrice(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    props: AddWebsite | WebsiteCostProps,
-  ): number {
-    return 1 / 20
-  }
-
-  static getExecutionWebsiteMiBPrice(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    props: AddWebsite | WebsiteCostProps,
-  ): number {
-    return 0
-  }
-
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected volumeManager: VolumeManager,
     protected domainManager: DomainManager,
@@ -336,6 +323,8 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   ) {}
 
   async getAll(): Promise<Website[]> {
+    if (!this.account) return []
+
     try {
       const response: Record<string, unknown> =
         await this.sdkClient.fetchAggregate(this.account.address, this.key)
@@ -363,6 +352,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   async *addSteps(newWebsite: AddWebsite): AsyncGenerator<void, Website, void> {
     const { website, name, tags, framework, payment, domains, ens } =
       await this.parseNewWebsite(newWebsite)
+
     try {
       if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
         throw Err.InvalidAccount
@@ -626,11 +616,9 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   async getCost(props: WebsiteCostProps): Promise<WebsiteCost> {
     let totalCost = Number.POSITIVE_INFINITY
 
-    const { website, payment } = props
+    const { website, paymentMethod = PaymentMethod.Hold } = props
 
-    const paymentMethod = payment?.type || PaymentMethod.Hold
-
-    const emptyCost = {
+    const emptyCost: WebsiteCost = {
       paymentMethod,
       cost: totalCost,
       lines: [],
@@ -641,8 +629,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
 
     const fileObject = new Blob(website.folder)
 
+    const { account = mockAccount } = this
+
     const costs = await this.sdkClient.storeClient.getEstimatedCost({
-      account: this.account,
+      account,
       fileObject,
     })
 

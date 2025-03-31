@@ -15,7 +15,7 @@ import {
   UseSortedListReturn,
   useSortedList,
 } from '@/hooks/common/useSortedList'
-import { useDefaultTiers } from './pricing/tiers/useDefaultTiers'
+import { useDefaultTiers } from './pricing/useDefaultTiers'
 import { useRequestCRNLastVersion } from './useRequestEntity/useRequestCRNLastVersion'
 import { EntityType } from '@/helpers/constants'
 
@@ -177,6 +177,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
   // -----------------------------
 
+  // @todo: For GPUs we are not filtering by a minimum required specs
   const { defaultTiers } = useDefaultTiers({ type: EntityType.Instance })
 
   const minSpecs = useMemo(() => {

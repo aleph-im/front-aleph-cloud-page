@@ -27,9 +27,12 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import { CostLine, CostSummary } from './cost'
+import { mockAccount } from './account'
 
 export const mockVolumeRef =
   'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe'
+export const mockVolumeMountPath = '/mocked-mount-path'
+export const mockVolumeName = 'mock-name'
 
 export { VolumeType }
 
@@ -124,7 +127,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   constructor(
-    protected account: Account,
+    protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected fileManager: FileManager,
     protected channel = defaultVolumeChannel,
@@ -134,7 +137,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     ids,
     page,
     pagination,
-    addresses = !ids ? [this.account.address] : undefined,
+    addresses = !ids && this.account ? [this.account.address] : undefined,
     channels = !ids ? [this.channel] : undefined,
   }: EntityManagerFetchOptions = {}): Promise<Volume[]> {
     try {
@@ -324,8 +327,10 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
     if (!newVolume || !newVolume.file) return emptyCost
 
+    const { account = mockAccount } = this
+
     const costs = await this.sdkClient.storeClient.getEstimatedCost({
-      account: this.account,
+      account,
       fileObject: newVolume.file,
     })
 
