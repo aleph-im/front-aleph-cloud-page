@@ -3,7 +3,6 @@ import { Icon, NoisyContainer } from '@aleph-front/core'
 import { Text } from '@/components/pages/dashboard/common'
 import { FunctionalButton } from '@/components/pages/dashboard/ManageInstance/cmp'
 import { EntityLogsControlProps } from './types'
-import BorderBox from '@/components/common/BorderBox'
 
 export const EntityLogsControl = ({
   onViewLogs,
