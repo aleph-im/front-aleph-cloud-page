@@ -23,7 +23,7 @@ export function LinkedVolumeItem({ volume, onClick }: any) {
   )
 
   return (
-    <div tw="flex items-center gap-4">
+    <div tw="flex flex-wrap items-center gap-4">
       <RelatedEntityCard onClick={onClick}>
         <ObjectImg
           id="Object16"
