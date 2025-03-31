@@ -83,6 +83,8 @@ export default function ManageInstance() {
 
     // Payment data
     paymentData,
+    paymentStreams,
+    hasStreams,
 
     // Logs
     handleDownloadLogs,
@@ -213,6 +215,7 @@ export default function ManageInstance() {
                   startTime={paymentData.startTime}
                   blockchain={paymentData.blockchain}
                   loading={paymentData.loading}
+                  streams={hasStreams ? paymentStreams : undefined}
                 />
               </div>
             </div>

@@ -60,6 +60,8 @@ export type ManageInstance = UseExecutableActionsReturn & {
 
   // Payment data
   paymentData: EntityPaymentProps
+  paymentStreams: EntityPaymentProps[]
+  hasStreams: boolean
 }
 
 export function useManageInstance(): ManageInstance {
@@ -89,6 +91,8 @@ export function useManageInstance(): ManageInstance {
     subscribeLogs,
   })
 
+  const { streamDetails, isRunning, logs } = executableActions
+
   // SSH keys
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
   const sshKeyManager = useSSHKeyManager()
@@ -109,10 +113,10 @@ export function useManageInstance(): ManageInstance {
   const labelVariant = useMemo(() => {
     if (!instance) return 'warning'
 
-    return instance.time < Date.now() - 1000 * 45 && executableActions.isRunning
+    return instance.time < Date.now() - 1000 * 45 && isRunning
       ? 'success'
       : 'warning'
-  }, [instance, executableActions.isRunning])
+  }, [instance, isRunning])
 
   // Extract instance volumes
   const volumes = useMemo(() => {
@@ -226,6 +230,35 @@ export function useManageInstance(): ManageInstance {
     ],
   )
 
+  // Check if we have streams
+  const hasStreams = useMemo(
+    () => !!streamDetails?.streams.length,
+    [streamDetails],
+  )
+
+  // Create individual payment props for each stream
+  const paymentStreams: EntityPaymentProps[] = useMemo(() => {
+    console.log('streams', streamDetails?.streams)
+    if (!hasStreams) return []
+    if (!streamDetails?.streams) return []
+
+    return streamDetails.streams.map((stream) => ({
+      cost: stream.flow / 3600, // Convert back from hourly rate to per-second rate
+      paymentType: PaymentType.superfluid,
+      runningTime,
+      startTime: instance?.time,
+      blockchain: instance?.payment?.chain,
+      loading: false,
+      receiver: stream.receiver,
+    }))
+  }, [
+    streamDetails?.streams,
+    runningTime,
+    instance?.time,
+    instance?.payment?.chain,
+    hasStreams,
+  ])
+
   // Side panel handlers
   const handleImmutableVolumeClick = useCallback((volume: any) => {
     setSidePanel({
@@ -295,8 +328,8 @@ export function useManageInstance(): ManageInstance {
       }
     }
 
-    if (downloadingLogs && executableActions.logs) {
-      const { stdout, stderr } = executableActions.logs
+    if (downloadingLogs && logs) {
+      const { stdout, stderr } = logs
 
       // If we have some content to download
       if (stdout.length > 0 || stderr.length > 0) {
@@ -314,7 +347,7 @@ export function useManageInstance(): ManageInstance {
         setIsDownloadingLogs(false)
       }
     }
-  }, [downloadingLogs, executableActions.logs, name])
+  }, [downloadingLogs, logs, name])
 
   // Logs download handler - this just activates the logs subscription without changing tab
   const handleDownloadLogs = useCallback(() => {
@@ -373,6 +406,8 @@ export function useManageInstance(): ManageInstance {
     handleDownloadLogs,
     isDownloadingLogs,
     paymentData,
+    paymentStreams,
+    hasStreams,
     labelVariant,
     volumes,
     immutableVolumes,

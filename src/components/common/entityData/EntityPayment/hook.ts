@@ -25,6 +25,7 @@ export function useEntityPayment({
   startTime,
   blockchain,
   loading = false,
+  receiver,
 }: EntityPaymentProps): UseEntityPaymentReturn {
   // Determine if payment is pay-as-you-go
   const isPAYG = useMemo(
@@ -95,6 +96,18 @@ export function useEntityPayment({
     }
   }, [runningTime])
 
+  // Determine receiver type for streams
+  const receiverType = useMemo(() => {
+    if (!receiver) return undefined
+
+    // Typically the community wallet contains "community" in its address
+    // This is a simple check, but you might want to use a more robust approach
+    if (receiver.toLowerCase().includes('community')) {
+      return 'Community Wallet (20%)'
+    }
+    return 'Node Operator (80%)'
+  }, [receiver])
+
   return {
     isPAYG,
     totalSpent,
@@ -103,5 +116,6 @@ export function useEntityPayment({
     formattedStartDate,
     formattedDuration,
     loading,
+    receiverType,
   }
 }
