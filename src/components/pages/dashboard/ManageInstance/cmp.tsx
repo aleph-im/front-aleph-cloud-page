@@ -29,7 +29,10 @@ export function FunctionalButton({ children, ...props }: ButtonProps) {
       variant="functional"
       size="sm"
       className="bg-purple0 text-main0"
-      tw="px-6 py-2 rounded-full flex items-center justify-center leading-none gap-x-3 font-bold"
+      tw="px-6 py-2 rounded-full flex items-center justify-center leading-none gap-x-3 font-bold
+         transition-all duration-200
+         active:(transform scale-95)
+         disabled:(opacity-50 cursor-not-allowed)"
       {...props}
     >
       {children}
@@ -196,7 +199,7 @@ export default function ManageInstance() {
                   onViewLogs={() => setTabId('log')}
                   onDownloadLogs={handleDownloadLogs}
                   downloadingLogs={isDownloadingLogs}
-                  disabled={!instance}
+                  disabled={!instance || !isRunning}
                 />
               </div>
               <div>
