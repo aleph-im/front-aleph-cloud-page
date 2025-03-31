@@ -9,7 +9,10 @@ import { useSSHKeyDetail } from './hook'
 import { EntityTypeName } from '@/helpers/constants'
 import Skeleton from '../Skeleton'
 
-export const SSHKeyDetail = ({ sshKeyId }: SSHKeyDetailProps) => {
+export const SSHKeyDetail = ({
+  sshKeyId,
+  showDelete = false,
+}: SSHKeyDetailProps) => {
   const { sshKey, theme, handleCopyKey, handleCopyLabel, handleDelete } =
     useSSHKeyDetail({ sshKeyId })
 
@@ -43,14 +46,16 @@ export const SSHKeyDetail = ({ sshKeyId }: SSHKeyDetailProps) => {
           </Label>
         </div>
         <div>
-          <Button
-            kind="functional"
-            variant="error"
-            size="md"
-            onClick={handleDelete}
-          >
-            <Icon name="trash" />
-          </Button>
+          {showDelete && (
+            <Button
+              kind="functional"
+              variant="error"
+              size="md"
+              onClick={handleDelete}
+            >
+              <Icon name="trash" />
+            </Button>
+          )}
         </div>
       </div>
 

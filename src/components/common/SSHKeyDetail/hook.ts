@@ -39,7 +39,7 @@ export function useSSHKeyDetail({
   const handleCopyKey = useCopyToClipboardAndNotify(sshKey?.key || '')
 
   const manager = useSSHKeyManager()
-  const { next, stop } = useCheckoutNotification({})
+  const { next, stop, noti } = useCheckoutNotification({})
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
@@ -62,10 +62,22 @@ export function useSSHKeyDetail({
 
       await router.replace('/')
     } catch (e) {
+      console.error(e)
+
+      const text = (e as Error).message
+      const cause = (e as Error)?.cause as string | Error | undefined
+      const detail = typeof cause === 'string' ? cause : cause?.message
+
+      noti?.add({
+        variant: 'error',
+        title: 'Error',
+        text,
+        detail,
+      })
     } finally {
       await stop()
     }
-  }, [dispatch, manager, sshKey, next, router, stop])
+  }, [dispatch, manager, sshKey, next, router, stop, noti])
 
   return {
     sshKey,
