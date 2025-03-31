@@ -14,13 +14,13 @@ import { EntityPaymentProps } from '@/components/common/entityData/EntityPayment
 import { useAppState } from '@/contexts/appState'
 import { ImmutableVolume, PaymentType } from '@aleph-sdk/message'
 import {
+  downloadBlob,
   ellipseAddress,
   isVolumeEphemeral,
   isVolumePersistent,
 } from '@/helpers/utils'
 import { LabelVariant } from '@/components/common/Price/types'
 import { useNotification } from '@aleph-front/core'
-import { downloadLogFiles } from '@/helpers/logs'
 
 // Type for side panel content
 export type SidePanelContent = {
@@ -270,6 +270,31 @@ export function useManageInstance(): ManageInstance {
 
   // This effect handles downloading logs when they become available during download mode
   useEffect(() => {
+    const downloadLogFiles = (
+      instanceName: string,
+      stdout: string,
+      stderr: string,
+    ) => {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const sanitizedName = instanceName.replace(/\s+/g, '_').toLowerCase()
+
+      // Download stdout file
+      if (stdout.trim()) {
+        downloadBlob(
+          new Blob([stdout], { type: 'text/plain' }),
+          `stdout_${sanitizedName}_${timestamp}.log`,
+        )
+      }
+
+      // Download stderr file
+      if (stderr.trim()) {
+        downloadBlob(
+          new Blob([stderr], { type: 'text/plain' }),
+          `stderr_${sanitizedName}_${timestamp}.log`,
+        )
+      }
+    }
+
     if (downloadingLogs && executableActions.logs) {
       const { stdout, stderr } = executableActions.logs
 
@@ -312,7 +337,7 @@ export function useManageInstance(): ManageInstance {
         noti?.add({
           variant: 'warning',
           title: 'Download failed',
-          text: 'Logs could not be retrieved in time. You may need to authenticate with your wallet.',
+          text: 'Logs could not be retrieved in time. Please try again.',
         })
       }, 30000) // 30 second timeout to allow for wallet authentication
     } catch (e) {
