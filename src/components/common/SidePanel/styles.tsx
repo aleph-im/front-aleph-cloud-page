@@ -27,7 +27,6 @@ export const StyledHeader = styled.div`
     ${tw`sticky top-0 pt-10 pb-4`}
 
     background: ${theme.color.background};
-    box-shadow: 0 0 0.7rem ${theme.color.main0};
   `}
 `
 
@@ -35,7 +34,6 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
   ${({ theme, $isOpen }) => css`
     position: fixed;
     background-color: ${theme.color.background};
-    box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
 
     /* Desktop Styles */
