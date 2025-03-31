@@ -69,6 +69,7 @@ import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceM
 import { GpuInstanceManager } from '@/domain/gpuInstance'
 import usePrevious from '@/hooks/common/usePrevious'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
+import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -499,6 +500,12 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
 
     setValue('streamCost', cost.cost)
   }, [cost, setValue, formValues])
+
+  // Sync form payment method with global state
+  useSyncPaymentMethod({
+    formPaymentMethod: formValues.paymentMethod,
+    setValue,
+  })
 
   return {
     address,
