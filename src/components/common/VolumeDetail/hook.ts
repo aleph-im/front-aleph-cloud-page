@@ -74,7 +74,7 @@ export function useVolumeDetail({
   }, [manager, volume])
 
   return {
-    volume: undefined,
+    volume,
     theme,
     handleDelete,
     handleDownload,

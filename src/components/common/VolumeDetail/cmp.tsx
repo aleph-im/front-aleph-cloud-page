@@ -9,7 +9,10 @@ import { useVolumeDetail } from './hook'
 import { EntityTypeName } from '@/helpers/constants'
 import Skeleton from '../Skeleton'
 
-export const VolumeDetail = ({ volumeId }: VolumeDetailProps) => {
+export const VolumeDetail = ({
+  volumeId,
+  showDelete = false,
+}: VolumeDetailProps) => {
   const { volume, theme, handleDelete, handleCopyHash, handleDownload } =
     useVolumeDetail({ volumeId })
 
@@ -49,26 +52,32 @@ export const VolumeDetail = ({ volumeId }: VolumeDetailProps) => {
           >
             <Icon name="download" />
           </Button>
-          <Button
-            kind="functional"
-            variant="error"
-            size="md"
-            onClick={handleDelete}
-          >
-            <Icon name="trash" />
-          </Button>
+          {showDelete && (
+            <Button
+              kind="functional"
+              variant="error"
+              size="md"
+              onClick={handleDelete}
+            >
+              <Icon name="trash" />
+            </Button>
+          )}
         </div>
       </div>
 
       <NoisyContainer>
         <div tw="flex items-center justify-start overflow-hidden">
           <Tag variant="accent" tw="mr-4 whitespace-nowrap">
-            {volume ? EntityTypeName[volume.type] : <Skeleton width="40%" />}
+            {volume ? (
+              EntityTypeName[volume.type]
+            ) : (
+              <Skeleton width="5rem" height="1.3em" />
+            )}
           </Tag>
           <div tw="flex-auto">
             <div className="tp-info text-main0">ITEM HASH</div>
             <IconText iconName="copy" onClick={handleCopyHash}>
-              {volume ? volume.id : <Skeleton width="40%" />}
+              {volume ? volume.id : <Skeleton width="12rem" />}
             </IconText>
           </div>
         </div>
@@ -90,7 +99,7 @@ export const VolumeDetail = ({ volumeId }: VolumeDetailProps) => {
                 </IconText>
               </a>
             ) : (
-              <Skeleton width="40%" />
+              <Skeleton width="10rem" />
             )}
           </div>
         </div>
@@ -103,7 +112,7 @@ export const VolumeDetail = ({ volumeId }: VolumeDetailProps) => {
                 {volume ? (
                   humanReadableSize(volume.size, 'MiB')
                 ) : (
-                  <Skeleton width="40%" />
+                  <Skeleton width="2rem" />
                 )}
               </Text>
             </div>
@@ -113,7 +122,7 @@ export const VolumeDetail = ({ volumeId }: VolumeDetailProps) => {
             <div className="tp-info text-main0">CREATED ON</div>
             <div>
               <Text className="fs-10 tp-body1">
-                {volume ? volume.date : <Skeleton width="40%" />}
+                {volume ? volume.date : <Skeleton width="5rem" />}
               </Text>
             </div>
           </div>
