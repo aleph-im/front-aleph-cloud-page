@@ -22,29 +22,61 @@ export const StyledBackdrop = styled.div<StyledSidePanelProps>`
     `}
 `
 
-export const StyledSidePanel = styled.div<StyledSidePanelProps>`
-  ${tw`fixed top-0 right-0 h-screen w-1/2`}
-
+export const StyledHeader = styled.div`
   ${({ theme }) => css`
-    background-color: ${theme.color.background};
+    ${tw`sticky top-0 pt-10 pb-4`}
+
+    background: ${theme.color.background};
+    box-shadow: 0 0 0.7rem ${theme.color.main0};
   `}
-  // width: 50vw;
-  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
-  padding: 2.5rem;
+`
 
-  /* For sliding effect */
-  transform: translateX(100%);
-  transition: transform 0.3s ease-in-out;
+export const StyledSidePanel = styled.div<StyledSidePanelProps>`
+  ${({ theme, $isOpen }) => css`
+    position: fixed;
+    background-color: ${theme.color.background};
+    box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
 
-  z-index: 29;
+    /* Desktop Styles */
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 50vw;
 
-  ${({ $isOpen }) =>
-    $isOpen
+    /* For sliding effect on desktop */
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 50;
+
+    ${$isOpen
       ? css`
           transform: translateX(0);
         `
       : css`
           transform: translateX(100%);
         `}
+
+    /* Mobile Styles */
+    @media (max-width: 768px) {
+      top: auto;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      height: 80vh;
+      border-radius: 1.5rem 1.5rem 0 0;
+
+      /* Override the transform for vertical sliding */
+      transform: translateY(100%);
+      transition: transform 0.3s ease-in-out;
+
+      ${$isOpen
+        ? css`
+            transform: translateY(0);
+          `
+        : css`
+            transform: translateY(100%);
+          `}
+    }
+  `}
 `
