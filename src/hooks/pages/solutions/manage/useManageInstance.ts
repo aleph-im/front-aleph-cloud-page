@@ -10,7 +10,11 @@ import {
   UseExecutableActionsReturn,
   useExecutableActions,
 } from '@/hooks/common/useExecutableActions'
-import { EntityPaymentProps } from '@/components/common/entityData/EntityPayment'
+import {
+  HoldingPaymentData,
+  PaymentData,
+  StreamPaymentData,
+} from '@/components/common/entityData/EntityPayment/types'
 import { useAppState } from '@/contexts/appState'
 import { ImmutableVolume, PaymentType } from '@aleph-sdk/message'
 import {
@@ -59,9 +63,7 @@ export type ManageInstance = UseExecutableActionsReturn & {
   handleDownloadLogs: () => void
 
   // Payment data
-  paymentData: EntityPaymentProps
-  paymentStreams: EntityPaymentProps[]
-  hasStreams: boolean
+  allPayments: PaymentData[]
 }
 
 export function useManageInstance(): ManageInstance {
@@ -210,37 +212,49 @@ export function useManageInstance(): ManageInstance {
       : undefined
   }, [instance?.time])
 
-  // Payment data for EntityPayment component
-  const paymentData: EntityPaymentProps = useMemo(
-    () => ({
+  // Create base payment data
+  const mainPayment: HoldingPaymentData | StreamPaymentData = useMemo(() => {
+    const isStreamPayment = instance?.payment?.type === PaymentType.superfluid
+
+    if (isStreamPayment) {
+      return {
+        cost,
+        paymentType: PaymentType.superfluid,
+        runningTime,
+        startTime: instance?.time,
+        blockchain: instance?.payment?.chain,
+        loading,
+        receiver: instance?.payment?.receiver || '',
+      } as StreamPaymentData
+    }
+
+    return {
       cost,
-      paymentType: instance?.payment?.type || PaymentType.hold,
+      paymentType: PaymentType.hold,
       runningTime,
       startTime: instance?.time,
       blockchain: instance?.payment?.chain,
       loading,
-    }),
-    [
-      cost,
-      instance?.payment?.type,
-      runningTime,
-      instance?.time,
-      instance?.payment?.chain,
-      loading,
-    ],
-  )
+    } as HoldingPaymentData
+  }, [
+    cost,
+    instance?.payment?.type,
+    instance?.payment?.receiver,
+    runningTime,
+    instance?.time,
+    instance?.payment?.chain,
+    loading,
+  ])
 
   // Check if we have streams
   const hasStreams = useMemo(
-    () => !!streamDetails?.streams.length,
+    () => !!streamDetails?.streams?.length,
     [streamDetails],
   )
 
-  // Create individual payment props for each stream
-  const paymentStreams: EntityPaymentProps[] = useMemo(() => {
-    console.log('streams', streamDetails?.streams)
-    if (!hasStreams) return []
-    if (!streamDetails?.streams) return []
+  // Create payment data for all streams
+  const streamPayments: StreamPaymentData[] = useMemo(() => {
+    if (!hasStreams || !streamDetails?.streams) return []
 
     return streamDetails.streams.map((stream) => ({
       cost: stream.flow / 3600, // Convert back from hourly rate to per-second rate
@@ -258,6 +272,14 @@ export function useManageInstance(): ManageInstance {
     instance?.payment?.chain,
     hasStreams,
   ])
+
+  // Combine main payment and stream payments into a single array
+  const allPayments: PaymentData[] = useMemo(() => {
+    if (hasStreams) {
+      return [mainPayment, ...streamPayments]
+    }
+    return [mainPayment]
+  }, [mainPayment, streamPayments, hasStreams])
 
   // Side panel handlers
   const handleImmutableVolumeClick = useCallback((volume: any) => {
@@ -405,9 +427,7 @@ export function useManageInstance(): ManageInstance {
     handleBack,
     handleDownloadLogs,
     isDownloadingLogs,
-    paymentData,
-    paymentStreams,
-    hasStreams,
+    allPayments,
     labelVariant,
     volumes,
     immutableVolumes,

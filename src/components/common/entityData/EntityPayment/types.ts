@@ -1,24 +1,37 @@
 import { Blockchain } from '@aleph-sdk/core'
 import { PaymentType } from '@aleph-sdk/message'
 
-// Single payment data item - raw data to be formatted by the hook
-export type EntityPaymentData = {
+// Base payment data interface
+export interface BasePaymentData {
   cost?: number
   paymentType: PaymentType
   runningTime?: number // in seconds
   startTime?: number // timestamp in milliseconds
   blockchain?: Blockchain
   loading?: boolean
-  receiver?: string // Optional: to identify different streams in PAYG instances
 }
 
-// Props for the EntityPayment component
-export type EntityPaymentProps = EntityPaymentData & {
-  streams?: EntityPaymentData[] // Optional array of stream payments
+// Holding payment data (standard payment)
+export interface HoldingPaymentData extends BasePaymentData {
+  paymentType: PaymentType.hold
+}
+
+// Stream payment data (pay-as-you-go)
+export interface StreamPaymentData extends BasePaymentData {
+  paymentType: PaymentType.superfluid
+  receiver: string // Identifies the stream recipient
+}
+
+// Union type for all payment data types
+export type PaymentData = HoldingPaymentData | StreamPaymentData
+
+// Props for the EntityPayment component - just an array of payment data
+export interface EntityPaymentProps {
+  payments: PaymentData[]
 }
 
 // Formatted data returned by the hook for display
-export type FormattedPaymentData = {
+export interface FormattedPaymentData {
   isPAYG: boolean
   totalSpent?: string
   formattedBlockchain?: string

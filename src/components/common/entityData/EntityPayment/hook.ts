@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { PaymentType } from '@aleph-sdk/message'
-import { EntityPaymentProps, UseEntityPaymentReturn } from './types'
+import { PaymentData, StreamPaymentData, UseEntityPaymentReturn } from './types'
 import { blockchains } from '@/domain/connect/base'
+import { communityWalletAddress } from '@/helpers/constants'
 
 // Helper to convert seconds into days, hours, minutes, and seconds
 function getTimeComponents(totalSeconds: number) {
@@ -16,17 +17,27 @@ function getTimeComponents(totalSeconds: number) {
 
 /**
  * Hook to format payment data for display
- * Takes raw data as input and returns formatted strings
+ * Takes raw payment data as input and returns formatted strings
  */
-export function useEntityPayment({
-  cost,
-  paymentType,
-  runningTime,
-  startTime,
-  blockchain,
-  loading = false,
-  receiver,
-}: EntityPaymentProps): UseEntityPaymentReturn {
+export function useFormatPayment(
+  paymentData: PaymentData,
+): UseEntityPaymentReturn {
+  const {
+    cost,
+    paymentType,
+    runningTime,
+    startTime,
+    blockchain,
+    loading = false,
+  } = paymentData
+
+  // Get stream-specific data if this is a stream payment
+  const receiver = useMemo(() => {
+    if (paymentType !== PaymentType.superfluid) return
+
+    return (paymentData as StreamPaymentData).receiver
+  }, [paymentData, paymentType])
+
   // Determine if payment is pay-as-you-go
   const isPAYG = useMemo(
     () => paymentType === PaymentType.superfluid,
@@ -41,10 +52,7 @@ export function useEntityPayment({
 
     // Use only the remainder (hours, minutes, seconds) from runningTime
     const { days, hours, minutes } = getTimeComponents(runningTime)
-
-    console.log('time', getTimeComponents(runningTime))
     const runningTimeInHours = days * 24 + hours + minutes / 60
-    console.log('runningTimeInHours', runningTimeInHours)
     return (cost * runningTimeInHours).toFixed(6)
   }, [cost, isPAYG, runningTime])
 
@@ -60,7 +68,6 @@ export function useEntityPayment({
     if (!cost) return
 
     const dailyRate = cost * 24
-    console.log('dailyRate', dailyRate)
     return `~${dailyRate.toFixed(4)}/day`
   }, [cost, isPAYG])
 
@@ -100,9 +107,9 @@ export function useEntityPayment({
   const receiverType = useMemo(() => {
     if (!receiver) return undefined
 
-    // Typically the community wallet contains "community" in its address
-    // This is a simple check, but you might want to use a more robust approach
-    if (receiver.toLowerCase().includes('community')) {
+    console.log('Receiver address:', receiver)
+    console.log('communityWalletAddress:', communityWalletAddress)
+    if (receiver == (communityWalletAddress as string)) {
       return 'Community Wallet (20%)'
     }
     return 'Node Operator (80%)'

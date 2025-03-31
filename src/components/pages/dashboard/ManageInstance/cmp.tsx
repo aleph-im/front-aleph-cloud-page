@@ -82,9 +82,7 @@ export default function ManageInstance() {
     rebootDisabled,
 
     // Payment data
-    paymentData,
-    paymentStreams,
-    hasStreams,
+    allPayments,
 
     // Logs
     handleDownloadLogs,
@@ -208,15 +206,7 @@ export default function ManageInstance() {
                 />
               </div>
               <div>
-                <EntityPayment
-                  cost={paymentData.cost}
-                  paymentType={paymentData.paymentType}
-                  runningTime={paymentData.runningTime}
-                  startTime={paymentData.startTime}
-                  blockchain={paymentData.blockchain}
-                  loading={paymentData.loading}
-                  streams={hasStreams ? paymentStreams : undefined}
-                />
+                <EntityPayment payments={allPayments} />
               </div>
             </div>
             <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">

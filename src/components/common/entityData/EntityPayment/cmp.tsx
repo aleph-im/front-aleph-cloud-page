@@ -1,21 +1,16 @@
 import React, { memo } from 'react'
 import { Logo, NoisyContainer } from '@aleph-front/core'
-import { EntityPaymentData, EntityPaymentProps } from './types'
+import { EntityPaymentProps, PaymentData } from './types'
 import { Text } from '@/components/pages/dashboard/common'
-import { useEntityPayment } from './hook'
+import { useFormatPayment } from './hook'
 import Skeleton from '../../Skeleton'
+import { PaymentType } from '@aleph-sdk/message'
 
 /**
  * Individual payment card component
  * Used to render the main payment or individual stream payments
  */
-const PaymentCard = ({
-  paymentData,
-  isStream = false,
-}: {
-  paymentData: EntityPaymentData
-  isStream?: boolean
-}) => {
+const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
   const {
     isPAYG,
     totalSpent,
@@ -25,7 +20,7 @@ const PaymentCard = ({
     formattedDuration,
     loading,
     receiverType,
-  } = useEntityPayment(paymentData)
+  } = useFormatPayment(paymentData)
 
   return (
     <NoisyContainer>
@@ -52,11 +47,7 @@ const PaymentCard = ({
               {loading ? (
                 <Skeleton width="5rem" />
               ) : isPAYG ? (
-                isStream ? (
-                  'Stream'
-                ) : (
-                  'Pay as you go'
-                )
+                'Pay as you go'
               ) : (
                 'Holding'
               )}
@@ -125,12 +116,12 @@ const PaymentCard = ({
 
 /**
  * Component to display payment information
- * Takes raw data as props and uses the hook for formatting
- * Can also handle multiple stream payments with the streams prop
+ * Takes an array of payment data objects and renders a card for each one
  */
-export const EntityPayment = (props: EntityPaymentProps) => {
-  const { streams } = props
-  const hasStreams = streams && streams.length > 0
+export const EntityPayment = ({ payments }: EntityPaymentProps) => {
+  if (!payments || payments.length === 0) {
+    return null
+  }
 
   return (
     <>
@@ -138,21 +129,14 @@ export const EntityPayment = (props: EntityPaymentProps) => {
         PAYMENT
       </div>
 
-      {/* Main payment card */}
-      {!hasStreams && <PaymentCard paymentData={props} />}
-
-      {/* Stream payments */}
-      {hasStreams && (
-        <div tw="flex flex-col gap-4">
-          {streams.map((streamData, index) => (
-            <PaymentCard
-              key={`stream-${index}-${streamData.receiver}`}
-              paymentData={streamData}
-              isStream={true}
-            />
-          ))}
-        </div>
-      )}
+      <div tw="flex flex-col gap-4">
+        {payments.map((paymentData, index) => (
+          <PaymentCard
+            key={`payment-${index}-${paymentData.paymentType}`}
+            paymentData={paymentData}
+          />
+        ))}
+      </div>
     </>
   )
 }
