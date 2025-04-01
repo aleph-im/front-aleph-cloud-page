@@ -1,414 +1,278 @@
-import Link from 'next/link'
-import { RotatingLines, ThreeDots } from 'react-loader-spinner'
-import ButtonLink from '@/components/common/ButtonLink'
-import IconText from '@/components/common/IconText'
-import { Label, NoisyContainer, Tabs, Tooltip } from '@aleph-front/core'
-import { EntityTypeName } from '@/helpers/constants'
-import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
+import { RotatingLines } from 'react-loader-spinner'
+import { ButtonProps, Label, Tooltip } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
 import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
-import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
-import { Container, Text, Separator } from '../common'
-import VolumeList from '../VolumeList'
-import BackButtonSection from '@/components/common/BackButtonSection'
-import LogsFeed from '../LogsFeed'
-import StreamSummary from '@/components/common/StreamSummary'
-import { blockchains } from '@/domain/connect/base'
+import BackButton from '@/components/common/BackButton'
+import { Skeleton } from '@/components/common/Skeleton/cmp'
+import { SidePanel } from '@/components/common/SidePanel/cmp'
+import SSHKeyDetail from '@/components/common/SSHKeyDetail'
+import VolumeDetail from '@/components/common/VolumeDetail'
+import { Slide, Slider } from '@/components/common/Slider/cmp'
+import EntityPayment from '@/components/common/entityData/EntityPayment'
+import InstanceDetails from '@/components/common/entityData/InstanceDetails'
+import {
+  EntityLogsContent,
+  EntityLogsControl,
+} from '@/components/common/entityData/EntityLogs'
+import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
+import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolumes'
+import EntityConnectionMethods from '@/components/common/entityData/EntityConnectionMethods'
+import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
+import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
 
+/**
+ * Button component with functional styling
+ */
+export function FunctionalButton({ children, ...props }: ButtonProps) {
+  return (
+    <Button
+      variant="functional"
+      size="sm"
+      className="bg-purple0 text-main0"
+      tw="px-6 py-2 rounded-full flex items-center justify-center leading-none gap-x-3 font-bold
+         transition-all duration-200
+         disabled:(opacity-50 cursor-not-allowed)"
+      {...props}
+    >
+      {children}
+    </Button>
+  )
+}
+
+/**
+ * ManageInstance component - purely presentational
+ * All business logic is in the useManageInstance hook
+ */
 export default function ManageInstance() {
   const {
+    // Basic data
     instance,
-    termsAndConditions,
+    name,
+    labelVariant,
+
+    // Status data
     status,
-    mappedKeys,
-    nodeDetails,
-    streamDetails,
     isRunning,
-    stopDisabled,
-    startDisabled,
-    rebootDisabled,
-    logs,
-    tabs,
-    tabId,
-    theme,
+
+    // Volumes data
+    immutableVolumes,
+    persistentVolumes,
+
+    // Action handlers
     handleStop,
     handleStart,
     handleReboot,
-    handleCopyHash,
-    handleCopyConnect,
-    handleCopyIpv6,
     handleDelete,
     handleBack,
+
+    // UI state
+    mappedKeys,
     setTabId,
+    theme,
+    logs,
+    sliderActiveIndex,
+
+    // Side panel
+    sidePanel,
+    handleImmutableVolumeClick,
+    handleSSHKeyClick,
+    closeSidePanel,
+
+    // Button states
+    stopDisabled,
+    startDisabled,
+    rebootDisabled,
+
+    // Payment data
+    paymentData,
+
+    // Logs
+    handleDownloadLogs,
+    isDownloadingLogs,
+
+    // Node details
+    nodeDetails,
   } = useManageInstance()
-
-  if (!instance) {
-    return (
-      <>
-        <BackButtonSection handleBack={handleBack} />
-        <Container>
-          <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </Container>
-      </>
-    )
-  }
-
-  const name =
-    (instance?.metadata?.name as string) || ellipseAddress(instance.id)
-  const typeName = EntityTypeName[instance.type]
-  const volumes = instance.volumes
 
   return (
     <>
-      <BackButtonSection handleBack={handleBack} />
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
-          <div tw="flex justify-between pb-5 flex-wrap gap-4 flex-col md:flex-row">
-            <div tw="flex items-center">
-              <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
-              <div className="tp-body2">{name}</div>
-              <Label
-                kind="secondary"
-                variant={
-                  instance.time < Date.now() - 1000 * 45 && isRunning
-                    ? 'success'
-                    : 'warning'
-                }
-                tw="ml-4"
-              >
+      {/* Header */}
+      <section tw="px-12 py-0! md:pt-10! pb-6">
+        <div tw=" px-0 py-0! md:pt-10! flex items-center justify-between gap-8">
+          <div tw="flex-1">
+            <BackButton handleBack={handleBack} />
+          </div>
+          <div tw="flex flex-col md:flex-row text-center gap-2 items-center justify-center">
+            <Label kind="secondary" variant={labelVariant}>
+              <div tw="flex items-center justify-center gap-2">
+                <Icon name="alien-8bit" className={`text-${labelVariant}`} />
                 {isRunning ? (
-                  'READY'
+                  'RUNNING'
                 ) : (
-                  <div tw="flex items-center">
-                    <div tw="mr-2">CONFIRMING</div>
+                  <>
+                    <div>{instance ? 'CONFIRMING' : 'LOADING'}</div>
                     <RotatingLines
                       strokeColor={theme.color.base2}
                       width=".8rem"
                     />
-                  </div>
+                  </>
                 )}
-              </Label>
+              </div>
+            </Label>
+            <div className="tp-h7 fs-18" tw="uppercase">
+              {instance ? name : <Skeleton width="20rem" />}
             </div>
-            <div tw="flex gap-4">
-              <Tooltip
-                content="Stop Instance"
-                my="bottom-center"
-                at="top-center"
+          </div>
+          <div tw="flex-1 flex flex-wrap md:flex-nowrap justify-end items-center gap-4">
+            <Tooltip content="Stop Instance" my="bottom-center" at="top-center">
+              <Button
+                kind="functional"
+                variant="secondary"
+                size="sm"
+                onClick={handleStop}
+                disabled={stopDisabled}
               >
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={handleStop}
-                  disabled={stopDisabled}
-                >
-                  <Icon name="stop" />
-                </Button>
-              </Tooltip>
-              <Tooltip
-                content="Reallocate Instance"
-                my="bottom-center"
-                at="top-center"
+                <Icon name="stop" />
+              </Button>
+            </Tooltip>
+            <Tooltip
+              content="Reallocate Instance"
+              my="bottom-center"
+              at="top-center"
+            >
+              <Button
+                kind="functional"
+                variant="secondary"
+                size="sm"
+                onClick={handleStart}
+                disabled={startDisabled}
               >
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={handleStart}
-                  disabled={startDisabled}
-                >
-                  <Icon name="play" />
-                </Button>
-              </Tooltip>
-
-              <Tooltip
-                content="Reboot Instance"
-                my="bottom-center"
-                at="top-center"
+                <Icon name="play" />
+              </Button>
+            </Tooltip>
+            <Tooltip
+              content="Reboot Instance"
+              my="bottom-center"
+              at="top-center"
+            >
+              <Button
+                kind="functional"
+                variant="secondary"
+                size="sm"
+                onClick={handleReboot}
+                disabled={rebootDisabled}
               >
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={handleReboot}
-                  disabled={rebootDisabled}
-                >
-                  <Icon name="arrow-rotate-backward" />
-                </Button>
-              </Tooltip>
+                <Icon name="arrow-rotate-backward" />
+              </Button>
+            </Tooltip>
+            <Tooltip
+              content="Remove Instance"
+              my="bottom-center"
+              at="top-center"
+            >
               <Button
                 kind="functional"
                 variant="error"
-                size="md"
+                size="sm"
                 onClick={handleDelete}
+                disabled={!instance}
               >
                 <Icon name="trash" />
               </Button>
-            </div>
+            </Tooltip>
           </div>
+        </div>
+      </section>
 
-          <NoisyContainer>
-            <div tw="flex items-center justify-start overflow-hidden">
-              <Tag variant="accent" tw="mr-4 whitespace-nowrap">
-                {typeName}
-              </Tag>
-              <div tw="flex-auto">
-                <div className="tp-info text-main0">ITEM HASH</div>
-                <IconText iconName="copy" onClick={handleCopyHash}>
-                  {instance.id}
-                </IconText>
+      {/* Slider */}
+      <Slider activeIndex={sliderActiveIndex}>
+        {/* Instance Properties */}
+        <Slide>
+          <div tw="w-full flex flex-wrap gap-x-24 gap-y-9 px-12 py-6 transition-transform duration-1000">
+            <div tw="flex-1 w-1/2 flex flex-col gap-y-9">
+              <div>
+                <InstanceDetails instance={instance} />
+              </div>
+              <div>
+                <EntityLogsControl
+                  onViewLogs={() => setTabId('log')}
+                  onDownloadLogs={handleDownloadLogs}
+                  downloadingLogs={isDownloadingLogs}
+                  disabled={!instance || !isRunning}
+                />
+              </div>
+              <div>
+                <EntitySSHKeys
+                  sshKeys={mappedKeys}
+                  onSSHKeyClick={handleSSHKeyClick}
+                />
+              </div>
+              <div>
+                <EntityPayment payments={paymentData} />
               </div>
             </div>
-
-            <Separator />
-
-            <div tw="flex flex-wrap justify-start gap-5 my-5">
+            <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">
               <div>
-                <div className="tp-info text-main0">CORES</div>
+                <EntityHostingCRN
+                  nodeDetails={nodeDetails}
+                  termsAndConditionsHash={
+                    instance?.requirements?.node?.terms_and_conditions
+                  }
+                />
+              </div>
+              <div>
+                <EntityConnectionMethods executableStatus={status} />
+              </div>
+              {immutableVolumes.length > 0 && (
                 <div>
-                  <Text>{instance.resources.vcpus} x86 64bit</Text>
+                  <EntityLinkedVolumes
+                    linkedVolumes={immutableVolumes}
+                    onImmutableVolumeClick={handleImmutableVolumeClick}
+                  />
                 </div>
-              </div>
-
-              <div>
-                <div className="tp-info text-main0">RAM</div>
+              )}
+              {persistentVolumes.length > 0 && (
                 <div>
-                  <Text>
-                    {convertByteUnits(instance.resources.memory, {
-                      from: 'MiB',
-                      to: 'GiB',
-                      displayUnit: true,
-                    })}
-                  </Text>
+                  <EntityPersistentStorage
+                    persistentVolumes={persistentVolumes}
+                  />
                 </div>
-              </div>
-
-              <div>
-                <div className="tp-info text-main0">HDD</div>
-                <div>
-                  <Text>
-                    {convertByteUnits(instance.size, {
-                      from: 'MiB',
-                      to: 'GiB',
-                      displayUnit: true,
-                    })}
-                  </Text>
-                </div>
-              </div>
-            </div>
-
-            <div tw="my-5">
-              <div className="tp-info text-main0">EXPLORER</div>
-              <div>
-                <a
-                  className="tp-body1 fs-16"
-                  href={instance.url}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                >
-                  <IconText iconName="square-up-right">
-                    <Text>{ellipseText(instance.url, 80)}</Text>
-                  </IconText>
-                </a>
-              </div>
-            </div>
-
-            <Separator />
-
-            <Tabs
-              selected={tabId}
-              align="left"
-              onTabChange={setTabId}
-              tabs={tabs}
-            />
-
-            <div role="tabpanel" tw="mt-6">
-              {tabId === 'detail' ? (
-                <>
-                  <div tw="my-5">
-                    <TextGradient type="h7" as="h2" color="main0">
-                      Connection methods
-                    </TextGradient>
-
-                    <div tw="my-5">
-                      <div className="tp-info text-main0">SSH COMMAND</div>
-                      <div>
-                        {status ? (
-                          <IconText iconName="copy" onClick={handleCopyConnect}>
-                            <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
-                          </IconText>
-                        ) : (
-                          <div tw="flex items-end">
-                            <span
-                              tw="mr-1"
-                              className="tp-body1 fs-16 text-main2"
-                            >
-                              Allocating
-                            </span>
-                            <ThreeDots
-                              width=".8rem"
-                              height="1rem"
-                              color={theme.color.main2}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div tw="my-5">
-                      <div className="tp-info text-main0">IPv6</div>
-                      <div>
-                        {status && (
-                          <IconText iconName="copy" onClick={handleCopyIpv6}>
-                            <Text>{status.ipv6Parsed}</Text>
-                          </IconText>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div tw="my-5">
-                    <TextGradient type="h7" as="h2" color="main0">
-                      Accessible for
-                    </TextGradient>
-
-                    <div tw="my-5 flex">
-                      {mappedKeys.map(
-                        (key, i) =>
-                          key && (
-                            <div key={key?.id} tw="mr-5">
-                              <div className="tp-info text-main0">
-                                SSH KEY #{i + 1}
-                              </div>
-
-                              <Link
-                                className="tp-body1 fs-16"
-                                href={'?hash=' + key.id}
-                                referrerPolicy="no-referrer"
-                              >
-                                <IconText iconName="square-up-right">
-                                  <Text>{key.label}</Text>
-                                </IconText>
-                              </Link>
-                            </div>
-                          ),
-                      )}
-                    </div>
-                  </div>
-
-                  {streamDetails && (
-                    <>
-                      <Separator />
-
-                      <TextGradient type="h7" as="h2" color="main0">
-                        Active streams
-                      </TextGradient>
-
-                      {!streamDetails.streams.length ? (
-                        <div tw="my-5">There are no active streams</div>
-                      ) : (
-                        <div tw="my-5">
-                          {streamDetails.streams.length} active streams in{' '}
-                          <strong className="text-main0">
-                            {blockchains[streamDetails.blockchain].name}
-                          </strong>{' '}
-                          network
-                        </div>
-                      )}
-
-                      {streamDetails.streams.map((stream) => (
-                        <div
-                          key={`${stream.sender}:${stream.receiver}`}
-                          tw="my-5"
-                        >
-                          <StreamSummary {...stream} />
-                        </div>
-                      ))}
-                    </>
-                  )}
-
-                  {nodeDetails && (
-                    <>
-                      <Separator />
-
-                      <TextGradient type="h7" as="h2" color="main0">
-                        Current CRN
-                      </TextGradient>
-
-                      <div tw="my-5">
-                        <div className="tp-info text-main0">NAME</div>
-                        <div>
-                          <Text>{nodeDetails.name}</Text>
-                        </div>
-                      </div>
-
-                      <div tw="my-5">
-                        <div className="tp-info text-main0">URL</div>
-                        <div>
-                          <a
-                            className="tp-body1 fs-16"
-                            href={nodeDetails.url}
-                            target="_blank"
-                            referrerPolicy="no-referrer"
-                          >
-                            <IconText iconName="square-up-right">
-                              <Text>{ellipseText(nodeDetails.url, 80)}</Text>
-                            </IconText>
-                          </a>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {volumes.length > 0 && (
-                    <>
-                      <Separator />
-
-                      <TextGradient type="h7" as="h2" color="main0">
-                        Linked Storage(s)
-                      </TextGradient>
-
-                      <VolumeList {...{ volumes }} />
-                    </>
-                  )}
-
-                  {termsAndConditions !== undefined && (
-                    <>
-                      <Separator />
-                      <TextGradient type="h7" as="h2" color="main0">
-                        Terms & Conditions
-                      </TextGradient>
-                      <div tw="my-5">
-                        <div className="tp-info text-main0">ACCEPTED T&C</div>
-                        <div>
-                          <a
-                            className="tp-body1 fs-16"
-                            href={termsAndConditions.url}
-                            target="_blank"
-                            referrerPolicy="no-referrer"
-                          >
-                            <IconText iconName="square-up-right">
-                              <Text>{termsAndConditions.name}</Text>
-                            </IconText>
-                          </a>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : tabId === 'log' ? (
-                <>
-                  <LogsFeed logs={logs} />
-                </>
-              ) : (
-                <></>
               )}
             </div>
-          </NoisyContainer>
-
-          <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/computing/instance/new">
-              Create new instance
-            </ButtonLink>
           </div>
-        </Container>
-      </section>
+        </Slide>
+
+        {/* Instance Logs */}
+        <Slide>
+          <div tw="w-full flex px-12 py-6 gap-8">
+            <FunctionalButton onClick={() => setTabId('detail')}>
+              <Icon name="angle-left" size="1.3em" />
+            </FunctionalButton>
+            <div tw="w-full flex flex-col justify-center items-center gap-3">
+              <EntityLogsContent logs={logs} />
+            </div>
+          </div>
+        </Slide>
+      </Slider>
+
+      {/* Side Panel */}
+      <SidePanel
+        title={sidePanel.type === 'volume' ? 'Volume' : 'SSH Key'}
+        isOpen={sidePanel.isOpen}
+        onClose={closeSidePanel}
+      >
+        {sidePanel.type === 'volume' ? (
+          sidePanel.selectedVolume && (
+            <VolumeDetail volumeId={sidePanel.selectedVolume.id} />
+          )
+        ) : sidePanel.type === 'sshKey' ? (
+          sidePanel.selectedSSHKey && (
+            <SSHKeyDetail sshKeyId={sidePanel.selectedSSHKey.id} />
+          )
+        ) : (
+          <>ERROR</>
+        )}
+      </SidePanel>
     </>
   )
 }

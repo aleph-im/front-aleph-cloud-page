@@ -146,7 +146,84 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const message = await this.sdkClient.getMessage(id)
 
     const [entity] = await this.parseMessages([message])
+
     return entity
+
+    // return {
+    //   type: EntityType.Instance,
+    //   id: 'fad1426244885cf5cbb9c0507ad2e023a5ef7d3c6d2866fd61a5447be322b433',
+    //   name: 'Gerard Instance detail test',
+    //   url: 'https://explorer.aleph.im/address/ETH/0x5f78199cd833c1dc1735bee4a7416caaE58Facca/message/INSTANCE/fad1426244885cf5cbb9c0507ad2e023a5ef7d3c6d2866fd61a5447be322b433',
+    //   date: '2025-02-21 14:50:40',
+    //   size: 20480,
+    //   confirmed: false,
+    //   allow_amend: false,
+    //   address: '0x5f78199cd833c1dc1735bee4a7416caaE58Facca',
+    //   time: 1740149440.07,
+    //   environment: {
+    //     internet: true,
+    //     aleph_api: true,
+    //     hypervisor: 'qemu',
+    //     trusted_execution: null,
+    //     reproducible: false,
+    //     shared_cache: false,
+    //   },
+    //   resources: {
+    //     vcpus: 1,
+    //     memory: 2048,
+    //     seconds: 30,
+    //     published_ports: null,
+    //   },
+    //   authorized_keys: [
+    //     'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDiIQCUoohyA1/wfZZHjG8tvtzZ5vhxRyramngqoh33SbORChsh+/F2NyGzMvdQvl4aGtH/NG+02exlbhwIfsdoBNfTyguSevfHy6ytA1Zp4ozA9AjUQrfAZcOebay24vIxdVrXJax2ayxyuFG7FXdjzlecqRUBgKWaMUcm69WunhlSWbIUkPryAb2DtI737oYKInBbjoFTRAeMpwWioxkNc/Ia79ChmqQbujjlYFMhUsOLcPMY6CHRc00N7vOvOmpXECQR276j576m9md2EJoquzpY5nqLuLr6wi5zDWX3TAnxT9hTsX1OOFHqdUTE1BPRvRSwWJVB7nVZwP9T15W04Jyr1ZU93Bg1ER0bVj2lSuie7JyA5xtR1HVo51jHAWceHyziRw/cEbuOhLq2y0iw4P1Db3Q51f6maLsVEHD/XdE2uW3GYT/EvqExo7VSYticV1OLvwYPjm1Ooq37LTClYXVlrmEsmJ9jDw41yEb/xl6s61jC+CE2pT26bmcJEj8= root@debian-s-1vcpu-2gb-lon1-01',
+    //     'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDmbg9i6JjExuSfXemJDQjTwgL8MIgLs0BNlAdJTnkdo1izqOIuD80cR2uIUT4ZH85BvDCjDmqVbN0PzPbXXbr901vTJdwtekbbIfT7/mKtFtAaHKuRROFuhhREe+7wHv+m7HBWPUSQ6uvxJY5vMPBureuJRCthF6OIsIJPBQMoHTWIDfj4+ea1wvLbFTMYU5M823r8Cp6wA307RyPWy6abCY2h4b4Oq3oyW7iZhblqYkkkibBp5825Is2Fbx6eharaExwE1BLW+P9OQRApaHAbQNwGF8nKAEsaNtCAUuUEcdNWQ32W1xSyRj9R56LOxU7UmOeLgebWr8HxlJnnJpvdOQ5eklunHWWyPSyrJOaGhWVjjkd3fA9tkkVl887qeze3J1IfqSTEKhFAHegkOesFkGJYcKEzLLab/Pds7sz6//Ue+HpDv1Xf1Qsq+4uAfonPuTh0M5Kv3t5oAz5v75/FRXZzDdL512U9b3KdKigqEsJ7VoFiTDpaT1SoJSBGprcnAUCslhXBjum3ftqdqc0ukimU/Bk1zj+f4fLvHI62EI8qFK5KsEPTCb+c6twCu4gXJnQD0suSgxAGBl5X8Rbe0+jhM2tgfSeIa8K3UeQVSwxbvAeCKevxcAfOiOrMbraKDJuAqOaxEeBxG0xrAU35H+ujLJVGBqSnBBpiSs6QsQ== gerardmo98@gmail.com',
+    //   ],
+    //   volumes: [
+    //     // Immutable
+    //     {
+    //       ref: '01a18f3dccc5528c3aaec0b50763814f57e5ed5742aaa225e1a5f769fc038f16',
+    //       use_latest: true,
+    //       mount: '/some/path',
+    //     },
+    //     // Immutable
+    //     {
+    //       ref: 'cef3c1326dc3b05e3e9bd2490f15c060b3fa9c83f1d3a558adbea82604140d89',
+    //       use_latest: true,
+    //       mount: '/some/other/path',
+    //     },
+    //     // Persistent
+    //     {
+    //       persistence: {
+    //         host: 'host',
+    //         store: 'store',
+    //       },
+    //       name: 'Volume name',
+    //       size_mib: 20480,
+    //       mount: '/another/path/butismore/extense',
+    //     },
+    //     // Ephemeral
+    //     {
+    //       ephemeral: true,
+    //       size_mib: 4096,
+    //       mount: '/another/path/for/ephemeral/volumes',
+    //     },
+    //   ],
+    //   payment: {
+    //     chain: Blockchain.ETH,
+    //     type: PaymentType.hold,
+    //   },
+    //   rootfs: {
+    //     parent: {
+    //       ref: 'b6ff5c3a8205d1ca4c7c3369300eeafff498b558f71b851aa2114afd0a532717',
+    //       use_latest: true,
+    //     },
+    //     persistence: 'host',
+    //     size_mib: 20480,
+    //   },
+    //   metadata: {
+    //     name: 'Gerard Instance detail test',
+    //   },
+    // }
   }
 
   async add(newInstance: AddInstance, account?: SuperfluidAccount): Promise<T> {

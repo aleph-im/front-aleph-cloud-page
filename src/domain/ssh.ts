@@ -72,6 +72,7 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
 
   async getByValues(values: string[]): Promise<(SSHKey | undefined)[]> {
     const all = await this.getAll()
+    console.log('all', all)
     return values.map((value) => all.find((d) => d.key === value))
   }
 
