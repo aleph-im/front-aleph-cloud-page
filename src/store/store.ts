@@ -58,7 +58,7 @@ export type StoreState = {
   connection: ConnectionState
   manager: ManagerState
   authorization: AuthorizationState
-  
+
   // Resource entities
   ssh: EntityState<SSHKey>
   domain: EntityState<Domain>
@@ -68,23 +68,23 @@ export type StoreState = {
   program: EntityState<Program>
   volume: EntityState<Volume>
   website: EntityState<Website>
-  
+
   // Volume relationships
   programVolume: EntityState<Volume>
   instanceVolume: EntityState<Volume>
   gpuInstanceVolume: EntityState<Volume>
   confidentialVolume: EntityState<Volume>
-  
+
   // Node entities (from account)
   ccns: EntityState<CCN>
   crns: EntityState<CRN>
-  
+
   // Node-related requests
   lastCRNVersion: RequestState<NodeLastVersions>
   lastCCNVersion: RequestState<NodeLastVersions>
   lastRewardsDistribution: RequestState<RewardsResponse>
   lastRewardsCalculation: RequestState<RewardsResponse>
-  
+
   // Filtering
   filter: FilterState
 }
@@ -94,7 +94,7 @@ export const storeReducer = mergeReducers<StoreState>({
   connection: getConnectionReducer(),
   manager: getManagerReducer(),
   authorization: getAuthorizationReducer(),
-  
+
   // Resource entities
   ssh: getEntityReducer<SSHKey>('ssh', 'id'),
   domain: getEntityReducer<Domain>('domain', 'id'),
@@ -110,17 +110,21 @@ export const storeReducer = mergeReducers<StoreState>({
   instanceVolume: getEntityReducer<Volume>('instanceVolume', 'id'),
   gpuInstanceVolume: getEntityReducer<Volume>('gpuInstanceVolume', 'id'),
   confidentialVolume: getEntityReducer<Volume>('confidentialVolume', 'id'),
-  
+
   // Node entities (from account)
   ccns: getEntityReducer<CCN>('ccns', 'hash', 'virtual'),
   crns: getEntityReducer<CRN>('crns', 'hash', 'virtual'),
-  
+
   // Node-related requests
   lastCRNVersion: getRequestReducer<NodeLastVersions>('lastCRNVersion'),
   lastCCNVersion: getRequestReducer<NodeLastVersions>('lastCCNVersion'),
-  lastRewardsDistribution: getRequestReducer<RewardsResponse>('lastRewardsDistribution'),
-  lastRewardsCalculation: getRequestReducer<RewardsResponse>('lastRewardsCalculation'),
-  
+  lastRewardsDistribution: getRequestReducer<RewardsResponse>(
+    'lastRewardsDistribution',
+  ),
+  lastRewardsCalculation: getRequestReducer<RewardsResponse>(
+    'lastRewardsCalculation',
+  ),
+
   // Filtering
   filter: getFilterReducer(),
 })

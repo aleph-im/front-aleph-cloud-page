@@ -1,8 +1,9 @@
 import { useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useNotification } from '@aleph-front/core'
-import { AlephNode, NodeManager } from '@/domain/node'
+import { AlephNode } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
+import { useNodeManager } from '../useManager/useNodeManager'
 import { EntityDelAction } from '@/store/entity'
 import { Account } from '@aleph-sdk/account'
 
@@ -29,11 +30,13 @@ export function useNodeDetail<N extends AlephNode>({
   const router = useRouter()
   const noti = useNotification()
 
-  const [state, dispatch] = useAppState()
-  const { account } = state.connection
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const [
+    {
+      connection: { account },
+    },
+    dispatch,
+  ] = useAppState()
+  const nodeManager = useNodeManager()
 
   const isCRN = useMemo(
     () => (node ? nodeManager.isCRN(node) : undefined),

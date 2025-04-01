@@ -1,6 +1,6 @@
 import { Button, TextGradient } from '@aleph-front/core'
 import { EntityType, EntityDomainType } from '@/helpers/constants'
-import { useNewFunctionPage } from '@/hooks/pages/computing/useNewFunctionPage'
+import { useNewFunctionPage } from './hook'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'

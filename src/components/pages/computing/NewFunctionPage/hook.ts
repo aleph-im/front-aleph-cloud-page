@@ -2,13 +2,13 @@ import { FormEvent, useCallback, useMemo } from 'react'
 import { useAppState } from '@/contexts/appState'
 import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 import { useRouter } from 'next/router'
-import { InstanceSpecsField } from '../../form/useSelectInstanceSpecs'
-import { VolumeField } from '../../form/useAddVolume'
-import { EnvVarField } from '../../form/useAddEnvVars'
+import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
+import { VolumeField } from '@/hooks/form/useAddVolume'
+import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   NameAndTagsField,
   defaultNameAndTags,
-} from '../../form/useAddNameAndTags'
+} from '@/hooks/form/useAddNameAndTags'
 import { useForm } from '@/hooks/common/useForm'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { DomainField } from '@/hooks/form/useAddDomains'

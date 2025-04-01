@@ -1,7 +1,6 @@
-import { useMemo } from 'react'
 import { useAppStoreEntityRequest } from '../useStoreEntitiesRequest'
-import { CCN, NodeLastVersions, NodeManager } from '@/domain/node'
-import { useAppState } from '@/contexts/appState'
+import { CCN, NodeLastVersions } from '@/domain/node'
+import { useNodeManager } from '../../common/useManager/useNodeManager'
 import { useAppStoreRequest } from '../useStoreRequest'
 
 export type UseRequestCCNsProps = {
@@ -16,11 +15,7 @@ export type UseRequestCCNsReturn = {
 export function useRequestCCNs({
   triggerDeps,
 }: UseRequestCCNsProps = {}): UseRequestCCNsReturn {
-  const [state] = useAppState()
-  const { account } = state.connection
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const nodeManager = useNodeManager()
 
   const { data: nodes } = useAppStoreEntityRequest({
     name: 'ccns',

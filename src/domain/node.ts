@@ -971,25 +971,51 @@ export class NodeManager {
     }
   }
 
-  getNodeVersionNumber(node: CRNSpecs): number {
-    if (!node?.version) return 0
-    return getVersionNumber(node?.version)
+  getNodeVersionNumber(node: CRN | CRNSpecs): number {
+    // CRNSpecs has version directly on the object
+    if ('cpu' in node && node.version) {
+      return getVersionNumber(node.version)
+    }
+
+    // For CRN type, version is in metricsData
+    if ('metricsData' in node && node.metricsData?.version) {
+      return getVersionNumber(node.metricsData.version)
+    }
+
+    return 0
   }
 
-  isStreamPaymentNotSupported(node: CRNSpecs): StreamNotSupportedIssue {
+  isStreamPaymentNotSupported(node: CRN | CRNSpecs): StreamNotSupportedIssue {
+    // Basic check for stream reward address - works with both types
     if (!extractValidEthAddress(node.stream_reward))
       return StreamNotSupportedIssue.RewardAddress
 
+    // Version check - works with both types
     if (this.getNodeVersionNumber(node) < getVersionNumber('1.1.0'))
       return StreamNotSupportedIssue.Version
 
-    let mismatch = false
-    this.getCRNConfig(node).then((config) => {
-      mismatch = !config?.payment.matched_reward_addresses
-    })
-    if (mismatch) return StreamNotSupportedIssue.MismatchRewardAddress
+    // Note: We can't check for address mismatch synchronously
+    // but the other checks are the most common failures
 
     return StreamNotSupportedIssue.Valid
+  }
+
+  async isStreamPaymentFullySupported(node: CRN | CRNSpecs): Promise<boolean> {
+    // Run basic checks first
+    const basicCheck = this.isStreamPaymentNotSupported(node)
+    if (basicCheck !== StreamNotSupportedIssue.Valid) {
+      return false
+    }
+
+    // Additional checks for CRNSpecs that require async operations
+    if ('cpu' in node) {
+      const config = await this.getCRNConfig(node)
+      if (!config?.payment.matched_reward_addresses) {
+        return false
+      }
+    }
+
+    return true
   }
 
   validateMinNodeSpecs(

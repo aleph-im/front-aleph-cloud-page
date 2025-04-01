@@ -35,7 +35,16 @@ export function useComputeResourceNodes({
   const { account, balance: accountBalance = 0 } = state.connection
   const { data: lastVersion } = state.lastCRNVersion
   const { entities: data } = state.crns
-  const filters = state.filter || {}
+  // Convert FilterState to UseFilterReturn
+  const filters = useMemo(() => {
+    const result: UseFilterReturn = {}
+    Object.entries(state.filter || {}).forEach(([key, value]) => {
+      if (value) {
+        result[key] = value.value
+      }
+    })
+    return result
+  }, [state.filter])
 
   // -----------------------------
 

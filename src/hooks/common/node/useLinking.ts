@@ -1,8 +1,9 @@
 import { useAppState } from '@/contexts/appState'
-import { CCN, CRN, NodeManager } from '@/domain/node'
+import { CCN, CRN } from '@/domain/node'
 import { EntityAddAction } from '@/store/entity'
 import { useNotification } from '@aleph-front/core'
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
+import { useNodeManager } from '../useManager/useNodeManager'
 
 export type UseLinkingReturn = {
   isLinked: (crnHashOrNode: string | CRN) => boolean
@@ -63,11 +64,11 @@ function calculateVirtualNodesUnlink(
 
 export function useLinking(): UseLinkingReturn {
   const [state, dispatch] = useAppState()
-  const { account } = state.connection
+  // We don't need account anymore since we use useNodeManager
   const { entities: crns } = state.crns
   const { entities: ccns } = state.ccns
 
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const nodeManager = useNodeManager()
 
   const noti = useNotification()
 

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { AlephNode, NodeManager } from '@/domain/node'
-import { useAppState } from '@/contexts/appState'
+import { AlephNode } from '@/domain/node'
+import { useNodeManager } from '../useManager/useNodeManager'
 
 export type UseFilterNodeIssuesProps<T extends AlephNode> = {
   nodes?: T[]
@@ -16,11 +16,7 @@ export function useFilterNodeIssues<T extends AlephNode>({
   nodes,
   isStaking,
 }: UseFilterNodeIssuesProps<T>): UseFilterNodeIssuesReturn {
-  const [state] = useAppState()
-  const { account } = state.connection
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const nodeManager = useNodeManager()
 
   const nodesIssues = useMemo(() => {
     const issues: Record<string, string> = {}

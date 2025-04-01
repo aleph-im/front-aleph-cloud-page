@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
-import { CCN, CRN, NodeManager } from '@/domain/node'
+import { CCN, CRN } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
+import { useNodeManager } from '../../common/useManager/useNodeManager'
 import { useRequest } from '@aleph-front/core'
 import { EntitySetAction } from '@/store/entity'
 
@@ -17,11 +18,9 @@ export function useRequestAlephNodes({
   triggerDeps,
 }: UseRequestAlephNodesProps): UseRequestAlephNodesReturn {
   const [state, dispatch] = useAppState()
-  const { account } = state.connection
   const { ccns, crns } = state
 
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const nodeManager = useNodeManager()
 
   const requestState = useMemo(() => {
     return {

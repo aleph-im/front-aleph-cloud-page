@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import { CCN, NodeManager } from '@/domain/node'
-import { useAppState } from '@/contexts/appState'
+import { CCN } from '@/domain/node'
+import { useNodeManager } from '../useManager/useNodeManager'
 
 export type UseFilterUserStakeNodesProps = {
   nodes?: CCN[]
@@ -13,11 +13,7 @@ export type UseFilterUserStakeNodesReturn = {
 export function useFilterUserStakeNodes({
   nodes,
 }: UseFilterUserStakeNodesProps): UseFilterUserStakeNodesReturn {
-  const [state] = useAppState()
-  const { account } = state.connection
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const nodeManager = useNodeManager()
 
   const filterStakeNodes = useCallback(
     (nodes?: CCN[]) => {

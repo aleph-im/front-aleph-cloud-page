@@ -157,14 +157,15 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     if (selectedNode) {
       nodeRef.current = selectedNode
     } else {
-      const gpuDevice = specs[queryCRN]?.compatible_available_gpus?.find(
-        (gpu) => {
-          return gpu.model === queryGPU
-        },
+      const gpuDevice = specs[queryCRN]?.data?.compatible_available_gpus?.find(
+        (gpu) => gpu.model === queryGPU,
       )
 
-      if (gpuDevice)
-        nodeRef.current = { ...specs[queryCRN], selectedGpu: gpuDevice }
+      if (gpuDevice && specs[queryCRN]?.data) {
+        // Create a copy with all the required properties to satisfy type constraints
+        const nodeData = { ...specs[queryCRN].data } as CRNSpecs
+        nodeRef.current = { ...nodeData, selectedGpu: gpuDevice }
+      }
     }
 
     return nodeRef.current
@@ -174,7 +175,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     if (!node) return
     if (!specs) return
 
-    return specs[node.hash]
+    return specs[node.hash]?.data
   }, [specs, node])
 
   // -------------------------

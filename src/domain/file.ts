@@ -199,11 +199,16 @@ export class FileManager {
       },
     })
 
-    return {
-      ...message,
-      contentItemHash: message.content.item_hash,
-      messageItemHash: message.item_hash,
+    // Create a properly typed object including both message properties and our additional fields
+    const result = message as unknown as StoreMessage & {
+      contentItemHash: string
+      messageItemHash: string
     }
+
+    result.contentItemHash = message.content.item_hash
+    result.messageItemHash = message.item_hash
+
+    return result
   }
 
   static async uploadFolder(

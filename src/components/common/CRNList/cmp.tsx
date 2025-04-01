@@ -91,36 +91,43 @@ export default function CRNList(props: CRNListProps) {
           label: 'CPU',
           width: '15%',
           sortable: true,
-          sortBy: (node) => specs[node.hash]?.cpu?.count || 0,
-          render: (node) => (
-            <div tw="whitespace-nowrap">
-              {specs[node.hash]
-                ? `${specs[node.hash]?.cpu?.count} x86 64bit`
-                : 'n/a'}
-            </div>
-          ),
+          sortBy: (node) => specs[node.hash]?.data?.cpu?.count || 0,
+          render: (node) => {
+            const cpuCount = specs[node.hash]?.data?.cpu?.count
+            return (
+              <div tw="whitespace-nowrap">
+                {cpuCount ? `${cpuCount} x86 64bit` : 'n/a'}
+              </div>
+            )
+          },
         },
         {
           label: 'RAM',
           width: '15%',
           sortable: true,
-          sortBy: (node) => specs[node.hash]?.mem?.available_kB || 0,
-          render: (node) => (
-            <div tw="whitespace-nowrap">
-              {humanReadableSize(specs[node.hash]?.mem?.available_kB, 'KiB')}
-            </div>
-          ),
+          sortBy: (node) => specs[node.hash]?.data?.mem?.available_kB || 0,
+          render: (node) => {
+            const ramSize = specs[node.hash]?.data?.mem?.available_kB
+            return (
+              <div tw="whitespace-nowrap">
+                {humanReadableSize(ramSize, 'KiB')}
+              </div>
+            )
+          },
         },
         {
           label: 'HDD',
           width: '15%',
           sortable: true,
-          sortBy: (node) => specs[node.hash]?.disk?.available_kB || 0,
-          render: (node) => (
-            <div tw="whitespace-nowrap">
-              {humanReadableSize(specs[node.hash]?.disk?.available_kB, 'KiB')}
-            </div>
-          ),
+          sortBy: (node) => specs[node.hash]?.data?.disk?.available_kB || 0,
+          render: (node) => {
+            const diskSize = specs[node.hash]?.data?.disk?.available_kB
+            return (
+              <div tw="whitespace-nowrap">
+                {humanReadableSize(diskSize, 'KiB')}
+              </div>
+            )
+          },
         },
         {
           label: 'VERSION',

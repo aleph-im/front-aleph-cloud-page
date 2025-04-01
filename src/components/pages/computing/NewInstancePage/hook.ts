@@ -161,7 +161,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     if (!queryCRN) return nodeRef.current
     if (typeof queryCRN !== 'string') return nodeRef.current
 
-    nodeRef.current = specs[queryCRN]
+    nodeRef.current = specs[queryCRN]?.data as CRNSpecs
     return nodeRef.current
   }, [specs, queryCRN])
 
@@ -169,7 +169,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     if (!node) return
     if (!specs) return
 
-    return specs[node.hash]
+    return specs[node.hash]?.data
   }, [specs, node])
 
   // -------------------------

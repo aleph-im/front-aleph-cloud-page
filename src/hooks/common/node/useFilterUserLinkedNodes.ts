@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import { CRN, NodeManager } from '@/domain/node'
-import { useAppState } from '@/contexts/appState'
+import { CRN } from '@/domain/node'
+import { useNodeManager } from '../useManager/useNodeManager'
 import { useUserCoreChannelNode } from './useUserCoreChannelNode'
 
 export type UseFilterUserLinkedNodesProps = {
@@ -14,11 +14,7 @@ export type UseFilterUserLinkedNodesReturn = {
 export function useFilterUserLinkedNodes({
   nodes,
 }: UseFilterUserLinkedNodesProps): UseFilterUserLinkedNodesReturn {
-  const [state] = useAppState()
-  const { account } = state.connection
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const nodeManager = useNodeManager()
 
   const { userNode } = useUserCoreChannelNode()
 
