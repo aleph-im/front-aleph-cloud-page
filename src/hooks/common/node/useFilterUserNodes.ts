@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import { AlephNode, NodeManager } from '@/domain/node'
-import { useAppState } from '@/contexts/appState'
+import { AlephNode } from '@/domain/node'
+import { useNodeManager } from '../useManager/useNodeManager'
 
 export type UseFilterUserNodesProps<Node> = {
   nodes?: Node[]
@@ -13,11 +13,8 @@ export type UseFilterUserNodesReturn<Node> = {
 export function useFilterUserNodes<Node extends AlephNode>({
   nodes,
 }: UseFilterUserNodesProps<Node>): UseFilterUserNodesReturn<Node> {
-  const [state] = useAppState()
-  const { account } = state.connection
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  // Use the singleton nodeManager
+  const nodeManager = useNodeManager()
 
   const filterUserNodes = useCallback(
     (nodes?: Node[]) => {
