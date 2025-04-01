@@ -10,6 +10,10 @@ import { ManagerState, getManagerReducer } from './manager'
 import { Confidential } from '@/domain/confidential'
 import { AuthorizationState, getAuthorizationReducer } from './authorization'
 import { GpuInstance } from '@/domain/gpuInstance'
+import { CCN, CRN, NodeLastVersions } from '@/domain/node'
+import { RequestState, getRequestReducer } from './request'
+import { RewardsResponse } from '@/domain/stake'
+import { FilterState, getFilterReducer } from './filter'
 
 export type StoreSubstate = Record<string, unknown>
 
@@ -50,9 +54,12 @@ export function getInitialState<
 }
 
 export type StoreState = {
+  // Connection/Auth
   connection: ConnectionState
   manager: ManagerState
   authorization: AuthorizationState
+  
+  // Resource entities
   ssh: EntityState<SSHKey>
   domain: EntityState<Domain>
   instance: EntityState<Instance>
@@ -61,17 +68,34 @@ export type StoreState = {
   program: EntityState<Program>
   volume: EntityState<Volume>
   website: EntityState<Website>
-
+  
+  // Volume relationships
   programVolume: EntityState<Volume>
   instanceVolume: EntityState<Volume>
   gpuInstanceVolume: EntityState<Volume>
   confidentialVolume: EntityState<Volume>
+  
+  // Node entities (from account)
+  ccns: EntityState<CCN>
+  crns: EntityState<CRN>
+  
+  // Node-related requests
+  lastCRNVersion: RequestState<NodeLastVersions>
+  lastCCNVersion: RequestState<NodeLastVersions>
+  lastRewardsDistribution: RequestState<RewardsResponse>
+  lastRewardsCalculation: RequestState<RewardsResponse>
+  
+  // Filtering
+  filter: FilterState
 }
 
 export const storeReducer = mergeReducers<StoreState>({
+  // Connection/Auth
   connection: getConnectionReducer(),
   manager: getManagerReducer(),
   authorization: getAuthorizationReducer(),
+  
+  // Resource entities
   ssh: getEntityReducer<SSHKey>('ssh', 'id'),
   domain: getEntityReducer<Domain>('domain', 'id'),
   instance: getEntityReducer<Instance>('instance', 'id'),
@@ -81,11 +105,24 @@ export const storeReducer = mergeReducers<StoreState>({
   volume: getEntityReducer<Volume>('volume', 'id'),
   website: getEntityReducer<Website>('website', 'id'),
 
-  // @note: refactor this entities
+  // Volume relationships
   programVolume: getEntityReducer<Volume>('programVolume', 'id'),
   instanceVolume: getEntityReducer<Volume>('instanceVolume', 'id'),
   gpuInstanceVolume: getEntityReducer<Volume>('gpuInstanceVolume', 'id'),
   confidentialVolume: getEntityReducer<Volume>('confidentialVolume', 'id'),
+  
+  // Node entities (from account)
+  ccns: getEntityReducer<CCN>('ccns', 'hash', 'virtual'),
+  crns: getEntityReducer<CRN>('crns', 'hash', 'virtual'),
+  
+  // Node-related requests
+  lastCRNVersion: getRequestReducer<NodeLastVersions>('lastCRNVersion'),
+  lastCCNVersion: getRequestReducer<NodeLastVersions>('lastCCNVersion'),
+  lastRewardsDistribution: getRequestReducer<RewardsResponse>('lastRewardsDistribution'),
+  lastRewardsCalculation: getRequestReducer<RewardsResponse>('lastRewardsCalculation'),
+  
+  // Filtering
+  filter: getFilterReducer(),
 })
 
 export const storeInitialState: StoreState = getInitialState(storeReducer)

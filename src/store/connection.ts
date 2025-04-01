@@ -47,7 +47,7 @@ export class ConnectionDisconnectAction {
     public payload: {
       provider?: ProviderId
       error?: Error
-    },
+    } = {},
   ) {}
 }
 
