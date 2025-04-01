@@ -124,7 +124,9 @@ export class FileManager {
   constructor(
     protected account?: Account,
     protected channel = defaultConsoleChannel,
-    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient = !account
+    protected sdkClient:
+      | AlephHttpClient
+      | AuthenticatedAlephHttpClient = !account
       ? new AlephHttpClient(apiServer)
       : new AuthenticatedAlephHttpClient(account, apiServer),
   ) {}
@@ -176,7 +178,9 @@ export class FileManager {
     storageEngine: Parameters<
       AuthenticatedAlephHttpClient['createStore']
     >[0]['storageEngine'] = ItemType.storage,
-  ): Promise<StoreMessage & { contentItemHash: string; messageItemHash: string }> {
+  ): Promise<
+    StoreMessage & { contentItemHash: string; messageItemHash: string }
+  > {
     if (!this.account) throw Err.InvalidAccount
 
     // @note: Quick temporal fix to upload files

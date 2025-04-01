@@ -190,12 +190,11 @@ export function useHeader(): UseHeaderReturn {
   // -----------------------
 
   // Add node rewards functionality from src_account
+  // Always call hooks unconditionally to follow React rules
   const {
     calculatedRewards: userRewards,
     distributionTimestamp: lastDistribution,
-  } = account?.address
-    ? useNodeRewards({ address: account?.address })
-    : { calculatedRewards: undefined, distributionTimestamp: undefined }
+  } = useNodeRewards({ address: account?.address || '' })
 
   const pendingDays = useMemo(() => {
     const distributionInterval = 10 * 24 * 60 * 60 * 1000 // 10 days

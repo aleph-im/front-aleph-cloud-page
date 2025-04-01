@@ -11,7 +11,9 @@ import { GetMessagesConfiguration, MessageType } from '@aleph-sdk/message'
 export class MessageManager {
   constructor(
     protected account?: Account,
-    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient = !account
+    protected sdkClient:
+      | AlephHttpClient
+      | AuthenticatedAlephHttpClient = !account
       ? new AlephHttpClient(apiServer)
       : new AuthenticatedAlephHttpClient(account, apiServer),
     protected channel = defaultConsoleChannel,

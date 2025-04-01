@@ -25,7 +25,6 @@ export type UseNodeDetailReturn<N> = {
 
 export function useNodeDetail<N extends AlephNode>({
   node,
-  nodes,
 }: UseNodeDetailProps<N>): UseNodeDetailReturn<N> {
   const router = useRouter()
   const noti = useNotification()

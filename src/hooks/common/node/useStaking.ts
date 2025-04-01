@@ -1,6 +1,5 @@
 import { useAppState } from '@/contexts/appState'
 import { CCN, NodeManager } from '@/domain/node'
-import { StakeManager } from '@/domain/stake'
 import { EntityAddAction } from '@/store/entity'
 import { useNotification } from '@aleph-front/core'
 import { useCallback, useMemo } from 'react'
@@ -49,7 +48,8 @@ function calculateVirtualNodesUnstake(
     let stakers
 
     if (node.hash === unstakeNode.hash) {
-      const { [address]: _, ...rest } = node.stakers
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [address]: unused, ...rest } = node.stakers
       stakers = rest
     } else {
       stakers = { ...node.stakers, [address]: perNodeStake }
@@ -72,7 +72,7 @@ export function useStaking(): UseStakingReturn {
 
   const stakeManager = useStakeManager()
   const nodeManager = useNodeManager()
-  
+
   const noti = useNotification()
 
   const userStake = useMemo(
