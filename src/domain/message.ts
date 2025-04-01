@@ -4,24 +4,40 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
-import { defaultConsoleChannel } from '@/helpers/constants'
+import { defaultConsoleChannel, apiServer } from '@/helpers/constants'
 import Err from '@/helpers/errors'
+import { GetMessagesConfiguration, MessageType } from '@aleph-sdk/message'
 
 export class MessageManager {
   constructor(
-    protected account: Account | undefined,
-    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
+    protected account?: Account,
+    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient = !account
+      ? new AlephHttpClient(apiServer)
+      : new AuthenticatedAlephHttpClient(account, apiServer),
     protected channel = defaultConsoleChannel,
   ) {}
 
   /**
    * Returns an aleph program message for a given hash
    */
-  async get(hash: string) {
+  async get<T extends MessageType>(hash: string) {
     try {
-      const msg = await this.sdkClient.getMessage(hash)
+      const msg = await this.sdkClient.getMessage<T>(hash)
 
       return msg
+    } catch (error) {
+      throw Err.RequestFailed(error)
+    }
+  }
+
+  /**
+   * Returns aleph program messages for a given configuration
+   */
+  async getAll(config: GetMessagesConfiguration) {
+    try {
+      const msgs = await this.sdkClient.getMessages(config)
+
+      return msgs
     } catch (error) {
       throw Err.RequestFailed(error)
     }

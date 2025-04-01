@@ -2,13 +2,19 @@ import {
   apiServer,
   crnListProgramUrl,
   defaultAccountChannel,
+  monitorAddress,
+  postType,
   scoringAddress,
+  tags,
+  wsServer,
+  channel,
 } from '@/helpers/constants'
 import { Account } from '@aleph-sdk/account'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+import { AggregateMessage, ItemType } from '@aleph-sdk/message'
 import {
   extractValidEthAddress,
   fetchAndCache,
@@ -17,7 +23,14 @@ import {
   sleep,
 } from '@/helpers/utils'
 import { FileManager } from './file'
-import { urlSchema } from '@/helpers/schemas/base'
+import { subscribeSocketFeed } from '@/helpers/socket'
+import {
+  newCCNSchema,
+  newCRNSchema,
+  updateCCNSchema,
+  updateCRNSchema,
+  urlSchema,
+} from '@/helpers/schemas/base'
 import Err from '@/helpers/errors'
 
 export type NodeType = 'ccn' | 'crn'
@@ -72,6 +85,9 @@ export type CRN = BaseNode & {
 
   parent: string | null
   type: string | 'compute'
+  scoreData?: CRNScore
+  metricsData?: CRNMetrics
+  parentData?: CCN
   stream_reward?: string
   terms_and_conditions?: string
 }
@@ -176,6 +192,7 @@ export type UpdateCCN = BaseUpdateNode & {
 export type UpdateCRN = BaseUpdateNode & {
   address?: string
   stream_reward?: string
+  terms_and_conditions?: string | File
 }
 
 export type UpdateAlephNode = UpdateCCN | UpdateCRN
@@ -320,6 +337,13 @@ export type CRNBenchmark = {
 
 // ---------- @todo: refactor into npm package
 
+export type CRNIps = {
+  hash: string
+  name?: string
+  host: boolean
+  vm: boolean
+}
+
 export enum StreamNotSupportedIssue {
   Valid = 0,
   IPV6 = 1,
@@ -337,6 +361,14 @@ export type ReducedCRNSpecs = {
 
 // @todo: Refactor (create a domain npm package and move this there)
 export class NodeManager {
+  static newCCNSchema = newCCNSchema
+  static newCRNSchema = newCRNSchema
+  static updateCCNSchema = updateCCNSchema
+  static updateCRNSchema = updateCRNSchema
+
+  static maxStakedPerNode = 1_000_000
+  static maxLinkedPerNode = 5
+
   static validateMinNodeSpecs(
     minSpecs: ReducedCRNSpecs,
     nodeSpecs: CRNSpecs,
@@ -377,12 +409,57 @@ export class NodeManager {
 
     crns = this.parseResourceNodes(crns)
 
+    crns = await this.parseScores(crns, true)
+    crns = await this.parseMetrics(crns, true)
+
     ccns = await this.parseScores(ccns, false)
     ccns = await this.parseMetrics(ccns, false)
 
     this.linkChildrenNodes(ccns, crns)
+    this.linkParentNodes(crns, ccns)
 
     return { ccns, crns, timestamp }
+  }
+
+  async *subscribeNodesFeed(
+    abort: Promise<void>,
+  ): AsyncGenerator<NodesResponse> {
+    const feed = subscribeSocketFeed<AggregateMessage<any>>(
+      `${wsServer}/api/ws0/messages?msgType=AGGREGATE&history=1&addresses=${monitorAddress}`,
+      abort,
+    )
+
+    for await (const data of feed) {
+      if (!data.content) return
+      if (!data.content.content) return
+
+      const { content, address, key, time } = data.content || {}
+      const { nodes, resource_nodes } = content
+
+      if (
+        address === monitorAddress &&
+        key === 'corechannel' &&
+        (nodes !== undefined || resource_nodes !== undefined)
+      ) {
+        let crns: CRN[] = resource_nodes as any
+        let ccns: CCN[] = nodes as any
+
+        crns = this.parseResourceNodes(crns)
+
+        crns = await this.parseScores(crns, true)
+        crns = await this.parseMetrics(crns, true)
+
+        ccns = await this.parseScores(ccns, false)
+        ccns = await this.parseMetrics(ccns, false)
+
+        this.linkChildrenNodes(ccns, crns)
+        this.linkParentNodes(crns, ccns)
+
+        const timestamp = Math.trunc(time * 1000)
+
+        yield { ccns, crns, timestamp }
+      }
+    }
   }
 
   async getAllCRNsSpecs(): Promise<CRNSpecs[]> {
@@ -487,6 +564,87 @@ export class NodeManager {
     }
   }
 
+  async getCRNips(node: CRN, retries = 2): Promise<CRNIps | undefined> {
+    if (!node.address) return
+
+    const address = node.address.toLowerCase().replace(/\/$/, '')
+    const url = `${address}/status/check/ipv6`
+    const { success } = urlSchema.safeParse(url)
+    if (!success) return
+
+    try {
+      return await fetchAndCache(
+        url,
+        `crn_ips_${node.hash}_1`,
+        3_600,
+        (res: CRNIps) => {
+          if (res.vm === undefined) throw Err.InvalidResponse
+
+          return {
+            ...res,
+            hash: node.hash,
+            name: node.name,
+          }
+        },
+      )
+    } catch (e) {
+      if (!retries) return
+      await sleep(100 * 2)
+      return this.getCRNips(node, retries - 1)
+    }
+  }
+
+  async getCRNBenchmark(
+    node: CRN,
+    retries = 4,
+  ): Promise<CRNBenchmark | undefined> {
+    if (!node.address) return
+    const { hash, name } = node
+
+    const address = node.address.toLowerCase().replace(/\/$/, '')
+    const url1 = `${address}/vm/873889eb4ce554385e7263724bd0745130099c24fd9c535f0a648100138a2514/benchmark`
+    const url2 = `${address}/vm/873889eb4ce554385e7263724bd0745130099c24fd9c535f0a648100138a2514/memory_speed`
+
+    const { success: success1 } = urlSchema.safeParse(url1)
+    const { success: success2 } = urlSchema.safeParse(url2)
+
+    if (!success1 || !success2) return
+
+    try {
+      const [cpu, ram] = await Promise.all([
+        fetchAndCache(
+          url1,
+          `4crn_benchmark_cpu_${node.hash}`,
+          3_600,
+          (res: CRNBenchmark['cpu']) => {
+            if (res.benchmark === undefined) throw Err.InvalidResponse
+            return res
+          },
+        ),
+        fetchAndCache(
+          url2,
+          `4crn_benchmark_ram_${node.hash}`,
+          3_600,
+          (res: CRNBenchmark['ram']) => {
+            if (res.speed_str === undefined) throw Err.InvalidResponse
+            return res
+          },
+        ),
+      ])
+
+      return {
+        hash,
+        name,
+        cpu,
+        ram,
+      }
+    } catch (e) {
+      if (!retries) return
+      await sleep(100 * 2)
+      return this.getCRNBenchmark(node, retries - 1)
+    }
+  }
+
   async getLatestVersion(node: AlephNode): Promise<NodeLastVersions> {
     return this.isCRN(node)
       ? this.getLatestCRNVersion()
@@ -511,6 +669,112 @@ export class NodeManager {
     )
   }
 
+  async newCoreChannelNode(newCCN: NewCCN): Promise<string> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    newCCN = await NodeManager.newCCNSchema.parseAsync(newCCN)
+
+    const res = await this.sdkClient.createPost({
+      postType,
+      channel,
+      content: {
+        tags: ['create-node', ...tags],
+        action: 'create-node',
+        details: newCCN,
+      },
+      storageEngine: ItemType.inline,
+    })
+
+    return res.item_hash
+  }
+
+  async newComputeResourceNode(newCRN: NewCRN): Promise<string> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    newCRN = await NodeManager.newCRNSchema.parseAsync(newCRN)
+
+    const res = await this.sdkClient.createPost({
+      postType,
+      channel,
+      content: {
+        tags: ['create-resource-node', ...tags],
+        action: 'create-resource-node',
+        details: { ...newCRN, type: 'compute' },
+      },
+      storageEngine: ItemType.inline,
+    })
+
+    return res.item_hash
+  }
+
+  async updateCoreChannelNode(
+    updateCCN: UpdateCCN,
+  ): Promise<[string, Partial<CCN>]> {
+    updateCCN = await NodeManager.updateCCNSchema.parseAsync(updateCCN)
+
+    return this.updateNode(updateCCN, 'create-node')
+  }
+
+  async updateComputeResourceNode(
+    updateCRN: UpdateCRN,
+  ): Promise<[string, Partial<CRN>]> {
+    updateCRN = await NodeManager.updateCRNSchema.parseAsync(updateCRN)
+
+    return this.updateNode(updateCRN, 'create-resource-node')
+  }
+
+  async removeNode(hash: string): Promise<string> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    const res = await this.sdkClient.createPost({
+      postType,
+      channel,
+      ref: hash,
+      content: {
+        tags: ['drop-node', ...tags],
+        action: 'drop-node',
+      },
+      storageEngine: ItemType.inline,
+    })
+
+    return res.item_hash
+  }
+
+  async linkComputeResourceNode(crnHash: string): Promise<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    await this.sdkClient.createPost({
+      postType,
+      channel,
+      ref: crnHash,
+      content: {
+        tags: ['link', ...tags],
+        action: 'link',
+      },
+      storageEngine: ItemType.inline,
+    })
+  }
+
+  async unlinkComputeResourceNode(crnHash: string): Promise<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    await this.sdkClient.createPost({
+      postType,
+      channel,
+      ref: crnHash,
+      content: {
+        tags: ['unlink', ...tags],
+        action: 'unlink',
+      },
+      storageEngine: ItemType.inline,
+    })
+  }
+
   protected async fetchAllNodes(): Promise<NodesResponse> {
     return fetchAndCache(
       `${apiServer}/api/v0/aggregates/0xa1B3bb7d2332383D96b7796B908fB7f7F3c2Be10.json?keys=corechannel&limit=100`,
@@ -526,6 +790,66 @@ export class NodeManager {
         return { ccns, crns, timestamp }
       },
     )
+  }
+
+  protected async updateNode<U extends UpdateAlephNode, N extends AlephNode>(
+    { hash, ...details }: U,
+    action: 'create-node' | 'create-resource-node',
+  ): Promise<[string, Partial<N>]> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
+      throw Err.InvalidAccount
+
+    if (!hash) throw Err.InvalidParameter('hash')
+
+    if (!details.locked) {
+      details.registration_url = ''
+    }
+
+    if (details.picture instanceof File) {
+      const { contentItemHash } = await this.fileManager.uploadFile(
+        details.picture,
+      )
+      details.picture = contentItemHash
+    }
+
+    if (details.banner instanceof File) {
+      const { contentItemHash } = await this.fileManager.uploadFile(
+        details.banner,
+      )
+      details.banner = contentItemHash
+    }
+
+    if (
+      'terms_and_conditions' in details &&
+      details.terms_and_conditions instanceof File
+    ) {
+      const { messageItemHash } = await this.fileManager.uploadFile(
+        details.terms_and_conditions,
+      )
+      details.terms_and_conditions = messageItemHash
+    }
+
+    const res = await this.sdkClient.createPost({
+      postType: 'amend',
+      ref: hash,
+      content: {
+        tags: [action, ...tags],
+        action,
+        details,
+      },
+      channel,
+      storageEngine: ItemType.inline,
+    })
+
+    return [
+      res.item_hash,
+      {
+        hash,
+        ...details,
+        picture: details.picture as string,
+        banner: details.banner as string,
+      } as unknown as Partial<N>,
+    ]
   }
 
   isCRN(node: AlephNode): node is CRN {
@@ -556,6 +880,10 @@ export class NodeManager {
     return !!node.stakers[this.account.address]
   }
 
+  isLinked(node: CRN): boolean {
+    return !!node.parentData
+  }
+
   isUserLinked(node: CRN, userNode?: CCN): boolean {
     if (!userNode) return false
 
@@ -563,6 +891,84 @@ export class NodeManager {
       (this.isUserNode(userNode) && userNode.hash === node.parent) ||
       (this.isUserNode(node) && !!node.parent)
     )
+  }
+
+  isUnlinkableBy(node: CRN, userNode?: CCN): boolean {
+    if (!userNode) return false
+
+    return (
+      (this.isUserNode(userNode) && userNode.hash === node.parent) ||
+      (this.isUserNode(node) && !!node.parent)
+    )
+  }
+
+  isStakeable(node: CCN): [boolean, string] {
+    if (node.total_staked >= NodeManager.maxStakedPerNode)
+      return [false, 'Too many ALEPH staked on that node']
+
+    if (this.isLocked(node)) return [false, 'This node is locked']
+
+    return [true, `${node.hash} is stakeable`]
+  }
+
+  isStakeableBy(node: CCN, balance: number | undefined): [boolean, string] {
+    const isStakeable = this.isStakeable(node)
+    if (!isStakeable[0]) return isStakeable
+
+    if (!balance || balance < 10_000)
+      return [false, 'You need at least 10000 ALEPH to stake']
+
+    if (this.isUserNode(node))
+      return [false, "You can't stake while you operate a node"]
+
+    if (this.isUserStake(node)) return [false, 'Already staking in this node']
+
+    return [true, `Stake ${balance.toFixed(2)} ALEPH in this node`]
+  }
+
+  isLinkable(node: CRN): [boolean, string] {
+    if (node.locked) return [false, 'This node is locked']
+
+    if (!!node.parent)
+      return [false, `The node is already linked to ${node.parent} ccn`]
+
+    return [true, `${node.hash} is linkable`]
+  }
+
+  isLinkableBy(node: CRN, userNode: CCN | undefined): [boolean, string] {
+    const isLinkable = this.isLinkable(node)
+    if (!isLinkable[0]) return isLinkable
+
+    if (!userNode || !this.isUserNode(userNode))
+      return [false, "The user doesn't own a core channel node"]
+
+    if (node.locked) return [false, 'This node is locked']
+
+    if (!!node.parent)
+      return [false, `The node is already linked to ${node.parent} ccn`]
+
+    if (userNode.resource_nodes.length >= NodeManager.maxLinkedPerNode)
+      return [
+        false,
+        `The user node is already linked to ${userNode.resource_nodes.length} nodes`,
+      ]
+
+    return [true, `Link ${node.hash} to ${userNode.hash}`]
+  }
+
+  hasIssues(node: AlephNode, staking = false): string | undefined {
+    if (this.isCRN(node)) {
+      if (node.score < 0.8) return 'The CRN is underperforming'
+      if (!node.parentData) return 'The CRN is not being linked to a CCN'
+      if ((node?.parentData?.score || 0) <= 0)
+        return 'The linked CCN is underperforming'
+    } else {
+      if (node.score < 0.8) return 'The CCN is underperforming'
+      if ((node?.crnsData.length || 0) < 2)
+        return 'The CCN has free slots to link more CRNs'
+      if (!staking && node?.crnsData.some((crn) => crn.score < 0.8))
+        return 'One of the linked CRN is underperforming'
+    }
   }
 
   getNodeVersionNumber(node: CRNSpecs): number {
@@ -619,6 +1025,25 @@ export class NodeManager {
       if (!crnsData) return
 
       ccn.crnsData = crnsData
+    })
+  }
+
+  protected linkParentNodes(crns: CRN[], ccns: CCN[]): void {
+    const ccnsMap = ccns.reduce(
+      (ac, cu) => {
+        ac[cu.hash] = cu
+        return ac
+      },
+      {} as Record<string, CCN>,
+    )
+
+    crns.forEach((crn) => {
+      if (!crn.parent) return
+
+      const parentData = ccnsMap[crn.parent]
+      if (!parentData) return
+
+      crn.parentData = parentData
     })
   }
 
