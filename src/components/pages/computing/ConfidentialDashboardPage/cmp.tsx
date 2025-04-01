@@ -4,7 +4,7 @@ import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import VolumesTabContent from '../../dashboard/VolumesTabContent'
 import DomainsTabContent from '../../dashboard/DomainsTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
-import { useConfidentialDashboardPage } from '@/hooks/pages/computing/useConfidentialDashboardPage'
+import { useConfidentialDashboardPage } from '@/components/pages/computing/ConfidentialDashboardPage/hook'
 import ConfidentialsTabContent from '../../dashboard/ConfidentialsTabContent'
 
 export default function ConfidentialDashboardPage() {

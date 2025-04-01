@@ -1,5 +1,5 @@
 import ButtonLink from '@/components/common/ButtonLink'
-import { useManageVolume } from '@/hooks/pages/solutions/manage/useManageVolume'
+import { useManageVolume } from '@/components/pages/dashboard/ManageVolume/hook'
 import { Container } from '../common'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import VolumeDetail from '@/components/common/VolumeDetail'

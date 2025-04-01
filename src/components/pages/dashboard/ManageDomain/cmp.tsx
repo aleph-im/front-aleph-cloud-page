@@ -8,7 +8,7 @@ import {
   EntityDomainTypeName,
 } from '@/helpers/constants'
 import { BulletItem, Button, Icon, Tag, TextGradient } from '@aleph-front/core'
-import { useManageDomain } from '@/hooks/pages/solutions/manage/useManageDomain'
+import { useManageDomain } from '@/components/pages/dashboard/ManageDomain/hook'
 import { ellipseAddress } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import ButtonLink from '@/components/common/ButtonLink'

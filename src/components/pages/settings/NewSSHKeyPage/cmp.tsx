@@ -1,7 +1,7 @@
 import Container from '@/components/common/CenteredContainer'
 import { NoisyContainer } from '@aleph-front/core'
 import Form from '@/components/form/Form'
-import { useNewSSHKeyPage } from '@/hooks/pages/settings/useNewSSHKeyPage'
+import { useNewSSHKeyPage } from '@/components/pages/settings/NewSSHKeyPage/hook'
 import { Button, TextArea, TextInput } from '@aleph-front/core'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import BackButtonSection from '@/components/common/BackButtonSection'

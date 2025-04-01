@@ -10,12 +10,12 @@ import {
 import {
   UseBreadcrumbNamesReturn,
   useBreadcrumbNames,
-} from '../common/useBreadcrumbNames'
-import { UseRoutesReturn, useRoutes } from '../common/useRoutes'
-import { useConnection } from '../common/useConnection'
+} from '../../../hooks/common/useBreadcrumbNames'
+import { UseRoutesReturn, useRoutes } from '../../../hooks/common/useRoutes'
+import { useConnection } from '../../../hooks/common/useConnection'
 import { BlockchainId, ProviderId, blockchains } from '@/domain/connect/base'
-import { usePaymentMethod } from '../common/usePaymentMethod'
-import { useAccountRewards as useNodeRewards } from '../common/node/useRewards'
+import { usePaymentMethod } from '../../../hooks/common/usePaymentMethod'
+import { useAccountRewards as useNodeRewards } from '../../../hooks/common/node/useRewards'
 
 export type UseHeaderReturn = UseRoutesReturn & {
   accountAddress?: string
@@ -190,10 +190,12 @@ export function useHeader(): UseHeaderReturn {
   // -----------------------
 
   // Add node rewards functionality from src_account
-  const { calculatedRewards: userRewards, distributionTimestamp: lastDistribution } = 
-    account?.address 
-    ? useNodeRewards({ address: account?.address }) 
-    : { calculatedRewards: undefined, distributionTimestamp: undefined };
+  const {
+    calculatedRewards: userRewards,
+    distributionTimestamp: lastDistribution,
+  } = account?.address
+    ? useNodeRewards({ address: account?.address })
+    : { calculatedRewards: undefined, distributionTimestamp: undefined }
 
   const pendingDays = useMemo(() => {
     const distributionInterval = 10 * 24 * 60 * 60 * 1000 // 10 days

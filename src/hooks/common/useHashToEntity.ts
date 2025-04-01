@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { AnyEntity } from '@/helpers/utils'
-import { useHashToEntityType } from './useHashToEntityType'
 import { useEntityManager } from '@/hooks/common/useManager/useEntityManager'
+import { useHashToEntityType } from './useHashToEntityType'
 
 export type UseHashToEntityProps = string | undefined
 export type UseHashToEntityReturn = AnyEntity | undefined

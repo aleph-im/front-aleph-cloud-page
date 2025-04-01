@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
-import { useFunctionDashboardPage } from '@/hooks/pages/computing/useFunctionDashboardPage'
+import { useFunctionDashboardPage } from '@/components/pages/computing/FunctionDashboardPage/hook'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import FunctionsTabContent from '../../dashboard/FunctionsTabContent'
 import VolumesTabContent from '../../dashboard/VolumesTabContent'

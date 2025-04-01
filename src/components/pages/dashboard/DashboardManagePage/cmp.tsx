@@ -1,13 +1,13 @@
 import { NoisyContainer } from '@aleph-front/core'
-import { useDashboardManagePage } from '@/hooks/pages/solutions/manage/useDashboardManagePage'
+import { useDashboardManagePage } from '@/components/pages/dashboard/DashboardManagePage/hook'
 import { EntityType } from '@/helpers/constants'
 import { Container } from '../common'
 import ManageSSHKey from '../ManageSSHKey'
 import ManageVolume from '../ManageVolume'
 import ManageInstance from '../ManageInstance'
-import ManageFunction from '../ManageFunction'
 import ManageDomain from '../ManageDomain'
 import ManageWebsite from '../ManageWebsite'
+import ManageFunction from '../ManageFunction'
 
 export default function DashboardManagePage() {
   const { type } = useDashboardManagePage()

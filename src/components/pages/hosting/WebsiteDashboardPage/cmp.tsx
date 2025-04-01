@@ -4,7 +4,7 @@ import Container from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import WebsitesTabContent from '../../dashboard/WebsitesTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
-import { useWebsiteDashboardPage } from '@/hooks/pages/hosting/useWebsiteDashboardPage'
+import { useWebsiteDashboardPage } from '@/components/pages/hosting/WebsiteDashboardPage/hook'
 import DomainsTabContent from '../../dashboard/DomainsTabContent'
 
 export default function SettingsDashboardPage() {

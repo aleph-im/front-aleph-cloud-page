@@ -10,7 +10,7 @@ import {
   useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
-import { useManageWebsite } from '@/hooks/pages/solutions/manage/useManageWebsite'
+import { useManageWebsite } from '@/components/pages/dashboard/ManageWebsite/hook'
 import { humanReadableSize } from '@/helpers/utils'
 import { Container, Text, Separator } from '../common'
 import { RotatingLines } from 'react-loader-spinner'

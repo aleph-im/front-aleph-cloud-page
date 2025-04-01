@@ -1,7 +1,7 @@
 import React from 'react'
 import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
-import { useSettingsDashboardPage } from '@/hooks/pages/settings/useSettingsDashboardPage'
+import { useSettingsDashboardPage } from '@/components/pages/settings/SettingsDashboardPage/hook'
 import SSHKeysTabContent from '../../dashboard/SSHKeysTabContent'
 import DomainsTabContent from '../../dashboard/DomainsTabContent'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'

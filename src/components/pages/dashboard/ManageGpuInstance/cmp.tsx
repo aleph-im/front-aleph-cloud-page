@@ -10,7 +10,7 @@ import { Container, Text, Separator } from '../common'
 import VolumeList from '../VolumeList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import LogsFeed from '../LogsFeed'
-import { useManageGpuInstance } from '@/hooks/pages/solutions/manage/useManageGpuInstance'
+import { useManageGpuInstance } from '@/components/pages/dashboard/ManageGpuInstance/hook'
 import StreamSummary from '@/components/common/StreamSummary'
 import { blockchains } from '@/domain/connect/base'
 

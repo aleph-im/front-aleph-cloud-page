@@ -1,7 +1,7 @@
 import React from 'react'
 import { Tabs } from '@aleph-front/core'
 import Container from '@/components/common/CenteredContainer'
-import { useStorageDashboardPage } from '@/hooks/pages/storage/useStorageDashboardPage'
+import { useStorageDashboardPage } from '@/components/pages/storage/StorageDashboardPage/hook'
 import VolumesTabContent from '../../dashboard/VolumesTabContent'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'

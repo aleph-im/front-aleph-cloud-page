@@ -3,7 +3,7 @@ import {
   EntityDomainType,
   PaymentMethod,
 } from '@/helpers/constants'
-import { useNewWebsitePage } from '@/hooks/pages/hosting/useNewWebsitePage'
+import { useNewWebsitePage } from '@/components/pages/hosting/NewWebsitePage/hook'
 import { Button, TextGradient } from '@aleph-front/core'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import Container from '@/components/common/CenteredContainer'

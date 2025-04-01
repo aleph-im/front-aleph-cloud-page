@@ -31,7 +31,7 @@ import Container from '@/components/common/CenteredContainer'
 import {
   useNewInstancePage,
   UseNewInstancePageReturn,
-} from '@/hooks/pages/computing/useNewInstancePage'
+} from '@/components/pages/computing/NewInstancePage/hook'
 import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import NewEntityTab from '../NewEntityTab'

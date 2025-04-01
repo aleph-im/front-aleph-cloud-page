@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-import { useHashToEntityType } from './useHashToEntityType'
+import { useHashToEntityType } from '../../../../hooks/common/useHashToEntityType'
 import { EntityType } from '@/helpers/constants'
 
 export type UseDashboardManagePageReturn = {

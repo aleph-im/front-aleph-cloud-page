@@ -1,6 +1,6 @@
 import React from 'react'
 import { PaymentMethod } from '@/helpers/constants'
-import { useNewVolumePage } from '@/hooks/pages/storage/useNewVolumePage'
+import { useNewVolumePage } from '@/components/pages/storage/NewVolumePage/hook'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import Container from '@/components/common/CenteredContainer'
 import { AddNewVolume } from '@/components/form/AddVolume'

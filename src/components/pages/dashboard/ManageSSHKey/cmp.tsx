@@ -1,5 +1,5 @@
 import ButtonLink from '@/components/common/ButtonLink'
-import { useManageSSHKey } from '@/hooks/pages/solutions/manage/useManageSSHKey'
+import { useManageSSHKey } from '@/components/pages/dashboard/ManageSSHKey/hook'
 import { Container } from '../common'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import BackButtonSection from '@/components/common/BackButtonSection'

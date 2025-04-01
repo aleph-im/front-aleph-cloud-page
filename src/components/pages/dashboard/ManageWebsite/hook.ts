@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Website, HistoryVolumes } from '@/domain/website'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { useAppState } from '@/contexts/appState'
-import { useHashToEntity } from './useHashToEntity'
+import { useHashToEntity } from '../../../../hooks/common/useHashToEntity'
 import { Volume } from '@/domain/volume'
 import { useRequestWebsites } from '@/hooks/common/useRequestEntity/useRequestWebsites'
 import { EntityDelAction, EntityAddAction } from '@/store/entity'
@@ -16,7 +16,7 @@ import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 import {
   UseNewWebsitePagePageReturn,
   useNewWebsitePage,
-} from '../../hosting/useNewWebsitePage'
+} from '../../hosting/NewWebsitePage/hook'
 import { DefaultTheme, useTheme } from 'styled-components'
 import { cidV0Tov1 } from '@/helpers/utils'
 

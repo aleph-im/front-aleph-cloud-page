@@ -4,7 +4,7 @@ import IconText from '@/components/common/IconText'
 import { Label, NoisyContainer, Tabs, Tooltip } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
-import { useManageFunction } from '@/hooks/pages/solutions/manage/useManageFunction'
+import { useManageFunction } from '@/components/pages/dashboard/hook/useManageFunction'
 import {
   ellipseAddress,
   ellipseText,

@@ -9,7 +9,7 @@ import VolumeList from '../VolumeList'
 import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import Link from 'next/link'
 import BackButtonSection from '@/components/common/BackButtonSection'
-import { useManageConfidential } from '@/hooks/pages/solutions/manage/useManageConfidential'
+import { useManageConfidential } from '@/components/pages/dashboard/ManageConfidential/hook'
 
 export default function ManageConfidential() {
   const {

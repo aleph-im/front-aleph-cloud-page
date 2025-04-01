@@ -4,7 +4,7 @@ import Container from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import GpuInstancesTabContent from '../../dashboard/GpuInstancesTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
-import { useGpuInstanceDashboardPage } from '@/hooks/pages/computing/useGpuInstanceDashboardPage'
+import { useGpuInstanceDashboardPage } from '@/components/pages/computing/GpuInstanceDashboardPage/hook'
 
 export default function GpuInstanceDashboardPage() {
   const {

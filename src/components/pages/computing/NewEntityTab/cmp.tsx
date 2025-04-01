@@ -2,7 +2,7 @@ import { Tabs } from '@aleph-front/core'
 import {
   UseNewEntityTabProps,
   useNewEntityTab,
-} from '@/hooks/pages/computing/useNewEntityTab'
+} from '@/components/pages/computing/NewEntityTab/hook'
 
 export type NewEntityTabProps = UseNewEntityTabProps
 

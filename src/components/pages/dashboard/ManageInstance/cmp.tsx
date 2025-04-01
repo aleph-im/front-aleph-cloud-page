@@ -1,7 +1,7 @@
 import { RotatingLines } from 'react-loader-spinner'
 import { ButtonProps, Label, Tooltip } from '@aleph-front/core'
 import { Button, Icon } from '@aleph-front/core'
-import { useManageInstance } from '@/hooks/pages/solutions/manage/useManageInstance'
+import { useManageInstance } from '@/components/pages/dashboard/ManageInstance/hook'
 import BackButton from '@/components/common/BackButton'
 import { Skeleton } from '@/components/common/Skeleton/cmp'
 import { SidePanel } from '@/components/common/SidePanel/cmp'

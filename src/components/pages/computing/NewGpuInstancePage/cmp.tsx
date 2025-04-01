@@ -42,7 +42,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import {
   useNewGpuInstancePage,
   UseNewGpuInstancePageReturn,
-} from '@/hooks/pages/computing/useNewGpuInstancePage'
+} from '@/components/pages/computing/NewGpuInstancePage/hook'
 
 const CheckoutButton = React.memo(
   ({

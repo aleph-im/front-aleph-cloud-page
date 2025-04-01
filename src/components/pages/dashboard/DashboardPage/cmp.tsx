@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Icon } from '@aleph-front/core'
-import { useDashboardPage } from '@/hooks/pages/solutions/useDashboardPage'
+import { useDashboardPage } from '@/components/pages/dashboard/DashboardPage/hook'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import Container from '@/components/common/CenteredContainer'
 import EntityCard from '@/components/common/EntityCard'
