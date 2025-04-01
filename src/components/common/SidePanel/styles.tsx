@@ -3,23 +3,27 @@ import { StyledSidePanelProps } from './types'
 import tw from 'twin.macro'
 
 export const StyledBackdrop = styled.div<StyledSidePanelProps>`
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  transition: opacity 0.5s ease-in-out;
-  opacity: 0;
-  z-index: 28; /* just below the side panel */
+  ${({ theme, $isOpen }) => css`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
 
-  ${({ $isOpen }) =>
-    $isOpen &&
+    transition:
+      opacity ${theme.transition.duration.normal}ms ease-in-out,
+      visibility ${theme.transition.duration.normal}ms ease-in-out;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 28; /* just below the side panel */
+
+    ${$isOpen &&
     css`
-      display: block;
       opacity: 1;
+      visibility: visible;
     `}
+  `}
 `
 
 export const StyledHeader = styled.div`
@@ -37,14 +41,14 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     overflow-y: auto;
 
     /* Desktop Styles */
-    top: 0;
-    right: 0;
-    height: 100vh;
+    top: 1rem;
+    right: 1rem;
+    bottom: 1rem;
     width: 50vw;
 
     /* For sliding effect on desktop */
     transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
+    transition: transform ${theme.transition.duration.normal}ms ease-in-out;
     z-index: 50;
 
     ${$isOpen
@@ -59,14 +63,15 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     @media (max-width: 768px) {
       top: auto;
       bottom: 0;
-      left: 0;
-      width: 100vw;
+      left: 0.5rem;
+      right: 0.5 rem;
       height: 80vh;
+      width: initial;
       border-radius: 1.5rem 1.5rem 0 0;
 
       /* Override the transform for vertical sliding */
       transform: translateY(100%);
-      transition: transform 0.3s ease-in-out;
+      transition: transform ${theme.transition.duration.normal}ms ease-in-out;
 
       ${$isOpen
         ? css`
