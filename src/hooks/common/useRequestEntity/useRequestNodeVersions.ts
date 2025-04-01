@@ -1,6 +1,5 @@
-import { useMemo } from 'react'
-import { NodeLastVersions, NodeManager } from '@/domain/node'
-import { useAppState } from '@/contexts/appState'
+import { NodeLastVersions } from '@/domain/node'
+import { useNodeManager } from '../../common/useManager/useNodeManager'
 import { useAppStoreRequest } from '../useStoreRequest'
 
 export type UseRequestNodeVersionsProps = {
@@ -15,11 +14,7 @@ export type UseRequestNodeVersionsReturn = {
 export function useRequestNodeVersions({
   triggerDeps,
 }: UseRequestNodeVersionsProps = {}): UseRequestNodeVersionsReturn {
-  const [state] = useAppState()
-  const { account } = state.connection
-
-  // @todo: Refactor this (use singleton)
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const nodeManager = useNodeManager()
 
   const { data: ccnLastVersion } = useAppStoreRequest({
     name: 'lastCCNVersion',

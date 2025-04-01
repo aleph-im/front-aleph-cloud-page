@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
-import { CCN, CRN, NodeManager, NodesResponse } from '@/domain/node'
+import { useEffect, useState } from 'react'
+import { CCN, CRN, NodesResponse } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
+import { useNodeManager } from '../../common/useManager/useNodeManager'
 import { EntitySetAction } from '@/store/entity'
 import { Future } from '@/helpers/utils'
 
@@ -17,11 +18,8 @@ export function useRequestNodesFeed({
   ccn = true,
   crn = true,
 }: UseRequestNodesFeedProps = {}): UseRequestNodesFeedReturn {
-  const [state, dispatch] = useAppState()
-  const { account } = state.connection
-
-  // @todo: Refactor this (use singleton)
-  const manager = useMemo(() => new NodeManager(account), [account])
+  const [, dispatch] = useAppState()
+  const manager = useNodeManager()
 
   // -----------------------------
 
@@ -30,7 +28,7 @@ export function useRequestNodesFeed({
   useEffect(() => {
     const abort = new Future<void>()
 
-    async function subscribe() {
+    const subscribe = async () => {
       const it = manager.subscribeNodesFeed(abort.promise)
 
       for await (const data of it) {

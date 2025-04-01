@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/dashboard/hook'
+export { default } from '@/components/pages/dashboard/ManageFunction'

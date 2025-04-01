@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
-import { CRN, CRNBenchmark, NodeManager } from '@/domain/node'
+import { useEffect, useState } from 'react'
+import { CRN, CRNBenchmark } from '@/domain/node'
 import { RequestState } from '@aleph-front/core'
-import { useAppState } from '@/contexts/appState'
+import { useNodeManager } from '../../common/useManager/useNodeManager'
 
 export type UseRequestCRNBenchmarkProps = {
   nodes?: CRN[]
@@ -15,9 +15,7 @@ export type UseRequestCRNBenchmarkReturn = {
 export function useRequestCRNBenchmark({
   nodes,
 }: UseRequestCRNBenchmarkProps): UseRequestCRNBenchmarkReturn {
-  const [state] = useAppState()
-  const { account } = state.connection
-  const nodeManager = useMemo(() => new NodeManager(account), [account])
+  const nodeManager = useNodeManager()
 
   const [benchmark, setBenchmark] = useState<
     Record<string, RequestState<CRNBenchmark>>
@@ -25,7 +23,7 @@ export function useRequestCRNBenchmark({
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    async function load() {
+    const load = async () => {
       if (!nodes) return
 
       await Promise.allSettled(

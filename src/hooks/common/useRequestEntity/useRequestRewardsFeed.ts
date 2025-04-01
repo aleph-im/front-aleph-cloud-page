@@ -23,7 +23,7 @@ export function useRequestRewardsFeed(): UseRequestRewardsFeedReturn {
   useEffect(() => {
     const abort = new Future<void>()
 
-    async function subscribe() {
+    const subscribe = async () => {
       const lastRewardsDistribution = await manager.getLastRewardsDistribution()
 
       setRewards((prev) => {

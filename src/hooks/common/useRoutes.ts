@@ -1,10 +1,9 @@
 import { useAppState } from '@/contexts/appState'
 import { Route } from '@aleph-front/core'
 import { useMemo } from 'react'
-import { useFilterUserStakeNodes } from '../node/useFilterUserStakeNodes'
-import { useFilterUserNodes } from '../node/useFilterUserNodes'
-import { useFilterNodeIssues } from '../node/useFilterNodeIssues'
-
+import { useFilterUserStakeNodes } from './node/useFilterUserStakeNodes'
+import { useFilterUserNodes } from './node/useFilterUserNodes'
+import { useFilterNodeIssues } from './node/useFilterNodeIssues'
 export type UseRoutesReturn = {
   routes: Route[]
 }
@@ -38,6 +37,7 @@ export function useRoutes(): UseRoutesReturn {
 
   // Combined routes
   const routes = useMemo(() => {
+    // Using 'as Route[]' to assert the type for the entire routes array
     return [
       // Console section moved under /console
       {
@@ -190,7 +190,7 @@ export function useRoutes(): UseRoutesReturn {
         target: '_blank',
         external: true,
       },
-    ]
+    ] as Route[]
   }, [stakeNodesWarningFlag, userCCNsWarningFlag, userCRNsWarningFlag])
 
   return { routes }

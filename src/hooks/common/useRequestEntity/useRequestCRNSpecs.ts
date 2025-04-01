@@ -8,7 +8,7 @@ export type UseRequestCRNSpecsProps = {
 }
 
 export type UseRequestCRNSpecsReturn = {
-  specs: Record<string, RequestState<CRNSpecs> | CRNSpecs>
+  specs: Record<string, RequestState<CRNSpecs>>
   loading: boolean
 }
 
@@ -18,15 +18,13 @@ export function useRequestCRNSpecs(
   const nodeManager = useNodeManager()
   const { nodes } = props || {}
 
-  const [specs, setSpecs] = useState<
-    Record<string, RequestState<CRNSpecs> | CRNSpecs>
-  >({})
+  const [specs, setSpecs] = useState<Record<string, RequestState<CRNSpecs>>>({})
   const [loading, setLoading] = useState<boolean>(true)
 
   // Request node-specific specs if nodes are provided
   useEffect(() => {
     if (nodes) {
-      async function loadNodeSpecs() {
+      const loadNodeSpecs = async () => {
         await Promise.allSettled(
           nodes.map(async (node) => {
             const nodeSpecs = await nodeManager.getCRNspecs(node)
@@ -52,13 +50,17 @@ export function useRequestCRNSpecs(
   // Request all specs if no nodes are provided
   useEffect(() => {
     if (!nodes) {
-      async function loadAllSpecs() {
+      const loadAllSpecs = async () => {
         const crnSpecs = await nodeManager.getAllCRNsSpecs()
 
         crnSpecs.forEach((spec) => {
           setSpecs((prev) => ({
             ...prev,
-            [spec.hash]: spec,
+            [spec.hash]: {
+              data: spec,
+              loading: false,
+              error: undefined,
+            },
           }))
         })
 
