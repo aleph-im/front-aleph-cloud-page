@@ -15,6 +15,7 @@ import { UseRoutesReturn, useRoutes } from '../common/useRoutes'
 import { useConnection } from '../common/useConnection'
 import { BlockchainId, ProviderId, blockchains } from '@/domain/connect/base'
 import { usePaymentMethod } from '../common/usePaymentMethod'
+import { useAccountRewards as useNodeRewards } from '../common/node/useRewards'
 
 export type UseHeaderReturn = UseRoutesReturn & {
   accountAddress?: string
@@ -188,6 +189,40 @@ export function useHeader(): UseHeaderReturn {
 
   // -----------------------
 
+  // Add node rewards functionality from src_account
+  const { calculatedRewards: userRewards, distributionTimestamp: lastDistribution } = 
+    account?.address 
+    ? useNodeRewards({ address: account?.address }) 
+    : { calculatedRewards: undefined, distributionTimestamp: undefined };
+
+  const pendingDays = useMemo(() => {
+    const distributionInterval = 10 * 24 * 60 * 60 * 1000 // 10 days
+
+    if (lastDistribution === undefined) {
+      const pendingDays = Math.ceil(
+        distributionInterval / (1000 * 60 * 60 * 24),
+      )
+      return pendingDays
+    }
+
+    const elapsedFromLast = Date.now() - lastDistribution
+    const timeTillNext = distributionInterval - elapsedFromLast
+
+    const pendingTime = Math.max(Math.ceil(timeTillNext), 0)
+    const pendingDays = Math.ceil(pendingTime / (1000 * 60 * 60 * 24))
+
+    return pendingDays
+  }, [lastDistribution])
+
+  const rewards = useMemo(() => {
+    if (!userRewards) return
+
+    return {
+      amount: userRewards,
+      days: pendingDays,
+    }
+  }, [pendingDays, userRewards])
+
   return {
     accountAddress: account?.address,
     accountBalance,
@@ -198,6 +233,7 @@ export function useHeader(): UseHeaderReturn {
     breadcrumbNames,
     breakpoint,
     isOpen,
+    rewards,
     selectedNetwork: selectedNetwork || networks[0],
     handleSwitchNetwork,
     handleToggle,
