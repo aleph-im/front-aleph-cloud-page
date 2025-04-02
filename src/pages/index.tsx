@@ -1,3 +1,6 @@
-import DashboardPage from '@/components/pages/dashboard/DashboardPage'
+import { useSPARedirect } from '@/hooks/common/useSPARedirect'
 
-export default DashboardPage
+export default function HomePage() {
+  useSPARedirect('/console')
+  return null
+}
