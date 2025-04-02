@@ -48,7 +48,6 @@ export function useRoutes(): UseRoutesReturn {
           {
             name: 'Solutions',
             href: '/console',
-            exact: true,
             children: [
               {
                 name: 'Dashboard',
