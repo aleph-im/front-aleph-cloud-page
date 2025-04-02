@@ -85,7 +85,7 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     eip155: true,
     solana: false,
     currency: 'AVAX',
-    explorerUrl: 'https://snowtrace.io/',
+    explorerUrl: 'https://subnets.avax.network/c-chain/',
     rpcUrl: 'https://avalanche.drpc.org',
   },
   [BlockchainId.BASE]: {

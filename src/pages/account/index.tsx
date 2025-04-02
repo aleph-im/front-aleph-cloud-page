@@ -1,4 +1,9 @@
-import DashboardPage from '@/components/pages/dashboard/DashboardPage'
+import { useRedirect } from '@/hooks/common/useRedirect'
+import { memo } from 'react'
 
-// @todo: remove this file. this is just a placeholder to test the sidebar
-export default DashboardPage
+export function AccountHomePage() {
+  useRedirect('/account/earn/staking')
+  return null
+}
+
+export default memo(AccountHomePage)

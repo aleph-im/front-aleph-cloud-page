@@ -7,4 +7,5 @@ export type ExternalLinkButtonProps = Omit<
 > & {
   href: string
   children?: ReactNode
+  size?: ButtonProps['size']
 }

@@ -1,6 +1,9 @@
 import { useSPARedirect } from '@/hooks/common/useSPARedirect'
+import { memo } from 'react'
 
-export default function HomePage() {
+export function HomePage() {
   useSPARedirect('/console')
   return null
 }
+
+export default memo(HomePage)

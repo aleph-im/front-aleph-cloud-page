@@ -21,6 +21,7 @@ import Err from './errors'
 import { Account } from '@aleph-sdk/account'
 import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
 import { EVMAccount } from '@aleph-sdk/evm'
+import { blockchains } from '@/domain/connect/base'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -223,6 +224,65 @@ const messageTypeWhitelist = new Set(Object.values(MessageType))
 export const getExplorerURL = ({ item_hash, chain, sender, type }: Message) => {
   type = messageTypeWhitelist.has(type as MessageType) ? type : MessageType.post
   return `https://explorer.aleph.im/address/${chain}/${sender}/message/${type}/${item_hash}`
+}
+
+/*
+ * Returns a link to the Ethereum explorer for a given hash, address or token address
+ */
+export const getETHExplorerURL = ({
+  hash,
+  address,
+  tokenAddress,
+}: {
+  hash?: string
+  address?: string
+  tokenAddress?: string
+}): string | undefined => {
+  const baseETHExplorerUrl = blockchains.ETH.explorerUrl
+
+  return hash
+    ? `${baseETHExplorerUrl}/tx/${hash}`
+    : address
+      ? `${baseETHExplorerUrl}/address/${address}`
+      : tokenAddress
+        ? `${baseETHExplorerUrl}/token/0x27702a26126e0B3702af63Ee09aC4d1A084EF628?a=${tokenAddress}`
+        : undefined
+}
+
+/*
+ * Returns a link to the Avalanche explorer for a given hash, address or token address
+ */
+export const getAVAXExplorerURL = ({
+  hash,
+  address,
+  tokenAddress,
+}: {
+  hash?: string
+  address?: string
+  tokenAddress?: string
+}): string | undefined => {
+  const baseAVAXExplorerUrl = blockchains.AVAX.explorerUrl
+
+  return hash
+    ? `${baseAVAXExplorerUrl}tx/${hash}`
+    : address
+      ? `${baseAVAXExplorerUrl}address/${address}`
+      : tokenAddress
+        ? `${baseAVAXExplorerUrl}address/${tokenAddress}?tab=erc20`
+        : undefined
+}
+
+export const getMultiaddressUrl = ({
+  multiaddress,
+}: {
+  multiaddress?: string
+}): string | undefined => {
+  if (!multiaddress) return
+
+  const [, ip] = multiaddress.match(/\/ip4\/(.+?)\//) || []
+  if (!ip) return
+
+  return `http://${ip}:4024`
 }
 
 export const getDate = (time: number | string): string => {
