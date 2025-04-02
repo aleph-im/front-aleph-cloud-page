@@ -23,7 +23,7 @@ export function useRouterLoadState(): UseRouterLoadStateReturn {
 
     return () => {
       router.events.off('routeChangeStart', handleRouteStart)
-      router.events.off('routeChangeComplete', handleRouteStart)
+      router.events.off('routeChangeComplete', handleRouteEnd)
       router.events.off('routeChangeError', handleRouteEnd)
     }
   }, [router])
