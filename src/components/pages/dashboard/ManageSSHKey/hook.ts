@@ -10,7 +10,7 @@ export function useManageSSHKey(): ManageSSHKey {
   const { hash } = router.query
 
   const handleBack = () => {
-    router.push('/settings/')
+    router.push('/console/settings/')
   }
 
   return {

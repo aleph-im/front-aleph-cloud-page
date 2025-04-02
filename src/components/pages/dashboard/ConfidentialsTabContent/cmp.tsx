@@ -83,7 +83,7 @@ export const ConfidentialsTabContent = memo(
                         <ButtonLink
                           kind="functional"
                           variant="secondary"
-                          href={`/computing/confidential/${row.id}`}
+                          href={`/console/computing/confidential/${row.id}`}
                         >
                           <Icon name="angle-right" size="lg" />
                         </ButtonLink>

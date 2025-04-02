@@ -149,7 +149,7 @@ export function useNewConfidentialPage(): UseNewConfidentialPageReturn {
   )
 
   const handleBack = () => {
-    router.push('/computing/confidential/')
+    router.push('/console/computing/confidential/')
   }
 
   const createConfidentialInstanceCommand = useMemo(() => {

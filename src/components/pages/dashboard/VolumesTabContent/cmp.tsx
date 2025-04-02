@@ -48,7 +48,7 @@ export const VolumesTabContent = ({
                   <ButtonLink
                     kind="functional"
                     variant="secondary"
-                    href={`/storage/volume/${row.id}`}
+                    href={`/console/storage/volume/${row.id}`}
                   >
                     <Icon name="angle-right" size="lg" />
                   </ButtonLink>
@@ -63,7 +63,7 @@ export const VolumesTabContent = ({
       </NoisyContainer>
       {cta && (
         <div tw="mt-10 text-center">
-          <ButtonLink variant="primary" href="/storage/volume/new">
+          <ButtonLink variant="primary" href="/console/storage/volume/new">
             <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new volume
           </ButtonLink>
         </div>

@@ -56,7 +56,7 @@ export const WebsitesTabContent = React.memo(
                         <ButtonLink
                           kind="functional"
                           variant="secondary"
-                          href={`/hosting/website/${row.id}`}
+                          href={`/console/hosting/website/${row.id}`}
                         >
                           <Icon name="angle-right" size="lg" />
                         </ButtonLink>
@@ -70,14 +70,14 @@ export const WebsitesTabContent = React.memo(
               </div>
             </NoisyContainer>
             <div tw="mt-20 text-center">
-              <ButtonLink variant="primary" href="/hosting/website/new">
+              <ButtonLink variant="primary" href="/console/hosting/website/new">
                 Create website
               </ButtonLink>
             </div>
           </>
         ) : (
           <div tw="mt-10 text-center">
-            <ButtonLink variant="primary" href="/hosting/website/new">
+            <ButtonLink variant="primary" href="/console/hosting/website/new">
               Create your first website
             </ButtonLink>
           </div>

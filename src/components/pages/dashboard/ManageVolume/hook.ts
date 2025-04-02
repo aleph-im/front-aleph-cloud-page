@@ -10,7 +10,7 @@ export function useManageVolume(): ManageVolume {
   const { hash } = router.query
 
   const handleBack = () => {
-    router.push('/storage/')
+    router.push('/console/storage/')
   }
 
   return {

@@ -74,7 +74,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
           new EntityAddAction({ name: 'volume', entities: accountVolume }),
         )
 
-        await router.replace('/')
+        await router.replace('/console')
       } finally {
         await stop()
       }
@@ -110,7 +110,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
   })
 
   const handleBack = () => {
-    router.push('/storage/')
+    router.push('/console/storage/')
   }
 
   return {

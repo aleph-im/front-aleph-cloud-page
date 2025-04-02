@@ -68,7 +68,7 @@ export const GpuInstancesTabContent = React.memo(
                         <ButtonLink
                           kind="functional"
                           variant="secondary"
-                          href={`/computing/gpu-instance/${row.id}`}
+                          href={`/console/computing/gpu-instance/${row.id}`}
                         >
                           <Icon name="angle-right" size="lg" />
                         </ButtonLink>
@@ -83,14 +83,20 @@ export const GpuInstancesTabContent = React.memo(
             </NoisyContainer>
 
             <div tw="mt-20 text-center">
-              <ButtonLink variant="primary" href="/computing/gpu-instance/new">
+              <ButtonLink
+                variant="primary"
+                href="/console/computing/gpu-instance/new"
+              >
                 Create GPU instance
               </ButtonLink>
             </div>
           </>
         ) : (
           <div tw="mt-10 text-center">
-            <ButtonLink variant="primary" href="/computing/gpu-instance/new">
+            <ButtonLink
+              variant="primary"
+              href="/console/computing/gpu-instance/new"
+            >
               Create your first GPU instance
             </ButtonLink>
           </div>

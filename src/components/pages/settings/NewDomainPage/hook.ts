@@ -96,7 +96,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
           new EntityAddAction({ name: 'domain', entities: accountDomain }),
         )
 
-        await router.replace('/')
+        await router.replace('/console')
       } finally {
         await stop()
       }
@@ -206,7 +206,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   }
 
   const handleBack = () => {
-    router.push('/settings/')
+    router.push('/console/settings/')
   }
 
   return {

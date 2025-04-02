@@ -113,7 +113,7 @@ export const CoreChannelNodesTable = ({
               size="md"
               variant="secondary"
               color="main0"
-              href={`/earn/ccn/${node.hash}`}
+              href={`/account/earn/ccn/${node.hash}`}
             >
               Info
             </ButtonLink>

@@ -62,7 +62,7 @@ export const DomainsTabContent = ({
                   <ButtonLink
                     kind="functional"
                     variant="secondary"
-                    href={`/settings/domain/${row.id}`}
+                    href={`/console/settings/domain/${row.id}`}
                   >
                     <Icon name="angle-right" size="lg" />
                   </ButtonLink>
@@ -77,7 +77,7 @@ export const DomainsTabContent = ({
       </NoisyContainer>
       {cta && (
         <div tw="mt-10 text-center">
-          <ButtonLink variant="primary" href="/settings/domain/new">
+          <ButtonLink variant="primary" href="/console/settings/domain/new">
             <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new domain
           </ButtonLink>
         </div>

@@ -41,7 +41,7 @@ export const SSHKeysTabContent = ({ data }: SSHKeysTabContentProps) => {
                   <ButtonLink
                     kind="functional"
                     variant="secondary"
-                    href={`/settings/ssh/${row.id}`}
+                    href={`/console/settings/ssh/${row.id}`}
                   >
                     <Icon name="angle-right" size="lg" />
                   </ButtonLink>
@@ -55,7 +55,7 @@ export const SSHKeysTabContent = ({ data }: SSHKeysTabContentProps) => {
         </div>
       </NoisyContainer>
       <div tw="mt-10 text-center">
-        <ButtonLink variant="primary" href="/settings/ssh/new">
+        <ButtonLink variant="primary" href="/console/settings/ssh/new">
           <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new SSH key
         </ButtonLink>
       </div>

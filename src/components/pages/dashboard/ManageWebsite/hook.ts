@@ -77,7 +77,7 @@ export function useManageWebsite(): ManageWebsite {
 
       dispatch(new EntityDelAction({ name: 'website', keys: [website.id] }))
 
-      await router.replace('/')
+      await router.replace('/console')
     } catch (e) {
       console.error(e)
 

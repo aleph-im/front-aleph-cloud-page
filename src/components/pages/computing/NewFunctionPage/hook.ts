@@ -93,7 +93,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
           new EntityAddAction({ name: 'program', entities: accountFunction }),
         )
 
-        await router.replace('/')
+        await router.replace('/console')
       } finally {
         await stop()
       }

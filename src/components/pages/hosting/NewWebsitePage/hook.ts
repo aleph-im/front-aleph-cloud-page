@@ -100,7 +100,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
           new EntityAddAction({ name: 'website', entities: accountWebsite }),
         )
 
-        await router.replace('/')
+        await router.replace('/console')
       } finally {
         await stop()
       }

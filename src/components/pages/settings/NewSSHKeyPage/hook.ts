@@ -67,7 +67,7 @@ export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
 
         dispatch(new EntityAddAction({ name: 'ssh', entities: accountSSHKey }))
 
-        await router.replace('/')
+        await router.replace('/console')
       } finally {
         await stop()
       }
@@ -96,7 +96,7 @@ export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
   })
 
   const handleBack = () => {
-    router.push('/settings/')
+    router.push('/console/settings/')
   }
 
   return {

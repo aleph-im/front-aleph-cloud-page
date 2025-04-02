@@ -68,7 +68,7 @@ export const InstancesTabContent = React.memo(
                         <ButtonLink
                           kind="functional"
                           variant="secondary"
-                          href={`/computing/instance/${row.id}`}
+                          href={`/console/computing/instance/${row.id}`}
                         >
                           <Icon name="angle-right" size="lg" />
                         </ButtonLink>
@@ -83,14 +83,20 @@ export const InstancesTabContent = React.memo(
             </NoisyContainer>
 
             <div tw="mt-20 text-center">
-              <ButtonLink variant="primary" href="/computing/instance/new">
+              <ButtonLink
+                variant="primary"
+                href="/console/computing/instance/new"
+              >
                 Create instance
               </ButtonLink>
             </div>
           </>
         ) : (
           <div tw="mt-10 text-center">
-            <ButtonLink variant="primary" href="/computing/instance/new">
+            <ButtonLink
+              variant="primary"
+              href="/console/computing/instance/new"
+            >
               Create your first instance
             </ButtonLink>
           </div>

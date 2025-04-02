@@ -76,7 +76,7 @@ export const FunctionsTabContent = React.memo(
                         <ButtonLink
                           kind="functional"
                           variant="secondary"
-                          href={`/computing/function/${row.id}`}
+                          href={`/console/computing/function/${row.id}`}
                         >
                           <Icon name="angle-right" size="lg" />
                         </ButtonLink>
@@ -90,14 +90,20 @@ export const FunctionsTabContent = React.memo(
               </div>
             </NoisyContainer>
             <div tw="mt-20 text-center">
-              <ButtonLink variant="primary" href="/computing/function/new">
+              <ButtonLink
+                variant="primary"
+                href="/console/computing/function/new"
+              >
                 Create function
               </ButtonLink>
             </div>
           </>
         ) : (
           <div tw="mt-10 text-center">
-            <ButtonLink variant="primary" href="/computing/function/new">
+            <ButtonLink
+              variant="primary"
+              href="/console/computing/function/new"
+            >
               Create your first function
             </ButtonLink>
           </div>

@@ -143,7 +143,7 @@ export const ComputeResourceNodesTable = ({
               size="md"
               variant="secondary"
               color="main0"
-              href={`/earn/crn/${node.hash}`}
+              href={`/account/earn/crn/${node.hash}`}
             >
               Info
             </ButtonLink>

@@ -76,7 +76,7 @@ export function useManageDomain(): ManageDomain {
 
       dispatch(new EntityDelAction({ name: 'domain', keys: [domain.id] }))
 
-      await router.replace('/')
+      await router.replace('/console')
     } catch (e) {
       console.error(e)
 
@@ -110,7 +110,7 @@ export function useManageDomain(): ManageDomain {
   const handleCopyRef = useCopyToClipboardAndNotify(domain?.ref || '')
 
   const handleBack = () => {
-    router.push('/settings/')
+    router.push('/console/settings/')
   }
 
   return {

@@ -64,7 +64,7 @@ export function useNodeDetail<N extends AlephNode>({
         }),
       )
 
-      router.replace(`/earn/${isCRN ? 'crn' : 'ccn'}`)
+      router.replace(`/account/earn/${isCRN ? 'crn' : 'ccn'}`)
     } catch (e) {
       noti?.add({
         variant: 'error',
