@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 
 const defaultNames = {
   '/': 'HOME',
-  '/console': 'HOME',
+  '/console': 'CONSOLE',
   '/console/storage': 'STORAGE / VOLUMES',
   '/console/storage/volume': '-',
   '/console/storage/volume/[hash]': '-',
