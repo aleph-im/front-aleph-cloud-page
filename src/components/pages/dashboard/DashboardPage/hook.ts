@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { useAccountEntities } from '@/hooks/common/useAccountEntities'
 import { useRequestExecutableStatus } from '@/hooks/common/useRequestEntity/useRequestExecutableStatus'
-import { useSPARedirect } from '@/hooks/common/useSPARedirect'
 import { Program } from '@/domain/program'
 import { Instance } from '@/domain/instance'
 import { RequestState } from '@aleph-front/core'
@@ -91,8 +90,6 @@ function calculateComputingAggregatedStatus({
 }
 
 export function useDashboardPage(): UseDashboardPageReturn {
-  useSPARedirect()
-
   const { confidentials: confidentialsAuthz } = useAuthorization()
 
   const {
