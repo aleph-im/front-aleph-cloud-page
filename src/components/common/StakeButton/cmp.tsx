@@ -1,12 +1,10 @@
 import { memo, useCallback, useMemo } from 'react'
 import { Button } from '@aleph-front/core'
-import { Account } from '@aleph-sdk/account'
 import { CCN } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
 
 export type StakeButtonProps = {
   node: CCN
-  account?: Account
   accountBalance?: number
   onStake: (nodeHash: string) => void
   onUnstake: (nodeHash: string) => void
@@ -15,7 +13,6 @@ export type StakeButtonProps = {
 // https://github.com/aleph-im/aleph-account/blob/main/src/components/NodesTable.vue#L137
 export const StakeButton = ({
   node,
-  account,
   accountBalance = 0,
   onStake,
   onUnstake: onUnstake,

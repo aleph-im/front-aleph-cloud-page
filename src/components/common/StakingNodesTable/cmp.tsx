@@ -110,7 +110,6 @@ export const StakingNodesTable = ({
             <StakeButton
               {...{
                 node,
-                account,
                 accountBalance,
                 onStake,
                 onUnstake,
