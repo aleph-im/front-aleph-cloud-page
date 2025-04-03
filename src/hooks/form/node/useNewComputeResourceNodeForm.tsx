@@ -100,7 +100,7 @@ export function useNewComputeResourceNodeForm(): UseNewComputeResourceNodeFormRe
         }),
       )
 
-      router.replace(`/earn/crn/${entity.hash}`)
+      router.replace(`/account/earn/crn/${entity.hash}`)
     },
     [dispatch, noti, router],
   )

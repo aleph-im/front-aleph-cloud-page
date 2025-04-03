@@ -86,7 +86,7 @@ export const NewCoreChannelNodePage = () => {
           >
             Create core node
           </Button>
-          <ButtonLink size="md" variant="textOnly" href="/earn/ccn">
+          <ButtonLink size="md" variant="textOnly" href="/account/earn/ccn">
             Cancel
           </ButtonLink>
         </section>

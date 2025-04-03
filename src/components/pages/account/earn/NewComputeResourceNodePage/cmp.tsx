@@ -85,7 +85,7 @@ export const NewComputeResourceNodePage = () => {
           >
             Register compute node
           </Button>
-          <ButtonLink size="md" variant="textOnly" href="/earn/crn">
+          <ButtonLink size="md" variant="textOnly" href="/account/earn/crn">
             Cancel
           </ButtonLink>
         </section>

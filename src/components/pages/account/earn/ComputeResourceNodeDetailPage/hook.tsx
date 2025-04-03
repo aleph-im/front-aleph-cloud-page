@@ -138,7 +138,7 @@ export function useComputeResourceNodeDetailPage(): UseComputeResourceNodeDetail
     if (!success) return success
 
     if (!userNode) return success
-    router.replace(`/earn/ccn/${userNode.hash}`)
+    router.replace(`/account/earn/ccn/${userNode.hash}`)
 
     return success
   }, [handleLinkBase, router, node, userNode])
@@ -150,7 +150,7 @@ export function useComputeResourceNodeDetailPage(): UseComputeResourceNodeDetail
     if (!success) return success
 
     if (!userNode) return success
-    router.replace(`/earn/ccn/${userNode?.hash}`)
+    router.replace(`/account/earn/ccn/${userNode?.hash}`)
 
     return success
   }, [handleUnlinkBase, router, node, userNode])

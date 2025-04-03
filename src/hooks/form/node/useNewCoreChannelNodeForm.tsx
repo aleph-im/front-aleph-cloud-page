@@ -103,7 +103,7 @@ export function useNewCoreChannelNodeForm(): UseNewCoreChannelNodeFormReturn {
         }),
       )
 
-      router.replace(`/earn/ccn/${entity.hash}`)
+      router.replace(`/account/earn/ccn/${entity.hash}`)
     },
     [dispatch, noti, router],
   )

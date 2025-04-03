@@ -275,7 +275,7 @@ export const CoreChannelNodeDetailPage = () => {
                           <div className="fs-10" tw="leading-4">
                             {isOwner ? (
                               <ButtonLink
-                                href="/earn/crn"
+                                href="/account/earn/crn"
                                 color="main0"
                                 size="md"
                                 kind="gradient"

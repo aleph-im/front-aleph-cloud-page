@@ -359,7 +359,7 @@ export const OverviewTabContent = ({
                     <>
                       <LinkedStatusDotIcon $score={node.parentData.score} />
                       <Link
-                        href={`/earn/ccn/${node.parentData.hash}`}
+                        href={`/account/earn/ccn/${node.parentData.hash}`}
                         legacyBehavior
                       >
                         <NodeName
