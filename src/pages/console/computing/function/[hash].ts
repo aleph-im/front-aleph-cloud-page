@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/console/dashboard/ManageFunction'
+export { default } from '@/components/pages/console/function/ManageFunction'

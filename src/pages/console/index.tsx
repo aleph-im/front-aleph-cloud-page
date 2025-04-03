@@ -1,3 +1,3 @@
-import DashboardPage from '@/components/pages/console/dashboard/DashboardPage'
+import DashboardPage from '@/components/pages/console/DashboardPage'
 
 export default DashboardPage

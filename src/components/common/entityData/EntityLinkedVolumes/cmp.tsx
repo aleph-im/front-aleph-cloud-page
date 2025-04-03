@@ -6,10 +6,10 @@ import {
   useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
 import { EntityLinkedVolumesProps } from './types'
-import { Text } from '@/components/pages/console/dashboard/common'
+import { Text } from '@/components/pages/console/common'
 import RelatedEntityCard from '../RelatedEntityCard'
 import { humanReadableSize } from '@/helpers/utils'
-import { FunctionalButton } from '@/components/pages/console/dashboard/ManageInstance/cmp'
+import { FunctionalButton } from '@/components/pages/console/instance/ManageInstance/cmp'
 
 export function LinkedVolumeItem({ volume, onClick }: any) {
   const handleCopyVolumeHash = useCopyToClipboardAndNotify(volume.id)

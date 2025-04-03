@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/console/hosting/WebsiteDashboardPage'
+export { default } from '@/components/pages/console/website/WebsiteDashboardPage'

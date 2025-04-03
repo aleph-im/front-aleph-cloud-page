@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/console/dashboard/ManageInstance'
+export { default } from '@/components/pages/console/instance/ManageInstance'

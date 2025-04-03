@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/console/computing/InstanceDashboardPage'
+export { default } from '@/components/pages/console/instance/InstanceDashboardPage'

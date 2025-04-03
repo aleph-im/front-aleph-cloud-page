@@ -1,4 +1,4 @@
-import { Container } from '@/components/pages/console/dashboard/common'
+import { Container } from '@/components/pages/console/common'
 import { BackButtonSectionProps } from './types'
 import BackButton from '../BackButton/cmp'
 

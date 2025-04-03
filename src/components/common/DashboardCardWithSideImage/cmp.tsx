@@ -1,4 +1,4 @@
-import { Container } from '@/components/pages/console/dashboard/common'
+import { Container } from '@/components/pages/console/common'
 import {
   CardWithSideImage,
   NoisyContainer,

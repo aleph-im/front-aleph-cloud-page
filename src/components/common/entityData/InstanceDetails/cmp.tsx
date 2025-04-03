@@ -7,7 +7,7 @@ import {
 import { InstanceDetailsProps } from './types'
 import Skeleton from '../../Skeleton'
 import IconText from '../../IconText'
-import { Text } from '@/components/pages/console/dashboard/common'
+import { Text } from '@/components/pages/console/common'
 import { convertByteUnits, ellipseText } from '@/helpers/utils'
 
 export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {

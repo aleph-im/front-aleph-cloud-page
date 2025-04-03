@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/console/storage/NewVolumePage'
+export { default } from '@/components/pages/console/volume/NewVolumePage'

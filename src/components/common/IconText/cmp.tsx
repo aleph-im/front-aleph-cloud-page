@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { IconTextProps } from './types'
-import { Text } from '@/components/pages/console/dashboard/common'
+import { Text } from '@/components/pages/console/common'
 import { StyledContainer, StyledIcon } from './styles'
 
 export const IconText = ({ children, onClick, iconName }: IconTextProps) => {

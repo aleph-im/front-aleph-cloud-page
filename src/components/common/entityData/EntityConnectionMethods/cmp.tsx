@@ -2,7 +2,7 @@ import React, { memo } from 'react'
 import { NoisyContainer } from '@aleph-front/core'
 import { EntityConnectionMethodsProps } from './types'
 import Skeleton from '../../Skeleton'
-import { Text } from '@/components/pages/console/dashboard/common'
+import { Text } from '@/components/pages/console/common'
 import IconText from '../../IconText'
 import { useEntityConnectionMethods } from './hook'
 
