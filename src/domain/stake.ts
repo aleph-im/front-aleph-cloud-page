@@ -92,6 +92,9 @@ export class StakeManager {
       abort,
     )
 
+    // @note: Consume socket first step
+    await feed.next()
+
     for await (const data of feed) {
       if (!data.content) return
       if (!data.content.content) return

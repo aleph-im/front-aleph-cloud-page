@@ -157,16 +157,16 @@ export const OverviewTabContent = ({
             />
           </Card2>
           <Card2 title="HARDWARE">
-            <Card2Field name="CPU" value={nodeSpecs?.properties.cpu.vendor} />
+            <Card2Field name="CPU" value={nodeSpecs?.properties?.cpu.vendor} />
             <Card2Field
               name="CPU ARCHITECTURE"
-              value={nodeSpecs?.properties.cpu.architecture}
+              value={nodeSpecs?.properties?.cpu.architecture}
             />
-            <Card2Field name="CPU COUNT" value={nodeSpecs?.cpu.count} />
+            <Card2Field name="CPU COUNT" value={nodeSpecs?.cpu?.count} />
             <Card2Field
               name="CPU FREQUENCY"
               value={`${(
-                (nodeSpecs?.cpu.core_frequencies.max || 0) / 1024
+                (nodeSpecs?.cpu?.core_frequencies.max || 0) / 1024
               ).toFixed(2)} GHz`}
             />
             {/* <Card2Field
@@ -190,7 +190,7 @@ export const OverviewTabContent = ({
               /> */}
             <Card2Field
               name="RAM"
-              value={humanReadableSize(nodeSpecs?.mem.total_kB, 'KiB')}
+              value={humanReadableSize(nodeSpecs?.mem?.total_kB, 'KiB')}
             />
             {/* <Card2Field
                 name="RAM SPEED"
@@ -214,7 +214,7 @@ export const OverviewTabContent = ({
               /> */}
             <Card2Field
               name="HDD"
-              value={humanReadableSize(nodeSpecs?.disk.total_kB, 'KiB')}
+              value={humanReadableSize(nodeSpecs?.disk?.total_kB, 'KiB')}
             />
 
             <div tw="text-center pt-6">

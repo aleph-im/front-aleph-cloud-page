@@ -266,56 +266,57 @@ export type GPUDevice = {
   pci_host: string
 }
 
-export type CRNSpecs = BaseNode &
-  CRN & {
-    cpu: {
-      count: number
-      load_average: {
-        load1: number
-        load5: number
-        load15: number
-      }
-      core_frequencies: {
-        min: number
-        max: number
-      }
+export type Specs = {
+  cpu: {
+    count: number
+    load_average: {
+      load1: number
+      load5: number
+      load15: number
     }
-    mem: {
-      total_kB: number
-      available_kB: number
+    core_frequencies: {
+      min: number
+      max: number
     }
-    disk: {
-      total_kB: number
-      available_kB: number
-    }
-    period: {
-      start_timestamp: string
-      duration_seconds: number
-    }
-    properties: {
-      cpu: {
-        architecture: string
-        vendor: string
-        features?: string[]
-      }
-    }
-    gpu?: {
-      devices?: GPUDevice[]
-      available_devices?: GPUDevice[]
-    }
-    active: boolean
-    version?: string
-    compatible_gpus?: GPUDevice[]
-    compatible_available_gpus?: GPUDevice[]
-    gpu_support?: boolean | null
-    confidential_support?: boolean
-    qemu_support?: boolean
-    ipv6_check?: {
-      host: boolean
-      vm: boolean
-    }
-    selectedGpu?: GPUDevice
   }
+  mem: {
+    total_kB: number
+    available_kB: number
+  }
+  disk: {
+    total_kB: number
+    available_kB: number
+  }
+  period: {
+    start_timestamp: string
+    duration_seconds: number
+  }
+  properties: {
+    cpu: {
+      architecture: string
+      vendor: string
+      features?: string[]
+    }
+  }
+  gpu?: {
+    devices?: GPUDevice[]
+    available_devices?: GPUDevice[]
+  }
+  active: boolean
+  version?: string
+  compatible_gpus?: GPUDevice[]
+  compatible_available_gpus?: GPUDevice[]
+  gpu_support?: boolean | null
+  confidential_support?: boolean
+  qemu_support?: boolean
+  ipv6_check?: {
+    host: boolean
+    vm: boolean
+  }
+  selectedGpu?: GPUDevice
+}
+
+export type CRNSpecs = (CRN & Specs) | (CRN & Partial<Specs>)
 
 export type CRNBenchmark = {
   hash: string
@@ -374,7 +375,7 @@ export class NodeManager {
     nodeSpecs: CRNSpecs,
   ): boolean {
     return (
-      minSpecs.cpu <= nodeSpecs.cpu?.count &&
+      minSpecs.cpu <= (nodeSpecs.cpu?.count || 0) &&
       minSpecs.ram <= (nodeSpecs.mem?.available_kB || 0) / 1024 &&
       minSpecs.storage <= (nodeSpecs.disk?.available_kB || 0) / 1024
     )
@@ -428,6 +429,9 @@ export class NodeManager {
       `${wsServer}/api/ws0/messages?msgType=AGGREGATE&history=1&addresses=${monitorAddress}`,
       abort,
     )
+
+    // @note: Consume socket first step
+    await feed.next()
 
     for await (const data of feed) {
       if (!data.content) return
