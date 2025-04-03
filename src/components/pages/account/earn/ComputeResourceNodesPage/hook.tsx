@@ -194,7 +194,7 @@ export function useComputeResourceNodesPage(
   // ----------------------------- NETWORK RESOURCES CHART
 
   const { specs } = useRequestCRNSpecs({ nodes })
-  console.log('specs', specs)
+
   const totalResources = useMemo(() => {
     const resources = Object.values(specs)
     return resources.reduce(
