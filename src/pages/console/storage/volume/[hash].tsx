@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/dashboard/ManageVolume'
+export { default } from '@/components/pages/console/dashboard/ManageVolume'

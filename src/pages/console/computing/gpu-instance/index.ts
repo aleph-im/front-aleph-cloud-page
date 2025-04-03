@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/computing/GpuInstanceDashboardPage'
+export { default } from '@/components/pages/console/computing/GpuInstanceDashboardPage'

@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/storage/StorageDashboardPage'
+export { default } from '@/components/pages/console/storage/StorageDashboardPage'

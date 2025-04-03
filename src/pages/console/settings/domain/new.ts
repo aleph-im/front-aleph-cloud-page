@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/settings/NewDomainPage'
+export { default } from '@/components/pages/console/settings/NewDomainPage'

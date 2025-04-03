@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/settings/SettingsDashboardPage'
+export { default } from '@/components/pages/console/settings/SettingsDashboardPage'

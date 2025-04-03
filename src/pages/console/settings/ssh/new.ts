@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/settings/NewSSHKeyPage'
+export { default } from '@/components/pages/console/settings/NewSSHKeyPage'

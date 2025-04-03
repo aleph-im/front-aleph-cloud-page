@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/hosting/NewWebsitePage'
+export { default } from '@/components/pages/console/hosting/NewWebsitePage'

@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { Icon, NoisyContainer } from '@aleph-front/core'
-import { Text } from '@/components/pages/dashboard/common'
-import { FunctionalButton } from '@/components/pages/dashboard/ManageInstance/cmp'
+import { Text } from '@/components/pages/console/dashboard/common'
+import { FunctionalButton } from '@/components/pages/console/dashboard/ManageInstance/cmp'
 import { EntityLogsControlProps } from './types'
 
 export const EntityLogsControl = ({

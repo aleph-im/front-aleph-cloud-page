@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/computing/NewInstancePage'
+export { default } from '@/components/pages/console/computing/NewInstancePage'

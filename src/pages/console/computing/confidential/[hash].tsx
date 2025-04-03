@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/dashboard/ManageConfidential'
+export { default } from '@/components/pages/console/dashboard/ManageConfidential'

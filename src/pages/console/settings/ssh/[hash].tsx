@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/dashboard/ManageSSHKey'
+export { default } from '@/components/pages/console/dashboard/ManageSSHKey'

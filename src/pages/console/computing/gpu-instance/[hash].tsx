@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/dashboard/ManageGpuInstance'
+export { default } from '@/components/pages/console/dashboard/ManageGpuInstance'

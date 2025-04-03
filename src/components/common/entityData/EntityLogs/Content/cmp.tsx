@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import LogsFeed from '@/components/pages/dashboard/LogsFeed'
+import LogsFeed from '@/components/pages/console/dashboard/LogsFeed'
 import { EntityLogsContentProps } from './types'
 
 export const EntityLogsContent = ({ logs }: EntityLogsContentProps) => {

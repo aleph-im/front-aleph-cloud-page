@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/computing/FunctionDashboardPage'
+export { default } from '@/components/pages/console/computing/FunctionDashboardPage'

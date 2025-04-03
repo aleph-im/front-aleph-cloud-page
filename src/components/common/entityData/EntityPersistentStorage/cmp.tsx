@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { NoisyContainer, ObjectImg } from '@aleph-front/core'
 import { EntityPersistentStorageProps } from './types'
-import { Text } from '@/components/pages/dashboard/common'
+import { Text } from '@/components/pages/console/dashboard/common'
 import { humanReadableSize } from '@/helpers/utils'
 
 export const EntityPersistentStorage = ({

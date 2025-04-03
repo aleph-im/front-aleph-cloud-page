@@ -1,1 +1,1 @@
-export { default } from '@/components/pages/computing/NewConfidentialPage'
+export { default } from '@/components/pages/console/computing/NewConfidentialPage'
