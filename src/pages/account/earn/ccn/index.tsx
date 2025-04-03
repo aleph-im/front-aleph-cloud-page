@@ -1,3 +1,3 @@
-import CoreChannelNodesPage from '@/components/pages/account/earn/CoreChannelNodesPage'
+import CoreChannelNodesPage from '@/components/pages/account/CoreChannelNodesPage'
 
 export default CoreChannelNodesPage

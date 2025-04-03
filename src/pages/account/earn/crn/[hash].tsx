@@ -1,3 +1,3 @@
-import ComputeResourceNodeDetailPage from '@/components/pages/account/earn/ComputeResourceNodeDetailPage'
+import ComputeResourceNodeDetailPage from '@/components/pages/account/ComputeResourceNodeDetailPage'
 
 export default ComputeResourceNodeDetailPage

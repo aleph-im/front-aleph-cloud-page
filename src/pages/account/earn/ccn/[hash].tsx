@@ -1,3 +1,3 @@
-import CoreChannelNodeDetailPage from '@/components/pages/account/earn/CoreChannelNodeDetailPage'
+import CoreChannelNodeDetailPage from '@/components/pages/account/CoreChannelNodeDetailPage'
 
 export default CoreChannelNodeDetailPage

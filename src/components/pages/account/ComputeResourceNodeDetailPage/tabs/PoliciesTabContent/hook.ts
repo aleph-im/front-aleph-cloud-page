@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { UseComputeResourceNodeDetailPageReturn } from '@/components/pages/account/earn/ComputeResourceNodeDetailPage/hook'
+import { UseComputeResourceNodeDetailPageReturn } from '@/components/pages/account/ComputeResourceNodeDetailPage/hook'
 import { apiServer } from '@/helpers/constants'
 import { MessageManager } from '@/domain/message'
 import { MessageType } from '@aleph-sdk/message'

@@ -1,3 +1,3 @@
-import NewComputeResourceNodePage from '@/components/pages/account/earn/NewComputeResourceNodePage'
+import NewComputeResourceNodePage from '@/components/pages/account/NewComputeResourceNodePage'
 
 export default NewComputeResourceNodePage

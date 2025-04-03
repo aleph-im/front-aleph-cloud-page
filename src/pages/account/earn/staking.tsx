@@ -1,4 +1,4 @@
-import StakingPage from '@/components/pages/account/earn/StakingPage'
+import StakingPage from '@/components/pages/account/StakingPage'
 // import { NodeManager } from '@/domain/node'
 
 // @todo: Activate SSR data pre-fetching

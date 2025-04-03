@@ -1,3 +1,3 @@
-import ComputeResourceNodesPage from '@/components/pages/account/earn/ComputeResourceNodesPage'
+import ComputeResourceNodesPage from '@/components/pages/account/ComputeResourceNodesPage'
 
 export default ComputeResourceNodesPage

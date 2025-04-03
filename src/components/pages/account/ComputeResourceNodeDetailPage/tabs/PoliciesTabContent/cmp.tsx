@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { UseComputeResourceNodeDetailPageReturn } from '@/components/pages/account/earn/ComputeResourceNodeDetailPage/hook'
+import { UseComputeResourceNodeDetailPageReturn } from '@/components/pages/account/ComputeResourceNodeDetailPage/hook'
 import Card2, { Card2Field } from '@/components/common/Card2'
 import {
   Button,
