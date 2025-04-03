@@ -98,8 +98,8 @@ export default function DashboardPage() {
                 img="Object20"
                 description="Deploy and manage your websites with ease. Support for static pages, Next.js, React, and Vue.js ensures you can create dynamic and robust web experiences."
                 introductionButtonText="Deploy your website"
-                dashboardPath="/hosting/website"
-                createPath="/hosting/website/new"
+                dashboardPath="/console/hosting/website"
+                createPath="/console/hosting/website/new"
                 information={{
                   type: 'amount',
                   data: websitesAggregatedStatus.total,
@@ -137,8 +137,8 @@ export default function DashboardPage() {
                 img="Object10"
                 description="Run code on-demand or persistently with our serverless computing platform. Scale effortlessly and integrate seamlessly."
                 introductionButtonText="Create your function"
-                dashboardPath="/computing/function"
-                createPath="/computing/function/new"
+                dashboardPath="/console/computing/function"
+                createPath="/console/computing/function/new"
                 information={{
                   type: 'amount',
                   data: programAggregatedStatus.total,
@@ -157,8 +157,8 @@ export default function DashboardPage() {
                 img="Object11"
                 description="Launch and manage virtual private servers (VPS) tailored to your needs. Choose automatic or manual node selection for complete control over your computing environment."
                 introductionButtonText="Create your instance"
-                dashboardPath="/computing/instance"
-                createPath="/computing/instance/new"
+                dashboardPath="/console/computing/instance"
+                createPath="/console/computing/instance/new"
                 information={{
                   type: 'computing',
                   data: instanceAggregatedStatus.total,
@@ -177,8 +177,8 @@ export default function DashboardPage() {
                 img="Object11"
                 description="Power your workloads with high-performance GPU computing. Ideal for AI, ML, rendering, and complex simulations. Scale effortlessly and take full control over your GPU resources."
                 introductionButtonText="Create your GPU Instance"
-                dashboardPath="/computing/gpu-instance"
-                createPath="/computing/gpu-instance/new"
+                dashboardPath="/console/computing/gpu-instance"
+                createPath="/console/computing/gpu-instance/new"
                 information={{
                   type: 'computing',
                   data: gpuInstanceAggregatedStatus.total,
@@ -196,8 +196,8 @@ export default function DashboardPage() {
                 isBeta
                 title="confidentials"
                 img="Object9"
-                dashboardPath="/computing/confidential"
-                createPath="/computing/confidential/new"
+                dashboardPath="/console/computing/confidential"
+                createPath="/console/computing/confidential/new"
                 description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your data stays safe."
                 introductionButtonText="Create your confidential"
                 information={{
@@ -235,8 +235,8 @@ export default function DashboardPage() {
                 }
                 title="volumes"
                 img="Object15"
-                dashboardPath="/storage"
-                createPath="/storage/volume/new"
+                dashboardPath="/console/storage"
+                createPath="/console/storage/volume/new"
                 description="Secure and reliable immutable volumes for your data storage needs. Ideal for dependency volumes and critical data, ensuring consistency and integrity."
                 introductionButtonText="Create your volume"
                 information={{
