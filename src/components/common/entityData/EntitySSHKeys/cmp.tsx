@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { Icon, NoisyContainer, ObjectImg } from '@aleph-front/core'
 import Skeleton from '../../Skeleton'
-import { Text } from '@/components/pages/dashboard/common'
+import { Text } from '@/components/pages/console/common'
 import RelatedEntityCard from '../RelatedEntityCard'
 import { EntitySSHKeysProps } from './types'
 

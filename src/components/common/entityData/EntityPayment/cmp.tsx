@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { Logo, NoisyContainer } from '@aleph-front/core'
 import { EntityPaymentProps, PaymentData } from './types'
-import { Text } from '@/components/pages/dashboard/common'
+import { Text } from '@/components/pages/console/common'
 import { useFormatPayment } from './hook'
 import Skeleton from '../../Skeleton'
 import IconText from '../../IconText'

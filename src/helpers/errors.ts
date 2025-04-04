@@ -7,6 +7,7 @@ export default {
   RequestFailed: (cause: unknown) => new Error('Request failed', { cause }),
   InvalidResponse: new Error('Invalid response'),
   InvalidAccount: new Error('Account needed to perform this action'),
+  InvalidParameter: (param: string) => new Error(`Invalid parameter: ${param}`),
   ManagerNotReady: new Error('Manager not ready'),
   MethodNotImplemented: new Error('Method not implemented'),
   NoWalletDetected: new Error('No wallet detected'),
