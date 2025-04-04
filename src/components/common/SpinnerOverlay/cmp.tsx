@@ -1,8 +1,8 @@
 import { memo } from 'react'
-import { SpinnerProps, useTransition } from '@aleph-front/core'
+import { Spinner, SpinnerProps, useTransition } from '@aleph-front/core'
 import { StyledSpinnerContainer } from './styles'
 import { createPortal } from 'react-dom'
-import { RotatingLines } from 'react-loader-spinner'
+// import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 
 export type SpinnerOverlayProps = SpinnerProps & {
@@ -31,8 +31,8 @@ export const SpinnerOverlay = ({
           $center={center}
           $fullScreen={fullScreen}
         >
-          {/* <Spinner {...{ color, ...rest }} /> */}
-          <RotatingLines strokeColor={color} width="4rem" {...rest} />
+          <Spinner {...{ color, ...rest }} />
+          {/* <RotatingLines strokeColor={color} width="4rem" {...rest} /> */}
         </StyledSpinnerContainer>
       )}
     </>
