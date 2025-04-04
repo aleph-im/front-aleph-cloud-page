@@ -9,7 +9,7 @@ export const StyledContainer = styled(NoisyContainer).attrs({
   ${tw`p-6 relative flex flex-col gap-6`}
 `
 
-export const StyledTitle = styled.div.attrs(addClasses('tp-info'))<{
+export const StyledTitle = styled.div.attrs(addClasses('tp-info text-main0'))<{
   children?: ReactNode
 }>`
   ${tw`uppercase`}
