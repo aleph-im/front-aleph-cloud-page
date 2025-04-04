@@ -11,6 +11,9 @@ export const Footer = () => {
         Link: Link as LinkComponent,
         logoHref: websiteUrl,
         logoTarget: '_blank',
+        logoImg: 'aleph',
+        logoByAleph: false,
+        logoText: 'Aleph Cloud',
         breakpoint: 'lg',
         buttons: [
           {
