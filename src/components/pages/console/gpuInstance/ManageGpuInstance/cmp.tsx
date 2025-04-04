@@ -404,7 +404,10 @@ export default function ManageGpuInstance() {
           </NoisyContainer>
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/computing/gpu-instance/new">
+            <ButtonLink
+              variant="primary"
+              href="/console/computing/gpu-instance/new"
+            >
               Create new GPU Instance
             </ButtonLink>
           </div>

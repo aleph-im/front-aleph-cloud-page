@@ -17,7 +17,7 @@ export type UseNewEntityTab = UseNewEntityTabProps & {
 
 export function useNewEntityTab(props: UseNewEntityTabProps): UseNewEntityTab {
   const handleChange = useCallback((id: string) => {
-    Router.push(`/computing/${id}/new`)
+    Router.push(`/console/computing/${id}/new`)
   }, [])
 
   return {

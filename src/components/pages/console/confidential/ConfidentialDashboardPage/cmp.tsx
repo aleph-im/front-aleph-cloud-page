@@ -32,7 +32,7 @@ export default function ConfidentialDashboardPage() {
               info="WHAT IS A..."
               title="Confidential Instance"
               description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your execution and data stays safe."
-              buttonUrl="/computing/confidential/new"
+              buttonUrl="/console/computing/confidential/new"
               buttonText="Create Confidential"
               externalLinkText="Developer docs"
               externalLinkUrl="https://docs.aleph.im/computing/confidential/"

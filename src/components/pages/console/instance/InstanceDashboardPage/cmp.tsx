@@ -32,7 +32,7 @@ export default function InstanceDashboardPage() {
               title="Instances"
               description="Launch and control virtual private servers (VPS) with ease. Choose between automatic or manual node selection, and customize your computing environment to meet your specific needs."
               withButton={instances?.length === 0}
-              buttonUrl="/computing/instance/new"
+              buttonUrl="/console/computing/instance/new"
               buttonText="Create instance"
             />
           </>

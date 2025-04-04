@@ -30,7 +30,7 @@ export default function SettingsDashboardPage() {
               imageSrc="/img/dashboard/ssh.svg"
               imageAlt="SSH Key illustration"
               withButton={sshKeys?.length === 0}
-              buttonUrl="/settings/ssh/new"
+              buttonUrl="/console/settings/ssh/new"
               buttonText="Add SSH key"
             />
           </>
@@ -48,7 +48,7 @@ export default function SettingsDashboardPage() {
               imageSrc="/img/dashboard/domain.svg"
               imageAlt="Domain illustration"
               withButton={domains?.length === 0}
-              buttonUrl="/settings/domain/new"
+              buttonUrl="/console/settings/domain/new"
               buttonText="Create custom domain"
               externalLinkUrl="https://docs.aleph.im/computing/custom_domain/setup/"
             />

@@ -136,7 +136,7 @@ export default function NewDomain() {
                         kind="functional"
                         size="md"
                         variant="warning"
-                        href="/hosting/website/new"
+                        href="/console/hosting/website/new"
                       >
                         Create your first website
                       </ButtonLink>
@@ -193,7 +193,7 @@ export default function NewDomain() {
                         kind="functional"
                         size="md"
                         variant="warning"
-                        href={`/computing/${labelResourceType}/new`}
+                        href={`/console/computing/${labelResourceType}/new`}
                       >
                         {`Create your first ${labelResourceType}` as string}
                       </ButtonLink>

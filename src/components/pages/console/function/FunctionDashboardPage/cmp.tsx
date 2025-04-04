@@ -32,7 +32,7 @@ function FunctionDashboardPage() {
               title="Functions"
               description="Deploy and manage serverless functions effortlessly with our robust computing platform. Run code on-demand or persistently, with seamless integration and scalability."
               withButton={programs?.length === 0}
-              buttonUrl="/computing/function/new"
+              buttonUrl="/console/computing/function/new"
               buttonText="Create function"
               externalLinkUrl="https://docs.aleph.im/tools/webconsole/"
             />

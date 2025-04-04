@@ -368,7 +368,7 @@ export function ManageWebsite() {
           </NoisyContainer>
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/hosting/website/new">
+            <ButtonLink variant="primary" href="/console/hosting/website/new">
               Create new website
             </ButtonLink>
           </div>

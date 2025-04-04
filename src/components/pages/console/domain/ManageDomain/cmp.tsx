@@ -69,7 +69,7 @@ export default function ManageDomain() {
                 variant="tertiary"
                 size="md"
                 onClick={() =>
-                  router.push(`/settings/domain/new/?name=${domain.id}`)
+                  router.push(`/console/settings/domain/new/?name=${domain.id}`)
                 }
               >
                 Update
@@ -313,7 +313,7 @@ export default function ManageDomain() {
           </NoisyContainer>
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/settings/domain/new">
+            <ButtonLink variant="primary" href="/console/settings/domain/new">
               Add new domain
             </ButtonLink>
           </div>

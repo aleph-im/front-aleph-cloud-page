@@ -16,7 +16,7 @@ export default function ManageSSHKey() {
           <SSHKeyDetail sshKeyId={sshKeyId} showDelete />
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/settings/ssh/new">
+            <ButtonLink variant="primary" href="/console/settings/ssh/new">
               Add new SSH Key
             </ButtonLink>
           </div>

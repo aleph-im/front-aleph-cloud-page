@@ -73,19 +73,19 @@ export const Footer = () => {
             links: [
               {
                 label: 'Computing',
-                href: '/computing/function/new/',
+                href: '/console/computing/function/new/',
               },
               {
                 label: 'Storage',
-                href: '/storage/volume/new/',
+                href: '/console/storage/volume/new/',
               },
               {
                 label: 'Custom domains',
-                href: '/settings/domain/new/',
+                href: '/console/settings/domain/new/',
               },
               {
                 label: 'SSH',
-                href: '/settings/ssh/new/',
+                href: '/console/settings/ssh/new/',
               },
             ],
           },

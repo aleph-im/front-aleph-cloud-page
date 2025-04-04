@@ -15,7 +15,7 @@ export default function ManageVolume() {
           <VolumeDetail volumeId={volumeId} showDelete />
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/storage/volume/new">
+            <ButtonLink variant="primary" href="/console/storage/volume/new">
               Create new volume
             </ButtonLink>
           </div>

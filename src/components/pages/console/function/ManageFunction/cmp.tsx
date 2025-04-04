@@ -386,7 +386,10 @@ export default function ManageFunction() {
           </NoisyContainer>
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/computing/function/new">
+            <ButtonLink
+              variant="primary"
+              href="/console/computing/function/new"
+            >
               Create new function
             </ButtonLink>
           </div>

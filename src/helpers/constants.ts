@@ -20,7 +20,7 @@ export const erc20Address = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
 export const splTokenAddress = '3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x'
 
 // Node console URL
-export const consoleUrl = 'https://console.twentysix.cloud'
+export const consoleUrl = 'https://console.twentysix.cloud/console'
 export const consoleNewInstanceUrl = `${consoleUrl}/computing/instance/new`
 
 export const crnListProgramUrl =

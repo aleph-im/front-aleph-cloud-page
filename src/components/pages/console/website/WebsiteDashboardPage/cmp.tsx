@@ -34,7 +34,7 @@ export default function SettingsDashboardPage() {
               title="Host your Website!"
               description="Build and deploy your website effortlessly using our web3 hosting solutions. Support for static pages, Next.js, React, and Vue.js ensures you have the flexibility to create the perfect site."
               withButton={websites?.length === 0}
-              buttonUrl="/hosting/website/new"
+              buttonUrl="/console/hosting/website/new"
               buttonText="Deploy your website"
             />
           </>

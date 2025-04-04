@@ -35,7 +35,7 @@ export default function GpuInstanceDashboardPage() {
               title="GPU Instances"
               description="Power your workloads with high-performance GPU computing. Ideal for AI, ML, rendering, and complex simulations. Scale effortlessly and take full control over your GPU resources."
               withButton={gpuInstances?.length === 0}
-              buttonUrl="/computing/gpu-instance/new"
+              buttonUrl="/console/computing/gpu-instance/new"
               buttonText="Create a GPU Instance"
             />
           </>

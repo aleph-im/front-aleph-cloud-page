@@ -31,7 +31,7 @@ export default function VolumeDashboardPage() {
               {
                 title: 'Volumes',
                 img: 'Object15',
-                buttonUrl: '/storage/volume/new',
+                buttonUrl: '/console/storage/volume/new',
                 information: {
                   type: 'storage',
                   data: total,
@@ -75,7 +75,7 @@ export default function VolumeDashboardPage() {
               title="Volumes"
               description="Create immutable volumes for secure and dependable data storage. Ideal for dependencies and other critical data, ensuring consistency and reliability across your applications"
               withButton={volumes.length === 0}
-              buttonUrl="/storage/volume/new"
+              buttonUrl="/console/storage/volume/new"
               buttonText="Create new volume"
               externalLinkUrl="https://docs.aleph.im/computing/volumes/immutable/"
             />
