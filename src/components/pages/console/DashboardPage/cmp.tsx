@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { Icon } from '@aleph-front/core'
 import { useDashboardPage } from '@/components/pages/console/DashboardPage/hook'
 import { SectionTitle } from '@/components/common/CompositeTitle'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import EntityCard from '@/components/common/EntityCard'
 import { HoldTokenDisclaimer } from '@/components/common/HoldTokenDisclaimer/cmp'
 import { EntityCardItemProps } from '@/components/common/EntityCard/types'
@@ -73,7 +73,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <Container $variant="xl">
+      <CenteredContainer $variant="xl">
         <section tw="px-0 pb-6 pt-12 lg:pb-5 ">
           <SectionTitle number="1">
             Web3 Hosting
@@ -248,10 +248,10 @@ export default function DashboardPage() {
             </EntityCardWrapper>
           </StyledEntityCardsContainer>
         </section>
-      </Container>
-      <Container $variant="xl">
+      </CenteredContainer>
+      <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
-      </Container>
+      </CenteredContainer>
     </>
   )
 }

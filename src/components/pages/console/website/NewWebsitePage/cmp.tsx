@@ -6,7 +6,7 @@ import {
 import { useNewWebsitePage } from '@/components/pages/console/website/NewWebsitePage/hook'
 import { Button, TextGradient } from '@aleph-front/core'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import AddWebsiteFolder from '@/components/form/AddWebsiteFolder'
 import { Form } from '@/components/form/Form'
 import { SectionTitle } from '@/components/common/CompositeTitle'
@@ -34,7 +34,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="1">Choose your framework</SectionTitle>
             <p tw="mb-6">
               Select your web development framework. This step provides guidance
@@ -44,10 +44,10 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
               in your website beforehand.
             </p>
             <SelectWebsiteFramework control={control} />
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 py-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="2">Upload your website</SectionTitle>
             <p tw="mb-6">
               Once your website is ready, upload your static folder here. This
@@ -57,10 +57,10 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
               on a global scale.
             </p>
             <AddWebsiteFolder control={control} />
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 py-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="3">Name and tags</SectionTitle>
             <p tw="mb-6">
               Organize and identify your websites more effectively by assigning
@@ -69,11 +69,11 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
               easier to manage your dapps.
             </p>
             <AddNameAndTags control={control} entityType={EntityType.Website} />
-          </Container>
+          </CenteredContainer>
         </section>
 
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="4">
               Advanced Configuration Options
             </SectionTitle>
@@ -112,7 +112,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
                 </SwitchToggleContainer>
               </div>
             </div>
-          </Container>
+          </CenteredContainer>
         </section>
 
         <CheckoutSummary

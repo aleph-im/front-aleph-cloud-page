@@ -2,7 +2,7 @@ import React from 'react'
 import { PaymentMethod } from '@/helpers/constants'
 import { useNewVolumePage } from './hook'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { AddNewVolume } from '@/components/form/AddVolume'
 import { Form } from '@/components/form/Form'
 import { SectionTitle } from '@/components/common/CompositeTitle'
@@ -27,10 +27,10 @@ export function NewVolumePage() {
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="1">Add volume</SectionTitle>
             <AddNewVolume control={control} />
-          </Container>
+          </CenteredContainer>
         </section>
         <CheckoutSummary
           address={address}

@@ -1,6 +1,6 @@
 import React, { memo } from 'react'
 import { Tabs } from '@aleph-front/core'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useFunctionDashboardPage } from './hook'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import FunctionsTabContent from '../../function/FunctionsTabContent'
@@ -14,16 +14,16 @@ function FunctionDashboardPage() {
 
   return (
     <>
-      <Container $variant="xl" tw="my-10">
+      <CenteredContainer $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
-      </Container>
+      </CenteredContainer>
       <div role="tabpanel">
         {tabId === 'program' ? (
           <>
             {!!programs?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <FunctionsTabContent data={programs} />
-              </Container>
+              </CenteredContainer>
             )}
             <DashboardCardWithSideImage
               imageSrc="/img/dashboard/function.svg"
@@ -40,26 +40,26 @@ function FunctionDashboardPage() {
         ) : tabId === 'volume' ? (
           <>
             {!!volumes?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <VolumesTabContent data={volumes} cta={false} />
-              </Container>
+              </CenteredContainer>
             )}
           </>
         ) : tabId === 'domain' ? (
           <>
             {!!domains?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <DomainsTabContent data={domains} cta={false} />
-              </Container>
+              </CenteredContainer>
             )}
           </>
         ) : (
           <></>
         )}
       </div>
-      <Container $variant="xl">
+      <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
-      </Container>
+      </CenteredContainer>
     </>
   )
 }

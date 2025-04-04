@@ -1,4 +1,4 @@
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { NoisyContainer } from '@aleph-front/core'
 import Form from '@/components/form/Form'
 import { useNewSSHKeyPage } from './hook'
@@ -15,7 +15,7 @@ export default function NewSSHKey() {
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="1">Configure SSH Key</SectionTitle>
             <p tw="mb-6">
               Access your cloud instances securely. Give existing key’s below
@@ -54,7 +54,7 @@ export default function NewSSHKey() {
                 Save SSH Key
               </Button>
             </div>
-          </Container>
+          </CenteredContainer>
         </section>
       </Form>
     </>

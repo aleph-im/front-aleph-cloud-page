@@ -12,7 +12,8 @@ import {
 import { EntityTypeName } from '@/helpers/constants'
 import { useManageWebsite } from './hook'
 import { humanReadableSize } from '@/helpers/utils'
-import { Container, Text, Separator } from '../../common'
+import { Text, Separator } from '../../common'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { RotatingLines } from 'react-loader-spinner'
 import { WebsiteFrameworks } from '@/domain/website'
 import { getDate, cidV0Tov1 } from '@/helpers/utils'
@@ -134,9 +135,9 @@ export function ManageWebsite() {
     return (
       <>
         <BackButtonSection handleBack={handleBack} />
-        <Container>
+        <CenteredContainer>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </Container>
+        </CenteredContainer>
       </>
     )
   }
@@ -145,7 +146,7 @@ export function ManageWebsite() {
     <>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <CenteredContainer>
           <div tw="flex justify-between pb-5">
             <div tw="flex items-center">
               <Icon name="floppy-disk" tw="mr-4" className="text-main0" />
@@ -371,7 +372,7 @@ export function ManageWebsite() {
               Create new website
             </ButtonLink>
           </div>
-        </Container>
+        </CenteredContainer>
       </section>
     </>
   )

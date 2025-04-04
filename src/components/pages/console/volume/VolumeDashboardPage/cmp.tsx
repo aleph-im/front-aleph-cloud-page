@@ -1,6 +1,6 @@
 import React from 'react'
 import { Tabs } from '@aleph-front/core'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useVolumeDashboardPage } from './hook'
 import VolumesTabContent from '../VolumesTabContent'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
@@ -18,11 +18,14 @@ export default function VolumeDashboardPage() {
 
   return (
     <>
-      <Container $variant="xl" tw="my-10">
+      <CenteredContainer $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
-      </Container>
+      </CenteredContainer>
       {total.amount !== 0 && (
-        <Container $variant="xl" tw="my-10 flex flex-wrap gap-6 justify-center">
+        <CenteredContainer
+          $variant="xl"
+          tw="my-10 flex flex-wrap gap-6 justify-center"
+        >
           <EntitySummaryCard
             items={[
               {
@@ -54,16 +57,16 @@ export default function VolumeDashboardPage() {
               },
             ]}
           />
-        </Container>
+        </CenteredContainer>
       )}
 
       <div role="tabpanel">
         {tabId === 'volume' ? (
           <>
             {!!volumes.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <VolumesTabContent data={volumes} />
-              </Container>
+              </CenteredContainer>
             )}
             <DashboardCardWithSideImage
               imageSrc="/img/dashboard/volume.svg"
@@ -81,9 +84,9 @@ export default function VolumeDashboardPage() {
           <></>
         )}
       </div>
-      <Container $variant="xl">
+      <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
-      </Container>
+      </CenteredContainer>
     </>
   )
 }

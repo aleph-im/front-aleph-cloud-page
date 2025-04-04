@@ -1,6 +1,6 @@
 import React from 'react'
 import { Tabs } from '@aleph-front/core'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useInstanceDashboardPage } from './hook'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import InstancesTabContent from '../InstancesTabContent'
@@ -14,16 +14,16 @@ export default function InstanceDashboardPage() {
 
   return (
     <>
-      <Container $variant="xl" tw="my-10">
+      <CenteredContainer $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
-      </Container>
+      </CenteredContainer>
       <div role="tabpanel">
         {tabId === 'instance' ? (
           <>
             {!!instances?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <InstancesTabContent data={instances} />
-              </Container>
+              </CenteredContainer>
             )}
             <DashboardCardWithSideImage
               imageSrc="/img/dashboard/instance.svg"
@@ -39,26 +39,26 @@ export default function InstanceDashboardPage() {
         ) : tabId === 'volume' ? (
           <>
             {!!volumes.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <VolumesTabContent data={volumes} cta={false} />
-              </Container>
+              </CenteredContainer>
             )}
           </>
         ) : tabId === 'domain' ? (
           <>
             {!!domains.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <DomainsTabContent data={domains} cta={false} />
-              </Container>
+              </CenteredContainer>
             )}
           </>
         ) : (
           <></>
         )}
       </div>
-      <Container $variant="xl">
+      <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
-      </Container>
+      </CenteredContainer>
     </>
   )
 }

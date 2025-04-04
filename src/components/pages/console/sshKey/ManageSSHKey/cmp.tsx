@@ -1,6 +1,6 @@
 import ButtonLink from '@/components/common/ButtonLink'
 import { useManageSSHKey } from './hook'
-import { Container } from '../../common'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
@@ -12,7 +12,7 @@ export default function ManageSSHKey() {
     <>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <CenteredContainer>
           <SSHKeyDetail sshKeyId={sshKeyId} showDelete />
 
           <div tw="mt-20 text-center">
@@ -20,10 +20,10 @@ export default function ManageSSHKey() {
               Add new SSH Key
             </ButtonLink>
           </div>
-        </Container>
-        <Container>
+        </CenteredContainer>
+        <CenteredContainer>
           <HoldTokenDisclaimer />
-        </Container>
+        </CenteredContainer>
       </section>
     </>
   )

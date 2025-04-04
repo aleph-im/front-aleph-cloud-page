@@ -1,6 +1,6 @@
 import React from 'react'
 import { Tabs } from '@aleph-front/core'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import GpuInstancesTabContent from '../GpuInstancesTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
@@ -17,16 +17,16 @@ export default function GpuInstanceDashboardPage() {
 
   return (
     <>
-      <Container $variant="xl" tw="my-10">
+      <CenteredContainer $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
-      </Container>
+      </CenteredContainer>
       <div role="tabpanel">
         {tabId === 'gpuInstances' ? (
           <>
             {!!gpuInstances?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <GpuInstancesTabContent data={gpuInstances} />
-              </Container>
+              </CenteredContainer>
             )}
             <DashboardCardWithSideImage
               imageSrc="/img/dashboard/instance.svg"
@@ -43,25 +43,25 @@ export default function GpuInstanceDashboardPage() {
           // ) : tabId === 'volume' ? (
           //   <>
           //     {!!volumes.length && (
-          //       <Container $variant="xl" tw="my-10">
+          //       <CenteredContainer $variant="xl" tw="my-10">
           //         <VolumesTabContent data={volumes} cta={false} />
-          //       </Container>
+          //       </CenteredContainer>
           //     )}
           //   </>
           // ) : tabId === 'domain' ? (
           //   <>
           //     {!!domains.length && (
-          //       <Container $variant="xl" tw="my-10">
+          //       <CenteredContainer $variant="xl" tw="my-10">
           //         <DomainsTabContent data={domains} cta={false} />
-          //       </Container>
+          //       </CenteredContainer>
           //     )}
           //   </>
           <></>
         )}
       </div>
-      <Container $variant="xl">
+      <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
-      </Container>
+      </CenteredContainer>
     </>
   )
 }

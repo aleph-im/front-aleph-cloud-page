@@ -9,7 +9,8 @@ import {
 } from '@/helpers/constants'
 import { BulletItem, Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { ellipseAddress } from '@/helpers/utils'
-import { Container, Text, Separator } from '../../common'
+import { Text, Separator } from '../../common'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import ButtonLink from '@/components/common/ButtonLink'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import BackButtonSection from '@/components/common/BackButtonSection'
@@ -33,9 +34,9 @@ export default function ManageDomain() {
     return (
       <>
         <BackButtonSection handleBack={handleBack} />
-        <Container>
+        <CenteredContainer>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </Container>
+        </CenteredContainer>
       </>
     )
   }
@@ -47,7 +48,7 @@ export default function ManageDomain() {
     <>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <CenteredContainer>
           <div tw="flex justify-between pb-5">
             <div tw="flex flex-wrap items-center">
               <Icon name="input-text" tw="mr-4" className="text-main0" />
@@ -316,10 +317,10 @@ export default function ManageDomain() {
               Add new domain
             </ButtonLink>
           </div>
-        </Container>
-        <Container>
+        </CenteredContainer>
+        <CenteredContainer>
           <HoldTokenDisclaimer />
-        </Container>
+        </CenteredContainer>
       </section>
     </>
   )

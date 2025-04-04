@@ -6,7 +6,8 @@ import { Label, NoisyContainer, Tabs, Tooltip } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
-import { Container, Text, Separator } from '../../common'
+import { Text, Separator } from '../../common'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import { useManageGpuInstance } from './hook'
 import StreamSummary from '@/components/common/StreamSummary'
@@ -45,9 +46,9 @@ export default function ManageGpuInstance() {
     return (
       <>
         <BackButtonSection handleBack={handleBack} />
-        <Container>
+        <CenteredContainer>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </Container>
+        </CenteredContainer>
       </>
     )
   }
@@ -61,7 +62,7 @@ export default function ManageGpuInstance() {
     <>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <CenteredContainer>
           <div tw="flex justify-between pb-5 flex-wrap gap-4 flex-col md:flex-row">
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
@@ -407,7 +408,7 @@ export default function ManageGpuInstance() {
               Create new GPU Instance
             </ButtonLink>
           </div>
-        </Container>
+        </CenteredContainer>
       </section>
     </>
   )

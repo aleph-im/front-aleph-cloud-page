@@ -27,7 +27,7 @@ import {
   PaymentMethod,
   apiServer,
 } from '@/helpers/constants'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useNewInstancePage, UseNewInstancePageReturn } from './hook'
 import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
@@ -304,22 +304,22 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 py-0 md:py-8">
-          <Container>
+          <CenteredContainer>
             <NewEntityTab selected="instance" />
-          </Container>
+          </CenteredContainer>
         </section>
         {createInstanceDisabledMessage && (
           <section tw="px-0 pt-20 pb-6 md:py-10">
-            <Container>
+            <CenteredContainer>
               <BorderBox $color="warning">
                 {createInstanceDisabledMessage}
               </BorderBox>
-            </Container>
+            </CenteredContainer>
           </section>
         )}
         {values.paymentMethod === PaymentMethod.Stream && (
           <section tw="px-0 pt-20 pb-6 md:py-10">
-            <Container>
+            <CenteredContainer>
               <SectionTitle number={1}>Select your node</SectionTitle>
               <p>
                 Your instance is set up with your manually selected Compute
@@ -362,11 +362,11 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                   </div>
                 </NoisyContainer>
               </div>
-            </Container>
+            </CenteredContainer>
           </section>
         )}
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number={sectionNumber(1)}>
               Select your tier
             </SectionTitle>
@@ -426,10 +426,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 )}
               </SelectInstanceSpecs>
             </div>
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number={sectionNumber(2)}>
               Choose an image
             </SectionTitle>
@@ -440,10 +440,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <div tw="px-0 mt-12 mb-6">
               <SelectInstanceImage name="image" control={control} />
             </div>
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number={sectionNumber(3)}>
               Configure SSH Key
             </SectionTitle>
@@ -456,10 +456,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <div tw="px-0 my-6">
               <AddSSHKeys name="sshKeys" control={control} />
             </div>
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number={sectionNumber(4)}>Name and tags</SectionTitle>
             <p tw="mb-6">
               Organize and identify your instances more effectively by assigning
@@ -471,10 +471,10 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               control={control}
               entityType={EntityType.Instance}
             />
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number={sectionNumber(5)}>
               Advanced Configuration Options
             </SectionTitle>
@@ -515,7 +515,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 </SwitchToggleContainer>
               </div>
             </div>
-          </Container>
+          </CenteredContainer>
         </section>
 
         <CheckoutSummary

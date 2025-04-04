@@ -8,7 +8,8 @@ import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import Link from 'next/link'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import { useManageConfidential } from './hook'
-import { Container, Text, Separator } from '../../common'
+import { Text, Separator } from '../../common'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import VolumeList from '../../volume/VolumeList'
 
 export default function ManageConfidential() {
@@ -31,9 +32,9 @@ export default function ManageConfidential() {
     return (
       <>
         <BackButtonSection handleBack={handleBack} />
-        <Container>
+        <CenteredContainer>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </Container>
+        </CenteredContainer>
       </>
     )
   }
@@ -47,7 +48,7 @@ export default function ManageConfidential() {
     <>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <CenteredContainer>
           <div tw="flex justify-between pb-5 flex-wrap gap-4 flex-col md:flex-row">
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
@@ -268,7 +269,7 @@ export default function ManageConfidential() {
               Create new confidential instance
             </ButtonLink>
           </div>
-        </Container>
+        </CenteredContainer>
       </section>
     </>
   )

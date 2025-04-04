@@ -6,7 +6,7 @@ import SelectInstanceSpecs from '@/components/form/SelectInstanceSpecs'
 import AddVolumes from '@/components/form/AddVolumes'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import AddFunctionCode from '@/components/form/AddFunctionCode'
 import SelectFunctionPersistence from '@/components/form/SelectFunctionPersistence'
 import BorderBox from '@/components/common/BorderBox'
@@ -37,22 +37,22 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 py-0 md:py-8">
-          <Container>
+          <CenteredContainer>
             <NewEntityTab selected="function" />
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="1">Code to execute</SectionTitle>
             <p>
               If your code has any dependencies, you can upload them separately
               in the volume section below to ensure a faster creation.
             </p>
             <AddFunctionCode name="code" control={control} />
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 py-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="2">Type of scheduling</SectionTitle>
             <p tw="mb-6">
               Configure if this program should be running continuously,
@@ -60,10 +60,10 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
               event.
             </p>
             <SelectFunctionPersistence name="isPersistent" control={control} />
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 py-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="3">Select an instance size</SectionTitle>
             <p tw="mb-6">
               Select the hardware resources allocated to your functions,
@@ -76,10 +76,10 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
               type={EntityType.Program}
               isPersistent={values.isPersistent}
             />
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 py-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="4">Name and tags</SectionTitle>
             <p tw="mb-6">
               Organize and identify your functions more effectively by assigning
@@ -88,11 +88,11 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
               easier to manage your web3 functions.
             </p>
             <AddNameAndTags control={control} entityType={EntityType.Program} />
-          </Container>
+          </CenteredContainer>
         </section>
 
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="5">
               Advanced Configuration Options
             </SectionTitle>
@@ -149,7 +149,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
                 </SwitchToggleContainer>
               </div>
             </div>
-          </Container>
+          </CenteredContainer>
         </section>
 
         <CheckoutSummary

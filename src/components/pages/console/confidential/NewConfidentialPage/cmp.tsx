@@ -1,5 +1,5 @@
 import BackButtonSection from '@/components/common/BackButtonSection'
-import { Container } from '../../common'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import {
   BulletItem,
@@ -80,13 +80,13 @@ export default function NewConfidentialPage() {
     <>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 py-0 md:py-8">
-        <Container>
+        <CenteredContainer>
           <NewEntityTab selected="confidential" />
-        </Container>
+        </CenteredContainer>
       </section>
       {/* 0. Requirements */}
       <section tw="px-0 pt-20 md:pt-10 pb-5">
-        <Container>
+        <CenteredContainer>
           <ToggleContainer
             toggleTitle={<SectionTitle number={0}>Requirements</SectionTitle>}
           >
@@ -137,11 +137,11 @@ export default function NewConfidentialPage() {
               </div>
             </div>
           </ToggleContainer>
-        </Container>
+        </CenteredContainer>
       </section>
       {/* 1. Create encrypted disk image */}
       <section tw="px-0 pt-0 pb-5">
-        <Container>
+        <CenteredContainer>
           <ToggleContainer
             toggleTitle={
               <SectionTitle number={1}>
@@ -278,11 +278,11 @@ export default function NewConfidentialPage() {
               </div>
             </div>
           </ToggleContainer>
-        </Container>
+        </CenteredContainer>
       </section>
       {/* 2. Upload encrypted disk image */}
       <section tw="px-0 pt-0 pb-5">
-        <Container>
+        <CenteredContainer>
           <ToggleContainer
             toggleTitle={
               <SectionTitle number={2}>
@@ -353,11 +353,11 @@ export default function NewConfidentialPage() {
               )}
             </div>
           </ToggleContainer>
-        </Container>
+        </CenteredContainer>
       </section>
       {/* 3. Create Confidential instance */}
       <section tw="px-0 pt-0 pb-5">
-        <Container>
+        <CenteredContainer>
           <ToggleContainer
             toggleTitle={
               <SectionTitle number={3}>
@@ -389,10 +389,10 @@ export default function NewConfidentialPage() {
               </div>
             </div>
           </ToggleContainer>
-        </Container>
+        </CenteredContainer>
       </section>
       <section tw="px-0 pt-6 pb-20">
-        <Container tw="flex items-center justify-center pt-8">
+        <CenteredContainer tw="flex items-center justify-center pt-8">
           <Button
             as="a"
             href="/computing/confidential"
@@ -400,7 +400,7 @@ export default function NewConfidentialPage() {
           >
             Check your Confidentials <Icon name="arrow-right" />
           </Button>
-        </Container>
+        </CenteredContainer>
       </section>
     </>
   )

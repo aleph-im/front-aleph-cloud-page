@@ -1,6 +1,6 @@
 import React from 'react'
 import { Tabs } from '@aleph-front/core'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useSettingsDashboardPage } from './hook'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
@@ -12,16 +12,16 @@ export default function SettingsDashboardPage() {
 
   return (
     <>
-      <Container $variant="xl" tw="my-10">
+      <CenteredContainer $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
-      </Container>
+      </CenteredContainer>
       <div role="tabpanel">
         {tabId === 'ssh' ? (
           <>
             {!!sshKeys?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <SSHKeysTabContent data={sshKeys} />
-              </Container>
+              </CenteredContainer>
             )}
             <DashboardCardWithSideImage
               info="WHAT ARE..."
@@ -37,9 +37,9 @@ export default function SettingsDashboardPage() {
         ) : tabId === 'domain' ? (
           <>
             {!!domains?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <DomainsTabContent data={domains} />
-              </Container>
+              </CenteredContainer>
             )}
             <DashboardCardWithSideImage
               info="WHAT ARE..."
@@ -57,9 +57,9 @@ export default function SettingsDashboardPage() {
           <></>
         )}
       </div>
-      <Container $variant="xl">
+      <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
-      </Container>
+      </CenteredContainer>
     </>
   )
 }

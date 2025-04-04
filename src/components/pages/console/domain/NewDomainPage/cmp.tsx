@@ -9,7 +9,7 @@ import {
   Tabs,
 } from '@aleph-front/core'
 import ButtonLink from '@/components/common/ButtonLink'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { NoisyContainer } from '@aleph-front/core'
 import Form from '@/components/form/Form'
@@ -54,7 +54,7 @@ export default function NewDomain() {
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="1">Custom domain</SectionTitle>
             <p tw="mb-6">
               Assign a user-friendly domain to your website, instance or
@@ -77,10 +77,10 @@ export default function NewDomain() {
                 Learn more
               </ExternalLinkButton>
             </div>
-          </Container>
+          </CenteredContainer>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <Container>
+          <CenteredContainer>
             <SectionTitle number="2">Select Resource</SectionTitle>
             <p tw="mb-6">
               You&apos;ll need to specify the resource your custom domain will
@@ -225,7 +225,7 @@ export default function NewDomain() {
                 Create domain
               </Button>
             </div>
-          </Container>
+          </CenteredContainer>
         </section>
       </Form>
     </>

@@ -1,5 +1,5 @@
 import { Tabs } from '@aleph-front/core'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import VolumesTabContent from '../../volume/VolumesTabContent'
 import DomainsTabContent from '../../domain/DomainsTabContent'
@@ -15,16 +15,16 @@ export default function ConfidentialDashboardPage() {
 
   return (
     <>
-      <Container $variant="xl" tw="my-10">
+      <CenteredContainer $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
-      </Container>
+      </CenteredContainer>
       <div role="tabpanel">
         {tabId === 'confidential' ? (
           <>
             {!!confidentials?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <ConfidentialsTabContent data={confidentials} />
-              </Container>
+              </CenteredContainer>
             )}
             <DashboardCardWithSideImage
               imageSrc="/img/dashboard/instance.svg"
@@ -41,26 +41,26 @@ export default function ConfidentialDashboardPage() {
         ) : tabId === 'volume' ? (
           <>
             {!!volumes?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <VolumesTabContent data={volumes} cta={false} />
-              </Container>
+              </CenteredContainer>
             )}
           </>
         ) : tabId === 'domain' ? (
           <>
             {!!domains?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <DomainsTabContent data={domains} cta={false} />
-              </Container>
+              </CenteredContainer>
             )}
           </>
         ) : (
           <></>
         )}
       </div>
-      <Container $variant="xl">
+      <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
-      </Container>
+      </CenteredContainer>
     </>
   )
 }

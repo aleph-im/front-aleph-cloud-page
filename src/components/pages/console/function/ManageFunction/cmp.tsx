@@ -11,7 +11,8 @@ import {
   humanReadableSize,
   convertByteUnits,
 } from '@/helpers/utils'
-import { Container, Text, Separator } from '../../common'
+import { Text, Separator } from '../../common'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import VolumeList from '../../volume/VolumeList'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
@@ -48,9 +49,9 @@ export default function ManageFunction() {
     return (
       <>
         <BackButtonSection handleBack={handleBack} />
-        <Container>
+        <CenteredContainer>
           <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </Container>
+        </CenteredContainer>
       </>
     )
   }
@@ -63,7 +64,7 @@ export default function ManageFunction() {
     <>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
-        <Container>
+        <CenteredContainer>
           <div tw="flex justify-between pb-5 flex-wrap gap-4 flex-col md:flex-row">
             <div tw="flex items-center">
               <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
@@ -389,7 +390,7 @@ export default function ManageFunction() {
               Create new function
             </ButtonLink>
           </div>
-        </Container>
+        </CenteredContainer>
       </section>
     </>
   )

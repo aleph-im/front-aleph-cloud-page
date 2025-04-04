@@ -1,6 +1,6 @@
 import React from 'react'
 import { Tabs } from '@aleph-front/core'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import WebsitesTabContent from '../WebsitesTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
@@ -13,9 +13,9 @@ export default function SettingsDashboardPage() {
   return (
     <>
       {tabs.length ? (
-        <Container $variant="xl" tw="my-10">
+        <CenteredContainer $variant="xl" tw="my-10">
           <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
-        </Container>
+        </CenteredContainer>
       ) : (
         <></>
       )}
@@ -23,9 +23,9 @@ export default function SettingsDashboardPage() {
         {tabId === 'website' ? (
           <>
             {!!websites?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <WebsitesTabContent data={websites} />
-              </Container>
+              </CenteredContainer>
             )}
             <DashboardCardWithSideImage
               imageSrc="/img/dashboard/website.svg"
@@ -41,18 +41,18 @@ export default function SettingsDashboardPage() {
         ) : tabId === 'domain' ? (
           <>
             {!!domains?.length && (
-              <Container $variant="xl" tw="my-10">
+              <CenteredContainer $variant="xl" tw="my-10">
                 <DomainsTabContent data={domains} cta={false} />
-              </Container>
+              </CenteredContainer>
             )}
           </>
         ) : (
           <></>
         )}
       </div>
-      <Container $variant="xl">
+      <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
-      </Container>
+      </CenteredContainer>
     </>
   )
 }
