@@ -99,7 +99,7 @@ export const LinkCRNButton = ({
           kind="gradient"
           size="md"
           variant="secondary"
-          color="main1"
+          color="main0"
           onClick={handleOnClick}
         >
           Unlink
