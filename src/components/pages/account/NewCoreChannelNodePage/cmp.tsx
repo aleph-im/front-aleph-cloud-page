@@ -11,6 +11,7 @@ import {
 import { useNewCoreChannelNodePage } from './hook'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import ButtonLink from '@/components/common/ButtonLink'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 
 export const NewCoreChannelNodePage = () => {
   const { nameCtrl, multiaddressCtrl, errors, handleSubmit } =
@@ -26,7 +27,7 @@ export const NewCoreChannelNodePage = () => {
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <div tw="px-6 lg:px-16 pb-6 lg:pb-5">
+      <CenteredContainer $variant="xl">
         <section>
           <TextGradient type="h5" forwardedAs="h1" tw="mb-8">
             Create core node
@@ -95,7 +96,7 @@ export const NewCoreChannelNodePage = () => {
             </section>
           </Form>
         </section>
-      </div>
+      </CenteredContainer>
     </>
   )
 }

@@ -12,6 +12,7 @@ import EstimatedNodeRewardsChart from '@/components/common/EstimatedNodeRewardsC
 import { useLazyRender } from '@/hooks/common/useLazyRender'
 import AvailableCRNSpotChart from '@/components/common/AvailableCRNSpotChart'
 import { StakeManager } from '@/domain/stake'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 
 export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
   const {
@@ -61,7 +62,7 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
         <meta name="description" content="Aleph Cloud Account Dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <div tw="px-6 lg:px-16 pb-6 lg:pb-5">
+      <CenteredContainer $variant="xl">
         <section>
           <TextGradient type="h5" forwardedAs="h1" tw="mb-8">
             Core nodes
@@ -175,7 +176,7 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
             </div>
           </div>
         </section>
-      </div>
+      </CenteredContainer>
     </>
   )
 }

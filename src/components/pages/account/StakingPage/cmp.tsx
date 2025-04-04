@@ -14,6 +14,7 @@ import ToggleDashboard from '@/components/common/ToggleDashboard'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import StakeChart from '@/components/common/StakeChart'
 import { useLazyRender } from '@/hooks/common/useLazyRender'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 
 export const StakingPage = (props: UseStakingPageProps) => {
   const {
@@ -48,7 +49,7 @@ export const StakingPage = (props: UseStakingPageProps) => {
         <meta name="description" content="Aleph Cloud Account Dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <div tw="px-6 lg:px-16 pb-6 lg:pb-5">
+      <CenteredContainer $variant="xl">
         <section>
           <TextGradient type="h5" forwardedAs="h1" tw="mb-8">
             Staking
@@ -170,7 +171,7 @@ export const StakingPage = (props: UseStakingPageProps) => {
             </div>
           </div>
         </section>
-      </div>
+      </CenteredContainer>
     </>
   )
 }

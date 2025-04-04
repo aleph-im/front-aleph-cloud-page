@@ -21,6 +21,7 @@ import {
   useComputeResourceNodesPage,
   UseComputeResourceNodesPageProps,
 } from './hook'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 
 export const ComputeResourceNodesPage = (
   props: UseComputeResourceNodesPageProps,
@@ -75,7 +76,7 @@ export const ComputeResourceNodesPage = (
         <meta name="description" content="Aleph Cloud Account Dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <div tw="px-6 lg:px-16 pb-6 lg:pb-5">
+      <CenteredContainer $variant="xl">
         <section>
           <TextGradient type="h5" forwardedAs="h1" tw="mb-8">
             Compute nodes
@@ -206,7 +207,7 @@ export const ComputeResourceNodesPage = (
             </div>
           </div>
         </section>
-      </div>
+      </CenteredContainer>
     </>
   )
 }
