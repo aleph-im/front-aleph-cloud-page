@@ -252,22 +252,31 @@ export abstract class BaseConnectionProviderManager {
     const provider = this.getProvider()
     const blockchainId = await this.getBlockchain()
 
+    let account: any
+
     switch (blockchainId) {
       case BlockchainId.ETH:
-        return getETHAccount(provider as any)
+        account = await getETHAccount(provider as any)
+        break
 
       case BlockchainId.AVAX:
-        return getAVAXAccount(provider as any)
+        account = await getAVAXAccount(provider as any)
+        break
 
       case BlockchainId.BASE:
-        return getBASEAccount(provider as any)
+        account = await getBASEAccount(provider as any)
+        break
 
       case BlockchainId.SOL:
-        return getSOLAccount(provider as any)
+        account = await getSOLAccount(provider as any)
+        break
 
       default:
         throw Err.ChainNotYetSupported
     }
+
+    // account.address = '0x000'
+    return account
   }
 
   async getBalance(account: Account): Promise<number> {

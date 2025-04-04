@@ -1,9 +1,10 @@
 import { useAppState } from '@/contexts/appState'
 import { CCN, CRN } from '@/domain/node'
 import { EntityAddAction } from '@/store/entity'
-import { useNotification } from '@aleph-front/core'
+import { useNotification, TooltipProps } from '@aleph-front/core'
 import { useCallback } from 'react'
 import { useNodeManager } from '../useManager/useNodeManager'
+import { useEthereumNetwork } from '../useEthereumNetwork'
 
 export type UseLinkingReturn = {
   isLinked: (crnHashOrNode: string | CRN) => boolean
@@ -12,6 +13,8 @@ export type UseLinkingReturn = {
     ccnHashOrNode: string | CCN,
   ) => boolean
   isUnlinkableByUser: (crnHashOrNode: string | CRN) => boolean
+  isEthereumNetwork: boolean
+  getEthereumNetworkTooltip: () => TooltipProps['content']
   handleLink: (
     crnHashOrNode: string | CRN,
     ccnHashOrNode: string | CCN,
@@ -69,6 +72,7 @@ export function useLinking(): UseLinkingReturn {
   const { entities: ccns } = state.ccns
 
   const nodeManager = useNodeManager()
+  const { isEthereumNetwork, getEthereumNetworkTooltip } = useEthereumNetwork()
 
   const noti = useNotification()
 
@@ -232,6 +236,8 @@ export function useLinking(): UseLinkingReturn {
     isLinked,
     isLinkableByUser,
     isUnlinkableByUser,
+    isEthereumNetwork,
+    getEthereumNetworkTooltip,
     handleLink,
     handleUnlink,
   }

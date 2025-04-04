@@ -1,8 +1,7 @@
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { UseComputeResourceNodeDetailPageReturn } from '@/components/pages/account/ComputeResourceNodeDetailPage/hook'
 import Card2, { Card2Field } from '@/components/common/Card2'
 import {
-  Button,
   Col,
   ellipseText,
   FileInput,
@@ -10,6 +9,10 @@ import {
   Row,
   Spinner,
 } from '@aleph-front/core'
+import { useAppState } from '@/contexts/appState'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
+import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
+import { unsupportedNetworkDisabledMessage } from '@/components/pages/account/disabledMessages'
 import ExternalLink from '@/components/common/ExternalLink'
 import { usePoliciesTabContent } from './hook'
 
@@ -35,6 +38,17 @@ export const PoliciesTabContent = (props: PoliciesTabContentProps) => {
     handleRemovePolicies,
   } = usePoliciesTabContent(props)
 
+  const [state] = useAppState()
+  const { blockchain } = state.connection
+
+  const isEthereumNetwork = useMemo(() => {
+    return blockchain === BlockchainId.ETH
+  }, [blockchain])
+
+  const blockchainName = useMemo(() => {
+    return blockchain ? blockchains[blockchain]?.name : 'Current network'
+  }, [blockchain])
+
   return (
     <section tw="mt-8">
       <Row count={1} xl={5} xlGap={'2rem'}>
@@ -46,22 +60,33 @@ export const PoliciesTabContent = (props: PoliciesTabContentProps) => {
           </Card2>
           {isOwner && (
             <>
-              <Button
+              <ButtonWithInfoTooltip
                 kind="flat"
                 variant="secondary"
                 size="md"
                 color="error"
                 onClick={handleRemovePolicies}
                 tw="my-8!"
-                disabled={removePoliciesDisabled}
+                disabled={removePoliciesDisabled || !isEthereumNetwork}
+                tooltipContent={
+                  !isEthereumNetwork
+                    ? unsupportedNetworkDisabledMessage(blockchainName)
+                    : undefined
+                }
+                tooltipPosition={{
+                  my: 'bottom-center',
+                  at: 'top-center',
+                }}
               >
                 <Icon
                   name="trash"
-                  color={removePoliciesDisabled ? '' : 'error'}
+                  color={
+                    removePoliciesDisabled || !isEthereumNetwork ? '' : 'error'
+                  }
                   size="lg"
                 />
                 remove policies
-              </Button>
+              </ButtonWithInfoTooltip>
               <FileInput
                 {...termsAndConditionsCtrl.field}
                 {...termsAndConditionsCtrl.fieldState}

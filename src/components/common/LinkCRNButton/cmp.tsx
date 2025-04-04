@@ -2,6 +2,9 @@ import { memo, useCallback, useMemo } from 'react'
 import { Button } from '@aleph-front/core'
 import { CCN, CRN } from '@/domain/node'
 import { UseLinkingReturn, useLinking } from '@/hooks/common/node/useLinking'
+import ButtonWithInfoTooltip, {
+  ButtonWithInfoTooltipProps,
+} from '@/components/common/ButtonWithInfoTooltip'
 
 export type LinkCRNButtonProps = {
   node: CRN
@@ -23,6 +26,8 @@ export const LinkCRNButton = ({
     isUnlinkableByUser: isUnlinkableByUserCheck,
     handleLink: defaultHandleLink,
     handleUnlink: defaultHandleUnlink,
+    isEthereumNetwork,
+    getEthereumNetworkTooltip,
   } = useLinking()
 
   const handleLink = onLink || defaultHandleLink
@@ -47,6 +52,34 @@ export const LinkCRNButton = ({
       handleLink(node, userNode)
     }
   }, [handleLink, handleUnlink, isUnlinkableByUser, node, userNode])
+
+  const buttonDisabled =
+    (!isLinkableByUser && !isUnlinkableByUser) || !isEthereumNetwork
+  const tooltipContent = getEthereumNetworkTooltip()
+
+  const buttonProps: Omit<ButtonWithInfoTooltipProps, 'children'> = {
+    kind: 'gradient',
+    size: 'md',
+    variant: 'secondary',
+    color: isUnlinkableByUser ? 'main1' : 'main0',
+    onClick: handleOnClick,
+    disabled: buttonDisabled,
+  }
+
+  if (!isEthereumNetwork) {
+    return (
+      <ButtonWithInfoTooltip
+        {...buttonProps}
+        tooltipContent={tooltipContent}
+        tooltipPosition={{
+          my: 'bottom-center',
+          at: 'top-center',
+        }}
+      >
+        {isUnlinkableByUser ? 'Unlink' : 'Link'}
+      </ButtonWithInfoTooltip>
+    )
+  }
 
   return (
     <>

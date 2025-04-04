@@ -11,8 +11,9 @@ import {
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CCN, NewCCN, NodeManager } from '@/domain/node'
-import { useNotification } from '@aleph-front/core'
+import { useNotification, TooltipProps } from '@aleph-front/core'
 import { EntityAddAction } from '@/store/entity'
+import { useEthereumNetwork } from '@/hooks/common/useEthereumNetwork'
 
 export type NewCoreChannelNodeFormState = NewCCN
 
@@ -30,6 +31,8 @@ export type UseNewCoreChannelNodeFormReturn = {
     'multiaddress'
   >
   errors: FieldErrors<NewCoreChannelNodeFormState>
+  isEthereumNetwork: boolean
+  getEthereumNetworkTooltip: () => TooltipProps['content']
   handleSubmit: (e: FormEvent) => Promise<void>
 }
 
@@ -70,6 +73,7 @@ export function useNewCoreChannelNodeForm(): UseNewCoreChannelNodeFormReturn {
     manager: { nodeManager },
   } = state
 
+  const { isEthereumNetwork, getEthereumNetworkTooltip } = useEthereumNetwork()
   const noti = useNotification()
 
   const onSubmit = useCallback(
@@ -137,6 +141,8 @@ export function useNewCoreChannelNodeForm(): UseNewCoreChannelNodeFormReturn {
     nameCtrl,
     multiaddressCtrl,
     errors,
+    isEthereumNetwork,
+    getEthereumNetworkTooltip,
     handleSubmit,
   }
 }

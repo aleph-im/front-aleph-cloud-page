@@ -1,13 +1,16 @@
 import { useAppState } from '@/contexts/appState'
 import { CCN, NodeManager } from '@/domain/node'
 import { EntityAddAction } from '@/store/entity'
-import { useNotification } from '@aleph-front/core'
+import { useNotification, TooltipProps } from '@aleph-front/core'
 import { useCallback, useMemo } from 'react'
 import { useNodeManager } from '../useManager/useNodeManager'
 import { useStakeManager } from '../useManager/useStakeManager'
+import { useEthereumNetwork } from '../useEthereumNetwork'
 
 export type UseStakingReturn = {
   userStake: number
+  isEthereumNetwork: boolean
+  getEthereumNetworkTooltip: () => TooltipProps['content']
   handleStake: (nodeHash: string) => Promise<boolean>
   handleUnstake: (nodeHash: string) => Promise<boolean>
 }
@@ -72,6 +75,7 @@ export function useStaking(): UseStakingReturn {
 
   const stakeManager = useStakeManager()
   const nodeManager = useNodeManager()
+  const { isEthereumNetwork, getEthereumNetworkTooltip } = useEthereumNetwork()
 
   const noti = useNotification()
 
@@ -180,6 +184,8 @@ export function useStaking(): UseStakingReturn {
 
   return {
     userStake,
+    isEthereumNetwork,
+    getEthereumNetworkTooltip,
     handleStake,
     handleUnstake,
   }

@@ -11,8 +11,9 @@ import {
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CRN, NewCRN, NodeManager } from '@/domain/node'
-import { useNotification } from '@aleph-front/core'
+import { useNotification, TooltipProps } from '@aleph-front/core'
 import { EntityAddAction } from '@/store/entity'
+import { useEthereumNetwork } from '@/hooks/common/useEthereumNetwork'
 
 export type NewComputeResourceNodeFormState = NewCRN
 
@@ -29,6 +30,8 @@ export type UseNewComputeResourceNodeFormReturn = {
   nameCtrl: UseControllerReturn<NewComputeResourceNodeFormState, 'name'>
   addressCtrl: UseControllerReturn<NewComputeResourceNodeFormState, 'address'>
   errors: FieldErrors<NewComputeResourceNodeFormState>
+  isEthereumNetwork: boolean
+  getEthereumNetworkTooltip: () => TooltipProps['content']
   handleSubmit: (e: FormEvent) => Promise<void>
 }
 
@@ -67,6 +70,7 @@ export function useNewComputeResourceNodeForm(): UseNewComputeResourceNodeFormRe
     manager: { nodeManager },
   } = state
 
+  const { isEthereumNetwork, getEthereumNetworkTooltip } = useEthereumNetwork()
   const noti = useNotification()
 
   const onSubmit = useCallback(
@@ -134,6 +138,8 @@ export function useNewComputeResourceNodeForm(): UseNewComputeResourceNodeFormRe
     nameCtrl,
     addressCtrl,
     errors,
+    isEthereumNetwork,
+    getEthereumNetworkTooltip,
     handleSubmit,
   }
 }

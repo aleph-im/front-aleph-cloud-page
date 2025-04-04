@@ -1,5 +1,5 @@
-import { memo } from 'react'
-import { Button, Icon, NodeName, Tooltip } from '@aleph-front/core'
+import { memo, useMemo } from 'react'
+import { Icon, NodeName, Tooltip } from '@aleph-front/core'
 import {
   ellipseAddress,
   getAVAXExplorerURL,
@@ -20,6 +20,10 @@ import { StreamNotSupportedIssue } from '@/domain/node'
 import { ThreeDots } from 'react-loader-spinner'
 import { LinkedStatusDotIcon } from '@/components/common/NodeLinkedNodes'
 import { UseComputeResourceNodeDetailPageReturn } from '@/components/pages/account/ComputeResourceNodeDetailPage/hook'
+import { useAppState } from '@/contexts/appState'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
+import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
+import { unsupportedNetworkDisabledMessage } from '@/components/pages/account/disabledMessages'
 
 export type OverviewTabContentProps = Pick<
   UseComputeResourceNodeDetailPageReturn,
@@ -67,6 +71,16 @@ export const OverviewTabContent = ({
   handleLink,
   handleUnlink,
 }: OverviewTabContentProps) => {
+  const [state] = useAppState()
+  const { blockchain } = state.connection
+
+  const isEthereumNetwork = useMemo(() => {
+    return blockchain === BlockchainId.ETH
+  }, [blockchain])
+
+  const blockchainName = useMemo(() => {
+    return blockchain ? blockchains[blockchain]?.name : 'Current network'
+  }, [blockchain])
   return (
     <section tw="mt-8">
       <div tw="flex flex-wrap gap-9">
@@ -337,17 +351,27 @@ export const OverviewTabContent = ({
                   <div tw="w-6 h-6 rounded-full bg-[#C4C4C433]" />
                   <div className="fs-10" tw="leading-4">
                     {isLinkableByUser ? (
-                      <Button
+                      <ButtonWithInfoTooltip
                         color="main0"
                         size="md"
                         kind="gradient"
                         variant="textOnly"
                         onClick={handleLink}
+                        disabled={!isEthereumNetwork}
+                        tooltipContent={
+                          !isEthereumNetwork
+                            ? unsupportedNetworkDisabledMessage(blockchainName)
+                            : undefined
+                        }
+                        tooltipPosition={{
+                          my: 'bottom-center',
+                          at: 'top-center',
+                        }}
                       >
                         <div>
                           <Icon name="link" tw="w-3.5 h-3.5" /> link now
                         </div>
-                      </Button>
+                      </ButtonWithInfoTooltip>
                     ) : (
                       <>not linked</>
                     )}
@@ -374,9 +398,23 @@ export const OverviewTabContent = ({
                     </>
                   )}
                   {isUnlinkableByUser && (
-                    <button onClick={handleUnlink}>
+                    <ButtonWithInfoTooltip
+                      kind="flat"
+                      variant="textOnly"
+                      onClick={handleUnlink}
+                      disabled={!isEthereumNetwork}
+                      tooltipContent={
+                        !isEthereumNetwork
+                          ? unsupportedNetworkDisabledMessage(blockchainName)
+                          : undefined
+                      }
+                      tooltipPosition={{
+                        my: 'bottom-center',
+                        at: 'top-center',
+                      }}
+                    >
                       <Icon name="trash" color="error" />
-                    </button>
+                    </ButtonWithInfoTooltip>
                   )}
                 </>
               )}

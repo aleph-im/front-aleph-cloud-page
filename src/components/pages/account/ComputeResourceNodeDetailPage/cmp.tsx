@@ -1,7 +1,11 @@
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import Head from 'next/head'
 import { useComputeResourceNodeDetailPage } from './hook'
-import { Button, Icon, Tabs } from '@aleph-front/core'
+import { Icon, Tabs } from '@aleph-front/core'
+import { useAppState } from '@/contexts/appState'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
+import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
+import { unsupportedNetworkDisabledMessage } from '@/components/pages/account/disabledMessages'
 import NodeDetailHeader from '@/components/common/NodeDetailHeader'
 import OverviewTabContent from './tabs/OverviewTabContent/cmp'
 import PoliciesTabContent from './tabs/PoliciesTabContent'
@@ -43,6 +47,17 @@ export const ComputeResourceNodeDetailPage = () => {
     handleUnlink,
   } = useComputeResourceNodeDetailPage()
 
+  const [state] = useAppState()
+  const { blockchain } = state.connection
+
+  const isEthereumNetwork = useMemo(() => {
+    return blockchain === BlockchainId.ETH
+  }, [blockchain])
+
+  const blockchainName = useMemo(() => {
+    return blockchain ? blockchains[blockchain]?.name : 'Current network'
+  }, [blockchain])
+
   return (
     <>
       <Head>
@@ -64,26 +79,45 @@ export const ComputeResourceNodeDetailPage = () => {
           />
           {isOwner && (
             <div tw="my-8 flex items-center justify-end gap-7">
-              <Button
+              <ButtonWithInfoTooltip
                 kind="flat"
                 variant="textOnly"
                 size="md"
                 color="error"
                 onClick={handleRemove}
+                disabled={!isEthereumNetwork}
+                tooltipContent={
+                  !isEthereumNetwork
+                    ? unsupportedNetworkDisabledMessage(blockchainName)
+                    : undefined
+                }
+                tooltipPosition={{
+                  my: 'bottom-center',
+                  at: 'top-center',
+                }}
               >
                 <Icon name="trash" color="error" size="lg" />
                 remove node
-              </Button>
-              <Button
+              </ButtonWithInfoTooltip>
+              <ButtonWithInfoTooltip
                 kind="gradient"
                 variant="primary"
                 size="md"
                 color="main0"
                 onClick={handleSubmit}
-                disabled={!isDirty}
+                disabled={!isDirty || !isEthereumNetwork}
+                tooltipContent={
+                  !isEthereumNetwork
+                    ? unsupportedNetworkDisabledMessage(blockchainName)
+                    : undefined
+                }
+                tooltipPosition={{
+                  my: 'bottom-center',
+                  at: 'top-center',
+                }}
               >
                 save changes
-              </Button>
+              </ButtonWithInfoTooltip>
             </div>
           )}
           <div tw="flex my-8">

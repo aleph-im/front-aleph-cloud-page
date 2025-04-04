@@ -2,20 +2,26 @@ import { memo } from 'react'
 import Head from 'next/head'
 import Form from '@/components/form/Form'
 import {
-  Button,
   CompositeTitle,
   NoisyContainer,
   TextGradient,
   TextInput,
 } from '@aleph-front/core'
+import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { useNewCoreChannelNodePage } from './hook'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import ButtonLink from '@/components/common/ButtonLink'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 
 export const NewCoreChannelNodePage = () => {
-  const { nameCtrl, multiaddressCtrl, errors, handleSubmit } =
-    useNewCoreChannelNodePage()
+  const {
+    nameCtrl,
+    multiaddressCtrl,
+    errors,
+    handleSubmit,
+    isEthereumNetwork,
+    getEthereumNetworkTooltip,
+  } = useNewCoreChannelNodePage()
 
   return (
     <>
@@ -81,15 +87,21 @@ export const NewCoreChannelNodePage = () => {
               </NoisyContainer>
             </section>
             <section tw="flex gap-10">
-              <Button
+              <ButtonWithInfoTooltip
                 color="main0"
                 kind="gradient"
                 variant="primary"
                 size="md"
                 type="submit"
+                disabled={!isEthereumNetwork}
+                tooltipContent={getEthereumNetworkTooltip()}
+                tooltipPosition={{
+                  my: 'bottom-center',
+                  at: 'top-center',
+                }}
               >
                 Create core node
-              </Button>
+              </ButtonWithInfoTooltip>
               <ButtonLink size="md" variant="textOnly" href="/account/earn/ccn">
                 Cancel
               </ButtonLink>
