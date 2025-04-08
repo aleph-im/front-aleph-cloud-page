@@ -51,9 +51,6 @@ export const StakingNodesTable = ({
       {
         label: '',
         align: 'center',
-        width: 0,
-        cellProps: () => ({ css: tw`p-0!` }),
-        hcellProps: () => ({ css: tw`p-0! border-0!` }),
         render: (node) =>
           nodesIssues?.[node.hash] ? (
             <NotificationBadge tw="flex! mx-auto!">&nbsp;</NotificationBadge>
