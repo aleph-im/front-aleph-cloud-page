@@ -97,7 +97,11 @@ export function getConnectionReducer(): ConnectionReducer {
         if (action.payload && action.payload.provider !== state.provider)
           return state
 
-        return { ...initialState }
+        // Keep the current payment method but reset everything else
+        return {
+          ...initialState,
+          paymentMethod: state.paymentMethod,
+        }
       }
 
       case ConnectionActionType.CONNECTION_CONNECT:
