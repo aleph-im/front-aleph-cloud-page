@@ -34,6 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
               <Main ref={mainRef}>
                 <Header />
                 <Content ref={contentRef}>
+                  <Loading />
                   <Component
                     {...{
                       ...pageProps,
@@ -41,7 +42,6 @@ export default function App({ Component, pageProps }: AppProps) {
                       contentRef,
                     }}
                   />
-                  <Loading />
                 </Content>
                 <Footer />
               </Main>
