@@ -22,15 +22,16 @@ export const StyledProgressContainer = styled.div<StyledProgressContainerProps>`
 
 export type StyledFakeProgressBarProps = {
   $progress: number
+  $skipTransition?: boolean
 }
 
 export const StyledFakeProgressBar = styled.div<StyledFakeProgressBarProps>`
-  ${({ theme, $progress }) => css`
+  ${({ theme, $progress, $skipTransition }) => css`
     ${tw`relative h-full`}
 
     width: ${$progress || 0}%;
 
     background: ${theme.color.main0};
-    transition: width 0.3s ease-out;
+    transition: ${$skipTransition ? 'none' : 'width 0.3s ease-out'};
   `}
 `
