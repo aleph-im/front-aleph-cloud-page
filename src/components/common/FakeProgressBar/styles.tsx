@@ -7,7 +7,8 @@ export type StyledProgressContainerProps = {
 
 export const StyledProgressContainer = styled.div<StyledProgressContainerProps>`
   ${({ $show }) => css`
-    ${tw`fixed lg:absolute top-0 left-0 right-0 h-1 z-50`}
+    ${tw`fixed lg:absolute top-0 left-0 right-0 z-50`}
+    height: 0.1875rem;
 
     ${$show
       ? css`
@@ -29,7 +30,7 @@ export const StyledFakeProgressBar = styled.div<StyledFakeProgressBarProps>`
 
     width: ${$progress || 0}%;
 
-    background: ${theme.color.main0}90;
+    background: ${theme.color.main0};
     transition: width 0.3s ease-out;
   `}
 `
