@@ -1,5 +1,4 @@
 import { memo, useMemo } from 'react'
-import tw from 'twin.macro'
 import {
   NodeName,
   NodeScore,
