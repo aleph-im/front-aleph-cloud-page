@@ -71,15 +71,6 @@ export const FakeProgressBar = ({ loading }: FakeProgressBarProps) => {
     }
   }, [progress, resetProgress])
 
-  // if (shouldMount || loading) {
-  //   console.log('ahora')
-  // } else {
-  //   console.log('no ahora')
-  // }
-  // console.log('loading', loading)
-  // console.log('shouldMount', shouldMount)
-  // console.log('stage', stage)
-
   return (
     <StyledProgressContainer $show={shouldMount || loading}>
       <StyledFakeProgressBar $progress={progress} />
