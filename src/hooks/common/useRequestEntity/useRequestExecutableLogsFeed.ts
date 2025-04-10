@@ -44,7 +44,7 @@ export function useRequestExecutableLogsFeed({
   useEffect(() => {
     const abort = new Future<void>()
 
-    async function subscribeFeed() {
+    const subscribeFeed = async () => {
       if (!subscribe) return
       if (!manager) return
       if (!nodeUrl) return

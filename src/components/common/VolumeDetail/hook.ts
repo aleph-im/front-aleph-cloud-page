@@ -59,7 +59,7 @@ export function useVolumeDetail({
 
       dispatch(new EntityDelAction({ name: 'volume', keys: [volume.id] }))
 
-      await router.replace('/')
+      await router.replace('/console')
     } catch (e) {
       console.error(e)
 

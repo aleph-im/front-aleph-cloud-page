@@ -14,7 +14,7 @@ import React from 'react'
 import { PaymentMethod } from '@/helpers/constants'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import InfoTooltipButton from '../../common/InfoTooltipButton'
-import Container from '@/components/common/CenteredContainer'
+import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { TextGradient } from '@aleph-front/core'
 import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import Price from '@/components/common/Price'
@@ -217,7 +217,7 @@ export const CheckoutSummary = ({
         className="fx-noise-light fx-grain-4"
         tw="px-0 pt-6 pb-24 md:pt-16 md:pb-32 md:mt-auto"
       >
-        <Container>
+        <CenteredContainer>
           <div className="bg-base1" tw="p-6">
             <TextGradient forwardedAs="h2" type="h5" tw="mb-1">
               Checkout summary
@@ -362,7 +362,7 @@ export const CheckoutSummary = ({
 
             {buttonNode && <div tw="mt-16 text-center">{buttonNode}</div>}
           </div>
-        </Container>
+        </CenteredContainer>
       </section>
     </>
   )

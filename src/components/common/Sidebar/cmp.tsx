@@ -39,6 +39,7 @@ const Sidebar = memo(() => {
       Link={Link as LinkComponent}
       logoHref={websiteUrl}
       logoTarget="_blank"
+      logoImg="aleph"
     />
   )
 })

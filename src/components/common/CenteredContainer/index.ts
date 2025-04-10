@@ -1,2 +1,1 @@
-export { default } from './styles'
-export type { CenteredContainerProps } from './types'
+export { default as CenteredContainer } from './cmp'

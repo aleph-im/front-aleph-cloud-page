@@ -26,7 +26,7 @@ export function useRequestExecutableStatus({
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    async function load() {
+    const load = async () => {
       if (!entities) return
 
       await Promise.allSettled(

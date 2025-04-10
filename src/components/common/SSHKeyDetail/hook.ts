@@ -60,7 +60,7 @@ export function useSSHKeyDetail({
 
       dispatch(new EntityDelAction({ name: 'ssh', keys: [sshKey.id] }))
 
-      await router.replace('/')
+      await router.replace('/console')
     } catch (e) {
       console.error(e)
 

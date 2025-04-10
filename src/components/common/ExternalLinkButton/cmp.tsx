@@ -6,24 +6,23 @@ import { Icon } from '@aleph-front/core'
 export const ExternalLinkButton = ({
   children,
   href,
+  size = 'md',
   ...rest
 }: ExternalLinkButtonProps) => {
   return (
     <>
       <StyledExternalLinkButton
-        {...{
-          href,
-          target: '_blank',
-          ...rest,
-        }}
-        tw="inline-flex items-center gap-2.5"
+        href={href}
+        size={size}
+        {...rest}
+        target="_blank"
       >
         {children ? children : href}
-        <Icon name="square-up-right" />
+        <Icon name="square-up-right" tw="ml-2.5" />
       </StyledExternalLinkButton>
     </>
   )
 }
 ExternalLinkButton.displayName = 'ExternalLinkButton'
 
-export default memo(ExternalLinkButton) as typeof ExternalLinkButton
+export default memo(ExternalLinkButton)

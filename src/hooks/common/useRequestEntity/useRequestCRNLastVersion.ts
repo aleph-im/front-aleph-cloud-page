@@ -14,7 +14,7 @@ export function useRequestCRNLastVersion(): UseRequestCRNLastVersionReturn {
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    async function load() {
+    const load = async () => {
       const version = await nodeManager.getLatestCRNVersion()
 
       setLastVersion(version)
