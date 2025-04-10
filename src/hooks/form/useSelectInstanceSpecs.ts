@@ -1,10 +1,10 @@
 import { CRNSpecs, ReducedCRNSpecs } from '@/domain/node'
 import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { convertByteUnits } from '@/helpers/utils'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 import { useNodeManager } from '../common/useManager/useNodeManager'
-import { useDefaultTiers } from '../common/pricing/useDefaultTiers'
+import { Tier, useDefaultTiers } from '../common/pricing/useDefaultTiers'
 
 export type InstanceSpecsField = ReducedCRNSpecs & {
   disabled?: boolean
@@ -62,14 +62,34 @@ export function useSelectInstanceSpecs({
   const manager = useNodeManager()
   const { defaultTiers } = useDefaultTiers({ type, gpuModel })
 
-  const options = useMemo(() => {
-    if (paymentMethod === PaymentMethod.Hold) return defaultTiers
-    if (!nodeSpecs) return []
+  const filterValidNodeSpecs = useCallback(
+    (option: Tier) => {
+      if (paymentMethod === PaymentMethod.Hold) return option
+      if (!nodeSpecs) return false
 
-    return defaultTiers.filter((opt) =>
-      manager.validateMinNodeSpecs(opt, nodeSpecs),
-    )
-  }, [defaultTiers, paymentMethod, nodeSpecs, manager])
+      return manager.validateMinNodeSpecs(option, nodeSpecs)
+    },
+    [manager, nodeSpecs, paymentMethod],
+  )
+
+  const disableHighTiersForHolding = useCallback(
+    (option: Tier) => {
+      if (paymentMethod !== PaymentMethod.Hold) return option
+      if (option.cpu <= 4) return option
+
+      return {
+        ...option,
+        disabled: true,
+      }
+    },
+    [paymentMethod],
+  )
+
+  const options = useMemo(() => {
+    return defaultTiers
+      .filter(filterValidNodeSpecs)
+      .map(disableHighTiersForHolding)
+  }, [defaultTiers, filterValidNodeSpecs, disableHighTiersForHolding])
 
   const specsCtrl = useController({
     control,
@@ -126,6 +146,7 @@ export function useSelectInstanceSpecs({
     onChange(updatedSpecs)
   }, [isPersistent, value, onChange, options, paymentMethod])
 
+  console.log('done options', options)
   return {
     specsCtrl,
     options,
