@@ -8,6 +8,7 @@ import { Tier, useDefaultTiers } from '../common/pricing/useDefaultTiers'
 
 export type InstanceSpecsField = ReducedCRNSpecs & {
   disabled?: boolean
+  disabledReason?: string
 }
 
 export function updateSpecsStorage(
@@ -80,6 +81,7 @@ export function useSelectInstanceSpecs({
       return {
         ...option,
         disabled: true,
+        disabledReason: 'High tiers are only avaiable for Pay-as-you-go.',
       }
     },
     [paymentMethod],
@@ -146,7 +148,6 @@ export function useSelectInstanceSpecs({
     onChange(updatedSpecs)
   }, [isPersistent, value, onChange, options, paymentMethod])
 
-  console.log('done options', options)
   return {
     specsCtrl,
     options,
