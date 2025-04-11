@@ -69,4 +69,8 @@ export default {
     new Error(`Unsupported GPU model: ${gpuModel}`),
   UnsupportedPaymentMethod: (paymentMethod?: string) =>
     new Error(`Unsupported payment method. ${paymentMethod}`),
+  NetworkMismatch: (requiredNetwork: string) =>
+    new Error(
+      `This instance was created on the ${requiredNetwork} network. Please switch to ${requiredNetwork} to manage it.`,
+    ),
 }
