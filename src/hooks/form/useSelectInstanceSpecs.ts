@@ -101,29 +101,39 @@ export function useSelectInstanceSpecs({
 
   const { value, onChange } = specsCtrl.field
 
-  // Auto select first available tier when CRN node is selected in PAYG mode
+  // Auto select first available tier
   useEffect(() => {
-    // Only apply for PAYG payment method when we have valid options and node specs
-    if (
-      paymentMethod === PaymentMethod.Stream &&
-      nodeSpecs &&
-      options.length > 0
-    ) {
-      // Cases when we should auto-select first available tier:
-      // 1. No tier is selected yet
-      // 2. Current selected tier is not compatible with the node
-      // 3. When options change (e.g., after changing the CRN node) and current selection isn't in the new options
-      const shouldAutoSelect =
-        !value ||
-        (nodeSpecs && !manager.validateMinNodeSpecs(value, nodeSpecs)) ||
-        !options.some((opt) => opt.cpu === value?.cpu && opt.ram === value?.ram)
+    if (!options.length) return
 
-      if (shouldAutoSelect) {
-        const firstAvailableTier = options[0]
-        onChange(
-          updateSpecsStorage(firstAvailableTier, isPersistent, paymentMethod),
+    // Find the matching option for the current value
+    const valueOption = !value
+      ? undefined
+      : options.find(
+          (opt) =>
+            opt.cpu === value?.cpu &&
+            opt.ram === value?.ram &&
+            opt.storage === value?.storage,
         )
-      }
+
+    // General cases when we should auto-select first available tier:
+    // 1. No tier is selected yet
+    // 2. Current selected tier is disabled
+    // 3. Current selected tier is not in the options anymore
+    let shouldAutoSelect = !value || !valueOption || valueOption.disabled
+
+    if (paymentMethod === PaymentMethod.Stream && !shouldAutoSelect) {
+      if (!nodeSpecs) return
+      // Cases when we should auto-select first available tier for PAYG:
+      // 1. Current selected tier is not compatible with the node
+
+      shouldAutoSelect = !manager.validateMinNodeSpecs(value, nodeSpecs)
+    }
+
+    if (shouldAutoSelect) {
+      const firstAvailableTier = options[0]
+      onChange(
+        updateSpecsStorage(firstAvailableTier, isPersistent, paymentMethod),
+      )
     }
   }, [
     options,
