@@ -218,7 +218,18 @@ export abstract class ExecutableManager<T extends Executable> {
       if (!receiver) return
 
       const nodes = await this.nodeManager.getCRNNodes()
-      const node = nodes.find((node) => node.stream_reward === receiver)
+
+      // @note: 1) Try to filter the node by the requirements field on the executable message (legacy messages doesn't contain it)
+
+      let node = nodes.find(
+        (node) => node.hash === executable.requirements?.node?.node_hash,
+      )
+
+      if (node) return node
+
+      // @note: 2) Try to filter the node by the stream receiver address (we took the assumption that reward addresses whould be unique in the CRN collection)
+
+      node = nodes.find((node) => node.stream_reward === receiver)
 
       return node
     }
@@ -235,7 +246,14 @@ export abstract class ExecutableManager<T extends Executable> {
 
     const nodes = await this.nodeManager.getCRNNodes()
 
-    const node = nodes.find(
+    // @note: 1) Try to filter the node by node hash
+    let node = nodes.find((node) => node.hash === node_id)
+
+    if (node) return node
+
+    // @note: 2) Try to filter the node by node address
+
+    node = nodes.find(
       (node) =>
         node.address &&
         NodeManager.normalizeUrl(node.address) ===
@@ -243,6 +261,8 @@ export abstract class ExecutableManager<T extends Executable> {
     )
 
     if (node) return node
+
+    // @note: 3) Fallback to a mock node (aleph provided nodes that are not part of the nodestatus collection)
 
     return {
       hash: node_id,

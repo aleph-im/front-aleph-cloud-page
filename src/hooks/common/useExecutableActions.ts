@@ -10,9 +10,8 @@ import {
 } from '@/domain/executable'
 import Err from '@/helpers/errors'
 import { PaymentType } from '@aleph-sdk/message'
-import { BlockchainId } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect/base'
 import { useAppState } from '@/contexts/appState'
-import { useConnection } from './useConnection'
 import { createFromEVMAccount } from '@aleph-sdk/superfluid'
 import { useExecutableStatus } from './useExecutableStatus'
 import {
@@ -25,10 +24,6 @@ import {
 } from '../form/useCheckoutNotification'
 import { EntityDelAction } from '@/store/entity'
 import { useRouter } from 'next/router'
-import {
-  isBlockchainHoldingCompatible,
-  isBlockchainPAYGCompatible,
-} from '@/domain/blockchain'
 import { isAccountPAYGCompatible } from '@/domain/account'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { StaticEVMAccount } from '@/domain/connect/staticEVMAccount'
@@ -78,10 +73,6 @@ export function useExecutableActions({
   const [state, dispatch] = useAppState()
   const { account, blockchain } = state.connection
 
-  const { handleConnect } = useConnection({
-    triggerOnMount: false,
-  })
-
   // ----------------------------
 
   const noti = useNotification()
@@ -124,24 +115,16 @@ export function useExecutableActions({
 
   // ----------------------------
 
-  const handleEnsureNetwork = useCallback(async () => {
-    if (!executable) return
+  const checkNetworkCompatibility = useCallback(
+    (requiredBlockchain?: BlockchainId): string | undefined => {
+      if (!requiredBlockchain || requiredBlockchain === blockchain)
+        return undefined
 
-    if (isPAYG) {
-      if (
-        !isBlockchainPAYGCompatible(blockchain) ||
-        !isAccountPAYGCompatible(account)
-      ) {
-        handleConnect({ blockchain: BlockchainId.BASE })
-        throw Err.ConnectYourPaymentWallet
-      }
-
-      return await createFromEVMAccount(account as EVMAccount)
-    } else if (!isBlockchainHoldingCompatible(blockchain)) {
-      handleConnect({ blockchain: BlockchainId.ETH })
-      throw Err.ConnectYourPaymentWallet
-    }
-  }, [account, blockchain, handleConnect, executable, isPAYG])
+      const networkInfo = blockchains[requiredBlockchain]
+      return networkInfo?.name || requiredBlockchain.toString()
+    },
+    [blockchain],
+  )
 
   const handleSendOperation = useCallback(
     async (operation: ExecutableOperations) => {
@@ -172,10 +155,23 @@ export function useExecutableActions({
     if (!isPAYG) throw Err.StreamNotSupported
 
     try {
-      await handleEnsureNetwork()
+      const instanceNetwork = executable.payment?.chain
+      const incompatibleNetwork = checkNetworkCompatibility(instanceNetwork)
+
+      if (incompatibleNetwork) {
+        throw Err.NetworkMismatch(incompatibleNetwork)
+      }
+
+      if (isPAYG && !isAccountPAYGCompatible(account)) {
+        throw Err.ConnectYourPaymentWallet
+      }
+
       if (!crn) throw Err.ConnectYourPaymentWallet
 
-      await manager.notifyCRNAllocation(crn, executable.id)
+      // For PAYG, notify CRN
+      if (isPAYG) {
+        await manager.notifyCRNAllocation(crn, executable.id)
+      }
     } catch (e) {
       noti?.add({
         variant: 'error',
@@ -183,7 +179,15 @@ export function useExecutableActions({
         text: (e as Error)?.message,
       })
     }
-  }, [crn, handleEnsureNetwork, executable, isPAYG, manager, noti])
+  }, [
+    crn,
+    executable,
+    isPAYG,
+    manager,
+    noti,
+    checkNetworkCompatibility,
+    account,
+  ])
 
   const isRunning = !!status?.ipv6Parsed
 
@@ -219,7 +223,25 @@ export function useExecutableActions({
     if (!executable) throw Err.InstanceNotFound
 
     try {
-      const superfluidAccount = await handleEnsureNetwork()
+      // Check if the current network matches the instance's payment network
+      const instanceNetwork = executable.payment?.chain
+      const isPAYG = executable.payment?.type === PaymentType.superfluid
+
+      // Use the network compatibility checker
+      const incompatibleNetwork = checkNetworkCompatibility(instanceNetwork)
+      if (incompatibleNetwork) {
+        throw Err.NetworkMismatch(incompatibleNetwork)
+      }
+
+      // Verify account compatibility with payment type
+      if (isPAYG && !isAccountPAYGCompatible(account)) {
+        throw Err.ConnectYourPaymentWallet
+      }
+
+      // Create superfluid account for PAYG instances
+      const superfluidAccount = isPAYG
+        ? await createFromEVMAccount(account as EVMAccount)
+        : undefined
 
       const iSteps = await manager.getDelSteps(executable)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
@@ -256,13 +278,14 @@ export function useExecutableActions({
     }
   }, [
     dispatch,
-    handleEnsureNetwork,
     executable,
     manager,
     next,
     router,
     stop,
     noti,
+    account,
+    checkNetworkCompatibility,
   ])
 
   // ------------------------------
