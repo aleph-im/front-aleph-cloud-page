@@ -3,8 +3,9 @@ import { EntityType, PaymentMethod } from '@/helpers/constants'
 import { convertByteUnits } from '@/helpers/utils'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
-import { useNodeManager } from '../common/useManager/useNodeManager'
 import { Tier, useDefaultTiers } from '../common/pricing/useDefaultTiers'
+import { useAppState } from '@/contexts/appState'
+import { useAccountVouchers } from '../common/useAccountVouchers'
 
 export type InstanceSpecsField = ReducedCRNSpecs & {
   disabled?: boolean
@@ -60,17 +61,22 @@ export function useSelectInstanceSpecs({
   nodeSpecs,
   ...rest
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
-  const manager = useNodeManager()
+  const [state] = useAppState()
+  const {
+    manager: { nodeManager },
+  } = state
+
   const { defaultTiers } = useDefaultTiers({ type, gpuModel })
+  const { vouchers } = useAccountVouchers()
 
   const filterValidNodeSpecs = useCallback(
     (option: Tier) => {
       if (paymentMethod === PaymentMethod.Hold) return option
       if (!nodeSpecs) return false
 
-      return manager.validateMinNodeSpecs(option, nodeSpecs)
+      return nodeManager.validateMinNodeSpecs(option, nodeSpecs)
     },
-    [manager, nodeSpecs, paymentMethod],
+    [nodeManager, nodeSpecs, paymentMethod],
   )
 
   const disableHighTiersForHolding = useCallback(
@@ -87,11 +93,62 @@ export function useSelectInstanceSpecs({
     [paymentMethod],
   )
 
+  const enableTiersWithVouchers = useCallback(
+    (option: Tier) => {
+      if (!option.disabled) return option
+      if (!vouchers.length) return option
+
+      console.log('vouchers', vouchers)
+      let enableOption = false
+
+      vouchers.some((voucher) => {
+        const maxCPU = voucher.attributes.find(
+          (attr) => attr.traitType === 'Max vCPU Cores',
+        )
+
+        const maxRam = voucher.attributes.find(
+          (attr) => attr.traitType === 'Max RAM (GB)',
+        )
+
+        if (!maxCPU && !maxRam) return false
+        enableOption = true
+
+        if (maxCPU) {
+          enableOption =
+            +maxCPU.value >= option.cpu ? enableOption && true : false
+        }
+
+        if (maxRam) {
+          enableOption =
+            +maxRam.value >=
+            convertByteUnits(option.ram, { from: 'MiB', to: 'GiB' })
+              ? enableOption && true
+              : false
+        }
+      })
+
+      return enableOption
+        ? {
+            ...option,
+            disabled: false,
+            disabledReason: undefined,
+          }
+        : option
+    },
+    [vouchers],
+  )
+
   const options = useMemo(() => {
     return defaultTiers
       .filter(filterValidNodeSpecs)
       .map(disableHighTiersForHolding)
-  }, [defaultTiers, filterValidNodeSpecs, disableHighTiersForHolding])
+      .map(enableTiersWithVouchers)
+  }, [
+    defaultTiers,
+    filterValidNodeSpecs,
+    disableHighTiersForHolding,
+    enableTiersWithVouchers,
+  ])
 
   const specsCtrl = useController({
     control,
@@ -126,7 +183,7 @@ export function useSelectInstanceSpecs({
       // Cases when we should auto-select first available tier for PAYG:
       // 1. Current selected tier is not compatible with the node
 
-      shouldAutoSelect = !manager.validateMinNodeSpecs(value, nodeSpecs)
+      shouldAutoSelect = !nodeManager.validateMinNodeSpecs(value, nodeSpecs)
     }
 
     if (shouldAutoSelect) {
@@ -142,7 +199,7 @@ export function useSelectInstanceSpecs({
     isPersistent,
     value,
     onChange,
-    manager,
+    nodeManager,
   ])
 
   useEffect(() => {
