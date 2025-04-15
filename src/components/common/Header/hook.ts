@@ -72,11 +72,17 @@ export function useHeader(): UseHeaderReturn {
   const wallets: Wallet[] = useMemo(
     () => [
       {
-        id: ProviderId.WalletConnect,
-        name: 'Wallet Connect',
+        id: ProviderId.Reown,
+        name: 'Reown AppKit',
         icon: 'walletConnect',
         color: 'main0',
       },
+      // {
+      //   id: ProviderId.WalletConnect,
+      //   name: 'Wallet Connect',
+      //   icon: 'walletConnect',
+      //   color: 'main0',
+      // },
       {
         id: ProviderId.Phantom,
         name: 'Phantom',

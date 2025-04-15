@@ -7,15 +7,20 @@ import { getAccountFromProvider as getAVAXAccount } from '@aleph-sdk/avalanche'
 import { getAccountFromProvider as getBASEAccount } from '@aleph-sdk/base'
 import { Mutex, getAccountBalance, sleep } from '@/helpers/utils'
 import { MetaMaskInpageProvider } from '@metamask/providers'
-import type {
-  Provider as EthersProvider,
+// import type {
+//   Provider as EthersProvider,
+//   CombinedProvider,
+// } from '@web3modal/scaffold-utils/ethers'
+import {
   CombinedProvider,
-} from '@web3modal/scaffold-utils/ethers'
+  Provider as EthersProvider,
+} from '@reown/appkit-adapter-ethers5'
 import Err from '@/helpers/errors'
 import { findChainDataByChainId } from '@aleph-sdk/evm'
 import { MetamaskErrorCodes } from './constants'
 import { WindowPhantomProvider as PhantomProvider } from '@/types/types'
 import { PaymentMethod } from '@/helpers/constants'
+import { CaipNetwork, CaipNetworkId } from '@reown/appkit'
 
 export { BlockchainId }
 
@@ -24,6 +29,7 @@ export { BlockchainId }
 export enum ProviderId {
   Metamask = 'metamask',
   WalletConnect = 'wallet-connect',
+  Reown = 'reown',
   Phantom = 'phantom',
 }
 
@@ -41,6 +47,10 @@ export const providers: Record<ProviderId, Provider> = {
     id: ProviderId.WalletConnect,
     name: 'WalletConnect',
   },
+  [ProviderId.Reown]: {
+    id: ProviderId.Reown,
+    name: 'Reown',
+  },
   [ProviderId.Phantom]: {
     id: ProviderId.Phantom,
     name: 'Phantom',
@@ -48,9 +58,9 @@ export const providers: Record<ProviderId, Provider> = {
 }
 
 export const defaultBlockchainProviders: Record<BlockchainId, ProviderId> = {
-  [BlockchainId.ETH]: ProviderId.WalletConnect,
-  [BlockchainId.AVAX]: ProviderId.WalletConnect,
-  [BlockchainId.BASE]: ProviderId.WalletConnect,
+  [BlockchainId.ETH]: ProviderId.Reown,
+  [BlockchainId.AVAX]: ProviderId.Reown,
+  [BlockchainId.BASE]: ProviderId.Reown,
   [BlockchainId.SOL]: ProviderId.Phantom,
 } as Record<BlockchainId, ProviderId>
 
@@ -58,13 +68,15 @@ export const defaultBlockchainProviders: Record<BlockchainId, ProviderId> = {
 
 export type Blockchain = {
   id: BlockchainId
+  caipId: CaipNetwork['caipNetworkId']
+  namespace: CaipNetwork['chainNamespace']
   name: string
   chainId: number
   eip155: boolean
   solana: boolean
   currency: string
   explorerUrl?: string
-  rpcUrl?: string
+  rpcUrl: string
 }
 
 export const blockchains: Record<BlockchainId, Blockchain> = {
@@ -74,6 +86,8 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     chainId: 1,
     eip155: true,
     solana: false,
+    caipId: 'eip155:1' as CaipNetworkId,
+    namespace: 'eip155',
     currency: 'ETH',
     explorerUrl: 'https://etherscan.io/',
     rpcUrl: 'https://eth.drpc.org',
@@ -84,6 +98,8 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     chainId: 43114,
     eip155: true,
     solana: false,
+    caipId: 'eip155:43114' as CaipNetworkId,
+    namespace: 'eip155',
     currency: 'AVAX',
     explorerUrl: 'https://subnets.avax.network/c-chain/',
     rpcUrl: 'https://avalanche.drpc.org',
@@ -94,6 +110,8 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     chainId: 8453,
     eip155: true,
     solana: false,
+    caipId: 'eip155:8453' as CaipNetworkId,
+    namespace: 'eip155',
     currency: 'ETH',
     explorerUrl: 'https://basescan.org',
     rpcUrl: 'https://mainnet.base.org',
@@ -104,6 +122,8 @@ export const blockchains: Record<BlockchainId, Blockchain> = {
     chainId: 900,
     eip155: false,
     solana: true,
+    caipId: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp' as CaipNetworkId,
+    namespace: 'solana',
     currency: 'SOL',
     rpcUrl: 'https://api.mainnet-beta.solana.com',
     explorerUrl: 'https://explorer.solana.com/',

@@ -14,6 +14,7 @@ export default {
   MetamaskNotInstalled: new Error('Metamask not installed'),
   PhantomNotInitialized: new Error('Phantom not initialized'),
   WalletConnectNotInitialized: new Error('WalletConnect not initialized'),
+  ReownNotInitialized: new Error('Reown not initialized'),
   ConnectYourWallet: new Error('Please connect your wallet'),
   ConnectYourPaymentWallet: new Error(
     'Please connect your Superfluid Base/Avalanche wallet',

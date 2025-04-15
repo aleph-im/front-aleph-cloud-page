@@ -1,7 +1,8 @@
 import { BaseConnectionProviderManager, BlockchainId, ProviderId } from './base'
 import { MetamaskConnectionProviderManager } from './metamask'
 import { PhantomConnectionProviderManager } from './phantom'
-import { WalletConnectConnectionProviderManager } from './walletConnect'
+import { ReownConnectionProviderManager } from './reown'
+import { WalletConnectConnectionProviderManager } from './walletConnect.old'
 
 export class ConnectionProviderManager {
   constructor(
@@ -20,7 +21,12 @@ export const connectionProviderManager = new ConnectionProviderManager({
     BlockchainId.AVAX,
     BlockchainId.BASE,
   ]),
-  [ProviderId.WalletConnect]: new WalletConnectConnectionProviderManager([
+  // [ProviderId.WalletConnect]: new WalletConnectConnectionProviderManager([
+  //   BlockchainId.ETH,
+  //   BlockchainId.AVAX,
+  //   BlockchainId.BASE,
+  // ]),
+  [ProviderId.Reown]: new ReownConnectionProviderManager([
     BlockchainId.ETH,
     BlockchainId.AVAX,
     BlockchainId.BASE,
