@@ -1,10 +1,11 @@
 import { useAppState } from '@/contexts/appState'
 import { Voucher } from '@/domain/voucher'
-import { useEffect, useState } from 'react'
+import { useLocalRequest } from '@aleph-front/core'
 
 export type UseAccountVouchersReturn = {
   vouchers: Voucher[]
   loading: boolean
+  error?: Error
 }
 
 export function useAccountVouchers(): UseAccountVouchersReturn {
@@ -13,28 +14,22 @@ export function useAccountVouchers(): UseAccountVouchersReturn {
     manager: { voucherManager },
   } = state
 
-  const [vouchers, setVouchers] = useState<Voucher[]>([])
-  const [loading, setLoading] = useState(true)
+  const {
+    data: vouchers = [],
+    loading,
+    error,
+  } = useLocalRequest({
+    doRequest: () => {
+      return voucherManager
+        ? voucherManager.getAll()
+        : Promise.resolve<Voucher[]>([])
+    },
+    onSuccess: () => null,
+    onError: () => null,
+    flushData: true,
+    triggerOnMount: true,
+    triggerDeps: [voucherManager],
+  })
 
-  useEffect(() => {
-    async function fetchVouchers() {
-      setLoading(true)
-
-      if (!voucherManager) return
-
-      try {
-        const fetchedVouchers = await voucherManager.getAll()
-        setVouchers(fetchedVouchers)
-      } catch (error) {
-        console.error('Error fetching vouchers:', error)
-        setVouchers([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchVouchers()
-  }, [voucherManager])
-
-  return { vouchers, loading }
+  return { vouchers, loading, error }
 }
