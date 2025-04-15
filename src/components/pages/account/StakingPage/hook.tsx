@@ -192,6 +192,8 @@ export function useStakingPage(
     handleLoadItems,
   } = usePaginatedList({
     list: sortedFilteredNodes,
+    itemsPerPage: 20,
+    numberOfPages: 2,
   })
 
   return {

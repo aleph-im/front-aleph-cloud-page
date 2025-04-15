@@ -92,6 +92,8 @@ export function useCoreChannelNodesPage(
     handleLoadItems,
   } = usePaginatedList({
     list: filteredNodes,
+    itemsPerPage: 20,
+    numberOfPages: 2,
   })
 
   return {

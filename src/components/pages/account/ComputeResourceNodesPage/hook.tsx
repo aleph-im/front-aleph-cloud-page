@@ -155,6 +155,8 @@ export function useComputeResourceNodesPage(
     handleLoadItems,
   } = usePaginatedList({
     list: filteredNodes,
+    itemsPerPage: 20,
+    numberOfPages: 2,
   })
 
   // ----------------------------- LINK CRN
