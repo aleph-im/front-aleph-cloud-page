@@ -93,41 +93,52 @@ export function useSelectInstanceSpecs({
     [paymentMethod],
   )
 
+  // Process and cache valid voucher configurations
+  const validVoucherConfigs = useMemo(() => {
+    if (!vouchers.length) return null
+
+    // Build a map of valid CPU/RAM configurations based on vouchers
+    const validConfigs = new Map<string, boolean>()
+
+    vouchers.forEach((voucher) => {
+      const maxCPU = voucher.attributes.find(
+        (attr) => attr.traitType === 'Max vCPU Cores',
+      )
+
+      const maxRam = voucher.attributes.find(
+        (attr) => attr.traitType === 'Max RAM (GB)',
+      )
+
+      if (!maxCPU && !maxRam) return
+
+      // Get max values
+      const cpuLimit = maxCPU ? +maxCPU.value : Infinity
+      const ramLimitGB = maxRam ? +maxRam.value : Infinity
+
+      // Store valid configurations as CPU-RAM pairs
+      for (let cpu = 1; cpu <= cpuLimit; cpu++) {
+        for (let ramGB = 1; ramGB <= ramLimitGB; ramGB++) {
+          const ramMiB = convertByteUnits(ramGB, { from: 'GiB', to: 'MiB' })
+          const key = `${cpu}-${ramMiB}`
+          validConfigs.set(key, true)
+        }
+      }
+    })
+
+    return validConfigs
+  }, [vouchers])
+
   const enableTiersWithVouchers = useCallback(
     (option: Tier) => {
       if (!option.disabled) return option
-      if (!vouchers.length) return option
+      if (!validVoucherConfigs) return option
 
-      console.log('vouchers', vouchers)
-      let enableOption = false
+      const configKey = `${option.cpu}-${option.ram}`
 
-      vouchers.some((voucher) => {
-        const maxCPU = voucher.attributes.find(
-          (attr) => attr.traitType === 'Max vCPU Cores',
-        )
+      // Check if this CPU/RAM configuration is valid according to vouchers
+      const isEnabledByVoucher = validVoucherConfigs.has(configKey)
 
-        const maxRam = voucher.attributes.find(
-          (attr) => attr.traitType === 'Max RAM (GB)',
-        )
-
-        if (!maxCPU && !maxRam) return false
-        enableOption = true
-
-        if (maxCPU) {
-          enableOption =
-            +maxCPU.value >= option.cpu ? enableOption && true : false
-        }
-
-        if (maxRam) {
-          enableOption =
-            +maxRam.value >=
-            convertByteUnits(option.ram, { from: 'MiB', to: 'GiB' })
-              ? enableOption && true
-              : false
-        }
-      })
-
-      return enableOption
+      return isEnabledByVoucher
         ? {
             ...option,
             disabled: false,
@@ -135,7 +146,7 @@ export function useSelectInstanceSpecs({
           }
         : option
     },
-    [vouchers],
+    [validVoucherConfigs],
   )
 
   const options = useMemo(() => {
