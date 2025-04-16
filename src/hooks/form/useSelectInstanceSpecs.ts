@@ -4,8 +4,8 @@ import { convertByteUnits } from '@/helpers/utils'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 import { Tier, useDefaultTiers } from '../common/pricing/useDefaultTiers'
-import { useAppState } from '@/contexts/appState'
 import { useAccountVouchers } from '../common/useAccountVouchers'
+import { useNodeManager } from '../common/useManager/useNodeManager'
 
 export type InstanceSpecsField = ReducedCRNSpecs & {
   disabled?: boolean
@@ -61,10 +61,7 @@ export function useSelectInstanceSpecs({
   nodeSpecs,
   ...rest
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
-  const [state] = useAppState()
-  const {
-    manager: { nodeManager },
-  } = state
+  const nodeManager = useNodeManager()
 
   const { defaultTiers } = useDefaultTiers({ type, gpuModel })
   const { vouchers } = useAccountVouchers()
