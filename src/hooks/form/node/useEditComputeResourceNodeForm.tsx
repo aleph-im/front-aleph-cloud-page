@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { CRN, NodeManager, UpdateCRN } from '@/domain/node'
 import { useNotification } from '@aleph-front/core'
 import { EntityAddAction } from '@/store/entity'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type UseEditComputeResourceNodeFormState = UpdateCRN
 
@@ -75,9 +76,10 @@ export function useEditComputeResourceNodeForm({
   const [state, dispatch] = useAppState()
   const {
     connection: { account },
-    manager: { nodeManager },
     crns: { entities: nodes },
   } = state
+
+  const nodeManager = useNodeManager()
 
   const noti = useNotification()
 

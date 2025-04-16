@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { CCN, NodeManager, UpdateCCN } from '@/domain/node'
 import { useNotification } from '@aleph-front/core'
 import { EntityAddAction } from '@/store/entity'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type UseEditCoreChannelNodeFormState = UpdateCCN
 
@@ -65,9 +66,10 @@ export function useEditCoreChannelNodeForm({
   const [state, dispatch] = useAppState()
   const {
     connection: { account },
-    manager: { nodeManager },
     ccns: { entities: nodes },
   } = state
+
+  const nodeManager = useNodeManager()
 
   const noti = useNotification()
 

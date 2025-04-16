@@ -1,6 +1,6 @@
-import { useAppState } from '@/contexts/appState'
 import { Voucher } from '@/domain/voucher'
 import { useLocalRequest } from '@aleph-front/core'
+import { useVoucherManager } from './useManager/useVoucherManager'
 
 export type UseAccountVouchersReturn = {
   vouchers: Voucher[]
@@ -9,10 +9,7 @@ export type UseAccountVouchersReturn = {
 }
 
 export function useAccountVouchers(): UseAccountVouchersReturn {
-  const [state] = useAppState()
-  const {
-    manager: { voucherManager },
-  } = state
+  const voucherManager = useVoucherManager()
 
   const {
     data: vouchers = [],

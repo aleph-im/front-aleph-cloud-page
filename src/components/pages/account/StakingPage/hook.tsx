@@ -15,6 +15,7 @@ import {
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import { useStaking } from '@/hooks/common/node/useStaking'
 import { useSortedList } from '@/hooks/common/useSortedList'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type UseStakingPageProps = {
   nodes?: CCN[]
@@ -43,8 +44,9 @@ export function useStakingPage(
   const [state] = useAppState()
   const {
     connection: { account, balance: accountBalance = 0 },
-    manager: { nodeManager },
   } = state
+
+  const nodeManager = useNodeManager()
 
   const {
     nodes,

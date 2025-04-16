@@ -16,7 +16,7 @@ import { useUserCoreChannelNode } from '@/hooks/common/node/useUserCoreChannelNo
 import { UseLinkingReturn, useLinking } from '@/hooks/common/node/useLinking'
 import { useRouter } from 'next/router'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { useAppState } from '@/contexts/appState'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type UseComputeResourceNodesPageProps = {
   nodes?: CRN[]
@@ -59,10 +59,8 @@ export function useComputeResourceNodesPage(
   const { account } = rest
 
   // -----------------------------
-  const [state] = useAppState()
-  const {
-    manager: { nodeManager },
-  } = state
+
+  const nodeManager = useNodeManager()
 
   // ----------------------------- USER MAIN CC NODE
 
