@@ -30,6 +30,7 @@ import { useRequestCRNIps } from '@/hooks/common/useRequestEntity/useRequestCRNI
 import { StakeManager } from '@/domain/stake'
 import { TabsProps } from '@aleph-front/core'
 import { DefaultTheme, useTheme } from 'styled-components'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 // import { useRequestCRNBenchmark } from '@/hooks/common/useRequestEntity/useRequestCRNBenchmark'
 
 export type UseComputeResourceNodeDetailPageProps = {
@@ -68,9 +69,10 @@ export function useComputeResourceNodeDetailPage(): UseComputeResourceNodeDetail
   const [state] = useAppState()
   const {
     connection: { account },
-    manager: { nodeManager },
     crns: { entities: nodes },
   } = state
+
+  const nodeManager = useNodeManager()
 
   const { node } = useComputeResourceNode({ hash })
 

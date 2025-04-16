@@ -15,7 +15,6 @@ import {
   PaymentData,
   StreamPaymentData,
 } from '@/components/common/entityData/EntityPayment/types'
-import { useAppState } from '@/contexts/appState'
 import { ImmutableVolume, PaymentType } from '@aleph-sdk/message'
 import {
   downloadBlob,
@@ -25,6 +24,7 @@ import {
 } from '@/helpers/utils'
 import { LabelVariant } from '@/components/common/Price/types'
 import { useNotification } from '@aleph-front/core'
+import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 
 // Type for side panel content
 export type SidePanelContent = {
@@ -73,13 +73,11 @@ export function useManageInstance(): ManageInstance {
   const { entities } = useRequestInstances({ ids: hash as string })
   const [instance] = entities || []
 
-  const manager = useInstanceManager()
   const theme = useTheme()
-  const [state] = useAppState()
-  const {
-    manager: { volumeManager },
-  } = state
   const noti = useNotification()
+
+  const instanceManager = useInstanceManager()
+  const volumeManager = useVolumeManager()
 
   // Tab state
   const [tabId, setTabId] = useState('detail')
@@ -89,7 +87,7 @@ export function useManageInstance(): ManageInstance {
   // Executive actions
   const executableActions = useExecutableActions({
     executable: instance,
-    manager,
+    manager: instanceManager,
     subscribeLogs,
   })
 
@@ -185,12 +183,12 @@ export function useManageInstance(): ManageInstance {
   // Fetch cost data
   useEffect(() => {
     const fetchCost = async () => {
-      if (!instance?.payment || !manager) return
+      if (!instance?.payment || !instanceManager) return
 
       setLoading(true)
 
       try {
-        const fetchedCost = await manager.getTotalCostByHash(
+        const fetchedCost = await instanceManager.getTotalCostByHash(
           instance.payment.type,
           instance.id,
         )
@@ -203,7 +201,7 @@ export function useManageInstance(): ManageInstance {
     }
 
     fetchCost()
-  }, [instance, manager])
+  }, [instance, instanceManager])
 
   // Calculate running time in seconds
   const runningTime = useMemo(() => {

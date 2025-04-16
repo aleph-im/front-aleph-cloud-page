@@ -1,5 +1,6 @@
 import { useAppState } from '@/contexts/appState'
 import { useForm } from '@/hooks/common/useForm'
+import { useFileManager } from '@/hooks/common/useManager/useFileManager'
 import { useCopyToClipboardAndNotify, useNotification } from '@aleph-front/core'
 import { ItemType, StoreMessage } from '@aleph-sdk/message'
 import { useRouter } from 'next/router'
@@ -54,8 +55,9 @@ export function useNewConfidentialPage(): UseNewConfidentialPageReturn {
 
   const {
     connection: { account },
-    manager: { fileManager },
   } = state
+
+  const fileManager = useFileManager()
 
   const [isUploadingFile, setIsUploadingFile] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | undefined>()

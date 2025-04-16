@@ -18,6 +18,7 @@ import Table from '@/components/common/Table'
 import { PriceType } from '@/domain/cost'
 import { useCostManager } from '@/hooks/common/useManager/useCostManager'
 import { useGpuPricingType } from '@/hooks/common/useGpuPricingType'
+import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { specsCtrl, options, type, isPersistent, paymentMethod } =
@@ -64,7 +65,14 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
                   className="fs-12 tp-body2"
                   tw="inline-block text-center py-2 px-4"
                 >
-                  (Soon)
+                  <InfoTooltipButton
+                    tooltipContent={
+                      row.specs.disabledReason || 'Tier not available'
+                    }
+                    plain
+                    my="center-right"
+                    at="bottom-right"
+                  />
                 </div>
               ) : (
                 <Button
