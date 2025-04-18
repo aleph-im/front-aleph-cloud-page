@@ -1,14 +1,11 @@
-import { RotatingLines } from 'react-loader-spinner'
 import Head from 'next/head'
-import { ButtonProps, Label, Tooltip } from '@aleph-front/core'
+import { ButtonProps } from '@aleph-front/core'
 import { Button, Icon } from '@aleph-front/core'
 import { useManageInstance } from './hook'
-import BackButton from '@/components/common/BackButton'
-import { Skeleton } from '@/components/common/Skeleton/cmp'
 import { SidePanel } from '@/components/common/SidePanel/cmp'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
 import VolumeDetail from '@/components/common/VolumeDetail'
-import { Slide, Slider } from '@/components/common/Slider/cmp'
+import { Slide, Slider } from '@/components/common/Slider'
 import EntityPayment from '@/components/common/entityData/EntityPayment'
 import InstanceDetails from '@/components/common/entityData/InstanceDetails'
 import {
@@ -20,6 +17,8 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityConnectionMethods from '@/components/common/entityData/EntityConnectionMethods'
 import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
 import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
+import { EntityType } from '@/helpers/constants'
+import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
 
 /**
  * Button component with functional styling
@@ -69,7 +68,6 @@ export default function ManageInstance() {
     // UI state
     mappedKeys,
     setTabId,
-    theme,
     logs,
     sliderActiveIndex,
 
@@ -83,6 +81,7 @@ export default function ManageInstance() {
     stopDisabled,
     startDisabled,
     rebootDisabled,
+    deleteDisabled,
 
     // Payment data
     paymentData,
@@ -104,94 +103,31 @@ export default function ManageInstance() {
           content="Manage your compute instance on Aleph Cloud"
         />
       </Head>
-      {/* Header */}
-      <section tw="px-12 py-0! md:pt-10! pb-6">
-        <div tw=" px-0 py-0! md:pt-10! flex items-center justify-between gap-8">
-          <div tw="flex-1">
-            <BackButton handleBack={handleBack} />
-          </div>
-          <div tw="flex flex-col md:flex-row text-center gap-2 items-center justify-center">
-            <Label kind="secondary" variant={labelVariant}>
-              <div tw="flex items-center justify-center gap-2">
-                <Icon name="alien-8bit" className={`text-${labelVariant}`} />
-                {isAllocated ? (
-                  'ALLOCATED'
-                ) : (
-                  <>
-                    <div>{instance ? 'CONFIRMING' : 'LOADING'}</div>
-                    <RotatingLines
-                      strokeColor={theme.color.base2}
-                      width=".8rem"
-                    />
-                  </>
-                )}
-              </div>
-            </Label>
-            <div className="tp-h7 fs-18" tw="uppercase">
-              {instance ? name : <Skeleton width="20rem" />}
-            </div>
-          </div>
-          <div tw="flex-1 flex flex-wrap md:flex-nowrap justify-end items-center gap-4">
-            <Tooltip content="Stop Instance" my="bottom-center" at="top-center">
-              <Button
-                kind="functional"
-                variant="secondary"
-                size="sm"
-                onClick={handleStop}
-                disabled={stopDisabled}
-              >
-                <Icon name="stop" />
-              </Button>
-            </Tooltip>
-            <Tooltip
-              content="Reallocate Instance"
-              my="bottom-center"
-              at="top-center"
-            >
-              <Button
-                kind="functional"
-                variant="secondary"
-                size="sm"
-                onClick={handleStart}
-                disabled={startDisabled}
-              >
-                <Icon name="play" />
-              </Button>
-            </Tooltip>
-            <Tooltip
-              content="Reboot Instance"
-              my="bottom-center"
-              at="top-center"
-            >
-              <Button
-                kind="functional"
-                variant="secondary"
-                size="sm"
-                onClick={handleReboot}
-                disabled={rebootDisabled}
-              >
-                <Icon name="arrow-rotate-backward" />
-              </Button>
-            </Tooltip>
-            <Tooltip
-              content="Remove Instance"
-              my="bottom-center"
-              at="top-center"
-            >
-              <Button
-                kind="functional"
-                variant="error"
-                size="sm"
-                onClick={handleDelete}
-                disabled={!instance}
-              >
-                <Icon name="trash" />
-              </Button>
-            </Tooltip>
-          </div>
-        </div>
-      </section>
-
+      <ManageEntityHeader
+        entity={instance}
+        name={name}
+        type={EntityType.Instance}
+        labelVariant={labelVariant}
+        isAllocated={isAllocated}
+        // Start action
+        showStart
+        startDisabled={startDisabled}
+        onStart={handleStart}
+        // Delete action
+        showDelete
+        deleteDisabled={deleteDisabled}
+        onDelete={handleDelete}
+        // Stop action
+        showStop
+        stopDisabled={stopDisabled}
+        onStop={handleStop}
+        // Reboot action
+        showReboot
+        rebootDisabled={rebootDisabled}
+        onReboot={handleReboot}
+        // Go back action
+        onBack={handleBack}
+      />
       {/* Slider */}
       <Slider activeIndex={sliderActiveIndex}>
         {/* Instance Properties */}

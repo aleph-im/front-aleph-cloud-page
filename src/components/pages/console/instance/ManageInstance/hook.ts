@@ -5,7 +5,6 @@ import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
-import { DefaultTheme, useTheme } from 'styled-components'
 import {
   UseExecutableActionsReturn,
   useExecutableActions,
@@ -22,8 +21,7 @@ import {
   isVolumeEphemeral,
   isVolumePersistent,
 } from '@/helpers/utils'
-import { LabelVariant } from '@/components/common/Price/types'
-import { useNotification } from '@aleph-front/core'
+import { LabelProps, useNotification } from '@aleph-front/core'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
 
 // Type for side panel content
@@ -39,7 +37,7 @@ export type ManageInstance = UseExecutableActionsReturn & {
   // Basic data
   instance?: Instance
   name: string
-  labelVariant: LabelVariant
+  labelVariant: LabelProps['variant']
 
   // Volumes data
   volumes: any[]
@@ -48,7 +46,6 @@ export type ManageInstance = UseExecutableActionsReturn & {
 
   // UI state
   mappedKeys: (SSHKey | undefined)[]
-  theme: DefaultTheme
   tabId: string
   sliderActiveIndex: number
   sidePanel: SidePanelContent
@@ -73,7 +70,6 @@ export function useManageInstance(): ManageInstance {
   const { entities } = useRequestInstances({ ids: hash as string })
   const [instance] = entities || []
 
-  const theme = useTheme()
   const noti = useNotification()
 
   const instanceManager = useInstanceManager()
@@ -396,7 +392,6 @@ export function useManageInstance(): ManageInstance {
     ...executableActions,
     instance,
     mappedKeys,
-    theme,
     tabId,
     setTabId,
     handleBack,
