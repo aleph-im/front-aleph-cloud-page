@@ -78,14 +78,14 @@ export function useManageFunction(): ManageFunction {
 
   const isPersistent = !!program?.on.persistent
 
-  const isRunning = isPersistent
-    ? executableActions.isRunning
+  const isAllocated = isPersistent
+    ? executableActions.isAllocated
     : !!program?.confirmed
 
   return {
     ...executableActions,
     isPersistent,
-    isRunning,
+    isAllocated,
     program,
     tabs,
     tabId,

@@ -52,7 +52,7 @@ export default function ManageInstance() {
 
     // Status data
     status,
-    isRunning,
+    isAllocated,
 
     // Volumes data
     immutableVolumes,
@@ -106,8 +106,8 @@ export default function ManageInstance() {
             <Label kind="secondary" variant={labelVariant}>
               <div tw="flex items-center justify-center gap-2">
                 <Icon name="alien-8bit" className={`text-${labelVariant}`} />
-                {isRunning ? (
-                  'RUNNING'
+                {isAllocated ? (
+                  'ALLOCATED'
                 ) : (
                   <>
                     <div>{instance ? 'CONFIRMING' : 'LOADING'}</div>
@@ -198,7 +198,7 @@ export default function ManageInstance() {
                   onViewLogs={() => setTabId('log')}
                   onDownloadLogs={handleDownloadLogs}
                   downloadingLogs={isDownloadingLogs}
-                  disabled={!instance || !isRunning}
+                  disabled={!instance || !isAllocated}
                 />
               </div>
               <div>

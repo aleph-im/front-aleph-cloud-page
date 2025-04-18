@@ -91,7 +91,7 @@ export function useManageInstance(): ManageInstance {
     subscribeLogs,
   })
 
-  const { streamDetails, isRunning, logs } = executableActions
+  const { streamDetails, isAllocated, logs } = executableActions
 
   // SSH keys
   const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
@@ -113,10 +113,10 @@ export function useManageInstance(): ManageInstance {
   const labelVariant = useMemo(() => {
     if (!instance) return 'warning'
 
-    return instance.time < Date.now() - 1000 * 45 && isRunning
+    return instance.time < Date.now() - 1000 * 45 && isAllocated
       ? 'success'
       : 'warning'
-  }, [instance, isRunning])
+  }, [instance, isAllocated])
 
   // Extract instance volumes
   const volumes = useMemo(() => {
