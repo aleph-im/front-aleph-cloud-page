@@ -19,6 +19,7 @@ import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
 import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
 import { EntityType } from '@/helpers/constants'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
+import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
 
 /**
  * Button component with functional styling
@@ -132,58 +133,50 @@ export default function ManageInstance() {
       <Slider activeIndex={sliderActiveIndex}>
         {/* Instance Properties */}
         <Slide>
-          <div tw="w-full flex flex-wrap gap-x-24 gap-y-9 px-12 py-6 transition-transform duration-1000">
-            <div tw="flex-1 w-1/2 flex flex-col gap-y-9">
-              <div>
-                <InstanceDetails instance={instance} />
-              </div>
-              <div>
-                <EntityLogsControl
-                  onViewLogs={() => setTabId('log')}
-                  onDownloadLogs={handleDownloadLogs}
-                  downloadingLogs={isDownloadingLogs}
-                  disabled={!instance || !isAllocated}
+          <EntityDataColumns
+            leftColumnElements={[
+              <InstanceDetails key="instance-details" instance={instance} />,
+              <EntityLogsControl
+                key="instance-logs-control"
+                onViewLogs={() => setTabId('log')}
+                onDownloadLogs={handleDownloadLogs}
+                downloadingLogs={isDownloadingLogs}
+                disabled={!instance || !isAllocated}
+              />,
+              <EntitySSHKeys
+                key="instance-ssh-keys"
+                sshKeys={mappedKeys}
+                onSSHKeyClick={handleSSHKeyClick}
+              />,
+              <EntityPayment key="instance-payment" payments={paymentData} />,
+            ]}
+            rightColumnElements={[
+              <EntityHostingCRN
+                key={'instance-hosting-crn'}
+                nodeDetails={nodeDetails}
+                termsAndConditionsHash={
+                  instance?.requirements?.node?.terms_and_conditions
+                }
+              />,
+              <EntityConnectionMethods
+                key="instance-connection-methods"
+                executableStatus={status}
+              />,
+              immutableVolumes.length > 0 && (
+                <EntityLinkedVolumes
+                  key="instance-linked-volumes"
+                  linkedVolumes={immutableVolumes}
+                  onImmutableVolumeClick={handleImmutableVolumeClick}
                 />
-              </div>
-              <div>
-                <EntitySSHKeys
-                  sshKeys={mappedKeys}
-                  onSSHKeyClick={handleSSHKeyClick}
+              ),
+              persistentVolumes.length > 0 && (
+                <EntityPersistentStorage
+                  key="instance-persistent-storage"
+                  persistentVolumes={persistentVolumes}
                 />
-              </div>
-              <div>
-                <EntityPayment payments={paymentData} />
-              </div>
-            </div>
-            <div tw="flex-1 w-1/2 min-w-[20rem] flex flex-col gap-y-9">
-              <div>
-                <EntityHostingCRN
-                  nodeDetails={nodeDetails}
-                  termsAndConditionsHash={
-                    instance?.requirements?.node?.terms_and_conditions
-                  }
-                />
-              </div>
-              <div>
-                <EntityConnectionMethods executableStatus={status} />
-              </div>
-              {immutableVolumes.length > 0 && (
-                <div>
-                  <EntityLinkedVolumes
-                    linkedVolumes={immutableVolumes}
-                    onImmutableVolumeClick={handleImmutableVolumeClick}
-                  />
-                </div>
-              )}
-              {persistentVolumes.length > 0 && (
-                <div>
-                  <EntityPersistentStorage
-                    persistentVolumes={persistentVolumes}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
+              ),
+            ]}
+          />
         </Slide>
 
         {/* Instance Logs */}
