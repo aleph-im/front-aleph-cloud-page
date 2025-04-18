@@ -3,11 +3,10 @@ import Head from 'next/head'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
 import { Label, NoisyContainer, Tabs, Tooltip } from '@aleph-front/core'
-import { EntityTypeName } from '@/helpers/constants'
+import { EntityType } from '@/helpers/constants'
 import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
 import { useManageFunction } from './hook'
 import {
-  ellipseAddress,
   ellipseText,
   humanReadableSize,
   convertByteUnits,
@@ -19,25 +18,38 @@ import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import LogsFeed from '@/components/common/LogsFeed'
+import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
 
 export default function ManageFunction() {
   const {
+    //Basic data
     program,
-    isAllocated,
-    nodeDetails,
+    name,
+    labelVariant,
     isPersistent,
-    rebootDisabled,
+
+    // Status data
+    status,
+    isAllocated,
+
+    // Button states
     startDisabled,
     stopDisabled,
+    rebootDisabled,
+    deleteDisabled,
+
+    nodeDetails,
     tabs,
     tabId,
     logs,
     setTabId,
-    handleDelete,
-    handleDownload,
-    handleReboot,
+
+    // Action handlers
     handleStart,
     handleStop,
+    handleReboot,
+    handleDelete,
+    handleDownload,
     handleCopyHash,
     handleCopyCode,
     handleCopyRuntime,
@@ -46,20 +58,53 @@ export default function ManageFunction() {
 
   const theme = useTheme()
 
-  if (!program) {
-    return (
-      <>
-        <BackButtonSection handleBack={handleBack} />
-        <CenteredContainer>
-          <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </CenteredContainer>
-      </>
-    )
-  }
+  // if (!program) {
+  //   return (
+  //     <>
+  //       <BackButtonSection handleBack={handleBack} />
+  //       <CenteredContainer>
+  //         <NoisyContainer tw="my-4">Loading...</NoisyContainer>
+  //       </CenteredContainer>
+  //     </>
+  //   )
+  // }
 
-  const name = (program?.metadata?.name as string) || ellipseAddress(program.id)
-  const typeName = EntityTypeName[program.type]
-  const volumes = program.volumes
+  // const typeName = EntityTypeName[program.type]
+  // const volumes = program.volumes
+
+  return (
+    <>
+      <ManageEntityHeader
+        entity={program}
+        name={name}
+        type={EntityType.Program}
+        labelVariant={labelVariant}
+        isAllocated={isAllocated}
+        // Start action
+        showStart={isPersistent}
+        startDisabled={startDisabled}
+        onStart={handleStart}
+        // Delete action
+        showDelete
+        deleteDisabled={deleteDisabled}
+        onDelete={handleDelete}
+        // Stop action
+        showStop={isPersistent}
+        stopDisabled={stopDisabled}
+        onStop={handleStop}
+        // Reboot action
+        showReboot={isPersistent}
+        rebootDisabled={rebootDisabled}
+        onReboot={handleReboot}
+        // Download action
+        showDownload
+        downloadDisabled={false}
+        onDownload={handleDownload}
+        // Go back action
+        onBack={handleBack}
+      />
+    </>
+  )
 
   return (
     <>
