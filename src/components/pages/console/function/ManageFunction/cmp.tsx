@@ -22,7 +22,7 @@ import LogsFeed from '@/components/common/LogsFeed'
 export default function ManageFunction() {
   const {
     program,
-    isRunning,
+    isAllocated,
     nodeDetails,
     isPersistent,
     rebootDisabled,
@@ -72,13 +72,13 @@ export default function ManageFunction() {
               <Label
                 kind="secondary"
                 variant={
-                  program.time < Date.now() - 1000 * 45 && isRunning
+                  program.time < Date.now() - 1000 * 45 && isAllocated
                     ? 'success'
                     : 'warning'
                 }
                 tw="ml-4"
               >
-                {isRunning ? (
+                {isAllocated ? (
                   'READY'
                 ) : (
                   <div tw="flex items-center">

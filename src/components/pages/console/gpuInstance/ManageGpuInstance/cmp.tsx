@@ -23,7 +23,7 @@ export default function ManageGpuInstance() {
     mappedKeys,
     nodeDetails,
     streamDetails,
-    isRunning,
+    isAllocated,
     stopDisabled,
     startDisabled,
     rebootDisabled,
@@ -70,13 +70,13 @@ export default function ManageGpuInstance() {
               <Label
                 kind="secondary"
                 variant={
-                  gpuInstance.time < Date.now() - 1000 * 45 && isRunning
+                  gpuInstance.time < Date.now() - 1000 * 45 && isAllocated
                     ? 'success'
                     : 'warning'
                 }
                 tw="ml-4"
               >
-                {isRunning ? (
+                {isAllocated ? (
                   'READY'
                 ) : (
                   <div tw="flex items-center">

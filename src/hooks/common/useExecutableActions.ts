@@ -43,7 +43,7 @@ export type UseExecutableActionsReturn = {
   logs: UseRequestExecutableLogsFeedReturn
   nodeDetails?: NodeDetails
   status?: ExecutableStatus
-  isRunning: boolean
+  isAllocated: boolean
   stopDisabled: boolean
   startDisabled: boolean
   rebootDisabled: boolean
@@ -189,11 +189,11 @@ export function useExecutableActions({
     account,
   ])
 
-  const isRunning = !!status?.ipv6Parsed
+  const isAllocated = !!status?.ipv6Parsed
 
-  const stopDisabled = !isPAYG || !isRunning || !crn
-  const startDisabled = !isPAYG || isRunning || !crn
-  const rebootDisabled = !isRunning || !crn
+  const stopDisabled = !isPAYG || !isAllocated || !crn
+  const startDisabled = !isPAYG || isAllocated || !crn
+  const rebootDisabled = !isAllocated || !crn
 
   const handleStop = useCallback(
     () => handleSendOperation('stop'),
@@ -319,7 +319,7 @@ export function useExecutableActions({
     nodeDetails,
     streamDetails,
     status,
-    isRunning,
+    isAllocated,
     stopDisabled,
     startDisabled,
     rebootDisabled,
