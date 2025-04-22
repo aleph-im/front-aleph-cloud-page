@@ -11,7 +11,7 @@
     "lint:fix": "next lint --fix"
   },
   "dependencies": {
-    "@aleph-front/core": "^1.27.2",
+    "@aleph-front/core": "^1.27.7",
     "@aleph-sdk/account": "^1.2.0",
     "@aleph-sdk/avalanche": "^1.5.0",
     "@aleph-sdk/client": "^1.4.5",
@@ -41,6 +41,7 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.45.2",
     "react-loader-spinner": "^5.3.4",
+    "recharts": "^2.15.1",
     "styled-components": "^5.3.10",
     "typescript": "^5.3.3",
     "usehooks-ts": "^2.9.1",

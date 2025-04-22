@@ -1,12 +1,12 @@
-import { Container } from '@/components/pages/dashboard/common'
 import { BackButtonSectionProps } from './types'
 import BackButton from '../BackButton/cmp'
+import { CenteredContainer } from '../CenteredContainer'
 
 export const BackButtonSection = ({ handleBack }: BackButtonSectionProps) => (
   <section tw="px-0 py-0! md:pt-10!">
-    <Container>
+    <CenteredContainer>
       <BackButton handleBack={handleBack} />
-    </Container>
+    </CenteredContainer>
   </section>
 )
 

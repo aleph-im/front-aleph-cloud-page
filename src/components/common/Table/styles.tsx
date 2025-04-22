@@ -54,7 +54,6 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
           &._active {
             td {
               color: ${theme.color.main0};
-              background: ${theme.color.purple4};
 
               &:first-child {
                 border-top-left-radius: 3.75rem;
@@ -73,8 +72,18 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
             }
           }
 
+          &:hover {
+            td {
+              background: ${theme.color.purple4}50;
+            }
+          }
+
           &._active {
             cursor: not-allowed;
+
+            td {
+              background: ${theme.color.purple4};
+            }
           }
 
           &._disabled {

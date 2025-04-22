@@ -8,6 +8,5 @@ export const StyledExternalLinkButton = styled(Button).attrs((props) => {
     kind: 'default',
     variant: 'textOnly',
     color: 'main0',
-    size: 'md',
   }
 })``

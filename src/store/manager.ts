@@ -26,7 +26,7 @@ function createDefaultManagers(account?: Account) {
     ? new AlephHttpClient(apiServer)
     : new AuthenticatedAlephHttpClient(account, apiServer)
 
-  const fileManager = new FileManager(sdkClient, account)
+  const fileManager = new FileManager(account, undefined, sdkClient)
   const nodeManager = new NodeManager(fileManager, sdkClient, account)
   const costManager = new CostManager(sdkClient)
   const messageManager = new MessageManager(account, sdkClient)

@@ -142,7 +142,10 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   // -----------------------------
 
   const nodeList = useMemo(() => {
+    // Extract the data from RequestState objects
     const crnSpecsList = Object.values(crnSpecs)
+      .map((spec) => spec.data)
+      .filter(Boolean) as CRNSpecs[]
 
     if (!enableGpu) return crnSpecsList
 
@@ -198,7 +201,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
       if (isLoadingSpecs) return ac
 
-      const nodeSpecs = crnSpecs[node.hash]
+      const nodeSpecs = crnSpecs[node.hash]?.data
 
       if (!isLoadingSpecs) {
         const validSpecs =
@@ -210,7 +213,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
         }
       }
 
-      if (!nodeSpecs.ipv6_check?.vm) {
+      if (!nodeSpecs?.ipv6_check?.vm) {
         ac[node.hash] = StreamNotSupportedIssue.IPV6
         return ac
       }

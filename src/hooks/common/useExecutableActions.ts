@@ -259,7 +259,7 @@ export function useExecutableActions({
         new EntityDelAction({ name: executable.type, keys: [executable.id] }),
       )
 
-      await router.replace('/')
+      await router.replace('/console')
     } catch (e) {
       console.error(e)
 

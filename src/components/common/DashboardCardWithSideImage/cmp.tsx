@@ -1,4 +1,4 @@
-import { Container } from '@/components/pages/dashboard/common'
+import { CenteredContainer } from '../CenteredContainer'
 import {
   CardWithSideImage,
   NoisyContainer,
@@ -21,7 +21,7 @@ export const DashboardCardWithSideImage = ({
   externalLinkUrl,
 }: DashboardCardWithSideImageProps) => (
   <NoisyContainer type="grain-1" tw="py-20">
-    <Container $variant="xl">
+    <CenteredContainer $variant="xl">
       <CardWithSideImage
         imageSrc={imageSrc}
         imageAlt={imageAlt}
@@ -51,7 +51,7 @@ export const DashboardCardWithSideImage = ({
           )}
         </div>
       </CardWithSideImage>
-    </Container>
+    </CenteredContainer>
   </NoisyContainer>
 )
 

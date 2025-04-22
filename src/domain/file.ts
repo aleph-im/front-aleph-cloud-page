@@ -122,9 +122,13 @@ export class FileManager {
   }
 
   constructor(
-    protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
     protected account?: Account,
     protected channel = defaultConsoleChannel,
+    protected sdkClient:
+      | AlephHttpClient
+      | AuthenticatedAlephHttpClient = !account
+      ? new AlephHttpClient(apiServer)
+      : new AuthenticatedAlephHttpClient(account, apiServer),
   ) {}
 
   async getAll(): Promise<AccountFilesResponse> {
@@ -174,7 +178,9 @@ export class FileManager {
     storageEngine: Parameters<
       AuthenticatedAlephHttpClient['createStore']
     >[0]['storageEngine'] = ItemType.storage,
-  ): Promise<StoreMessage> {
+  ): Promise<
+    StoreMessage & { contentItemHash: string; messageItemHash: string }
+  > {
     if (!this.account) throw Err.InvalidAccount
 
     // @note: Quick temporal fix to upload files
@@ -187,9 +193,22 @@ export class FileManager {
       channel,
       fileObject: buffer,
       storageEngine,
+      metadata: {
+        name: fileObject.name,
+        format: fileObject.type,
+      },
     })
 
-    return message
+    // Create a properly typed object including both message properties and our additional fields
+    const result = message as unknown as StoreMessage & {
+      contentItemHash: string
+      messageItemHash: string
+    }
+
+    result.contentItemHash = message.content.item_hash
+    result.messageItemHash = message.item_hash
+
+    return result
   }
 
   static async uploadFolder(
