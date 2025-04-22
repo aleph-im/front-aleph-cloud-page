@@ -14,6 +14,7 @@ import { CRN, NewCRN, NodeManager } from '@/domain/node'
 import { useNotification, TooltipProps } from '@aleph-front/core'
 import { EntityAddAction } from '@/store/entity'
 import { useEthereumNetwork } from '@/hooks/common/useEthereumNetwork'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type NewComputeResourceNodeFormState = NewCRN
 
@@ -67,8 +68,9 @@ export function useNewComputeResourceNodeForm(): UseNewComputeResourceNodeFormRe
   const [state, dispatch] = useAppState()
   const {
     connection: { account },
-    manager: { nodeManager },
   } = state
+
+  const nodeManager = useNodeManager()
 
   const { isEthereumNetwork, getEthereumNetworkTooltip } = useEthereumNetwork()
   const noti = useNotification()

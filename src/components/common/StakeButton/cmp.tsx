@@ -1,11 +1,11 @@
 import { memo, useCallback, useMemo } from 'react'
 import { Button } from '@aleph-front/core'
 import { CCN } from '@/domain/node'
-import { useAppState } from '@/contexts/appState'
 import ButtonWithInfoTooltip, {
   ButtonWithInfoTooltipProps,
 } from '@/components/common/ButtonWithInfoTooltip'
 import { useStaking } from '@/hooks/common/node/useStaking'
+import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
 
 export type StakeButtonProps = {
   node: CCN
@@ -21,10 +21,7 @@ export const StakeButton = ({
   onStake,
   onUnstake: onUnstake,
 }: StakeButtonProps) => {
-  const [state] = useAppState()
-  const {
-    manager: { nodeManager },
-  } = state
+  const nodeManager = useNodeManager()
 
   const { isEthereumNetwork, getEthereumNetworkTooltip } = useStaking()
 

@@ -1,6 +1,6 @@
-import { useAppState } from '@/contexts/appState'
 import { StoreContent } from '@aleph-sdk/message'
 import { useEffect, useState } from 'react'
+import { useMessageManager } from './useManager/useMessageManager'
 
 export type TermsAndConditions = {
   cid: string
@@ -20,10 +20,7 @@ export type UseFetchTermsAndConditionsReturn = {
 export default function useFetchTermsAndConditions({
   termsAndConditionsMessageHash,
 }: UseFetchTermsAndConditionsProps): UseFetchTermsAndConditionsReturn {
-  const [state] = useAppState()
-  const {
-    manager: { messageManager },
-  } = state
+  const messageManager = useMessageManager()
 
   const [loading, setLoading] = useState(true)
   const [termsAndConditions, setTermsAndConditions] = useState<

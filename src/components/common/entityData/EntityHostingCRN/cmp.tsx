@@ -5,17 +5,14 @@ import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
 import IconText from '../../IconText'
 import { ellipseText } from '@/helpers/utils'
-import { useAppState } from '@/contexts/appState'
 import { StoreContent } from '@aleph-sdk/message'
+import { useMessageManager } from '@/hooks/common/useManager/useMessageManager'
 
 export const EntityHostingCRN = ({
   nodeDetails,
   termsAndConditionsHash,
 }: EntityHostingCRNProps) => {
-  const [state] = useAppState()
-  const {
-    manager: { messageManager },
-  } = state
+  const messageManager = useMessageManager()
 
   const [termsAndConditions, setTermsAndConditions] = useState<
     TermsAndConditions | undefined
