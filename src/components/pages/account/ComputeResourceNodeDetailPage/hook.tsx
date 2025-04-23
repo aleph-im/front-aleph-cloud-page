@@ -24,7 +24,6 @@ import {
   useHostingProviderTop,
 } from '@/hooks/common/node/useHostingProviderTop'
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
-import { consoleNewInstanceUrl } from '@/helpers/constants'
 import { convertByteUnits } from '@/helpers/utils'
 import { useRequestCRNIps } from '@/hooks/common/useRequestEntity/useRequestCRNIps'
 import { StakeManager } from '@/domain/stake'
@@ -245,7 +244,7 @@ export function useComputeResourceNodeDetailPage(): UseComputeResourceNodeDetail
 
     const isLoading = nodeIssue === undefined
     return !isLoading && !nodeIssue
-      ? `${consoleNewInstanceUrl}?crn=${node.hash}`
+      ? `/console/computing/instance/new?crn=${node.hash}`
       : undefined
   }, [node, nodeIssue])
 

@@ -234,7 +234,6 @@ export const OverviewTabContent = ({
             <div tw="text-center pt-6">
               <ButtonLink
                 href={createInstanceUrl || '#'}
-                target="_blank"
                 kind="gradient"
                 variant="primary"
                 size="md"

@@ -178,14 +178,14 @@ export function useRoutes(): UseRoutesReturn {
       {
         name: 'Explorer',
         icon: 'explore',
-        href: 'https://explorer.aleph.im/',
+        href: 'https://explorer.aleph.cloud/',
         target: '_blank',
         external: true,
       },
       {
         name: 'Swap',
         icon: 'swap',
-        href: 'https://swap.aleph.im/',
+        href: 'https://swap.aleph.cloud/',
         target: '_blank',
         external: true,
       },
