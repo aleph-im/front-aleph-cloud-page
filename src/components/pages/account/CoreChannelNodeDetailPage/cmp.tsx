@@ -339,7 +339,7 @@ export const CoreChannelNodeDetailPage = () => {
                             <>
                               <LinkedStatusDotIcon $score={crn.score} />
                               <Link
-                                href={`/earn/crn/${crn.hash}`}
+                                href={`/account/earn/crn/${crn.hash}`}
                                 legacyBehavior
                               >
                                 <NodeName
