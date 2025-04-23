@@ -1,4 +1,5 @@
 import React from 'react'
+import Head from 'next/head'
 import { Tabs } from '@aleph-front/core'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useSettingsDashboardPage } from './hook'
@@ -12,6 +13,10 @@ export default function SettingsDashboardPage() {
 
   return (
     <>
+      <Head>
+        <title>Console | Settings - Aleph Cloud</title>
+        <meta name="description" content="Aleph Cloud Console Settings" />
+      </Head>
       <CenteredContainer $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
       </CenteredContainer>

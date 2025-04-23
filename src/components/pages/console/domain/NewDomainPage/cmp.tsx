@@ -1,3 +1,4 @@
+import Head from 'next/head'
 import { useState } from 'react'
 import {
   Button,
@@ -51,6 +52,13 @@ export default function NewDomain() {
 
   return (
     <>
+      <Head>
+        <title>Console | New Domain - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Register a custom domain for your Aleph Cloud resources"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">

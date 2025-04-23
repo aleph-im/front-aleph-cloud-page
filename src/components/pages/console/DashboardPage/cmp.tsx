@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import Head from 'next/head'
 import { Icon } from '@aleph-front/core'
 import { useDashboardPage } from '@/components/pages/console/DashboardPage/hook'
 import { SectionTitle } from '@/components/common/CompositeTitle'
@@ -73,6 +74,10 @@ export default function DashboardPage() {
 
   return (
     <>
+      <Head>
+        <title>Console - Aleph Cloud</title>
+        <meta name="description" content="Aleph Cloud Console Dashboard" />
+      </Head>
       <CenteredContainer $variant="xl">
         <section tw="px-0 pb-6 pt-12 lg:pb-5 ">
           <SectionTitle number="1">

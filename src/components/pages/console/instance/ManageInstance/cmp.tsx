@@ -1,4 +1,5 @@
 import { RotatingLines } from 'react-loader-spinner'
+import Head from 'next/head'
 import { ButtonProps, Label, Tooltip } from '@aleph-front/core'
 import { Button, Icon } from '@aleph-front/core'
 import { useManageInstance } from './hook'
@@ -96,6 +97,13 @@ export default function ManageInstance() {
 
   return (
     <>
+      <Head>
+        <title>Console | Manage Instance - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your compute instance on Aleph Cloud"
+        />
+      </Head>
       {/* Header */}
       <section tw="px-12 py-0! md:pt-10! pb-6">
         <div tw=" px-0 py-0! md:pt-10! flex items-center justify-between gap-8">

@@ -1,3 +1,4 @@
+import Head from 'next/head'
 import { Button, TextGradient } from '@aleph-front/core'
 import { EntityType, EntityDomainType } from '@/helpers/constants'
 import { useNewFunctionPage } from './hook'
@@ -34,6 +35,13 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
 
   return (
     <>
+      <Head>
+        <title>Console | New Function - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Create a new serverless function on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 py-0 md:py-8">

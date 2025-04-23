@@ -1,4 +1,5 @@
 import React from 'react'
+import Head from 'next/head'
 import { PaymentMethod } from '@/helpers/constants'
 import { useNewVolumePage } from './hook'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
@@ -24,6 +25,13 @@ export function NewVolumePage() {
 
   return (
     <>
+      <Head>
+        <title>Console | New Volume - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Create a new persistent storage volume on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">

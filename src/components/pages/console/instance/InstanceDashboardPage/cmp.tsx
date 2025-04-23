@@ -1,4 +1,5 @@
 import React from 'react'
+import Head from 'next/head'
 import { Tabs } from '@aleph-front/core'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useInstanceDashboardPage } from './hook'
@@ -14,6 +15,13 @@ export default function InstanceDashboardPage() {
 
   return (
     <>
+      <Head>
+        <title>Console | Instances - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your virtual machine instances on Aleph Cloud"
+        />
+      </Head>
       <CenteredContainer $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
       </CenteredContainer>

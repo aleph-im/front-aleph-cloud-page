@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import Head from 'next/head'
 import Link from 'next/link'
 import {
   Label,
@@ -144,6 +145,10 @@ export function ManageWebsite() {
 
   return (
     <>
+      <Head>
+        <title>Console | Manage Website - Aleph Cloud</title>
+        <meta name="description" content="Manage your website on Aleph Cloud" />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <CenteredContainer>

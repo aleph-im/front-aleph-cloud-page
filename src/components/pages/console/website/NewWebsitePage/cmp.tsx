@@ -1,3 +1,4 @@
+import Head from 'next/head'
 import {
   EntityType,
   EntityDomainType,
@@ -31,6 +32,13 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
 
   return (
     <>
+      <Head>
+        <title>Console | New Website - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Create a new website on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">

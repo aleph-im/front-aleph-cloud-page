@@ -1,3 +1,4 @@
+import Head from 'next/head'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { SectionTitle } from '@/components/common/CompositeTitle'
@@ -78,6 +79,13 @@ export default function NewConfidentialPage() {
   } = useNewConfidentialPage()
   return (
     <>
+      <Head>
+        <title>Console | New Confidential - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Create a new confidential computing instance on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 py-0 md:py-8">
         <CenteredContainer>

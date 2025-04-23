@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Head from 'next/head'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
 import { Label, NoisyContainer, Tabs, Tooltip } from '@aleph-front/core'
@@ -62,6 +63,13 @@ export default function ManageFunction() {
 
   return (
     <>
+      <Head>
+        <title>Console | Manage Function - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your serverless function on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <CenteredContainer>

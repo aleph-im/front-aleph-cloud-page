@@ -1,3 +1,4 @@
+import Head from 'next/head'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { NoisyContainer } from '@aleph-front/core'
 import Form from '@/components/form/Form'
@@ -12,6 +13,13 @@ export default function NewSSHKey() {
 
   return (
     <>
+      <Head>
+        <title>Console | New SSH Key - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Add a new SSH key for secure access to your Aleph Cloud instances"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">

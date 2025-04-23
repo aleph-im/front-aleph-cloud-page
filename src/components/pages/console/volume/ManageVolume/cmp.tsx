@@ -1,4 +1,5 @@
 import ButtonLink from '@/components/common/ButtonLink'
+import Head from 'next/head'
 import { useManageVolume } from './hook'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import BackButtonSection from '@/components/common/BackButtonSection'
@@ -9,6 +10,13 @@ export default function ManageVolume() {
 
   return (
     <>
+      <Head>
+        <title>Console | Manage Volume - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your storage volumes on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <CenteredContainer>

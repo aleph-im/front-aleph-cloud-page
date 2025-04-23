@@ -1,4 +1,5 @@
 import React from 'react'
+import Head from 'next/head'
 import { Tabs } from '@aleph-front/core'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
@@ -17,6 +18,13 @@ export default function GpuInstanceDashboardPage() {
 
   return (
     <>
+      <Head>
+        <title>Console | GPU Instances - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your GPU instances on Aleph Cloud"
+        />
+      </Head>
       <CenteredContainer $variant="xl" tw="my-10">
         <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />
       </CenteredContainer>

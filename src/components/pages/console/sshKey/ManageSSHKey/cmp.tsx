@@ -1,4 +1,5 @@
 import ButtonLink from '@/components/common/ButtonLink'
+import Head from 'next/head'
 import { useManageSSHKey } from './hook'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
@@ -10,6 +11,13 @@ export default function ManageSSHKey() {
 
   return (
     <>
+      <Head>
+        <title>Console | Manage SSH Key - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your SSH keys on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <CenteredContainer>

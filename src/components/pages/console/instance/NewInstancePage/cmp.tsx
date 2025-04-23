@@ -1,5 +1,6 @@
 import React from 'react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
+import Head from 'next/head'
 import Image from 'next/image'
 import {
   Button,
@@ -301,6 +302,13 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
   return (
     <>
+      <Head>
+        <title>Console | New Instance - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Create a new virtual machine instance on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 py-0 md:py-8">

@@ -1,5 +1,6 @@
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
+import Head from 'next/head'
 import { Label, NoisyContainer } from '@aleph-front/core'
 import { EntityTypeName } from '@/helpers/constants'
 import { Icon, Tag, TextGradient } from '@aleph-front/core'
@@ -46,6 +47,13 @@ export default function ManageConfidential() {
 
   return (
     <>
+      <Head>
+        <title>Console | Manage Confidential - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your confidential instance on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <CenteredContainer>

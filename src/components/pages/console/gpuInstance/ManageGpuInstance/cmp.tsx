@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Head from 'next/head'
 import { RotatingLines, ThreeDots } from 'react-loader-spinner'
 import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
@@ -60,6 +61,13 @@ export default function ManageGpuInstance() {
 
   return (
     <>
+      <Head>
+        <title>Console | Manage GPU Instance - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your GPU instance on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <CenteredContainer>

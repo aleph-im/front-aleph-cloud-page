@@ -1,4 +1,5 @@
 import IconText from '@/components/common/IconText'
+import Head from 'next/head'
 import { Label, NoisyContainer } from '@aleph-front/core'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -46,6 +47,13 @@ export default function ManageDomain() {
 
   return (
     <>
+      <Head>
+        <title>Console | Manage Domain - Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your domain settings on Aleph Cloud"
+        />
+      </Head>
       <BackButtonSection handleBack={handleBack} />
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <CenteredContainer>
