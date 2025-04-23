@@ -119,7 +119,7 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
     instance: {
       title: 'Sign Instance Creation',
       content:
-        "By signing this, you confirm the creation of your new instance on Twentysix.cloud. This step finalises the setup options you've chosen, including resources, configurations, and any additional features.",
+        "By signing this, you confirm the creation of your new instance on Aleph Cloud. This step finalises the setup options you've chosen, including resources, configurations, and any additional features.",
     },
     instanceDel: {
       title: 'Sign Instance Deletion',
@@ -132,7 +132,7 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
     program: {
       title: 'Sign Function Creation',
       content:
-        "By signing this, you confirm the creation of your new function on Twentysix.cloud. This step finalises the setup options you've chosen, including the codebase volume, resources, configurations, and any additional features.",
+        "By signing this, you confirm the creation of your new function on Aleph Cloud. This step finalises the setup options you've chosen, including the codebase volume, resources, configurations, and any additional features.",
     },
     programDel: {
       title: 'Sign Function Deletion',
@@ -160,7 +160,7 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
     website: {
       title: 'Sign Website Creation',
       content:
-        'By signing this, you confirm the deployment of your new website on Twentysix.cloud.',
+        'By signing this, you confirm the deployment of your new website on Aleph Cloud.',
     },
     websiteDel: {
       title: 'Sign Website Deletion',
