@@ -17,6 +17,7 @@ import { AppStateProvider } from '@/contexts/appState'
 //import { HeliaProvider } from '@/contexts/helia'
 import Loading from './_loading'
 import { useRef } from 'react'
+import Head from 'next/head'
 
 export default function App({ Component, pageProps }: AppProps) {
   const mainRef = useRef<HTMLDivElement>(null)
@@ -24,6 +25,10 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ThemeProvider theme={themes.twentysix}>
+      <Head>
+        <title>App - Aleph Cloud</title>
+        <meta name="description" content="Aleph Cloud App" />
+      </Head>
       <GlobalStyles />
       <GlobalStylesOverride />
       <AppStateProvider>
