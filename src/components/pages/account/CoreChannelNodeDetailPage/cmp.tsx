@@ -71,7 +71,7 @@ export const CoreChannelNodeDetailPage = () => {
   return (
     <>
       <Head>
-        <title>Aleph Cloud | CCN Detail</title>
+        <title>Account | CCN Detail - Aleph Cloud</title>
         <meta name="description" content="Aleph Cloud Compute Resource Node" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>

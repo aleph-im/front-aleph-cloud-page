@@ -26,7 +26,7 @@ export const NewCoreChannelNodePage = () => {
   return (
     <>
       <Head>
-        <title>Aleph Cloud | Create CCN</title>
+        <title>Account | CreateCCN - Aleph Cloud</title>
         <meta
           name="description"
           content="Aleph Cloud Create Core Channel Node"

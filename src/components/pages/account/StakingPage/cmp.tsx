@@ -45,7 +45,7 @@ export const StakingPage = (props: UseStakingPageProps) => {
   return (
     <>
       <Head>
-        <title>Aleph Cloud | Account</title>
+        <title>Account - Aleph Cloud</title>
         <meta name="description" content="Aleph Cloud Account Dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>

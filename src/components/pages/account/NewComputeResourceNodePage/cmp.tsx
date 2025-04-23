@@ -26,7 +26,7 @@ export const NewComputeResourceNodePage = () => {
   return (
     <>
       <Head>
-        <title>Aleph Cloud | Create CRN</title>
+        <title>Account | CreateCRN - Aleph Cloud</title>
         <meta
           name="description"
           content="Aleph Cloud Create Compute Resource Node"
