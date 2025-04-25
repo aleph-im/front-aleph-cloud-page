@@ -15,5 +15,5 @@ jobs:
       - name: Build check
         uses: ./.github/actions/build
         with:
-          fa_token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
           export: false

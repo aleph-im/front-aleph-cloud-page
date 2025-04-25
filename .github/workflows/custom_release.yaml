@@ -16,8 +16,8 @@ jobs:
       - name: Build and Export
         uses: ./.github/actions/build
         with:
-          fa_token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
       - name: Push to IPFS
         uses: ./.github/actions/push_to_ipfs
         with:
-          upload_dir: out
+          upload-dir: out
