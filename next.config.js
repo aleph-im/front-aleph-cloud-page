@@ -1,12 +1,12 @@
 // next.config.js
 const withTwin = require('./withTwin.js')
 
-const isGithubActions = process.env.IS_GH_PAGES || false
+const isGithubPages = process.env.IS_GH_PAGES || false
 
 let assetPrefix = ''
 let basePath = process.env.NEXTJS_BASEPATH || ''
 
-if (isGithubActions) {
+if (isGithubPages) {
   // trim off `<owner>/`
   const repo = process.env.GITHUB_REPOSITORY.replace(/.*?\//, '')
 
@@ -15,6 +15,9 @@ if (isGithubActions) {
 
   process.env.NEXTJS_BASEPATH = basePath
 }
+
+// default to true when unset
+const shouldExport = process.env.NEXTJS_EXPORT !== 'false'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -26,6 +29,7 @@ const nextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
+  output: shouldExport ? 'export' : undefined,
 }
 
 module.exports = withTwin(nextConfig)
