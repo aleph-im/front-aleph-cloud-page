@@ -1,0 +1,44 @@
+name: Push on IPFS
+description: 'Builds statics and uploads them to IPFS'
+
+inputs:
+  build-dir:
+    description: 'Build output directory'
+    required: true
+  fa-token:
+    description: 'FontAwesome NPM Auth Token'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install & Build
+      shell: bash
+      env:
+        FONTAWESOME_NPM_AUTH_TOKEN: ${{ inputs.fa-token }}
+      run: |
+        npm config set "@fortawesome:registry" https://npm.fontawesome.com/
+        npm config set "//npm.fontawesome.com/:_authToken" $FONTAWESOME_NPM_AUTH_TOKEN
+        npm ci
+        npm run build
+        npm run export
+        touch ${{ inputs.build-dir }}/.nojekyll
+
+    - name: Push to IPFS
+      shell: bash
+      run: |
+        pip install 'aioipfs>=0.6.2'
+        CID=$(python3 ./scripts/push_on_ipfs.py "${{ inputs.build-dir }}")
+        echo "CID: $CID" >> $GITHUB_STEP_SUMMARY
+        echo "::set-output name=cid::$CID"
+outputs:
+  cid:
+    description: 'IPFS CID'

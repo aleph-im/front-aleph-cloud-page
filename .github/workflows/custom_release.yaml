@@ -1,0 +1,16 @@
+name: Custom release
+
+on:
+  push:
+    branches:
+      - release/**
+
+jobs:
+  push-to-ipfs:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Push to IPFS
+        uses: ./.github/actions/push_to_ipfs.yaml
+        with:
+          build-dir: out
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}

@@ -1,4 +1,4 @@
-name: Manual Bump & Release Trigger
+name: New version release
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ on:
           - patch
 
 jobs:
-  bump-and-push:
+  bump-version:
     runs-on: ubuntu-latest
     environment: release
     steps:
@@ -43,3 +43,13 @@ jobs:
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           git push origin HEAD:main
           git push origin --tags
+
+  push-to-ipfs:
+    needs: bump-version
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Push to IPFS
+        uses: ./.github/actions/push_to_ipfs.yaml
+        with:
+          build-dir: out
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
