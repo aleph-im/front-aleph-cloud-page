@@ -15,7 +15,7 @@ runs:
         pip install 'aioipfs>=0.6.2'
         CID=$(python3 ./scripts/push_on_ipfs.py "${{ inputs.upload-dir }}")
         echo "CID: $CID" >> $GITHUB_STEP_SUMMARY
-        echo "{cid}={$CID}" >> $GITHUB_OUTPUT
+        echo "cid=$CID" >> $GITHUB_OUTPUT
 outputs:
   cid:
     description: 'IPFS CID'
