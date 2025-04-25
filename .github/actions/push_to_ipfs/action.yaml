@@ -10,6 +10,7 @@ runs:
   using: 'composite'
   steps:
     - name: Push to IPFS
+      id: push_to_ipfs
       shell: bash
       run: |
         pip install 'aioipfs>=0.6.2'
