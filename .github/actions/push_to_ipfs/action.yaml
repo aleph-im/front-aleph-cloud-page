@@ -10,6 +10,7 @@ runs:
   using: 'composite'
   steps:
     - name: Push to IPFS
+      shell: bash
       run: |
         pip install 'aioipfs>=0.6.2'
         CID=$(python3 ./scripts/push_on_ipfs.py "${{ inputs.upload-dir }}")

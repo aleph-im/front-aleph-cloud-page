@@ -26,6 +26,7 @@ runs:
 
     - name: Configure FontAwesome registry
       if: ${{ inputs.fa-token != '' }}
+      shell: bash
       env:
         FONTAWESOME_NPM_AUTH_TOKEN: ${{ inputs.fa-token }}
       run: |
@@ -33,9 +34,11 @@ runs:
         npm config set "//npm.fontawesome.com/:_authToken" $FONTAWESOME_NPM_AUTH_TOKEN
 
     - name: Install dependencies
+      shell: bash
       run: npm ci
 
     - name: Build and export
+      shell: bash
       env:
         NEXTJS_EXPORT: ${{ inputs.export }}
       run: npm run build
