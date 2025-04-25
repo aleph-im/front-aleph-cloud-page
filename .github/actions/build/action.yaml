@@ -29,9 +29,9 @@ runs:
       env:
         FONTAWESOME_NPM_AUTH_TOKEN: ${{ inputs.fa-token }}
       run: |
-      npm config set "@fortawesome:registry" https://npm.fontawesome.com/
-      npm config set "//npm.fontawesome.com/:_authToken" $FONTAWESOME_NPM_AUTH_TOKEN
-      npm ci
+        npm config set "@fortawesome:registry" https://npm.fontawesome.com/
+        npm config set "//npm.fontawesome.com/:_authToken" $FONTAWESOME_NPM_AUTH_TOKEN
+        npm ci
 
     - name: Build and export
       shell: bash
