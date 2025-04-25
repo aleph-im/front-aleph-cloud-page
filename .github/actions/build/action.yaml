@@ -24,17 +24,10 @@ runs:
         node-version: ${{ inputs.node-version }}
         cache: npm
 
-    - name: Configure FontAwesome registry
-      if: ${{ inputs.fa-token != '' }}
+    - name: Install dependencies
       shell: bash
       env:
         FONTAWESOME_NPM_AUTH_TOKEN: ${{ inputs.fa-token }}
-      run: |
-        npm config set "@fortawesome:registry" https://npm.fontawesome.com/
-        npm config set "//npm.fontawesome.com/:_authToken" $FONTAWESOME_NPM_AUTH_TOKEN
-
-    - name: Install dependencies
-      shell: bash
       run: npm ci
 
     - name: Build and export
