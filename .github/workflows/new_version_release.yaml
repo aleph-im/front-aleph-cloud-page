@@ -48,6 +48,8 @@ jobs:
   push-to-ipfs:
     needs: bump-version
     runs-on: ubuntu-22.04
+    outputs:
+      cid: ${{ steps.push_to_ipfs.outputs.cid }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -57,6 +59,34 @@ jobs:
         with:
           fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
       - name: Push to IPFS
+        id: push_to_ipfs
         uses: ./.github/actions/push_to_ipfs
         with:
           upload-dir: out
+
+  create-release:
+    needs: push-to-ipfs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_latest_tag.outputs.tag }}
+          release_name: Release ${{ steps.get_latest_tag.outputs.tag }}
+          body: |
+            **IPFS CID:** `${{ needs.push-to-ipfs.outputs.cid }}`
+          draft: false
+          prerelease: false
