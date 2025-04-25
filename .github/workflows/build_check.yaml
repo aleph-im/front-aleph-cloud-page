@@ -1,4 +1,5 @@
 name: Build Check
+description: Check build without exporting
 
 on:
   pull_request:

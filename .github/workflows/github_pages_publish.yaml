@@ -1,4 +1,5 @@
-name: Publish
+name: Github Pages Publish
+description: Publish preview to Github Pages
 
 on:
   push:

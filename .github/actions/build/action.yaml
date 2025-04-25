@@ -1,5 +1,5 @@
-name: 'build'
-description: 'Reusable build action: checkout, setup Node, install dependencies, build and optional export'
+name: Build
+description: Build and export Next.js app
 
 inputs:
   node-version:

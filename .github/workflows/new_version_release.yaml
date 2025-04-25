@@ -1,4 +1,5 @@
 name: New version release
+description: Bump version and push to IPFS
 
 on:
   workflow_dispatch:

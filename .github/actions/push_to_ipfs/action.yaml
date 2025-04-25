@@ -1,5 +1,5 @@
 name: Push to IPFS
-description: Push folder to IPFS
+description: Push directory to IPFS
 
 inputs:
   upload-dir:
