@@ -30,6 +30,15 @@ runs:
         FONTAWESOME_NPM_AUTH_TOKEN: ${{ inputs.fa-token }}
       run: npm ci
 
+    - name: Cache
+      uses: actions/cache@v4
+      with:
+        path: .next/cache
+        # Generate a new cache whenever packages or next config changes.
+        key: ${{ runner.os }}-next-build-${{ hashFiles('**/package-lock.json','**/next.config.js') }}
+        restore-keys: |
+          ${{ runner.os }}-next-build-
+
     - name: Build and export
       shell: bash
       env:
