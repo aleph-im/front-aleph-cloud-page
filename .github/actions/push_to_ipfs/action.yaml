@@ -20,3 +20,4 @@ runs:
 outputs:
   cid:
     description: 'IPFS CID'
+    value: ${{ steps.push_to_ipfs.outputs.cid }}
