@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node_version: 18
 
       - name: Bump version
         env:
@@ -54,8 +54,8 @@ jobs:
       - name: Build and Export
         uses: ./.github/actions/build
         with:
-          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+          fa_token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
       - name: Push to IPFS
         uses: ./.github/actions/push_to_ipfs
         with:
-          upload-dir: out
+          upload_dir: out

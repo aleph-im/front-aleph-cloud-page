@@ -2,11 +2,11 @@ name: 'build'
 description: 'Reusable build action: checkout, setup Node, install dependencies, build and optional export'
 
 inputs:
-  node-version:
+  node_version:
     description: 'Node.js version'
     required: false
     default: 18
-  fa-token:
+  fa_token:
     description: 'FontAwesome NPM Auth Token (optional)'
     required: false
     default: ''
@@ -21,14 +21,14 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ inputs.node-version }}
+        node_version: ${{ inputs.node_version }}
         cache: npm
 
     - name: Configure FontAwesome registry
-      if: ${{ inputs.fa-token != '' }}
+      if: ${{ inputs.fa_token != '' }}
       shell: bash
       env:
-        FONTAWESOME_NPM_AUTH_TOKEN: ${{ inputs.fa-token }}
+        FONTAWESOME_NPM_AUTH_TOKEN: ${{ inputs.fa_token }}
       run: |
         npm config set "@fortawesome:registry" https://npm.fontawesome.com/
         npm config set "//npm.fontawesome.com/:_authToken" $FONTAWESOME_NPM_AUTH_TOKEN

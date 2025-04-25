@@ -2,7 +2,7 @@ name: Push to IPFS
 description: Push folder to IPFS
 
 inputs:
-  upload-dir:
+  upload_dir:
     description: 'Directory to upload'
     required: true
 
@@ -13,7 +13,7 @@ runs:
       shell: bash
       run: |
         pip install 'aioipfs>=0.6.2'
-        CID=$(python3 ./scripts/push_on_ipfs.py "${{ inputs.upload-dir }}")
+        CID=$(python3 ./scripts/push_on_ipfs.py "${{ inputs.upload_dir }}")
         echo "CID: $CID" >> $GITHUB_STEP_SUMMARY
         echo "::set-output name=cid::$CID"
 outputs:

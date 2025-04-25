@@ -20,7 +20,7 @@ jobs:
       - name: Build and Export
         uses: ./.github/actions/build
         with:
-          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+          fa_token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
