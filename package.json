@@ -1,6 +1,6 @@
 {
   "name": "front-aleph-cloud",
-  "version": "0.28.7",
+  "version": "0.28.8",
   "private": true,
   "scripts": {
     "dev": "next dev --experimental-https",
