@@ -9,6 +9,7 @@ import Skeleton from '../../Skeleton'
 import IconText from '../../IconText'
 import { Text } from '@/components/pages/console/common'
 import { convertByteUnits, ellipseText } from '@/helpers/utils'
+import { EntityType, EntityTypeObject } from '@/helpers/constants'
 
 export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
   const handleCopyHash = useCopyToClipboardAndNotify(instance?.id || '')
@@ -21,7 +22,7 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
       <NoisyContainer>
         <div tw="flex gap-4">
           <ObjectImg
-            id="Object11"
+            id={EntityTypeObject[EntityType.Instance]}
             color="main0"
             size="6rem"
             tw="min-w-[7rem] min-h-[7rem]"

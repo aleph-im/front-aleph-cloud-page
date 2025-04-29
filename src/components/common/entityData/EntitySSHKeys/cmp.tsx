@@ -4,6 +4,7 @@ import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
 import RelatedEntityCard from '../RelatedEntityCard'
 import { EntitySSHKeysProps } from './types'
+import { EntityType, EntityTypeObject } from '@/helpers/constants'
 
 export const EntitySSHKeys = ({
   sshKeys,
@@ -28,7 +29,7 @@ export const EntitySSHKeys = ({
                   >
                     {/* @todo: Change object to key image */}
                     <ObjectImg
-                      id="Object9"
+                      id={EntityTypeObject[EntityType.SSHKey]}
                       color="base2"
                       size="2.5rem"
                       tw="min-w-[3rem] min-h-[3rem]"
@@ -50,7 +51,7 @@ export const EntitySSHKeys = ({
           ) : (
             <div tw="flex items-center gap-6">
               <ObjectImg
-                id="Object9"
+                id={EntityTypeObject[EntityType.SSHKey]}
                 color="main0"
                 size="2.5rem"
                 tw="min-w-[3rem] min-h-[3rem]"
