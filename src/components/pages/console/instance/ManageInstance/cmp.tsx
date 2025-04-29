@@ -55,22 +55,33 @@ export default function ManageInstance() {
     status,
     isAllocated,
 
+    // Node details
+    nodeDetails,
+
     // Volumes data
     immutableVolumes,
     persistentVolumes,
 
-    // Action handlers
-    handleStop,
-    handleStart,
-    handleReboot,
-    handleDelete,
-    handleBack,
-
-    // UI state
+    // SSH Keys
     mappedKeys,
-    setTabId,
+
+    // Payment data
+    paymentData,
+
+    // Logs
     logs,
-    sliderActiveIndex,
+    handleDownloadLogs,
+    isDownloadingLogs,
+
+    // Action buttons
+    stopDisabled,
+    handleStop,
+    startDisabled,
+    handleStart,
+    rebootDisabled,
+    handleReboot,
+    deleteDisabled,
+    handleDelete,
 
     // Side panel
     sidePanel,
@@ -78,21 +89,12 @@ export default function ManageInstance() {
     handleSSHKeyClick,
     closeSidePanel,
 
-    // Button states
-    stopDisabled,
-    startDisabled,
-    rebootDisabled,
-    deleteDisabled,
+    // UI state
+    setTabId,
+    sliderActiveIndex,
 
-    // Payment data
-    paymentData,
-
-    // Logs
-    handleDownloadLogs,
-    isDownloadingLogs,
-
-    // Node details
-    nodeDetails,
+    // Navigation handlers
+    handleBack,
   } = useManageInstance()
 
   return (
