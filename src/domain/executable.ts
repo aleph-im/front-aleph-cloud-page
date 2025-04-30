@@ -75,6 +75,7 @@ export type PaymentConfiguration =
 export type Executable = BaseExecutableContent & {
   type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
   id: string // hash
+  chain?: BlockchainId
   payment?: BaseExecutableContent['payment']
   //@todo: Add `trusted_execution` field in FunctionEnvironment in ts sdk
   environment?: any

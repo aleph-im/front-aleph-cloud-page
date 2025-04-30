@@ -224,7 +224,7 @@ export function useExecutableActions({
 
     try {
       // Check if the current network matches the instance's payment network
-      const instanceNetwork = executable.payment?.chain
+      const instanceNetwork = executable.chain || executable.payment?.chain
       const isPAYG = executable.payment?.type === PaymentType.superfluid
 
       // Use the network compatibility checker
