@@ -436,6 +436,7 @@ export class ProgramManager
 
         return {
           id: message.item_hash,
+          chain: message.chain,
           ...message.content,
           name: message.content.metadata?.name || 'Unnamed program',
           type: EntityType.Program,

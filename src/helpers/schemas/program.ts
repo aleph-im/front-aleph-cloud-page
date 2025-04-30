@@ -62,6 +62,7 @@ export const functionSchema = z
     envVars: addEnvVarsSchema.optional(),
     domains: addDomainsSchema.optional(),
     metadata: metadataSchema.optional(),
+    payment: z.any().optional(),
   })
   .merge(addNameAndTagsSchema)
   .refine(

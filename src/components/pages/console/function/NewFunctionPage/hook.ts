@@ -12,7 +12,7 @@ import {
 import { useForm } from '@/hooks/common/useForm'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { DomainField } from '@/hooks/form/useAddDomains'
-import { ProgramManager } from '@/domain/program'
+import { AddProgram, ProgramManager } from '@/domain/program'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { FunctionCodeField, defaultCode } from '@/hooks/form/useAddFunctionCode'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -31,6 +31,7 @@ import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 import { useDefaultTiers } from '@/hooks/common/pricing/useDefaultTiers'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
+import { useConnection } from '@/hooks/common/useConnection'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -59,8 +60,14 @@ export type UseNewFunctionPage = {
 
 export function useNewFunctionPage(): UseNewFunctionPage {
   const router = useRouter()
-  const [appState, dispatch] = useAppState()
-  const { account, balance: accountBalance = 0 } = appState.connection
+  const [, dispatch] = useAppState()
+  const {
+    blockchain,
+    account,
+    balance: accountBalance = 0,
+  } = useConnection({
+    triggerOnMount: false,
+  })
 
   const manager = useProgramManager()
   const { next, stop } = useCheckoutNotification()
@@ -69,10 +76,18 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     async (state: NewFunctionFormState) => {
       if (!manager) throw Err.ConnectYourWallet
 
-      const iSteps = await manager.getAddSteps(state)
+      const program = {
+        ...state,
+        payment: {
+          chain: blockchain,
+          type: PaymentMethod.Hold,
+        },
+      } as AddProgram
+
+      const iSteps = await manager.getAddSteps(program)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = manager.addSteps(state)
+      const steps = manager.addSteps(program)
 
       try {
         let accountFunction
@@ -98,7 +113,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         await stop()
       }
     },
-    [dispatch, manager, next, router, stop],
+    [blockchain, dispatch, manager, next, router, stop],
   )
 
   const { defaultTiers } = useDefaultTiers({ type: EntityType.Program })
