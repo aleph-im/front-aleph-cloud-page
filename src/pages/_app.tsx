@@ -1,7 +1,5 @@
 import type { AppProps } from 'next/app'
-import { ThemeProvider } from 'styled-components'
 import {
-  themes,
   GlobalStyles,
   Notification as NotificationProvider,
   Modal as ModalProvider,
@@ -17,6 +15,7 @@ import { AppStateProvider } from '@/contexts/appState'
 import useResetScroll from '@/hooks/common/useResetScroll'
 import { useRef } from 'react'
 import Head from 'next/head'
+import { ThemeProvider } from './_themeProvider'
 
 export default function App({ Component, pageProps }: AppProps) {
   const mainRef = useRef<HTMLDivElement>(null)
@@ -25,18 +24,20 @@ export default function App({ Component, pageProps }: AppProps) {
   useResetScroll([mainRef, contentRef])
 
   return (
-    <ThemeProvider theme={themes.twentysix}>
-      <Head>
-        <title>App - Aleph Cloud</title>
-        <meta name="description" content="Aleph Cloud App" />
-      </Head>
-      <GlobalStyles />
-      <GlobalStylesOverride />
-      <AppStateProvider>
+    <AppStateProvider>
+      <ThemeProvider>
+        <Head>
+          <title>App - Aleph Cloud</title>
+          <meta name="description" content="Aleph Cloud App" />
+        </Head>
+        <GlobalStyles />
+        <GlobalStylesOverride />
         <ModalProvider>
           <NotificationProvider max={10} timeout={2000}>
             <Viewport>
-              <Sidebar />
+              <ThemeProvider theme="twentysix">
+                <Sidebar />
+              </ThemeProvider>
               <Main ref={mainRef}>
                 <Header />
                 <Content ref={contentRef}>
@@ -53,7 +54,7 @@ export default function App({ Component, pageProps }: AppProps) {
             </Viewport>
           </NotificationProvider>
         </ModalProvider>
-      </AppStateProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AppStateProvider>
   )
 }

@@ -14,6 +14,7 @@ import { CCN, CRN, NodeLastVersions } from '@/domain/node'
 import { RequestState, getRequestReducer } from './request'
 import { RewardsResponse } from '@/domain/stake'
 import { FilterState, getFilterReducer } from './filter'
+import { ConfigState, getConfigReducer } from './config'
 
 export type StoreSubstate = Record<string, unknown>
 
@@ -58,6 +59,7 @@ export type StoreState = {
   connection: ConnectionState
   manager: ManagerState
   authorization: AuthorizationState
+  config: ConfigState
 
   // Resource entities
   ssh: EntityState<SSHKey>
@@ -94,6 +96,7 @@ export const storeReducer = mergeReducers<StoreState>({
   connection: getConnectionReducer(),
   manager: getManagerReducer(),
   authorization: getAuthorizationReducer(),
+  config: getConfigReducer(),
 
   // Resource entities
   ssh: getEntityReducer<SSHKey>('ssh', 'id'),
