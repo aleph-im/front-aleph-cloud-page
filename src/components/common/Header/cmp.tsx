@@ -13,6 +13,7 @@ import { websiteUrl } from '@/helpers/constants'
 import { blockchains } from '@/domain/connect/base'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import { useAppState } from '@/contexts/appState'
+import { useConfig } from '@/hooks/common/config/useConfig'
 
 const CustomLink = (props: RenderLinkProps) => {
   return props.route.children ? <span {...props} /> : <Link {...props} />
@@ -41,29 +42,18 @@ export const Header = () => {
 
   const ensName = useEnsNameLookup(accountAddress)
 
-  const [state, dispatch] = useAppState()
+  const { theme, switchTheme } = useConfig()
 
   const handleThemeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      const active = event.target.checked
+      const newTheme = event.target.checked ? 'twentysixDark' : 'twentysix'
 
-      active
-        ? dispatch({
-            type: 'SWITCH_THEME',
-            payload: { theme: 'twentysixDark' },
-          })
-        : dispatch({
-            type: 'SWITCH_THEME',
-            payload: { theme: 'twentysix' },
-          })
+      switchTheme({ theme: newTheme })
     },
-    [dispatch],
+    [switchTheme],
   )
 
-  const switchThemeChecked = useMemo(
-    () => state.config.theme === 'twentysixDark',
-    [state.config.theme],
-  )
+  const switchThemeChecked = useMemo(() => theme === 'twentysixDark', [theme])
   const switchThemeLabel = useMemo(
     () => (switchThemeChecked ? 'Dark' : 'Light'),
     [switchThemeChecked],
