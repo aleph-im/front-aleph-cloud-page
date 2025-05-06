@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useCallback } from 'react'
 import { Icon } from '@aleph-front/core'
 import { RelatedEntityCardProps } from './types'
 import { StyledRelatedEntityCard } from './styles'
@@ -8,9 +8,15 @@ export const RelatedEntityCard = ({
   disabled = false,
   onClick: handleClick,
 }: RelatedEntityCardProps) => {
+  const handleRelatedEntityClick = useCallback(() => {
+    if (disabled) return
+
+    handleClick()
+  }, [disabled, handleClick])
+
   return (
     <StyledRelatedEntityCard
-      onClick={() => !disabled && handleClick()}
+      onClick={handleRelatedEntityClick}
       $disabled={disabled}
     >
       {children}
