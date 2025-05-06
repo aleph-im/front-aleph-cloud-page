@@ -4,25 +4,29 @@ import {
   ObjectImg,
   useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
-import { InstanceDetailsProps } from './types'
+import { ProgramDetailsProps } from './types'
 import Skeleton from '../../Skeleton'
 import IconText from '../../IconText'
 import { Text } from '@/components/pages/console/common'
-import { convertByteUnits, ellipseText } from '@/helpers/utils'
+import {
+  convertByteUnits,
+  ellipseText,
+  humanReadableSize,
+} from '@/helpers/utils'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
 
-export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
-  const handleCopyHash = useCopyToClipboardAndNotify(instance?.id || '')
+export const ProgramDetails = ({ program }: ProgramDetailsProps) => {
+  const handleCopyHash = useCopyToClipboardAndNotify(program?.id || '')
 
   return (
     <>
       <div className="tp-h7 fs-24" tw="uppercase mb-2">
-        INSTANCE DETAILS
+        FUNCTION DETAILS
       </div>
       <NoisyContainer>
         <div tw="flex gap-4">
           <ObjectImg
-            id={EntityTypeObject[EntityType.Instance]}
+            id={EntityTypeObject[EntityType.Program]}
             color="main0"
             size="6rem"
             tw="min-w-[7rem] min-h-[7rem]"
@@ -30,9 +34,9 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
           <div tw="flex flex-col gap-4 w-full">
             <div tw="w-full">
               <div className="tp-info text-main0 fs-12">ITEM HASH</div>
-              {instance ? (
+              {program ? (
                 <IconText iconName="copy" onClick={handleCopyHash}>
-                  {instance.id}
+                  {program.id}
                 </IconText>
               ) : (
                 <Skeleton width="100%" />
@@ -43,8 +47,8 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
                 <div className="tp-info text-main0 fs-12">CORES</div>
                 <div>
                   <Text tw="flex items-center gap-1">
-                    {instance?.resources ? (
-                      `${instance.resources.vcpus} x86 64bit`
+                    {program?.resources ? (
+                      `${program.resources.vcpus} x86 64bit`
                     ) : (
                       <Skeleton width="7rem" />
                     )}
@@ -55,8 +59,8 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
                 <div className="tp-info text-main0 fs-12">RAM</div>
                 <div>
                   <Text>
-                    {instance?.resources ? (
-                      convertByteUnits(instance.resources.memory, {
+                    {program?.resources ? (
+                      convertByteUnits(program.resources.memory, {
                         from: 'MiB',
                         to: 'GiB',
                         displayUnit: true,
@@ -68,15 +72,23 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
                 </div>
               </div>
               <div>
-                <div className="tp-info text-main0 fs-12">HDD</div>
+                <div className="tp-info text-main0 fs-12">TIMEOUT</div>
                 <div>
                   <Text>
-                    {instance ? (
-                      convertByteUnits(instance.size, {
-                        from: 'MiB',
-                        to: 'GiB',
-                        displayUnit: true,
-                      })
+                    {program ? (
+                      `${program.resources.seconds}s`
+                    ) : (
+                      <Skeleton width="6rem" />
+                    )}
+                  </Text>
+                </div>
+              </div>
+              <div>
+                <div className="tp-info text-main0 fs-12">SIZE</div>
+                <div>
+                  <Text>
+                    {program ? (
+                      humanReadableSize(program.size || 0, 'MiB')
                     ) : (
                       <Skeleton width="6rem" />
                     )}
@@ -87,15 +99,34 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
             <div>
               <div className="tp-info text-main0 fs-12">EXPLORER</div>
               <div>
-                {instance ? (
+                {program ? (
                   <a
                     className="tp-body1 fs-16"
-                    href={instance.url}
+                    href={program.url}
                     target="_blank"
                     referrerPolicy="no-referrer"
                   >
                     <IconText iconName="square-up-right">
-                      <Text>{ellipseText(instance.url, 80)}</Text>
+                      <Text>{ellipseText(program.url, 80)}</Text>
+                    </IconText>
+                  </a>
+                ) : (
+                  <Skeleton width="20rem" />
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="tp-info text-main0 fs-12">API ENTRYPOINT</div>
+              <div>
+                {program ? (
+                  <a
+                    className="tp-body1 fs-16"
+                    href={program.urlVM}
+                    target="_blank"
+                    referrerPolicy="no-referrer"
+                  >
+                    <IconText iconName="square-up-right">
+                      <Text>{ellipseText(program.urlVM, 80)}</Text>
                     </IconText>
                   </a>
                 ) : (
@@ -109,6 +140,6 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
     </>
   )
 }
-InstanceDetails.displayName = 'InstanceDetails'
+ProgramDetails.displayName = 'ProgramDetails'
 
-export default memo(InstanceDetails) as typeof InstanceDetails
+export default memo(ProgramDetails) as typeof ProgramDetails

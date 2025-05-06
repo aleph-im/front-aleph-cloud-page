@@ -12,6 +12,7 @@ import {
   StyledEntityCardsContainer,
   StyledSectionDescription,
 } from './styles'
+import { EntityType, EntityTypeObject } from '@/helpers/constants'
 
 export default function DashboardPage() {
   const {
@@ -100,7 +101,7 @@ export default function DashboardPage() {
                     : 'introduction'
                 }
                 title="Websites"
-                img="Object20"
+                img={EntityTypeObject[EntityType.Website]}
                 description="Deploy and manage your websites with ease. Support for static pages, Next.js, React, and Vue.js ensures you can create dynamic and robust web experiences."
                 introductionButtonText="Deploy your website"
                 dashboardPath="/console/hosting/website"
@@ -139,7 +140,7 @@ export default function DashboardPage() {
                     : 'introduction'
                 }
                 title="functions"
-                img="Object10"
+                img={EntityTypeObject[EntityType.Program]}
                 description="Run code on-demand or persistently with our serverless computing platform. Scale effortlessly and integrate seamlessly."
                 introductionButtonText="Create your function"
                 dashboardPath="/console/computing/function"
@@ -159,7 +160,7 @@ export default function DashboardPage() {
                     : 'introduction'
                 }
                 title="instances"
-                img="Object11"
+                img={EntityTypeObject[EntityType.Instance]}
                 description="Launch and manage virtual private servers (VPS) tailored to your needs. Choose automatic or manual node selection for complete control over your computing environment."
                 introductionButtonText="Create your instance"
                 dashboardPath="/console/computing/instance"
@@ -179,7 +180,7 @@ export default function DashboardPage() {
                 }
                 isBeta
                 title="GPU instances"
-                img="Object11"
+                img={EntityTypeObject[EntityType.GpuInstance]}
                 description="Power your workloads with high-performance GPU computing. Ideal for AI, ML, rendering, and complex simulations. Scale effortlessly and take full control over your GPU resources."
                 introductionButtonText="Create your GPU Instance"
                 dashboardPath="/console/computing/gpu-instance"
@@ -200,7 +201,7 @@ export default function DashboardPage() {
                 isComingSoon={!confidentialsAuthz}
                 isBeta
                 title="confidentials"
-                img="Object9"
+                img={EntityTypeObject[EntityType.Confidential]}
                 dashboardPath="/console/computing/confidential"
                 createPath="/console/computing/confidential/new"
                 description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your data stays safe."
@@ -239,7 +240,7 @@ export default function DashboardPage() {
                     : 'introduction'
                 }
                 title="volumes"
-                img="Object15"
+                img={EntityTypeObject[EntityType.Volume]}
                 dashboardPath="/console/storage"
                 createPath="/console/storage/volume/new"
                 description="Secure and reliable immutable volumes for your data storage needs. Ideal for dependency volumes and critical data, ensuring consistency and integrity."

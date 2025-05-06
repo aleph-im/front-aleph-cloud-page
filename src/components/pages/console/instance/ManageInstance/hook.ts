@@ -1,11 +1,10 @@
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Instance } from '@/domain/instance'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
-import { DefaultTheme, useTheme } from 'styled-components'
 import {
   UseExecutableActionsReturn,
   useExecutableActions,
@@ -15,19 +14,18 @@ import {
   PaymentData,
   StreamPaymentData,
 } from '@/components/common/entityData/EntityPayment/types'
-import { ImmutableVolume, PaymentType } from '@aleph-sdk/message'
 import {
-  downloadBlob,
-  ellipseAddress,
-  isVolumeEphemeral,
-  isVolumePersistent,
-} from '@/helpers/utils'
-import { LabelVariant } from '@/components/common/Price/types'
-import { useNotification } from '@aleph-front/core'
-import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
+  ImmutableVolume,
+  PaymentType,
+  PersistentVolume,
+} from '@aleph-sdk/message'
+import { ellipseAddress } from '@/helpers/utils'
+import { LabelProps } from '@aleph-front/core'
+import useDownloadLogs from '@/hooks/common/useDownloadLogs'
+import useClassifyMachineVolumes from '@/hooks/common/useClassifyMachineVolumes'
 
 // Type for side panel content
-export type SidePanelContent = {
+type SidePanelContent = {
   isOpen: boolean
   type?: 'sshKey' | 'volume'
   selectedVolume?: any
@@ -39,17 +37,14 @@ export type ManageInstance = UseExecutableActionsReturn & {
   // Basic data
   instance?: Instance
   name: string
-  labelVariant: LabelVariant
+  labelVariant: LabelProps['variant']
 
   // Volumes data
-  volumes: any[]
-  immutableVolumes: any[]
-  persistentVolumes: any[]
+  immutableVolumes: ImmutableVolume[]
+  persistentVolumes: PersistentVolume[]
 
   // UI state
   mappedKeys: (SSHKey | undefined)[]
-  theme: DefaultTheme
-  tabId: string
   sliderActiveIndex: number
   sidePanel: SidePanelContent
   isDownloadingLogs: boolean
@@ -73,18 +68,13 @@ export function useManageInstance(): ManageInstance {
   const { entities } = useRequestInstances({ ids: hash as string })
   const [instance] = entities || []
 
-  const theme = useTheme()
-  const noti = useNotification()
-
   const instanceManager = useInstanceManager()
-  const volumeManager = useVolumeManager()
 
   // Tab state
   const [tabId, setTabId] = useState('detail')
-  const [downloadingLogs, setDownloadingLogs] = useState(false)
-  const subscribeLogs = tabId === 'log' || downloadingLogs
+  const subscribeLogs = tabId === 'log'
 
-  // Executive actions
+  // Executable actions
   const executableActions = useExecutableActions({
     executable: instance,
     manager: instanceManager,
@@ -99,10 +89,7 @@ export function useManageInstance(): ManageInstance {
 
   // Payment data
   const [cost, setCost] = useState<number>()
-  const [loading, setLoading] = useState<boolean>(false)
-
-  // Volumes data
-  const [immutableVolumes, setImmutableVolumes] = useState<any[]>([])
+  const [loadingPaymentData, setLoadingPaymentData] = useState<boolean>(false)
 
   // Side panel state
   const [sidePanel, setSidePanel] = useState<SidePanelContent>({
@@ -119,16 +106,9 @@ export function useManageInstance(): ManageInstance {
   }, [instance, isAllocated])
 
   // Extract instance volumes
-  const volumes = useMemo(() => {
-    if (!instance) return []
-    return instance.volumes
-  }, [instance])
-
-  // Filter persistent volumes
-  const persistentVolumes = useMemo(() => {
-    if (!volumes) return []
-    return volumes.filter((volume) => isVolumePersistent(volume))
-  }, [volumes])
+  const { persistentVolumes, immutableVolumes } = useClassifyMachineVolumes({
+    volumes: instance?.volumes,
+  })
 
   // Format instance name
   const name = useMemo(() => {
@@ -154,38 +134,12 @@ export function useManageInstance(): ManageInstance {
     getMapped()
   }, [sshKeyManager, instance])
 
-  // Fetch immutable volumes
-  useEffect(() => {
-    if (!volumes || !volumeManager) return
-
-    const buildVolumes = async () => {
-      const rawVolumes = volumes.filter(
-        (volume) => !isVolumePersistent(volume) && !isVolumeEphemeral(volume),
-      ) as ImmutableVolume[]
-
-      const decoratedVolumes = await Promise.all(
-        rawVolumes.map(async (rawVolume) => {
-          const extraInfo = await volumeManager.get(rawVolume.ref)
-
-          return {
-            ...rawVolume,
-            ...extraInfo,
-          }
-        }),
-      )
-
-      setImmutableVolumes(decoratedVolumes)
-    }
-
-    buildVolumes()
-  }, [volumes, volumeManager])
-
   // Fetch cost data
   useEffect(() => {
     const fetchCost = async () => {
       if (!instance?.payment || !instanceManager) return
 
-      setLoading(true)
+      setLoadingPaymentData(true)
 
       try {
         const fetchedCost = await instanceManager.getTotalCostByHash(
@@ -196,7 +150,7 @@ export function useManageInstance(): ManageInstance {
       } catch (error) {
         console.error('Error fetching cost:', error)
       } finally {
-        setLoading(false)
+        setLoadingPaymentData(false)
       }
     }
 
@@ -221,7 +175,7 @@ export function useManageInstance(): ManageInstance {
             runningTime,
             startTime: instance.time,
             blockchain: instance.payment.chain,
-            loading,
+            loading: loadingPaymentData,
           } as HoldingPaymentData,
         ]
       case PaymentType.superfluid:
@@ -253,7 +207,7 @@ export function useManageInstance(): ManageInstance {
     runningTime,
     instance?.time,
     streamDetails?.streams,
-    loading,
+    loadingPaymentData,
   ])
 
   // Side panel handlers
@@ -280,131 +234,27 @@ export function useManageInstance(): ManageInstance {
     }))
   }, [])
 
+  // Download logs handler
+  const { handleDownloadLogs, isDownloadingLogs } = useDownloadLogs({
+    fileName: name,
+    logs,
+  })
+
   // Navigation handler
   const handleBack = useCallback(() => {
     router.push('.')
   }, [router])
 
-  // State for UI feedback during logs download
-  const [isDownloadingLogs, setIsDownloadingLogs] = useState(false)
-  const downloadTimeoutRef = useRef<NodeJS.Timeout>()
-
-  // Clean up timeout when component unmounts
-  useEffect(() => {
-    return () => {
-      if (downloadTimeoutRef.current) {
-        clearTimeout(downloadTimeoutRef.current)
-      }
-    }
-  }, [])
-
-  // This effect handles downloading logs when they become available during download mode
-  useEffect(() => {
-    const downloadLogFiles = (
-      instanceName: string,
-      stdout: string,
-      stderr: string,
-    ) => {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-      const sanitizedName = instanceName.replace(/\s+/g, '_').toLowerCase()
-
-      // Download stdout file
-      if (stdout.trim()) {
-        downloadBlob(
-          new Blob([stdout], { type: 'text/plain' }),
-          `stdout_${sanitizedName}_${timestamp}.log`,
-        )
-      }
-
-      // Download stderr file
-      if (stderr.trim()) {
-        downloadBlob(
-          new Blob([stderr], { type: 'text/plain' }),
-          `stderr_${sanitizedName}_${timestamp}.log`,
-        )
-      }
-    }
-
-    if (downloadingLogs && logs) {
-      const { stdout, stderr } = logs
-
-      // If we have some content to download
-      if (stdout.length > 0 || stderr.length > 0) {
-        // Download the logs
-        downloadLogFiles(name, stdout, stderr)
-
-        // Clear the timeout
-        if (downloadTimeoutRef.current) {
-          clearTimeout(downloadTimeoutRef.current)
-          downloadTimeoutRef.current = undefined
-        }
-
-        // Reset states
-        setDownloadingLogs(false)
-        setIsDownloadingLogs(false)
-      }
-    }
-  }, [downloadingLogs, logs, name])
-
-  // Logs download handler - this just activates the logs subscription without changing tab
-  const handleDownloadLogs = useCallback(() => {
-    // If already downloading, don't start another download
-    if (isDownloadingLogs || downloadingLogs) return
-
-    try {
-      // Set UI feedback state
-      setIsDownloadingLogs(true)
-
-      // Set flag to trigger logs subscription without changing tab
-      setDownloadingLogs(true)
-
-      // Set a timeout to handle case where logs don't become available
-      downloadTimeoutRef.current = setTimeout(() => {
-        // If logs haven't been downloaded by this time, show error
-        setDownloadingLogs(false)
-        setIsDownloadingLogs(false)
-
-        noti?.add({
-          variant: 'warning',
-          title: 'Download failed',
-          text: 'Logs could not be retrieved in time. Please try again.',
-        })
-      }, 30000) // 30 second timeout to allow for wallet authentication
-    } catch (e) {
-      console.error('Error initiating logs download:', e)
-
-      // Show error notification
-      noti?.add({
-        variant: 'error',
-        title: 'Error downloading logs',
-        text: (e as Error)?.message,
-      })
-
-      // Reset states
-      setDownloadingLogs(false)
-      setIsDownloadingLogs(false)
-
-      // Clear timeout
-      if (downloadTimeoutRef.current) {
-        clearTimeout(downloadTimeoutRef.current)
-        downloadTimeoutRef.current = undefined
-      }
-    }
-  }, [isDownloadingLogs, downloadingLogs, noti])
-
   return {
     ...executableActions,
     instance,
     mappedKeys,
-    theme,
-    tabId,
     setTabId,
     handleBack,
     handleDownloadLogs,
     isDownloadingLogs,
     paymentData,
     labelVariant,
-    volumes,
     immutableVolumes,
     persistentVolumes,
     name,

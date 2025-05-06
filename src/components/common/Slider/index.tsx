@@ -1,1 +1,1 @@
-export { default } from './cmp'
+export { default as Slider, Slide } from './cmp'
