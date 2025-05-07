@@ -7,6 +7,7 @@ import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import { websiteUrl } from '@/helpers/constants'
 import { blockchains } from '@/domain/connect/base'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
+import LoadingProgress from '../LoadingProgres'
 
 const CustomLink = (props: RenderLinkProps) => {
   return props.route.children ? <span {...props} /> : <Link {...props} />
@@ -38,6 +39,7 @@ export const Header = () => {
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
+        <LoadingProgress breakpoint={breakpoint} />
         <StyledNavbarMobile
           {...{
             routes,

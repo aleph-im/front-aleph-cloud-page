@@ -4,11 +4,14 @@ import { FakeProgressBarProps } from './types'
 import { useFakeProgressBar } from './hook'
 
 export const FakeProgressBar = (props: FakeProgressBarProps) => {
-  const { loading, progress, skipTransition, shouldMount } =
+  const { loading, breakpoint, progress, skipTransition, shouldMount } =
     useFakeProgressBar(props)
 
   return (
-    <StyledProgressContainer $show={shouldMount || loading}>
+    <StyledProgressContainer
+      $breakpoint={breakpoint}
+      $show={shouldMount || loading}
+    >
       <StyledFakeProgressBar
         $progress={progress}
         $skipTransition={skipTransition}

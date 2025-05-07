@@ -14,8 +14,6 @@ import Content from '@/components/common/Content'
 import Viewport from '@/components/common/Viewport'
 import Sidebar from '@/components/common/Sidebar'
 import { AppStateProvider } from '@/contexts/appState'
-//import { HeliaProvider } from '@/contexts/helia'
-import Loading from './_loading'
 import { useRef } from 'react'
 import Head from 'next/head'
 
@@ -39,7 +37,6 @@ export default function App({ Component, pageProps }: AppProps) {
               <Main ref={mainRef}>
                 <Header />
                 <Content ref={contentRef}>
-                  <Loading />
                   <Component
                     {...{
                       ...pageProps,
