@@ -2,6 +2,7 @@ import JSZip from 'jszip'
 import { Account } from '@aleph-sdk/account'
 import {
   Encoding,
+  PaymentType,
   ProgramContent,
   ProgramPublishConfiguration,
 } from '@aleph-sdk/message'
@@ -258,6 +259,14 @@ export class ProgramManager
     } catch (err) {
       throw Err.RequestFailed(err)
     }
+  }
+
+  async getTotalCostByHash(
+    paymentMethod: PaymentMethod | PaymentType,
+    hash: string,
+  ): Promise<number> {
+    const costs = await this.sdkClient.programClient.getCost(hash)
+    return this.parseCost(paymentMethod, Number(costs.cost))
   }
 
   async getCost(newProgram: ProgramCostProps): Promise<ProgramCost> {

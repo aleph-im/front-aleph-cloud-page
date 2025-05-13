@@ -1,5 +1,7 @@
 // ------------------------ @todo: Refactor in domain package --------------------
 
+import { ObjectImgProps } from '@aleph-front/core'
+
 export const defaultAccountChannel = 'ALEPH-ACCOUNT'
 
 // Default node ops message config
@@ -158,6 +160,17 @@ export const EntityTypeSlug: Record<EntityType, string> = {
   [EntityType.Domain]: 'domain',
   [EntityType.Website]: 'website',
   [EntityType.Confidential]: 'confidential',
+}
+
+export const EntityTypeObject: Record<EntityType, ObjectImgProps['id']> = {
+  [EntityType.Volume]: 'Object15',
+  [EntityType.Program]: 'Object10',
+  [EntityType.Instance]: 'Object11',
+  [EntityType.GpuInstance]: 'Object11',
+  [EntityType.SSHKey]: 'Object21',
+  [EntityType.Domain]: 'Object8',
+  [EntityType.Website]: 'Object20',
+  [EntityType.Confidential]: 'Object9',
 }
 
 export enum PaymentMethod {
