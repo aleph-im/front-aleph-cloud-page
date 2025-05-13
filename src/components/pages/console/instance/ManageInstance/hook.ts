@@ -83,18 +83,7 @@ export function useManageInstance(): ManageInstance {
 
   const { streamDetails, isAllocated, logs } = executableActions
 
-  // SSH keys
-  const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
-  const sshKeyManager = useSSHKeyManager()
-
-  // Payment data
-  const [cost, setCost] = useState<number>()
-  const [loadingPaymentData, setLoadingPaymentData] = useState<boolean>(false)
-
-  // Side panel state
-  const [sidePanel, setSidePanel] = useState<SidePanelContent>({
-    isOpen: false,
-  })
+  // === UTILS ===
 
   // Calculate label variant
   const labelVariant = useMemo(() => {
@@ -105,23 +94,38 @@ export function useManageInstance(): ManageInstance {
       : 'warning'
   }, [instance, isAllocated])
 
-  // Extract instance volumes
-  const { persistentVolumes, immutableVolumes } = useClassifyMachineVolumes({
-    volumes: instance?.volumes,
-  })
-
   // Format instance name
   const name = useMemo(() => {
     if (!instance) return ''
     return (instance?.metadata?.name as string) || ellipseAddress(instance.id)
   }, [instance])
 
-  // Calculate slider active index
-  const sliderActiveIndex = useMemo(() => {
-    return tabId === 'log' ? 1 : 0
-  }, [tabId])
+  // Calculate running time in seconds
+  const runningTime = useMemo(() => {
+    return instance?.time
+      ? Math.floor(Date.now() - instance.time * 1000) / 1000
+      : undefined
+  }, [instance?.time])
 
-  // Fetch SSH keys
+  // Download logs handler
+  const { handleDownloadLogs, isDownloadingLogs } = useDownloadLogs({
+    fileName: name,
+    logs,
+  })
+
+  // Navigation handler
+  const handleBack = useCallback(() => {
+    router.push('.')
+  }, [router])
+
+  // -----------------
+
+  // === SSH KEYS ===
+
+  const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
+  const sshKeyManager = useSSHKeyManager()
+
+  // Fetch
   useEffect(() => {
     if (!instance || !sshKeyManager) return
     const getMapped = async () => {
@@ -134,7 +138,21 @@ export function useManageInstance(): ManageInstance {
     getMapped()
   }, [sshKeyManager, instance])
 
-  // Fetch cost data
+  // -----------------
+
+  // === VOLUMES ===
+
+  const { persistentVolumes, immutableVolumes } = useClassifyMachineVolumes({
+    volumes: instance?.volumes,
+  })
+
+  // -----------------
+
+  // === PAYMENT DATA ===
+  const [cost, setCost] = useState<number>()
+  const [loadingPaymentData, setLoadingPaymentData] = useState<boolean>(false)
+
+  // Fetch cost
   useEffect(() => {
     const fetchCost = async () => {
       if (!instance?.payment || !instanceManager) return
@@ -156,13 +174,6 @@ export function useManageInstance(): ManageInstance {
 
     fetchCost()
   }, [instance, instanceManager])
-
-  // Calculate running time in seconds
-  const runningTime = useMemo(() => {
-    return instance?.time
-      ? Math.floor(Date.now() - instance.time * 1000) / 1000
-      : undefined
-  }, [instance?.time])
 
   // Create payment data array based on payment type
   const paymentData: PaymentData[] = useMemo(() => {
@@ -210,7 +221,15 @@ export function useManageInstance(): ManageInstance {
     loadingPaymentData,
   ])
 
-  // Side panel handlers
+  // -----------------
+
+  // === SIDE PANEL ===
+
+  const [sidePanel, setSidePanel] = useState<SidePanelContent>({
+    isOpen: false,
+  })
+
+  // Handlers
   const handleImmutableVolumeClick = useCallback((volume: any) => {
     setSidePanel({
       isOpen: true,
@@ -234,16 +253,15 @@ export function useManageInstance(): ManageInstance {
     }))
   }, [])
 
-  // Download logs handler
-  const { handleDownloadLogs, isDownloadingLogs } = useDownloadLogs({
-    fileName: name,
-    logs,
-  })
+  // -----------------
 
-  // Navigation handler
-  const handleBack = useCallback(() => {
-    router.push('.')
-  }, [router])
+  // === SLIDER ===
+
+  const sliderActiveIndex = useMemo(() => {
+    return tabId === 'log' ? 1 : 0
+  }, [tabId])
+
+  // -----------------
 
   return {
     ...executableActions,
