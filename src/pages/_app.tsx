@@ -15,7 +15,6 @@ import Viewport from '@/components/common/Viewport'
 import Sidebar from '@/components/common/Sidebar'
 import { AppStateProvider } from '@/contexts/appState'
 import useResetScroll from '@/hooks/common/useResetScroll'
-import Loading from './_loading'
 import { useRef } from 'react'
 import Head from 'next/head'
 
@@ -41,7 +40,6 @@ export default function App({ Component, pageProps }: AppProps) {
               <Main ref={mainRef}>
                 <Header />
                 <Content ref={contentRef}>
-                  <Loading />
                   <Component
                     {...{
                       ...pageProps,
