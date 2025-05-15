@@ -23,11 +23,14 @@ import { ellipseAddress } from '@/helpers/utils'
 import { LabelProps } from '@aleph-front/core'
 import useDownloadLogs from '@/hooks/common/useDownloadLogs'
 import useClassifyMachineVolumes from '@/hooks/common/useClassifyMachineVolumes'
+import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
+import { Domain } from '@/domain/domain'
 
 // Type for side panel content
 type SidePanelContent = {
   isOpen: boolean
-  type?: 'sshKey' | 'volume'
+  type?: 'sshKey' | 'volume' | 'domain'
+  selectedDomain?: Domain
   selectedVolume?: any
   selectedSSHKey?: SSHKey
 }
@@ -42,6 +45,10 @@ export type ManageInstance = UseExecutableActionsReturn & {
   // Volumes data
   immutableVolumes: ImmutableVolume[]
   persistentVolumes: PersistentVolume[]
+
+  // Custom domains
+  customDomains: Domain[]
+  handleCustomDomainClick: (domain: Domain) => void
 
   // UI state
   mappedKeys: (SSHKey | undefined)[]
@@ -145,6 +152,36 @@ export function useManageInstance(): ManageInstance {
   const { persistentVolumes, immutableVolumes } = useClassifyMachineVolumes({
     volumes: instance?.volumes,
   })
+
+  // === CUSTOM DOMAINS ===
+
+  const domainManager = useDomainManager()
+  const [customDomains, setCustomDomains] = useState<Domain[]>([])
+
+  // Fetch custom domains
+  useEffect(() => {
+    if (!instance || !domainManager) return
+
+    const getCustomDomains = async () => {
+      const domains = await domainManager.getAll()
+
+      const instanceDomains = domains.filter((domain) =>
+        instance.id?.includes(domain.ref),
+      )
+
+      setCustomDomains(instanceDomains)
+    }
+
+    getCustomDomains()
+  }, [instance, domainManager])
+
+  const handleCustomDomainClick = useCallback((domain: any) => {
+    setSidePanel({
+      isOpen: true,
+      type: 'domain',
+      selectedDomain: domain,
+    })
+  }, [])
 
   // -----------------
 
@@ -267,6 +304,8 @@ export function useManageInstance(): ManageInstance {
     ...executableActions,
     instance,
     mappedKeys,
+    customDomains,
+    handleCustomDomainClick,
     setTabId,
     handleBack,
     handleDownloadLogs,

@@ -20,6 +20,8 @@ import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
 import { EntityType } from '@/helpers/constants'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
 import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
+import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
+import DomainDetail from '@/components/common/DomainDetail'
 
 /**
  * Button component with functional styling
@@ -64,6 +66,10 @@ export default function ManageInstance() {
 
     // SSH Keys
     mappedKeys,
+
+    // Custom domains
+    customDomains,
+    handleCustomDomainClick,
 
     // Payment data
     paymentData,
@@ -177,6 +183,11 @@ export default function ManageInstance() {
                   persistentVolumes={persistentVolumes}
                 />
               ),
+              <EntityCustomDomains
+                key={'instance-custom-domains'}
+                customDomains={customDomains}
+                onCustomDomainClick={handleCustomDomainClick}
+              />,
             ]}
           />
         </Slide>
@@ -207,6 +218,10 @@ export default function ManageInstance() {
         ) : sidePanel.type === 'sshKey' ? (
           sidePanel.selectedSSHKey && (
             <SSHKeyDetail sshKeyId={sidePanel.selectedSSHKey.id} />
+          )
+        ) : sidePanel.type === 'domain' ? (
+          sidePanel.selectedDomain && (
+            <DomainDetail domainId={sidePanel.selectedDomain.id} />
           )
         ) : (
           <>ERROR</>
