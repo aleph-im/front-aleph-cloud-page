@@ -27,7 +27,6 @@ export const EntitySSHKeys = ({
                       handleSSHKeyClick(sshKey)
                     }}
                   >
-                    {/* @todo: Change object to key image */}
                     <ObjectImg
                       id={EntityTypeObject[EntityType.SSHKey]}
                       color="base2"
