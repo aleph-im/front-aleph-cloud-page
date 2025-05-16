@@ -207,7 +207,13 @@ export default function ManageInstance() {
 
       {/* Side Panel */}
       <SidePanel
-        title={sidePanel.type === 'volume' ? 'Volume' : 'SSH Key'}
+        title={
+          sidePanel.type === 'volume'
+            ? 'Volume'
+            : sidePanel.type === 'sshKey'
+              ? 'SSH Key'
+              : 'Custom Domain'
+        }
         isOpen={sidePanel.isOpen}
         onClose={closeSidePanel}
       >
