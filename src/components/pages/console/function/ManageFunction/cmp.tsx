@@ -14,11 +14,13 @@ import ProgramDetails from '@/components/common/entityData/ProgramDetails'
 import EntityLinkedRuntime from '@/components/common/entityData/EntityLinkedRuntime'
 import SidePanel from '@/components/common/SidePanel'
 import VolumeDetail from '@/components/common/VolumeDetail'
+import DomainDetail from '@/components/common/DomainDetail'
 import EntityLinkedCodebase from '@/components/common/entityData/EntityLinkedCodebase'
 import EntityPayment from '@/components/common/entityData/EntityPayment'
 import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
 import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolumes'
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
+import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 
 export default function ManageFunction() {
   const {
@@ -37,6 +39,10 @@ export default function ManageFunction() {
     // Volumes data
     immutableVolumes,
     persistentVolumes,
+
+    // Custom domains
+    customDomains,
+    handleCustomDomainClick,
 
     // Payment data
     paymentData,
@@ -166,6 +172,11 @@ export default function ManageFunction() {
                   persistentVolumes={persistentVolumes}
                 />
               ),
+              <EntityCustomDomains
+                key={'function-custom-domains'}
+                customDomains={customDomains}
+                onCustomDomainClick={handleCustomDomainClick}
+              />,
             ]}
           />
         </Slide>
@@ -192,6 +203,10 @@ export default function ManageFunction() {
         {sidePanel.type === 'volume' ? (
           sidePanel.selectedVolumeId && (
             <VolumeDetail volumeId={sidePanel.selectedVolumeId} />
+          )
+        ) : sidePanel.type === 'domain' ? (
+          sidePanel.selectedDomain && (
+            <DomainDetail domainId={sidePanel.selectedDomain.id} />
           )
         ) : (
           <>ERROR</>
