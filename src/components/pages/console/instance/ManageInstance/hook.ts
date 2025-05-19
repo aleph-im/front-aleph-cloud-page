@@ -25,6 +25,7 @@ import useDownloadLogs from '@/hooks/common/useDownloadLogs'
 import useClassifyMachineVolumes from '@/hooks/common/useClassifyMachineVolumes'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { Domain } from '@/domain/domain'
+import { DomainWithStatus } from '@/components/common/entityData/EntityCustomDomains/types'
 
 // Type for side panel content
 type SidePanelContent = {
@@ -47,7 +48,7 @@ export type ManageInstance = UseExecutableActionsReturn & {
   persistentVolumes: PersistentVolume[]
 
   // Custom domains
-  customDomains: Domain[]
+  customDomains: DomainWithStatus[]
   handleCustomDomainClick: (domain: Domain) => void
 
   // UI state
@@ -156,26 +157,53 @@ export function useManageInstance(): ManageInstance {
   // === CUSTOM DOMAINS ===
 
   const domainManager = useDomainManager()
-  const [customDomains, setCustomDomains] = useState<Domain[]>([])
+  const [domains, setDomains] = useState<Domain[]>([])
+  const [customDomains, setCustomDomains] = useState<DomainWithStatus[]>([])
 
   // Fetch custom domains
   useEffect(() => {
     if (!instance || !domainManager) return
 
     const getCustomDomains = async () => {
-      const domains = await domainManager.getAll()
+      const allDomains = await domainManager.getAll()
 
-      const instanceDomains = domains.filter((domain) =>
+      const instanceDomains = allDomains.filter((domain) =>
         instance.id?.includes(domain.ref),
       )
 
-      setCustomDomains(instanceDomains)
+      setDomains(instanceDomains)
     }
 
     getCustomDomains()
   }, [instance, domainManager])
 
-  const handleCustomDomainClick = useCallback((domain: any) => {
+  // Get status for each domain and update customDomains
+  useEffect(() => {
+    if (!domainManager || domains.length === 0) return
+
+    const fetchDomainStatuses = async () => {
+      const domainsWithStatus: DomainWithStatus[] = await Promise.all(
+        domains.map(async (domain) => {
+          const status = await domainManager.checkStatus(domain)
+          return {
+            domain,
+            status,
+          }
+        }),
+      )
+
+      setCustomDomains(domainsWithStatus)
+    }
+
+    fetchDomainStatuses()
+
+    // Refresh domain statuses periodically
+    const intervalId = setInterval(fetchDomainStatuses, 30000) // Every 30 seconds
+
+    return () => clearInterval(intervalId)
+  }, [domains, domainManager])
+
+  const handleCustomDomainClick = useCallback((domain: Domain) => {
     setSidePanel({
       isOpen: true,
       type: 'domain',

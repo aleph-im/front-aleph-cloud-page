@@ -1,10 +1,59 @@
-import React, { memo } from 'react'
+import React, { memo, useRef } from 'react'
 import { Icon, NoisyContainer, ObjectImg } from '@aleph-front/core'
 import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
 import RelatedEntityCard from '../RelatedEntityCard'
 import { EntityCustomDomainsProps } from './types'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
+import ResponsiveTooltip from '../../ResponsiveTooltip'
+
+const DomainCard = ({
+  domain,
+  status,
+  onDomainClick: handleDomainClick,
+}: {
+  domain: EntityCustomDomainsProps['customDomains'][number]['domain']
+  status: EntityCustomDomainsProps['customDomains'][number]['status']
+  onDomainClick: EntityCustomDomainsProps['onCustomDomainClick']
+}) => {
+  const warningIconRef = useRef(null)
+
+  return (
+    <RelatedEntityCard
+      key={domain.id}
+      onClick={() => {
+        handleDomainClick(domain)
+      }}
+    >
+      <ObjectImg
+        id={EntityTypeObject[EntityType.Domain]}
+        color="base2"
+        size="2.5rem"
+        tw="min-w-[3rem] min-h-[3rem]"
+      />
+      <div>
+        <div className="tp-info text-main0 fs-12">DOMAIN</div>
+        <div tw="flex items-center gap-2">
+          {status && !status.status && (
+            <>
+              <div ref={warningIconRef}>
+                <Icon size="xl" name="warning" color="warning" />
+              </div>
+              <ResponsiveTooltip
+                my={'bottom-center'}
+                at={'top-center'}
+                targetRef={warningIconRef}
+                content={status.help}
+              />
+            </>
+          )}
+          <Text>{domain.name}</Text>
+        </div>
+      </div>
+      <Icon name="eye" tw="absolute top-2 right-2" className="openEntityIcon" />
+    </RelatedEntityCard>
+  )
+}
 
 export const EntityCustomDomains = ({
   customDomains,
@@ -19,30 +68,14 @@ export const EntityCustomDomains = ({
         <div tw="flex flex-wrap gap-4">
           {customDomains.length ? (
             customDomains.map(
-              (customDomain) =>
-                customDomain && (
-                  <RelatedEntityCard
-                    key={customDomain.id}
-                    onClick={() => {
-                      handleCustomDomainClick(customDomain)
-                    }}
-                  >
-                    <ObjectImg
-                      id={EntityTypeObject[EntityType.Domain]}
-                      color="base2"
-                      size="2.5rem"
-                      tw="min-w-[3rem] min-h-[3rem]"
-                    />
-                    <div>
-                      <div className="tp-info text-main0 fs-12">DOMAIN</div>
-                      <Text>{customDomain.name}</Text>
-                    </div>
-                    <Icon
-                      name="eye"
-                      tw="absolute top-2 right-2"
-                      className="openEntityIcon"
-                    />
-                  </RelatedEntityCard>
+              ({ domain, status }) =>
+                domain && (
+                  <DomainCard
+                    key={domain.id}
+                    domain={domain}
+                    status={status}
+                    onDomainClick={handleCustomDomainClick}
+                  />
                 ),
             )
           ) : (
