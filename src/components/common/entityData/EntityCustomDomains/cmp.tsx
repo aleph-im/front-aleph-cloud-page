@@ -1,5 +1,5 @@
 import React, { memo, useRef } from 'react'
-import { Icon, NoisyContainer, ObjectImg } from '@aleph-front/core'
+import { Icon, NoisyContainer, ObjectImg, Spinner } from '@aleph-front/core'
 import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
 import RelatedEntityCard from '../RelatedEntityCard'
@@ -34,18 +34,22 @@ const DomainCard = ({
       <div>
         <div className="tp-info text-main0 fs-12">DOMAIN</div>
         <div tw="flex items-center gap-2">
-          {status && !status.status && (
-            <>
-              <div ref={warningIconRef}>
-                <Icon size="xl" name="warning" color="warning" />
-              </div>
-              <ResponsiveTooltip
-                my={'bottom-center'}
-                at={'top-center'}
-                targetRef={warningIconRef}
-                content={status.help}
-              />
-            </>
+          {!status ? (
+            <Spinner color="main0" size="3em" tw="-m-4" />
+          ) : (
+            !status.status && (
+              <>
+                <div ref={warningIconRef}>
+                  <Icon size="xl" name="warning" color="warning" />
+                </div>
+                <ResponsiveTooltip
+                  my={'bottom-center'}
+                  at={'top-center'}
+                  targetRef={warningIconRef}
+                  content={status.help}
+                />
+              </>
+            )
           )}
           <Text>{domain.name}</Text>
         </div>
