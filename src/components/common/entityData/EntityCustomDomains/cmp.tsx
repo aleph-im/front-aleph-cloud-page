@@ -34,16 +34,17 @@ const DomainCard = ({
       <div>
         <div className="tp-info text-main0 fs-12">DOMAIN</div>
         <div tw="flex items-center gap-2">
+          <Text>{domain.name}</Text>
           {!status ? (
             <Spinner color="main0" size="3em" tw="-m-4" />
           ) : (
             !status.status && (
               <>
                 <div ref={warningIconRef}>
-                  <Icon size="xl" name="warning" color="warning" />
+                  <Icon size="md" name="warning" color="warning" />
                 </div>
                 <ResponsiveTooltip
-                  my={'bottom-center'}
+                  my={'bottom-right'}
                   at={'top-center'}
                   targetRef={warningIconRef}
                   content={status.help}
@@ -51,9 +52,9 @@ const DomainCard = ({
               </>
             )
           )}
-          <Text>{domain.name}</Text>
         </div>
       </div>
+
       <Icon name="eye" tw="absolute top-2 right-2" className="openEntityIcon" />
     </RelatedEntityCard>
   )
