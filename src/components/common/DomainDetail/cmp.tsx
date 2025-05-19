@@ -299,12 +299,12 @@ export const DomainDetail = ({
                 className="tp-body1 fs-16"
                 href={
                   (domain.target === 'instance'
-                    ? '/computing/instance/'
+                    ? '/console/computing/instance/'
                     : domain.target === 'confidential'
-                      ? '/computing/confidential/'
+                      ? '/console/computing/confidential/'
                       : domain.target === 'program'
-                        ? '/computing/function/'
-                        : '/storage/volume/') + refEntity.id
+                        ? '/console/computing/function/'
+                        : '/console/storage/volume/') + refEntity.id
                 }
               >
                 <IconText iconName="square-up-right">Details</IconText>
