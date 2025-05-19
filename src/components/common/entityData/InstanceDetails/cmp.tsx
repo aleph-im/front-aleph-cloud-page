@@ -10,6 +10,7 @@ import IconText from '../../IconText'
 import { Text } from '@/components/pages/console/common'
 import { convertByteUnits, ellipseText } from '@/helpers/utils'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
+import InfoTitle from '../InfoTitle'
 
 export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
   const handleCopyHash = useCopyToClipboardAndNotify(instance?.id || '')
@@ -29,7 +30,7 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
           />
           <div tw="flex flex-col gap-4 w-full">
             <div tw="w-full">
-              <div className="tp-info text-main0 fs-12">ITEM HASH</div>
+              <InfoTitle>ITEM HASH</InfoTitle>
               {instance ? (
                 <IconText iconName="copy" onClick={handleCopyHash}>
                   {instance.id}
@@ -40,7 +41,7 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
             </div>
             <div tw="flex flex-wrap gap-4">
               <div>
-                <div className="tp-info text-main0 fs-12">CORES</div>
+                <InfoTitle>CORES</InfoTitle>
                 <div>
                   <Text tw="flex items-center gap-1">
                     {instance?.resources ? (
@@ -52,7 +53,7 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
                 </div>
               </div>
               <div>
-                <div className="tp-info text-main0 fs-12">RAM</div>
+                <InfoTitle>RAM</InfoTitle>
                 <div>
                   <Text>
                     {instance?.resources ? (
@@ -68,7 +69,7 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
                 </div>
               </div>
               <div>
-                <div className="tp-info text-main0 fs-12">HDD</div>
+                <InfoTitle>HDD</InfoTitle>
                 <div>
                   <Text>
                     {instance ? (
@@ -85,7 +86,7 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
               </div>
             </div>
             <div>
-              <div className="tp-info text-main0 fs-12">EXPLORER</div>
+              <InfoTitle>EXPLORER</InfoTitle>
               <div>
                 {instance ? (
                   <a

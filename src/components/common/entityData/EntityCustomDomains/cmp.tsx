@@ -6,6 +6,7 @@ import RelatedEntityCard from '../RelatedEntityCard'
 import { EntityCustomDomainsProps } from './types'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
 import ResponsiveTooltip from '../../ResponsiveTooltip'
+import InfoTitle from '../InfoTitle'
 
 const DomainCard = ({
   domain,
@@ -32,7 +33,7 @@ const DomainCard = ({
         tw="min-w-[3rem] min-h-[3rem]"
       />
       <div>
-        <div className="tp-info text-main0 fs-12">DOMAIN</div>
+        <InfoTitle>DOMAIN</InfoTitle>
         <div tw="flex items-center gap-2">
           <Text>{domain.name}</Text>
           {!status ? (
@@ -92,7 +93,7 @@ export const EntityCustomDomains = ({
                 tw="min-w-[3rem] min-h-[3rem]"
               />
               <div>
-                <div className="tp-info text-main0 fs-12">DOMAIN</div>
+                <InfoTitle>DOMAIN</InfoTitle>
                 <Text>
                   <Skeleton width="7rem" />
                 </Text>
