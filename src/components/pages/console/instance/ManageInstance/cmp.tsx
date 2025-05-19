@@ -22,6 +22,7 @@ import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeade
 import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import DomainDetail from '@/components/common/DomainDetail'
+import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
 
 /**
  * Button component with functional styling
@@ -190,6 +191,7 @@ export default function ManageInstance() {
                   onCustomDomainClick={handleCustomDomainClick}
                 />
               ),
+              <EntityPortForwarding />,
             ]}
           />
         </Slide>
