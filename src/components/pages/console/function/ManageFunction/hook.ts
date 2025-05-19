@@ -21,7 +21,7 @@ import {
   PersistentVolume,
 } from '@aleph-sdk/message'
 import useClassifyMachineVolumes from '@/hooks/common/useClassifyMachineVolumes'
-import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
+import useEntityCustomDomains from '@/hooks/common/useEntityCustomDomains'
 import { Domain } from '@/domain/domain'
 import { DomainWithStatus } from '@/components/common/entityData/EntityCustomDomains/types'
 
@@ -109,52 +109,10 @@ export function useManageFunction(): ManageFunction {
 
   // === CUSTOM DOMAINS ===
 
-  const domainManager = useDomainManager()
-  const [domains, setDomains] = useState<Domain[]>([])
-  const [customDomains, setCustomDomains] = useState<DomainWithStatus[]>([])
-
-  // Fetch custom domains
-  useEffect(() => {
-    if (!program || !domainManager) return
-
-    const getCustomDomains = async () => {
-      const allDomains = await domainManager.getAll()
-
-      const programDomains = allDomains.filter((domain) =>
-        program.id?.includes(domain.ref),
-      )
-
-      setDomains(programDomains)
-    }
-
-    getCustomDomains()
-  }, [program, domainManager])
-
-  // Get status for each domain and update customDomains
-  useEffect(() => {
-    if (!domainManager || domains.length === 0) return
-
-    const fetchDomainStatuses = async () => {
-      const domainsWithStatus: DomainWithStatus[] = await Promise.all(
-        domains.map(async (domain) => {
-          const status = await domainManager.checkStatus(domain)
-          return {
-            domain,
-            status,
-          }
-        }),
-      )
-
-      setCustomDomains(domainsWithStatus)
-    }
-
-    fetchDomainStatuses()
-
-    // Refresh domain statuses periodically
-    const intervalId = setInterval(fetchDomainStatuses, 30000) // Every 30 seconds
-
-    return () => clearInterval(intervalId)
-  }, [domains, domainManager])
+  // Use the custom hook and override the handleCustomDomainClick function
+  const { customDomains } = useEntityCustomDomains({
+    entityId: program?.id,
+  })
 
   const handleCustomDomainClick = useCallback((domain: Domain) => {
     setSidePanel({
