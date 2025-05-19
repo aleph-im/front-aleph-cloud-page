@@ -159,24 +159,26 @@ export default function ManageFunction() {
                 entrypoint={program?.code.entrypoint}
                 onCodebaseVolumeClick={handleCodebaseVolumeClick}
               />,
-              immutableVolumes.length > 0 && (
+              immutableVolumes.length && (
                 <EntityLinkedVolumes
                   key="instance-linked-volumes"
                   linkedVolumes={immutableVolumes}
                   onImmutableVolumeClick={handleImmutableVolumeClick}
                 />
               ),
-              persistentVolumes.length > 0 && (
+              persistentVolumes.length && (
                 <EntityPersistentStorage
                   key="instance-persistent-storage"
                   persistentVolumes={persistentVolumes}
                 />
               ),
-              <EntityCustomDomains
-                key={'function-custom-domains'}
-                customDomains={customDomains}
-                onCustomDomainClick={handleCustomDomainClick}
-              />,
+              customDomains.length && (
+                <EntityCustomDomains
+                  key={'function-custom-domains'}
+                  customDomains={customDomains}
+                  onCustomDomainClick={handleCustomDomainClick}
+                />
+              ),
             ]}
           />
         </Slide>

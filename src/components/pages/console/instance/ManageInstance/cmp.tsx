@@ -170,24 +170,26 @@ export default function ManageInstance() {
                 key="instance-connection-methods"
                 executableStatus={status}
               />,
-              immutableVolumes.length > 0 && (
+              immutableVolumes.length && (
                 <EntityLinkedVolumes
                   key="instance-linked-volumes"
                   linkedVolumes={immutableVolumes}
                   onImmutableVolumeClick={handleImmutableVolumeClick}
                 />
               ),
-              persistentVolumes.length > 0 && (
+              persistentVolumes.length && (
                 <EntityPersistentStorage
                   key="instance-persistent-storage"
                   persistentVolumes={persistentVolumes}
                 />
               ),
-              <EntityCustomDomains
-                key={'instance-custom-domains'}
-                customDomains={customDomains}
-                onCustomDomainClick={handleCustomDomainClick}
-              />,
+              customDomains.length && (
+                <EntityCustomDomains
+                  key={'instance-custom-domains'}
+                  customDomains={customDomains}
+                  onCustomDomainClick={handleCustomDomainClick}
+                />
+              ),
             ]}
           />
         </Slide>
