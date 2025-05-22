@@ -47,6 +47,7 @@ export type UseExecutableActionsReturn = {
   stopDisabled: boolean
   startDisabled: boolean
   rebootDisabled: boolean
+  deleteDisabled: boolean
   logsDisabled: boolean
   streamDetails?: StreamPaymentDetails
   handleStop: () => void
@@ -194,6 +195,7 @@ export function useExecutableActions({
   const stopDisabled = !isPAYG || !isAllocated || !crn
   const startDisabled = !isPAYG || isAllocated || !crn
   const rebootDisabled = !isAllocated || !crn
+  const deleteDisabled = !executable
 
   const handleStop = useCallback(
     () => handleSendOperation('stop'),
@@ -224,7 +226,7 @@ export function useExecutableActions({
 
     try {
       // Check if the current network matches the instance's payment network
-      const instanceNetwork = executable.payment?.chain
+      const instanceNetwork = executable.chain || executable.payment?.chain
       const isPAYG = executable.payment?.type === PaymentType.superfluid
 
       // Use the network compatibility checker
@@ -323,6 +325,7 @@ export function useExecutableActions({
     stopDisabled,
     startDisabled,
     rebootDisabled,
+    deleteDisabled,
     logsDisabled: !logs,
     handleStop,
     handleStart,

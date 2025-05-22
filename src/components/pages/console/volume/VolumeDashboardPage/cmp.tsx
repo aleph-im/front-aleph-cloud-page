@@ -7,6 +7,7 @@ import VolumesTabContent from '../VolumesTabContent'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 import EntitySummaryCard from '@/components/common/EntitySummaryCard'
+import { EntityType, EntityTypeObject } from '@/helpers/constants'
 
 export default function VolumeDashboardPage() {
   const {
@@ -38,7 +39,7 @@ export default function VolumeDashboardPage() {
             items={[
               {
                 title: 'Volumes',
-                img: 'Object15',
+                img: EntityTypeObject[EntityType.Volume],
                 buttonUrl: '/console/storage/volume/new',
                 information: {
                   type: 'storage',

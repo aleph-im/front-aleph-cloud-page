@@ -1,5 +1,7 @@
 // ------------------------ @todo: Refactor in domain package --------------------
 
+import { ObjectImgProps } from '@aleph-front/core'
+
 export const defaultAccountChannel = 'ALEPH-ACCOUNT'
 
 // Default node ops message config
@@ -7,8 +9,8 @@ export const channel = 'FOUNDATION'
 export const tags = ['mainnet']
 export const postType = 'corechan-operation'
 
-export const apiServer = 'https://api2.aleph.im'
-export const wsServer = 'wss://api2.aleph.im'
+export const apiServer = 'https://api.aleph.im'
+export const wsServer = 'wss://api.aleph.im'
 export const mbPerAleph = 3
 
 export const communityWalletAddress =
@@ -20,7 +22,7 @@ export const erc20Address = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
 export const splTokenAddress = '3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x'
 
 export const crnListProgramUrl =
-  'https://dchq.staging.aleph.sh/vm/bec08b08bb9f9685880f3aeb9c1533951ad56abef2a39c97f5a93683bdaa5e30/crns.json'
+  'https://aleph.sh/vm/bec08b08bb9f9685880f3aeb9c1533951ad56abef2a39c97f5a93683bdaa5e30/crns.json'
 
 export const websiteUrl = 'https://www.aleph.cloud'
 
@@ -158,6 +160,17 @@ export const EntityTypeSlug: Record<EntityType, string> = {
   [EntityType.Domain]: 'domain',
   [EntityType.Website]: 'website',
   [EntityType.Confidential]: 'confidential',
+}
+
+export const EntityTypeObject: Record<EntityType, ObjectImgProps['id']> = {
+  [EntityType.Volume]: 'Object15',
+  [EntityType.Program]: 'Object10',
+  [EntityType.Instance]: 'Object11',
+  [EntityType.GpuInstance]: 'Object11',
+  [EntityType.SSHKey]: 'Object21',
+  [EntityType.Domain]: 'Object8',
+  [EntityType.Website]: 'Object20',
+  [EntityType.Confidential]: 'Object9',
 }
 
 export enum PaymentMethod {

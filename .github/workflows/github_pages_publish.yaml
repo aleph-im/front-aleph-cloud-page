@@ -1,0 +1,30 @@
+name: Github Pages Publish
+description: Publish preview to Github Pages
+
+on:
+  push:
+    branches:
+      - main
+      - release/**
+
+env:
+  IS_GH_PAGES: gh-pages
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build and Export
+        uses: ./.github/actions/build
+        with:
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: out

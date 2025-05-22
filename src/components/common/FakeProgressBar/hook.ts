@@ -4,6 +4,7 @@ import { FakeProgressBarHookReturn, FakeProgressBarProps } from './types'
 
 export const useFakeProgressBar = ({
   loading,
+  breakpoint,
 }: FakeProgressBarProps): FakeProgressBarHookReturn => {
   const [progress, setProgress] = useState(0)
   const [skipTransition, setSkipTransition] = useState(false)
@@ -100,6 +101,7 @@ export const useFakeProgressBar = ({
 
   return {
     loading,
+    breakpoint,
     progress,
     skipTransition,
     shouldMount,

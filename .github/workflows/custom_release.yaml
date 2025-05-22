@@ -1,0 +1,24 @@
+name: Custom Release
+description: Build and push to IPFS without a version bump
+
+on:
+  push:
+    branches:
+      - release/**
+  workflow_dispatch: {}
+
+jobs:
+  push-to-ipfs:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build and Export
+        uses: ./.github/actions/build
+        with:
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+      - name: Push to IPFS
+        uses: ./.github/actions/push_to_ipfs
+        with:
+          upload-dir: out
