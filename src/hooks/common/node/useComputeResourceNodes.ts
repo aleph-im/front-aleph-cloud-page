@@ -24,8 +24,10 @@ export type UseComputeResourceNodesReturn = {
   filteredNodes?: CRN[]
   filter?: string
   lastVersion?: NodeLastVersions
+  showInactive: boolean
   handleSortItems: UseSortedListReturn<CRN>['handleSortItems']
   handleFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleShowInactiveChange: (e: ChangeEvent<HTMLInputElement>) => void
 } & Pick<UseFiltersReturn, 'filters'>
 
 export function useComputeResourceNodes({
@@ -54,6 +56,7 @@ export function useComputeResourceNodes({
   })
 
   const [filter, setFilter] = useState<string>()
+  const [showInactive, setShowInactive] = useState<boolean>(false)
 
   const handleFilterChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +65,13 @@ export function useComputeResourceNodes({
       setCrnqFilter(filter)
     },
     [setCrnqFilter],
+  )
+
+  const handleShowInactiveChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setShowInactive(e.target.checked)
+    },
+    [],
   )
 
   useEffect(() => {
@@ -73,20 +83,21 @@ export function useComputeResourceNodes({
 
   // -----------------------------
 
-  const filterNodes = useCallback(
-    (query?: string, nodes?: CRN[]): CRN[] | undefined => {
-      if (!nodes) return
-      if (!query) return nodes
+  const filterNodesByQuery = useCallback((query?: string) => {
+    if (!query) return () => true
 
-      return nodes.filter(
-        (node) =>
-          node.name?.toLowerCase().includes(query.toLowerCase()) ||
-          (node.parentData?.name || '')
-            .toLowerCase()
-            .includes(query.toLowerCase()),
-      )
+    return (node: CRN) =>
+      node.name?.toLowerCase().includes(query.toLowerCase()) ||
+      (node.parentData?.name || '').toLowerCase().includes(query.toLowerCase())
+  }, [])
+
+  const filterInactiveNodes = useCallback(
+    () => (node: CRN) => {
+      if (showInactive) return true
+
+      return !node.inactive_since && node.score > 0
     },
-    [],
+    [showInactive],
   )
 
   const nodes = useMemo(() => {
@@ -96,10 +107,12 @@ export function useComputeResourceNodes({
     return nodes.sort((a, b) => b.score - a.score)
   }, [prefetchNodes, data])
 
-  const filteredNodes = useMemo(
-    () => filterNodes(crnqFilter, nodes),
-    [filterNodes, crnqFilter, nodes],
-  )
+  const filteredNodes = useMemo(() => {
+    if (!nodes) return
+    return nodes
+      .filter(filterNodesByQuery(crnqFilter))
+      .filter(filterInactiveNodes())
+  }, [filterNodesByQuery, filterInactiveNodes, crnqFilter, nodes])
 
   // -----------------------------
 
@@ -117,7 +130,9 @@ export function useComputeResourceNodes({
     filter,
     lastVersion,
     filters,
+    showInactive,
     handleSortItems,
     handleFilterChange,
+    handleShowInactiveChange,
   }
 }
