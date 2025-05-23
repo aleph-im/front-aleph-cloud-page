@@ -1,6 +1,13 @@
 import { memo } from 'react'
 import Head from 'next/head'
-import { Button, Icon, Tabs, TextGradient, TextInput } from '@aleph-front/core'
+import {
+  Button,
+  Checkbox,
+  Icon,
+  Tabs,
+  TextGradient,
+  TextInput,
+} from '@aleph-front/core'
 import { UseCoreChannelNodesPageProps, useCoreChannelNodesPage } from './hook'
 import CoreChannelNodesTable from '@/components/common/CoreChannelNodesTable'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
@@ -28,10 +35,12 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
     filter,
     lastVersion,
     loadItemsDisabled,
+    showInactive,
     handleLoadItems,
     handleSortItems,
     handleTabChange,
     handleFilterChange,
+    handleShowInactiveChange,
   } = useCoreChannelNodesPage(props)
 
   const { render } = useLazyRender()
@@ -119,6 +128,12 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
                   align="left"
                   selected={selectedTab}
                   onTabChange={handleTabChange}
+                />
+                <Checkbox
+                  label="Show inactive nodes"
+                  checked={showInactive}
+                  onChange={handleShowInactiveChange}
+                  size="xs"
                 />
               </div>
               <TextInput

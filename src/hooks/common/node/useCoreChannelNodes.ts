@@ -18,8 +18,10 @@ export type UseCoreChannelNodesReturn = {
   filteredNodes?: CCN[]
   filter?: string
   lastVersion?: NodeLastVersions
+  showInactive: boolean
   handleSortItems: UseSortedListReturn<CCN>['handleSortItems']
   handleFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleShowInactiveChange: (e: ChangeEvent<HTMLInputElement>) => void
 } & Pick<UseFiltersReturn, 'filters'>
 
 export function useCoreChannelNodes({
@@ -42,6 +44,7 @@ export function useCoreChannelNodes({
   })
 
   const [filter, setFilter] = useState<string>()
+  const [showInactive, setShowInactive] = useState<boolean>(false)
 
   const handleFilterChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +53,13 @@ export function useCoreChannelNodes({
       setCcnqFilter(filter)
     },
     [setCcnqFilter],
+  )
+
+  const handleShowInactiveChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setShowInactive(e.target.checked)
+    },
+    [],
   )
 
   useEffect(() => {
@@ -61,22 +71,27 @@ export function useCoreChannelNodes({
 
   // -----------------------------
 
-  const filterNodes = useCallback(
-    (query?: string, nodes?: CCN[]): CCN[] | undefined => {
-      if (!nodes) return
-      if (!query) return nodes
+  const filterNodesByQuery = useCallback((query?: string) => {
+    if (!query) return () => true
 
-      return nodes.filter((node) =>
-        node.name?.toLowerCase().includes(query.toLowerCase()),
-      )
+    return (node: CCN) => node.name?.toLowerCase().includes(query.toLowerCase())
+  }, [])
+
+  const filterInactiveNodes = useCallback(
+    () => (node: CCN) => {
+      if (showInactive) return true
+
+      return !node.inactive_since && node.score > 0
     },
-    [],
+    [showInactive],
   )
 
-  const filteredNodes = useMemo(
-    () => filterNodes(ccnqFilter, nodes),
-    [filterNodes, ccnqFilter, nodes],
-  )
+  const filteredNodes = useMemo(() => {
+    if (!nodes) return
+    return nodes
+      .filter(filterNodesByQuery(ccnqFilter))
+      .filter(filterInactiveNodes())
+  }, [filterNodesByQuery, filterInactiveNodes, ccnqFilter, nodes])
 
   const presortedFilteredNodes = useMemo(() => {
     if (!filteredNodes) return
@@ -99,7 +114,9 @@ export function useCoreChannelNodes({
     filter,
     lastVersion,
     filters,
+    showInactive,
     handleSortItems,
     handleFilterChange,
+    handleShowInactiveChange,
   }
 }

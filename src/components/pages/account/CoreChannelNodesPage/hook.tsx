@@ -36,7 +36,13 @@ export function useCoreChannelNodesPage(
   const [state] = useAppState()
   const { account, balance: accountBalance = 0 } = state.connection
 
-  const { nodes, filteredNodes, ...rest } = useCoreChannelNodes(props)
+  const {
+    nodes,
+    filteredNodes,
+    showInactive,
+    handleShowInactiveChange,
+    ...rest
+  } = useCoreChannelNodes(props)
 
   // -----------------------------
 
@@ -111,5 +117,7 @@ export function useCoreChannelNodesPage(
     loadItemsDisabled,
     handleLoadItems,
     handleTabChange,
+    showInactive,
+    handleShowInactiveChange,
   }
 }
