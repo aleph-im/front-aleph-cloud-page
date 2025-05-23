@@ -5,6 +5,7 @@ import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
 import IconText from '../../IconText'
 import { useEntityConnectionMethods } from './hook'
+import InfoTitle from '../InfoTitle'
 
 export const EntityConnectionMethods = ({
   executableStatus,
@@ -25,7 +26,7 @@ export const EntityConnectionMethods = ({
       <NoisyContainer>
         <div tw="flex flex-col gap-4">
           <div>
-            <div className="tp-info text-main0 fs-12">SSH COMMAND</div>
+            <InfoTitle>SSH COMMAND</InfoTitle>
             <div>
               {!isLoading ? (
                 <IconText iconName="copy" onClick={handleCopyCommand}>
@@ -37,7 +38,7 @@ export const EntityConnectionMethods = ({
             </div>
           </div>
           <div>
-            <div className="tp-info text-main0 fs-12">IPV6</div>
+            <InfoTitle>IPV6</InfoTitle>
             <div>
               {!isLoading ? (
                 <IconText iconName="copy" onClick={handleCopyIpv6}>

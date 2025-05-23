@@ -11,6 +11,7 @@ import { FunctionalButton } from '@/components/pages/console/instance/ManageInst
 import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
+import InfoTitle from '../InfoTitle'
 
 export const EntityLinkedCodebase = ({
   loading,
@@ -51,7 +52,7 @@ export const EntityLinkedCodebase = ({
                 tw="min-w-[3rem] min-h-[3rem]"
               />
               <div>
-                <div className="tp-info text-main0 fs-12">ENTRYPOINT</div>
+                <InfoTitle>ENTRYPOINT</InfoTitle>
                 <Text>
                   {!entrypoint || loading ? (
                     <Skeleton width="6rem" />

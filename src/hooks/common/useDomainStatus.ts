@@ -16,7 +16,6 @@ export function useDomainStatus(
   useEffect(() => {
     if (!manager) return
     if (!domain) return
-    if (status?.status) return
 
     async function request() {
       if (!manager) return
@@ -26,11 +25,11 @@ export function useDomainStatus(
       setStatus(status)
     }
 
-    if (!status) request()
+    request()
 
     const id = setInterval(request, 10 * 1000)
     return () => clearInterval(id)
-  }, [status, domain, manager])
+  }, [domain, manager])
 
   return status
 }

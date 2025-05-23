@@ -3,6 +3,7 @@ import { Icon, NoisyContainer } from '@aleph-front/core'
 import { Text } from '@/components/pages/console/common'
 import { FunctionalButton } from '@/components/pages/console/instance/ManageInstance/cmp'
 import { EntityLogsControlProps } from './types'
+import InfoTitle from '../../InfoTitle'
 
 export const EntityLogsControl = ({
   onViewLogs,
@@ -18,7 +19,7 @@ export const EntityLogsControl = ({
       <NoisyContainer>
         <div tw="flex flex-col gap-4">
           <div>
-            <div className="tp-info text-main0 fs-12">INFO</div>
+            <InfoTitle>INFO</InfoTitle>
             <Text>
               Real-time logs of the of the virtual machine. Use this to debug
               any issue with the boot of your instance and to monitor the

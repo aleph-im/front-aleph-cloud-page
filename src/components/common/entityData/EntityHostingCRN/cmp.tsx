@@ -7,6 +7,7 @@ import IconText from '../../IconText'
 import { ellipseText } from '@/helpers/utils'
 import { StoreContent } from '@aleph-sdk/message'
 import { useMessageManager } from '@/hooks/common/useManager/useMessageManager'
+import InfoTitle from '../InfoTitle'
 
 export const EntityHostingCRN = ({
   nodeDetails,
@@ -55,7 +56,7 @@ export const EntityHostingCRN = ({
         <div tw="flex flex-col gap-4">
           <div tw="flex gap-4">
             <div>
-              <div className="tp-info text-main0 fs-12">NAME</div>
+              <InfoTitle>NAME</InfoTitle>
               <div>
                 <Text>
                   {nodeDetails ? nodeDetails.name : <Skeleton width="7rem" />}
@@ -63,7 +64,7 @@ export const EntityHostingCRN = ({
               </div>
             </div>
             <div>
-              <div className="tp-info text-main0 fs-12">URL</div>
+              <InfoTitle>URL</InfoTitle>
               <div>
                 {nodeDetails ? (
                   <a
@@ -84,7 +85,7 @@ export const EntityHostingCRN = ({
           </div>
           {termsAndConditions && (
             <div>
-              <div className="tp-info text-main0 fs-12">ACCEPTED T&C</div>
+              <InfoTitle>ACCEPTED T&C</InfoTitle>
               <div>
                 <a
                   className="tp-body1 fs-16"

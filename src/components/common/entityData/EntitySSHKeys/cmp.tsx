@@ -5,6 +5,7 @@ import { Text } from '@/components/pages/console/common'
 import RelatedEntityCard from '../RelatedEntityCard'
 import { EntitySSHKeysProps } from './types'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
+import InfoTitle from '../InfoTitle'
 
 export const EntitySSHKeys = ({
   sshKeys,
@@ -27,7 +28,6 @@ export const EntitySSHKeys = ({
                       handleSSHKeyClick(sshKey)
                     }}
                   >
-                    {/* @todo: Change object to key image */}
                     <ObjectImg
                       id={EntityTypeObject[EntityType.SSHKey]}
                       color="base2"
@@ -35,9 +35,7 @@ export const EntitySSHKeys = ({
                       tw="min-w-[3rem] min-h-[3rem]"
                     />
                     <div>
-                      <div className="tp-info text-main0 fs-12">
-                        SSH KEY NAME
-                      </div>
+                      <InfoTitle>SSH KEY NAME</InfoTitle>
                       <Text>{sshKey.label}</Text>
                     </div>
                     <Icon
@@ -57,13 +55,13 @@ export const EntitySSHKeys = ({
                 tw="min-w-[3rem] min-h-[3rem]"
               />
               <div>
-                <div className="tp-info text-main0 fs-12">SSH KEY NAME</div>
+                <InfoTitle>SSH KEY NAME</InfoTitle>
                 <Text>
                   <Skeleton width="9rem" />
                 </Text>
               </div>
               <div>
-                <div className="tp-info text-main0 fs-12">CREATED ON</div>
+                <InfoTitle>CREATED ON</InfoTitle>
                 <Text>
                   <Skeleton width="14rem" />
                 </Text>

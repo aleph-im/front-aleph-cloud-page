@@ -20,6 +20,8 @@ import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
 import { EntityType } from '@/helpers/constants'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
 import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
+import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
+import DomainDetail from '@/components/common/DomainDetail'
 
 /**
  * Button component with functional styling
@@ -64,6 +66,10 @@ export default function ManageInstance() {
 
     // SSH Keys
     mappedKeys,
+
+    // Custom domains
+    customDomains,
+    handleCustomDomainClick,
 
     // Payment data
     paymentData,
@@ -164,17 +170,24 @@ export default function ManageInstance() {
                 key="instance-connection-methods"
                 executableStatus={status}
               />,
-              immutableVolumes.length > 0 && (
+              immutableVolumes.length && (
                 <EntityLinkedVolumes
                   key="instance-linked-volumes"
                   linkedVolumes={immutableVolumes}
                   onImmutableVolumeClick={handleImmutableVolumeClick}
                 />
               ),
-              persistentVolumes.length > 0 && (
+              persistentVolumes.length && (
                 <EntityPersistentStorage
                   key="instance-persistent-storage"
                   persistentVolumes={persistentVolumes}
+                />
+              ),
+              customDomains.length && (
+                <EntityCustomDomains
+                  key={'instance-custom-domains'}
+                  customDomains={customDomains}
+                  onCustomDomainClick={handleCustomDomainClick}
                 />
               ),
             ]}
@@ -196,7 +209,13 @@ export default function ManageInstance() {
 
       {/* Side Panel */}
       <SidePanel
-        title={sidePanel.type === 'volume' ? 'Volume' : 'SSH Key'}
+        title={
+          sidePanel.type === 'volume'
+            ? 'Volume'
+            : sidePanel.type === 'sshKey'
+              ? 'SSH Key'
+              : 'Custom Domain'
+        }
         isOpen={sidePanel.isOpen}
         onClose={closeSidePanel}
       >
@@ -207,6 +226,10 @@ export default function ManageInstance() {
         ) : sidePanel.type === 'sshKey' ? (
           sidePanel.selectedSSHKey && (
             <SSHKeyDetail sshKeyId={sidePanel.selectedSSHKey.id} />
+          )
+        ) : sidePanel.type === 'domain' ? (
+          sidePanel.selectedDomain && (
+            <DomainDetail domainId={sidePanel.selectedDomain.id} />
           )
         ) : (
           <>ERROR</>
