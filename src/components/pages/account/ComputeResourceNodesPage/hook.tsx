@@ -22,7 +22,10 @@ export type UseComputeResourceNodesPageProps = {
   nodes?: CRN[]
 }
 
-export type UseComputeResourceNodesPageReturn = UseComputeResourceNodesReturn &
+export type UseComputeResourceNodesPageReturn = Omit<
+  UseComputeResourceNodesReturn,
+  'filteredNodes'
+> &
   Pick<UseLinkingReturn, 'handleLink' | 'handleUnlink'> & {
     userNodes?: CRN[]
     filteredUserNodes?: CRN[]
@@ -54,6 +57,8 @@ export function useComputeResourceNodesPage(
   const {
     nodes,
     filteredNodes: baseFilteredNodes,
+    showInactive,
+    handleShowInactiveChange,
     ...rest
   } = useComputeResourceNodes(props)
   const { account } = rest
@@ -215,7 +220,6 @@ export function useComputeResourceNodesPage(
 
   return {
     nodes,
-    filteredNodes,
     userNodes,
     filteredUserNodes,
     userNodesIssues,
@@ -232,6 +236,8 @@ export function useComputeResourceNodesPage(
     handleUnlink,
     handleTabChange,
     handleLinkableOnlyChange,
+    showInactive,
+    handleShowInactiveChange,
     ...rest,
   }
 }

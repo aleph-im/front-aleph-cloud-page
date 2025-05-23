@@ -24,8 +24,10 @@ export type UseComputeResourceNodesReturn = {
   filteredNodes?: CRN[]
   filter?: string
   lastVersion?: NodeLastVersions
+  showInactive: boolean
   handleSortItems: UseSortedListReturn<CRN>['handleSortItems']
   handleFilterChange: (e: ChangeEvent<HTMLInputElement>) => void
+  handleShowInactiveChange: (e: ChangeEvent<HTMLInputElement>) => void
 } & Pick<UseFiltersReturn, 'filters'>
 
 export function useComputeResourceNodes({
@@ -54,6 +56,7 @@ export function useComputeResourceNodes({
   })
 
   const [filter, setFilter] = useState<string>()
+  const [showInactive, setShowInactive] = useState<boolean>(false)
 
   const handleFilterChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +65,13 @@ export function useComputeResourceNodes({
       setCrnqFilter(filter)
     },
     [setCrnqFilter],
+  )
+
+  const handleShowInactiveChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setShowInactive(e.target.checked)
+    },
+    [],
   )
 
   useEffect(() => {
@@ -82,8 +92,12 @@ export function useComputeResourceNodes({
   }, [])
 
   const filterInactiveNodes = useCallback(
-    () => (node: CRN) => !node.inactive_since && node.score > 0,
-    [],
+    () => (node: CRN) => {
+      if (showInactive) return true
+
+      return !node.inactive_since && node.score > 0
+    },
+    [showInactive],
   )
 
   const nodes = useMemo(() => {
@@ -116,7 +130,9 @@ export function useComputeResourceNodes({
     filter,
     lastVersion,
     filters,
+    showInactive,
     handleSortItems,
     handleFilterChange,
+    handleShowInactiveChange,
   }
 }
