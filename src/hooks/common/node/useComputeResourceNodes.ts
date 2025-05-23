@@ -73,19 +73,16 @@ export function useComputeResourceNodes({
 
   // -----------------------------
 
-  const filterNodes = useCallback(
-    (query?: string, nodes?: CRN[]): CRN[] | undefined => {
-      if (!nodes) return
-      if (!query) return nodes
+  const filterNodesByQuery = useCallback((query?: string) => {
+    if (!query) return () => true
 
-      return nodes.filter(
-        (node) =>
-          node.name?.toLowerCase().includes(query.toLowerCase()) ||
-          (node.parentData?.name || '')
-            .toLowerCase()
-            .includes(query.toLowerCase()),
-      )
-    },
+    return (node: CRN) =>
+      node.name?.toLowerCase().includes(query.toLowerCase()) ||
+      (node.parentData?.name || '').toLowerCase().includes(query.toLowerCase())
+  }, [])
+
+  const filterInactiveNodes = useCallback(
+    () => (node: CRN) => !node.inactive_since && node.score > 0,
     [],
   )
 
@@ -96,10 +93,12 @@ export function useComputeResourceNodes({
     return nodes.sort((a, b) => b.score - a.score)
   }, [prefetchNodes, data])
 
-  const filteredNodes = useMemo(
-    () => filterNodes(crnqFilter, nodes),
-    [filterNodes, crnqFilter, nodes],
-  )
+  const filteredNodes = useMemo(() => {
+    if (!nodes) return
+    return nodes
+      .filter(filterNodesByQuery(crnqFilter))
+      .filter(filterInactiveNodes())
+  }, [filterNodesByQuery, filterInactiveNodes, crnqFilter, nodes])
 
   // -----------------------------
 
