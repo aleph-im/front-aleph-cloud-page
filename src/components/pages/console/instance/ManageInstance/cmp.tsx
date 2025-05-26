@@ -191,7 +191,7 @@ export default function ManageInstance() {
                   onCustomDomainClick={handleCustomDomainClick}
                 />
               ),
-              <EntityPortForwarding />,
+              <EntityPortForwarding key="port-forwarding" />,
             ]}
           />
         </Slide>
