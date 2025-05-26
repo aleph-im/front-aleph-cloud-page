@@ -42,6 +42,8 @@ export const ComputeResourceNodesPage = (
     isLinkableOnlyDisabled,
     totalResources,
     loadItemsDisabled,
+    showInactive,
+    handleShowInactiveChange,
     handleLoadItems,
     handleSortItems,
     handleLink,
@@ -142,6 +144,12 @@ export const ComputeResourceNodesPage = (
                   onChange={handleLinkableOnlyChange}
                   size="xs"
                   disabled={isLinkableOnlyDisabled}
+                />
+                <Checkbox
+                  label="Show inactive nodes"
+                  checked={showInactive}
+                  onChange={handleShowInactiveChange}
+                  size="xs"
                 />
               </div>
               <TextInput
