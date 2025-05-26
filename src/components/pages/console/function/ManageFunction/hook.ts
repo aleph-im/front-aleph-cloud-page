@@ -21,13 +21,17 @@ import {
   PersistentVolume,
 } from '@aleph-sdk/message'
 import useClassifyMachineVolumes from '@/hooks/common/useClassifyMachineVolumes'
+import useEntityCustomDomains from '@/hooks/common/useEntityCustomDomains'
+import { Domain } from '@/domain/domain'
+import { DomainWithStatus } from '@/components/common/entityData/EntityCustomDomains/types'
 
 // Type for side panel content
 type SidePanelContent = {
   title: string
   isOpen: boolean
-  type?: 'volume'
+  type?: 'volume' | 'domain'
   selectedVolumeId?: string
+  selectedDomain?: Domain
 }
 
 export type ManageFunction = UseExecutableActionsReturn & {
@@ -40,6 +44,10 @@ export type ManageFunction = UseExecutableActionsReturn & {
   // Volumes data
   immutableVolumes: ImmutableVolume[]
   persistentVolumes: PersistentVolume[]
+
+  // Custom domains
+  customDomains: DomainWithStatus[]
+  handleCustomDomainClick: (domain: Domain) => void
 
   // UI State
   sliderActiveIndex: number
@@ -98,6 +106,24 @@ export function useManageFunction(): ManageFunction {
 
     return executableLogsDisabled
   }, [isAllocated, executableLogsDisabled, program])
+
+  // === CUSTOM DOMAINS ===
+
+  // Use the custom hook and override the handleCustomDomainClick function
+  const { customDomains } = useEntityCustomDomains({
+    entityId: program?.id,
+  })
+
+  const handleCustomDomainClick = useCallback((domain: Domain) => {
+    setSidePanel({
+      title: 'Custom Domain',
+      isOpen: true,
+      type: 'domain',
+      selectedDomain: domain,
+    })
+  }, [])
+
+  // -----------------
 
   // Side panel state
   const [sidePanel, setSidePanel] = useState<SidePanelContent>({
@@ -264,6 +290,9 @@ export function useManageFunction(): ManageFunction {
 
     immutableVolumes,
     persistentVolumes,
+
+    customDomains,
+    handleCustomDomainClick,
 
     paymentData,
 

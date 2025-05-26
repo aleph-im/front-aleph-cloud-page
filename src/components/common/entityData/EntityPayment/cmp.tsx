@@ -6,6 +6,7 @@ import { useFormatPayment } from './hook'
 import Skeleton from '../../Skeleton'
 import IconText from '../../IconText'
 import { ellipseAddress } from '@/helpers/utils'
+import InfoTitle from '../InfoTitle'
 
 /**
  * Individual payment card component
@@ -45,7 +46,7 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
         {/* Payment type row */}
         <div tw="flex flex-wrap gap-x-6 gap-y-4">
           <div>
-            <div className="tp-info text-main0 fs-12">TYPE</div>
+            <InfoTitle>TYPE</InfoTitle>
             <Text>
               {loading ? (
                 <Skeleton width="5rem" />
@@ -57,7 +58,7 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
             </Text>
           </div>
           <div>
-            <div className="tp-info text-main0 fs-12">BLOCKCHAIN</div>
+            <InfoTitle>BLOCKCHAIN</InfoTitle>
             <Text>
               {formattedBlockchain ? (
                 formattedBlockchain
@@ -68,13 +69,13 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
           </div>
           {receiverType && (
             <div>
-              <div className="tp-info text-main0 fs-12">RECEIVER</div>
+              <InfoTitle>RECEIVER</InfoTitle>
               <Text>{receiverType}</Text>
             </div>
           )}
           {receiverAddress && (
             <div>
-              <div className="tp-info text-main0 fs-12">RECEIVER ADDRESS</div>
+              <InfoTitle>RECEIVER ADDRESS</InfoTitle>
               <IconText iconName="copy" onClick={handleCopyReceiverAddress}>
                 {ellipseAddress(receiverAddress)}
               </IconText>
@@ -85,7 +86,7 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
         {/* Start date, flow rate, and time elapsed */}
         <div tw="flex flex-wrap gap-x-6 gap-y-4">
           <div>
-            <div className="tp-info text-main0 fs-12">START DATE</div>
+            <InfoTitle>START DATE</InfoTitle>
             <Text>
               {formattedStartDate ? (
                 formattedStartDate
@@ -98,7 +99,7 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
           {isStream && (
             <>
               <div>
-                <div className="tp-info text-main0 fs-12">FLOW RATE</div>
+                <InfoTitle>FLOW RATE</InfoTitle>
                 <Text>
                   {formattedFlowRate ? (
                     formattedFlowRate
@@ -108,7 +109,7 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
                 </Text>
               </div>
               <div>
-                <div className="tp-info text-main0 fs-12">TIME ELAPSED</div>
+                <InfoTitle>TIME ELAPSED</InfoTitle>
                 <Text>
                   {formattedDuration ? (
                     formattedDuration

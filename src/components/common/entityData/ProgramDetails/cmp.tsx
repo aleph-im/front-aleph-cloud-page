@@ -14,6 +14,7 @@ import {
   humanReadableSize,
 } from '@/helpers/utils'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
+import InfoTitle from '../InfoTitle'
 
 export const ProgramDetails = ({ program }: ProgramDetailsProps) => {
   const handleCopyHash = useCopyToClipboardAndNotify(program?.id || '')
@@ -33,7 +34,7 @@ export const ProgramDetails = ({ program }: ProgramDetailsProps) => {
           />
           <div tw="flex flex-col gap-4 w-full">
             <div tw="w-full">
-              <div className="tp-info text-main0 fs-12">ITEM HASH</div>
+              <InfoTitle>ITEM HASH</InfoTitle>
               {program ? (
                 <IconText iconName="copy" onClick={handleCopyHash}>
                   {program.id}
@@ -44,7 +45,7 @@ export const ProgramDetails = ({ program }: ProgramDetailsProps) => {
             </div>
             <div tw="flex flex-wrap gap-4">
               <div>
-                <div className="tp-info text-main0 fs-12">CORES</div>
+                <InfoTitle>CORES</InfoTitle>
                 <div>
                   <Text tw="flex items-center gap-1">
                     {program?.resources ? (
@@ -56,7 +57,7 @@ export const ProgramDetails = ({ program }: ProgramDetailsProps) => {
                 </div>
               </div>
               <div>
-                <div className="tp-info text-main0 fs-12">RAM</div>
+                <InfoTitle>RAM</InfoTitle>
                 <div>
                   <Text>
                     {program?.resources ? (
@@ -72,7 +73,7 @@ export const ProgramDetails = ({ program }: ProgramDetailsProps) => {
                 </div>
               </div>
               <div>
-                <div className="tp-info text-main0 fs-12">TIMEOUT</div>
+                <InfoTitle>TIMEOUT</InfoTitle>
                 <div>
                   <Text>
                     {program ? (
@@ -84,7 +85,7 @@ export const ProgramDetails = ({ program }: ProgramDetailsProps) => {
                 </div>
               </div>
               <div>
-                <div className="tp-info text-main0 fs-12">SIZE</div>
+                <InfoTitle>SIZE</InfoTitle>
                 <div>
                   <Text>
                     {program ? (
@@ -97,7 +98,7 @@ export const ProgramDetails = ({ program }: ProgramDetailsProps) => {
               </div>
             </div>
             <div>
-              <div className="tp-info text-main0 fs-12">EXPLORER</div>
+              <InfoTitle>EXPLORER</InfoTitle>
               <div>
                 {program ? (
                   <a
@@ -116,7 +117,7 @@ export const ProgramDetails = ({ program }: ProgramDetailsProps) => {
               </div>
             </div>
             <div>
-              <div className="tp-info text-main0 fs-12">API ENTRYPOINT</div>
+              <InfoTitle>API ENTRYPOINT</InfoTitle>
               <div>
                 {program ? (
                   <a

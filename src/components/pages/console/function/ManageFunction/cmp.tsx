@@ -14,11 +14,13 @@ import ProgramDetails from '@/components/common/entityData/ProgramDetails'
 import EntityLinkedRuntime from '@/components/common/entityData/EntityLinkedRuntime'
 import SidePanel from '@/components/common/SidePanel'
 import VolumeDetail from '@/components/common/VolumeDetail'
+import DomainDetail from '@/components/common/DomainDetail'
 import EntityLinkedCodebase from '@/components/common/entityData/EntityLinkedCodebase'
 import EntityPayment from '@/components/common/entityData/EntityPayment'
 import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
 import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolumes'
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
+import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 
 export default function ManageFunction() {
   const {
@@ -37,6 +39,10 @@ export default function ManageFunction() {
     // Volumes data
     immutableVolumes,
     persistentVolumes,
+
+    // Custom domains
+    customDomains,
+    handleCustomDomainClick,
 
     // Payment data
     paymentData,
@@ -153,17 +159,24 @@ export default function ManageFunction() {
                 entrypoint={program?.code.entrypoint}
                 onCodebaseVolumeClick={handleCodebaseVolumeClick}
               />,
-              immutableVolumes.length > 0 && (
+              immutableVolumes.length && (
                 <EntityLinkedVolumes
                   key="instance-linked-volumes"
                   linkedVolumes={immutableVolumes}
                   onImmutableVolumeClick={handleImmutableVolumeClick}
                 />
               ),
-              persistentVolumes.length > 0 && (
+              persistentVolumes.length && (
                 <EntityPersistentStorage
                   key="instance-persistent-storage"
                   persistentVolumes={persistentVolumes}
+                />
+              ),
+              customDomains.length && (
+                <EntityCustomDomains
+                  key={'function-custom-domains'}
+                  customDomains={customDomains}
+                  onCustomDomainClick={handleCustomDomainClick}
                 />
               ),
             ]}
@@ -192,6 +205,10 @@ export default function ManageFunction() {
         {sidePanel.type === 'volume' ? (
           sidePanel.selectedVolumeId && (
             <VolumeDetail volumeId={sidePanel.selectedVolumeId} />
+          )
+        ) : sidePanel.type === 'domain' ? (
+          sidePanel.selectedDomain && (
+            <DomainDetail domainId={sidePanel.selectedDomain.id} />
           )
         ) : (
           <>ERROR</>
