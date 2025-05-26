@@ -39,10 +39,6 @@ export const EntityPortForwarding = ({}: EntityPortForwardingProps) => {
                     />
                   </div>
                   <div tw="flex flex-col gap-3">
-                    <Text>TLS</Text>
-                    <Checkbox />
-                  </div>
-                  <div tw="flex flex-col gap-3">
                     <Text>UDP</Text>
                     <Checkbox />
                   </div>
@@ -108,10 +104,6 @@ export const EntityPortForwarding = ({}: EntityPortForwardingProps) => {
                   defaultValue="28743"
                   required
                 />
-              </div>
-              <div tw="flex flex-col gap-3">
-                <Text>TLS</Text>
-                <Checkbox disabled checked />
               </div>
               <div tw="flex flex-col gap-3">
                 <Text>UDP</Text>
