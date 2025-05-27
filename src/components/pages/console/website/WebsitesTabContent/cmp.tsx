@@ -4,6 +4,7 @@ import { WebsitesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const WebsitesTabContent = React.memo(
   ({ data }: WebsitesTabContentProps) => {
@@ -70,14 +71,20 @@ export const WebsitesTabContent = React.memo(
               </div>
             </NoisyContainer>
             <div tw="mt-20 text-center">
-              <ButtonLink variant="primary" href="/console/hosting/website/new">
+              <ButtonLink
+                variant="primary"
+                href={NAVIGATION_URLS.console.web3Hosting.website.new}
+              >
                 Create website
               </ButtonLink>
             </div>
           </>
         ) : (
           <div tw="mt-10 text-center">
-            <ButtonLink variant="primary" href="/console/hosting/website/new">
+            <ButtonLink
+              variant="primary"
+              href={NAVIGATION_URLS.console.web3Hosting.website.new}
+            >
               Create your first website
             </ButtonLink>
           </div>

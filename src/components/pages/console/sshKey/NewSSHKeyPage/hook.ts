@@ -16,6 +16,7 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export type NewSSHKeyFormState = {
   key: string
@@ -96,7 +97,7 @@ export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
   })
 
   const handleBack = () => {
-    router.push('/console/settings/')
+    router.push(NAVIGATION_URLS.console.settings.home)
   }
 
   return {

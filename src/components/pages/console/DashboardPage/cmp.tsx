@@ -12,7 +12,11 @@ import {
   StyledEntityCardsContainer,
   StyledSectionDescription,
 } from './styles'
-import { EntityType, EntityTypeObject } from '@/helpers/constants'
+import {
+  EntityType,
+  EntityTypeObject,
+  NAVIGATION_URLS,
+} from '@/helpers/constants'
 
 export default function DashboardPage() {
   const {
@@ -105,7 +109,7 @@ export default function DashboardPage() {
                 description="Deploy and manage your websites with ease. Support for static pages, Next.js, React, and Vue.js ensures you can create dynamic and robust web experiences."
                 introductionButtonText="Deploy your website"
                 dashboardPath="/console/hosting/website"
-                createPath="/console/hosting/website/new"
+                createPath={NAVIGATION_URLS.console.web3Hosting.website.new}
                 information={{
                   type: 'amount',
                   data: websitesAggregatedStatus.total,

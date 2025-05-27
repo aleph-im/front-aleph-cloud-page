@@ -5,6 +5,7 @@ import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const VolumesTabContent = ({
   data,
@@ -48,7 +49,7 @@ export const VolumesTabContent = ({
                   <ButtonLink
                     kind="functional"
                     variant="secondary"
-                    href={`/console/storage/volume/${row.id}`}
+                    href={`${NAVIGATION_URLS.console.storage.volumes.home}/${row.id}`}
                   >
                     <Icon name="angle-right" size="lg" />
                   </ButtonLink>
@@ -63,7 +64,10 @@ export const VolumesTabContent = ({
       </NoisyContainer>
       {cta && (
         <div tw="mt-10 text-center">
-          <ButtonLink variant="primary" href="/console/storage/volume/new">
+          <ButtonLink
+            variant="primary"
+            href={NAVIGATION_URLS.console.storage.volumes.new}
+          >
             <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new volume
           </ButtonLink>
         </div>

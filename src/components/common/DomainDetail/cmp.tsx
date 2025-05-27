@@ -13,6 +13,7 @@ import IconText from '../IconText'
 import { Separator, Text } from '@/components/pages/console/common'
 import { ellipseAddress } from '@/helpers/utils'
 import { useDomainDetail } from './hook'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 import {
   EntityDomainType,
   EntityDomainTypeName,
@@ -299,12 +300,13 @@ export const DomainDetail = ({
                 className="tp-body1 fs-16"
                 href={
                   (domain.target === 'instance'
-                    ? '/console/computing/instance/'
+                    ? NAVIGATION_URLS.console.computing.instances.home
                     : domain.target === 'confidential'
-                      ? '/console/computing/confidential/'
+                      ? NAVIGATION_URLS.console.computing.confidentials.home
                       : domain.target === 'program'
-                        ? '/console/computing/function/'
-                        : '/console/storage/volume/') + refEntity.id
+                        ? NAVIGATION_URLS.console.computing.functions.home
+                        : NAVIGATION_URLS.console.storage.volumes.home) +
+                  `/${refEntity.id}`
                 }
               >
                 <IconText iconName="square-up-right">Details</IconText>

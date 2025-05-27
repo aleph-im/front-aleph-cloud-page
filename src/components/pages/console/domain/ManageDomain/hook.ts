@@ -1,3 +1,4 @@
+import { NAVIGATION_URLS } from '@/helpers/constants'
 import { useRouter } from 'next/router'
 
 export type ManageDomain = {
@@ -10,7 +11,7 @@ export function useManageDomain(): ManageDomain {
   const { hash } = router.query
 
   const handleBack = () => {
-    router.push('/console/settings/')
+    router.push(NAVIGATION_URLS.console.settings.home)
   }
 
   return {

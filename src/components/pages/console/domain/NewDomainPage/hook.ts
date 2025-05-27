@@ -4,7 +4,7 @@ import { useForm } from '@/hooks/common/useForm'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { DomainManager } from '@/domain/domain'
-import { EntityDomainType } from '@/helpers/constants'
+import { EntityDomainType, NAVIGATION_URLS } from '@/helpers/constants'
 import {
   FieldErrors,
   UseControllerReturn,
@@ -206,7 +206,7 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   }
 
   const handleBack = () => {
-    router.push('/console/settings/')
+    router.push(NAVIGATION_URLS.console.settings.home)
   }
 
   return {

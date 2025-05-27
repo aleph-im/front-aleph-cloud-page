@@ -8,6 +8,7 @@ import FunctionsTabContent from '../../function/FunctionsTabContent'
 import VolumesTabContent from '../../volume/VolumesTabContent'
 import DomainsTabContent from '../../domain/DomainsTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 function FunctionDashboardPage() {
   const { tabs, tabId, setTabId, programs, volumes, domains } =
@@ -42,7 +43,7 @@ function FunctionDashboardPage() {
               withButton={programs?.length === 0}
               buttonUrl="/console/computing/function/new"
               buttonText="Create function"
-              externalLinkUrl="https://docs.aleph.im/tools/webconsole/"
+              externalLinkUrl={NAVIGATION_URLS.docs.functions}
             />
           </>
         ) : tabId === 'volume' ? (
