@@ -9,6 +9,7 @@ import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
 import { DefaultTheme, useTheme } from 'styled-components'
 import { useExecutableActions } from '@/hooks/common/useExecutableActions'
 import { useConfidentialManager } from '@/hooks/common/useManager/useConfidentialManager'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export type ManageConfidential = {
   authorized: boolean
@@ -35,7 +36,7 @@ export function useManageConfidential(): ManageConfidential {
   const { confidentials: authorized } = useAuthorization()
 
   useEffect(() => {
-    if (!authorized) push('/')
+    if (!authorized) push(NAVIGATION_URLS.console.home)
   }, [authorized, push])
 
   // ------------------

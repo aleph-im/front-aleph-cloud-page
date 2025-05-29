@@ -22,6 +22,7 @@ import {
   UseComputeResourceNodesPageProps,
 } from './hook'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const ComputeResourceNodesPage = (
   props: UseComputeResourceNodesPageProps,
@@ -56,7 +57,7 @@ export const ComputeResourceNodesPage = (
   const { render } = useLazyRender()
 
   const CreateNode = (
-    <Link href="/account/earn/crn/new" passHref legacyBehavior>
+    <Link href={NAVIGATION_URLS.account.earn.crn.new} passHref legacyBehavior>
       <Button
         color="main0"
         kind="gradient"

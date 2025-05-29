@@ -256,6 +256,9 @@ export const NAVIGATION_URLS = {
       },
     },
   },
+  error: {
+    notFound: '/404',
+  },
   explorer: { home: 'https://explorer.aleph.im' },
   swap: { home: 'https://swap.aleph.cloud' },
   docs: {

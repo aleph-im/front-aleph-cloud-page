@@ -27,6 +27,7 @@ import { useRouter } from 'next/router'
 import { isAccountPAYGCompatible } from '@/domain/account'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { StaticEVMAccount } from '@/domain/connect/staticEVMAccount'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export type UseExecutableActionsProps = {
   executable?: Executable
@@ -261,7 +262,7 @@ export function useExecutableActions({
         new EntityDelAction({ name: executable.type, keys: [executable.id] }),
       )
 
-      await router.replace('/console')
+      await router.replace(NAVIGATION_URLS.console.home)
     } catch (e) {
       console.error(e)
 
