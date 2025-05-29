@@ -20,6 +20,7 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export type NewVolumeFormState = NewVolumeStandaloneField
 
@@ -74,7 +75,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
           new EntityAddAction({ name: 'volume', entities: accountVolume }),
         )
 
-        await router.replace('/console')
+        await router.replace(NAVIGATION_URLS.console.home)
       } finally {
         await stop()
       }
@@ -110,7 +111,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
   })
 
   const handleBack = () => {
-    router.push('/console/storage/')
+    router.push(NAVIGATION_URLS.console.storage.home)
   }
 
   return {

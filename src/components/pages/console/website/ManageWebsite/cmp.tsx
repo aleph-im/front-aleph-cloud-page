@@ -10,7 +10,7 @@ import {
   TextGradient,
   useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
-import { EntityTypeName } from '@/helpers/constants'
+import { EntityTypeName, NAVIGATION_URLS } from '@/helpers/constants'
 import { useManageWebsite } from './hook'
 import { humanReadableSize } from '@/helpers/utils'
 import { Text, Separator } from '../../common'
@@ -373,7 +373,10 @@ export function ManageWebsite() {
           </NoisyContainer>
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/console/hosting/website/new">
+            <ButtonLink
+              variant="primary"
+              href={NAVIGATION_URLS.console.web3Hosting.website.new}
+            >
               Create new website
             </ButtonLink>
           </div>

@@ -5,6 +5,7 @@ import ButtonLink from '@/components/common/ButtonLink'
 import { convertByteUnits, ellipseAddress } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const FunctionsTabContent = React.memo(
   ({ data }: FunctionsTabContentProps) => {
@@ -76,7 +77,7 @@ export const FunctionsTabContent = React.memo(
                         <ButtonLink
                           kind="functional"
                           variant="secondary"
-                          href={`/console/computing/function/${row.id}`}
+                          href={`${NAVIGATION_URLS.console.computing.functions.home}/${row.id}`}
                         >
                           <Icon name="angle-right" size="lg" />
                         </ButtonLink>
@@ -92,7 +93,7 @@ export const FunctionsTabContent = React.memo(
             <div tw="mt-20 text-center">
               <ButtonLink
                 variant="primary"
-                href="/console/computing/function/new"
+                href={NAVIGATION_URLS.console.computing.functions.new}
               >
                 Create function
               </ButtonLink>
@@ -102,7 +103,7 @@ export const FunctionsTabContent = React.memo(
           <div tw="mt-10 text-center">
             <ButtonLink
               variant="primary"
-              href="/console/computing/function/new"
+              href={NAVIGATION_URLS.console.computing.functions.new}
             >
               Create your first function
             </ButtonLink>

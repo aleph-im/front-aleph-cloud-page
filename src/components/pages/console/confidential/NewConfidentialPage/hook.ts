@@ -13,6 +13,7 @@ import {
   useState,
 } from 'react'
 import { useController, UseControllerReturn, useWatch } from 'react-hook-form'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export type EncryptedFileDiskFormState = {
   encryptedDiskImage?: File | undefined
@@ -151,7 +152,7 @@ export function useNewConfidentialPage(): UseNewConfidentialPageReturn {
   )
 
   const handleBack = () => {
-    router.push('/console/computing/confidential/')
+    router.push(NAVIGATION_URLS.console.computing.confidentials.home)
   }
 
   const createConfidentialInstanceCommand = useMemo(() => {

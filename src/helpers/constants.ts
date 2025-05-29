@@ -192,3 +192,89 @@ export enum WebsiteFrameworkId {
 }
 
 export const EXTRA_WEI = 3600 / 10 ** 18
+
+export const NAVIGATION_URLS = {
+  console: {
+    home: '/console',
+    settings: {
+      home: '/console/settings',
+      ssh: {
+        home: '/console/settings/ssh',
+        new: '/console/settings/ssh/new',
+      },
+      domain: {
+        home: '/console/settings/domain',
+        new: '/console/settings/domain/new',
+      },
+    },
+    web3Hosting: {
+      home: '/console/hosting',
+      website: {
+        home: '/console/hosting/website',
+        new: '/console/hosting/website/new',
+      },
+    },
+    computing: {
+      home: '/console/computing',
+      functions: {
+        home: '/console/computing/function',
+        new: '/console/computing/function/new',
+      },
+      instances: {
+        home: '/console/computing/instance',
+        new: '/console/computing/instance/new',
+      },
+      gpus: {
+        home: '/console/computing/gpu-instance',
+        new: '/console/computing/gpu-instance/new',
+      },
+      confidentials: {
+        home: '/console/computing/confidential',
+        new: '/console/computing/confidential/new',
+      },
+    },
+    storage: {
+      home: '/console/storage',
+      volumes: {
+        home: '/console/storage/volume',
+        new: '/console/storage/volume/new',
+      },
+    },
+  },
+  account: {
+    home: '/account',
+    earn: {
+      home: '/account/earn',
+      staking: '/account/earn/staking',
+      ccn: {
+        home: '/account/earn/ccn',
+        new: '/account/earn/ccn/new',
+      },
+      crn: {
+        home: '/account/earn/crn',
+        new: '/account/earn/crn/new',
+      },
+    },
+  },
+  error: {
+    notFound: '/404',
+  },
+  explorer: { home: 'https://explorer.aleph.im' },
+  swap: { home: 'https://swap.aleph.cloud' },
+  docs: {
+    home: 'https://docs.aleph.cloud',
+    customDomains:
+      'https://docs.aleph.cloud/devhub/deploying-and-hosting/custom-domains/setup.html',
+    functions:
+      'https://docs.aleph.cloud/devhub/compute-resources/functions/webconsole/',
+    confidentials:
+      'https://docs.aleph.cloud/devhub/compute-resources/confidential-instances/01-confidential-instance-introduction.html',
+    immutableVolumes:
+      'https://docs.aleph.cloud/devhub/building-applications/data-storage/types-of-storage/immutable-volume.html',
+  },
+  external: {
+    vrf: 'https://medium.com/aleph-im/aleph-im-verifiable-random-function-vrf-b03544a7e904',
+    indexingFramework:
+      'https://docs.aleph.cloud/devhub/building-applications/blockchain-data/indexing/',
+  },
+}
