@@ -61,7 +61,7 @@ export function useHostingProviderTop<T extends AlephNode>({
     return [...top3Buckets, othersBucket].map(([name, count], i) => {
       const percentage = count / total
       const color =
-        i === 0 ? 'error' : i === 1 ? 'main2' : i === 2 ? 'main0' : 'main1'
+        i === 0 ? 'success' : i === 1 ? 'warning' : i === 2 ? 'error' : 'main0'
 
       return {
         tier: i + 1,

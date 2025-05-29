@@ -22,17 +22,17 @@ export const TotalNetworkResourcesChart = ({
       {
         label: 'CPU',
         value: resources?.cpu || '-',
-        color: 'main1',
+        color: 'main0',
       },
       {
         label: 'RAM',
         value: humanReadableSize(resources?.ram, 'MiB'),
-        color: 'main1',
+        color: 'main0',
       },
       {
         label: 'HDD',
         value: humanReadableSize(resources?.hdd, 'MiB'),
-        color: 'main1',
+        color: 'main0',
       },
     ]
   }, [resources])
