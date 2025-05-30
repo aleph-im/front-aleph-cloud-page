@@ -30,26 +30,43 @@ export function useEntityPortForwarding({
 
   // Load existing ports for the entity
   useEffect(() => {
-    if (!entityHash || !forwardedPortsManager) return
-
     const loadPorts = async () => {
+      // Always include the system SSH port 2222
+      const systemPorts: ForwardedPort[] = [
+        {
+          source: '2222',
+          destination: '28741',
+          tcp: true,
+          udp: true,
+          isDeletable: false,
+        },
+      ]
+
+      if (!entityHash || !forwardedPortsManager) {
+        setPorts(systemPorts)
+        return
+      }
+
       try {
         const existingPorts =
           await forwardedPortsManager.getByEntityHash(entityHash)
-        if (existingPorts?.ports) {
-          const formattedPorts: ForwardedPort[] = Object.entries(
-            existingPorts.ports,
-          ).map(([port, protocol]) => ({
-            source: port,
-            destination: port, // For now, assume destination is same as source
-            tcp: protocol.tcp,
-            udp: protocol.udp,
-            isDeletable: true,
-          }))
-          setPorts(formattedPorts)
-        }
+
+        const userPorts: ForwardedPort[] = existingPorts?.ports
+          ? Object.entries(existingPorts.ports)
+              .filter(([port]) => port !== '2222') // Exclude system port from user ports
+              .map(([port, protocol]) => ({
+                source: port,
+                destination: port, // For now, assume destination is same as source
+                tcp: protocol.tcp,
+                udp: protocol.udp,
+                isDeletable: true,
+              }))
+          : []
+
+        setPorts([...systemPorts, ...userPorts])
       } catch (error) {
         console.error('Failed to load ports:', error)
+        setPorts(systemPorts) // Fallback to system ports only
       }
     }
 
@@ -67,6 +84,12 @@ export function useEntityPortForwarding({
   const handleRemovePort = useCallback(
     async (source: string) => {
       if (!entityHash || !forwardedPortsManager || isLoading) return
+
+      // Prevent removal of system port 2222
+      if (source === '2222') {
+        console.warn('Cannot remove system port 2222')
+        return
+      }
 
       setIsLoading(true)
       try {
@@ -105,6 +128,15 @@ export function useEntityPortForwarding({
     async (newPorts: NewForwardedPortEntry[]) => {
       if (!entityHash || !forwardedPortsManager || isLoading) return
 
+      // Filter out port 2222 if user tries to add it manually
+      const filteredPorts = newPorts.filter((port) => port.port !== '2222')
+
+      if (filteredPorts.length === 0) {
+        console.warn('No valid ports to add (port 2222 is reserved)')
+        setShowPortForm(false)
+        return
+      }
+
       setIsLoading(true)
       try {
         // Get existing ports
@@ -114,7 +146,7 @@ export function useEntityPortForwarding({
 
         // Convert new ports to the correct format
         const newPortsMap: Record<number, PortProtocol> = {}
-        newPorts.forEach((port) => {
+        filteredPorts.forEach((port) => {
           const portNumber = parseInt(port.port, 10)
           newPortsMap[portNumber] = {
             tcp: port.tcp,
@@ -132,13 +164,15 @@ export function useEntityPortForwarding({
         })
 
         // Update local state
-        const newFormattedPorts: ForwardedPort[] = newPorts.map((port) => ({
-          source: port.port,
-          destination: port.port, // Assuming destination is the same as source for new ports
-          tcp: port.tcp,
-          udp: port.udp,
-          isDeletable: true, // New ports are deletable
-        }))
+        const newFormattedPorts: ForwardedPort[] = filteredPorts.map(
+          (port) => ({
+            source: port.port,
+            destination: port.port, // Assuming destination is the same as source for new ports
+            tcp: port.tcp,
+            udp: port.udp,
+            isDeletable: true, // New ports are deletable
+          }),
+        )
 
         setPorts((prev) => [...prev, ...newFormattedPorts])
         setShowPortForm(false)
