@@ -68,7 +68,7 @@ export function useDomainDetail({
     if (!manager) throw Err.ConnectYourWallet
     if (!domain) throw Err.DomainNotFound
 
-    const iSteps = await manager.getDelSteps(domain)
+    const iSteps = await manager.getDelSteps()
     const nSteps = iSteps.map((i) => stepsCatalog[i])
     const steps = manager.delSteps(domain)
 

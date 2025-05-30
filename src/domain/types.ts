@@ -12,10 +12,13 @@ export interface EntityManager<T, AT> extends ReadOnlyEntityManager<T> {
   add(entity: AT | AT[]): Promise<T | T[]>
   del(entityOrId: string | T): Promise<void>
 
-  getAddSteps(entity: AT | AT[]): Promise<CheckoutStepType[]>
+  getAddSteps(entity?: AT | AT[], ...args: any[]): Promise<CheckoutStepType[]>
   addSteps(entity: AT | AT[]): AsyncGenerator<void, T | T[], void>
 
-  getDelSteps(entity: string | T | (string | T)[]): Promise<CheckoutStepType[]>
+  getDelSteps(
+    entity?: string | T | (string | T)[],
+    ...args: any[]
+  ): Promise<CheckoutStepType[]>
   delSteps(
     entity: string | T | (string | T)[],
     extra?: any,

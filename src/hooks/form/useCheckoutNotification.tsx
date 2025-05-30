@@ -175,4 +175,14 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content:
         'Notifiying the selected CRN for allocating the instance. It can take a while',
     },
+    portForwarding: {
+      title: 'Sign Port Forwarding Configuration',
+      content:
+        'By signing this, you confirm the port forwarding configuration for your instance, enabling network access to specific ports.',
+    },
+    portForwardingDel: {
+      title: 'Sign Port Forwarding Deletion',
+      content:
+        'By signing this, you confirm the deletion of your port forwarding configuration.',
+    },
   }
