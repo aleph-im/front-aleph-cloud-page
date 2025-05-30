@@ -7,10 +7,17 @@ export type ForwardedPort = {
 }
 
 export type NewForwardedPortEntry = {
-  id: string
   port: string
   udp: boolean
   tcp: boolean
+}
+
+export type AddPortFormState = {
+  ports: NewForwardedPortEntry[]
+}
+
+export const defaultAddPortFormState: AddPortFormState = {
+  ports: [{ port: '', udp: false, tcp: false }],
 }
 
 export type EntityPortForwardingProps = {
