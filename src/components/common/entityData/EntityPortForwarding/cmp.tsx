@@ -12,7 +12,9 @@ import InfoTitle from '../InfoTitle'
 import { useEntityPortForwarding } from './hook'
 import AddPortForm from './AddPortForm'
 
-export const EntityPortForwarding = ({}: EntityPortForwardingProps) => {
+export const EntityPortForwarding = ({
+  entityHash,
+}: EntityPortForwardingProps) => {
   const {
     // State
     showPortForm,
@@ -22,7 +24,7 @@ export const EntityPortForwarding = ({}: EntityPortForwardingProps) => {
     handleCancelAddPort,
     handleRemovePort,
     handleSubmitNewPorts,
-  } = useEntityPortForwarding()
+  } = useEntityPortForwarding({ entityHash })
 
   return (
     <>

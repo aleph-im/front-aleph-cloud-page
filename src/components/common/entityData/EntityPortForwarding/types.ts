@@ -21,5 +21,5 @@ export const defaultAddPortFormState: AddPortFormState = {
 }
 
 export type EntityPortForwardingProps = {
-  // No props currently needed, but allows React built-in props like key
+  entityHash?: string
 }
