@@ -254,18 +254,20 @@ export const EntityPortForwarding = ({}: EntityPortForwardingProps) => {
                     Add
                   </Button>
                   {newPorts.length > 0 && (
-                    <Button
-                      variant="primary"
-                      kind="gradient"
-                      onClick={handleSaveNewPorts}
-                      disabled={disabledSaveNewPorts}
-                    >
-                      Save
-                    </Button>
+                    <>
+                      <Button
+                        variant="primary"
+                        kind="gradient"
+                        onClick={handleSaveNewPorts}
+                        disabled={disabledSaveNewPorts}
+                      >
+                        Save
+                      </Button>
+                      <Button variant="tertiary" onClick={handleCancelAddPort}>
+                        Cancel
+                      </Button>
+                    </>
                   )}
-                  <Button variant="tertiary" onClick={handleCancelAddPort}>
-                    Cancel
-                  </Button>
                 </div>
               </>
             ) : (
