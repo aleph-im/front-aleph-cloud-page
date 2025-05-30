@@ -75,4 +75,117 @@ export class ForwardedPortsManager extends AggregateManager<
     const entities = await this.getAll()
     return entities.find((entity) => entity.entityHash === entityHash)
   }
+
+  async delByEntityHash(entityHash: string): Promise<void> {
+    await this.del(entityHash)
+  }
+
+  async addMultiplePorts(
+    entityHash: string,
+    newPorts: { port: string; tcp: boolean; udp: boolean }[],
+  ): Promise<ForwardedPorts> {
+    // Get existing ports
+    const existingPorts = await this.getByEntityHash(entityHash)
+    const currentPorts = existingPorts?.ports || {}
+
+    // Convert new ports to the correct format and merge
+    const newPortsMap: Record<number, PortProtocol> = {}
+    newPorts.forEach((port) => {
+      const portNumber = parseInt(port.port, 10)
+      newPortsMap[portNumber] = {
+        tcp: port.tcp,
+        udp: port.udp,
+      }
+    })
+
+    // Merge with existing ports
+    const updatedPorts = { ...currentPorts, ...newPortsMap }
+
+    // Save to aggregate
+    const [result] = await this.add({
+      entityHash,
+      ports: updatedPorts,
+    })
+
+    return result
+  }
+
+  async removePort(entityHash: string, portSource: string): Promise<void> {
+    // Get current ports and remove the specified one
+    const existingPorts = await this.getByEntityHash(entityHash)
+    const currentPorts = existingPorts?.ports || {}
+
+    // Create new ports object without the removed port
+    const updatedPorts = { ...currentPorts }
+    delete updatedPorts[parseInt(portSource, 10)]
+
+    // Save updated ports or delete entire entry if no ports left
+    if (Object.keys(updatedPorts).length > 0) {
+      await this.add({
+        entityHash,
+        ports: updatedPorts,
+      })
+    } else {
+      await this.del(entityHash)
+    }
+  }
+
+  async syncWithPortStatus(
+    entityHash: string,
+  ): Promise<ForwardedPorts | undefined> {
+    const existingPorts = await this.getByEntityHash(entityHash)
+    if (!existingPorts) return undefined
+
+    // Update is handled by the UI layer
+    // This method mainly serves as a data access point
+    return existingPorts
+  }
+
+  validatePortEntry(port: { port: string; tcp: boolean; udp: boolean }): {
+    isValid: boolean
+    error?: string
+  } {
+    const portNumber = parseInt(port.port, 10)
+
+    // Check port range
+    if (isNaN(portNumber) || portNumber < 1 || portNumber > 65535) {
+      return { isValid: false, error: 'Port must be between 1 and 65535' }
+    }
+
+    // Check at least one protocol is selected
+    if (!port.tcp && !port.udp) {
+      return {
+        isValid: false,
+        error: 'At least one protocol (TCP or UDP) must be selected',
+      }
+    }
+
+    // Check system port (SSH)
+    if (portNumber === 22) {
+      return { isValid: false, error: 'Port 22 is reserved for SSH' }
+    }
+
+    return { isValid: true }
+  }
+
+  async validatePortConflicts(
+    entityHash: string,
+    newPorts: { port: string; tcp: boolean; udp: boolean }[],
+  ): Promise<{ hasConflicts: boolean; conflicts: string[] }> {
+    const existingPorts = await this.getByEntityHash(entityHash)
+    const currentPorts = existingPorts?.ports || {}
+    const conflicts: string[] = []
+
+    newPorts.forEach((newPort) => {
+      const portNumber = parseInt(newPort.port, 10)
+      if (currentPorts[portNumber]) {
+        conflicts.push(newPort.port)
+      }
+    })
+
+    return {
+      hasConflicts: conflicts.length > 0,
+      conflicts,
+    }
+  }
 }

@@ -34,6 +34,7 @@ function createDefaultManagers(account?: Account) {
   const sshKeyManager = new SSHKeyManager(account, sdkClient)
   const domainManager = new DomainManager(account, sdkClient)
   const volumeManager = new VolumeManager(account, sdkClient, fileManager)
+  const forwardedPortsManager = new ForwardedPortsManager(account, sdkClient)
 
   const instanceManager = new InstanceManager(
     account,
@@ -44,6 +45,7 @@ function createDefaultManagers(account?: Account) {
     fileManager,
     nodeManager,
     costManager,
+    forwardedPortsManager,
   )
   const programManager = new ProgramManager(
     account,
@@ -63,6 +65,7 @@ function createDefaultManagers(account?: Account) {
     fileManager,
     nodeManager,
     costManager,
+    forwardedPortsManager,
   )
   const confidentialManager = new ConfidentialManager(
     account,
@@ -80,7 +83,6 @@ function createDefaultManagers(account?: Account) {
     domainManager,
   )
   const voucherManager = new VoucherManager(account, sdkClient)
-  const forwardedPortsManager = new ForwardedPortsManager(account, sdkClient)
 
   return {
     sdkClient,

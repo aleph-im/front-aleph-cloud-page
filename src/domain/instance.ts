@@ -36,6 +36,7 @@ import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
+import { ForwardedPortsManager } from './forwardedPorts'
 import {
   instanceSchema,
   instanceStreamSchema,
@@ -121,6 +122,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     protected fileManager: FileManager,
     protected nodeManager: NodeManager,
     protected costManager: CostManager,
+    protected forwardedPortsManager: ForwardedPortsManager,
     protected channel = defaultInstanceChannel,
   ) {
     super(account, volumeManager, domainManager, nodeManager, sdkClient)

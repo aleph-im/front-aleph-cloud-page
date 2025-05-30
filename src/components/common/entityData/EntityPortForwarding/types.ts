@@ -1,6 +1,8 @@
+import { ExecutableStatus, ExecutableManager } from '@/domain/executable'
+
 export type ForwardedPort = {
   source: string
-  destination: string
+  destination?: string
   udp: boolean
   tcp: boolean
   isDeletable: boolean
@@ -21,5 +23,7 @@ export const defaultAddPortFormState: AddPortFormState = {
 }
 
 export type EntityPortForwardingProps = {
-  // No props currently needed, but allows React built-in props like key
+  entityHash?: string
+  executableStatus?: ExecutableStatus
+  executableManager?: ExecutableManager<any>
 }

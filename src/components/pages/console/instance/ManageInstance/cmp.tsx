@@ -51,6 +51,7 @@ export default function ManageInstance() {
   const {
     // Basic data
     instance,
+    manager,
     name,
     labelVariant,
 
@@ -103,6 +104,8 @@ export default function ManageInstance() {
     // Navigation handlers
     handleBack,
   } = useManageInstance()
+
+  console.log('status', status)
 
   return (
     <>
@@ -191,7 +194,12 @@ export default function ManageInstance() {
                   onCustomDomainClick={handleCustomDomainClick}
                 />
               ),
-              <EntityPortForwarding key="port-forwarding" />,
+              <EntityPortForwarding
+                key="port-forwarding"
+                entityHash={instance?.id}
+                executableStatus={status}
+                executableManager={manager}
+              />,
             ]}
           />
         </Slide>
