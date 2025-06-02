@@ -19,11 +19,21 @@ export type UseEntityPortForwardingReturn = {
   handleSubmitNewPorts: (newPorts: NewForwardedPortEntry[]) => void
 }
 
+export const SYSTEM_PORTS: ForwardedPort[] = [
+  {
+    source: '2222',
+    destination: '28741',
+    tcp: true,
+    udp: true,
+    isDeletable: false, // System port cannot be deleted
+  },
+]
+
 export function useEntityPortForwarding({
   entityHash,
 }: UseEntityPortForwardingProps = {}): UseEntityPortForwardingReturn {
   const [showPortForm, setShowPortForm] = useState(false)
-  const [ports, setPorts] = useState<ForwardedPort[]>([])
+  const [ports, setPorts] = useState<ForwardedPort[]>(SYSTEM_PORTS)
   const [isLoading, setIsLoading] = useState(false)
 
   const forwardedPortsManager = useForwardedPortsManager()
@@ -31,19 +41,8 @@ export function useEntityPortForwarding({
   // Load existing ports for the entity
   useEffect(() => {
     const loadPorts = async () => {
-      // Always include the system SSH port 2222
-      const systemPorts: ForwardedPort[] = [
-        {
-          source: '2222',
-          destination: '28741',
-          tcp: true,
-          udp: true,
-          isDeletable: false,
-        },
-      ]
-
       if (!entityHash || !forwardedPortsManager) {
-        setPorts(systemPorts)
+        setPorts(SYSTEM_PORTS)
         return
       }
 
@@ -63,10 +62,10 @@ export function useEntityPortForwarding({
               }))
           : []
 
-        setPorts([...systemPorts, ...userPorts])
+        setPorts([...SYSTEM_PORTS, ...userPorts])
       } catch (error) {
         console.error('Failed to load ports:', error)
-        setPorts(systemPorts) // Fallback to system ports only
+        setPorts(SYSTEM_PORTS) // Fallback to system ports only
       }
     }
 
@@ -86,12 +85,16 @@ export function useEntityPortForwarding({
       if (!entityHash || !forwardedPortsManager || isLoading) return
 
       // Prevent removal of system port 2222
-      if (source === '2222') {
-        console.warn('Cannot remove system port 2222')
+      // Check source does not belong to any system port
+      if (
+        SYSTEM_PORTS.some((port) => port.source === source && !port.isDeletable)
+      ) {
+        console.warn(`Cannot remove system port ${source}`)
         return
       }
 
       setIsLoading(true)
+
       try {
         // Get current ports and remove the specified one
         const existingPorts =
