@@ -20,8 +20,8 @@ jobs:
 
       - name: Build and Export
         uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
-        env:
-          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+        with:
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4

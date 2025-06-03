@@ -16,6 +16,5 @@ jobs:
       - name: Build check
         uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
         with:
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
           export: false
-        env:
-          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
