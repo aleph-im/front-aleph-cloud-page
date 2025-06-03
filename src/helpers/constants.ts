@@ -273,7 +273,7 @@ export const NAVIGATION_URLS = {
       'https://docs.aleph.cloud/devhub/building-applications/data-storage/types-of-storage/immutable-volume.html',
   },
   external: {
-    vrf: 'https://medium.com/aleph-im/aleph-im-verifiable-random-function-vrf-b03544a7e904',
+    vrf: 'https://docs.aleph.cloud/devhub/tools/vrf/',
     indexingFramework:
       'https://docs.aleph.cloud/devhub/building-applications/blockchain-data/indexing/',
   },
