@@ -17,7 +17,7 @@ on:
 jobs:
   bump-version:
     runs-on: ubuntu-latest
-    environment: release
+    environment: production
     outputs:
       new_tag: ${{ steps.bump_version.outputs.new_tag }}
     steps:
