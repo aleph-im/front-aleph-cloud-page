@@ -110,7 +110,7 @@ export function useRoutes(): UseRoutesReturn {
                 children: [
                   {
                     name: 'Volumes',
-                    href: NAVIGATION_URLS.console.storage.volumes.home,
+                    href: NAVIGATION_URLS.console.storage.home,
                     icon: 'storageSolutions',
                   },
                 ],
