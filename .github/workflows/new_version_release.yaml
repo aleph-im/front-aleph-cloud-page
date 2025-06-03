@@ -60,8 +60,8 @@ jobs:
 
       - name: Build and Export
         uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
-        with:
-          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Push to IPFS
         id: push_to_ipfs
