@@ -42,12 +42,13 @@ export const EntityPortForwarding = ({
               <div tw="flex gap-4 items-center">
                 <div tw="flex flex-col gap-3">
                   <Text>Source</Text>
-                  {/* @todo: Remove min-width prop from TextInput on front-core */}
                   <TextInput
                     name="source-port"
                     dataView
                     defaultValue={source}
                     required
+                    width="6em"
+                    textAlign="center"
                   />
                 </div>
                 <div className="text-main0 fs-18" tw=" font-bold self-end mb-3">
@@ -61,6 +62,8 @@ export const EntityPortForwarding = ({
                     dataView
                     defaultValue={destination}
                     required
+                    width="6em"
+                    textAlign="center"
                   />
                 </div>
               </div>

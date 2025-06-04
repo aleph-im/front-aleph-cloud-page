@@ -18,6 +18,8 @@ const PortItem = React.memo(
               {...portCtrl.fieldState}
               placeholder="8080"
               required
+              width="6em"
+              textAlign="center"
             />
           </div>
           <div tw="flex flex-col gap-3">
