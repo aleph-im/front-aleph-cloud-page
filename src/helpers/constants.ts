@@ -21,8 +21,7 @@ export const senderAddress = '0x3a5CC6aBd06B601f4654035d125F9DD2FC992C25'
 export const erc20Address = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
 export const splTokenAddress = '3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x'
 
-export const crnListProgramUrl =
-  'https://coco-1.crn.aleph.sh/vm/bec08b08bb9f9685880f3aeb9c1533951ad56abef2a39c97f5a93683bdaa5e30/crns.json'
+export const crnListProgramUrl = 'https://crns-list.aleph.sh/crns.json'
 
 export const websiteUrl = 'https://www.aleph.cloud'
 
