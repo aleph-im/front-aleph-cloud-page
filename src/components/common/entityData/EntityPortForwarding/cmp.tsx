@@ -14,6 +14,7 @@ import AddPortForm from './AddPortForm'
 
 export const EntityPortForwarding = ({
   entityHash,
+  executableStatus,
 }: EntityPortForwardingProps) => {
   const {
     // State
@@ -24,7 +25,7 @@ export const EntityPortForwarding = ({
     handleCancelAddPort,
     handleRemovePort,
     handleSubmitNewPorts,
-  } = useEntityPortForwarding({ entityHash })
+  } = useEntityPortForwarding({ entityHash, executableStatus })
 
   return (
     <>
@@ -64,6 +65,7 @@ export const EntityPortForwarding = ({
                     required
                     width="6em"
                     textAlign="center"
+                    loading={!destination}
                   />
                 </div>
               </div>

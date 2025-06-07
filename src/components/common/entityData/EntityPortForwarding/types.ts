@@ -1,6 +1,8 @@
+import { ExecutableStatus } from '@/domain/executable'
+
 export type ForwardedPort = {
   source: string
-  destination: string
+  destination?: string
   udp: boolean
   tcp: boolean
   isDeletable: boolean
@@ -22,4 +24,5 @@ export const defaultAddPortFormState: AddPortFormState = {
 
 export type EntityPortForwardingProps = {
   entityHash?: string
+  executableStatus?: ExecutableStatus
 }

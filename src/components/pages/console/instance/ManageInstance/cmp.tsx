@@ -104,6 +104,8 @@ export default function ManageInstance() {
     handleBack,
   } = useManageInstance()
 
+  console.log('status', status)
+
   return (
     <>
       <Head>
@@ -194,6 +196,7 @@ export default function ManageInstance() {
               <EntityPortForwarding
                 key="port-forwarding"
                 entityHash={instance?.id}
+                executableStatus={status}
               />,
             ]}
           />

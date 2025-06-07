@@ -2,9 +2,11 @@ import { useCallback, useState, useEffect } from 'react'
 import { ForwardedPort, NewForwardedPortEntry } from './types'
 import { useForwardedPortsManager } from '@/hooks/common/useManager/useForwardedPortsManager'
 import { PortProtocol } from '@/domain/forwardedPorts'
+import { ExecutableStatus } from '@/domain/executable'
 
 export type UseEntityPortForwardingProps = {
   entityHash?: string
+  executableStatus?: ExecutableStatus
 }
 
 export type UseEntityPortForwardingReturn = {
@@ -21,16 +23,17 @@ export type UseEntityPortForwardingReturn = {
 
 export const SYSTEM_PORTS: ForwardedPort[] = [
   {
-    source: '2222',
-    destination: '28741',
+    source: '22',
+    destination: undefined,
     tcp: true,
     udp: true,
-    isDeletable: false, // System port cannot be deleted
+    isDeletable: false, // System ports cannot be deleted
   },
 ]
 
 export function useEntityPortForwarding({
   entityHash,
+  executableStatus,
 }: UseEntityPortForwardingProps = {}): UseEntityPortForwardingReturn {
   const [showPortForm, setShowPortForm] = useState(false)
   const [ports, setPorts] = useState<ForwardedPort[]>(SYSTEM_PORTS)
@@ -51,15 +54,13 @@ export function useEntityPortForwarding({
           await forwardedPortsManager.getByEntityHash(entityHash)
 
         const userPorts: ForwardedPort[] = existingPorts?.ports
-          ? Object.entries(existingPorts.ports)
-              .filter(([port]) => port !== '2222') // Exclude system port from user ports
-              .map(([port, protocol]) => ({
-                source: port,
-                destination: port, // For now, assume destination is same as source
-                tcp: protocol.tcp,
-                udp: protocol.udp,
-                isDeletable: true,
-              }))
+          ? Object.entries(existingPorts.ports).map(([port, protocol]) => ({
+              source: port,
+              destination: undefined,
+              tcp: protocol.tcp,
+              udp: protocol.udp,
+              isDeletable: true,
+            }))
           : []
 
         setPorts([...SYSTEM_PORTS, ...userPorts])
@@ -71,6 +72,23 @@ export function useEntityPortForwarding({
 
     loadPorts()
   }, [entityHash, forwardedPortsManager])
+
+  // Load destination ports from executable status
+  useEffect(() => {
+    console.log('executableStatus', executableStatus)
+    if (!executableStatus?.mappedPorts) return
+
+    const updatedPorts = ports.map((port) => {
+      const mappedPort = executableStatus.mappedPorts[port.source]
+
+      return {
+        ...port,
+        destination: mappedPort?.host.toString(),
+      }
+    })
+
+    setPorts(updatedPorts)
+  }, [executableStatus, ports])
 
   const handleAddPort = useCallback(() => {
     setShowPortForm(true)

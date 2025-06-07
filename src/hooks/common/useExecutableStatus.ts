@@ -24,8 +24,9 @@ export function useExecutableStatus({
       if (!manager) return
       if (!executable) return
 
-      const status = await manager.checkStatus(executable)
-      setStatus(status)
+      const checkedStatus = await manager.checkStatus(executable)
+      console.log('useExecutableStatus - status', checkedStatus)
+      setStatus(checkedStatus)
     }
 
     if (!status) request()
