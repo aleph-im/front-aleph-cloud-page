@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 import { ForwardedPort, NewForwardedPortEntry } from './types'
 import { useForwardedPortsManager } from '@/hooks/common/useManager/useForwardedPortsManager'
 import { PortProtocol } from '@/domain/forwardedPorts'
@@ -114,6 +114,67 @@ export function useEntityPortForwarding({
       })
     })
   }, [executableStatus])
+
+  // Periodic polling to check for unmapped ports every 5 seconds
+  const pollingIntervalRef = useRef<NodeJS.Timeout>()
+
+  useEffect(() => {
+    // Clear any existing interval
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current)
+    }
+
+    // Only start polling if we have the required data and there are unmapped ports
+    if (!executableManager || !entityHash || !executableStatus?.node) return
+
+    const checkForUnmappedPorts = async () => {
+      try {
+        // Check if there are any ports without destination
+        const hasUnmappedPorts = ports.some((port) => !port.destination)
+        if (!hasUnmappedPorts) return
+
+        // Fetch current status to get updated mapped ports
+        const nodeUrl = NodeManager.normalizeUrl(
+          executableStatus.node.address || '',
+        )
+        if (!nodeUrl) return
+
+        // Create a mock executable to use the checkStatus method
+        const mockExecutable = {
+          id: entityHash,
+          payment: executableStatus.node,
+        }
+
+        const updatedStatus = await executableManager.checkStatus(
+          mockExecutable as any,
+        )
+
+        if (updatedStatus?.mappedPorts) {
+          setPorts((currentPorts) => {
+            return currentPorts.map((port) => {
+              const mappedPort = updatedStatus.mappedPorts?.[port.source]
+              return {
+                ...port,
+                destination: mappedPort?.host.toString() || port.destination,
+              }
+            })
+          })
+        }
+      } catch (error) {
+        console.error('Failed to poll for unmapped ports:', error)
+      }
+    }
+
+    // Start polling every 5 seconds
+    pollingIntervalRef.current = setInterval(checkForUnmappedPorts, 5000)
+
+    // Cleanup on unmount or dependency change
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+      }
+    }
+  }, [executableManager, entityHash, executableStatus?.node, ports])
 
   const handleAddPort = useCallback(() => {
     setShowPortForm(true)
