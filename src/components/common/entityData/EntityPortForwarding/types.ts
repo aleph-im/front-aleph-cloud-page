@@ -1,4 +1,4 @@
-import { ExecutableStatus } from '@/domain/executable'
+import { ExecutableStatus, ExecutableManager } from '@/domain/executable'
 
 export type ForwardedPort = {
   source: string
@@ -25,4 +25,5 @@ export const defaultAddPortFormState: AddPortFormState = {
 export type EntityPortForwardingProps = {
   entityHash?: string
   executableStatus?: ExecutableStatus
+  executableManager?: ExecutableManager<any>
 }

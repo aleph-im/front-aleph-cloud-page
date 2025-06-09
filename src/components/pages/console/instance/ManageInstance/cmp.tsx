@@ -51,6 +51,7 @@ export default function ManageInstance() {
   const {
     // Basic data
     instance,
+    manager,
     name,
     labelVariant,
 
@@ -197,6 +198,7 @@ export default function ManageInstance() {
                 key="port-forwarding"
                 entityHash={instance?.id}
                 executableStatus={status}
+                executableManager={manager}
               />,
             ]}
           />

@@ -2,11 +2,13 @@ import { useCallback, useState, useEffect } from 'react'
 import { ForwardedPort, NewForwardedPortEntry } from './types'
 import { useForwardedPortsManager } from '@/hooks/common/useManager/useForwardedPortsManager'
 import { PortProtocol } from '@/domain/forwardedPorts'
-import { ExecutableStatus } from '@/domain/executable'
+import { ExecutableStatus, ExecutableManager } from '@/domain/executable'
+import { NodeManager } from '@/domain/node'
 
 export type UseEntityPortForwardingProps = {
   entityHash?: string
   executableStatus?: ExecutableStatus
+  executableManager?: ExecutableManager<any>
 }
 
 export type UseEntityPortForwardingReturn = {
@@ -34,12 +36,33 @@ export const SYSTEM_PORTS: ForwardedPort[] = [
 export function useEntityPortForwarding({
   entityHash,
   executableStatus,
+  executableManager,
 }: UseEntityPortForwardingProps = {}): UseEntityPortForwardingReturn {
   const [showPortForm, setShowPortForm] = useState(false)
   const [ports, setPorts] = useState<ForwardedPort[]>(SYSTEM_PORTS)
   const [isLoading, setIsLoading] = useState(false)
 
   const forwardedPortsManager = useForwardedPortsManager()
+
+  // Function to notify CRN about port changes
+  const notifyCRNUpdate = useCallback(async () => {
+    if (!executableManager || !entityHash || !executableStatus?.node) return
+
+    try {
+      const nodeUrl = NodeManager.normalizeUrl(
+        executableStatus.node.address || '',
+      )
+      if (!nodeUrl) return
+
+      await executableManager.sendPostOperation({
+        hostname: nodeUrl,
+        operation: 'update' as any,
+        vmId: entityHash,
+      })
+    } catch (error) {
+      console.error('Failed to notify CRN about port changes:', error)
+    }
+  }, [executableManager, entityHash, executableStatus?.node])
 
   // Load existing ports for the entity
   useEffect(() => {
@@ -80,7 +103,7 @@ export function useEntityPortForwarding({
 
     setPorts((currentPorts) => {
       return currentPorts.map((port) => {
-        const mappedPort = executableStatus.mappedPorts[port.source]
+        const mappedPort = executableStatus.mappedPorts?.[port.source]
 
         return {
           ...port,
@@ -136,13 +159,16 @@ export function useEntityPortForwarding({
 
         // Update local state
         setPorts((prev) => prev.filter((port) => port.source !== source))
+
+        // Notify CRN about the port change
+        await notifyCRNUpdate()
       } catch (error) {
         console.error('Failed to remove port:', error)
       } finally {
         setIsLoading(false)
       }
     },
-    [entityHash, forwardedPortsManager, isLoading],
+    [entityHash, forwardedPortsManager, isLoading, notifyCRNUpdate],
   )
 
   const handleSubmitNewPorts = useCallback(
@@ -197,6 +223,9 @@ export function useEntityPortForwarding({
 
         setPorts((prev) => [...prev, ...newFormattedPorts])
         setShowPortForm(false)
+
+        // Notify CRN about the port change
+        await notifyCRNUpdate()
       } catch (error) {
         console.error('Failed to save ports:', error)
         // @todo: Show error notification to user
@@ -204,7 +233,7 @@ export function useEntityPortForwarding({
         setIsLoading(false)
       }
     },
-    [entityHash, forwardedPortsManager, isLoading],
+    [entityHash, forwardedPortsManager, isLoading, notifyCRNUpdate],
   )
 
   return {
