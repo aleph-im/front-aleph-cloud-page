@@ -78,17 +78,17 @@ export function useEntityPortForwarding({
     console.log('executableStatus', executableStatus)
     if (!executableStatus?.mappedPorts) return
 
-    const updatedPorts = ports.map((port) => {
-      const mappedPort = executableStatus.mappedPorts[port.source]
+    setPorts((currentPorts) => {
+      return currentPorts.map((port) => {
+        const mappedPort = executableStatus.mappedPorts[port.source]
 
-      return {
-        ...port,
-        destination: mappedPort?.host.toString(),
-      }
+        return {
+          ...port,
+          destination: mappedPort?.host.toString(),
+        }
+      })
     })
-
-    setPorts(updatedPorts)
-  }, [executableStatus, ports])
+  }, [executableStatus])
 
   const handleAddPort = useCallback(() => {
     setShowPortForm(true)
