@@ -531,29 +531,36 @@ export abstract class ExecutableManager<T extends Executable> {
     hostname,
     operation,
     vmId,
+    requireSignature = true,
   }: {
     operation: ExecutableOperations
     vmId: string
     hostname: string
+    requireSignature?: boolean
   }): Promise<Response> {
-    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
-
     const url = new URL(hostname + '/control/machine/' + vmId + '/' + operation)
-    const { hostname: domain, pathname: path } = url
 
-    const signedOperationToken = await this.getAuthOperationToken(
-      keyPair.privateKey,
-      domain,
-      path,
-    )
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+
+    if (requireSignature) {
+      const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
+      const { hostname: domain, pathname: path } = url
+
+      const signedOperationToken = await this.getAuthOperationToken(
+        keyPair.privateKey,
+        domain,
+        path,
+      )
+
+      headers['X-SignedOperation'] = JSON.stringify(signedOperationToken)
+      headers['X-SignedPubKey'] = JSON.stringify(pubKeyHeader)
+    }
 
     return fetch(url.toString(), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-SignedOperation': JSON.stringify(signedOperationToken),
-        'X-SignedPubKey': JSON.stringify(pubKeyHeader),
-      },
+      headers,
       mode: 'cors',
     })
   }

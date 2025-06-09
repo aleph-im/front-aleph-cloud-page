@@ -55,9 +55,11 @@ export function useEntityPortForwarding({
       if (!nodeUrl) return
 
       await executableManager.sendPostOperation({
-        hostname: nodeUrl,
+        hostname: 'https://ovh.staging.aleph.sh',
+        // hostname: nodeUrl,
         operation: 'update' as any,
         vmId: entityHash,
+        requireSignature: false,
       })
     } catch (error) {
       console.error('Failed to notify CRN about port changes:', error)
