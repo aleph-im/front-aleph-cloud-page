@@ -345,6 +345,13 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
       await this.delStreams(instance, account)
       await this.delInstance(instance)
+
+      // Remove forwarded ports for the deleted instance
+      try {
+        await this.forwardedPortsManager.delByEntityHash(instance.id)
+      } catch (err) {
+        console.error('Failed to remove forwarded ports for instance:', err)
+      }
     } catch (err) {
       throw Err.RequestFailed(err)
     }
@@ -428,6 +435,13 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
         yield
         await this.delInstance(instance)
+
+        // Remove forwarded ports for the deleted instance
+        try {
+          await this.forwardedPortsManager.delByEntityHash(instance.id)
+        } catch (err) {
+          console.error('Failed to remove forwarded ports for instance:', err)
+        }
       }
     } catch (err) {
       throw Err.RequestFailed(err)
