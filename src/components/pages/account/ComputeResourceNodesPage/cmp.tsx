@@ -122,7 +122,7 @@ export const ComputeResourceNodesPage = (
                     Core Channel Node (CCN). A CCN operator can vouch for up to
                     five CRNs, ensuring fair and balanced participation.
                   </p>
-                  <ExternalLinkButton href="https://docs.aleph.im/nodes/compute/">
+                  <ExternalLinkButton href="https://docs.aleph.cloud/nodes/compute/installation/ubuntu-24.04/">
                     Node Setup Guide
                   </ExternalLinkButton>
                 </div>

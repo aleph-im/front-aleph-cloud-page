@@ -113,7 +113,7 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
                     more information on how to set up a node and detailed
                     technical and token requirements, please visit our
                   </p>
-                  <ExternalLinkButton href="https://docs.aleph.im/nodes/core/">
+                  <ExternalLinkButton href="https://docs.aleph.cloud/nodes/core/installation/">
                     Node Setup Guide
                   </ExternalLinkButton>
                 </div>
