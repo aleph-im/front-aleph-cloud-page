@@ -406,6 +406,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
         }
 
         steps.push('instanceDel')
+        steps.push('portForwardingDel')
       }),
     )
 
@@ -437,6 +438,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
         await this.delInstance(instance)
 
         // Remove forwarded ports for the deleted instance
+        yield
         try {
           await this.forwardedPortsManager.delByEntityHash(instance.id)
         } catch (err) {
