@@ -108,7 +108,14 @@ function usePortForwardingOperations(
         return
       }
 
-      const validation = validatePortBatch(filteredPorts)
+      // Get existing ports count (excluding system ports like SSH)
+      const existingPorts =
+        await forwardedPortsManager.getByEntityHash(entityHash)
+      const currentPortsCount = existingPorts?.ports
+        ? Object.keys(existingPorts.ports).length
+        : 0
+
+      const validation = validatePortBatch(filteredPorts, currentPortsCount)
       if (!validation.isValid) {
         onError?.(validation.errors.join(', '))
         return

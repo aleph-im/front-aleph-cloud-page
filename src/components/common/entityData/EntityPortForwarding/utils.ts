@@ -104,6 +104,7 @@ export function validatePortEntry(port: {
 
 export function validatePortBatch(
   ports: { port: string; tcp: boolean; udp: boolean }[],
+  existingPortsCount = 0,
 ): { isValid: boolean; errors: string[] } {
   const errors: string[] = []
 
@@ -121,6 +122,14 @@ export function validatePortBatch(
   )
   if (duplicates.length > 0) {
     errors.push(`Duplicate ports in batch: ${duplicates.join(', ')}`)
+  }
+
+  // Check if adding these ports would exceed the maximum limit
+  const totalPortsAfterAdd = existingPortsCount + ports.length
+  if (totalPortsAfterAdd > MAX_PORTS_ALLOWED) {
+    errors.push(
+      `Maximum ${MAX_PORTS_ALLOWED} ports allowed. Adding ${ports.length} port(s) would result in ${totalPortsAfterAdd} total ports`,
+    )
   }
 
   return {

@@ -101,6 +101,14 @@ export class ForwardedPortsManager extends AggregateManager<
     // Merge with existing ports
     const updatedPorts = { ...currentPorts, ...newPortsMap }
 
+    // Check if total ports exceed the maximum limit (20)
+    const totalPorts = Object.keys(updatedPorts).length
+    if (totalPorts > 20) {
+      throw new Error(
+        `Maximum 20 ports allowed. Current total would be ${totalPorts}`,
+      )
+    }
+
     // Save to aggregate
     const [result] = await this.add({
       entityHash,
