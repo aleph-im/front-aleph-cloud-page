@@ -144,3 +144,144 @@ export function validatePortBatch(
 export function hasUnmappedPorts(ports: ForwardedPort[]): boolean {
   return ports.some((port) => !port.destination)
 }
+
+// Browser cache utilities for pending ports
+const PENDING_PORTS_CACHE_KEY = 'aleph_pending_forwarded_ports'
+const CACHE_EXPIRY_MS = 30 * 60 * 1000 // 30 minutes
+
+export type PendingPortEntry = {
+  entityHash: string
+  ports: Record<number, PortProtocol>
+  timestamp: number
+}
+
+export type PendingPortsCache = Record<string, PendingPortEntry>
+
+function getPendingPortsCache(): PendingPortsCache {
+  try {
+    const cached = localStorage.getItem(PENDING_PORTS_CACHE_KEY)
+    if (!cached) return {}
+
+    const cache: PendingPortsCache = JSON.parse(cached)
+    const now = Date.now()
+
+    // Clean expired entries
+    const validCache: PendingPortsCache = {}
+    Object.entries(cache).forEach(([key, entry]) => {
+      if (now - entry.timestamp < CACHE_EXPIRY_MS) {
+        validCache[key] = entry
+      }
+    })
+
+    // Update cache if any entries were cleaned
+    if (Object.keys(validCache).length !== Object.keys(cache).length) {
+      localStorage.setItem(PENDING_PORTS_CACHE_KEY, JSON.stringify(validCache))
+    }
+
+    return validCache
+  } catch (error) {
+    console.warn('Failed to read pending ports cache:', error)
+    return {}
+  }
+}
+
+function setPendingPortsCache(cache: PendingPortsCache): void {
+  try {
+    localStorage.setItem(PENDING_PORTS_CACHE_KEY, JSON.stringify(cache))
+  } catch (error) {
+    console.warn('Failed to write pending ports cache:', error)
+  }
+}
+
+export function addPendingPorts(
+  entityHash: string,
+  newPorts: Record<number, PortProtocol>,
+): void {
+  const cache = getPendingPortsCache()
+  const existing = cache[entityHash]
+
+  cache[entityHash] = {
+    entityHash,
+    ports: existing ? { ...existing.ports, ...newPorts } : newPorts,
+    timestamp: Date.now(),
+  }
+
+  setPendingPortsCache(cache)
+}
+
+export function removePendingPorts(
+  entityHash: string,
+  portNumbers: number[],
+): void {
+  const cache = getPendingPortsCache()
+  const existing = cache[entityHash]
+
+  if (!existing) return
+
+  const updatedPorts = { ...existing.ports }
+  portNumbers.forEach((portNumber) => {
+    delete updatedPorts[portNumber]
+  })
+
+  if (Object.keys(updatedPorts).length === 0) {
+    delete cache[entityHash]
+  } else {
+    cache[entityHash] = {
+      ...existing,
+      ports: updatedPorts,
+      timestamp: Date.now(),
+    }
+  }
+
+  setPendingPortsCache(cache)
+}
+
+export function clearPendingPorts(entityHash: string): void {
+  const cache = getPendingPortsCache()
+  delete cache[entityHash]
+  setPendingPortsCache(cache)
+}
+
+export function getPendingPortsForEntity(
+  entityHash: string,
+): Record<number, PortProtocol> {
+  const cache = getPendingPortsCache()
+  return cache[entityHash]?.ports || {}
+}
+
+export function mergePendingPortsWithAggregate(
+  entityHash: string,
+  aggregatePorts: Record<number, PortProtocol>,
+): Record<number, PortProtocol> {
+  const pendingPorts = getPendingPortsForEntity(entityHash)
+  return { ...aggregatePorts, ...pendingPorts }
+}
+
+export function cleanupConfirmedPorts(
+  entityHash: string,
+  aggregatePorts: Record<number, PortProtocol>,
+): void {
+  const pendingPorts = getPendingPortsForEntity(entityHash)
+  const confirmedPortNumbers: number[] = []
+
+  // Find which pending ports are now confirmed in the aggregate
+  Object.keys(pendingPorts).forEach((portStr) => {
+    const portNumber = parseInt(portStr, 10)
+    const pendingPort = pendingPorts[portNumber]
+    const aggregatePort = aggregatePorts[portNumber]
+
+    // If the port exists in aggregate with matching protocols, it's confirmed
+    if (
+      aggregatePort &&
+      aggregatePort.tcp === pendingPort.tcp &&
+      aggregatePort.udp === pendingPort.udp
+    ) {
+      confirmedPortNumbers.push(portNumber)
+    }
+  })
+
+  // Remove confirmed ports from cache
+  if (confirmedPortNumbers.length > 0) {
+    removePendingPorts(entityHash, confirmedPortNumbers)
+  }
+}

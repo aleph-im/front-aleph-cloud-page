@@ -13,6 +13,9 @@ import {
   NOTIFICATION_DELAY,
   POLLING_INTERVAL,
   hasUnmappedPorts,
+  addPendingPorts,
+  removePendingPorts,
+  transformPortsToAPIFormat,
 } from './utils'
 
 export type UseEntityPortForwardingProps = {
@@ -132,7 +135,9 @@ function usePortForwardingOperations(
 
       onLoadingChange?.(true)
       try {
-        await forwardedPortsManager.addMultiplePorts(entityHash, filteredPorts)
+        // Add to cache immediately for instant UI feedback
+        const newPortsForCache = transformPortsToAPIFormat(filteredPorts)
+        addPendingPorts(entityHash, newPortsForCache)
 
         const newFormattedPorts: ForwardedPort[] = filteredPorts.map(
           (port) => ({
@@ -144,10 +149,15 @@ function usePortForwardingOperations(
           }),
         )
 
+        // Update UI immediately
         onPortsAdd?.(newFormattedPorts)
         onSuccess?.()
+
+        // Save to aggregate in background
+        await forwardedPortsManager.addMultiplePorts(entityHash, filteredPorts)
       } catch (error) {
         console.error('Failed to save ports:', error)
+        // If aggregate save fails, keep cached ports for later retry
         onError?.('Failed to save ports')
       } finally {
         onLoadingChange?.(false)
@@ -175,9 +185,15 @@ function usePortForwardingOperations(
 
       onLoadingChange?.(true)
       try {
-        await forwardedPortsManager.removePort(entityHash, portSource)
+        // Remove from cache immediately
+        removePendingPorts(entityHash, [parseInt(portSource, 10)])
+
+        // Update UI immediately
         onPortRemove?.(portSource)
         onSuccess?.()
+
+        // Remove from aggregate in background
+        await forwardedPortsManager.removePort(entityHash, portSource)
       } catch (error) {
         console.error('Failed to remove port:', error)
         onError?.('Failed to remove port')

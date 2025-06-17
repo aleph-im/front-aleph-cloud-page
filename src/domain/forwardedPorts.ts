@@ -9,7 +9,11 @@ import {
 } from '@/helpers/constants'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { AggregateManager } from './aggregateManager'
-import { isSystemPort } from '@/components/common/entityData/EntityPortForwarding/utils'
+import {
+  isSystemPort,
+  mergePendingPortsWithAggregate,
+  cleanupConfirmedPorts,
+} from '@/components/common/entityData/EntityPortForwarding/utils'
 
 export type PortProtocol = {
   tcp: boolean
@@ -74,7 +78,36 @@ export class ForwardedPortsManager extends AggregateManager<
     entityHash: string,
   ): Promise<ForwardedPorts | undefined> {
     const entities = await this.getAll()
-    return entities.find((entity) => entity.entityHash === entityHash)
+    const entity = entities.find((entity) => entity.entityHash === entityHash)
+
+    if (!entity) {
+      // Check if there are pending ports in cache for this entity
+      const pendingPorts = mergePendingPortsWithAggregate(entityHash, {})
+      if (Object.keys(pendingPorts).length > 0) {
+        return {
+          id: '', // Temporary ID for cached data
+          entityHash,
+          ports: pendingPorts,
+          updated_at: new Date().toISOString(),
+          date: new Date().toISOString(),
+        }
+      }
+      return undefined
+    }
+
+    // Clean up confirmed ports from cache before merging
+    cleanupConfirmedPorts(entityHash, entity.ports || {})
+
+    // Merge aggregate data with remaining pending ports from cache
+    const mergedPorts = mergePendingPortsWithAggregate(
+      entityHash,
+      entity.ports || {},
+    )
+
+    return {
+      ...entity,
+      ports: mergedPorts,
+    }
   }
 
   async delByEntityHash(entityHash: string): Promise<void> {
