@@ -94,9 +94,12 @@ export function validatePortEntry(port: {
     }
   }
 
-  // Check system port (SSH)
-  if (portNumber === 22) {
-    return { isValid: false, error: 'Port 22 is reserved for SSH' }
+  // Check system port
+  if (isSystemPort(port.port)) {
+    return {
+      isValid: false,
+      error: `Port ${port.port} is a reserved system port`,
+    }
   }
 
   return { isValid: true }

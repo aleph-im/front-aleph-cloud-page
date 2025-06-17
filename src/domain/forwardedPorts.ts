@@ -9,6 +9,7 @@ import {
 } from '@/helpers/constants'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { AggregateManager } from './aggregateManager'
+import { isSystemPort } from '@/components/common/entityData/EntityPortForwarding/utils'
 
 export type PortProtocol = {
   tcp: boolean
@@ -168,9 +169,12 @@ export class ForwardedPortsManager extends AggregateManager<
       }
     }
 
-    // Check system port (SSH)
-    if (portNumber === 22) {
-      return { isValid: false, error: 'Port 22 is reserved for SSH' }
+    // Check system port
+    if (isSystemPort(port.port)) {
+      return {
+        isValid: false,
+        error: `Port ${port.port} is a reserved system port`,
+      }
     }
 
     return { isValid: true }
