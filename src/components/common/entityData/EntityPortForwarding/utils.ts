@@ -12,7 +12,7 @@ export const SYSTEM_PORTS: ForwardedPort[] = [
 ]
 
 export const MAX_PORTS_ALLOWED = 20
-export const POLLING_INTERVAL = 5000
+export const POLLING_INTERVAL = 20000
 export const NOTIFICATION_DELAY = 5000
 
 export function getSystemPorts(): ForwardedPort[] {
