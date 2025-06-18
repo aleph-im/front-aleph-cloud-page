@@ -97,6 +97,7 @@ function usePortForwardingOperations(
   onLoadingChange?: (loading: boolean) => void,
   onPortsAdd?: (ports: ForwardedPort[]) => void,
   onPortRemove?: (portSource: string) => void,
+  onPortRemovalStateChange?: (portSource: string, isRemoving: boolean) => void,
 ) {
   const forwardedPortsManager = useForwardedPortsManager()
 
@@ -183,22 +184,23 @@ function usePortForwardingOperations(
         return
       }
 
-      onLoadingChange?.(true)
-      try {
-        // Remove from cache immediately
-        removePendingPorts(entityHash, [parseInt(portSource, 10)])
+      // Set port as removing to show loading state
+      onPortRemovalStateChange?.(portSource, true)
 
-        // Update UI immediately
+      try {
+        // Wait for user to sign the message before removing from UI
+        await forwardedPortsManager.removePort(entityHash, portSource)
+
+        // Only after successful signing, remove from cache and UI
+        removePendingPorts(entityHash, [parseInt(portSource, 10)])
         onPortRemove?.(portSource)
         onSuccess?.()
-
-        // Remove from aggregate in background
-        await forwardedPortsManager.removePort(entityHash, portSource)
       } catch (error) {
         console.error('Failed to remove port:', error)
         onError?.('Failed to remove port')
       } finally {
-        onLoadingChange?.(false)
+        // Clear the removing state
+        onPortRemovalStateChange?.(portSource, false)
       }
     },
     [
@@ -207,8 +209,8 @@ function usePortForwardingOperations(
       isLoading,
       onSuccess,
       onError,
-      onLoadingChange,
       onPortRemove,
+      onPortRemovalStateChange,
     ],
   )
 
@@ -356,6 +358,17 @@ export function useEntityPortForwarding({
     setError(null)
   }, [])
 
+  const setPortRemovalState = useCallback(
+    (portSource: string, isRemoving: boolean) => {
+      setPorts((prev) =>
+        prev.map((port) =>
+          port.source === portSource ? { ...port, isRemoving } : port,
+        ),
+      )
+    },
+    [],
+  )
+
   const updatePorts = useCallback(
     (updater: (currentPorts: ForwardedPort[]) => ForwardedPort[]) => {
       setPorts(updater)
@@ -383,6 +396,7 @@ export function useEntityPortForwarding({
     setIsLoading,
     addPortsToState,
     removePortFromState,
+    setPortRemovalState,
   )
 
   // Port polling logic

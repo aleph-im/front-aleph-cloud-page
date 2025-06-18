@@ -43,60 +43,72 @@ export const EntityPortForwarding = ({
             <InfoTitle>CONFIGURED PORTS</InfoTitle>
             <Text>Maximum 20 ports allowed</Text>
           </div>
-          {ports.map(({ source, destination, tcp, udp, isDeletable }) => (
-            <div key={`port-${source}`} tw="flex gap-4 items-center flex-wrap">
-              <div tw="flex gap-4 items-center">
-                <div tw="flex flex-col gap-3">
-                  <Text>Source</Text>
-                  <TextInput
-                    name="source-port"
-                    dataView
-                    defaultValue={source}
-                    required
-                    width="6em"
-                    textAlign="center"
-                  />
-                </div>
-                <div className="text-main0 fs-18" tw=" font-bold self-end mb-3">
-                  {'-'}
-                </div>
-                <div tw="flex flex-col gap-3">
-                  <Text>Destination</Text>
-                  {/* @todo: Remove min-width prop from TextInput on front-core */}
-                  <TextInput
-                    name="destination-port"
-                    dataView
-                    defaultValue={destination}
-                    required
-                    width="6em"
-                    textAlign="center"
-                    loading={!destination}
-                  />
-                </div>
-              </div>
-              <div tw="flex gap-4 items-center">
-                <div tw="flex flex-col gap-3">
-                  <Text>TCP</Text>
-                  <Checkbox disabled checked={tcp} />
-                </div>
-                <div tw="flex flex-col gap-3">
-                  <Text>UDP</Text>
-                  <Checkbox disabled checked={udp} />
-                </div>
-                {isDeletable && (
-                  <div tw="self-end">
-                    <Button
-                      variant="warning"
-                      kind="functional"
-                      onClick={() => handleRemovePort(source)}
-                    >
-                      <Icon name="trash-xmark" />
-                    </Button>
+          {ports.map(
+            ({ source, destination, tcp, udp, isDeletable, isRemoving }) => (
+              <div
+                key={`port-${source}`}
+                tw="flex gap-4 items-center flex-wrap"
+              >
+                <div tw="flex gap-4 items-center">
+                  <div tw="flex flex-col gap-3">
+                    <Text>Source</Text>
+                    <TextInput
+                      name="source-port"
+                      dataView
+                      defaultValue={source}
+                      required
+                      width="6em"
+                      textAlign="center"
+                    />
                   </div>
-                )}
+                  <div
+                    className="text-main0 fs-18"
+                    tw=" font-bold self-end mb-3"
+                  >
+                    {'-'}
+                  </div>
+                  <div tw="flex flex-col gap-3">
+                    <Text>Destination</Text>
+                    {/* @todo: Remove min-width prop from TextInput on front-core */}
+                    <TextInput
+                      name="destination-port"
+                      dataView
+                      defaultValue={destination}
+                      required
+                      width="6em"
+                      textAlign="center"
+                      loading={!destination}
+                    />
+                  </div>
+                </div>
+                <div tw="flex gap-4 items-center">
+                  <div tw="flex flex-col gap-3">
+                    <Text>TCP</Text>
+                    <Checkbox disabled checked={tcp} />
+                  </div>
+                  <div tw="flex flex-col gap-3">
+                    <Text>UDP</Text>
+                    <Checkbox disabled checked={udp} />
+                  </div>
+                  {isDeletable && (
+                    <div tw="self-end">
+                      <Button
+                        variant="warning"
+                        kind="functional"
+                        onClick={() => handleRemovePort(source)}
+                        disabled={!!isRemoving}
+                      >
+                        <Icon
+                          name={isRemoving ? 'spinner' : 'trash-xmark'}
+                          spin={isRemoving}
+                        />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
           <div tw="mt-2">
             {showPortForm ? (
               <AddPortForm

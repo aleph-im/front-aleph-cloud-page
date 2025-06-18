@@ -6,6 +6,7 @@ export type ForwardedPort = {
   udp: boolean
   tcp: boolean
   isDeletable: boolean
+  isRemoving?: boolean
 }
 
 export type NewForwardedPortEntry = {
