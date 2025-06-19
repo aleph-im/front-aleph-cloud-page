@@ -14,8 +14,12 @@ import {
   POLLING_INTERVAL,
   hasUnmappedPorts,
   addPendingPorts,
-  removePendingPorts,
   transformPortsToAPIFormat,
+  mergePendingPortsWithAggregate,
+  cleanupConfirmedPorts,
+  addPendingPortRemoval,
+  cleanupConfirmedRemovals,
+  applyPendingRemovals,
 } from './utils'
 
 export type UseEntityPortForwardingProps = {
@@ -191,8 +195,8 @@ function usePortForwardingOperations(
         // Wait for user to sign the message before removing from UI
         await forwardedPortsManager.removePort(entityHash, portSource)
 
-        // Only after successful signing, remove from cache and UI
-        removePendingPorts(entityHash, [parseInt(portSource, 10)])
+        // Only after successful signing, add to pending removals cache and update UI
+        addPendingPortRemoval(entityHash, parseInt(portSource, 10))
         onPortRemove?.(portSource)
         onSuccess?.()
       } catch (error) {
@@ -318,9 +322,22 @@ export function useEntityPortForwarding({
       const existingPorts =
         await forwardedPortsManager.getByEntityHash(entityHash)
 
-      const userPorts: ForwardedPort[] = existingPorts?.ports
-        ? transformAPIPortsToUI(existingPorts.ports)
-        : []
+      const aggregatePorts = existingPorts?.ports || {}
+
+      // Merge aggregate ports with cached pending additions
+      const portsWithAdditions = mergePendingPortsWithAggregate(
+        entityHash,
+        aggregatePorts,
+      )
+
+      // Apply pending removals
+      const finalPorts = applyPendingRemovals(entityHash, portsWithAdditions)
+
+      // Clean up any confirmed changes from cache
+      cleanupConfirmedPorts(entityHash, aggregatePorts)
+      cleanupConfirmedRemovals(entityHash, aggregatePorts)
+
+      const userPorts: ForwardedPort[] = transformAPIPortsToUI(finalPorts)
 
       const allPorts = [...getSystemPorts(), ...userPorts]
       setPorts(allPorts)
