@@ -153,7 +153,10 @@ function usePortForwardingOperations(
 
       onLoadingChange?.(true)
       try {
-        // Add to cache immediately for instant UI feedback
+        // Wait for user to sign the message before updating UI
+        await forwardedPortsManager.addMultiplePorts(entityHash, filteredPorts)
+
+        // Only after successful signing, add to cache and update UI
         const newPortsForCache = transformPortsToAPIFormat(filteredPorts)
         addPendingPorts(entityHash, accountAddress, newPortsForCache)
 
@@ -167,16 +170,11 @@ function usePortForwardingOperations(
           }),
         )
 
-        // Update UI immediately
         onPortsAdd?.(newFormattedPorts)
         onSuccess?.()
-
-        // Save to aggregate in background
-        await forwardedPortsManager.addMultiplePorts(entityHash, filteredPorts)
       } catch (error) {
-        console.error('Failed to save ports:', error)
-        // If aggregate save fails, keep cached ports for later retry
-        onError?.('Failed to save ports')
+        console.error('Failed to add ports:', error)
+        onError?.('Failed to add ports')
       } finally {
         onLoadingChange?.(false)
       }
