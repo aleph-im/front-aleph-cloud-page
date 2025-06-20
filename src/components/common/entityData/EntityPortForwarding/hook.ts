@@ -17,10 +17,9 @@ import {
   addPendingPorts,
   transformPortsToAPIFormat,
   mergePendingPortsWithAggregate,
-  cleanupConfirmedPorts,
   addPendingPortRemoval,
-  cleanupConfirmedRemovals,
   applyPendingRemovals,
+  getPendingRemovalsForEntity,
 } from './utils'
 
 export type UseEntityPortForwardingProps = {
@@ -136,8 +135,19 @@ function usePortForwardingOperations(
         entityHash,
         filteredPorts,
       )
-      if (conflicts.hasConflicts) {
-        onError?.(`Ports already exist: ${conflicts.conflicts.join(', ')}`)
+
+      // Filter out conflicts that are actually pending removal
+      const pendingRemovals = getPendingRemovalsForEntity(
+        entityHash,
+        accountAddress,
+      )
+      const actualConflicts = conflicts.conflicts.filter((portStr) => {
+        const portNumber = parseInt(portStr, 10)
+        return !pendingRemovals.includes(portNumber)
+      })
+
+      if (actualConflicts.length > 0) {
+        onError?.(`Ports already exist: ${actualConflicts.join(', ')}`)
         return
       }
 
@@ -352,11 +362,6 @@ export function useEntityPortForwarding({
         accountAddress,
         portsWithAdditions,
       )
-
-      // Clean up any confirmed changes from cache
-      cleanupConfirmedPorts(entityHash, accountAddress, aggregatePorts)
-      cleanupConfirmedRemovals(entityHash, accountAddress, aggregatePorts)
-
       const userPorts: ForwardedPort[] = transformAPIPortsToUI(finalPorts)
 
       const allPorts = [...getSystemPorts(), ...userPorts]
