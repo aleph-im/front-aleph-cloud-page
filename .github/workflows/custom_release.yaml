@@ -19,6 +19,6 @@ jobs:
         with:
           fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
       - name: Push to IPFS
-        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.2.1
+        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.2.2
         with:
           upload-dir: out
