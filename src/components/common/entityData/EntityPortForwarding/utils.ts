@@ -208,6 +208,31 @@ export function addPendingPorts(
   const cacheKey = createCacheKey(entityHash, accountAddress)
   const existing = cache[cacheKey]
 
+  // Check if any of the new ports are in pending removals and remove them
+  const removalCache = getPendingRemovalsCache()
+  const pendingRemovals = removalCache[cacheKey]
+
+  if (pendingRemovals) {
+    const newPortNumbers = Object.keys(newPorts).map(Number)
+    const updatedRemovedPorts = pendingRemovals.removedPorts.filter(
+      (portNumber) => !newPortNumbers.includes(portNumber),
+    )
+
+    if (updatedRemovedPorts.length === 0) {
+      // No more pending removals for this entity, remove the entry
+      delete removalCache[cacheKey]
+    } else {
+      // Update with remaining pending removals
+      removalCache[cacheKey] = {
+        ...pendingRemovals,
+        removedPorts: updatedRemovedPorts,
+        timestamp: Date.now(),
+      }
+    }
+
+    setPendingRemovalsCache(removalCache)
+  }
+
   cache[cacheKey] = {
     entityHash,
     accountAddress,
