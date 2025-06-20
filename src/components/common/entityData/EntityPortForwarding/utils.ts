@@ -149,8 +149,14 @@ export function hasUnmappedPorts(ports: ForwardedPort[]): boolean {
 const PENDING_PORTS_CACHE_KEY = 'aleph_pending_forwarded_ports'
 const CACHE_EXPIRY_MS = 30 * 60 * 1000 // 30 minutes
 
+// Helper function to create account-scoped cache keys
+function createCacheKey(entityHash: string, accountAddress: string): string {
+  return `${entityHash}:${accountAddress}`
+}
+
 export type PendingPortEntry = {
   entityHash: string
+  accountAddress: string
   ports: Record<number, PortProtocol>
   timestamp: number
 }
@@ -195,13 +201,16 @@ function setPendingPortsCache(cache: PendingPortsCache): void {
 
 export function addPendingPorts(
   entityHash: string,
+  accountAddress: string,
   newPorts: Record<number, PortProtocol>,
 ): void {
   const cache = getPendingPortsCache()
-  const existing = cache[entityHash]
+  const cacheKey = createCacheKey(entityHash, accountAddress)
+  const existing = cache[cacheKey]
 
-  cache[entityHash] = {
+  cache[cacheKey] = {
     entityHash,
+    accountAddress,
     ports: existing ? { ...existing.ports, ...newPorts } : newPorts,
     timestamp: Date.now(),
   }
@@ -211,10 +220,12 @@ export function addPendingPorts(
 
 export function removePendingPorts(
   entityHash: string,
+  accountAddress: string,
   portNumbers: number[],
 ): void {
   const cache = getPendingPortsCache()
-  const existing = cache[entityHash]
+  const cacheKey = createCacheKey(entityHash, accountAddress)
+  const existing = cache[cacheKey]
 
   if (!existing) return
 
@@ -224,9 +235,9 @@ export function removePendingPorts(
   })
 
   if (Object.keys(updatedPorts).length === 0) {
-    delete cache[entityHash]
+    delete cache[cacheKey]
   } else {
-    cache[entityHash] = {
+    cache[cacheKey] = {
       ...existing,
       ports: updatedPorts,
       timestamp: Date.now(),
@@ -236,46 +247,45 @@ export function removePendingPorts(
   setPendingPortsCache(cache)
 }
 
-export function clearPendingPorts(entityHash: string): void {
+export function clearPendingPorts(
+  entityHash: string,
+  accountAddress: string,
+): void {
   const cache = getPendingPortsCache()
-  delete cache[entityHash]
+  const cacheKey = createCacheKey(entityHash, accountAddress)
+  delete cache[cacheKey]
   setPendingPortsCache(cache)
 }
 
 export function getPendingPortsForEntity(
   entityHash: string,
+  accountAddress: string,
 ): Record<number, PortProtocol> {
   const cache = getPendingPortsCache()
-  return cache[entityHash]?.ports || {}
+  const cacheKey = createCacheKey(entityHash, accountAddress)
+  return cache[cacheKey]?.ports || {}
 }
 
 export function mergePendingPortsWithAggregate(
   entityHash: string,
+  accountAddress: string,
   aggregatePorts: Record<number, PortProtocol>,
 ): Record<number, PortProtocol> {
-  const pendingPorts = getPendingPortsForEntity(entityHash)
+  const pendingPorts = getPendingPortsForEntity(entityHash, accountAddress)
   return { ...aggregatePorts, ...pendingPorts }
 }
 
 export function cleanupConfirmedPorts(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   entityHash: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  accountAddress: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   aggregatePorts: Record<number, PortProtocol>,
 ): void {
-  const pendingPorts = getPendingPortsForEntity(entityHash)
-
-  console.log('cleanupConfirmedPorts debug:', {
-    entityHash,
-    pendingPorts: Object.keys(pendingPorts).map(Number),
-    aggregatePortNumbers: Object.keys(aggregatePorts).map(Number),
-    note: 'Prioritizing cache over aggregate - keeping all pending additions',
-  })
-
   // PRIORITIZE CACHE: Don't clean up additions based on aggregate state
   // The aggregate might be stale, so trust the cache until it expires naturally
   // Let the natural cache expiry (30 minutes) handle cleanup instead
-
-  console.log('Keeping all cached additions, trusting cache over aggregate')
-
   // Note: We don't call removePendingPorts() here anymore
   // The cache will expire naturally after 30 minutes if not confirmed
 }
@@ -285,6 +295,7 @@ const PENDING_REMOVALS_CACHE_KEY = 'aleph_pending_port_removals'
 
 export type PendingRemovalEntry = {
   entityHash: string
+  accountAddress: string
   removedPorts: number[]
   timestamp: number
 }
@@ -294,37 +305,27 @@ export type PendingRemovalsCache = Record<string, PendingRemovalEntry>
 function getPendingRemovalsCache(): PendingRemovalsCache {
   try {
     const cached = localStorage.getItem(PENDING_REMOVALS_CACHE_KEY)
-    console.log('getPendingRemovalsCache raw data:', cached)
-
     if (!cached) return {}
 
     const cache: PendingRemovalsCache = JSON.parse(cached)
     const now = Date.now()
 
-    console.log('getPendingRemovalsCache parsed:', cache)
-
     // Clean expired entries
     const validCache: PendingRemovalsCache = {}
     Object.entries(cache).forEach(([key, entry]) => {
-      const age = now - entry.timestamp
-      const isExpired = age >= CACHE_EXPIRY_MS
-      console.log(`Cache entry ${key}: age=${age}ms, expired=${isExpired}`)
-
-      if (!isExpired) {
+      if (now - entry.timestamp < CACHE_EXPIRY_MS) {
         validCache[key] = entry
       }
     })
 
     // Update cache if any entries were cleaned
     if (Object.keys(validCache).length !== Object.keys(cache).length) {
-      console.log('Cleaning expired cache entries, updating localStorage')
       localStorage.setItem(
         PENDING_REMOVALS_CACHE_KEY,
         JSON.stringify(validCache),
       )
     }
 
-    console.log('getPendingRemovalsCache final result:', validCache)
     return validCache
   } catch (error) {
     console.warn('Failed to read pending removals cache:', error)
@@ -342,13 +343,16 @@ function setPendingRemovalsCache(cache: PendingRemovalsCache): void {
 
 export function addPendingPortRemoval(
   entityHash: string,
+  accountAddress: string,
   portNumber: number,
 ): void {
   const cache = getPendingRemovalsCache()
-  const existing = cache[entityHash]
+  const cacheKey = createCacheKey(entityHash, accountAddress)
+  const existing = cache[cacheKey]
 
-  cache[entityHash] = {
+  cache[cacheKey] = {
     entityHash,
+    accountAddress,
     removedPorts: existing
       ? [...existing.removedPorts, portNumber]
       : [portNumber],
@@ -360,62 +364,43 @@ export function addPendingPortRemoval(
 
 export function cleanupConfirmedRemovals(
   entityHash: string,
+  accountAddress: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   aggregatePorts: Record<number, PortProtocol>,
 ): void {
   const cache = getPendingRemovalsCache()
-  const pendingRemovals = cache[entityHash]
+  const cacheKey = createCacheKey(entityHash, accountAddress)
+  const pendingRemovals = cache[cacheKey]
 
   if (!pendingRemovals) return
-
-  console.log('cleanupConfirmedRemovals debug:', {
-    entityHash,
-    originalRemovals: pendingRemovals.removedPorts,
-    aggregatePortNumbers: Object.keys(aggregatePorts).map(Number),
-    note: 'Prioritizing cache over aggregate - keeping all pending removals',
-  })
 
   // PRIORITIZE CACHE: Don't clean up removals based on aggregate state
   // The aggregate might be stale, so trust the cache until it expires naturally
   // Only clean up entries that are genuinely old (handled by cache expiry)
 
   // Just update the timestamp to keep the cache fresh
-  cache[entityHash] = {
+  cache[cacheKey] = {
     ...pendingRemovals,
     timestamp: Date.now(),
   }
 
-  console.log(
-    'Keeping all cached removals, trusting cache over aggregate:',
-    pendingRemovals.removedPorts,
-  )
   setPendingRemovalsCache(cache)
 }
 
 export function applyPendingRemovals(
   entityHash: string,
+  accountAddress: string,
   ports: Record<number, PortProtocol>,
 ): Record<number, PortProtocol> {
   const cache = getPendingRemovalsCache()
-  const pendingRemovals = cache[entityHash]
-
-  console.log('applyPendingRemovals debug:', {
-    entityHash,
-    inputPorts: Object.keys(ports).map(Number),
-    pendingRemovals: pendingRemovals?.removedPorts || [],
-    cacheExists: !!pendingRemovals,
-  })
+  const cacheKey = createCacheKey(entityHash, accountAddress)
+  const pendingRemovals = cache[cacheKey]
 
   if (!pendingRemovals) return ports
 
   const filteredPorts = { ...ports }
   pendingRemovals.removedPorts.forEach((portNumber) => {
     delete filteredPorts[portNumber]
-  })
-
-  console.log('applyPendingRemovals result:', {
-    originalPorts: Object.keys(ports).map(Number),
-    filteredPorts: Object.keys(filteredPorts).map(Number),
-    removedPorts: pendingRemovals.removedPorts,
   })
 
   return filteredPorts

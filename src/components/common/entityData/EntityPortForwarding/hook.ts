@@ -3,6 +3,7 @@ import { NewForwardedPortEntry, ForwardedPort } from './types'
 import { ExecutableStatus, ExecutableManager } from '@/domain/executable'
 import { NodeManager } from '@/domain/node'
 import { useForwardedPortsManager } from '@/hooks/common/useManager/useForwardedPortsManager'
+import { useAppState } from '@/contexts/appState'
 import {
   getSystemPorts,
   transformAPIPortsToUI,
@@ -95,6 +96,7 @@ function useCRNNotification(
 // Port operations functions
 function usePortForwardingOperations(
   entityHash?: string,
+  accountAddress?: string,
   isLoading?: boolean,
   onSuccess?: () => void,
   onError?: (error: string) => void,
@@ -107,7 +109,8 @@ function usePortForwardingOperations(
 
   const addPorts = useCallback(
     async (newPorts: NewForwardedPortEntry[]) => {
-      if (!entityHash || !forwardedPortsManager || isLoading) return
+      if (!entityHash || !accountAddress || !forwardedPortsManager || isLoading)
+        return
 
       const filteredPorts = filterOutSystemPorts(newPorts)
 
@@ -142,7 +145,7 @@ function usePortForwardingOperations(
       try {
         // Add to cache immediately for instant UI feedback
         const newPortsForCache = transformPortsToAPIFormat(filteredPorts)
-        addPendingPorts(entityHash, newPortsForCache)
+        addPendingPorts(entityHash, accountAddress, newPortsForCache)
 
         const newFormattedPorts: ForwardedPort[] = filteredPorts.map(
           (port) => ({
@@ -170,6 +173,7 @@ function usePortForwardingOperations(
     },
     [
       entityHash,
+      accountAddress,
       forwardedPortsManager,
       isLoading,
       onSuccess,
@@ -181,7 +185,8 @@ function usePortForwardingOperations(
 
   const removePort = useCallback(
     async (portSource: string) => {
-      if (!entityHash || !forwardedPortsManager || isLoading) return
+      if (!entityHash || !accountAddress || !forwardedPortsManager || isLoading)
+        return
 
       if (isSystemPort(portSource)) {
         onError?.(`Cannot remove system port ${portSource}`)
@@ -196,7 +201,11 @@ function usePortForwardingOperations(
         await forwardedPortsManager.removePort(entityHash, portSource)
 
         // Only after successful signing, add to pending removals cache and update UI
-        addPendingPortRemoval(entityHash, parseInt(portSource, 10))
+        addPendingPortRemoval(
+          entityHash,
+          accountAddress,
+          parseInt(portSource, 10),
+        )
         onPortRemove?.(portSource)
         onSuccess?.()
       } catch (error) {
@@ -209,6 +218,7 @@ function usePortForwardingOperations(
     },
     [
       entityHash,
+      accountAddress,
       forwardedPortsManager,
       isLoading,
       onSuccess,
@@ -303,6 +313,11 @@ export function useEntityPortForwarding({
   executableStatus,
   executableManager,
 }: UseEntityPortForwardingProps = {}): UseEntityPortForwardingReturn {
+  // Get account address from app state
+  const [appState] = useAppState()
+  const { account } = appState.connection
+  const accountAddress = account?.address
+
   // State
   const [ports, setPorts] = useState<ForwardedPort[]>(getSystemPorts())
   const [showPortForm, setShowPortForm] = useState(false)
@@ -313,7 +328,7 @@ export function useEntityPortForwarding({
 
   // Load existing ports for the entity
   const loadPorts = useCallback(async () => {
-    if (!entityHash || !forwardedPortsManager) {
+    if (!entityHash || !accountAddress || !forwardedPortsManager) {
       setPorts(getSystemPorts())
       return
     }
@@ -327,15 +342,20 @@ export function useEntityPortForwarding({
       // Merge aggregate ports with cached pending additions
       const portsWithAdditions = mergePendingPortsWithAggregate(
         entityHash,
+        accountAddress,
         aggregatePorts,
       )
 
       // Apply pending removals
-      const finalPorts = applyPendingRemovals(entityHash, portsWithAdditions)
+      const finalPorts = applyPendingRemovals(
+        entityHash,
+        accountAddress,
+        portsWithAdditions,
+      )
 
       // Clean up any confirmed changes from cache
-      cleanupConfirmedPorts(entityHash, aggregatePorts)
-      cleanupConfirmedRemovals(entityHash, aggregatePorts)
+      cleanupConfirmedPorts(entityHash, accountAddress, aggregatePorts)
+      cleanupConfirmedRemovals(entityHash, accountAddress, aggregatePorts)
 
       const userPorts: ForwardedPort[] = transformAPIPortsToUI(finalPorts)
 
@@ -347,7 +367,7 @@ export function useEntityPortForwarding({
       setError('Failed to load ports')
       setPorts(getSystemPorts())
     }
-  }, [entityHash, forwardedPortsManager])
+  }, [entityHash, accountAddress, forwardedPortsManager])
 
   // Load ports when entityHash changes
   useEffect(() => {
@@ -407,6 +427,7 @@ export function useEntityPortForwarding({
   // Port operations logic
   const { addPorts, removePort } = usePortForwardingOperations(
     entityHash,
+    accountAddress,
     isLoading,
     scheduleNotifyCRNUpdate,
     setError,
