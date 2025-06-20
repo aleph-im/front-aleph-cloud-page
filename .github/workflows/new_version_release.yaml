@@ -65,7 +65,7 @@ jobs:
 
       - name: Push to IPFS
         id: push_to_ipfs
-        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.2.0
+        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.2.1
         with:
           upload-dir: out
 
