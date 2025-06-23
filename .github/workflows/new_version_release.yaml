@@ -53,7 +53,7 @@ jobs:
     needs: bump-version
     runs-on: ubuntu-22.04
     outputs:
-      cid: ${{ steps.push_to_ipfs.outputs.cid }}
+      cid: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
