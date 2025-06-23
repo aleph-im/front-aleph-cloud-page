@@ -8,7 +8,8 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  push-to-ipfs:
+  build:
+    name: Build & export static site
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
@@ -18,6 +19,25 @@ jobs:
         uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
         with:
           fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Upload export as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+          if-no-files-found: error
+          retention-days: 1
+
+  push-to-ipfs:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download export artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+
       - name: Push to IPFS
         uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.0
         with:

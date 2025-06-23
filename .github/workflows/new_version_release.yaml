@@ -15,7 +15,28 @@ on:
           - patch
 
 jobs:
+  build:
+    name: Build & export static site
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build and Export
+        uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
+        with:
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Upload export as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+          if-no-files-found: error
+          retention-days: 7
+
   bump-version:
+    needs: build
     runs-on: ubuntu-latest
     environment: production
     outputs:
@@ -50,18 +71,16 @@ jobs:
           git push origin --tags
 
   push-to-ipfs:
-    needs: bump-version
+    needs: build
     runs-on: ubuntu-22.04
     outputs:
       cid: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Build and Export
-        uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
+      - name: Download export artifact
+        uses: actions/download-artifact@v4
         with:
-          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+          name: nextjs-export
+          path: out
 
       - name: Push to IPFS
         id: push_to_ipfs
