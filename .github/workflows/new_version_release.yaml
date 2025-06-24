@@ -39,7 +39,8 @@ jobs:
     needs: build
     runs-on: ubuntu-22.04
     outputs:
-      cid: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
+      cid_v0: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
+      cid_v1: ${{ steps.push_to_ipfs.outputs.cid_v1 }}
     steps:
       - name: Download export artifact
         uses: actions/download-artifact@v4
@@ -100,6 +101,8 @@ jobs:
           tag_name: ${{ needs.bump-version.outputs.new_tag }}
           release_name: Release ${{ needs.bump-version.outputs.new_tag }}
           body: |
-            **IPFS CID:** `${{ needs.push-to-ipfs.outputs.cid }}`
+            **IPFS CID:** `${{ needs.push-to-ipfs.outputs.cid_v0 }}`
+
+            **Preview:** https://${{ needs.push-to-ipfs.outputs.cid_v1 }}.ipfs.aleph.sh
           draft: false
           prerelease: false
