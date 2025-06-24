@@ -36,6 +36,7 @@ jobs:
           retention-days: 1
 
   push-to-ipfs:
+    name: Push site to IPFS
     needs: build
     runs-on: ubuntu-22.04
     outputs:
@@ -55,6 +56,7 @@ jobs:
           upload-dir: out
 
   bump-version:
+    name: Bump version
     needs: push-to-ipfs
     runs-on: ubuntu-latest
     environment: production
@@ -90,6 +92,7 @@ jobs:
           git push origin --tags
 
   create-release:
+    name: Create GitHub Release
     needs: [bump-version, push-to-ipfs]
     runs-on: ubuntu-latest
     steps:

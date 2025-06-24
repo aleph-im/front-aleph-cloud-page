@@ -29,6 +29,7 @@ jobs:
           retention-days: 1
 
   push-to-ipfs:
+    name: Push site to IPFS
     needs: build
     runs-on: ubuntu-22.04
     outputs:
@@ -48,6 +49,7 @@ jobs:
           upload-dir: out
 
   preview:
+    name: Build preview url
     needs: push-to-ipfs
     runs-on: ubuntu-22.04
     steps:
