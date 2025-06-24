@@ -36,6 +36,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: nextjs-export
+          path: out
 
       - name: Push to IPFS
         uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.0

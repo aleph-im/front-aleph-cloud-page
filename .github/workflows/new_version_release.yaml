@@ -33,10 +33,28 @@ jobs:
           name: nextjs-export
           path: out
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
+
+  push-to-ipfs:
+    needs: build
+    runs-on: ubuntu-22.04
+    outputs:
+      cid: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
+    steps:
+      - name: Download export artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+
+      - name: Push to IPFS
+        id: push_to_ipfs
+        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.0
+        with:
+          upload-dir: out
 
   bump-version:
-    needs: build
+    needs: push-to-ipfs
     runs-on: ubuntu-latest
     environment: production
     outputs:
@@ -69,23 +87,6 @@ jobs:
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           git push origin HEAD:main
           git push origin --tags
-
-  push-to-ipfs:
-    needs: build
-    runs-on: ubuntu-22.04
-    outputs:
-      cid: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
-    steps:
-      - name: Download export artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: nextjs-export
-
-      - name: Push to IPFS
-        id: push_to_ipfs
-        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.0
-        with:
-          upload-dir: out
 
   create-release:
     needs: [bump-version, push-to-ipfs]
