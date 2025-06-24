@@ -33,10 +33,31 @@ jobs:
           name: nextjs-export
           path: out
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
+
+  push-to-ipfs:
+    name: Push site to IPFS
+    needs: build
+    runs-on: ubuntu-22.04
+    outputs:
+      cid_v0: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
+      cid_v1: ${{ steps.push_to_ipfs.outputs.cid_v1 }}
+    steps:
+      - name: Download export artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+
+      - name: Push to IPFS
+        id: push_to_ipfs
+        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.1
+        with:
+          upload-dir: out
 
   bump-version:
-    needs: build
+    name: Bump version
+    needs: push-to-ipfs
     runs-on: ubuntu-latest
     environment: production
     outputs:
@@ -70,24 +91,8 @@ jobs:
           git push origin HEAD:main
           git push origin --tags
 
-  push-to-ipfs:
-    needs: build
-    runs-on: ubuntu-22.04
-    outputs:
-      cid: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
-    steps:
-      - name: Download export artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: nextjs-export
-
-      - name: Push to IPFS
-        id: push_to_ipfs
-        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.0
-        with:
-          upload-dir: out
-
   create-release:
+    name: Create GitHub Release
     needs: [bump-version, push-to-ipfs]
     runs-on: ubuntu-latest
     steps:
@@ -99,6 +104,8 @@ jobs:
           tag_name: ${{ needs.bump-version.outputs.new_tag }}
           release_name: Release ${{ needs.bump-version.outputs.new_tag }}
           body: |
-            **IPFS CID:** `${{ needs.push-to-ipfs.outputs.cid }}`
+            **IPFS CID:** `${{ needs.push-to-ipfs.outputs.cid_v0 }}`
+
+            **Preview:** https://${{ needs.push-to-ipfs.outputs.cid_v1 }}.ipfs.aleph.sh
           draft: false
           prerelease: false
