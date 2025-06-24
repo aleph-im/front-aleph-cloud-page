@@ -39,6 +39,6 @@ jobs:
           path: out
 
       - name: Push to IPFS
-        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.0
+        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.1
         with:
           upload-dir: out
