@@ -80,7 +80,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: nextjs-export
-          path: out
 
       - name: Push to IPFS
         id: push_to_ipfs
