@@ -14,6 +14,7 @@ import {
 } from '@aleph-sdk/client'
 import { AddInstance, Instance, InstanceManager } from './instance'
 import { CostManager, CostSummary } from './cost'
+import { ForwardedPortsManager } from './forwardedPorts'
 
 export type GpuInstanceCostProps = AddInstance
 export type GpuInstanceCost = CostSummary
@@ -35,6 +36,7 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
     protected fileManager: FileManager,
     protected nodeManager: NodeManager,
     protected costManager: CostManager,
+    protected forwardedPortsManager: ForwardedPortsManager,
     protected channel = defaultGpuInstanceChannel,
   ) {
     super(
@@ -46,6 +48,7 @@ export class GpuInstanceManager extends InstanceManager<GpuInstance> {
       fileManager,
       nodeManager,
       costManager,
+      forwardedPortsManager,
       channel,
     )
   }

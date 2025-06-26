@@ -36,6 +36,7 @@ import { VolumeManager } from './volume'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
+import { ForwardedPortsManager } from './forwardedPorts'
 import {
   instanceSchema,
   instanceStreamSchema,
@@ -121,6 +122,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     protected fileManager: FileManager,
     protected nodeManager: NodeManager,
     protected costManager: CostManager,
+    protected forwardedPortsManager: ForwardedPortsManager,
     protected channel = defaultInstanceChannel,
   ) {
     super(account, volumeManager, domainManager, nodeManager, sdkClient)
@@ -343,6 +345,13 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
       await this.delStreams(instance, account)
       await this.delInstance(instance)
+
+      // Remove forwarded ports for the deleted instance
+      try {
+        await this.forwardedPortsManager.delByEntityHash(instance.id)
+      } catch (err) {
+        console.error('Failed to remove forwarded ports for instance:', err)
+      }
     } catch (err) {
       throw Err.RequestFailed(err)
     }
@@ -397,6 +406,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
         }
 
         steps.push('instanceDel')
+        steps.push('portForwardingDel')
       }),
     )
 
@@ -426,6 +436,14 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
         yield
         await this.delInstance(instance)
+
+        // Remove forwarded ports for the deleted instance
+        yield
+        try {
+          await this.forwardedPortsManager.delByEntityHash(instance.id)
+        } catch (err) {
+          console.error('Failed to remove forwarded ports for instance:', err)
+        }
       }
     } catch (err) {
       throw Err.RequestFailed(err)

@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Instance } from '@/domain/instance'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
+import { InstanceManager } from '@/domain/instance'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
@@ -40,6 +41,7 @@ type SidePanelContent = {
 export type ManageInstance = UseExecutableActionsReturn & {
   // Basic data
   instance?: Instance
+  manager?: InstanceManager
   name: string
   labelVariant: LabelProps['variant']
 
@@ -289,6 +291,7 @@ export function useManageInstance(): ManageInstance {
   return {
     ...executableActions,
     instance,
+    manager: instanceManager,
     mappedKeys,
     customDomains,
     handleCustomDomainClick,

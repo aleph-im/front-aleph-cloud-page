@@ -105,6 +105,20 @@ export type ExecutableStatus = {
   ipv6: string
   ipv6Parsed: string
   node: CRN
+  // fields added from v2 request
+  hostIpv4?: string
+  ipv4Parsed?: string
+  mappedPorts?: Record<string, { host: number; tcp: boolean; udp: boolean }>
+  status?: {
+    running: boolean
+    definedAt?: string
+    preparingAt?: string
+    preparedAt?: string
+    startingAt?: string
+    startedAt?: string
+    stoppingAt?: string
+    stoppedAt?: string
+  }
 }
 
 // -----------------------------------------
@@ -116,7 +130,12 @@ export type SignedPublicKeyHeader = {
   signature: string
 }
 
-export type ExecutableOperations = 'reboot' | 'expire' | 'erase' | 'stop'
+export type ExecutableOperations =
+  | 'reboot'
+  | 'expire'
+  | 'erase'
+  | 'stop'
+  | 'update'
 
 export type KeyPair = {
   publicKey: JsonWebKey
@@ -192,24 +211,66 @@ export abstract class ExecutableManager<T extends Executable> {
 
     const nodeUrl = NodeManager.normalizeUrl(address)
 
-    const query = await fetch(`${nodeUrl}/about/executions/list`)
-    const response = await query.json()
+    const { version, json: response } = await this.fetchExecutions(nodeUrl)
 
     const hash = executable.id
-    const status = response[hash]
-    if (!status) return
 
-    const networking = status['networking']
+    const executionStatus = (response as any)[hash]
+    if (!executionStatus) return
+
+    const networking = executionStatus['networking']
     if (!networking) return
 
-    const { ipv4, ipv6 } = networking
+    if (version === 'v1') {
+      const { ipv4, ipv6 } = networking
 
-    return {
-      hash,
-      ipv4,
-      ipv6,
-      ipv6Parsed: this.formatVMIPv6Address(ipv6),
-      node,
+      return {
+        hash,
+        ipv4,
+        ipv6,
+        ipv6Parsed: this.formatVMIPv6Address(ipv6),
+        node,
+      }
+    } else if (version === 'v2') {
+      const {
+        host_ipv4: hostIpv4,
+        ipv4_network: ipv4,
+        ipv4_ip: ipv4Parsed,
+        ipv6_network: ipv6,
+        ipv6_ip: ipv6Parsed,
+        mapped_ports: mappedPorts = {},
+      } = networking
+
+      const {
+        defined_at: definedAt,
+        preparing_at: preparingAt,
+        prepared_at: preparedAt,
+        starting_at: startingAt,
+        started_at: startedAt,
+        stopping_at: stoppingAt,
+        stopped_at: stoppedAt,
+      } = executionStatus['status'] || {}
+
+      return {
+        node,
+        hash,
+        hostIpv4,
+        ipv4,
+        ipv4Parsed,
+        ipv6,
+        ipv6Parsed,
+        mappedPorts,
+        status: {
+          running: executionStatus['running'] || false,
+          definedAt,
+          preparingAt,
+          preparedAt,
+          startingAt,
+          startedAt,
+          stoppingAt,
+          stoppedAt,
+        },
+      }
     }
   }
 
@@ -475,29 +536,36 @@ export abstract class ExecutableManager<T extends Executable> {
     hostname,
     operation,
     vmId,
+    requireSignature = true,
   }: {
     operation: ExecutableOperations
     vmId: string
     hostname: string
+    requireSignature?: boolean
   }): Promise<Response> {
-    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
-
     const url = new URL(hostname + '/control/machine/' + vmId + '/' + operation)
-    const { hostname: domain, pathname: path } = url
 
-    const signedOperationToken = await this.getAuthOperationToken(
-      keyPair.privateKey,
-      domain,
-      path,
-    )
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+
+    if (requireSignature) {
+      const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
+      const { hostname: domain, pathname: path } = url
+
+      const signedOperationToken = await this.getAuthOperationToken(
+        keyPair.privateKey,
+        domain,
+        path,
+      )
+
+      headers['X-SignedOperation'] = JSON.stringify(signedOperationToken)
+      headers['X-SignedPubKey'] = JSON.stringify(pubKeyHeader)
+    }
 
     return fetch(url.toString(), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-SignedOperation': JSON.stringify(signedOperationToken),
-        'X-SignedPubKey': JSON.stringify(pubKeyHeader),
-      },
+      headers,
       mode: 'cors',
     })
   }
@@ -1079,5 +1147,27 @@ export abstract class ExecutableManager<T extends Executable> {
     cost: number,
   ) {
     return paymentMethod === PaymentMethod.Hold ? cost : cost * 3600
+  }
+
+  protected async fetchExecutions(
+    nodeUrl: string,
+    init?: RequestInit,
+  ): Promise<{ version: 'v1' | 'v2'; json: unknown }> {
+    try {
+      const res = await fetch(`${nodeUrl}/v2/about/executions/list`, init)
+
+      if (res.ok) return { version: 'v2', json: await res.json() }
+
+      if (res.status === 404 || res.status === 405)
+        throw new Error('Execution list v2 Not found')
+
+      throw new Error(`Execution list v2 failed: ${res.status}`)
+    } catch {
+      const res = await fetch(`${nodeUrl}/about/executions/list`, init)
+
+      if (!res.ok) throw new Error(`Execution list v1 failed: ${res.status}`)
+
+      return { version: 'v1', json: await res.json() }
+    }
   }
 }
