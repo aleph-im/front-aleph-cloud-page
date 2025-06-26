@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export function useSPARedirect(fallbackRedirect?: string): void {
   const router = useRouter()
@@ -10,7 +11,10 @@ export function useSPARedirect(fallbackRedirect?: string): void {
         try {
           await router.replace(router.asPath, router.asPath)
         } catch (e) {
-          await router.replace('/404', '/404')
+          await router.replace(
+            NAVIGATION_URLS.error.notFound,
+            NAVIGATION_URLS.error.notFound,
+          )
         }
         return
       }

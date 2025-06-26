@@ -14,7 +14,11 @@ import { CenteredContainer } from '@/components/common/CenteredContainer'
 import ExternalLinkButton from '@/components/common/ExternalLinkButton'
 import { NoisyContainer } from '@aleph-front/core'
 import Form from '@/components/form/Form'
-import { EntityDomainTypeName, EntityDomainType } from '@/helpers/constants'
+import {
+  EntityDomainTypeName,
+  EntityDomainType,
+  NAVIGATION_URLS,
+} from '@/helpers/constants'
 import { useNewDomainPage } from './hook'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import BackButtonSection from '@/components/common/BackButtonSection'
@@ -81,7 +85,7 @@ export default function NewDomain() {
               />
             </NoisyContainer>
             <div tw="mt-6 text-right">
-              <ExternalLinkButton href="https://docs.aleph.im/computing/custom_domain/setup/">
+              <ExternalLinkButton href={NAVIGATION_URLS.docs.customDomains}>
                 Learn more
               </ExternalLinkButton>
             </div>
@@ -144,7 +148,7 @@ export default function NewDomain() {
                         kind="functional"
                         size="md"
                         variant="warning"
-                        href="/console/hosting/website/new"
+                        href={NAVIGATION_URLS.console.web3Hosting.website.new}
                       >
                         Create your first website
                       </ButtonLink>

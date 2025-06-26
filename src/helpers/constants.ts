@@ -21,8 +21,7 @@ export const senderAddress = '0x3a5CC6aBd06B601f4654035d125F9DD2FC992C25'
 export const erc20Address = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
 export const splTokenAddress = '3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x'
 
-export const crnListProgramUrl =
-  'https://coco-1.crn.aleph.sh/vm/bec08b08bb9f9685880f3aeb9c1533951ad56abef2a39c97f5a93683bdaa5e30/crns.json'
+export const crnListProgramUrl = 'https://crns-list.aleph.sh/crns.json'
 
 export const websiteUrl = 'https://www.aleph.cloud'
 
@@ -195,3 +194,89 @@ export enum WebsiteFrameworkId {
 }
 
 export const EXTRA_WEI = 3600 / 10 ** 18
+
+export const NAVIGATION_URLS = {
+  console: {
+    home: '/console',
+    settings: {
+      home: '/console/settings',
+      ssh: {
+        home: '/console/settings/ssh',
+        new: '/console/settings/ssh/new',
+      },
+      domain: {
+        home: '/console/settings/domain',
+        new: '/console/settings/domain/new',
+      },
+    },
+    web3Hosting: {
+      home: '/console/hosting',
+      website: {
+        home: '/console/hosting/website',
+        new: '/console/hosting/website/new',
+      },
+    },
+    computing: {
+      home: '/console/computing',
+      functions: {
+        home: '/console/computing/function',
+        new: '/console/computing/function/new',
+      },
+      instances: {
+        home: '/console/computing/instance',
+        new: '/console/computing/instance/new',
+      },
+      gpus: {
+        home: '/console/computing/gpu-instance',
+        new: '/console/computing/gpu-instance/new',
+      },
+      confidentials: {
+        home: '/console/computing/confidential',
+        new: '/console/computing/confidential/new',
+      },
+    },
+    storage: {
+      home: '/console/storage',
+      volumes: {
+        home: '/console/storage/volume',
+        new: '/console/storage/volume/new',
+      },
+    },
+  },
+  account: {
+    home: '/account',
+    earn: {
+      home: '/account/earn',
+      staking: '/account/earn/staking',
+      ccn: {
+        home: '/account/earn/ccn',
+        new: '/account/earn/ccn/new',
+      },
+      crn: {
+        home: '/account/earn/crn',
+        new: '/account/earn/crn/new',
+      },
+    },
+  },
+  error: {
+    notFound: '/404',
+  },
+  explorer: { home: 'https://explorer.aleph.im' },
+  swap: { home: 'https://swap.aleph.cloud' },
+  docs: {
+    home: 'https://docs.aleph.cloud',
+    customDomains:
+      'https://docs.aleph.cloud/devhub/deploying-and-hosting/custom-domains/setup.html',
+    functions:
+      'https://docs.aleph.cloud/devhub/compute-resources/functions/webconsole/',
+    confidentials:
+      'https://docs.aleph.cloud/devhub/compute-resources/confidential-instances/01-confidential-instance-introduction.html',
+    immutableVolumes:
+      'https://docs.aleph.cloud/devhub/building-applications/data-storage/types-of-storage/immutable-volume.html',
+  },
+  external: {
+    vrf: 'https://docs.aleph.cloud/devhub/tools/vrf/',
+    indexingFramework:
+      'https://docs.aleph.cloud/devhub/building-applications/blockchain-data/indexing/',
+  },
+}

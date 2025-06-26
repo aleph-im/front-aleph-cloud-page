@@ -22,6 +22,7 @@ import {
   UseComputeResourceNodesPageProps,
 } from './hook'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const ComputeResourceNodesPage = (
   props: UseComputeResourceNodesPageProps,
@@ -56,7 +57,7 @@ export const ComputeResourceNodesPage = (
   const { render } = useLazyRender()
 
   const CreateNode = (
-    <Link href="/account/earn/crn/new" passHref legacyBehavior>
+    <Link href={NAVIGATION_URLS.account.earn.crn.new} passHref legacyBehavior>
       <Button
         color="main0"
         kind="gradient"
@@ -121,7 +122,7 @@ export const ComputeResourceNodesPage = (
                     Core Channel Node (CCN). A CCN operator can vouch for up to
                     five CRNs, ensuring fair and balanced participation.
                   </p>
-                  <ExternalLinkButton href="https://docs.aleph.im/nodes/compute/">
+                  <ExternalLinkButton href="https://docs.aleph.cloud/nodes/compute/installation/ubuntu-24.04/">
                     Node Setup Guide
                   </ExternalLinkButton>
                 </div>

@@ -8,6 +8,7 @@ import { useRequestConfidentialVolumes } from '@/hooks/common/useRequestEntity/u
 import { useRequestConfidentialDomains } from '@/hooks/common/useRequestEntity/useRequestConfidentialDomains'
 import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
 import { useRouter } from 'next/router'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export type UseConfidentialDashboardPageReturn = {
   authorized: boolean
@@ -58,7 +59,7 @@ export function useConfidentialDashboardPage(): UseConfidentialDashboardPageRetu
   }, [domains, confidentials, volumes])
 
   useEffect(() => {
-    if (!authorized) push('/')
+    if (!authorized) push(NAVIGATION_URLS.console.home)
   }, [authorized, push])
 
   return {

@@ -80,7 +80,7 @@ export const NewCoreChannelNodePage = () => {
                   placeholder="/ip4/{ip-address}/tcp/4025/p2p/SmlS3hb..."
                 />
                 <div tw="mt-2">
-                  <ExternalLinkButton href="https://docs.aleph.im/nodes/core/">
+                  <ExternalLinkButton href="https://docs.aleph.cloud/nodes/core/installation/">
                     How to create a node
                   </ExternalLinkButton>
                 </div>

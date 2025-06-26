@@ -20,6 +20,7 @@ import { useLazyRender } from '@/hooks/common/useLazyRender'
 import AvailableCRNSpotChart from '@/components/common/AvailableCRNSpotChart'
 import { StakeManager } from '@/domain/stake'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
   const {
@@ -46,7 +47,7 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
   const { render } = useLazyRender()
 
   const CreateNode = (
-    <Link href="/account/earn/ccn/new" passHref legacyBehavior>
+    <Link href={NAVIGATION_URLS.account.earn.ccn.new} passHref legacyBehavior>
       <Button
         color="main0"
         kind="gradient"
@@ -112,7 +113,7 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
                     more information on how to set up a node and detailed
                     technical and token requirements, please visit our
                   </p>
-                  <ExternalLinkButton href="https://docs.aleph.im/nodes/core/">
+                  <ExternalLinkButton href="https://docs.aleph.cloud/nodes/core/installation/">
                     Node Setup Guide
                   </ExternalLinkButton>
                 </div>

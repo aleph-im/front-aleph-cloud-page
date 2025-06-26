@@ -15,9 +15,51 @@ on:
           - patch
 
 jobs:
+  build:
+    name: Build & export static site
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build and Export
+        uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
+        with:
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Upload export as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+          if-no-files-found: error
+          retention-days: 1
+
+  push-to-ipfs:
+    name: Push site to IPFS
+    needs: build
+    runs-on: ubuntu-22.04
+    outputs:
+      cid_v0: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
+      cid_v1: ${{ steps.push_to_ipfs.outputs.cid_v1 }}
+    steps:
+      - name: Download export artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+
+      - name: Push to IPFS
+        id: push_to_ipfs
+        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.1
+        with:
+          upload-dir: out
+
   bump-version:
+    name: Bump version
+    needs: push-to-ipfs
     runs-on: ubuntu-latest
-    environment: release
+    environment: production
     outputs:
       new_tag: ${{ steps.bump_version.outputs.new_tag }}
     steps:
@@ -49,27 +91,8 @@ jobs:
           git push origin HEAD:main
           git push origin --tags
 
-  push-to-ipfs:
-    needs: bump-version
-    runs-on: ubuntu-22.04
-    outputs:
-      cid: ${{ steps.push_to_ipfs.outputs.cid }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Build and Export
-        uses: ./.github/actions/build
-        with:
-          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
-
-      - name: Push to IPFS
-        id: push_to_ipfs
-        uses: ./.github/actions/push_to_ipfs
-        with:
-          upload-dir: out
-
   create-release:
+    name: Create GitHub Release
     needs: [bump-version, push-to-ipfs]
     runs-on: ubuntu-latest
     steps:
@@ -81,6 +104,8 @@ jobs:
           tag_name: ${{ needs.bump-version.outputs.new_tag }}
           release_name: Release ${{ needs.bump-version.outputs.new_tag }}
           body: |
-            **IPFS CID:** `${{ needs.push-to-ipfs.outputs.cid }}`
+            **IPFS CID:** `${{ needs.push-to-ipfs.outputs.cid_v0 }}`
+
+            **Preview:** https://${{ needs.push-to-ipfs.outputs.cid_v1 }}.ipfs.aleph.sh
           draft: false
           prerelease: false

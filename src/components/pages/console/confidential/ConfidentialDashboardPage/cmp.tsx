@@ -6,6 +6,7 @@ import DomainsTabContent from '../../domain/DomainsTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 import { useConfidentialDashboardPage } from './hook'
 import ConfidentialsTabContent from '../ConfidentialsTabContent'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export default function ConfidentialDashboardPage() {
   const { authorized, tabs, tabId, setTabId, confidentials, volumes, domains } =
@@ -35,7 +36,7 @@ export default function ConfidentialDashboardPage() {
               buttonUrl="/console/computing/confidential/new"
               buttonText="Create Confidential"
               externalLinkText="Developer docs"
-              externalLinkUrl="https://docs.aleph.im/computing/confidential/"
+              externalLinkUrl={NAVIGATION_URLS.docs.confidentials}
             />
           </>
         ) : tabId === 'volume' ? (

@@ -7,6 +7,7 @@ import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 import SSHKeysTabContent from '../sshKey/SSHKeysTabContent'
 import DomainsTabContent from '../domain/DomainsTabContent'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export default function SettingsDashboardPage() {
   const { tabs, tabId, setTabId, domains, sshKeys } = useSettingsDashboardPage()
@@ -35,7 +36,7 @@ export default function SettingsDashboardPage() {
               imageSrc="/img/dashboard/ssh.svg"
               imageAlt="SSH Key illustration"
               withButton={sshKeys?.length === 0}
-              buttonUrl="/console/settings/ssh/new"
+              buttonUrl={NAVIGATION_URLS.console.settings.ssh.new}
               buttonText="Add SSH key"
             />
           </>
@@ -53,9 +54,9 @@ export default function SettingsDashboardPage() {
               imageSrc="/img/dashboard/domain.svg"
               imageAlt="Domain illustration"
               withButton={domains?.length === 0}
-              buttonUrl="/console/settings/domain/new"
+              buttonUrl={NAVIGATION_URLS.console.settings.domain.new}
               buttonText="Create custom domain"
-              externalLinkUrl="https://docs.aleph.im/computing/custom_domain/setup/"
+              externalLinkUrl={NAVIGATION_URLS.docs.customDomains}
             />
           </>
         ) : (

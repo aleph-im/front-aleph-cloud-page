@@ -8,17 +8,52 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  push-to-ipfs:
+  build:
+    name: Build & export static site
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Build and Export
-        uses: ./.github/actions/build
+        uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
         with:
           fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Upload export as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+          if-no-files-found: error
+          retention-days: 1
+
+  push-to-ipfs:
+    name: Push site to IPFS
+    needs: build
+    runs-on: ubuntu-22.04
+    outputs:
+      cid_v0: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
+      cid_v1: ${{ steps.push_to_ipfs.outputs.cid_v1 }}
+    steps:
+      - name: Download export artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+
       - name: Push to IPFS
-        uses: ./.github/actions/push_to_ipfs
+        id: push_to_ipfs
+        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.1
         with:
           upload-dir: out
+
+  preview:
+    name: Build preview url
+    needs: push-to-ipfs
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Print preview url
+        shell: bash
+        run: |
+          echo "Preview: https://${{ needs.push-to-ipfs.outputs.cid_v1 }}.ipfs.aleph.sh" >> $GITHUB_STEP_SUMMARY

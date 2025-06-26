@@ -6,6 +6,7 @@ import WebsitesTabContent from '../WebsitesTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 import { useWebsiteDashboardPage } from '@/components/pages/console/website/WebsiteDashboardPage/hook'
 import DomainsTabContent from '../../domain/DomainsTabContent'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export default function SettingsDashboardPage() {
   const { tabs, tabId, setTabId, websites, domains } = useWebsiteDashboardPage()
@@ -34,7 +35,7 @@ export default function SettingsDashboardPage() {
               title="Host your Website!"
               description="Build and deploy your website effortlessly using our web3 hosting solutions. Support for static pages, Next.js, React, and Vue.js ensures you have the flexibility to create the perfect site."
               withButton={websites?.length === 0}
-              buttonUrl="/console/hosting/website/new"
+              buttonUrl={NAVIGATION_URLS.console.web3Hosting.website.new}
               buttonText="Deploy your website"
             />
           </>

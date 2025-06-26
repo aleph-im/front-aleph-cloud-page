@@ -7,7 +7,11 @@ import VolumesTabContent from '../VolumesTabContent'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 import EntitySummaryCard from '@/components/common/EntitySummaryCard'
-import { EntityType, EntityTypeObject } from '@/helpers/constants'
+import {
+  EntityType,
+  EntityTypeObject,
+  NAVIGATION_URLS,
+} from '@/helpers/constants'
 
 export default function VolumeDashboardPage() {
   const {
@@ -84,9 +88,9 @@ export default function VolumeDashboardPage() {
               title="Volumes"
               description="Create immutable volumes for secure and dependable data storage. Ideal for dependencies and other critical data, ensuring consistency and reliability across your applications"
               withButton={volumes.length === 0}
-              buttonUrl="/console/storage/volume/new"
+              buttonUrl={NAVIGATION_URLS.console.storage.volumes.new}
               buttonText="Create new volume"
-              externalLinkUrl="https://docs.aleph.im/computing/volumes/immutable/"
+              externalLinkUrl={NAVIGATION_URLS.docs.immutableVolumes}
             />
           </>
         ) : (

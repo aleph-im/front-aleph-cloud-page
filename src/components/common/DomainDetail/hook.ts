@@ -18,6 +18,7 @@ import { Account } from '@aleph-sdk/account'
 import { Confidential } from '@/domain/confidential'
 import { useHashToEntity } from '@/hooks/common/useHashToEntity'
 import { useDomainStatus } from '@/hooks/common/useDomainStatus'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export type UseDomainDetailReturn = {
   domain?: Domain
@@ -83,7 +84,7 @@ export function useDomainDetail({
 
       dispatch(new EntityDelAction({ name: 'domain', keys: [domain.id] }))
 
-      await router.replace('/console')
+      await router.replace(NAVIGATION_URLS.console.home)
     } catch (e) {
       console.error(e)
 
@@ -106,7 +107,9 @@ export function useDomainDetail({
   const handleUpdate = useCallback(() => {
     if (!domain) throw Err.DomainNotFound
 
-    router.push(`/console/settings/domain/new/?name=${domain.id}`)
+    router.push(
+      `${NAVIGATION_URLS.console.settings.domain.new}/?name=${domain.id}`,
+    )
   }, [router, domain])
 
   const handleRetry = useCallback(async () => {

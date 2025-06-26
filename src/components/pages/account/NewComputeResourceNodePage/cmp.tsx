@@ -80,7 +80,7 @@ export const NewComputeResourceNodePage = () => {
                   placeholder="https://my-domain.tld/"
                 />
                 <div tw="mt-2">
-                  <ExternalLinkButton href="https://docs.aleph.im/nodes/compute/">
+                  <ExternalLinkButton href="https://docs.aleph.cloud/nodes/compute/installation/ubuntu-24.04/">
                     How to install your node and retrieve your address
                   </ExternalLinkButton>
                 </div>

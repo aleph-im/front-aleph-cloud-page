@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { useFilterUserStakeNodes } from './node/useFilterUserStakeNodes'
 import { useFilterUserNodes } from './node/useFilterUserNodes'
 import { useFilterNodeIssues } from './node/useFilterNodeIssues'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 export type UseRoutesReturn = {
   routes: Route[]
 }
@@ -47,56 +48,56 @@ export function useRoutes(): UseRoutesReturn {
         children: [
           {
             name: 'Solutions',
-            href: '/console',
+            href: NAVIGATION_URLS.console.home,
             children: [
               {
                 name: 'Dashboard',
-                href: '/console',
+                href: NAVIGATION_URLS.console.home,
                 exact: true,
                 icon: 'dashboard',
               },
               {
                 name: 'Settings',
-                href: '/console/settings',
+                href: NAVIGATION_URLS.console.settings.home,
                 exact: true,
                 icon: 'settings',
               },
               {
                 name: 'Web3 Hosting',
-                href: '/console/hosting',
+                href: NAVIGATION_URLS.console.web3Hosting.home,
                 icon: 'web3HostingBox',
                 children: [
                   {
                     name: 'Manage your website',
-                    href: '/console/hosting/website',
+                    href: NAVIGATION_URLS.console.web3Hosting.website.home,
                     icon: 'manageWebsite',
                   },
                 ],
               },
               {
                 name: 'Computing',
-                href: '/console/computing',
+                href: NAVIGATION_URLS.console.computing.home,
                 icon: 'computeSolutions',
                 children: [
                   {
                     name: 'Functions',
-                    href: '/console/computing/function',
+                    href: NAVIGATION_URLS.console.computing.functions.home,
                     icon: 'functions',
                   },
                   {
                     name: 'Instances',
-                    href: '/console/computing/instance',
+                    href: NAVIGATION_URLS.console.computing.instances.home,
                     icon: 'instance',
                   },
                   {
                     name: 'GPU',
                     icon: 'gpu',
                     label: '(BETA)',
-                    href: '/console/computing/gpu-instance',
+                    href: NAVIGATION_URLS.console.computing.gpus.home,
                   },
                   {
                     name: 'Confidentials',
-                    href: '/console/computing/confidential',
+                    href: NAVIGATION_URLS.console.computing.confidentials.home,
                     label: '(BETA)',
                     icon: 'confidential',
                   },
@@ -104,12 +105,12 @@ export function useRoutes(): UseRoutesReturn {
               },
               {
                 name: 'Storage',
-                href: '/console/storage',
+                href: NAVIGATION_URLS.console.storage.home,
                 icon: 'storageSolutions',
                 children: [
                   {
                     name: 'Volumes',
-                    href: '/console/storage',
+                    href: NAVIGATION_URLS.console.storage.home,
                     icon: 'storageSolutions',
                   },
                 ],
@@ -121,7 +122,7 @@ export function useRoutes(): UseRoutesReturn {
                 children: [
                   {
                     name: 'VRF',
-                    href: 'https://medium.com/aleph-im/aleph-im-verifiable-random-function-vrf-b03544a7e904',
+                    href: NAVIGATION_URLS.external.vrf,
                     external: true,
                     target: '_blank',
                     icon: 'arrow-up-right-from-square',
@@ -129,7 +130,7 @@ export function useRoutes(): UseRoutesReturn {
                   },
                   {
                     name: 'Indexing Framework',
-                    href: 'https://docs.aleph.im/tools/indexer/',
+                    href: NAVIGATION_URLS.external.indexingFramework,
                     external: true,
                     target: '_blank',
                     icon: 'arrow-up-right-from-square',
@@ -145,28 +146,28 @@ export function useRoutes(): UseRoutesReturn {
       {
         name: 'Account',
         icon: 'profile',
-        href: '/account',
+        href: NAVIGATION_URLS.account.home,
         children: [
           {
             name: 'Earn',
-            href: '/account',
+            href: NAVIGATION_URLS.account.home,
             icon: 'earn',
             children: [
               {
                 name: 'Staking',
-                href: '/account/earn/staking',
+                href: NAVIGATION_URLS.account.earn.staking,
                 icon: 'earn',
                 flag: stakeNodesWarningFlag,
               },
               {
                 name: 'Core nodes',
-                href: '/account/earn/ccn',
+                href: NAVIGATION_URLS.account.earn.ccn.home,
                 icon: 'ccn',
                 flag: userCCNsWarningFlag,
               },
               {
                 name: 'Compute nodes',
-                href: '/account/earn/crn',
+                href: NAVIGATION_URLS.account.earn.crn.home,
                 icon: 'crn',
                 flag: userCRNsWarningFlag,
               },
@@ -178,14 +179,14 @@ export function useRoutes(): UseRoutesReturn {
       {
         name: 'Explorer',
         icon: 'explore',
-        href: 'https://explorer.aleph.cloud/',
+        href: NAVIGATION_URLS.explorer.home,
         target: '_blank',
         external: true,
       },
       {
         name: 'Swap',
         icon: 'swap',
-        href: 'https://swap.aleph.cloud/',
+        href: NAVIGATION_URLS.swap.home,
         target: '_blank',
         external: true,
       },
