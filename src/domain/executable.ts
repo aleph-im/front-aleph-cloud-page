@@ -1154,11 +1154,7 @@ export abstract class ExecutableManager<T extends Executable> {
     init?: RequestInit,
   ): Promise<{ version: 'v1' | 'v2'; json: unknown }> {
     try {
-      // const res = await fetch(`${nodeUrl}/v2/about/executions/list`, init)
-      const res = await fetch(
-        `https://ovh.staging.aleph.sh/v2/about/executions/list`,
-        init,
-      )
+      const res = await fetch(`${nodeUrl}/v2/about/executions/list`, init)
 
       if (res.ok) return { version: 'v2', json: await res.json() }
 
@@ -1174,21 +1170,4 @@ export abstract class ExecutableManager<T extends Executable> {
       return { version: 'v1', json: await res.json() }
     }
   }
-
-  // protected normalizeExecutionsResponse(
-  //   version: 'v1' | 'v2',
-  //   raw: unknown,
-  // ): Record<string, NormalizedStatus> {
-  //   if (version === 'v1') {
-  //     const v1 = raw as V1ExecutionsMap
-  //     return Object.fromEntries(
-  //       Object.entries(v1).map(([id, data]) => [id, { id, ...data }]),
-  //     )
-  //   } else {
-  //     const v2 = raw as V2ExecutionsList
-  //     return Object.fromEntries(
-  //       v2.executions.map((it) => [it.id, { id: it.id, ...it }]),
-  //     )
-  //   }
-  // }
 }

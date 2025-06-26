@@ -60,8 +60,7 @@ function useCRNNotification(
       if (!nodeUrl) return
 
       await executableManager.sendPostOperation({
-        hostname: 'https://ovh.staging.aleph.sh',
-        // hostname: nodeUrl,
+        hostname: nodeUrl,
         operation: 'update',
         vmId: entityHash,
         requireSignature: false,

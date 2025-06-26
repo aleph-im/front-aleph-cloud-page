@@ -9,8 +9,8 @@ export const channel = 'FOUNDATION'
 export const tags = ['mainnet']
 export const postType = 'corechan-operation'
 
-export const apiServer = 'http://51.159.223.120:4024'
-export const wsServer = 'ws://51.159.223.120:4024'
+export const apiServer = 'https://api.aleph.im'
+export const wsServer = 'wss://api.aleph.im'
 export const mbPerAleph = 3
 
 export const communityWalletAddress =
