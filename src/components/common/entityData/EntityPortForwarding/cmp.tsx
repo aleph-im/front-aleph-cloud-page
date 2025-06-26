@@ -11,6 +11,7 @@ import { EntityPortForwardingProps } from './types'
 import InfoTitle from '../InfoTitle'
 import { useEntityPortForwarding } from './hook'
 import AddPortForm from './AddPortForm'
+import InfoTooltipButton from '../../InfoTooltipButton'
 
 export const EntityPortForwarding = ({
   entityHash,
@@ -32,10 +33,41 @@ export const EntityPortForwarding = ({
     executableManager,
   })
 
+  const tooltipContent = (
+    <>
+      <p className="tp-body3 fs-18 text-base2" tw="mb-4">
+        IPv4 Port Forwarding Details
+      </p>
+      <p className="tp-body2 fs-14">Randomized Source Ports:</p>
+      <p className="tp-body1 fs-14">
+        Source (external) ports are automatically assigned and may change
+        whenever the instance or function is reallocated. Always refer to the
+        instance detail page to verify current mappings.
+      </p>
+      <p className="tp-body2 fs-14" tw="mt-4">
+        Port Limits:
+      </p>
+      <p className="tp-body1 fs-14">
+        You can specify up to 20 internal ports per instance or function. Ensure
+        you enter ports relevant to your service to maintain effective network
+        security and performance.
+      </p>
+    </>
+  )
+
   return (
     <>
-      <div className="tp-h7 fs-24" tw="uppercase mb-2">
-        IPV4 PORT FORWARDING
+      <div className="tp-h7 fs-24" tw="flex items-center uppercase mb-2">
+        <InfoTooltipButton
+          plain
+          my="top-left"
+          at="top-right"
+          vAlign="bottom"
+          iconSize="0.9em"
+          tooltipContent={tooltipContent}
+        >
+          IPV4 PORT FORWARDING
+        </InfoTooltipButton>
       </div>
       <NoisyContainer>
         <div tw="flex flex-col gap-y-4">
