@@ -12,8 +12,10 @@ export const EntityConnectionMethods = ({
 }: EntityConnectionMethodsProps) => {
   const {
     isLoading,
+    formattedIPv4,
     formattedIPv6,
     formattedSSHCommand,
+    handleCopyIpv4,
     handleCopyIpv6,
     handleCopyCommand,
   } = useEntityConnectionMethods({ executableStatus })
@@ -37,6 +39,21 @@ export const EntityConnectionMethods = ({
               )}
             </div>
           </div>
+          {(isLoading || formattedIPv4 !== '') && (
+            <div>
+              <InfoTitle>IPV4</InfoTitle>
+              <div>
+                {!isLoading ? (
+                  <IconText iconName="copy" onClick={handleCopyIpv4}>
+                    <Text>{formattedIPv4}</Text>
+                  </IconText>
+                ) : (
+                  <Skeleton width="9rem" />
+                )}
+              </div>
+            </div>
+          )}
+
           <div>
             <InfoTitle>IPV6</InfoTitle>
             <div>
