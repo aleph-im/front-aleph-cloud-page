@@ -9,7 +9,9 @@ export type EntityConnectionMethodsProps = {
 export type UseEntityConnectionMethodsReturn = {
   isLoading: boolean
   formattedIPv6: string
+  formattedIPv4: string
   formattedSSHCommand: string
   handleCopyIpv6: () => void
+  handleCopyIpv4: () => void
   handleCopyCommand: () => void
 }
