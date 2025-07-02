@@ -193,10 +193,10 @@ export function useExecutableActions({
 
   const isAllocated = !!status?.ipv6Parsed
 
-  const stopDisabled = !isPAYG || !isAllocated || !crn
-  const startDisabled = !isPAYG || isAllocated || !crn
-  const rebootDisabled = !isAllocated || !crn
-  const deleteDisabled = !executable
+  const stopDisabled = false
+  const startDisabled = false
+  const rebootDisabled = false
+  const deleteDisabled = false
 
   const handleStop = useCallback(
     () => handleSendOperation('stop'),
