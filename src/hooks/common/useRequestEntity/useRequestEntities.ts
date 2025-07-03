@@ -19,7 +19,9 @@ export type UseRequestEntitiesReturn<Entity> = {
   entities?: Entity[]
 }
 
-export function useRequestEntities<Entity extends ConfirmableEntity>({
+export function useRequestEntities<
+  Entity extends ConfirmableEntity & { id: string },
+>({
   name,
   manager,
   ids,
@@ -34,6 +36,36 @@ export function useRequestEntities<Entity extends ConfirmableEntity>({
     name,
     doRequest: async () => {
       if (!manager) return []
+
+      // Check if data already exists in state
+      const currentState = state[name] as { entities?: Entity[] }
+      console.log(name, 'currentState', currentState)
+
+      if (currentState?.entities && currentState.entities.length > 0) {
+        console.log(name, 'entities present')
+        // If requesting specific IDs, check if they exist in current state
+        if (ids) {
+          console.log(name, 'checking ids')
+
+          const requestedIds = typeof ids === 'string' ? [ids] : ids
+          const existingIds = currentState.entities.map((entity) => entity.id)
+          const allExist = requestedIds.every((id) => existingIds.includes(id))
+
+          if (allExist) {
+            console.log(name, 'all ids exist')
+
+            // Return filtered entities if all requested IDs exist
+            return currentState.entities.filter((entity) =>
+              requestedIds.includes(entity.id),
+            )
+          }
+        } else {
+          console.log(name, 'return entities')
+
+          // If no specific IDs requested, return existing entities
+          return currentState.entities
+        }
+      }
 
       if (typeof ids !== 'string') {
         if (ids && !ids.length) return []
