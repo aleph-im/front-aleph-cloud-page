@@ -109,3 +109,32 @@ jobs:
             **Preview:** https://${{ needs.push-to-ipfs.outputs.cid_v1 }}.ipfs.aleph.sh
           draft: false
           prerelease: false
+
+  deploy-app:
+    name: Deploy to production
+    needs: [push-to-ipfs, bump-version]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          pip install -r scripts/deploy/requirements.txt
+        shell: bash
+
+      - name: Deploy to Aleph
+        run: |
+          python scripts/deploy/client.py \
+            --cid ${{ needs.push-to-ipfs.outputs.cid_v0 }} \
+            --app ${{ env.DEPLOY_APP }} \
+            --url ${{ env.DEPLOY_URL }} \
+            --key ${{ secrets.DEPLOY_PRIVATE_KEY }}
