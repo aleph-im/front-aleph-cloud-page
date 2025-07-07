@@ -1,11 +1,6 @@
-import { ChangeEvent, memo, useCallback, useMemo, useState } from 'react'
+import { ChangeEvent, memo, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import {
-  AccountPicker,
-  RenderLinkProps,
-  Switch,
-  themes,
-} from '@aleph-front/core'
+import { AccountPicker, RenderLinkProps, Switch } from '@aleph-front/core'
 import { StyledHeader, StyledNavbarDesktop, StyledNavbarMobile } from './styles'
 import { useHeader } from '@/components/common/Header/hook'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
@@ -13,7 +8,6 @@ import { websiteUrl } from '@/helpers/constants'
 import { blockchains } from '@/domain/connect/base'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
-import { useAppState } from '@/contexts/appState'
 import { useConfig } from '@/hooks/common/config/useConfig'
 
 const CustomLink = (props: RenderLinkProps) => {

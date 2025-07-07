@@ -9,7 +9,7 @@ export function useConfig() {
     ({ theme }: { theme: ConfigState['theme'] }) => {
       dispatch(new ConfigSwitchThemeAction({ theme }))
     },
-    [config.theme, dispatch],
+    [dispatch],
   )
 
   return {

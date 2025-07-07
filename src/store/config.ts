@@ -2,7 +2,7 @@ import { themes } from '@aleph-front/core'
 import { StoreReducer } from './store'
 
 export type ConfigState = {
-  theme: keyof typeof themes
+  theme: keyof typeof themes | 'twentysixDark'
 }
 
 export const initialState: ConfigState = {
