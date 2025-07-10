@@ -6,7 +6,8 @@ import { useAppState } from '@/contexts/appState'
 import { useHashToEntity } from '../../../../../hooks/common/useHashToEntity'
 import { Volume } from '@/domain/volume'
 import { useRequestWebsites } from '@/hooks/common/useRequestEntity/useRequestWebsites'
-import { EntityDelAction, EntityAddAction } from '@/store/entity'
+import { EntityAddAction } from '@/store/entity'
+import { useDispatchDeleteEntityAction } from '@/hooks/common/useDeleteEntityAction'
 import {
   stepsCatalog,
   useCheckoutNotification,
@@ -42,6 +43,9 @@ export type ManageWebsite = {
 
 export function useManageWebsite(): ManageWebsite {
   const [, dispatch] = useAppState()
+  const { dispatchDeleteEntity } = useDispatchDeleteEntityAction({
+    entityName: 'website',
+  })
 
   const router = useRouter()
   const { hash } = router.query
@@ -75,7 +79,7 @@ export function useManageWebsite(): ManageWebsite {
         await next(nSteps)
       }
 
-      dispatch(new EntityDelAction({ name: 'website', keys: [website.id] }))
+      dispatchDeleteEntity(website.id)
 
       await router.replace('/console')
     } catch (e) {
@@ -94,7 +98,7 @@ export function useManageWebsite(): ManageWebsite {
     } finally {
       await stop()
     }
-  }, [dispatch, manager, website, next, router, stop, noti])
+  }, [dispatchDeleteEntity, manager, website, next, router, stop, noti])
 
   const handleUpdate = useCallback(
     async (cid?: string, version?: string) => {

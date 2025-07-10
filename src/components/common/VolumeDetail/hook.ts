@@ -2,9 +2,8 @@ import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import { Volume } from '@/domain/volume'
 import { useVolumeManager } from '@/hooks/common/useManager/useVolumeManager'
-import { useAppState } from '@/contexts/appState'
 import { useRequestVolumes } from '@/hooks/common/useRequestEntity/useRequestVolumes'
-import { EntityDelAction } from '@/store/entity'
+import { useDispatchDeleteEntityAction } from '@/hooks/common/useDeleteEntityAction'
 import Err from '@/helpers/errors'
 import {
   stepsCatalog,
@@ -29,8 +28,10 @@ export function useVolumeDetail({
   volumeId,
 }: UseVolumeDetailProps): UseVolumeDetailReturn {
   const theme = useTheme()
-  const [, dispatch] = useAppState()
   const router = useRouter()
+  const { dispatchDeleteEntity } = useDispatchDeleteEntityAction({
+    entityName: 'volume',
+  })
 
   const { entities } = useRequestVolumes({ ids: volumeId })
   const [volume] = entities || []
@@ -57,7 +58,7 @@ export function useVolumeDetail({
         await next(nSteps)
       }
 
-      dispatch(new EntityDelAction({ name: 'volume', keys: [volume.id] }))
+      dispatchDeleteEntity(volume.id)
 
       await router.replace('/console')
     } catch (e) {
@@ -76,7 +77,7 @@ export function useVolumeDetail({
     } finally {
       await stop()
     }
-  }, [manager, volume, dispatch, router, next, noti, stop])
+  }, [dispatchDeleteEntity, manager, volume, router, next, noti, stop])
 
   const handleDownload = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet

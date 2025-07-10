@@ -22,7 +22,8 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '../form/useCheckoutNotification'
-import { EntityDelAction } from '@/store/entity'
+import { EntityAddAction } from '@/store/entity'
+import { useDispatchDeleteEntityAction } from './useDeleteEntityAction'
 import { useRouter } from 'next/router'
 import { isAccountPAYGCompatible } from '@/domain/account'
 import { EVMAccount } from '@aleph-sdk/evm'
@@ -74,6 +75,9 @@ export function useExecutableActions({
 
   const [state, dispatch] = useAppState()
   const { account, blockchain } = state.connection
+  const { dispatchDeleteEntity } = useDispatchDeleteEntityAction({
+    entityName: executable?.type || '',
+  })
 
   // ----------------------------
 
@@ -246,21 +250,33 @@ export function useExecutableActions({
         ? await createFromEVMAccount(account as EVMAccount)
         : undefined
 
-      const iSteps = await manager.getDelSteps(executable)
-      const nSteps = iSteps.map((i) => stepsCatalog[i])
-      const steps = manager.delSteps(executable, superfluidAccount)
+      // Optimistic deletion: Remove entity from cache immediately
+      dispatchDeleteEntity(executable.id)
 
-      while (true) {
-        const { done } = await steps.next()
-        if (done) {
-          break
+      try {
+        const iSteps = await manager.getDelSteps(executable)
+        const nSteps = iSteps.map((i) => stepsCatalog[i])
+        const steps = manager.delSteps(executable, superfluidAccount)
+
+        while (true) {
+          const { done } = await steps.next()
+          if (done) {
+            break
+          }
+          await next(nSteps)
         }
-        await next(nSteps)
-      }
+      } catch (deletionError) {
+        // Rollback: Add entity back to cache if deletion fails
+        dispatch(
+          new EntityAddAction({
+            name: executable.type,
+            entities: [executable],
+          }),
+        )
 
-      dispatch(
-        new EntityDelAction({ name: executable.type, keys: [executable.id] }),
-      )
+        // Re-throw to trigger error handling
+        throw deletionError
+      }
 
       await router.replace(NAVIGATION_URLS.console.home)
     } catch (e) {
@@ -280,6 +296,7 @@ export function useExecutableActions({
       await stop()
     }
   }, [
+    dispatchDeleteEntity,
     dispatch,
     executable,
     manager,
