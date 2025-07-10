@@ -21,7 +21,7 @@ export function useRequestConfidentialDomains(
   const [state] = useAppState()
   const confidentials = state.confidential.entities
 
-  const { entities: domains } = useRequestDomains(props)
+  const { entities: domains, loading } = useRequestDomains(props)
 
   const entities = useMemo(() => {
     if (!confidentials) return []
@@ -40,5 +40,6 @@ export function useRequestConfidentialDomains(
 
   return {
     entities,
+    loading,
   }
 }

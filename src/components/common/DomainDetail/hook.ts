@@ -5,7 +5,7 @@ import { Domain, DomainStatus } from '@/domain/domain'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { useRequestDomains } from '@/hooks/common/useRequestEntity/useRequestDomains'
-import { EntityDelAction } from '@/store/entity'
+import { useDispatchDeleteEntityAction } from '@/hooks/common/useDeleteEntityAction'
 import Err from '@/helpers/errors'
 import {
   stepsCatalog,
@@ -46,8 +46,11 @@ export function useDomainDetail({
     {
       connection: { account },
     },
-    dispatch,
   ] = useAppState()
+
+  const { dispatchDeleteEntity } = useDispatchDeleteEntityAction({
+    entityName: 'domain',
+  })
 
   const { entities } = useRequestDomains({ ids: domainId })
   const [domain] = entities || []
@@ -82,7 +85,7 @@ export function useDomainDetail({
         await next(nSteps)
       }
 
-      dispatch(new EntityDelAction({ name: 'domain', keys: [domain.id] }))
+      dispatchDeleteEntity(domain.id)
 
       await router.replace(NAVIGATION_URLS.console.home)
     } catch (e) {
@@ -101,7 +104,7 @@ export function useDomainDetail({
     } finally {
       await stop()
     }
-  }, [dispatch, manager, domain, next, router, stop, noti])
+  }, [dispatchDeleteEntity, manager, domain, next, router, stop, noti])
 
   const disabledUpdate = useMemo(() => !domain, [domain])
   const handleUpdate = useCallback(() => {

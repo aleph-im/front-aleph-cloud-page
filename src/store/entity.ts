@@ -1,6 +1,62 @@
 import { RequestState } from '@aleph-front/core'
 import { StoreReducer } from './store'
 
+type CachedEntityName =
+  | 'ssh'
+  | 'domain'
+  | 'instance'
+  | 'gpuInstance'
+  | 'confidential'
+  | 'program'
+  | 'volume'
+  | 'website'
+  | 'programVolume'
+  | 'instanceVolume'
+  | 'gpuInstanceVolume'
+  | 'confidentialVolume'
+  | 'ccns'
+  | 'crns'
+
+// Entity relationship mapping for cascade invalidation
+// When ANY entity is deleted, clear ALL entity caches for complete consistency
+export const ENTITY_RELATIONSHIPS: Record<
+  CachedEntityName,
+  CachedEntityName[]
+> = {
+  ssh: ['instance', 'gpuInstance', 'confidential', 'program'],
+  domain: [
+    'instance',
+    'gpuInstance',
+    'confidential',
+    'program',
+    'volume',
+    'website',
+  ],
+  instance: ['ssh', 'domain', 'volume', 'instanceVolume'],
+  gpuInstance: ['ssh', 'domain', 'volume', 'gpuInstanceVolume'],
+  confidential: ['ssh', 'domain', 'volume', 'confidentialVolume'],
+  program: ['ssh', 'domain', 'volume', 'programVolume'],
+  volume: [
+    'domain',
+    'instance',
+    'gpuInstance',
+    'confidential',
+    'program',
+    'website',
+    'programVolume',
+    'instanceVolume',
+    'gpuInstanceVolume',
+    'confidentialVolume',
+  ],
+  website: ['domain', 'volume'],
+  programVolume: ['volume', 'program'],
+  instanceVolume: ['volume', 'instance'],
+  gpuInstanceVolume: ['volume', 'gpuInstance'],
+  confidentialVolume: ['volume', 'confidential'],
+  ccns: ['crns'],
+  crns: ['ccns'],
+}
+
 export type EntityState<T> = {
   keys: string[] | undefined
   entities: T[] | undefined
@@ -22,6 +78,7 @@ export enum EntityActionType {
   ENTITY_ERROR = 'ENTITY_ERROR',
   ENTITY_ADD = 'ENTITY_ADD',
   ENTITY_DEL = 'ENTITY_DEL',
+  ENTITY_CASCADE_INVALIDATE = 'ENTITY_CASCADE_INVALIDATE',
 }
 
 export class EntitySetAction<T> {
@@ -51,7 +108,18 @@ export class EntityAddAction<T> {
 
 export class EntityDelAction {
   readonly type = EntityActionType.ENTITY_DEL
-  constructor(public payload: { name: string; keys: string | string[] }) {}
+  constructor(
+    public payload: {
+      name: string
+      keys: string | string[]
+      cascadeInvalidate?: boolean
+    },
+  ) {}
+}
+
+export class EntityCascadeInvalidateAction {
+  readonly type = EntityActionType.ENTITY_CASCADE_INVALIDATE
+  constructor(public payload: { name: string }) {}
 }
 
 export type EntityAction<T> =
@@ -61,6 +129,7 @@ export type EntityAction<T> =
   | EntityErrorAction
   | EntityAddAction<T>
   | EntityDelAction
+  | EntityCascadeInvalidateAction
 
 function addEntitiesToCollection<E>(
   entities: E[],
@@ -111,6 +180,15 @@ function replaceCollection<E>(
 
 function collectionKeys<E>(collection: E[], key: keyof E): string[] {
   return collection.map((e) => e[key] as string)
+}
+
+export function createCascadeInvalidationActions(
+  entityName: CachedEntityName,
+): EntityCascadeInvalidateAction[] {
+  const relatedEntities = ENTITY_RELATIONSHIPS[entityName] || []
+  return relatedEntities.map(
+    (name) => new EntityCascadeInvalidateAction({ name }),
+  )
 }
 
 export type EntityReducer<T> = StoreReducer<EntityState<T>, EntityAction<T>>
@@ -199,6 +277,24 @@ export function getEntityReducer<E, K extends keyof E = keyof E>(
         )
 
         const keys = collectionKeys(entities, key)
+
+        return {
+          ...state,
+          keys,
+          entities,
+        }
+      }
+
+      case EntityActionType.ENTITY_CASCADE_INVALIDATE: {
+        // Clear cache for related entities
+
+        const keys = collectionKeys([], key)
+        const entities = replaceCollection(
+          [],
+          state.entities || [],
+          key,
+          virtualKey,
+        )
 
         return {
           ...state,

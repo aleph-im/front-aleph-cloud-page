@@ -21,7 +21,7 @@ export function useRequestProgramDomains(
   const [state] = useAppState()
   const programs = state.program.entities
 
-  const { entities: domains } = useRequestDomains(props)
+  const { entities: domains, loading } = useRequestDomains(props)
 
   const entities = useMemo(() => {
     if (!programs) return []
@@ -42,5 +42,6 @@ export function useRequestProgramDomains(
 
   return {
     entities,
+    loading,
   }
 }

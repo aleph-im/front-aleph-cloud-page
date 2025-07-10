@@ -10,18 +10,18 @@ import InfoTitle from '../InfoTitle'
 
 const DomainCard = ({
   domain,
-  status,
   onDomainClick: handleDomainClick,
 }: {
-  domain: EntityCustomDomainsProps['customDomains'][number]['domain']
-  status: EntityCustomDomainsProps['customDomains'][number]['status']
+  domain: EntityCustomDomainsProps['customDomains'][number]
   onDomainClick: EntityCustomDomainsProps['onCustomDomainClick']
 }) => {
   const warningIconRef = useRef(null)
 
+  const { id, name, status } = domain
+
   return (
     <RelatedEntityCard
-      key={domain.id}
+      key={id}
       onClick={() => {
         handleDomainClick(domain)
       }}
@@ -35,7 +35,7 @@ const DomainCard = ({
       <div>
         <InfoTitle>DOMAIN</InfoTitle>
         <div tw="flex items-center gap-2">
-          <Text>{domain.name}</Text>
+          <Text>{name}</Text>
           {!status ? (
             <Spinner color="main0" size="3em" tw="-m-4" />
           ) : (
@@ -74,12 +74,11 @@ export const EntityCustomDomains = ({
         <div tw="flex flex-wrap gap-4">
           {customDomains.length ? (
             customDomains.map(
-              ({ domain, status }) =>
+              (domain) =>
                 domain && (
                   <DomainCard
                     key={domain.id}
                     domain={domain}
-                    status={status}
                     onDomainClick={handleCustomDomainClick}
                   />
                 ),

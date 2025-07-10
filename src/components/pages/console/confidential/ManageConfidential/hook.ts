@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Confidential, ConfidentialStatus } from '@/domain/confidential'
-import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
 import { useRequestConfidentials } from '@/hooks/common/useRequestEntity/useRequestConfidentials'
 import { useCopyToClipboardAndNotify } from '@aleph-front/core'
@@ -10,6 +9,7 @@ import { DefaultTheme, useTheme } from 'styled-components'
 import { useExecutableActions } from '@/hooks/common/useExecutableActions'
 import { useConfidentialManager } from '@/hooks/common/useManager/useConfidentialManager'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+import { useRequestSSHKeys } from '@/hooks/common/useRequestEntity/useRequestSSHKeys'
 
 export type ManageConfidential = {
   authorized: boolean
@@ -57,20 +57,16 @@ export function useManageConfidential(): ManageConfidential {
 
   // ------------------
   // Load SSH keys
-  const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
-  const sshKeyManager = useSSHKeyManager()
 
-  useEffect(() => {
-    if (!confidential || !sshKeyManager) return
-    const getMapped = async () => {
-      const mapped = await sshKeyManager?.getByValues(
-        confidential.authorized_keys || [],
-      )
-      setMappedKeys(mapped)
-    }
+  const { entities: sshKeys } = useRequestSSHKeys()
 
-    getMapped()
-  }, [sshKeyManager, confidential])
+  const mappedKeys = useMemo(() => {
+    if (!confidential?.authorized_keys || !sshKeys) return []
+
+    return confidential.authorized_keys.map((value) =>
+      sshKeys.find((d) => d.key === value),
+    )
+  }, [confidential, sshKeys])
 
   // ------------------
   // Handlers

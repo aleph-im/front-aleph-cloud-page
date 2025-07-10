@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Instance } from '@/domain/instance'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { InstanceManager } from '@/domain/instance'
-import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
 import { SSHKey } from '@/domain/ssh'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
 import {
@@ -27,6 +26,7 @@ import useClassifyMachineVolumes from '@/hooks/common/useClassifyMachineVolumes'
 import useEntityCustomDomains from '@/hooks/common/useEntityCustomDomains'
 import { Domain } from '@/domain/domain'
 import { DomainWithStatus } from '@/components/common/entityData/EntityCustomDomains/types'
+import { useRequestSSHKeys } from '@/hooks/common/useRequestEntity/useRequestSSHKeys'
 
 // Type for side panel content
 type SidePanelContent = {
@@ -132,21 +132,15 @@ export function useManageInstance(): ManageInstance {
 
   // === SSH KEYS ===
 
-  const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
-  const sshKeyManager = useSSHKeyManager()
+  const { entities: sshKeys } = useRequestSSHKeys()
 
-  // Fetch
-  useEffect(() => {
-    if (!instance || !sshKeyManager) return
-    const getMapped = async () => {
-      const mapped = await sshKeyManager?.getByValues(
-        instance.authorized_keys || [],
-      )
-      setMappedKeys(mapped)
-    }
+  const mappedKeys = useMemo(() => {
+    if (!instance?.authorized_keys || !sshKeys) return []
 
-    getMapped()
-  }, [sshKeyManager, instance])
+    return instance.authorized_keys.map((value) =>
+      sshKeys.find((d) => d.key === value),
+    )
+  }, [instance, sshKeys])
 
   // -----------------
 

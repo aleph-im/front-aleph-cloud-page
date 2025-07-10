@@ -3,9 +3,8 @@ import { useRouter } from 'next/router'
 import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 import { SSHKey } from '@/domain/ssh'
 import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
-import { useAppState } from '@/contexts/appState'
 import { useRequestSSHKeys } from '@/hooks/common/useRequestEntity/useRequestSSHKeys'
-import { EntityDelAction } from '@/store/entity'
+import { useDispatchDeleteEntityAction } from '@/hooks/common/useDeleteEntityAction'
 import Err from '@/helpers/errors'
 import {
   stepsCatalog,
@@ -29,8 +28,10 @@ export function useSSHKeyDetail({
   sshKeyId,
 }: UseSSHKeyDetailProps): UseSSHKeyDetailReturn {
   const theme = useTheme()
-  const [, dispatch] = useAppState()
   const router = useRouter()
+  const { dispatchDeleteEntity } = useDispatchDeleteEntityAction({
+    entityName: 'ssh',
+  })
 
   const { entities } = useRequestSSHKeys({ ids: sshKeyId })
   const [sshKey] = entities || []
@@ -58,7 +59,7 @@ export function useSSHKeyDetail({
         await next(nSteps)
       }
 
-      dispatch(new EntityDelAction({ name: 'ssh', keys: [sshKey.id] }))
+      dispatchDeleteEntity(sshKey.id)
 
       await router.replace('/console')
     } catch (e) {
@@ -77,7 +78,7 @@ export function useSSHKeyDetail({
     } finally {
       await stop()
     }
-  }, [dispatch, manager, sshKey, next, router, stop, noti])
+  }, [dispatchDeleteEntity, manager, sshKey, next, router, stop, noti])
 
   return {
     sshKey,
