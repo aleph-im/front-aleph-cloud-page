@@ -21,7 +21,7 @@ export function useRequestWebsiteDomains(
   const [state] = useAppState()
   const websites = state.website.entities
 
-  const { entities: domains } = useRequestDomains(props)
+  const { entities: domains, loading } = useRequestDomains(props)
 
   const entities = useMemo(() => {
     if (!websites) return []
@@ -42,5 +42,6 @@ export function useRequestWebsiteDomains(
 
   return {
     entities,
+    loading,
   }
 }
