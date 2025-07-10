@@ -17,6 +17,7 @@ export type UseRequestEntitiesProps<Entity> = {
 
 export type UseRequestEntitiesReturn<Entity> = {
   entities?: Entity[]
+  loading: boolean
 }
 
 // Helper function to handle single entity requests (string ID)
@@ -109,13 +110,16 @@ export function useRequestEntities<
   const { account } = state.connection
   triggerDeps = [account, ids, ...triggerDeps]
 
-  const { data: entities, request } = useAppStoreEntityRequest({
+  const {
+    data: entities,
+    loading,
+    request,
+  } = useAppStoreEntityRequest({
     name,
     doRequest: async () => {
       if (!manager) return []
 
       const currentState = state[name] as { entities?: Entity[] }
-      console.log(name, 'currentState', currentState)
 
       // Route to appropriate handler based on ids type
       if (typeof ids === 'string') {
@@ -140,5 +144,6 @@ export function useRequestEntities<
 
   return {
     entities,
+    loading,
   }
 }
