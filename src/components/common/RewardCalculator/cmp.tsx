@@ -12,7 +12,7 @@ export type RewardCalculatorProps = {
 
 // https://github.com/aleph-im/aleph-account/blob/main/src/pages/Stake.vue#L63C13-L63C13
 export const RewardCalculator = ({ nodes, ...rest }: RewardCalculatorProps) => {
-  const [value, setValue] = useState<number | undefined>(1_000)
+  const [value, setValue] = useState<number | undefined>(10_000)
 
   const handleValueChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value ? Number(e.target.value) : undefined
