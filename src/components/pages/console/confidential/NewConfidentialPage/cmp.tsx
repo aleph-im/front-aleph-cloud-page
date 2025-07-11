@@ -21,6 +21,7 @@ import IconText from '@/components/common/IconText'
 import { useNewConfidentialPage } from './hook'
 import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
 import NewEntityTab from '@/components/common/NewEntityTab'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export function ExternalBulletItemLink({
   href,
@@ -118,27 +119,27 @@ export default function NewConfidentialPage() {
                 </div>
                 <BulletList size="regular" gap="1rem" items={[]}>
                   <ExternalBulletItemLink
-                    href="https://docs.aleph.im/tools/aleph-client/"
+                    href={NAVIGATION_URLS.docs.cli.home}
                     title="Aleph Client command-line tool"
                   />
                   <ExternalBulletItemLink
-                    href="https://doc.rust-lang.org/cargo/getting-started/installation.html"
+                    href={NAVIGATION_URLS.external.rustCargo}
                     title="Rust and Cargo"
                   />
                   <ExternalBulletItemLink
-                    href="https://github.com/virtee/sevctl"
+                    href={NAVIGATION_URLS.external.sevctl}
                     title="Sevctl tool from AMD"
                   />
                   <ExternalBulletItemLink
-                    href="https://www.openssh.com/"
+                    href={NAVIGATION_URLS.external.openssh}
                     title="OpenSSH keypair"
                   />
                   <ExternalBulletItemLink
-                    href="https://github.com/ipfs/kubo"
+                    href={NAVIGATION_URLS.external.ipfsKubo}
                     title="IPFS Server"
                   />
                   <ExternalBulletItemLink
-                    href="https://command-not-found.com/guestmount"
+                    href={NAVIGATION_URLS.external.guestmount}
                     title="Guestmount"
                   />
                 </BulletList>
@@ -389,7 +390,7 @@ export default function NewConfidentialPage() {
                   and VM initialization all at once. To run the three steps
                   separately{' '}
                   <ExternalLink
-                    href="https://docs.aleph.im/computing/confidential/instance/"
+                    href={NAVIGATION_URLS.docs.confidentials}
                     color="main0"
                     text="check the docs"
                   />

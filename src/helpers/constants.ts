@@ -273,10 +273,19 @@ export const NAVIGATION_URLS = {
       'https://docs.aleph.cloud/devhub/compute-resources/confidential-instances/01-confidential-instance-introduction.html',
     immutableVolumes:
       'https://docs.aleph.cloud/devhub/building-applications/data-storage/types-of-storage/immutable-volume.html',
+    cli: {
+      home: 'https://docs.aleph.cloud/devhub/sdks-and-tools/aleph-cli/',
+    },
   },
   external: {
     vrf: 'https://docs.aleph.cloud/devhub/tools/vrf/',
     indexingFramework:
       'https://docs.aleph.cloud/devhub/building-applications/blockchain-data/indexing/',
+    rustCargo:
+      'https://doc.rust-lang.org/cargo/getting-started/installation.html',
+    sevctl: 'https://github.com/virtee/sevctl',
+    openssh: 'https://www.openssh.com/',
+    ipfsKubo: 'https://github.com/ipfs/kubo',
+    guestmount: 'https://command-not-found.com/guestmount',
   },
 }
