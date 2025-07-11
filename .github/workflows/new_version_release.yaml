@@ -88,7 +88,6 @@ jobs:
     name: Bump version
     needs: [push-to-ipfs, deploy-app]
     runs-on: ubuntu-latest
-    environment: production
     outputs:
       new_tag: ${{ steps.bump_version.outputs.new_tag }}
     steps:
