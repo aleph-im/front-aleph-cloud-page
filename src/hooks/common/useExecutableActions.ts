@@ -65,11 +65,12 @@ export function useExecutableActions({
   const isPAYG = executable?.payment?.type === PaymentType.superfluid
   const executableId = executable?.id
 
-  const status = useExecutableStatus({
+  const { status, calculatedStatus } = useExecutableStatus({
     executable,
     manager,
   })
 
+  console.log('calculatedStatus', calculatedStatus)
   // ----------------------------
 
   const [state, dispatch] = useAppState()
