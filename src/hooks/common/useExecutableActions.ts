@@ -3,6 +3,7 @@ import { useLocalRequest, useNotification } from '@aleph-front/core'
 import { CRN, NodeManager } from '@/domain/node'
 import {
   Executable,
+  ExecutableCalculatedStatus,
   ExecutableManager,
   ExecutableOperations,
   ExecutableStatus,
@@ -44,6 +45,7 @@ export type UseExecutableActionsReturn = {
   logs: UseRequestExecutableLogsFeedReturn
   nodeDetails?: NodeDetails
   status?: ExecutableStatus
+  calculatedStatus?: ExecutableCalculatedStatus
   isAllocated: boolean
   stopDisabled: boolean
   startDisabled: boolean
@@ -70,7 +72,6 @@ export function useExecutableActions({
     manager,
   })
 
-  console.log('calculatedStatus', calculatedStatus)
   // ----------------------------
 
   const [state, dispatch] = useAppState()
@@ -323,6 +324,7 @@ export function useExecutableActions({
     nodeDetails,
     streamDetails,
     status,
+    calculatedStatus,
     isAllocated,
     stopDisabled,
     startDisabled,

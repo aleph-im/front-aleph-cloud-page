@@ -57,6 +57,7 @@ export default function ManageInstance() {
 
     // Status data
     status,
+    calculatedStatus,
     isAllocated,
 
     // Node details
@@ -105,8 +106,6 @@ export default function ManageInstance() {
     handleBack,
   } = useManageInstance()
 
-  console.log('status', status)
-
   return (
     <>
       <Head>
@@ -122,6 +121,8 @@ export default function ManageInstance() {
         type={EntityType.Instance}
         labelVariant={labelVariant}
         isAllocated={isAllocated}
+        status={status}
+        calculatedStatus={calculatedStatus}
         // Start action
         showStart
         startDisabled={startDisabled}

@@ -99,7 +99,16 @@ export type ExecutableSchedulerAllocation = {
   }
 }
 
+export type ExecutableCalculatedStatus =
+  | 'loading'
+  | 'not-allocated'
+  | 'stopped'
+  | 'stopping'
+  | 'running'
+  | 'preparing'
+
 export type ExecutableStatus = {
+  version: 'v1' | 'v2'
   hash: string
   ipv4: string
   ipv6: string
@@ -225,6 +234,7 @@ export abstract class ExecutableManager<T extends Executable> {
       const { ipv4, ipv6 } = networking
 
       return {
+        version: 'v1',
         hash,
         ipv4,
         ipv6,
@@ -252,6 +262,7 @@ export abstract class ExecutableManager<T extends Executable> {
       } = executionStatus['status'] || {}
 
       return {
+        version: 'v2',
         node,
         hash,
         hostIpv4,
