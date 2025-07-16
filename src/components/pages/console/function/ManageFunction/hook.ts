@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import { LabelProps } from '@aleph-front/core'
 import { Program } from '@/domain/program'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { useRequestPrograms } from '@/hooks/common/useRequestEntity/useRequestPrograms'
@@ -38,7 +37,6 @@ export type ManageFunction = UseExecutableActionsReturn & {
   // Basic data
   program?: Program
   name: string
-  labelVariant: LabelProps['variant']
   isPersistent: boolean
 
   // Volumes data
@@ -136,15 +134,6 @@ export function useManageFunction(): ManageFunction {
     if (!program) return ''
     return (program?.metadata?.name as string) || ellipseAddress(program.id)
   }, [program])
-
-  // Calculate label variant
-  const labelVariant = useMemo(() => {
-    if (!program) return 'warning'
-
-    return program.time < Date.now() - 1000 * 45 && isAllocated
-      ? 'success'
-      : 'warning'
-  }, [program, isAllocated])
 
   // Calculate slider active index
   const sliderActiveIndex = useMemo(() => {
@@ -283,7 +272,6 @@ export function useManageFunction(): ManageFunction {
     ...executableActions,
     program,
     name,
-    labelVariant,
     isPersistent,
 
     isAllocated,

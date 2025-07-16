@@ -27,10 +27,11 @@ export default function ManageFunction() {
     //Basic data
     program,
     name,
-    labelVariant,
     isPersistent,
 
     // Status data
+    status,
+    calculatedStatus,
     isAllocated,
 
     // Node Details
@@ -91,8 +92,9 @@ export default function ManageFunction() {
         entity={program}
         name={name}
         type={EntityType.Program}
-        labelVariant={labelVariant}
         isAllocated={isAllocated}
+        status={status}
+        calculatedStatus={calculatedStatus}
         // Start action
         showStart={isPersistent}
         startDisabled={startDisabled}

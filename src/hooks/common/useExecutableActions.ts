@@ -45,7 +45,7 @@ export type UseExecutableActionsReturn = {
   logs: UseRequestExecutableLogsFeedReturn
   nodeDetails?: NodeDetails
   status?: ExecutableStatus
-  calculatedStatus?: ExecutableCalculatedStatus
+  calculatedStatus: ExecutableCalculatedStatus
   isAllocated: boolean
   stopDisabled: boolean
   startDisabled: boolean

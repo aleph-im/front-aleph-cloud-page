@@ -27,7 +27,7 @@ export type ConfidentialStatus = ExecutableStatus | undefined
 
 // @todo: Refactor
 export type Confidential = InstanceContent & {
-  type: EntityType.Instance
+  type: EntityType.Confidential
   id: string // hash
   name: string
   url: string

@@ -21,7 +21,6 @@ import {
   PersistentVolume,
 } from '@aleph-sdk/message'
 import { ellipseAddress } from '@/helpers/utils'
-import { LabelProps } from '@aleph-front/core'
 import useDownloadLogs from '@/hooks/common/useDownloadLogs'
 import useClassifyMachineVolumes from '@/hooks/common/useClassifyMachineVolumes'
 import useEntityCustomDomains from '@/hooks/common/useEntityCustomDomains'
@@ -43,7 +42,6 @@ export type ManageInstance = UseExecutableActionsReturn & {
   instance?: Instance
   manager?: InstanceManager
   name: string
-  labelVariant: LabelProps['variant']
 
   // Volumes data
   immutableVolumes: ImmutableVolume[]
@@ -91,19 +89,9 @@ export function useManageInstance(): ManageInstance {
     subscribeLogs,
   })
 
-  const { streamDetails, isAllocated, logs } = executableActions
+  const { streamDetails, logs } = executableActions
 
   // === UTILS ===
-
-  // Calculate label variant
-  const labelVariant = useMemo(() => {
-    if (!instance) return 'warning'
-
-    return instance.time < Date.now() - 1000 * 45 && isAllocated
-      ? 'success'
-      : 'warning'
-  }, [instance, isAllocated])
-
   // Format instance name
   const name = useMemo(() => {
     if (!instance) return ''
@@ -300,7 +288,6 @@ export function useManageInstance(): ManageInstance {
     handleDownloadLogs,
     isDownloadingLogs,
     paymentData,
-    labelVariant,
     immutableVolumes,
     persistentVolumes,
     name,

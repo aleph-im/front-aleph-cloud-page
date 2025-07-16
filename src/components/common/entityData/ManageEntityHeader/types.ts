@@ -4,33 +4,15 @@ import {
   ExecutableStatus,
 } from '@/domain/executable'
 import { EntityType } from '@/helpers/constants'
-import { LabelProps } from '@aleph-front/core'
-import { DefaultTheme } from 'styled-components'
-
-export type EntityStatusPropsV1 = {
-  entity: ManageEntityHeaderProps['entity']
-  isAllocated: ManageEntityHeaderProps['isAllocated']
-  labelVariant: ManageEntityHeaderProps['labelVariant']
-  theme: DefaultTheme
-}
-
-export type EntityStatusPropsV2 = {
-  calculatedStatus: ManageEntityHeaderProps['calculatedStatus']
-  theme: DefaultTheme
-}
-
-export type EntityStatusProps = EntityStatusPropsV1 &
-  EntityStatusPropsV2 & { status: ManageEntityHeaderProps['status'] }
 
 export type ManageEntityHeaderProps = {
   name: string
-  labelVariant: LabelProps['variant']
   isAllocated: boolean
   entity?: Executable
   type: EntityType
 
   status?: ExecutableStatus
-  calculatedStatus?: ExecutableCalculatedStatus
+  calculatedStatus: ExecutableCalculatedStatus
 
   // Stop action
   showStop?: boolean

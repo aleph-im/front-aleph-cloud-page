@@ -13,7 +13,7 @@ export type UseExecutableStatusProps = {
 
 export type UseExecutableStatusReturn = {
   status?: ExecutableStatus
-  calculatedStatus?: ExecutableCalculatedStatus
+  calculatedStatus: ExecutableCalculatedStatus
 }
 
 export function useExecutableStatus({
@@ -46,27 +46,26 @@ export function useExecutableStatus({
     return { latestKey, latestTime }
   }, [status])
 
-  const calculatedStatus: ExecutableCalculatedStatus | undefined =
-    useMemo(() => {
-      if (!hasTriedFetchingStatus) return 'loading'
-      if (status?.version === 'v1') return
+  const calculatedStatus: ExecutableCalculatedStatus = useMemo(() => {
+    if (!hasTriedFetchingStatus) return 'loading'
+    if (status?.version === 'v1') return 'v1'
 
-      const latest = latestStatus()
-      if (!latest) return 'not-allocated'
+    const latest = latestStatus()
+    if (!latest) return 'not-allocated'
 
-      switch (latest.latestKey) {
-        case 'stoppedAt':
-          return 'stopped'
-        case 'stoppingAt':
-          return 'stopping'
-        case 'startedAt':
-          return 'running'
-        case 'preparingAt':
-          return 'preparing'
-        default:
-          return 'not-allocated'
-      }
-    }, [hasTriedFetchingStatus, status?.version, latestStatus])
+    switch (latest.latestKey) {
+      case 'stoppedAt':
+        return 'stopped'
+      case 'stoppingAt':
+        return 'stopping'
+      case 'startedAt':
+        return 'running'
+      case 'preparingAt':
+        return 'preparing'
+      default:
+        return 'not-allocated'
+    }
+  }, [hasTriedFetchingStatus, status?.version, latestStatus])
 
   const shouldFetchStatus = useCallback(
     () => calculatedStatus !== 'running',
@@ -86,6 +85,7 @@ export function useExecutableStatus({
       try {
         const fetchedStatus = await manager.checkStatus(executable)
 
+        console.log('fetched status', fetchedStatus)
         setStatus(fetchedStatus)
       } finally {
         setHasTriedFetchingStatus(true)

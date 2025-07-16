@@ -1,126 +1,14 @@
-import React, { memo, useMemo } from 'react'
-import { Button, Icon, Label, Tooltip } from '@aleph-front/core'
-import {
-  EntityStatusProps,
-  EntityStatusPropsV1,
-  EntityStatusPropsV2,
-  ManageEntityHeaderProps,
-} from './types'
+import React, { memo } from 'react'
+import { Button, Icon, Tooltip } from '@aleph-front/core'
+import { ManageEntityHeaderProps } from './types'
 import BackButton from '../../BackButton'
 import { useTheme } from 'styled-components'
-import { RotatingLines } from 'react-loader-spinner'
 import Skeleton from '../../Skeleton'
-
-const EntityStatusV2 = ({ theme, calculatedStatus }: EntityStatusPropsV2) => {
-  const labelVariant = useMemo(() => {
-    switch (calculatedStatus) {
-      case 'not-allocated':
-        return 'warning'
-      case 'stopped':
-        return 'error'
-      case 'stopping':
-        return 'warning'
-      case 'running':
-        return 'success'
-      case 'preparing':
-        return 'warning'
-    }
-  }, [calculatedStatus])
-
-  const text = useMemo(() => {
-    switch (calculatedStatus) {
-      case 'not-allocated':
-        return 'NOT ALLLOCATED'
-      case 'stopped':
-        return 'STOPPED'
-      case 'stopping':
-        return 'STOPPING'
-      case 'running':
-        return 'RUNNING'
-      case 'preparing':
-        return 'PREPARING'
-    }
-  }, [calculatedStatus])
-
-  const showSpinner = useMemo(() => {
-    switch (calculatedStatus) {
-      case 'not-allocated':
-        return false
-      case 'stopped':
-        return false
-      case 'stopping':
-        return true
-      case 'running':
-        return false
-      case 'preparing':
-        return true
-    }
-  }, [calculatedStatus])
-
-  return (
-    <>
-      <Icon name="alien-8bit" className={`text-${labelVariant}`} />
-      <div>{text}</div>
-      {showSpinner && (
-        <RotatingLines strokeColor={theme.color.base2} width=".8rem" />
-      )}
-    </>
-  )
-}
-
-const EntityStatusV1 = ({
-  entity,
-  isAllocated,
-  labelVariant,
-  theme,
-}: EntityStatusPropsV1) => {
-  return (
-    <>
-      <Icon name="alien-8bit" className={`text-${labelVariant}`} />
-      {isAllocated ? (
-        'ALLOCATED'
-      ) : (
-        <>
-          <div>{entity ? 'CONFIRMING' : 'LOADING'}</div>
-          <RotatingLines strokeColor={theme.color.base2} width=".8rem" />
-        </>
-      )}
-    </>
-  )
-}
-
-const EntityStatus = ({
-  entity,
-  isAllocated,
-  labelVariant,
-  status,
-  calculatedStatus,
-  theme,
-}: EntityStatusProps) => {
-  if (calculatedStatus === 'loading')
-    return (
-      <>
-        <div>Loading</div>
-        <RotatingLines strokeColor={theme.color.base2} width=".8rem" />
-      </>
-    )
-
-  return status?.version === 'v1' ? (
-    <EntityStatusV1
-      entity={entity}
-      isAllocated={isAllocated}
-      labelVariant={labelVariant}
-      theme={theme}
-    />
-  ) : (
-    <EntityStatusV2 calculatedStatus={calculatedStatus} theme={theme} />
-  )
-}
+import EntityStatus from '../EntityStatus'
 
 export const ManageEntityHeader = ({
   // Basic data
   name,
-  labelVariant,
   isAllocated,
   entity,
   type,
@@ -161,18 +49,13 @@ export const ManageEntityHeader = ({
           <BackButton handleBack={handleBack} />
         </div>
         <div tw="flex flex-col md:flex-row text-center gap-2 items-center justify-center">
-          <Label kind="secondary" variant={labelVariant}>
-            <div tw="flex items-center justify-center gap-2">
-              <EntityStatus
-                status={status}
-                calculatedStatus={calculatedStatus}
-                entity={entity}
-                labelVariant={labelVariant}
-                isAllocated={isAllocated}
-                theme={theme}
-              />
-            </div>
-          </Label>
+          <EntityStatus
+            status={status}
+            calculatedStatus={calculatedStatus}
+            entity={entity}
+            isAllocated={isAllocated}
+            theme={theme}
+          />
           <div className="tp-h7 fs-18" tw="uppercase">
             {entity ? name : <Skeleton width="20rem" />}
           </div>

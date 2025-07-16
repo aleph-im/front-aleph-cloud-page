@@ -73,7 +73,11 @@ export type PaymentConfiguration =
   | StreamPaymentConfiguration
 
 export type Executable = BaseExecutableContent & {
-  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
+  type:
+    | EntityType.Instance
+    | EntityType.GpuInstance
+    | EntityType.Confidential
+    | EntityType.Program
   id: string // hash
   chain?: BlockchainId
   payment?: BaseExecutableContent['payment']
@@ -100,6 +104,7 @@ export type ExecutableSchedulerAllocation = {
 }
 
 export type ExecutableCalculatedStatus =
+  | 'v1'
   | 'loading'
   | 'not-allocated'
   | 'stopped'
