@@ -81,7 +81,7 @@ export default function ManageFunction() {
   return (
     <>
       <Head>
-        <title>Console | Manage Function - Aleph Cloud</title>
+        <title>Console | Manage Function | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your serverless function on Aleph Cloud"

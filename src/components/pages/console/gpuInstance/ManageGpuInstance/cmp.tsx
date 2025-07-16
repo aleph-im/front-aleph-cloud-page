@@ -62,7 +62,7 @@ export default function ManageGpuInstance() {
   return (
     <>
       <Head>
-        <title>Console | Manage GPU Instance - Aleph Cloud</title>
+        <title>Console | Manage GPU Instance | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your GPU instance on Aleph Cloud"

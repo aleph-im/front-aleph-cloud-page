@@ -146,7 +146,7 @@ export function ManageWebsite() {
   return (
     <>
       <Head>
-        <title>Console | Manage Website - Aleph Cloud</title>
+        <title>Console | Manage Website | Aleph Cloud</title>
         <meta name="description" content="Manage your website on Aleph Cloud" />
       </Head>
       <BackButtonSection handleBack={handleBack} />

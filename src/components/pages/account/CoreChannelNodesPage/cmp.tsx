@@ -68,7 +68,7 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
   return (
     <>
       <Head>
-        <title>Account - Aleph Cloud</title>
+        <title>Account | Aleph Cloud</title>
         <meta name="description" content="Aleph Cloud Account Dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>

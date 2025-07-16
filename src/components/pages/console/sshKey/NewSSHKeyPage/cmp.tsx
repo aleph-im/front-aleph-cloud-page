@@ -14,7 +14,7 @@ export default function NewSSHKey() {
   return (
     <>
       <Head>
-        <title>Console | New SSH Key - Aleph Cloud</title>
+        <title>Console | New SSH Key | Aleph Cloud</title>
         <meta
           name="description"
           content="Add a new SSH key for secure access to your Aleph Cloud instances"

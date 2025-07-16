@@ -33,7 +33,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
   return (
     <>
       <Head>
-        <title>Console | New Website - Aleph Cloud</title>
+        <title>Console | New Website | Aleph Cloud</title>
         <meta
           name="description"
           content="Create a new website on Aleph Cloud"

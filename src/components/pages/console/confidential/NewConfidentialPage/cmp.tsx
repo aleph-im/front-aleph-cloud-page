@@ -81,7 +81,7 @@ export default function NewConfidentialPage() {
   return (
     <>
       <Head>
-        <title>Console | New Confidential - Aleph Cloud</title>
+        <title>Console | New Confidential | Aleph Cloud</title>
         <meta
           name="description"
           content="Create a new confidential computing instance on Aleph Cloud"

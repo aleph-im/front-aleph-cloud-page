@@ -25,7 +25,7 @@ export default function VolumeDashboardPage() {
   return (
     <>
       <Head>
-        <title>Console | Volumes - Aleph Cloud</title>
+        <title>Console | Volumes | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your storage volumes on Aleph Cloud"

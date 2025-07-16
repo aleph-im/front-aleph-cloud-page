@@ -80,7 +80,7 @@ export default function DashboardPage() {
   return (
     <>
       <Head>
-        <title>Console - Aleph Cloud</title>
+        <title>Console | Aleph Cloud</title>
         <meta name="description" content="Aleph Cloud Console Dashboard" />
       </Head>
       <CenteredContainer $variant="xl">

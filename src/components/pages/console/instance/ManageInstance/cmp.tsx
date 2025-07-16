@@ -110,7 +110,7 @@ export default function ManageInstance() {
   return (
     <>
       <Head>
-        <title>Console | Manage Instance - Aleph Cloud</title>
+        <title>Console | Manage Instance | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your compute instance on Aleph Cloud"

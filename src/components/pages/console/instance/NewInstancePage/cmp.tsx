@@ -303,7 +303,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   return (
     <>
       <Head>
-        <title>Console | New Instance - Aleph Cloud</title>
+        <title>Console | New Instance | Aleph Cloud</title>
         <meta
           name="description"
           content="Create a new virtual machine instance on Aleph Cloud"

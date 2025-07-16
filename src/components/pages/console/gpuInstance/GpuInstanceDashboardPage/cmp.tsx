@@ -19,7 +19,7 @@ export default function GpuInstanceDashboardPage() {
   return (
     <>
       <Head>
-        <title>Console | GPU Instances - Aleph Cloud</title>
+        <title>Console | GPU Instances | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your GPU instances on Aleph Cloud"
