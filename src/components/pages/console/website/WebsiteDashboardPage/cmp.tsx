@@ -7,12 +7,22 @@ import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSid
 import { useWebsiteDashboardPage } from '@/components/pages/console/website/WebsiteDashboardPage/hook'
 import DomainsTabContent from '../../domain/DomainsTabContent'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+import Head from 'next/head'
 
-export default function SettingsDashboardPage() {
+export default function WebsiteDashboardPage() {
   const { tabs, tabId, setTabId, websites, domains } = useWebsiteDashboardPage()
 
   return (
     <>
+      <Head>
+        <title>Host decentralized Websites | Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Build and deploy your website with Aleph Cloud’s Web3 hosting. Enjoy secure, censorship-resistant hosting with support for static sites and modern frameworks."
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+
       {tabs.length ? (
         <CenteredContainer $variant="xl" tw="my-10">
           <Tabs selected={tabId} tabs={tabs} onTabChange={setTabId} />

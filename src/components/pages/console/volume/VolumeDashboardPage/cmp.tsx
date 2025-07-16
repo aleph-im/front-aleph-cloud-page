@@ -25,10 +25,10 @@ export default function VolumeDashboardPage() {
   return (
     <>
       <Head>
-        <title>Console | Volumes | Aleph Cloud</title>
+        <title>Immutable cloud storage | Aleph Cloud</title>
         <meta
           name="description"
-          content="Manage your storage volumes on Aleph Cloud"
+          content="Create and manage immutable cloud storage volumes with Aleph Cloud. Reliable, decentralized file storage for mission-critical data and dependencies."
         />
       </Head>
       <CenteredContainer $variant="xl" tw="my-10">

@@ -19,10 +19,10 @@ export default function GpuInstanceDashboardPage() {
   return (
     <>
       <Head>
-        <title>Console | GPU Instances | Aleph Cloud</title>
+        <title>GPU cloud computing | Aleph Cloud</title>
         <meta
           name="description"
-          content="Manage your GPU instances on Aleph Cloud"
+          content="Scale AI, ML, and HPC workloads with powerful GPU instances on Aleph Cloud. On-demand pricing and decentralized infrastructure for maximum flexibility."
         />
       </Head>
       <CenteredContainer $variant="xl" tw="my-10">

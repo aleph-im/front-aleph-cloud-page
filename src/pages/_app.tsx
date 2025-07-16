@@ -27,8 +27,11 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider theme={themes.twentysix}>
       <Head>
-        <title>App | Aleph Cloud</title>
-        <meta name="description" content="Aleph Cloud App" />
+        <title>Decentralized compute console | Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Manage your confidential compute resources and decentralized storage on Aleph Cloud. Launch VMs, deploy applications, and monitor usage, all from one dashboard."
+        />
       </Head>
       <GlobalStyles />
       <GlobalStylesOverride />

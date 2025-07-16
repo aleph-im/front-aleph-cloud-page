@@ -45,8 +45,11 @@ export const StakingPage = (props: UseStakingPageProps) => {
   return (
     <>
       <Head>
-        <title>Account | Aleph Cloud</title>
-        <meta name="description" content="Aleph Cloud Account Dashboard" />
+        <title>Aleph token staking | Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Control your Aleph Cloud account, manage staking, and unlock decentralized connectivity. Earn rewards for supporting confidential, decentralized cloud infrastructure."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <CenteredContainer $variant="xl">

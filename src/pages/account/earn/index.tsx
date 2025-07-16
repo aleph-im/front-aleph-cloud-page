@@ -3,8 +3,9 @@ import { memo } from 'react'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 import Head from 'next/head'
 
-export function AccountHomePage() {
+export function AccountEarnHomePage() {
   useRedirect(NAVIGATION_URLS.account.earn.staking)
+
   return (
     <Head>
       <title>Aleph token staking | Aleph Cloud</title>
@@ -16,4 +17,4 @@ export function AccountHomePage() {
   )
 }
 
-export default memo(AccountHomePage)
+export default memo(AccountEarnHomePage)
