@@ -4,7 +4,7 @@ import { useNotification } from '@aleph-front/core'
 import { AlephNode } from '@/domain/node'
 import { useAppState } from '@/contexts/appState'
 import { useNodeManager } from '../useManager/useNodeManager'
-import { EntityDelAction } from '@/store/entity'
+import { useDispatchDeleteEntityAction } from '../useDeleteEntityAction'
 import { Account } from '@aleph-sdk/account'
 
 export type UseNodeDetailProps<N> = {
@@ -34,7 +34,6 @@ export function useNodeDetail<N extends AlephNode>({
     {
       connection: { account },
     },
-    dispatch,
   ] = useAppState()
   const nodeManager = useNodeManager()
 
@@ -42,6 +41,15 @@ export function useNodeDetail<N extends AlephNode>({
     () => (node ? nodeManager.isCRN(node) : undefined),
     [nodeManager, node],
   )
+
+  const { dispatchDeleteEntity: dispatchDeleteCRN } =
+    useDispatchDeleteEntityAction({
+      entityName: 'crns',
+    })
+  const { dispatchDeleteEntity: dispatchDeleteCCN } =
+    useDispatchDeleteEntityAction({
+      entityName: 'ccns',
+    })
 
   const handleRemove = useCallback(async () => {
     if (!node) return
@@ -57,12 +65,11 @@ export function useNodeDetail<N extends AlephNode>({
         text: `Your node "${node.hash}" was deleted successfully.`,
       })
 
-      dispatch(
-        new EntityDelAction({
-          name: isCRN ? 'crns' : 'ccns',
-          keys: [nodeHash],
-        }),
-      )
+      if (isCRN) {
+        dispatchDeleteCRN(nodeHash)
+      } else {
+        dispatchDeleteCCN(nodeHash)
+      }
 
       router.replace(`/account/earn/${isCRN ? 'crn' : 'ccn'}`)
     } catch (e) {
@@ -72,7 +79,15 @@ export function useNodeDetail<N extends AlephNode>({
         text: (e as Error).message,
       })
     }
-  }, [dispatch, isCRN, node, nodeManager, noti, router])
+  }, [
+    dispatchDeleteCRN,
+    dispatchDeleteCCN,
+    isCRN,
+    node,
+    nodeManager,
+    noti,
+    router,
+  ])
 
   const { nodes_with_identical_asn: nodesOnSameASN } =
     node?.scoreData?.measurements || {}

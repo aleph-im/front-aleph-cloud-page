@@ -21,7 +21,7 @@ export function useRequestGpuInstanceDomains(
   const [state] = useAppState()
   const gpuInstances = state.gpuInstance.entities
 
-  const { entities: domains } = useRequestDomains(props)
+  const { entities: domains, loading } = useRequestDomains(props)
 
   const entities = useMemo(() => {
     if (!gpuInstances) return []
@@ -40,5 +40,6 @@ export function useRequestGpuInstanceDomains(
 
   return {
     entities,
+    loading,
   }
 }

@@ -1,7 +1,6 @@
 import { Domain, DomainStatus } from '@/domain/domain'
 
-export type DomainWithStatus = {
-  domain: Domain
+export type DomainWithStatus = Domain & {
   status?: DomainStatus
 }
 

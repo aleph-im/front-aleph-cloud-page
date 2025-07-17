@@ -1,6 +1,5 @@
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
-import { useSSHKeyManager } from '@/hooks/common/useManager/useSSHKeyManager'
+import { useMemo, useState } from 'react'
 import { SSHKey } from '@/domain/ssh'
 import { TabsProps, useCopyToClipboardAndNotify } from '@aleph-front/core'
 import { DefaultTheme, useTheme } from 'styled-components'
@@ -14,6 +13,7 @@ import useFetchTermsAndConditions, {
 import { useRequestGpuInstances } from '@/hooks/common/useRequestEntity/useRequestGpuInstances'
 import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceManager'
 import { GpuInstance } from '@/domain/gpuInstance'
+import { useRequestSSHKeys } from '@/hooks/common/useRequestEntity/useRequestSSHKeys'
 
 export type ManageGpuInstance = UseExecutableActionsReturn & {
   gpuInstance?: GpuInstance
@@ -72,27 +72,21 @@ export function useManageGpuInstance(): ManageGpuInstance {
     [logsDisabled],
   )
 
-  const [mappedKeys, setMappedKeys] = useState<(SSHKey | undefined)[]>([])
-
   const handleCopyHash = useCopyToClipboardAndNotify(gpuInstance?.id || '')
   const handleCopyIpv6 = useCopyToClipboardAndNotify(status?.ipv6Parsed || '')
   const handleCopyConnect = useCopyToClipboardAndNotify(
     `ssh root@${status?.ipv6Parsed}`,
   )
 
-  const sshKeyManager = useSSHKeyManager()
+  const { entities: sshKeys } = useRequestSSHKeys()
 
-  useEffect(() => {
-    if (!gpuInstance || !sshKeyManager) return
-    const getMapped = async () => {
-      const mapped = await sshKeyManager?.getByValues(
-        gpuInstance.authorized_keys || [],
-      )
-      setMappedKeys(mapped)
-    }
+  const mappedKeys = useMemo(() => {
+    if (!gpuInstance?.authorized_keys || !sshKeys) return []
 
-    getMapped()
-  }, [sshKeyManager, gpuInstance])
+    return gpuInstance.authorized_keys.map((value) =>
+      sshKeys.find((d) => d.key === value),
+    )
+  }, [gpuInstance, sshKeys])
 
   const handleBack = () => {
     router.push('.')

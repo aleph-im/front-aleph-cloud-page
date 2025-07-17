@@ -20,7 +20,7 @@ export function useRequestInstanceDomains(
   const [state] = useAppState()
   const instances = state.instance.entities
 
-  const { entities: domains } = useRequestDomains(props)
+  const { entities: domains, loading } = useRequestDomains(props)
 
   const entities = useMemo(() => {
     if (!instances) return []
@@ -39,5 +39,6 @@ export function useRequestInstanceDomains(
 
   return {
     entities,
+    loading,
   }
 }
