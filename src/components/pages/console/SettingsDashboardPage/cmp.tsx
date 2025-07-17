@@ -15,7 +15,7 @@ export default function SettingsDashboardPage() {
   return (
     <>
       <Head>
-        <title>Console | Settings - Aleph Cloud</title>
+        <title>Console | Settings | Aleph Cloud</title>
         <meta name="description" content="Aleph Cloud Console Settings" />
       </Head>
       <CenteredContainer $variant="xl" tw="my-10">

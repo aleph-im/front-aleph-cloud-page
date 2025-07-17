@@ -12,7 +12,7 @@ export default function ManageDomain() {
   return (
     <>
       <Head>
-        <title>Console | Manage Domain - Aleph Cloud</title>
+        <title>Console | Manage Domain | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your domain settings on Aleph Cloud"

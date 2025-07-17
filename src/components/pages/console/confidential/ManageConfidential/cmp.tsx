@@ -48,7 +48,7 @@ export default function ManageConfidential() {
   return (
     <>
       <Head>
-        <title>Console | Manage Confidential - Aleph Cloud</title>
+        <title>Console | Manage Confidential | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your confidential instance on Aleph Cloud"

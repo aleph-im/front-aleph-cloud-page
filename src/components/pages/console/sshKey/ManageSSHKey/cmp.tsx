@@ -12,7 +12,7 @@ export default function ManageSSHKey() {
   return (
     <>
       <Head>
-        <title>Console | Manage SSH Key - Aleph Cloud</title>
+        <title>Console | Manage SSH Key | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your SSH keys on Aleph Cloud"

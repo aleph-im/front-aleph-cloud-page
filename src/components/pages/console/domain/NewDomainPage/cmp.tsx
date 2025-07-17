@@ -57,7 +57,7 @@ export default function NewDomain() {
   return (
     <>
       <Head>
-        <title>Console | New Domain - Aleph Cloud</title>
+        <title>Console | New Domain | Aleph Cloud</title>
         <meta
           name="description"
           content="Register a custom domain for your Aleph Cloud resources"

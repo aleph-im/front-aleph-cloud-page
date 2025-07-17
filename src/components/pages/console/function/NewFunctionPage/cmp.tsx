@@ -36,7 +36,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
   return (
     <>
       <Head>
-        <title>Console | New Function - Aleph Cloud</title>
+        <title>Console | New Function | Aleph Cloud</title>
         <meta
           name="description"
           content="Create a new serverless function on Aleph Cloud"

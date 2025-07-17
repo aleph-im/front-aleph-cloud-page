@@ -16,7 +16,7 @@ export default function InstanceDashboardPage() {
   return (
     <>
       <Head>
-        <title>Console | Instances - Aleph Cloud</title>
+        <title>Console | Instances | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your virtual machine instances on Aleph Cloud"

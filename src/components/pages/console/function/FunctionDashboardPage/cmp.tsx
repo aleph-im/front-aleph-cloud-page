@@ -17,7 +17,7 @@ function FunctionDashboardPage() {
   return (
     <>
       <Head>
-        <title>Console | Functions - Aleph Cloud</title>
+        <title>Console | Functions | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your serverless functions on Aleph Cloud"

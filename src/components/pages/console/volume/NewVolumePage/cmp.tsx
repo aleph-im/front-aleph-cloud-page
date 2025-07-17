@@ -26,7 +26,7 @@ export function NewVolumePage() {
   return (
     <>
       <Head>
-        <title>Console | New Volume - Aleph Cloud</title>
+        <title>Console | New Volume | Aleph Cloud</title>
         <meta
           name="description"
           content="Create a new persistent storage volume on Aleph Cloud"

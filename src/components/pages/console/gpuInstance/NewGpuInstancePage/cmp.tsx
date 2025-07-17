@@ -294,7 +294,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
   return (
     <>
       <Head>
-        <title>Console | New GPU Instance - Aleph Cloud</title>
+        <title>Console | New GPU Instance | Aleph Cloud</title>
         <meta
           name="description"
           content="Create a new GPU-enabled virtual machine on Aleph Cloud"

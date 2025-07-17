@@ -11,7 +11,7 @@ export default function ManageVolume() {
   return (
     <>
       <Head>
-        <title>Console | Manage Volume - Aleph Cloud</title>
+        <title>Console | Manage Volume | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your storage volumes on Aleph Cloud"

@@ -80,8 +80,11 @@ export default function DashboardPage() {
   return (
     <>
       <Head>
-        <title>Console - Aleph Cloud</title>
-        <meta name="description" content="Aleph Cloud Console Dashboard" />
+        <title>Confidential cloud console | Aleph Cloud</title>
+        <meta
+          name="description"
+          content="Access your Aleph Cloud dashboard for compute, storage, and hosting. Manage decentralized resources with full data privacy and blockchain-level security."
+        />
       </Head>
       <CenteredContainer $variant="xl">
         <section tw="px-0 pb-6 pt-12 lg:pb-5 ">
