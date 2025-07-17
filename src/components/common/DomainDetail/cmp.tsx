@@ -305,7 +305,7 @@ export const DomainDetail = ({
                       ? NAVIGATION_URLS.console.computing.confidentials.home
                       : domain.target === 'program'
                         ? NAVIGATION_URLS.console.computing.functions.home
-                        : NAVIGATION_URLS.console.storage.home) +
+                        : NAVIGATION_URLS.console.storage.volumes.home) +
                   `/${refEntity.id}`
                 }
               >
