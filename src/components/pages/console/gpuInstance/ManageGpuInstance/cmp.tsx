@@ -1,63 +1,85 @@
-import Link from 'next/link'
 import Head from 'next/head'
-import { RotatingLines, ThreeDots } from 'react-loader-spinner'
-import ButtonLink from '@/components/common/ButtonLink'
-import IconText from '@/components/common/IconText'
-import { Label, NoisyContainer, Tabs, Tooltip } from '@aleph-front/core'
-import { EntityTypeName } from '@/helpers/constants'
-import { Button, Icon, Tag, TextGradient } from '@aleph-front/core'
-import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
-import { Text, Separator } from '../../common'
-import { CenteredContainer } from '@/components/common/CenteredContainer'
-import BackButtonSection from '@/components/common/BackButtonSection'
+import { Icon } from '@aleph-front/core'
 import { useManageGpuInstance } from './hook'
-import StreamSummary from '@/components/common/StreamSummary'
-import { blockchains } from '@/domain/connect/base'
-import VolumeList from '../../volume/VolumeList'
-import LogsFeed from '@/components/common/LogsFeed'
+import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
+import { Slide, Slider } from '@/components/common/Slider'
+import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
+import InstanceDetails from '@/components/common/entityData/InstanceDetails'
+import {
+  EntityLogsContent,
+  EntityLogsControl,
+} from '@/components/common/entityData/EntityLogs'
+import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
+import EntityPayment from '@/components/common/entityData/EntityPayment'
+import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
+import EntityConnectionMethods from '@/components/common/entityData/EntityConnectionMethods'
+import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolumes'
+import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
+import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
+import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
+import FunctionalButton from '@/components/common/FunctionalButton'
+import SidePanel from '@/components/common/SidePanel'
+import VolumeDetail from '@/components/common/VolumeDetail'
+import SSHKeyDetail from '@/components/common/SSHKeyDetail'
+import DomainDetail from '@/components/common/DomainDetail'
 
 export default function ManageGpuInstance() {
   const {
+    // Basic data
     gpuInstance,
-    termsAndConditions,
+    manager,
+    name,
+
+    // Status data
     status,
-    mappedKeys,
-    nodeDetails,
-    streamDetails,
+    calculatedStatus,
     isAllocated,
-    stopDisabled,
-    startDisabled,
-    rebootDisabled,
+
+    // Node details
+    nodeDetails,
+
+    // Volumes data
+    immutableVolumes,
+    persistentVolumes,
+
+    // SSH Keys
+    mappedKeys,
+
+    // Custom domains
+    customDomains,
+    handleCustomDomainClick,
+
+    // Payment data
+    paymentData,
+
+    // Logs
     logs,
-    tabs,
-    tabId,
-    theme,
+    handleDownloadLogs,
+    isDownloadingLogs,
+
+    // Action buttons
+    stopDisabled,
     handleStop,
+    startDisabled,
     handleStart,
+    rebootDisabled,
     handleReboot,
-    handleCopyHash,
-    handleCopyConnect,
-    handleCopyIpv6,
+    deleteDisabled,
     handleDelete,
-    handleBack,
+
+    // Side panel
+    sidePanel,
+    handleImmutableVolumeClick,
+    handleSSHKeyClick,
+    closeSidePanel,
+
+    // UI state
     setTabId,
+    sliderActiveIndex,
+
+    // Navigation handlers
+    handleBack,
   } = useManageGpuInstance()
-
-  if (!gpuInstance) {
-    return (
-      <>
-        <BackButtonSection handleBack={handleBack} />
-        <CenteredContainer>
-          <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </CenteredContainer>
-      </>
-    )
-  }
-
-  const name =
-    (gpuInstance?.metadata?.name as string) || ellipseAddress(gpuInstance.id)
-  const typeName = EntityTypeName[gpuInstance.type]
-  const volumes = gpuInstance.volumes
 
   return (
     <>
@@ -65,362 +87,145 @@ export default function ManageGpuInstance() {
         <title>Console | Manage GPU Instance | Aleph Cloud</title>
         <meta
           name="description"
-          content="Manage your GPU instance on Aleph Cloud"
+          content="Manage your compute instance on Aleph Cloud"
         />
       </Head>
-      <BackButtonSection handleBack={handleBack} />
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <CenteredContainer>
-          <div tw="flex justify-between pb-5 flex-wrap gap-4 flex-col md:flex-row">
-            <div tw="flex items-center">
-              <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
-              <div className="tp-body2">{name}</div>
-              <Label
-                kind="secondary"
-                variant={
-                  gpuInstance.time < Date.now() - 1000 * 45 && isAllocated
-                    ? 'success'
-                    : 'warning'
+      <ManageEntityHeader
+        entity={gpuInstance}
+        name={name}
+        type="GPU instance"
+        isAllocated={isAllocated}
+        status={status}
+        calculatedStatus={calculatedStatus}
+        // Start action
+        showStart
+        startDisabled={startDisabled}
+        onStart={handleStart}
+        // Delete action
+        showDelete
+        deleteDisabled={deleteDisabled}
+        onDelete={handleDelete}
+        // Stop action
+        showStop
+        stopDisabled={stopDisabled}
+        onStop={handleStop}
+        // Reboot action
+        showReboot
+        rebootDisabled={rebootDisabled}
+        onReboot={handleReboot}
+        // Go back action
+        onBack={handleBack}
+      />
+      {/* Slider */}
+      <Slider activeIndex={sliderActiveIndex}>
+        {/* Instance Properties */}
+        <Slide>
+          <EntityDataColumns
+            leftColumnElements={[
+              <InstanceDetails
+                key="gpuInstance-details"
+                instance={gpuInstance}
+              />,
+              <EntityLogsControl
+                key="gpuInstance-logs-control"
+                onViewLogs={() => setTabId('log')}
+                onDownloadLogs={handleDownloadLogs}
+                downloadingLogs={isDownloadingLogs}
+                disabled={!gpuInstance || !isAllocated}
+              />,
+              <EntitySSHKeys
+                key="gpuInstance-ssh-keys"
+                sshKeys={mappedKeys}
+                onSSHKeyClick={handleSSHKeyClick}
+              />,
+              <EntityPayment
+                key="gpuInstance-payment"
+                payments={paymentData}
+              />,
+            ]}
+            rightColumnElements={[
+              <EntityHostingCRN
+                key={'gpuInstance-hosting-crn'}
+                nodeDetails={nodeDetails}
+                termsAndConditionsHash={
+                  gpuInstance?.requirements?.node?.terms_and_conditions
                 }
-                tw="ml-4"
-              >
-                {isAllocated ? (
-                  'READY'
-                ) : (
-                  <div tw="flex items-center">
-                    <div tw="mr-2">CONFIRMING</div>
-                    <RotatingLines
-                      strokeColor={theme.color.base2}
-                      width=".8rem"
-                    />
-                  </div>
-                )}
-              </Label>
-            </div>
-            <div tw="flex gap-4">
-              <Tooltip
-                content="Stop GPU Instance"
-                my="bottom-center"
-                at="top-center"
-              >
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={handleStop}
-                  disabled={stopDisabled}
-                >
-                  <Icon name="stop" />
-                </Button>
-              </Tooltip>
-              <Tooltip
-                content="Reallocate GPU Instance"
-                my="bottom-center"
-                at="top-center"
-              >
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={handleStart}
-                  disabled={startDisabled}
-                >
-                  <Icon name="play" />
-                </Button>
-              </Tooltip>
+              />,
+              <EntityConnectionMethods
+                key="gpuInstance-connection-methods"
+                executableStatus={status}
+              />,
+              immutableVolumes.length && (
+                <EntityLinkedVolumes
+                  key="gpuInstance-linked-volumes"
+                  linkedVolumes={immutableVolumes}
+                  onImmutableVolumeClick={handleImmutableVolumeClick}
+                />
+              ),
+              persistentVolumes.length && (
+                <EntityPersistentStorage
+                  key="gpuInstance-persistent-storage"
+                  persistentVolumes={persistentVolumes}
+                />
+              ),
+              customDomains.length && (
+                <EntityCustomDomains
+                  key={'gpuInstance-custom-domains'}
+                  customDomains={customDomains}
+                  onCustomDomainClick={handleCustomDomainClick}
+                />
+              ),
+              <EntityPortForwarding
+                key="port-forwarding"
+                entityHash={gpuInstance?.id}
+                executableStatus={status}
+                executableManager={manager}
+              />,
+            ]}
+          />
+        </Slide>
 
-              <Tooltip
-                content="Reboot GPU Instance"
-                my="bottom-center"
-                at="top-center"
-              >
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={handleReboot}
-                  disabled={rebootDisabled}
-                >
-                  <Icon name="arrow-rotate-backward" />
-                </Button>
-              </Tooltip>
-              <Button
-                kind="functional"
-                variant="error"
-                size="md"
-                onClick={handleDelete}
-              >
-                <Icon name="trash" />
-              </Button>
+        {/* Instance Logs */}
+        <Slide>
+          <div tw="w-full flex px-12 py-6 gap-8">
+            <FunctionalButton onClick={() => setTabId('detail')}>
+              <Icon name="angle-left" size="1.3em" />
+            </FunctionalButton>
+            <div tw="w-full flex flex-col justify-center items-center gap-3">
+              <EntityLogsContent logs={logs} />
             </div>
           </div>
+        </Slide>
+      </Slider>
 
-          <NoisyContainer>
-            <div tw="flex items-center justify-start overflow-hidden">
-              <Tag variant="accent" tw="mr-4 whitespace-nowrap">
-                {typeName}
-              </Tag>
-              <div tw="flex-auto">
-                <div className="tp-info text-main0">ITEM HASH</div>
-                <IconText iconName="copy" onClick={handleCopyHash}>
-                  {gpuInstance.id}
-                </IconText>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div tw="flex flex-wrap justify-start gap-5 my-5">
-              <div>
-                <div className="tp-info text-main0">CORES</div>
-                <div>
-                  <Text>{gpuInstance.resources.vcpus} x86 64bit</Text>
-                </div>
-              </div>
-
-              <div>
-                <div className="tp-info text-main0">RAM</div>
-                <div>
-                  <Text>
-                    {convertByteUnits(gpuInstance.resources.memory, {
-                      from: 'MiB',
-                      to: 'GiB',
-                      displayUnit: true,
-                    })}
-                  </Text>
-                </div>
-              </div>
-
-              <div>
-                <div className="tp-info text-main0">HDD</div>
-                <div>
-                  <Text>
-                    {convertByteUnits(gpuInstance.size, {
-                      from: 'MiB',
-                      to: 'GiB',
-                      displayUnit: true,
-                    })}
-                  </Text>
-                </div>
-              </div>
-            </div>
-
-            <div tw="my-5">
-              <div className="tp-info text-main0">EXPLORER</div>
-              <div>
-                <a
-                  className="tp-body1 fs-16"
-                  href={gpuInstance.url}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                >
-                  <IconText iconName="square-up-right">
-                    <Text>{ellipseText(gpuInstance.url, 80)}</Text>
-                  </IconText>
-                </a>
-              </div>
-            </div>
-
-            <Separator />
-
-            <Tabs
-              selected={tabId}
-              align="left"
-              onTabChange={setTabId}
-              tabs={tabs}
-            />
-
-            <div role="tabpanel" tw="mt-6">
-              {tabId === 'detail' ? (
-                <>
-                  <div tw="my-5">
-                    <TextGradient type="h7" as="h2" color="main0">
-                      Connection methods
-                    </TextGradient>
-
-                    <div tw="my-5">
-                      <div className="tp-info text-main0">SSH COMMAND</div>
-                      <div>
-                        {status ? (
-                          <IconText iconName="copy" onClick={handleCopyConnect}>
-                            <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
-                          </IconText>
-                        ) : (
-                          <div tw="flex items-end">
-                            <span
-                              tw="mr-1"
-                              className="tp-body1 fs-16 text-main2"
-                            >
-                              Allocating
-                            </span>
-                            <ThreeDots
-                              width=".8rem"
-                              height="1rem"
-                              color={theme.color.main2}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div tw="my-5">
-                      <div className="tp-info text-main0">IPv6</div>
-                      <div>
-                        {status && (
-                          <IconText iconName="copy" onClick={handleCopyIpv6}>
-                            <Text>{status.ipv6Parsed}</Text>
-                          </IconText>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div tw="my-5">
-                    <TextGradient type="h7" as="h2" color="main0">
-                      Accessible for
-                    </TextGradient>
-
-                    <div tw="my-5 flex">
-                      {mappedKeys.map(
-                        (key, i) =>
-                          key && (
-                            <div key={key?.id} tw="mr-5">
-                              <div className="tp-info text-main0">
-                                SSH KEY #{i + 1}
-                              </div>
-
-                              <Link
-                                className="tp-body1 fs-16"
-                                href={'?hash=' + key.id}
-                                referrerPolicy="no-referrer"
-                              >
-                                <IconText iconName="square-up-right">
-                                  <Text>{key.label}</Text>
-                                </IconText>
-                              </Link>
-                            </div>
-                          ),
-                      )}
-                    </div>
-                  </div>
-
-                  {nodeDetails && (
-                    <>
-                      <Separator />
-
-                      <TextGradient type="h7" as="h2" color="main0">
-                        Current CRN
-                      </TextGradient>
-
-                      <div tw="my-5">
-                        <div className="tp-info text-main0">NAME</div>
-                        <div>
-                          <Text>{nodeDetails.name}</Text>
-                        </div>
-                      </div>
-
-                      <div tw="my-5">
-                        <div className="tp-info text-main0">URL</div>
-                        <div>
-                          <a
-                            className="tp-body1 fs-16"
-                            href={nodeDetails.url}
-                            target="_blank"
-                            referrerPolicy="no-referrer"
-                          >
-                            <IconText iconName="square-up-right">
-                              <Text>{ellipseText(nodeDetails.url, 80)}</Text>
-                            </IconText>
-                          </a>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {streamDetails && (
-                    <>
-                      <Separator />
-
-                      <TextGradient type="h7" as="h2" color="main0">
-                        Active streams
-                      </TextGradient>
-
-                      {!streamDetails.streams.length ? (
-                        <div tw="my-5">There are no active streams</div>
-                      ) : (
-                        <div tw="my-5">
-                          {streamDetails.streams.length} active streams in{' '}
-                          <strong className="text-main0">
-                            {blockchains[streamDetails.blockchain].name}
-                          </strong>{' '}
-                          network
-                        </div>
-                      )}
-
-                      {streamDetails.streams.map((stream) => (
-                        <div
-                          key={`${stream.sender}:${stream.receiver}`}
-                          tw="my-5"
-                        >
-                          <StreamSummary {...stream} />
-                        </div>
-                      ))}
-                    </>
-                  )}
-
-                  {volumes.length > 0 && (
-                    <>
-                      <Separator />
-
-                      <TextGradient type="h7" as="h2" color="main0">
-                        Linked Storage(s)
-                      </TextGradient>
-
-                      <VolumeList {...{ volumes }} />
-                    </>
-                  )}
-
-                  {termsAndConditions !== undefined && (
-                    <>
-                      <Separator />
-                      <TextGradient type="h7" as="h2" color="main0">
-                        Terms & Conditions
-                      </TextGradient>
-                      <div tw="my-5">
-                        <div className="tp-info text-main0">ACCEPTED T&C</div>
-                        <div>
-                          <a
-                            className="tp-body1 fs-16"
-                            href={termsAndConditions.url}
-                            target="_blank"
-                            referrerPolicy="no-referrer"
-                          >
-                            <IconText iconName="square-up-right">
-                              <Text>{termsAndConditions.name}</Text>
-                            </IconText>
-                          </a>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : tabId === 'log' ? (
-                <>
-                  <LogsFeed logs={logs} />
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
-          </NoisyContainer>
-
-          <div tw="mt-20 text-center">
-            <ButtonLink
-              variant="primary"
-              href="/console/computing/gpu-instance/new"
-            >
-              Create new GPU Instance
-            </ButtonLink>
-          </div>
-        </CenteredContainer>
-      </section>
+      {/* Side Panel */}
+      <SidePanel
+        title={
+          sidePanel.type === 'volume'
+            ? 'Volume'
+            : sidePanel.type === 'sshKey'
+              ? 'SSH Key'
+              : 'Custom Domain'
+        }
+        isOpen={sidePanel.isOpen}
+        onClose={closeSidePanel}
+      >
+        {sidePanel.type === 'volume' ? (
+          sidePanel.selectedVolume && (
+            <VolumeDetail volumeId={sidePanel.selectedVolume.id} />
+          )
+        ) : sidePanel.type === 'sshKey' ? (
+          sidePanel.selectedSSHKey && (
+            <SSHKeyDetail sshKeyId={sidePanel.selectedSSHKey.id} />
+          )
+        ) : sidePanel.type === 'domain' ? (
+          sidePanel.selectedDomain && (
+            <DomainDetail domainId={sidePanel.selectedDomain.id} />
+          )
+        ) : (
+          <>ERROR</>
+        )}
+      </SidePanel>
     </>
   )
 }

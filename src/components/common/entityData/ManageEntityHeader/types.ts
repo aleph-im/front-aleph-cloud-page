@@ -3,13 +3,12 @@ import {
   ExecutableCalculatedStatus,
   ExecutableStatus,
 } from '@/domain/executable'
-import { EntityType } from '@/helpers/constants'
 
 export type ManageEntityHeaderProps = {
   name: string
   isAllocated: boolean
   entity?: Executable
-  type: EntityType
+  type: 'instance' | 'function' | 'GPU instance'
 
   status?: ExecutableStatus
   calculatedStatus: ExecutableCalculatedStatus
