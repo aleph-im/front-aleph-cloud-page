@@ -7,11 +7,11 @@ import {
 } from '@aleph-front/core'
 import { EntityLinkedCodebaseProps } from './types'
 import RelatedEntityCard from '../RelatedEntityCard'
-import { FunctionalButton } from '@/components/pages/console/instance/ManageInstance/cmp'
 import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
 import InfoTitle from '../InfoTitle'
+import FunctionalButton from '../../FunctionalButton'
 
 export const EntityLinkedCodebase = ({
   loading,

@@ -5,7 +5,6 @@ import { useManageFunction } from './hook'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
 import { Slide, Slider } from '@/components/common/Slider'
 import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
-import { FunctionalButton } from '../../instance/ManageInstance/cmp'
 import {
   EntityLogsContent,
   EntityLogsControl,
@@ -21,6 +20,7 @@ import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
 import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolumes'
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
+import FunctionalButton from '@/components/common/FunctionalButton'
 
 export default function ManageFunction() {
   const {

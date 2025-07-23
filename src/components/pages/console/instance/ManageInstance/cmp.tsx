@@ -1,6 +1,5 @@
 import Head from 'next/head'
-import { ButtonProps } from '@aleph-front/core'
-import { Button, Icon } from '@aleph-front/core'
+import { Icon } from '@aleph-front/core'
 import { useManageInstance } from './hook'
 import { SidePanel } from '@/components/common/SidePanel/cmp'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
@@ -23,25 +22,7 @@ import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import DomainDetail from '@/components/common/DomainDetail'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
-
-/**
- * Button component with functional styling
- */
-export function FunctionalButton({ children, ...props }: ButtonProps) {
-  return (
-    <Button
-      variant="functional"
-      size="sm"
-      className="bg-purple0 text-main0"
-      tw="px-6 py-2 rounded-full flex items-center justify-center leading-none gap-x-3 font-bold
-         transition-all duration-200
-         disabled:(opacity-50 cursor-not-allowed)"
-      {...props}
-    >
-      {children}
-    </Button>
-  )
-}
+import FunctionalButton from '@/components/common/FunctionalButton'
 
 /**
  * ManageInstance component - purely presentational
