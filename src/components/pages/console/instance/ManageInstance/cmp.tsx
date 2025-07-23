@@ -53,7 +53,6 @@ export default function ManageInstance() {
     instance,
     manager,
     name,
-    labelVariant,
 
     // Status data
     status,
@@ -119,7 +118,6 @@ export default function ManageInstance() {
         entity={instance}
         name={name}
         type={EntityType.Instance}
-        labelVariant={labelVariant}
         isAllocated={isAllocated}
         status={status}
         calculatedStatus={calculatedStatus}

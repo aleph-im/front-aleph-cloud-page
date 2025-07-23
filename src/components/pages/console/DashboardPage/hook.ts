@@ -9,6 +9,7 @@ import { useAttachedVolumes } from '@/hooks/common/useAttachedVolumes'
 import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
 import { useConfidentialManager } from '@/hooks/common/useManager/useConfidentialManager'
 import { GpuInstance } from '@/domain/gpuInstance'
+import { Confidential } from '@/domain/confidential'
 
 export type AmountAggregatedStatus = {
   amount: number
@@ -64,7 +65,7 @@ function calculateComputingAggregatedStatus({
   entities,
   entitiesStatus,
 }: {
-  entities: Program[] | Instance[] | GpuInstance[]
+  entities: Program[] | Instance[] | GpuInstance[] | Confidential[]
   entitiesStatus: Record<string, RequestState<ExecutableStatus>>
 }) {
   return entities.reduce(
