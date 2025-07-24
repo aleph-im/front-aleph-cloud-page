@@ -1,13 +1,18 @@
-import { Executable } from '@/domain/executable'
+import {
+  Executable,
+  ExecutableCalculatedStatus,
+  ExecutableStatus,
+} from '@/domain/executable'
 import { EntityType } from '@/helpers/constants'
-import { LabelProps } from '@aleph-front/core'
 
 export type ManageEntityHeaderProps = {
   name: string
-  labelVariant: LabelProps['variant']
   isAllocated: boolean
   entity?: Executable
   type: EntityType
+
+  status?: ExecutableStatus
+  calculatedStatus: ExecutableCalculatedStatus
 
   // Stop action
   showStop?: boolean

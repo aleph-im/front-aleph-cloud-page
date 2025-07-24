@@ -1,18 +1,21 @@
 import React, { memo } from 'react'
-import { Button, Icon, Label, Tooltip } from '@aleph-front/core'
+import { Button, Icon, Tooltip } from '@aleph-front/core'
 import { ManageEntityHeaderProps } from './types'
 import BackButton from '../../BackButton'
 import { useTheme } from 'styled-components'
-import { RotatingLines } from 'react-loader-spinner'
 import Skeleton from '../../Skeleton'
+import EntityStatus from '../EntityStatus'
 
 export const ManageEntityHeader = ({
   // Basic data
   name,
-  labelVariant,
   isAllocated,
   entity,
   type,
+
+  // Status
+  status,
+  calculatedStatus,
 
   // Stop action
   showStop = false,
@@ -46,22 +49,13 @@ export const ManageEntityHeader = ({
           <BackButton handleBack={handleBack} />
         </div>
         <div tw="flex flex-col md:flex-row text-center gap-2 items-center justify-center">
-          <Label kind="secondary" variant={labelVariant}>
-            <div tw="flex items-center justify-center gap-2">
-              <Icon name="alien-8bit" className={`text-${labelVariant}`} />
-              {isAllocated ? (
-                'ALLOCATED'
-              ) : (
-                <>
-                  <div>{entity ? 'CONFIRMING' : 'LOADING'}</div>
-                  <RotatingLines
-                    strokeColor={theme.color.base2}
-                    width=".8rem"
-                  />
-                </>
-              )}
-            </div>
-          </Label>
+          <EntityStatus
+            status={status}
+            calculatedStatus={calculatedStatus}
+            entity={entity}
+            isAllocated={isAllocated}
+            theme={theme}
+          />
           <div className="tp-h7 fs-18" tw="uppercase">
             {entity ? name : <Skeleton width="20rem" />}
           </div>
