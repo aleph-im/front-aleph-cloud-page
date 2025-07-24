@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { Icon, NoisyContainer } from '@aleph-front/core'
 import { Text } from '@/components/pages/console/common'
-import { FunctionalButton } from '@/components/pages/console/instance/ManageInstance/cmp'
+import FunctionalButton from '@/components/common/FunctionalButton'
 import { EntityLogsControlProps } from './types'
 import InfoTitle from '../../InfoTitle'
 

@@ -7,7 +7,7 @@ import {
 } from '@aleph-front/core'
 import { EntityLinkedRuntimeProps } from './types'
 import RelatedEntityCard from '../RelatedEntityCard'
-import { FunctionalButton } from '@/components/pages/console/instance/ManageInstance/cmp'
+import FunctionalButton from '@/components/common/FunctionalButton'
 import Skeleton from '../../Skeleton'
 import { ellipseText } from '@/helpers/utils'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
