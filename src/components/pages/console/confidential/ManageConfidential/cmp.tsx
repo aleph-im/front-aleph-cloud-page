@@ -4,7 +4,7 @@ import { useManageGpuInstance } from './hook'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
 import { Slide, Slider } from '@/components/common/Slider'
 import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
-import InstanceDetails from '@/components/common/entityData/InstanceDetails'
+import InstanceEntityDetails from '@/components/common/entityData/InstanceEntityDetails'
 import {
   EntityLogsContent,
   EntityLogsControl,
@@ -122,9 +122,10 @@ export default function ManageConfidential() {
         <Slide>
           <EntityDataColumns
             leftColumnElements={[
-              <InstanceDetails
+              <InstanceEntityDetails
                 key="confidentialInstance-details"
-                instance={confidentialInstance}
+                entity={confidentialInstance}
+                title="CONFIDENTIAL INSTANCE"
               />,
               <EntityLogsControl
                 key="confidentialInstance-logs-control"

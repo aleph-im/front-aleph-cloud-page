@@ -4,7 +4,7 @@ import { useManageGpuInstance } from './hook'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
 import { Slide, Slider } from '@/components/common/Slider'
 import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
-import InstanceDetails from '@/components/common/entityData/InstanceDetails'
+import InstanceEntityDetails from '@/components/common/entityData/InstanceEntityDetails'
 import {
   EntityLogsContent,
   EntityLogsControl,
@@ -122,9 +122,10 @@ export default function ManageGpuInstance() {
         <Slide>
           <EntityDataColumns
             leftColumnElements={[
-              <InstanceDetails
+              <InstanceEntityDetails
                 key="gpuInstance-details"
-                instance={gpuInstance}
+                entity={gpuInstance}
+                title="GPU INSTANCE"
               />,
               <EntityLogsControl
                 key="gpuInstance-logs-control"

@@ -6,7 +6,7 @@ import SSHKeyDetail from '@/components/common/SSHKeyDetail'
 import VolumeDetail from '@/components/common/VolumeDetail'
 import { Slide, Slider } from '@/components/common/Slider'
 import EntityPayment from '@/components/common/entityData/EntityPayment'
-import InstanceDetails from '@/components/common/entityData/InstanceDetails'
+import InstanceEntityDetails from '@/components/common/entityData/InstanceEntityDetails'
 import {
   EntityLogsContent,
   EntityLogsControl,
@@ -127,7 +127,10 @@ export default function ManageInstance() {
         <Slide>
           <EntityDataColumns
             leftColumnElements={[
-              <InstanceDetails key="instance-details" instance={instance} />,
+              <InstanceEntityDetails
+                key="instance-details"
+                entity={instance}
+              />,
               <EntityLogsControl
                 key="instance-logs-control"
                 onViewLogs={() => setTabId('log')}

@@ -12,13 +12,16 @@ import { convertByteUnits, ellipseText } from '@/helpers/utils'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
 import InfoTitle from '../InfoTitle'
 
-export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
-  const handleCopyHash = useCopyToClipboardAndNotify(instance?.id || '')
+export const InstanceEntityDetails = ({
+  entity,
+  title = 'INSTANCE',
+}: InstanceDetailsProps) => {
+  const handleCopyHash = useCopyToClipboardAndNotify(entity?.id || '')
 
   return (
     <>
       <div className="tp-h7 fs-24" tw="uppercase mb-2">
-        INSTANCE DETAILS
+        {title} DETAILS
       </div>
       <NoisyContainer>
         <div tw="flex gap-4">
@@ -31,9 +34,9 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
           <div tw="flex flex-col gap-4 w-full">
             <div tw="w-full">
               <InfoTitle>ITEM HASH</InfoTitle>
-              {instance ? (
+              {entity ? (
                 <IconText iconName="copy" onClick={handleCopyHash}>
-                  {instance.id}
+                  {entity.id}
                 </IconText>
               ) : (
                 <Skeleton width="100%" />
@@ -44,8 +47,8 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
                 <InfoTitle>CORES</InfoTitle>
                 <div>
                   <Text tw="flex items-center gap-1">
-                    {instance?.resources ? (
-                      `${instance.resources.vcpus} x86 64bit`
+                    {entity?.resources ? (
+                      `${entity.resources.vcpus} x86 64bit`
                     ) : (
                       <Skeleton width="7rem" />
                     )}
@@ -56,8 +59,8 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
                 <InfoTitle>RAM</InfoTitle>
                 <div>
                   <Text>
-                    {instance?.resources ? (
-                      convertByteUnits(instance.resources.memory, {
+                    {entity?.resources ? (
+                      convertByteUnits(entity.resources.memory, {
                         from: 'MiB',
                         to: 'GiB',
                         displayUnit: true,
@@ -72,8 +75,8 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
                 <InfoTitle>HDD</InfoTitle>
                 <div>
                   <Text>
-                    {instance ? (
-                      convertByteUnits(instance.size, {
+                    {entity ? (
+                      convertByteUnits(entity.size, {
                         from: 'MiB',
                         to: 'GiB',
                         displayUnit: true,
@@ -88,15 +91,15 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
             <div>
               <InfoTitle>EXPLORER</InfoTitle>
               <div>
-                {instance ? (
+                {entity ? (
                   <a
                     className="tp-body1 fs-16"
-                    href={instance.url}
+                    href={entity.url}
                     target="_blank"
                     referrerPolicy="no-referrer"
                   >
                     <IconText iconName="square-up-right">
-                      <Text>{ellipseText(instance.url, 80)}</Text>
+                      <Text>{ellipseText(entity.url, 80)}</Text>
                     </IconText>
                   </a>
                 ) : (
@@ -110,6 +113,6 @@ export const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
     </>
   )
 }
-InstanceDetails.displayName = 'InstanceDetails'
+InstanceEntityDetails.displayName = 'InstanceEntityDetails'
 
-export default memo(InstanceDetails) as typeof InstanceDetails
+export default memo(InstanceEntityDetails) as typeof InstanceEntityDetails
