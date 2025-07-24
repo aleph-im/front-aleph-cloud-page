@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import { EntityType } from '@/helpers/constants'
 import { Icon } from '@aleph-front/core'
 import { useManageFunction } from './hook'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
@@ -91,7 +90,7 @@ export default function ManageFunction() {
       <ManageEntityHeader
         entity={program}
         name={name}
-        type={EntityType.Program}
+        type={'function'}
         isAllocated={isAllocated}
         status={status}
         calculatedStatus={calculatedStatus}
