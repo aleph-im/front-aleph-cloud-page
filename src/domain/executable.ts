@@ -649,6 +649,14 @@ export abstract class ExecutableManager<T extends Executable> {
     }
   }
 
+  async getTotalCostByHash(
+    paymentMethod: PaymentMethod | PaymentType,
+    hash: string,
+  ): Promise<number> {
+    const costs = await this.sdkClient.instanceClient.getCost(hash)
+    return this.parseCost(paymentMethod, Number(costs.cost))
+  }
+
   protected async getAuthOperationToken(
     privateKey: JsonWebKey,
     domain: string,
