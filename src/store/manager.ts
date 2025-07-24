@@ -75,6 +75,8 @@ function createDefaultManagers(account?: Account) {
     sshKeyManager,
     fileManager,
     nodeManager,
+    costManager,
+    forwardedPortsManager,
   )
   const websiteManager = new WebsiteManager(
     account,
