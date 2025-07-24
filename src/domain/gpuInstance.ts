@@ -2,7 +2,6 @@
 import { Account } from '@aleph-sdk/account'
 import { HostRequirements, Payment, PaymentType } from '@aleph-sdk/message'
 import { defaultGpuInstanceChannel, EntityType } from '@/helpers/constants'
-import { ExecutableStatus } from './executable'
 import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
 import { VolumeManager } from './volume'

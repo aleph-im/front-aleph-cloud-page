@@ -103,7 +103,7 @@ export type InstanceCRNNetworking = {
 export type InstanceStatus = ExecutableStatus
 
 export type InstanceEntity = Omit<Instance, 'type'> & {
-  type: EntityType.Instance | EntityType.GpuInstance
+  type: EntityType.Instance | EntityType.GpuInstance | EntityType.Confidential
 }
 
 export class InstanceManager<T extends InstanceEntity = Instance>
@@ -448,14 +448,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     } catch (err) {
       throw Err.RequestFailed(err)
     }
-  }
-
-  async getTotalCostByHash(
-    paymentMethod: PaymentMethod | PaymentType,
-    hash: string,
-  ): Promise<number> {
-    const costs = await this.sdkClient.instanceClient.getCost(hash)
-    return this.parseCost(paymentMethod, Number(costs.cost))
   }
 
   async getCost(

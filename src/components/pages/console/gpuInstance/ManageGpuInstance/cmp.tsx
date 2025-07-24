@@ -27,7 +27,7 @@ export default function ManageGpuInstance() {
   const {
     // Basic data
     gpuInstance,
-    manager,
+    gpuInstanceManager,
     name,
 
     // Status data
@@ -179,7 +179,7 @@ export default function ManageGpuInstance() {
                 key="port-forwarding"
                 entityHash={gpuInstance?.id}
                 executableStatus={status}
-                executableManager={manager}
+                executableManager={gpuInstanceManager}
               />,
             ]}
           />

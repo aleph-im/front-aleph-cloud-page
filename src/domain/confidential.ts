@@ -1,48 +1,33 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Account } from '@aleph-sdk/account'
-import { InstanceContent, MessageType } from '@aleph-sdk/message'
+import { Payment, PaymentType } from '@aleph-sdk/message'
 import {
   CheckoutStepType,
-  defaultInstanceChannel,
+  defaultConfidentialInstanceChannel,
   EntityType,
 } from '@/helpers/constants'
-import { getDate, getExplorerURL } from '@/helpers/utils'
-import { ExecutableManager, ExecutableStatus } from './executable'
 import { FileManager } from './file'
 import { SSHKeyManager } from './ssh'
 import { VolumeManager } from './volume'
 import { DomainManager } from './domain'
-import { EntityManager } from './types'
-import {
-  instanceSchema,
-  instanceStreamSchema,
-} from '@/helpers/schemas/instance'
 import { NodeManager } from './node'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+import { Instance, InstanceManager } from './instance'
+import { CostManager } from './cost'
+import { ForwardedPortsManager } from './forwardedPorts'
+import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 
-export type ConfidentialStatus = ExecutableStatus | undefined
-
-// @todo: Refactor
-export type Confidential = InstanceContent & {
-  type: EntityType.Confidential
-  id: string // hash
-  name: string
-  url: string
-  date: string
-  size: number
-  confirmed?: boolean
+export type Confidential = Omit<Instance, 'type'> & {
+  type: EntityType.GpuInstance
+  payment: Payment & {
+    type: PaymentType.superfluid
+  }
 }
 
-export class ConfidentialManager
-  extends ExecutableManager<Confidential>
-  implements EntityManager<Confidential, unknown>
-{
-  static addSchema = instanceSchema
-  static addStreamSchema = instanceStreamSchema
-
+export class ConfidentialManager extends InstanceManager<Confidential> {
   constructor(
     protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
@@ -51,30 +36,52 @@ export class ConfidentialManager
     protected sshKeyManager: SSHKeyManager,
     protected fileManager: FileManager,
     protected nodeManager: NodeManager,
-    protected channel = defaultInstanceChannel,
+    protected costManager: CostManager,
+    protected forwardedPortsManager: ForwardedPortsManager,
+    protected channel = defaultConfidentialInstanceChannel,
   ) {
-    super(account, volumeManager, domainManager, nodeManager, sdkClient)
+    super(
+      account,
+      sdkClient,
+      volumeManager,
+      domainManager,
+      sshKeyManager,
+      fileManager,
+      nodeManager,
+      costManager,
+      forwardedPortsManager,
+      channel,
+    )
   }
 
-  add(entity: unknown): Promise<Confidential | Confidential[]> {
+  add(
+    newInstance: unknown,
+    account?: SuperfluidAccount,
+  ): Promise<Confidential> {
     throw new Error('Method not implemented.')
   }
+
   del(entityOrId: string | Confidential): Promise<void> {
     throw new Error('Method not implemented.')
   }
+
   getAddSteps(entity: unknown): Promise<CheckoutStepType[]> {
     throw new Error('Method not implemented.')
   }
+
   addSteps(
-    entity: unknown,
-  ): AsyncGenerator<void, Confidential | Confidential[], void> {
+    newInstance: unknown,
+    account?: SuperfluidAccount,
+  ): AsyncGenerator<void, Confidential, void> {
     throw new Error('Method not implemented.')
   }
+
   getDelSteps(
     entity: string | Confidential | (string | Confidential)[],
   ): Promise<CheckoutStepType[]> {
     throw new Error('Method not implemented.')
   }
+
   delSteps(
     entity: string | Confidential | (string | Confidential)[],
     extra?: any,
@@ -82,53 +89,10 @@ export class ConfidentialManager
     throw new Error('Method not implemented.')
   }
 
-  async getStreamPaymentDetails(): Promise<undefined> {
-    // @note: Do not throw an error, just do nothing
-    // @todo: Move this method to the Executable base classs
-    return undefined
-  }
+  protected override parseMessagesFilter({ content }: any): boolean {
+    if (content === undefined) return false
 
-  async getAll(): Promise<Confidential[]> {
-    if (!this.account) return []
-
-    try {
-      const response = await this.sdkClient.getMessages({
-        addresses: [this.account.address],
-        messageTypes: [MessageType.instance],
-      })
-
-      return await this.parseMessages(response.messages)
-    } catch (err) {
-      return []
-    }
-  }
-
-  async get(id: string): Promise<Confidential | undefined> {
-    const message = await this.sdkClient.getMessage(id)
-
-    const [entity] = await this.parseMessages([message])
-    return entity
-  }
-
-  protected async parseMessages(messages: any[]): Promise<Confidential[]> {
-    return messages
-      .filter(({ content }) => {
-        if (content === undefined) return false
-
-        // Filter confidential VMs
-        return content.environment?.trusted_execution
-      })
-      .map((message) => {
-        return {
-          id: message.item_hash,
-          ...message.content,
-          name: message.content.metadata?.name || 'Unnamed instance',
-          type: EntityType.Instance,
-          url: getExplorerURL(message),
-          date: getDate(message.time),
-          size: message.content.rootfs?.size_mib || 0,
-          confirmed: !!message.confirmed,
-        }
-      })
+    // Filter confidential VMs
+    return content.environment?.trusted_execution
   }
 }

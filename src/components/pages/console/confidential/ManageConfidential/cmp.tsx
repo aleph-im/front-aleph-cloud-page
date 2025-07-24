@@ -1,49 +1,85 @@
-import ButtonLink from '@/components/common/ButtonLink'
-import IconText from '@/components/common/IconText'
 import Head from 'next/head'
-import { Label, NoisyContainer } from '@aleph-front/core'
-import { EntityTypeName } from '@/helpers/constants'
-import { Icon, Tag, TextGradient } from '@aleph-front/core'
-import { convertByteUnits, ellipseAddress, ellipseText } from '@/helpers/utils'
-import { RotatingLines, ThreeDots } from 'react-loader-spinner'
-import Link from 'next/link'
-import BackButtonSection from '@/components/common/BackButtonSection'
-import { useManageConfidential } from './hook'
-import { Text, Separator } from '../../common'
-import { CenteredContainer } from '@/components/common/CenteredContainer'
-import VolumeList from '../../volume/VolumeList'
+import { Icon } from '@aleph-front/core'
+import { useManageGpuInstance } from './hook'
+import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
+import { Slide, Slider } from '@/components/common/Slider'
+import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
+import InstanceDetails from '@/components/common/entityData/InstanceDetails'
+import {
+  EntityLogsContent,
+  EntityLogsControl,
+} from '@/components/common/entityData/EntityLogs'
+import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
+import EntityPayment from '@/components/common/entityData/EntityPayment'
+import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
+import EntityConnectionMethods from '@/components/common/entityData/EntityConnectionMethods'
+import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolumes'
+import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
+import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
+import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
+import FunctionalButton from '@/components/common/FunctionalButton'
+import SidePanel from '@/components/common/SidePanel'
+import VolumeDetail from '@/components/common/VolumeDetail'
+import SSHKeyDetail from '@/components/common/SSHKeyDetail'
+import DomainDetail from '@/components/common/DomainDetail'
 
 export default function ManageConfidential() {
   const {
-    authorized,
-    theme,
-    confidential,
+    // Basic data
+    confidentialInstance,
+    confidentialInstanceManager,
+    name,
+
+    // Status data
     status,
-    mappedKeys,
+    calculatedStatus,
+    isAllocated,
+
+    // Node details
     nodeDetails,
-    handleCopyHash,
-    handleCopyConnect,
-    handleCopyIpv6,
+
+    // Volumes data
+    immutableVolumes,
+    persistentVolumes,
+
+    // SSH Keys
+    mappedKeys,
+
+    // Custom domains
+    customDomains,
+    handleCustomDomainClick,
+
+    // Payment data
+    paymentData,
+
+    // Logs
+    logs,
+    handleDownloadLogs,
+    isDownloadingLogs,
+
+    // Action buttons
+    stopDisabled,
+    handleStop,
+    startDisabled,
+    handleStart,
+    rebootDisabled,
+    handleReboot,
+    deleteDisabled,
+    handleDelete,
+
+    // Side panel
+    sidePanel,
+    handleImmutableVolumeClick,
+    handleSSHKeyClick,
+    closeSidePanel,
+
+    // UI state
+    setTabId,
+    sliderActiveIndex,
+
+    // Navigation handlers
     handleBack,
-  } = useManageConfidential()
-
-  if (!authorized) return
-
-  if (!confidential) {
-    return (
-      <>
-        <BackButtonSection handleBack={handleBack} />
-        <CenteredContainer>
-          <NoisyContainer tw="my-4">Loading...</NoisyContainer>
-        </CenteredContainer>
-      </>
-    )
-  }
-
-  const name =
-    (confidential?.metadata?.name as string) || ellipseAddress(confidential.id)
-  const typeName = EntityTypeName[confidential.type]
-  const volumes = confidential.volumes
+  } = useManageGpuInstance()
 
   return (
     <>
@@ -51,234 +87,145 @@ export default function ManageConfidential() {
         <title>Console | Manage Confidential | Aleph Cloud</title>
         <meta
           name="description"
-          content="Manage your confidential instance on Aleph Cloud"
+          content="Manage your compute instance on Aleph Cloud"
         />
       </Head>
-      <BackButtonSection handleBack={handleBack} />
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <CenteredContainer>
-          <div tw="flex justify-between pb-5 flex-wrap gap-4 flex-col md:flex-row">
-            <div tw="flex items-center">
-              <Icon name="alien-8bit" tw="mr-4" className="text-main0" />
-              <div className="tp-body2">{name}</div>
-              <Label
-                kind="secondary"
-                variant={
-                  confidential.time < Date.now() - 1000 * 45 &&
-                  status?.ipv6Parsed
-                    ? 'success'
-                    : 'warning'
+      <ManageEntityHeader
+        entity={confidentialInstance}
+        name={name}
+        type="confidential instance"
+        isAllocated={isAllocated}
+        status={status}
+        calculatedStatus={calculatedStatus}
+        // Start action
+        showStart
+        startDisabled={startDisabled}
+        onStart={handleStart}
+        // Delete action
+        showDelete
+        deleteDisabled={deleteDisabled}
+        onDelete={handleDelete}
+        // Stop action
+        showStop
+        stopDisabled={stopDisabled}
+        onStop={handleStop}
+        // Reboot action
+        showReboot
+        rebootDisabled={rebootDisabled}
+        onReboot={handleReboot}
+        // Go back action
+        onBack={handleBack}
+      />
+      {/* Slider */}
+      <Slider activeIndex={sliderActiveIndex}>
+        {/* Instance Properties */}
+        <Slide>
+          <EntityDataColumns
+            leftColumnElements={[
+              <InstanceDetails
+                key="confidentialInstance-details"
+                instance={confidentialInstance}
+              />,
+              <EntityLogsControl
+                key="confidentialInstance-logs-control"
+                onViewLogs={() => setTabId('log')}
+                onDownloadLogs={handleDownloadLogs}
+                downloadingLogs={isDownloadingLogs}
+                disabled={!confidentialInstance || !isAllocated}
+              />,
+              <EntitySSHKeys
+                key="confidentialInstance-ssh-keys"
+                sshKeys={mappedKeys}
+                onSSHKeyClick={handleSSHKeyClick}
+              />,
+              <EntityPayment
+                key="confidentialInstance-payment"
+                payments={paymentData}
+              />,
+            ]}
+            rightColumnElements={[
+              <EntityHostingCRN
+                key={'confidentialInstance-hosting-crn'}
+                nodeDetails={nodeDetails}
+                termsAndConditionsHash={
+                  confidentialInstance?.requirements?.node?.terms_and_conditions
                 }
-                tw="ml-4"
-              >
-                {status?.ipv6Parsed ? (
-                  'READY'
-                ) : (
-                  <div tw="flex items-center">
-                    <div tw="mr-2">CONFIRMING</div>
-                    <RotatingLines
-                      strokeColor={theme.color.base2}
-                      width=".8rem"
-                    />
-                  </div>
-                )}
-              </Label>
+              />,
+              <EntityConnectionMethods
+                key="confidentialInstance-connection-methods"
+                executableStatus={status}
+              />,
+              immutableVolumes.length && (
+                <EntityLinkedVolumes
+                  key="confidentialInstance-linked-volumes"
+                  linkedVolumes={immutableVolumes}
+                  onImmutableVolumeClick={handleImmutableVolumeClick}
+                />
+              ),
+              persistentVolumes.length && (
+                <EntityPersistentStorage
+                  key="confidentialInstance-persistent-storage"
+                  persistentVolumes={persistentVolumes}
+                />
+              ),
+              customDomains.length && (
+                <EntityCustomDomains
+                  key={'confidentialInstance-custom-domains'}
+                  customDomains={customDomains}
+                  onCustomDomainClick={handleCustomDomainClick}
+                />
+              ),
+              <EntityPortForwarding
+                key="port-forwarding"
+                entityHash={confidentialInstance?.id}
+                executableStatus={status}
+                executableManager={confidentialInstanceManager}
+              />,
+            ]}
+          />
+        </Slide>
+
+        {/* Instance Logs */}
+        <Slide>
+          <div tw="w-full flex px-12 py-6 gap-8">
+            <FunctionalButton onClick={() => setTabId('detail')}>
+              <Icon name="angle-left" size="1.3em" />
+            </FunctionalButton>
+            <div tw="w-full flex flex-col justify-center items-center gap-3">
+              <EntityLogsContent logs={logs} />
             </div>
           </div>
+        </Slide>
+      </Slider>
 
-          <NoisyContainer>
-            <div tw="flex items-center justify-start overflow-hidden">
-              <Tag variant="accent" tw="mr-4 whitespace-nowrap">
-                {typeName}
-              </Tag>
-              <div tw="flex-auto">
-                <div className="tp-info text-main0">ITEM HASH</div>
-                <IconText iconName="copy" onClick={handleCopyHash}>
-                  {confidential.id}
-                </IconText>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div tw="flex my-5">
-              <div tw="mr-5">
-                <div className="tp-info text-main0">CORES</div>
-                <div>
-                  <Text>{confidential.resources.vcpus} x86 64bit</Text>
-                </div>
-              </div>
-
-              <div tw="mr-5">
-                <div className="tp-info text-main0">RAM</div>
-                <div>
-                  <Text>
-                    {convertByteUnits(confidential.resources.memory, {
-                      from: 'MiB',
-                      to: 'GiB',
-                      displayUnit: true,
-                    })}
-                  </Text>
-                </div>
-              </div>
-
-              <div tw="mr-5">
-                <div className="tp-info text-main0">HDD</div>
-                <div>
-                  <Text>
-                    {convertByteUnits(confidential.size, {
-                      from: 'MiB',
-                      to: 'GiB',
-                      displayUnit: true,
-                    })}
-                  </Text>
-                </div>
-              </div>
-            </div>
-
-            <div tw="mr-5">
-              <div className="tp-info text-main0">EXPLORER</div>
-              <div>
-                <a
-                  className="tp-body1 fs-16"
-                  href={confidential.url}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                >
-                  <IconText iconName="square-up-right">
-                    <Text>{ellipseText(confidential.url, 80)}</Text>
-                  </IconText>
-                </a>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div tw="my-5">
-              <TextGradient type="h7" as="h2" color="main0">
-                Connection methods
-              </TextGradient>
-
-              <div tw="my-5">
-                <div className="tp-info text-main0">SSH COMMAND</div>
-                <div>
-                  {status ? (
-                    <IconText iconName="copy" onClick={handleCopyConnect}>
-                      <Text>&gt;_ ssh root@{status.ipv6Parsed}</Text>
-                    </IconText>
-                  ) : (
-                    <div tw="flex items-end">
-                      <span tw="mr-1" className="tp-body1 fs-16 text-main2">
-                        Allocating
-                      </span>
-                      <ThreeDots
-                        width=".8rem"
-                        height="1rem"
-                        color={theme.color.main2}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div tw="my-5">
-                <div className="tp-info text-main0">IPv6</div>
-                <div>
-                  {status && (
-                    <IconText iconName="copy" onClick={handleCopyIpv6}>
-                      <Text>{status.ipv6Parsed}</Text>
-                    </IconText>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div tw="my-5">
-              <TextGradient type="h7" as="h2" color="main0">
-                Accessible for
-              </TextGradient>
-
-              <div tw="my-5 flex">
-                {mappedKeys.map(
-                  (key, i) =>
-                    key && (
-                      <div key={key?.id} tw="mr-5">
-                        <div className="tp-info text-main0">
-                          SSH KEY #{i + 1}
-                        </div>
-
-                        <Link
-                          className="tp-body1 fs-16"
-                          href={'?hash=' + key.id}
-                          referrerPolicy="no-referrer"
-                        >
-                          <IconText iconName="square-up-right">
-                            <Text>{key.label}</Text>
-                          </IconText>
-                        </Link>
-                      </div>
-                    ),
-                )}
-              </div>
-            </div>
-
-            {nodeDetails && (
-              <>
-                <Separator />
-
-                <TextGradient type="h7" as="h2" color="main0">
-                  Current CRN
-                </TextGradient>
-
-                <div tw="my-5">
-                  <div className="tp-info text-main0">NAME</div>
-                  <div>
-                    <Text>{nodeDetails.name}</Text>
-                  </div>
-                </div>
-
-                <div tw="my-5">
-                  <div className="tp-info text-main0">URL</div>
-                  <div>
-                    <a
-                      className="tp-body1 fs-16"
-                      href={nodeDetails.url}
-                      target="_blank"
-                      referrerPolicy="no-referrer"
-                    >
-                      <IconText iconName="square-up-right">
-                        <Text>{ellipseText(nodeDetails.url, 80)}</Text>
-                      </IconText>
-                    </a>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {volumes.length > 0 && (
-              <>
-                <Separator />
-
-                <TextGradient type="h7" as="h2" color="main0">
-                  Linked Storage(s)
-                </TextGradient>
-
-                <VolumeList {...{ volumes }} />
-              </>
-            )}
-          </NoisyContainer>
-
-          <div tw="mt-20 text-center">
-            <ButtonLink
-              variant="primary"
-              href="https://docs.aleph.im/computing/confidential/"
-              target="_blank"
-            >
-              Create new confidential instance
-            </ButtonLink>
-          </div>
-        </CenteredContainer>
-      </section>
+      {/* Side Panel */}
+      <SidePanel
+        title={
+          sidePanel.type === 'volume'
+            ? 'Volume'
+            : sidePanel.type === 'sshKey'
+              ? 'SSH Key'
+              : 'Custom Domain'
+        }
+        isOpen={sidePanel.isOpen}
+        onClose={closeSidePanel}
+      >
+        {sidePanel.type === 'volume' ? (
+          sidePanel.selectedVolume && (
+            <VolumeDetail volumeId={sidePanel.selectedVolume.id} />
+          )
+        ) : sidePanel.type === 'sshKey' ? (
+          sidePanel.selectedSSHKey && (
+            <SSHKeyDetail sshKeyId={sidePanel.selectedSSHKey.id} />
+          )
+        ) : sidePanel.type === 'domain' ? (
+          sidePanel.selectedDomain && (
+            <DomainDetail domainId={sidePanel.selectedDomain.id} />
+          )
+        ) : (
+          <>ERROR</>
+        )}
+      </SidePanel>
     </>
   )
 }
