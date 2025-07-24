@@ -60,6 +60,7 @@ export const defaultVolumeChannel = defaultConsoleChannel
 export const defaultSSHChannel = defaultConsoleChannel
 export const defaultInstanceChannel = defaultConsoleChannel
 export const defaultGpuInstanceChannel = defaultConsoleChannel
+export const defaultConfidentialInstanceChannel = defaultConsoleChannel
 export const defaultProgramChannel = defaultConsoleChannel
 export const defaultDomainChannel = defaultConsoleChannel
 export const defaultWebsiteChannel = defaultConsoleChannel
