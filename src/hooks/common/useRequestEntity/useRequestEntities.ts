@@ -1,4 +1,7 @@
-import { useAppStoreEntityRequest } from '../useStoreEntitiesRequest'
+import {
+  CACHE_STRATEGY,
+  useAppStoreEntityRequest,
+} from '../useStoreEntitiesRequest'
 import {
   ConfirmableEntity,
   useRetryNotConfirmedEntities,
@@ -6,6 +9,7 @@ import {
 import { useAppState } from '@/contexts/appState'
 import { EntityManager, ReadOnlyEntityManager } from '@/domain/types'
 import { StoreState } from '@/store/store'
+import { useMemo } from 'react'
 
 export type UseRequestEntitiesProps<Entity> = {
   name: keyof StoreState
@@ -20,6 +24,8 @@ export type UseRequestEntitiesReturn<Entity> = {
   loading: boolean
 }
 
+type RequestType = 'single' | 'multiple' | 'all'
+
 // Helper function to handle single entity requests (string ID)
 const handleSingleEntityRequest = async <
   Entity extends ConfirmableEntity & { id: string },
@@ -27,17 +33,13 @@ const handleSingleEntityRequest = async <
   manager: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>,
   entityId: string,
   currentState: { entities?: Entity[] },
-  name: keyof StoreState,
 ): Promise<Entity[]> => {
-  console.log(name, 'handling single entity request for ID:', entityId)
-
   // Check cache for single entity
   if (currentState?.entities?.length) {
     const cachedEntity = currentState.entities.find(
       (entity) => entity.id === entityId,
     )
     if (cachedEntity) {
-      console.log(name, 'single entity found in cache')
       return [cachedEntity]
     }
   }
@@ -54,10 +56,7 @@ const handleMultipleEntitiesRequest = async <
   manager: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>,
   entityIds: string[],
   currentState: { entities?: Entity[] },
-  name: keyof StoreState,
 ): Promise<Entity[]> => {
-  console.log(name, 'handling multiple entities request for IDs:', entityIds)
-
   if (!entityIds.length) return []
 
   // Check cache for multiple entities
@@ -66,7 +65,6 @@ const handleMultipleEntitiesRequest = async <
     const allEntitiesCached = entityIds.every((id) => existingIds.includes(id))
 
     if (allEntitiesCached) {
-      console.log(name, 'all requested entities found in cache')
       return currentState.entities.filter((entity) =>
         entityIds.includes(entity.id),
       )
@@ -83,13 +81,9 @@ const handleAllEntitiesRequest = async <
 >(
   manager: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>,
   currentState: { entities?: Entity[] },
-  name: keyof StoreState,
 ): Promise<Entity[]> => {
-  console.log(name, 'handling all entities request')
-
   // Check cache for all entities
   if (currentState?.entities?.length) {
-    console.log(name, 'returning cached entities')
     return currentState.entities
   }
 
@@ -110,6 +104,23 @@ export function useRequestEntities<
   const { account } = state.connection
   triggerDeps = [account, ids, ...triggerDeps]
 
+  const requestType: RequestType = useMemo(() => {
+    if (typeof ids === 'string') return 'single'
+    if (Array.isArray(ids)) return 'multiple'
+    return 'all'
+  }, [ids])
+
+  const cacheStrategy: CACHE_STRATEGY = useMemo(() => {
+    switch (requestType) {
+      case 'single':
+        return 'none'
+      case 'multiple':
+        return 'merge'
+      case 'all':
+        return 'overwrite'
+    }
+  }, [requestType])
+
   const {
     data: entities,
     loading,
@@ -121,19 +132,24 @@ export function useRequestEntities<
 
       const currentState = state[name] as { entities?: Entity[] }
 
-      // Route to appropriate handler based on ids type
-      if (typeof ids === 'string') {
-        return handleSingleEntityRequest(manager, ids, currentState, name)
-      } else if (Array.isArray(ids)) {
-        return handleMultipleEntitiesRequest(manager, ids, currentState, name)
-      } else {
-        return handleAllEntitiesRequest(manager, currentState, name)
+      switch (requestType) {
+        case 'single':
+          return handleSingleEntityRequest(manager, ids as string, currentState)
+        case 'multiple':
+          return handleMultipleEntitiesRequest(
+            manager,
+            ids as string[],
+            currentState,
+          )
+        case 'all':
+          return handleAllEntitiesRequest(manager, currentState)
       }
     },
     onSuccess: () => null,
     flushData: true,
     triggerOnMount,
     triggerDeps,
+    cacheStrategy,
   })
 
   useRetryNotConfirmedEntities({
