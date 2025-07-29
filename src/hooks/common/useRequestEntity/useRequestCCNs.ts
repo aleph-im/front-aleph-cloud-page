@@ -24,6 +24,7 @@ export function useRequestCCNs({
     flushData: false,
     triggerOnMount: true,
     triggerDeps,
+    cacheStrategy: 'overwrite',
   })
 
   // -----------------------------
