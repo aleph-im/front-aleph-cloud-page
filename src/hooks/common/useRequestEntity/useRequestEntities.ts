@@ -46,6 +46,7 @@ const handleSingleEntityRequest = async <
 
   // Fetch single entity
   const entity = await manager.get(entityId)
+
   return entity ? [entity] : []
 }
 
@@ -122,7 +123,7 @@ export function useRequestEntities<
   }, [requestType])
 
   const {
-    data: entities,
+    data: allEntities,
     loading,
     request,
   } = useAppStoreEntityRequest({
@@ -152,14 +153,32 @@ export function useRequestEntities<
     cacheStrategy,
   })
 
+  // Filter entities based on request type
+  const filteredEntities = useMemo(() => {
+    if (!allEntities) return allEntities
+
+    switch (requestType) {
+      case 'single':
+        return allEntities.filter((entity) => entity.id === (ids as string))
+      case 'multiple':
+        return allEntities.filter((entity) =>
+          (ids as string[]).includes(entity.id),
+        )
+      case 'all':
+        return allEntities
+      default:
+        return allEntities
+    }
+  }, [allEntities, requestType, ids])
+
   useRetryNotConfirmedEntities({
-    entities,
+    entities: filteredEntities,
     request,
     triggerOnMount,
   })
 
   return {
-    entities,
+    entities: filteredEntities,
     loading,
   }
 }
