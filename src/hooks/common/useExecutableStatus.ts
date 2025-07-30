@@ -5,6 +5,7 @@ import {
   ExecutableStatus,
 } from '@/domain/executable'
 import { ExecutableManager } from '@/domain/executable'
+import { calculateExecutableStatus } from '@/helpers/executableStatus'
 
 export type UseExecutableStatusProps = {
   executable: Executable | undefined
@@ -24,48 +25,13 @@ export function useExecutableStatus({
     useState<UseExecutableStatusReturn['status']>(undefined)
   const [hasTriedFetchingStatus, setHasTriedFetchingStatus] = useState(false)
 
-  const latestStatus = useCallback(() => {
-    if (!status?.status) return
-
-    let latestKey: string | undefined
-    let latestTime = -Infinity
-
-    for (const [key, value] of Object.entries(status.status)) {
-      if (!key.endsWith('At')) continue
-      if (value === null) continue
-
-      const t = new Date(value as string).getTime()
-      if (t > latestTime) {
-        latestTime = t
-        latestKey = key
-      }
-    }
-
-    if (!latestKey) return
-
-    return { latestKey, latestTime }
-  }, [status])
-
   const calculatedStatus: ExecutableCalculatedStatus = useMemo(() => {
-    if (!hasTriedFetchingStatus) return 'loading'
-    if (status?.version === 'v1') return 'v1'
-
-    const latest = latestStatus()
-    if (!latest) return 'not-allocated'
-
-    switch (latest.latestKey) {
-      case 'stoppedAt':
-        return 'stopped'
-      case 'stoppingAt':
-        return 'stopping'
-      case 'startedAt':
-        return 'running'
-      case 'preparingAt':
-        return 'preparing'
-      default:
-        return 'not-allocated'
-    }
-  }, [hasTriedFetchingStatus, status?.version, latestStatus])
+    return calculateExecutableStatus(
+      hasTriedFetchingStatus,
+      status,
+      executable?.type,
+    )
+  }, [hasTriedFetchingStatus, status, executable?.type])
 
   const shouldFetchStatus = useCallback(
     () => calculatedStatus !== 'running',
@@ -85,7 +51,6 @@ export function useExecutableStatus({
       try {
         const fetchedStatus = await manager.checkStatus(executable)
 
-        console.log('fetched status', fetchedStatus)
         setStatus(fetchedStatus)
       } finally {
         setHasTriedFetchingStatus(true)

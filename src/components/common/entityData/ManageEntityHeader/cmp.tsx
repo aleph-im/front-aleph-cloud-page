@@ -14,7 +14,6 @@ export const ManageEntityHeader = ({
   type,
 
   // Status
-  status,
   calculatedStatus,
 
   // Stop action
@@ -50,7 +49,6 @@ export const ManageEntityHeader = ({
         </div>
         <div tw="flex flex-col md:flex-row text-center gap-2 items-center justify-center">
           <EntityStatus
-            status={status}
             calculatedStatus={calculatedStatus}
             entity={entity}
             isAllocated={isAllocated}

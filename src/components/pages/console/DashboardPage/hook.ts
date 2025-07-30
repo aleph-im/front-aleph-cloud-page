@@ -10,6 +10,7 @@ import { useAuthorization } from '@/hooks/common/authorization/useAuthorization'
 import { useConfidentialManager } from '@/hooks/common/useManager/useConfidentialManager'
 import { GpuInstance } from '@/domain/gpuInstance'
 import { Confidential } from '@/domain/confidential'
+import { calculateExecutableStatus } from '@/helpers/executableStatus'
 
 export type AmountAggregatedStatus = {
   amount: number
@@ -70,12 +71,37 @@ function calculateComputingAggregatedStatus({
 }) {
   return entities.reduce(
     (ac, cv) => {
-      const hasIpv6 = !!entitiesStatus[cv.id]?.data?.ipv6Parsed
-      const statusKey = hasIpv6
-        ? 'running'
-        : cv.confirmed
-          ? 'paused'
-          : 'booting'
+      const statusRequest = entitiesStatus[cv.id]
+      const status = statusRequest?.data
+      const hasTriedFetching = !statusRequest?.loading
+
+      const calculatedStatus = calculateExecutableStatus(
+        hasTriedFetching,
+        status,
+        cv.type,
+      )
+
+      let statusKey: 'running' | 'paused' | 'booting'
+
+      switch (calculatedStatus) {
+        case 'v1':
+          const hasIpv6 = !!entitiesStatus[cv.id]?.data?.ipv6Parsed
+          statusKey = hasIpv6 ? 'running' : cv.confirmed ? 'paused' : 'booting'
+          break
+        case 'running':
+        case 'stopping':
+          statusKey = 'running'
+          break
+        case 'stopped':
+          statusKey = 'paused'
+          break
+        case 'preparing':
+        case 'not-allocated':
+        case 'loading':
+        default:
+          statusKey = 'booting'
+          break
+      }
 
       ac[statusKey] += 1
       ac.amount += 1
