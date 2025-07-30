@@ -29,7 +29,6 @@ export default function ManageFunction() {
     isPersistent,
 
     // Status data
-    status,
     calculatedStatus,
     isAllocated,
 
@@ -78,8 +77,6 @@ export default function ManageFunction() {
     handleBack,
   } = useManageFunction()
 
-  console.log('calculatedStatus', calculatedStatus)
-
   return (
     <>
       <Head>
@@ -94,7 +91,6 @@ export default function ManageFunction() {
         name={name}
         type={'function'}
         isAllocated={isAllocated}
-        status={status}
         calculatedStatus={calculatedStatus}
         // Start action
         showStart={isPersistent}

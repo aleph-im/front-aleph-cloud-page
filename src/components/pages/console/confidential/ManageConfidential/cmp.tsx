@@ -95,7 +95,6 @@ export default function ManageConfidential() {
         name={name}
         type="confidential instance"
         isAllocated={isAllocated}
-        status={status}
         calculatedStatus={calculatedStatus}
         // Start action
         showStart

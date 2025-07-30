@@ -6,7 +6,6 @@ import {
   EntityStatusPropsV2,
 } from './types'
 import { RotatingLines } from 'react-loader-spinner'
-import { EntityType } from '@/helpers/constants'
 
 const EntityStatusV2 = ({ theme, calculatedStatus }: EntityStatusPropsV2) => {
   const labelVariant = useMemo(() => {
@@ -100,26 +99,9 @@ const EntityStatusV1 = ({
 export const EntityStatus = ({
   entity,
   isAllocated,
-  status,
   calculatedStatus,
   theme,
 }: EntityStatusProps) => {
-  const isEntityTypeInstance = useMemo(() => {
-    if (!entity) return false
-
-    return (
-      entity.type === EntityType.Instance ||
-      entity.type === EntityType.Confidential ||
-      entity.type === EntityType.GpuInstance
-    )
-  }, [entity])
-
-  const entityStatusVersion = useMemo(() => {
-    if (status?.version === 'v1') return 'v1'
-
-    return isEntityTypeInstance ? 'v2' : 'v1'
-  }, [status?.version, isEntityTypeInstance])
-
   if (calculatedStatus === 'loading' || !entity) {
     return (
       <Label kind="secondary" variant="warning">
@@ -131,7 +113,7 @@ export const EntityStatus = ({
     )
   }
 
-  return entityStatusVersion === 'v1' ? (
+  return calculatedStatus === 'v1' ? (
     <EntityStatusV1 entity={entity} isAllocated={isAllocated} theme={theme} />
   ) : (
     <EntityStatusV2 calculatedStatus={calculatedStatus} theme={theme} />

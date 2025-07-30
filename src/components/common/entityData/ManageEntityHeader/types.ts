@@ -1,8 +1,4 @@
-import {
-  Executable,
-  ExecutableCalculatedStatus,
-  ExecutableStatus,
-} from '@/domain/executable'
+import { Executable, ExecutableCalculatedStatus } from '@/domain/executable'
 
 export type ManageEntityHeaderProps = {
   name: string
@@ -10,7 +6,6 @@ export type ManageEntityHeaderProps = {
   entity?: Executable
   type: 'instance' | 'function' | 'GPU instance' | 'confidential instance'
 
-  status?: ExecutableStatus
   calculatedStatus: ExecutableCalculatedStatus
 
   // Stop action

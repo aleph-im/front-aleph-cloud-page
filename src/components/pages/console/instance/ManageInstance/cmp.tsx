@@ -100,7 +100,6 @@ export default function ManageInstance() {
         name={name}
         type={EntityType.Instance}
         isAllocated={isAllocated}
-        status={status}
         calculatedStatus={calculatedStatus}
         // Start action
         showStart

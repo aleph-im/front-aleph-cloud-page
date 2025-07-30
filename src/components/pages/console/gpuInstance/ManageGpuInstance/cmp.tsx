@@ -95,7 +95,6 @@ export default function ManageGpuInstance() {
         name={name}
         type="GPU instance"
         isAllocated={isAllocated}
-        status={status}
         calculatedStatus={calculatedStatus}
         // Start action
         showStart
