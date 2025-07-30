@@ -1,5 +1,6 @@
 import { RequestState } from '@aleph-front/core'
-import { StoreReducer } from './store'
+import { StoreReducer, StoreAction } from './store'
+import { ConnectionActionType } from './connection'
 
 type CachedEntityName =
   | 'ssh'
@@ -191,7 +192,10 @@ export function createCascadeInvalidationActions(
   )
 }
 
-export type EntityReducer<T> = StoreReducer<EntityState<T>, EntityAction<T>>
+export type EntityReducer<T> = StoreReducer<
+  EntityState<T>,
+  EntityAction<T> | StoreAction
+>
 
 export function getEntityReducer<E, K extends keyof E = keyof E>(
   name: string,
@@ -199,6 +203,18 @@ export function getEntityReducer<E, K extends keyof E = keyof E>(
   virtualKey?: K,
 ): EntityReducer<E> {
   return (state = initialState, action) => {
+    // Handle connection actions regardless of entity name
+    if (
+      action.type === ConnectionActionType.CONNECTION_CONNECT ||
+      action.type === ConnectionActionType.CONNECTION_UPDATE ||
+      action.type === ConnectionActionType.CONNECTION_DISCONNECT
+    ) {
+      // Reset all cached entities when account connects, updates, or disconnects
+      return {
+        ...initialState,
+      }
+    }
+
     if (action.payload?.name !== name) return state
 
     switch (action.type) {
@@ -206,7 +222,9 @@ export function getEntityReducer<E, K extends keyof E = keyof E>(
         const { data, ...rest } = action.payload.state
 
         const entities = data
-        const keys = entities ? collectionKeys(entities, key) : undefined
+        const keys = entities
+          ? collectionKeys(entities, key as keyof E)
+          : undefined
 
         return {
           ...state,
