@@ -78,6 +78,8 @@ export default function ManageFunction() {
     handleBack,
   } = useManageFunction()
 
+  console.log('calculatedStatus', calculatedStatus)
+
   return (
     <>
       <Head>

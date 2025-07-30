@@ -5,6 +5,7 @@ import {
   ExecutableStatus,
 } from '@/domain/executable'
 import { ExecutableManager } from '@/domain/executable'
+import { EntityType } from '@/helpers/constants'
 
 export type UseExecutableStatusProps = {
   executable: Executable | undefined
@@ -49,6 +50,7 @@ export function useExecutableStatus({
   const calculatedStatus: ExecutableCalculatedStatus = useMemo(() => {
     if (!hasTriedFetchingStatus) return 'loading'
     if (status?.version === 'v1') return 'v1'
+    if (executable?.type === EntityType.Program) return 'v1'
 
     const latest = latestStatus()
     if (!latest) return 'not-allocated'
@@ -65,7 +67,7 @@ export function useExecutableStatus({
       default:
         return 'not-allocated'
     }
-  }, [hasTriedFetchingStatus, status?.version, latestStatus])
+  }, [hasTriedFetchingStatus, status?.version, executable?.type, latestStatus])
 
   const shouldFetchStatus = useCallback(
     () => calculatedStatus !== 'running',
