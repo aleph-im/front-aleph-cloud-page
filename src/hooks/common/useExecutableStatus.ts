@@ -85,7 +85,6 @@ export function useExecutableStatus({
       try {
         const fetchedStatus = await manager.checkStatus(executable)
 
-        console.log('fetched status', fetchedStatus)
         setStatus(fetchedStatus)
       } finally {
         setHasTriedFetchingStatus(true)

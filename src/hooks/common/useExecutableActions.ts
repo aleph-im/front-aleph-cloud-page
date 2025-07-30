@@ -199,10 +199,48 @@ export function useExecutableActions({
 
   const isAllocated = !!status?.ipv6Parsed
 
-  const stopDisabled = !isPAYG || !isAllocated || !crn
-  const startDisabled = !isPAYG || isAllocated || !crn
-  const rebootDisabled = !isAllocated || !crn
-  const deleteDisabled = !executable
+  const stopDisabled = useMemo(() => {
+    if (!isPAYG || !crn) return true
+
+    switch (calculatedStatus) {
+      case 'v1':
+        return !isAllocated
+      case 'running':
+        return false
+      default:
+        return true
+    }
+  }, [calculatedStatus, crn, isAllocated, isPAYG])
+
+  const startDisabled = useMemo(() => {
+    if (!isPAYG || !crn) return true
+
+    switch (calculatedStatus) {
+      case 'v1':
+        return isAllocated
+      case 'stopped':
+        return false
+      default:
+        return true
+    }
+  }, [calculatedStatus, crn, isAllocated, isPAYG])
+
+  const rebootDisabled = useMemo(() => {
+    if (!isPAYG || !crn) return true
+
+    switch (calculatedStatus) {
+      case 'v1':
+        return !isAllocated
+      case 'running':
+        return false
+      default:
+        return true
+    }
+  }, [calculatedStatus, crn, isAllocated, isPAYG])
+
+  const deleteDisabled = useMemo(() => {
+    return !executable
+  }, [executable])
 
   const handleStop = useCallback(
     () => handleSendOperation('stop'),
