@@ -126,7 +126,7 @@ export const EntityCard = ({
         return imageElement
       case 'introduction':
         return (
-          <div className="fs-12" tw="max-w-[13rem]">
+          <div className="fs-14" tw="max-w-[13rem]">
             {description}
           </div>
         )
