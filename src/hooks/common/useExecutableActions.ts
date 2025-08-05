@@ -199,8 +199,10 @@ export function useExecutableActions({
 
   const isAllocated = !!status?.ipv6Parsed
 
+  console.log('calculatedStatus', calculatedStatus, 'status', status)
+
   const stopDisabled = useMemo(() => {
-    if (!isPAYG || !crn) return true
+    if (isPAYG || !crn) return true
 
     switch (calculatedStatus) {
       case 'v1':
@@ -213,7 +215,7 @@ export function useExecutableActions({
   }, [calculatedStatus, crn, isAllocated, isPAYG])
 
   const startDisabled = useMemo(() => {
-    if (!isPAYG || !crn) return true
+    if (isPAYG || !crn) return true
 
     switch (calculatedStatus) {
       case 'v1':
@@ -226,7 +228,7 @@ export function useExecutableActions({
   }, [calculatedStatus, crn, isAllocated, isPAYG])
 
   const rebootDisabled = useMemo(() => {
-    if (!isPAYG || !crn) return true
+    if (!crn) return true
 
     switch (calculatedStatus) {
       case 'v1':
@@ -236,7 +238,7 @@ export function useExecutableActions({
       default:
         return true
     }
-  }, [calculatedStatus, crn, isAllocated, isPAYG])
+  }, [calculatedStatus, crn, isAllocated])
 
   const deleteDisabled = useMemo(() => {
     return !executable
