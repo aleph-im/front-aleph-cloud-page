@@ -168,7 +168,7 @@ export default function DashboardPage() {
                 }
                 title="instances"
                 img={EntityTypeObject[EntityType.Instance]}
-                description="Launch and manage virtual private servers (VPS) tailored to your needs. Choose automatic or manual node selection for complete control over your computing environment."
+                description="Deploy and manage VPS with full control. Pick nodes manually or automatically to match your computing environment."
                 introductionButtonText="Create your instance"
                 dashboardPath="/console/computing/instance"
                 createPath="/console/computing/instance/new"
@@ -188,7 +188,7 @@ export default function DashboardPage() {
                 isBeta
                 title="GPU instances"
                 img={EntityTypeObject[EntityType.GpuInstance]}
-                description="Power your workloads with high-performance GPU computing. Ideal for AI, ML, rendering, and complex simulations. Scale effortlessly and take full control over your GPU resources."
+                description="Run AI, ML, rendering & simulations on high-performance GPUs. Scale easily with full control over your GPU resources."
                 introductionButtonText="Create your GPU Instance"
                 dashboardPath="/console/computing/gpu-instance"
                 createPath="/console/computing/gpu-instance/new"
