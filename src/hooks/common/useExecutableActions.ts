@@ -222,6 +222,8 @@ export function useExecutableActions({
         return isAllocated
       case 'stopped':
         return false
+      case 'not-allocated':
+        return false
       default:
         return true
     }
