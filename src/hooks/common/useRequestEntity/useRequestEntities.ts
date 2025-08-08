@@ -114,7 +114,7 @@ export function useRequestEntities<
   const cacheStrategy: CACHE_STRATEGY = useMemo(() => {
     switch (requestType) {
       case 'single':
-        return 'none'
+        return 'merge'
       case 'multiple':
         return 'merge'
       case 'all':
