@@ -6,12 +6,15 @@ import EntityTable from '@/components/common/EntityTable'
 import { Icon, NoisyContainer } from '@aleph-front/core'
 import IconText from '@/components/common/IconText'
 import { Text } from '../../common'
-import { EntityDomainTypeName } from '@/helpers/constants'
+import { EntityDomainType, EntityDomainTypeName } from '@/helpers/constants'
+import { useDomainsEntityNames } from '@/hooks/common/useDomainsEntityNames'
 
 export const DomainsTabContent = ({
   data,
   cta = true,
 }: DomainsTabContentProps) => {
+  const entityNames = useDomainsEntityNames(data)
+
   return (
     <>
       <NoisyContainer>
@@ -50,7 +53,13 @@ export const DomainsTabContent = ({
                 label: 'Ref',
                 width: '50%',
                 sortable: true,
-                render: (row) => row.ref,
+                render: (row) => {
+                  if (row.target === EntityDomainType.IPFS) {
+                    return row.ref
+                  }
+
+                  return entityNames.get(row.ref) ?? row.ref
+                },
                 cellProps: () => ({
                   css: tw`max-w-0 whitespace-nowrap overflow-hidden text-ellipsis px-3!`,
                 }),
