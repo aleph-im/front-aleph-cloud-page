@@ -89,7 +89,7 @@ export const EntityHostingCRN = ({
                   {nodeDetails ? (
                     nodeDetails.version
                   ) : (
-                    <Skeleton width="7rem" />
+                    <Skeleton width="4rem" />
                   )}
                 </Text>
               </div>
