@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocalRequest, useNotification } from '@aleph-front/core'
-import { CRN, NodeManager } from '@/domain/node'
+import { CRNSpecs, NodeManager } from '@/domain/node'
 import {
   Executable,
   ExecutableCalculatedStatus,
@@ -40,6 +40,7 @@ export type UseExecutableActionsProps = {
 export type NodeDetails = {
   name: string
   url: string
+  version: string
 }
 
 export type UseExecutableActionsReturn = {
@@ -84,7 +85,7 @@ export function useExecutableActions({
   // ----------------------------
 
   const noti = useNotification()
-  const [crn, setCRN] = useState<CRN>()
+  const [crn, setCRN] = useState<CRNSpecs>()
 
   useEffect(() => {
     let cancelled = false
@@ -113,6 +114,7 @@ export function useExecutableActions({
     return {
       name: crn.name || crn.hash,
       url: crn.address || '',
+      version: crn.version || 'unknown',
     }
   }, [crn])
 
@@ -198,8 +200,6 @@ export function useExecutableActions({
   ])
 
   const isAllocated = !!status?.ipv6Parsed
-
-  console.log('calculatedStatus', calculatedStatus, 'status', status)
 
   const stopDisabled = useMemo(() => {
     if (isPAYG || !crn) return true

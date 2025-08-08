@@ -42,7 +42,7 @@ import {
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
 import { BlockchainId } from './connect/base'
-import { CRN, NodeManager } from './node'
+import { CRN, CRNSpecs, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
 import {
   convertByteUnits,
@@ -290,12 +290,12 @@ export abstract class ExecutableManager<T extends Executable> {
     }
   }
 
-  async getAllocationCRN(executable: T): Promise<CRN | undefined> {
+  async getAllocationCRN(executable: T): Promise<CRNSpecs | undefined> {
     if (executable.payment?.type === PaymentType.superfluid) {
       const { receiver } = executable.payment
       if (!receiver) return
 
-      const nodes = await this.nodeManager.getCRNNodes()
+      const nodes = await this.nodeManager.getAllCRNsSpecs()
 
       // @note: 1) Try to filter the node by the requirements field on the executable message (legacy messages doesn't contain it)
 
@@ -322,11 +322,10 @@ export abstract class ExecutableManager<T extends Executable> {
 
     const { node_id, url } = response.node
 
-    const nodes = await this.nodeManager.getCRNNodes()
+    const nodes = await this.nodeManager.getAllCRNsSpecs()
 
     // @note: 1) Try to filter the node by node hash
     let node = nodes.find((node) => node.hash === node_id)
-
     if (node) return node
 
     // @note: 2) Try to filter the node by node address
@@ -337,10 +336,11 @@ export abstract class ExecutableManager<T extends Executable> {
         NodeManager.normalizeUrl(node.address) ===
           NodeManager.normalizeUrl(url),
     )
-
     if (node) return node
 
     // @note: 3) Fallback to a mock node (aleph provided nodes that are not part of the nodestatus collection)
+    const { latest: latestVersion } =
+      await this.nodeManager.getLatestCRNVersion()
 
     return {
       hash: node_id,
@@ -356,6 +356,7 @@ export abstract class ExecutableManager<T extends Executable> {
       status: 'linked',
       parent: null,
       type: 'compute',
+      version: latestVersion || undefined,
     }
   }
 

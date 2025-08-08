@@ -82,6 +82,18 @@ export const EntityHostingCRN = ({
                 )}
               </div>
             </div>
+            <div>
+              <InfoTitle>VERSION</InfoTitle>
+              <div>
+                <Text>
+                  {nodeDetails ? (
+                    nodeDetails.version
+                  ) : (
+                    <Skeleton width="4rem" />
+                  )}
+                </Text>
+              </div>
+            </div>
           </div>
           {termsAndConditions && (
             <div>
