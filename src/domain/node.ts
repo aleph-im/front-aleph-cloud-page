@@ -472,7 +472,7 @@ export class NodeManager {
       const response = await fetchAndCache(
         crnListProgramUrl,
         `all_crn_specs`,
-        3_600,
+        300_000, // 5 minutes
         (res: { crns: any[]; last_refresh: string }) => {
           if (res.crns === undefined) throw Err.InvalidResponse
 
