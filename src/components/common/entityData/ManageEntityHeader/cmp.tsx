@@ -5,6 +5,7 @@ import BackButton from '../../BackButton'
 import { useTheme } from 'styled-components'
 import Skeleton from '../../Skeleton'
 import EntityStatus from '../EntityStatus'
+import { RotatingLines } from 'react-loader-spinner'
 
 export const ManageEntityHeader = ({
   // Basic data
@@ -19,22 +20,27 @@ export const ManageEntityHeader = ({
   // Stop action
   showStop = false,
   stopDisabled,
+  stopLoading = false,
   onStop: handleStop,
   // Start action
   showStart = false,
   startDisabled,
+  startLoading = false,
   onStart: handleStart,
   // Reboot action
   showReboot = false,
   rebootDisabled,
+  rebootLoading = false,
   onReboot: handleReboot,
   // Delete action
   showDelete = false,
   deleteDisabled,
+  deleteLoading = false,
   onDelete: handleDelete,
   // Download action
   showDownload = false,
   downloadDisabled,
+  downloadLoading = false,
   onDownload: handleDownload,
   // Go back action
   onBack: handleBack,
@@ -70,9 +76,16 @@ export const ManageEntityHeader = ({
                 variant="secondary"
                 size="sm"
                 onClick={handleStop}
-                disabled={stopDisabled}
+                disabled={stopDisabled || stopLoading}
               >
-                <Icon name="stop" />
+                {stopLoading ? (
+                  <RotatingLines
+                    strokeColor={theme.color.base2}
+                    width=".8rem"
+                  />
+                ) : (
+                  <Icon name="stop" />
+                )}
               </Button>
             </Tooltip>
           )}
@@ -88,9 +101,16 @@ export const ManageEntityHeader = ({
                 variant="secondary"
                 size="sm"
                 onClick={handleStart}
-                disabled={startDisabled}
+                disabled={startDisabled || startLoading}
               >
-                <Icon name="play" />
+                {startLoading ? (
+                  <RotatingLines
+                    strokeColor={theme.color.base2}
+                    width=".8rem"
+                  />
+                ) : (
+                  <Icon name="play" />
+                )}
               </Button>
             </Tooltip>
           )}
@@ -106,9 +126,16 @@ export const ManageEntityHeader = ({
                 variant="secondary"
                 size="sm"
                 onClick={handleReboot}
-                disabled={rebootDisabled}
+                disabled={rebootDisabled || rebootLoading}
               >
-                <Icon name="arrow-rotate-backward" />
+                {rebootLoading ? (
+                  <RotatingLines
+                    strokeColor={theme.color.base2}
+                    width=".8rem"
+                  />
+                ) : (
+                  <Icon name="arrow-rotate-backward" />
+                )}
               </Button>
             </Tooltip>
           )}
@@ -126,9 +153,16 @@ export const ManageEntityHeader = ({
                 forwardedAs="a"
                 size="sm"
                 onClick={handleDownload}
-                disabled={downloadDisabled}
+                disabled={downloadDisabled || downloadLoading}
               >
-                <Icon name="download" />
+                {downloadLoading ? (
+                  <RotatingLines
+                    strokeColor={theme.color.base2}
+                    width=".8rem"
+                  />
+                ) : (
+                  <Icon name="download" />
+                )}
               </Button>
             </Tooltip>
           )}
@@ -144,9 +178,16 @@ export const ManageEntityHeader = ({
                 variant="error"
                 size="sm"
                 onClick={handleDelete}
-                disabled={deleteDisabled}
+                disabled={deleteDisabled || deleteLoading}
               >
-                <Icon name="trash" />
+                {deleteLoading ? (
+                  <RotatingLines
+                    strokeColor={theme.color.base2}
+                    width=".8rem"
+                  />
+                ) : (
+                  <Icon name="trash" />
+                )}
               </Button>
             </Tooltip>
           )}

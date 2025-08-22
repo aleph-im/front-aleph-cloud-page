@@ -54,14 +54,19 @@ export default function ManageFunction() {
 
     // Action buttons
     stopDisabled,
+    stopLoading,
     handleStop,
     startDisabled,
+    startLoading,
     handleStart,
     rebootDisabled,
+    rebootLoading,
     handleReboot,
     deleteDisabled,
+    deleteLoading,
     handleDelete,
     downloadDisabled,
+    downloadLoading,
     handleDownload,
 
     // UI state
@@ -95,22 +100,27 @@ export default function ManageFunction() {
         // Start action
         showStart={isPersistent}
         startDisabled={startDisabled}
+        startLoading={startLoading}
         onStart={handleStart}
         // Delete action
         showDelete
         deleteDisabled={deleteDisabled}
+        deleteLoading={deleteLoading}
         onDelete={handleDelete}
         // Stop action
         showStop={isPersistent}
         stopDisabled={stopDisabled}
+        stopLoading={stopLoading}
         onStop={handleStop}
         // Reboot action
         showReboot={isPersistent}
         rebootDisabled={rebootDisabled}
+        rebootLoading={rebootLoading}
         onReboot={handleReboot}
         // Download action
         showDownload
         downloadDisabled={downloadDisabled}
+        downloadLoading={downloadLoading}
         onDownload={handleDownload}
         // Go back action
         onBack={handleBack}

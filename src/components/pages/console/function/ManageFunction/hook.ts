@@ -61,6 +61,7 @@ export type ManageFunction = UseExecutableActionsReturn & {
   setTabId: (tabId: string) => void
   handleDownload: () => void
   downloadDisabled: boolean
+  downloadLoading: boolean
   handleDownloadLogs: () => void
   handleRuntimeVolumeClick: (id: string) => void
   handleCodebaseVolumeClick: (id: string) => void
@@ -148,6 +149,7 @@ export function useManageFunction(): ManageFunction {
   // Payment data
   const [cost, setCost] = useState<number>()
   const [loading, setLoading] = useState<boolean>(false)
+  const [downloadLoading, setDownloadLoading] = useState<boolean>(false)
 
   // Fetch cost data
   useEffect(() => {
@@ -207,15 +209,21 @@ export function useManageFunction(): ManageFunction {
     if (!programManager) throw Err.ConnectYourWallet
     if (!program) throw Err.FunctionNotFound
 
-    await programManager.download(program)
+    try {
+      setDownloadLoading(true)
+      await programManager.download(program)
+    } finally {
+      setDownloadLoading(false)
+    }
   }, [programManager, program])
 
   const downloadDisabled = useMemo(() => {
     if (!programManager) return true
     if (!program) return true
+    if (downloadLoading) return true
 
     return false
-  }, [program, programManager])
+  }, [program, programManager, downloadLoading])
 
   // Side panel handlers
   const openVolumeSidePanel = useCallback(
@@ -290,6 +298,7 @@ export function useManageFunction(): ManageFunction {
 
     handleDownload,
     downloadDisabled,
+    downloadLoading,
 
     setTabId,
     sliderActiveIndex,

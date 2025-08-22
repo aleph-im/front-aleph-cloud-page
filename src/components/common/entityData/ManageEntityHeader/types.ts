@@ -11,26 +11,31 @@ export type ManageEntityHeaderProps = {
   // Stop action
   showStop?: boolean
   stopDisabled?: boolean
+  stopLoading?: boolean
   onStop?: () => void
 
   // Start action
   showStart?: boolean
   startDisabled?: boolean
+  startLoading?: boolean
   onStart?: () => void
 
   // Reboot action
   showReboot?: boolean
   rebootDisabled?: boolean
+  rebootLoading?: boolean
   onReboot?: () => void
 
   // Delete action
   showDelete?: boolean
   deleteDisabled?: boolean
+  deleteLoading?: boolean
   onDelete?: () => void
 
   // Download action
   showDownload?: boolean
   downloadDisabled?: boolean
+  downloadLoading?: boolean
   onDownload?: () => void
 
   // Go back action

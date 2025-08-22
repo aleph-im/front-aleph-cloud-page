@@ -54,6 +54,10 @@ export type UseExecutableActionsReturn = {
   rebootDisabled: boolean
   deleteDisabled: boolean
   logsDisabled: boolean
+  stopLoading: boolean
+  startLoading: boolean
+  rebootLoading: boolean
+  deleteLoading: boolean
   streamDetails?: StreamPaymentDetails
   handleStop: () => void
   handleStart: () => void
@@ -86,6 +90,12 @@ export function useExecutableActions({
 
   const noti = useNotification()
   const [crn, setCRN] = useState<CRNSpecs>()
+
+  // Loading states
+  const [stopLoading, setStopLoading] = useState(false)
+  const [startLoading, setStartLoading] = useState(false)
+  const [rebootLoading, setRebootLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -137,11 +147,16 @@ export function useExecutableActions({
   )
 
   const handleSendOperation = useCallback(
-    async (operation: ExecutableOperations) => {
+    async (
+      operation: ExecutableOperations,
+      setLoading?: (loading: boolean) => void,
+    ) => {
       try {
         if (!manager) throw Err.ConnectYourWallet
         if (!nodeUrl) throw Err.InvalidNode
         if (!executableId) throw Err.InvalidNode
+
+        setLoading?.(true)
 
         await manager.sendPostOperation({
           hostname: nodeUrl,
@@ -154,6 +169,8 @@ export function useExecutableActions({
           title: 'Error',
           text: (e as Error)?.message,
         })
+      } finally {
+        setLoading?.(false)
       }
     },
     [manager, nodeUrl, noti, executableId],
@@ -165,6 +182,8 @@ export function useExecutableActions({
     if (!isPAYG) throw Err.StreamNotSupported
 
     try {
+      setStartLoading(true)
+
       const instanceNetwork = executable.payment?.chain
       const incompatibleNetwork = checkNetworkCompatibility(instanceNetwork)
 
@@ -188,6 +207,8 @@ export function useExecutableActions({
         title: 'Error',
         text: (e as Error)?.message,
       })
+    } finally {
+      setStartLoading(false)
     }
   }, [
     crn,
@@ -247,12 +268,12 @@ export function useExecutableActions({
   }, [executable])
 
   const handleStop = useCallback(
-    () => handleSendOperation('stop'),
+    () => handleSendOperation('stop', setStopLoading),
     [handleSendOperation],
   )
 
   const handleReboot = useCallback(
-    () => handleSendOperation('reboot'),
+    () => handleSendOperation('reboot', setRebootLoading),
     [handleSendOperation],
   )
 
@@ -274,6 +295,8 @@ export function useExecutableActions({
     if (!executable) throw Err.InstanceNotFound
 
     try {
+      setDeleteLoading(true)
+
       // Check if the current network matches the instance's payment network
       const instanceNetwork = executable.chain || executable.payment?.chain
       const isPAYG = executable.payment?.type === PaymentType.superfluid
@@ -337,6 +360,7 @@ export function useExecutableActions({
         detail,
       })
     } finally {
+      setDeleteLoading(false)
       await stop()
     }
   }, [
@@ -390,6 +414,10 @@ export function useExecutableActions({
     rebootDisabled,
     deleteDisabled,
     logsDisabled: !logs,
+    stopLoading,
+    startLoading,
+    rebootLoading,
+    deleteLoading,
     handleStop,
     handleStart,
     handleReboot,

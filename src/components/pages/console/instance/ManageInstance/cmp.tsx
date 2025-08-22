@@ -64,12 +64,16 @@ export default function ManageInstance() {
 
     // Action buttons
     stopDisabled,
+    stopLoading,
     handleStop,
     startDisabled,
+    startLoading,
     handleStart,
     rebootDisabled,
+    rebootLoading,
     handleReboot,
     deleteDisabled,
+    deleteLoading,
     handleDelete,
 
     // Side panel
@@ -104,18 +108,22 @@ export default function ManageInstance() {
         // Start action
         showStart
         startDisabled={startDisabled}
+        startLoading={startLoading}
         onStart={handleStart}
         // Delete action
         showDelete
         deleteDisabled={deleteDisabled}
+        deleteLoading={deleteLoading}
         onDelete={handleDelete}
         // Stop action
         showStop
         stopDisabled={stopDisabled}
+        stopLoading={stopLoading}
         onStop={handleStop}
         // Reboot action
         showReboot
         rebootDisabled={rebootDisabled}
+        rebootLoading={rebootLoading}
         onReboot={handleReboot}
         // Go back action
         onBack={handleBack}
