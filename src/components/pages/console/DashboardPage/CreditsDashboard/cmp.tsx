@@ -10,8 +10,8 @@ import { SectionTitle } from '@/components/common/CompositeTitle'
 
 import ToggleDashboard from '@/components/common/ToggleDashboard'
 import StyledTable from '@/components/common/Table'
-import ButtonLink from '@/components/common/ButtonLink'
 import tw from 'twin.macro'
+import DetailsMenuButton from '@/components/common/DetailsMenuButton'
 
 export default function CreditsDashboard() {
   const [creditsDashboardOpen, setCreditsDashboardOpen] = useState(true)
@@ -94,69 +94,104 @@ export default function CreditsDashboard() {
               </TextGradient>
 
               <Button variant="textOnly" size="sm" tw="mb-7!" disabled>
-                History <Icon name="chevron-square-right" />
+                History <Icon name="chevron-square-right" tw="ml-1" />
               </Button>
             </div>
-            <StyledTable
-              // borderType="none"
-              rowNoise
-              rowKey={(row) => row.id}
-              data={data}
-              columns={[
-                {
-                  label: 'STATUS',
-                  align: 'left',
-                  sortable: true,
-                  render: (row) => row.status,
-                },
-                {
-                  label: 'DATE',
-                  align: 'left',
-                  sortable: true,
-                  render: (row) => row.date,
-                },
-                {
-                  label: 'AMOUNT',
-                  align: 'left',
-                  sortable: true,
-                  render: (row) => row.amount,
-                },
-                {
-                  label: 'ASSET',
-                  align: 'left',
-                  sortable: true,
-                  render: (row) => row.asset,
-                },
-                {
-                  label: 'CREDITS',
-                  align: 'left',
-                  sortable: true,
-                  render: (row) => `~${row.credits}`,
-                },
-                {
-                  label: '',
-                  width: '100%',
-                  align: 'right',
-                  render: (row) => (
-                    <Button
-                      kind="functional"
-                      variant="textOnly"
-                      href={`/console/computing/instance/${row.id}`}
-                    >
-                      <div
-                        className="bg-base0"
-                        tw="h-10 w-12 flex items-center justify-center"
-                      >
-                        <Icon name="ellipsis" size="lg" />
-                      </div>
-                    </Button>
-                  ),
-                  cellProps: () => ({
-                    css: tw`pl-3!`,
-                  }),
-                },
-              ]}
-            />
+            <div tw="overflow-x-auto">
+              <StyledTable
+                // borderType="none"
+                // rowNoise
+                rowKey={(row) => row.id}
+                data={data}
+                columns={[
+                  {
+                    label: 'STATUS',
+                    align: 'left',
+                    sortable: true,
+                    render: (row) => {
+                      let color = 'warning'
+
+                      switch (row.status) {
+                        case 'finished':
+                          color = 'success'
+                          break
+                        case 'ongoing':
+                          color = 'warning'
+                          break
+                        case 'failed':
+                          color = 'error'
+                          break
+                      }
+
+                      return (
+                        <div tw="relative h-6 w-6">
+                          <Icon
+                            name="circle"
+                            gradient={color}
+                            tw="absolute top-0 left-0"
+                            size="24px"
+                          ></Icon>
+                          <Icon
+                            name="circle"
+                            color="base0"
+                            tw="absolute top-[1.5px] left-[1.5px]"
+                            size="21px"
+                          />
+                          <Icon
+                            name="alien-8bit"
+                            gradient={color}
+                            tw="absolute top-[4px] left-[2px]"
+                            size="16px"
+                          />
+                        </div>
+                      )
+                    },
+                  },
+                  {
+                    label: 'DATE',
+                    align: 'left',
+                    sortable: true,
+                    render: (row) => row.date,
+                  },
+                  {
+                    label: 'AMOUNT',
+                    align: 'left',
+                    sortable: true,
+                    render: (row) => row.amount,
+                  },
+                  {
+                    label: 'ASSET',
+                    align: 'left',
+                    sortable: true,
+                    render: (row) => row.asset,
+                  },
+                  {
+                    label: 'CREDITS',
+                    align: 'left',
+                    sortable: true,
+                    render: (row) => `~${row.credits}`,
+                  },
+                  {
+                    label: '',
+                    width: '100%',
+                    align: 'right',
+                    render: (row) => {
+                      return (
+                        <DetailsMenuButton
+                          menuItems={[
+                            { label: 'Details', href: '/' },
+                            { label: 'Report issue', href: '/' },
+                          ]}
+                        />
+                      )
+                    },
+                    cellProps: () => ({
+                      css: tw`pl-3!`,
+                    }),
+                  },
+                ]}
+              />
+            </div>
           </div>
         </div>
       </ToggleDashboard>
