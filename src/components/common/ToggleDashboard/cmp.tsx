@@ -1,19 +1,41 @@
-import { ReactNode, memo, useCallback, useRef, useState } from 'react'
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  memo,
+  useCallback,
+  useRef,
+  useState,
+} from 'react'
 import tw from 'twin.macro'
 import { Button, Icon, useTransition, useBounds } from '@aleph-front/core'
 import { StyledButtonsContainer, StyledToggleContainer } from './styles'
 
 export type ToggleDashboardProps = {
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
+
   buttons?: ReactNode
+  toggleButton?: { children: ReactNode; disabled?: boolean }
   children?: ReactNode
 }
 
 export const ToggleDashboard = ({
   buttons,
   children,
+  open,
+  setOpen,
+  toggleButton = {
+    children: (
+      <>
+        <Icon name="gauge" />
+        open dashboard
+      </>
+    ),
+    disabled: false,
+  },
   ...rest
 }: ToggleDashboardProps) => {
-  const [open, setOpen] = useState(true)
   const handleToogle = useCallback(() => setOpen((prev) => !prev), [])
 
   const ref = useRef<HTMLDivElement>(null)
@@ -57,9 +79,9 @@ export const ToggleDashboard = ({
               size="md"
               onClick={handleToogle}
               tw="gap-2.5"
+              disabled={toggleButton.disabled}
             >
-              <Icon name="gauge" />
-              open dashboard
+              {toggleButton.children}
             </Button>
           </StyledButtonsContainer>
         )}
