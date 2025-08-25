@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import Head from 'next/head'
 import {
   Button,
@@ -64,6 +64,7 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
       </Button>
     </Link>
   )
+  const [dashboardOpen, setDashboardOpen] = useState(true)
 
   return (
     <>
@@ -77,7 +78,11 @@ export const CoreChannelNodesPage = (props: UseCoreChannelNodesPageProps) => {
           <TextGradient type="h5" forwardedAs="h1" tw="mb-8">
             Core nodes
           </TextGradient>
-          <ToggleDashboard buttons={CreateNode}>
+          <ToggleDashboard
+            open={dashboardOpen}
+            setOpen={setDashboardOpen}
+            buttons={CreateNode}
+          >
             <div tw="flex items-start gap-6 flex-wrap 2xl:flex-nowrap">
               <div tw="flex-auto 2xl:flex-none max-w-full flex items-stretch gap-6 flex-wrap 2xl:flex-nowrap order-2 2xl:order-none">
                 <div tw="flex-auto 2xl:flex-none max-w-full">
