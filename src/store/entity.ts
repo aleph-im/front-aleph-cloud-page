@@ -209,7 +209,12 @@ export function getEntityReducer<E, K extends keyof E = keyof E>(
       action.type === ConnectionActionType.CONNECTION_UPDATE ||
       action.type === ConnectionActionType.CONNECTION_DISCONNECT
     ) {
-      // Reset all cached entities when account connects, updates, or disconnects
+      // For CCN/CRN entities, preserve data since it's global and not account-specific
+      if (name === 'ccns' || name === 'crns') {
+        return state
+      }
+
+      // Reset all other cached entities when account connects, updates, or disconnects
       return {
         ...initialState,
       }
