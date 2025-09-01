@@ -28,10 +28,13 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
         }
       }
 
+      border-collapse: separate;
+      border-spacing: 0 1rem;
+
       thead {
         color: ${theme.color.text};
-        background: ${({ theme }) => theme.color.light0};
-        border-bottom: 0.125rem solid ${theme.color.white};
+        background: ${({ theme }) => theme.color.purple1};
+
         th > div {
           opacity: 1 !important;
         }
@@ -40,6 +43,8 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
       tbody {
         tr {
           cursor: pointer;
+          background: ${({ theme }) => theme.color.purple1};
+          height: 4rem;
 
           td {
             transition: all ${timing} ${duration.fast}ms 0ms;
@@ -54,16 +59,6 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
           &._active {
             td {
               color: ${theme.color.main0};
-
-              &:first-child {
-                border-top-left-radius: 3.75rem;
-                border-bottom-left-radius: 3.75rem;
-              }
-
-              &:last-child {
-                border-top-right-radius: 3.75rem;
-                border-bottom-right-radius: 3.75rem;
-              }
             }
 
             .check-button {
@@ -99,7 +94,7 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
 
       td,
       th {
-        ${tw`px-4 w-0 whitespace-nowrap text-ellipsis`}
+        ${tw`py-1 px-6 w-0 whitespace-nowrap text-ellipsis`}
       }
     `
   }}
