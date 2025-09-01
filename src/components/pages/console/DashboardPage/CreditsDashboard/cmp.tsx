@@ -179,7 +179,10 @@ export default function CreditsDashboard() {
                       return (
                         <DetailsMenuButton
                           menuItems={[
-                            { label: 'Details', href: '/' },
+                            {
+                              label: 'Details',
+                              href: `/credits/detail/${row.id}`,
+                            },
                             { label: 'Report issue', href: '/' },
                           ]}
                         />

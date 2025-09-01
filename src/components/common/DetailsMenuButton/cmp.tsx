@@ -1,4 +1,11 @@
-import { memo, RefObject, useCallback, useRef, useState } from 'react'
+import {
+  memo,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Button, Icon, Tooltip } from '@aleph-front/core'
 import Link from 'next/link'
 
@@ -17,6 +24,27 @@ export const DetailsMenuButton = ({ menuItems }: DetailsMenuButtonProps) => {
 
   const handleClick = useCallback(() => setOpen(!open), [open, setOpen])
   const handleClose = useCallback(() => setOpen(false), [setOpen])
+
+  // Handle click outside of the tooltip to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        open &&
+        tooltipRef.current &&
+        !tooltipRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false)
+      }
+    }
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [open])
 
   return (
     <>
