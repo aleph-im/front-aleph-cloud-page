@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Button,
   Icon,
@@ -12,9 +12,18 @@ import ToggleDashboard from '@/components/common/ToggleDashboard'
 import StyledTable from '@/components/common/Table'
 import tw from 'twin.macro'
 import DetailsMenuButton from '@/components/common/DetailsMenuButton'
+import { useConnection } from '@/hooks/common/useConnection'
 
 export default function CreditsDashboard() {
-  const [creditsDashboardOpen, setCreditsDashboardOpen] = useState(true)
+  const [creditsDashboardOpen, setCreditsDashboardOpen] = useState(false)
+  const { account } = useConnection({ triggerOnMount: false })
+  const isConnected = !!account
+
+  useEffect(() => {
+    if (!isConnected && creditsDashboardOpen) {
+      setCreditsDashboardOpen(false)
+    }
+  }, [isConnected, creditsDashboardOpen])
 
   const data = [
     {
@@ -47,7 +56,7 @@ export default function CreditsDashboard() {
               Open credits <Icon name="credit-card" />
             </>
           ),
-          disabled: false,
+          disabled: !isConnected,
         }}
       >
         <div tw="flex flex-col gap-5">
