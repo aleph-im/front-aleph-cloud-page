@@ -185,30 +185,12 @@ export const CheckoutSummary = ({
   })
   const nftVoucherBalance = useNFTVoucherBalance()
 
-  const disabledHold =
-    disablePaymentMethod && paymentMethod !== PaymentMethod.Hold
-  const disabledStream =
-    disablePaymentMethod && paymentMethod !== PaymentMethod.Stream
-
-  const paymentMethodSwitchNode = control && (
-    <SelectPaymentMethod
-      name="paymentMethod"
-      control={control}
-      disabledHold={disabledHold}
-      disabledStream={disabledStream}
-      onSwitch={onSwitchPaymentMethod}
-      disabledStreamTooltip={disabledStreamTooltip}
-    />
-  )
-
   return (
     <>
       <div tw="md:mt-32" />
       <CheckoutSummaryFooter
         {...{
-          paymentMethod,
           submitButton: footerButton,
-          paymentMethodSwitch: paymentMethodSwitchNode,
           mainRef,
           totalCost: cost?.cost,
         }}
@@ -228,26 +210,14 @@ export const CheckoutSummary = ({
               </div>
             )}
 
-            {control && (
-              <>
-                <div tw="w-full my-6 mt-10">
-                  <div className="bg-purple0" tw="p-6">
-                    <TextGradient forwardedAs="h3" type="h7" tw="mb-3">
-                      Payment Method
-                    </TextGradient>
-                    <div tw="my-4">{paymentMethodSwitchNode}</div>
-                  </div>
-                </div>
-              </>
-            )}
-
             <div tw="my-6 p-6">
               <div tw="max-w-full overflow-auto">
                 <StyledHoldingSummaryLine $isHeader className="tp-body3 fs-12">
-                  <div>UNLOCKED</div>
+                  <div>AVAILABLE CREDITS</div>
                   <div>CURRENT WALLET {ellipseAddress(address)}</div>
                   <div>
-                    <Price value={unlockedAmount} />
+                    {unlockedAmount}
+                    {/* <Price value={unlockedAmount} /> */}
                   </div>
                 </StyledHoldingSummaryLine>
                 {nftVoucherBalance > 0 && (
@@ -274,17 +244,21 @@ export const CheckoutSummary = ({
                     {/* <div className="text-main0 tp-body2">{line.detail}</div> */}
                     <div>{line.detail}</div>
                     <div>
-                      <span className="text-main0 tp-body3">
+                      <span>
                         {line.cost !== 0 ? (
-                          <Price
-                            value={line.cost}
-                            duration={
-                              cost?.paymentMethod === PaymentMethod.Stream
-                                ? 'h'
-                                : undefined
-                            }
-                          />
+                          <div tw="flex gap-1">
+                            <span className="tp-body3">{line.cost}</span>
+                            <span className="tp-body">/ h</span>
+                          </div>
                         ) : (
+                          // <Price
+                          //   value={line.cost}
+                          //   duration={
+                          //     cost?.paymentMethod === PaymentMethod.Stream
+                          //       ? 'h'
+                          //       : undefined
+                          //   }
+                          // />
                           '-'
                         )}
                       </span>
@@ -324,41 +298,31 @@ export const CheckoutSummary = ({
                   })} */}
                 <StyledHoldingSummaryLine>
                   <div></div>
-                  <div className="text-main0 tp-body2">
-                    {paymentMethod === PaymentMethod.Hold
-                      ? 'Total'
-                      : 'Total / h'}
-                  </div>
+                  <div className="text-main0 tp-body2">Total credits / h</div>
                   <div>
-                    <span className="text-main0 tp-body3">
-                      <Price value={cost?.cost} />
+                    <span className="text-main0">
+                      {/* <Price value={cost?.cost} /> */}
+                      <div tw="flex gap-1">
+                        <span>{cost?.cost}</span>
+                        <span>/ h</span>
+                      </div>
                     </span>
                   </div>
                 </StyledHoldingSummaryLine>
-                {paymentMethod === PaymentMethod.Stream && (
-                  <StyledHoldingSummaryLine>
-                    <div></div>
-                    <div className="text-main0 tp-body2">Min. required</div>
-                    <div>
-                      <span className="text-main0 tp-body3">
-                        <Price value={cost?.cost * 4} />
-                      </span>
-                    </div>
-                  </StyledHoldingSummaryLine>
-                )}
+                <StyledHoldingSummaryLine>
+                  <div></div>
+                  <div className="text-main0 tp-body2">Min. required</div>
+                  <div>
+                    <span className="text-main0 tp-body3">
+                      {/* <Price value={cost?.cost * 4} /> */}
+                      <div tw="flex gap-1">
+                        <span>{cost?.cost * 4}</span>
+                      </div>
+                    </span>
+                  </div>
+                </StyledHoldingSummaryLine>
               </div>
             </div>
-
-            {paymentMethod === PaymentMethod.Stream && receiverAddress && (
-              <StreamSummary
-                {...{
-                  title: 'Review the transaction',
-                  sender: address,
-                  receiver: receiverAddress,
-                  flow: cost?.cost || 0,
-                }}
-              />
-            )}
 
             {buttonNode && <div tw="mt-16 text-center">{buttonNode}</div>}
           </div>
