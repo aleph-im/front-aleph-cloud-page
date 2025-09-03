@@ -33,7 +33,7 @@ import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import NewEntityTab from '@/components/common/NewEntityTab'
 import NodesTable from '@/components/common/NodesTable'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
 import CRNList from '../../../../common/CRNList'
@@ -318,7 +318,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         )}
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={1}>Selected GPU</SectionTitle>
+            <CompositeSectionTitle number={1}>
+              Selected GPU
+            </CompositeSectionTitle>
             <p>
               Your instance is configured with your manually selected GPU,
               operating under the <Strong>Pay-as-you-go</Strong> payment method
@@ -356,9 +358,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(1)}>
+            <CompositeSectionTitle number={sectionNumber(1)}>
               Select your tier
-            </SectionTitle>
+            </CompositeSectionTitle>
             {values.paymentMethod === PaymentMethod.Hold ? (
               <p>
                 Your instance is ready to be configured using our{' '}
@@ -399,9 +401,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(2)}>
+            <CompositeSectionTitle number={sectionNumber(2)}>
               Choose an image
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p>
               Chose a base image for your GPU Instance. It&apos;s the base
               system that you will be able to customize.
@@ -413,9 +415,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(3)}>
+            <CompositeSectionTitle number={sectionNumber(3)}>
               Configure SSH Key
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p>
               Access your cloud instances securely. Give existing key&apos;s
               below access to this instance or add new keys. Remember, storing
@@ -429,7 +431,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(4)}>Name and tags</SectionTitle>
+            <CompositeSectionTitle number={sectionNumber(4)}>
+              Name and tags
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Organize and identify your instances more effectively by assigning
               a unique name, obtaining a hash reference, and defining multiple
@@ -444,9 +448,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(5)}>
+            <CompositeSectionTitle number={sectionNumber(5)}>
               Advanced Configuration Options
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Customize your GPU Instance with our Advanced Configuration
               Options. Add volumes and custom domains to meet your specific

@@ -6,7 +6,7 @@ import CheckoutSummary from '@/components/form/CheckoutSummary'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { AddNewVolume } from '@/components/form/AddVolume'
 import { Form } from '@/components/form/Form'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { insufficientFundsDisabledMessage } from './disabledMessages'
@@ -36,7 +36,7 @@ export function NewVolumePage() {
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="1">Add volume</SectionTitle>
+            <CompositeSectionTitle number="1">Add volume</CompositeSectionTitle>
             <AddNewVolume control={control} />
           </CenteredContainer>
         </section>

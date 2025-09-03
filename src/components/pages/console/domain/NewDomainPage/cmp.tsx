@@ -20,7 +20,7 @@ import {
   NAVIGATION_URLS,
 } from '@/helpers/constants'
 import { useNewDomainPage } from './hook'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import BackButtonSection from '@/components/common/BackButtonSection'
 
 export default function NewDomain() {
@@ -67,7 +67,9 @@ export default function NewDomain() {
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="1">Custom domain</SectionTitle>
+            <CompositeSectionTitle number="1">
+              Custom domain
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Assign a user-friendly domain to your website, instance or
               function to not only simplify access to your web3 application but
@@ -93,7 +95,9 @@ export default function NewDomain() {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="2">Select Resource</SectionTitle>
+            <CompositeSectionTitle number="2">
+              Select Resource
+            </CompositeSectionTitle>
             <p tw="mb-6">
               You&apos;ll need to specify the resource your custom domain will
               be associated with. This could either be a website, an instance or

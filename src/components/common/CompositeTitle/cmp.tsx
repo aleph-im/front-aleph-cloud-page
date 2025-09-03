@@ -1,5 +1,18 @@
-import { memo, ReactNode } from 'react'
-import { TextGradient } from '@aleph-front/core'
+import { ReactNode } from 'react'
+import {
+  CompositeTitle,
+  CompositeTitleProps,
+  TextGradient,
+} from '@aleph-front/core'
+
+export const CompositeSectionTitle = (props: CompositeTitleProps) => {
+  return (
+    <CompositeTitle
+      {...{ as: 'h2', color: 'main0', numberColor: 'main0', ...props }}
+    />
+  )
+}
+CompositeSectionTitle.displayName = 'CompositeSectionTitle'
 
 export const SectionTitle = ({ children }: { children: ReactNode }) => {
   return (
@@ -9,5 +22,3 @@ export const SectionTitle = ({ children }: { children: ReactNode }) => {
   )
 }
 SectionTitle.displayName = 'SectionTitle'
-
-export default memo(SectionTitle) as typeof SectionTitle

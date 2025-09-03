@@ -188,7 +188,7 @@ export function useManageFunction(): ManageFunction {
         return [
           {
             cost,
-            paymentType: PaymentType.hold,
+            paymentType: 'credit',
             runningTime,
             startTime: program.time,
             blockchain: program.payment.chain,
@@ -198,7 +198,7 @@ export function useManageFunction(): ManageFunction {
       default:
         return [
           {
-            paymentType: PaymentType.hold,
+            paymentType: 'credit',
             loading: true,
           } as PaymentData,
         ]

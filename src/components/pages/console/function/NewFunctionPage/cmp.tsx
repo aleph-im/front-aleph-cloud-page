@@ -16,7 +16,7 @@ import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime'
 import NewEntityTab from '@/components/common/NewEntityTab'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import { PageProps } from '@/types/types'
 import BackButtonSection from '@/components/common/BackButtonSection'
 
@@ -51,7 +51,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="1">Code to execute</SectionTitle>
+            <CompositeSectionTitle number="1">
+              Code to execute
+            </CompositeSectionTitle>
             <p>
               If your code has any dependencies, you can upload them separately
               in the volume section below to ensure a faster creation.
@@ -61,7 +63,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 py-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="2">Type of scheduling</SectionTitle>
+            <CompositeSectionTitle number="2">
+              Type of scheduling
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Configure if this program should be running continuously,
               persistent, or only on-demand in response to a user request or an
@@ -72,7 +76,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 py-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="3">Select an instance size</SectionTitle>
+            <CompositeSectionTitle number="3">
+              Select an instance size
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Select the hardware resources allocated to your functions,
               ensuring optimal performance and efficient resource usage tailored
@@ -88,7 +94,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 py-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="4">Name and tags</SectionTitle>
+            <CompositeSectionTitle number="4">
+              Name and tags
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Organize and identify your functions more effectively by assigning
               a unique name, obtaining a hash reference, and defining multiple
@@ -101,9 +109,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
 
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="5">
+            <CompositeSectionTitle number="5">
               Advanced Configuration Options
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Customize your function with our Advanced Configuration Options.
               Add volumes and custom domains to meet your specific needs.

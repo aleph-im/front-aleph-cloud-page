@@ -10,7 +10,7 @@ import CheckoutSummary from '@/components/form/CheckoutSummary'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import AddWebsiteFolder from '@/components/form/AddWebsiteFolder'
 import { Form } from '@/components/form/Form'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import AddDomains from '@/components/form/AddDomains'
@@ -43,7 +43,9 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="1">Choose your framework</SectionTitle>
+            <CompositeSectionTitle number="1">
+              Choose your framework
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Select your web development framework. This step provides guidance
               to properly configure your dapp, before building your project
@@ -56,7 +58,9 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 py-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="2">Upload your website</SectionTitle>
+            <CompositeSectionTitle number="2">
+              Upload your website
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Once your website is ready, upload your static folder here. This
               step transitions your local project to our decentralized cloud,
@@ -69,7 +73,9 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 py-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="3">Name and tags</SectionTitle>
+            <CompositeSectionTitle number="3">
+              Name and tags
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Organize and identify your websites more effectively by assigning
               a unique name, obtaining a hash reference, and defining multiple
@@ -82,9 +88,9 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
 
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="4">
+            <CompositeSectionTitle number="4">
               Advanced Configuration Options
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Customize your website with our Advanced Configuration Options.
               Add custom domains or ENS domains to meet your specific needs.
