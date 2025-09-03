@@ -59,6 +59,11 @@ export type HoldPaymentConfiguration = {
   type: PaymentMethod.Hold
 }
 
+export type CreditPaymentConfiguration = {
+  chain: BlockchainId
+  type: PaymentMethod.Credit
+}
+
 export type StreamPaymentConfiguration = {
   chain: BlockchainId
   type: PaymentMethod.Stream
@@ -71,6 +76,7 @@ export type StreamPaymentConfiguration = {
 export type PaymentConfiguration =
   | HoldPaymentConfiguration
   | StreamPaymentConfiguration
+  | CreditPaymentConfiguration
 
 export type Executable = BaseExecutableContent & {
   type:

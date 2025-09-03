@@ -179,6 +179,7 @@ export const EntityTypeObject: Record<EntityType, ObjectImgProps['id']> = {
 export enum PaymentMethod {
   Hold = 'hold',
   Stream = 'stream',
+  Credit = 'credit',
 }
 
 export const superToken = '0x1290248E01ED2F9f863A9752A8aAD396ef3a1B00'

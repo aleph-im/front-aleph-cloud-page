@@ -11,19 +11,16 @@ import {
 } from './types'
 import { memo, useEffect, useState } from 'react'
 import React from 'react'
-import { PaymentMethod } from '@/helpers/constants'
 import { VolumeManager, VolumeType } from '@/domain/volume'
 import InfoTooltipButton from '../../common/InfoTooltipButton'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { TextGradient } from '@aleph-front/core'
-import SelectPaymentMethod from '@/components/form/SelectPaymentMethod'
 import Price from '@/components/common/Price'
 import CheckoutSummaryFooter from '../CheckoutSummaryFooter'
 import { AddWebsite, WebsiteManager } from '@/domain/website'
 import { useConnection } from '@/hooks/common/useConnection'
 import { Blockchain } from '@aleph-sdk/core'
 import { useNFTVoucherBalance } from '@/hooks/common/useNFTVoucherBalance'
-import StreamSummary from '@/components/common/StreamSummary'
 
 const CheckoutSummaryVolumeLine = ({
   volume,
@@ -168,17 +165,11 @@ CheckoutSummaryWebsiteLine.displayName = 'CheckoutSummaryWebsiteLine'
 export const CheckoutSummary = ({
   address,
   cost,
-  paymentMethod,
   unlockedAmount,
   description,
   button: buttonNode,
   footerButton = buttonNode,
-  control,
-  receiverAddress,
   mainRef,
-  disablePaymentMethod = true,
-  disabledStreamTooltip,
-  onSwitchPaymentMethod,
 }: CheckoutSummaryProps) => {
   const { blockchain } = useConnection({
     triggerOnMount: false,

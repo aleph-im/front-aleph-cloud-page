@@ -7,14 +7,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { usePaymentMethod } from '@/hooks/common/usePaymentMethod'
-import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 import Router, { useRouter } from 'next/router'
-import {
-  createFromEVMAccount,
-  isAccountSupported as isAccountPAYGCompatible,
-  isBlockchainSupported as isBlockchainPAYGCompatible,
-} from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
 import {
   defaultNameAndTags,
@@ -44,10 +37,6 @@ import {
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
 import {
-  defaultStreamDuration,
-  StreamDurationField,
-} from '@/hooks/form/useSelectStreamDuration'
-import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
@@ -55,17 +44,12 @@ import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
 import { BlockchainId, blockchains } from '@/domain/connect/base'
-import { PaymentConfiguration } from '@/domain/executable'
-import { EVMAccount } from '@aleph-sdk/evm'
-import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
-import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
 import {
-  accountConnectionRequiredDisabledMessage,
-  unsupportedHoldingDisabledMessage,
-  unsupportedManualCRNSelectionDisabledMessage,
-  unsupportedStreamManualCRNSelectionDisabledMessage,
-  unsupportedStreamDisabledMessage,
-} from './disabledMessages'
+  CreditPaymentConfiguration,
+  PaymentConfiguration,
+} from '@/domain/executable'
+import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
+import { accountConnectionRequiredDisabledMessage } from './disabledMessages'
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
@@ -83,8 +67,6 @@ export type NewInstanceFormState = NameAndTagsField & {
   systemVolume: InstanceSystemVolumeField
   nodeSpecs?: CRNSpecs
   paymentMethod: PaymentMethod
-  streamDuration: StreamDurationField
-  streamCost: number
   termsAndConditions?: string
 }
 
@@ -97,10 +79,7 @@ export type UseNewInstancePageReturn = {
   manuallySelectCRNDisabled: boolean
   manuallySelectCRNDisabledMessage?: TooltipProps['content']
   createInstanceDisabled: boolean
-  createInstanceDisabledMessage?: TooltipProps['content']
   createInstanceButtonTitle?: string
-  streamDisabled: boolean
-  disabledStreamDisabledMessage?: TooltipProps['content']
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
@@ -128,7 +107,6 @@ export type UseNewInstancePageReturn = {
 
 export function useNewInstancePage(): UseNewInstancePageReturn {
   const [, dispatch] = useAppState()
-  const { paymentMethod: globalPaymentMethod } = usePaymentMethod()
 
   const {
     blockchain,
@@ -145,7 +123,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const router = useRouter()
   const { crn: queryCRN } = router.query
 
-  const hasInitialized = useRef(false)
   const nodeRef = useRef<CRNSpecs | undefined>(undefined)
   const [selectedNode, setSelectedNode] = useState<CRNSpecs>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
@@ -194,53 +171,33 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     async (state: NewInstanceFormState) => {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
+      if (!node) throw Err.InvalidNode
+      if (!nodeSpecs) throw Err.InvalidCRNSpecs
 
-      let superfluidAccount
-      let payment: PaymentConfiguration = {
-        chain: BlockchainId.ETH,
-        type: PaymentMethod.Hold,
+      const [minSpecs] = defaultTiers
+      const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
+      if (!isValid) throw Err.InvalidCRNSpecs
+
+      if (!blockchain) {
+        handleConnect({ blockchain: BlockchainId.BASE })
+        throw Err.InvalidNetwork
       }
 
-      if (state.paymentMethod === PaymentMethod.Stream) {
-        if (!node || !node.stream_reward) throw Err.InvalidNode
-        if (!nodeSpecs) throw Err.InvalidCRNSpecs
-        if (!state?.streamCost) throw Err.InvalidStreamCost
-
-        const [minSpecs] = defaultTiers
-        const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
-        if (!isValid) throw Err.InvalidCRNSpecs
-
-        if (
-          !blockchain ||
-          !isBlockchainPAYGCompatible(blockchain) ||
-          !isAccountPAYGCompatible(account)
-        ) {
-          handleConnect({ blockchain: BlockchainId.BASE })
-          throw Err.InvalidNetwork
-        }
-
-        superfluidAccount = await createFromEVMAccount(account as EVMAccount)
-
-        payment = {
-          chain: blockchain,
-          type: PaymentMethod.Stream,
-          sender: account.address,
-          receiver: node.stream_reward,
-          streamCost: state.streamCost,
-          streamDuration: state.streamDuration,
-        }
+      const payment: CreditPaymentConfiguration = {
+        chain: blockchain,
+        type: PaymentMethod.Credit,
       }
 
       const instance = {
         ...state,
         payment,
-        node: state.paymentMethod === PaymentMethod.Stream ? node : undefined,
+        node,
       } as AddInstance
 
       const iSteps = await manager.getAddSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = manager.addSteps(instance, superfluidAccount)
+      const steps = manager.addSteps(instance)
 
       try {
         let accountInstance
@@ -289,12 +246,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       image: defaultInstanceImage,
       specs: defaultTiers[0],
       systemVolume: { size: defaultTiers[0]?.storage },
-      paymentMethod: globalPaymentMethod,
-      streamDuration: defaultStreamDuration,
-      streamCost: Number.POSITIVE_INFINITY,
+      paymentMethod: PaymentMethod.Credit,
       termsAndConditions: undefined,
     }),
-    [defaultTiers, globalPaymentMethod],
+    [defaultTiers],
   )
 
   const {
@@ -305,9 +260,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   } = useForm({
     defaultValues,
     onSubmit,
-    resolver: zodResolver(
-      !node ? InstanceManager.addSchema : InstanceManager.addStreamSchema,
-    ),
+    resolver: zodResolver(InstanceManager.addSchema),
     readyDeps: [],
   })
 
@@ -319,20 +272,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const { size: systemVolumeSize } = formValues.systemVolume
 
   const payment: PaymentConfiguration = useMemo(() => {
-    return formValues.paymentMethod === PaymentMethod.Stream
-      ? ({
-          chain: blockchain,
-          type: PaymentMethod.Stream,
-          sender: account?.address,
-          receiver: node?.stream_reward,
-          streamCost: formValues?.streamCost || 1,
-          streamDuration: formValues?.streamDuration,
-        } as PaymentConfiguration)
-      : ({
-          chain: blockchain,
-          type: PaymentMethod.Hold,
-        } as PaymentConfiguration)
-  }, [formValues, blockchain, account, node])
+    return {
+      chain: blockchain,
+      type: PaymentMethod.Credit,
+    } as CreditPaymentConfiguration
+  }, [blockchain])
 
   const costProps: UseInstanceCostProps = useMemo(
     () => ({
@@ -342,7 +286,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         specs: formValues.specs,
         volumes: formValues.volumes,
         domains: formValues.domains,
-        streamDuration: formValues.streamDuration,
         paymentMethod: formValues.paymentMethod,
         payment,
         isPersistent: true,
@@ -363,19 +306,12 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // Memos
 
   const shouldRequestTermsAndConditions = useMemo(() => {
-    return (
-      !!node?.terms_and_conditions &&
-      formValues.paymentMethod === PaymentMethod.Stream
-    )
-  }, [node, formValues.paymentMethod])
+    return !!node?.terms_and_conditions
+  }, [node])
 
   const blockchainName = useMemo(() => {
     return blockchain ? blockchains[blockchain]?.name : 'Current network'
   }, [blockchain])
-
-  // No longer disable payment method switching - allow switching regardless of connection state
-  const disabledStreamDisabledMessage = undefined
-  const streamDisabled = false
 
   const address = useMemo(() => account?.address || '', [account])
 
@@ -385,15 +321,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
         return accountConnectionRequiredDisabledMessage(
           'manually selecting CRNs',
         )
-
-      if (!isAccountPAYGCompatible(account))
-        return unsupportedStreamManualCRNSelectionDisabledMessage(
-          blockchainName,
-        )
-
-      if (formValues.paymentMethod === PaymentMethod.Hold)
-        return unsupportedManualCRNSelectionDisabledMessage()
-    }, [account, blockchainName, formValues.paymentMethod])
+    }, [account])
 
   const manuallySelectCRNDisabled = useMemo(() => {
     return !!manuallySelectCRNDisabledMessage
@@ -411,21 +339,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return canAfford
   }, [account, canAfford, isCreateButtonDisabled])
 
-  const createInstanceDisabledMessage: UseNewInstancePageReturn['createInstanceDisabledMessage'] =
-    useMemo(() => {
-      // Checks configuration for PAYG tier
-      if (formValues.paymentMethod === PaymentMethod.Stream) {
-        if (!isBlockchainPAYGCompatible(blockchain))
-          return unsupportedStreamDisabledMessage(blockchainName)
-      }
-
-      // Checks configuration for Holder tier
-      if (formValues.paymentMethod === PaymentMethod.Hold) {
-        if (!isBlockchainHoldingCompatible(blockchain))
-          return unsupportedHoldingDisabledMessage(blockchainName)
-      }
-    }, [blockchain, blockchainName, formValues.paymentMethod])
-
   const createInstanceButtonTitle: UseNewInstancePageReturn['createInstanceButtonTitle'] =
     useMemo(() => {
       if (!account) return 'Connect'
@@ -435,10 +348,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     }, [account, hasEnoughBalance])
 
   const createInstanceDisabled = useMemo(() => {
-    if (createInstanceButtonTitle !== 'Create instance') return true
-
-    return !!createInstanceDisabledMessage
-  }, [createInstanceButtonTitle, createInstanceDisabledMessage])
+    return createInstanceButtonTitle !== 'Create instance'
+  }, [createInstanceButtonTitle])
 
   // -------------------------
   // Handlers
@@ -491,16 +402,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Effects
 
-  // @note: First time the user loads the page, set payment method to Stream if CRN is present
-  useEffect(() => {
-    if (hasInitialized.current) return
-    if (!router.isReady) return
-
-    hasInitialized.current = true
-
-    if (queryCRN) setValue('paymentMethod', PaymentMethod.Stream)
-  }, [queryCRN, router.isReady, setValue])
-
   // @note: Updates url depending on payment method
   useEffect(() => {
     if (!node) return
@@ -509,12 +410,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     const { crn, ...rest } = Router.query
 
     Router.replace({
-      query:
-        formValues.paymentMethod === PaymentMethod.Hold
-          ? { ...rest }
-          : { ...rest, crn: node.hash },
+      query: { ...rest, crn: node.hash },
     })
-  }, [node, formValues.paymentMethod])
+  }, [node])
 
   const prevStorage = usePrevious(storage)
 
@@ -536,27 +434,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setValue('nodeSpecs', nodeSpecs)
   }, [nodeSpecs, setValue])
 
-  // @note: Set streamCost
-  useEffect(() => {
-    if (!cost) return
-    if (cost.paymentMethod !== PaymentMethod.Stream) return
-    if (formValues.streamCost === cost.cost) return
-
-    setValue('streamCost', cost.cost)
-  }, [cost, setValue, formValues])
-
-  // Sync form payment method with global state
-  useSyncPaymentMethod({
-    formPaymentMethod: formValues.paymentMethod,
-    setValue,
-  })
-
   return {
     address,
     accountBalance,
     blockchainName,
     createInstanceDisabled,
-    createInstanceDisabledMessage,
     createInstanceButtonTitle,
     manuallySelectCRNDisabled,
     manuallySelectCRNDisabledMessage,
@@ -567,8 +449,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     node,
     lastVersion,
     nodeSpecs,
-    streamDisabled,
-    disabledStreamDisabledMessage,
     selectedModal,
     setSelectedModal,
     selectedNode,

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
 import {
@@ -22,12 +22,7 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import {
-  EntityDomainType,
-  EntityType,
-  PaymentMethod,
-  apiServer,
-} from '@/helpers/constants'
+import { EntityDomainType, EntityType, apiServer } from '@/helpers/constants'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useNewInstancePage, UseNewInstancePageReturn } from './hook'
 import Form from '@/components/form/Form'
@@ -40,7 +35,6 @@ import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
 import CRNList from '../../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
-import BorderBox from '@/components/common/BorderBox'
 import ExternalLink from '@/components/common/ExternalLink'
 
 const CheckoutButton = React.memo(
@@ -95,12 +89,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     address,
     accountBalance,
     blockchainName,
-    streamDisabled,
-    disabledStreamDisabledMessage,
     manuallySelectCRNDisabled,
     manuallySelectCRNDisabledMessage,
     createInstanceDisabled,
-    createInstanceDisabledMessage,
     createInstanceButtonTitle,
     values,
     control,
@@ -126,11 +117,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleAcceptTermsAndConditions,
     handleCheckTermsAndConditions,
   } = useNewInstancePage()
-
-  const sectionNumber = useCallback(
-    (n: number) => (values.paymentMethod === PaymentMethod.Stream ? 1 : 0) + n,
-    [values.paymentMethod],
-  )
 
   // ------------------
   // Handle modals
@@ -298,7 +284,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
   const manuallySelectButtonRef = useRef<HTMLButtonElement>(null)
-  const manuallySelectButtonRef2 = useRef<HTMLButtonElement>(null)
 
   return (
     <>
@@ -316,87 +301,63 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <NewEntityTab selected="instance" />
           </CenteredContainer>
         </section>
-        {createInstanceDisabledMessage && (
-          <section tw="px-0 pt-20 pb-6 md:py-10">
-            <CenteredContainer>
-              <BorderBox $color="warning">
-                {createInstanceDisabledMessage}
-              </BorderBox>
-            </CenteredContainer>
-          </section>
-        )}
-        {values.paymentMethod === PaymentMethod.Stream && (
-          <section tw="px-0 pt-20 pb-6 md:py-10">
-            <CenteredContainer>
-              <CompositeSectionTitle number={1}>
-                Select your node
-              </CompositeSectionTitle>
-              <p>
-                Your instance is set up with your manually selected Compute
-                Resource Node (CRN), operating under the{' '}
-                <Strong>Pay-as-you-go</Strong> payment method on{' '}
-                <Strong>{blockchainName}</Strong>. This setup gives you direct
-                control over your resource allocation and costs, requiring
-                active management of your instance. To adjust your CRN or
-                explore different payment options, you can modify your selection
-                below.
-              </p>
-              <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
-                <NoisyContainer>
-                  <NodesTable
-                    columns={columns}
-                    data={nodeData}
-                    rowProps={() => ({ className: '_active' })}
-                  />
-                  <div tw="mt-6">
-                    {!node && (
-                      <>
-                        <ButtonWithInfoTooltip
-                          ref={manuallySelectButtonRef}
-                          type="button"
-                          kind="functional"
-                          variant="warning"
-                          size="md"
-                          onClick={handleManuallySelectCRN}
-                          disabled={manuallySelectCRNDisabled}
-                          tooltipContent={manuallySelectCRNDisabledMessage}
-                          tooltipPosition={{
-                            my: 'bottom-left',
-                            at: 'center-center',
-                          }}
-                        >
-                          Manually select CRN
-                        </ButtonWithInfoTooltip>
-                      </>
-                    )}
-                  </div>
-                </NoisyContainer>
-              </div>
-            </CenteredContainer>
-          </section>
-        )}
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(1)}>
+            <CompositeSectionTitle number={1}>
+              Select your node
+            </CompositeSectionTitle>
+            <p>
+              Your instance is set up with your manually selected Compute
+              Resource Node (CRN), operating under the{' '}
+              <Strong>Pay-as-you-go</Strong> payment method on{' '}
+              <Strong>{blockchainName}</Strong>. This setup gives you direct
+              control over your resource allocation and costs, requiring active
+              management of your instance. To adjust your CRN or explore
+              different payment options, you can modify your selection below.
+            </p>
+            <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
+              <NoisyContainer>
+                <NodesTable
+                  columns={columns}
+                  data={nodeData}
+                  rowProps={() => ({ className: '_active' })}
+                />
+                <div tw="mt-6">
+                  {!node && (
+                    <>
+                      <ButtonWithInfoTooltip
+                        ref={manuallySelectButtonRef}
+                        type="button"
+                        kind="functional"
+                        variant="warning"
+                        size="md"
+                        onClick={handleManuallySelectCRN}
+                        disabled={manuallySelectCRNDisabled}
+                        tooltipContent={manuallySelectCRNDisabledMessage}
+                        tooltipPosition={{
+                          my: 'bottom-left',
+                          at: 'center-center',
+                        }}
+                      >
+                        Manually select CRN
+                      </ButtonWithInfoTooltip>
+                    </>
+                  )}
+                </div>
+              </NoisyContainer>
+            </div>
+          </CenteredContainer>
+        </section>
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <CenteredContainer>
+            <CompositeSectionTitle number={2}>
               Select your tier
             </CompositeSectionTitle>
-            {values.paymentMethod === PaymentMethod.Hold ? (
-              <p>
-                Your instance is ready to be configured using our{' '}
-                <Strong>automated CRN selection</Strong>, set to run on{' '}
-                <Strong>{blockchainName}</Strong> with the{' '}
-                <Strong>Holder-tier payment</Strong> method, allowing you
-                seamless access while you hold ALEPH tokens. If you wish to
-                customize your Compute Resource Node (CRN) or use a different
-                payment approach, you can change your selection below.
-              </p>
-            ) : (
-              <p>
-                Please select one of the available instance tiers as a base for
-                your VM. You will be able to customize the volumes further below
-                in the form.
-              </p>
-            )}
+            <p>
+              Please select one of the available instance tiers as a base for
+              your VM. You will be able to customize the volumes further below
+              in the form.
+            </p>
 
             <div tw="px-0 my-6 relative">
               <SpinnerOverlay show={!!node && !nodeSpecs} />
@@ -405,34 +366,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 control={control}
                 type={EntityType.Instance}
                 isPersistent
-                paymentMethod={values.paymentMethod}
                 nodeSpecs={nodeSpecs}
               >
-                {values.paymentMethod !== PaymentMethod.Stream ? (
-                  <div tw="mt-6">
-                    <ButtonWithInfoTooltip
-                      ref={manuallySelectButtonRef2}
-                      type="button"
-                      kind="functional"
-                      variant="warning"
-                      size="md"
-                      disabled={manuallySelectCRNDisabled}
-                      onClick={handleManuallySelectCRN}
-                      tooltipContent={manuallySelectCRNDisabledMessage}
-                      tooltipPosition={{
-                        my: 'bottom-left',
-                        at: 'center-center',
-                      }}
-                    >
-                      Manually select CRN
-                    </ButtonWithInfoTooltip>
+                {!node && (
+                  <div tw="mt-6 text-center">
+                    First select your node in the previous step
                   </div>
-                ) : (
-                  !node && (
-                    <div tw="mt-6 text-center">
-                      First select your node in the previous step
-                    </div>
-                  )
                 )}
               </SelectInstanceSpecs>
             </div>
@@ -440,7 +379,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(2)}>
+            <CompositeSectionTitle number={3}>
               Choose an image
             </CompositeSectionTitle>
             <p>
@@ -454,7 +393,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(3)}>
+            <CompositeSectionTitle number={4}>
               Configure SSH Key
             </CompositeSectionTitle>
             <p>
@@ -470,7 +409,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(4)}>
+            <CompositeSectionTitle number={5}>
               Name and tags
             </CompositeSectionTitle>
             <p tw="mb-6">
@@ -487,7 +426,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(5)}>
+            <CompositeSectionTitle number={6}>
               Advanced Configuration Options
             </CompositeSectionTitle>
             <p tw="mb-6">
@@ -536,10 +475,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           cost={cost}
           receiverAddress={node?.reward}
           unlockedAmount={accountBalance}
-          paymentMethod={values.paymentMethod}
-          streamDuration={values.streamDuration}
-          disablePaymentMethod={streamDisabled}
-          disabledStreamTooltip={disabledStreamDisabledMessage}
           mainRef={mainRef}
           description={
             <>
@@ -555,7 +490,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <CheckoutButton
               disabled={createInstanceDisabled}
               title={createInstanceButtonTitle}
-              tooltipContent={createInstanceDisabledMessage}
               isFooter={false}
               shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
@@ -568,7 +502,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <CheckoutButton
               disabled={createInstanceDisabled}
               title={createInstanceButtonTitle}
-              tooltipContent={createInstanceDisabledMessage}
               isFooter={true}
               shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={

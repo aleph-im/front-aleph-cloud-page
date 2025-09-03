@@ -8,8 +8,6 @@ import FloatingFooter from '../FloatingFooter'
 
 export const CheckoutSummaryFooter = ({
   submitButton: submitButtonNode,
-  paymentMethodSwitch: paymentMethodSwitchNode,
-  paymentMethod,
   mainRef: containerRef,
   totalCost,
   shouldHide = true,

@@ -59,10 +59,12 @@ export type PriceTypeObject = {
     storage: {
       payg: string
       holding: string
+      credit: string
     }
     computeUnit: {
       payg: string
       holding: string
+      credit: string
     }
   }
   tiers: {
