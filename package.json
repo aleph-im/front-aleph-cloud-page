@@ -1,6 +1,6 @@
 {
   "name": "front-aleph-cloud",
-  "version": "0.34.3",
+  "version": "0.34.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
