@@ -521,7 +521,11 @@ export function getLatestReleases(
   payload: any,
   outdatedAfter = 1000 * 60 * 60 * 24 * 14,
 ) {
-  const versions = {
+  const versions: {
+    latest: string | null
+    prerelease: string | null
+    outdated: string | null
+  } = {
     latest: null,
     prerelease: null,
     outdated: null,
@@ -547,6 +551,22 @@ export function getLatestReleases(
     ) {
       versions.outdated = item.tag_name
     }
+  }
+
+  // If the latest version is newer than the prerelease, ignore the prerelease
+  // (this can happen when a stable version is released after a prerelease)
+  // Example:
+  // latest = 0.10.0, prerelease = 0.9.0-beta.1
+  // We want to show only latest = 0.10.0
+  // But,
+  // if latest = 0.10.0 and prerelease = 0.11.0-beta.1
+  // we want to show both
+  if (
+    versions.latest &&
+    versions.prerelease &&
+    versions.latest > versions.prerelease.split('-')[0]
+  ) {
+    versions.prerelease = null
   }
 
   return versions
