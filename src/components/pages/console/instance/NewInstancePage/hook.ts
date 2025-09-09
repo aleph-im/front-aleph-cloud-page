@@ -342,7 +342,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const createInstanceButtonTitle: UseNewInstancePageReturn['createInstanceButtonTitle'] =
     useMemo(() => {
       if (!account) return 'Connect'
-      if (!hasEnoughBalance) return 'Insufficient ALEPH'
+      if (!hasEnoughBalance) return 'Insufficient Credits'
 
       return 'Create instance'
     }, [account, hasEnoughBalance])
