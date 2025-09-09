@@ -8,11 +8,6 @@ import {
   useState,
 } from 'react'
 import Router, { useRouter } from 'next/router'
-import {
-  createFromEVMAccount,
-  isAccountSupported as isAccountPAYGCompatible,
-  isBlockchainSupported as isBlockchainPAYGCompatible,
-} from '@aleph-sdk/superfluid'
 import { useForm } from '@/hooks/common/useForm'
 import {
   defaultNameAndTags,
@@ -41,10 +36,6 @@ import {
 import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRNSpecs, NodeManager } from '@/domain/node'
 import {
-  defaultStreamDuration,
-  StreamDurationField,
-} from '@/hooks/form/useSelectStreamDuration'
-import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
@@ -52,15 +43,12 @@ import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
 import { BlockchainId, blockchains } from '@/domain/connect/base'
-import { PaymentConfiguration } from '@/domain/executable'
-import { EVMAccount } from '@aleph-sdk/evm'
-import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
-import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
 import {
-  unsupportedHoldingDisabledMessage,
-  unsupportedStreamDisabledMessage,
-  holderTierNotSupportedMessage,
-} from './disabledMessages'
+  CreditPaymentConfiguration,
+  PaymentConfiguration,
+} from '@/domain/executable'
+import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
+import { accountConnectionRequiredDisabledMessage } from './disabledMessages'
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
@@ -69,7 +57,6 @@ import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceM
 import { GpuInstanceManager } from '@/domain/gpuInstance'
 import usePrevious from '@/hooks/common/usePrevious'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
-import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -80,8 +67,6 @@ export type NewGpuInstanceFormState = NameAndTagsField & {
   systemVolume: InstanceSystemVolumeField
   nodeSpecs?: CRNSpecs
   paymentMethod: PaymentMethod
-  streamDuration: StreamDurationField
-  streamCost: number
   termsAndConditions?: string
 }
 
@@ -91,11 +76,10 @@ export type UseNewGpuInstancePageReturn = {
   address: string
   accountBalance: number
   blockchainName: string
+  manuallySelectCRNDisabled: boolean
+  manuallySelectCRNDisabledMessage?: TooltipProps['content']
   createInstanceDisabled: boolean
-  createInstanceDisabledMessage?: TooltipProps['content']
   createInstanceButtonTitle?: string
-  streamDisabled: boolean
-  disabledStreamDisabledMessage?: TooltipProps['content']
   values: any
   control: Control<any>
   errors: FieldErrors<NewGpuInstanceFormState>
@@ -203,46 +187,33 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     async (state: NewGpuInstanceFormState) => {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
-      if (!node || !node.stream_reward) throw Err.InvalidNode
+      if (!node) throw Err.InvalidNode
       if (!nodeSpecs) throw Err.InvalidCRNSpecs
-      if (!state?.streamCost) throw Err.InvalidStreamCost
 
       const [minSpecs] = defaultTiers
       const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
       if (!isValid) throw Err.InvalidCRNSpecs
 
-      if (
-        !blockchain ||
-        !isBlockchainPAYGCompatible(blockchain) ||
-        !isAccountPAYGCompatible(account)
-      ) {
+      if (!blockchain) {
         handleConnect({ blockchain: BlockchainId.BASE })
         throw Err.InvalidNetwork
       }
 
-      const superfluidAccount = await createFromEVMAccount(
-        account as EVMAccount,
-      )
-
-      const payment = {
+      const payment: CreditPaymentConfiguration = {
         chain: blockchain,
-        type: PaymentMethod.Stream,
-        sender: account.address,
-        receiver: node.stream_reward,
-        streamCost: state.streamCost,
-        streamDuration: state.streamDuration,
+        type: PaymentMethod.Credit,
       }
 
       const instance = {
         ...state,
         payment,
-        node: state.paymentMethod === PaymentMethod.Stream ? node : undefined,
+        node,
       } as AddInstance
 
       const iSteps = await manager.getAddSteps(instance)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = manager.addSteps(instance, superfluidAccount)
+      const steps = manager.addSteps(instance)
 
       try {
         let accountInstance
@@ -289,11 +260,9 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     () => ({
       ...defaultNameAndTags,
       image: defaultInstanceImage,
-      specs: undefined,
+      specs: defaultTiers[0],
       systemVolume: { size: defaultTiers[0]?.storage },
-      paymentMethod: PaymentMethod.Stream,
-      streamDuration: defaultStreamDuration,
-      streamCost: Number.POSITIVE_INFINITY,
+      paymentMethod: PaymentMethod.Credit,
       termsAndConditions: undefined,
     }),
     [defaultTiers],
@@ -307,8 +276,8 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   } = useForm({
     defaultValues,
     onSubmit,
-    resolver: zodResolver(GpuInstanceManager.addStreamSchema),
-    readyDeps: [defaultValues],
+    resolver: zodResolver(GpuInstanceManager.addSchema),
+    readyDeps: [],
   })
 
   const formValues = useWatch({ control }) as NewGpuInstanceFormState
@@ -321,13 +290,9 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   const payment: PaymentConfiguration = useMemo(() => {
     return {
       chain: blockchain,
-      type: PaymentMethod.Stream,
-      sender: account?.address,
-      receiver: node?.stream_reward,
-      streamCost: formValues?.streamCost || 1,
-      streamDuration: formValues?.streamDuration,
-    } as PaymentConfiguration
-  }, [formValues, blockchain, account, node])
+      type: PaymentMethod.Credit,
+    } as CreditPaymentConfiguration
+  }, [blockchain])
 
   const costProps: UseGpuInstanceCostProps = useMemo(
     () => ({
@@ -337,7 +302,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
         specs: formValues.specs,
         volumes: formValues.volumes,
         domains: formValues.domains,
-        streamDuration: formValues.streamDuration,
         paymentMethod: formValues.paymentMethod,
         payment,
         isPersistent: true,
@@ -357,20 +321,24 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // Memos
 
   const shouldRequestTermsAndConditions = useMemo(() => {
-    return (
-      !!node?.terms_and_conditions &&
-      formValues.paymentMethod === PaymentMethod.Stream
-    )
-  }, [node, formValues.paymentMethod])
+    return !!node?.terms_and_conditions
+  }, [node])
 
   const blockchainName = useMemo(() => {
     return blockchain ? blockchains[blockchain]?.name : 'Current network'
   }, [blockchain])
 
-  const disabledStreamDisabledMessage: UseNewGpuInstancePageReturn['disabledStreamDisabledMessage'] =
-    holderTierNotSupportedMessage()
+  const manuallySelectCRNDisabledMessage: UseNewGpuInstancePageReturn['manuallySelectCRNDisabledMessage'] =
+    useMemo(() => {
+      if (!account)
+        return accountConnectionRequiredDisabledMessage(
+          'manually selecting CRNs',
+        )
+    }, [account])
 
-  const streamDisabled = true
+  const manuallySelectCRNDisabled = useMemo(() => {
+    return !!manuallySelectCRNDisabledMessage
+  }, [manuallySelectCRNDisabledMessage])
 
   const address = useMemo(() => account?.address || '', [account])
 
@@ -386,34 +354,17 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     return canAfford
   }, [account, canAfford, isCreateButtonDisabled])
 
-  const createInstanceDisabledMessage: UseNewGpuInstancePageReturn['createInstanceDisabledMessage'] =
-    useMemo(() => {
-      // Checks configuration for PAYG tier
-      if (formValues.paymentMethod === PaymentMethod.Stream) {
-        if (!isBlockchainPAYGCompatible(blockchain))
-          return unsupportedStreamDisabledMessage(blockchainName)
-      }
-
-      // Checks configuration for Holder tier
-      if (formValues.paymentMethod === PaymentMethod.Hold) {
-        if (!isBlockchainHoldingCompatible(blockchain))
-          return unsupportedHoldingDisabledMessage(blockchainName)
-      }
-    }, [blockchain, blockchainName, formValues.paymentMethod])
-
   const createInstanceButtonTitle: UseNewGpuInstancePageReturn['createInstanceButtonTitle'] =
     useMemo(() => {
       if (!account) return 'Connect'
-      if (!hasEnoughBalance) return 'Insufficient ALEPH'
+      if (!hasEnoughBalance) return 'Insufficient Credits'
 
       return 'Create instance'
     }, [account, hasEnoughBalance])
 
   const createInstanceDisabled = useMemo(() => {
-    if (createInstanceButtonTitle !== 'Create instance') return true
-
-    return !!createInstanceDisabledMessage
-  }, [createInstanceButtonTitle, createInstanceDisabledMessage])
+    return createInstanceButtonTitle !== 'Create instance'
+  }, [createInstanceButtonTitle])
 
   // -------------------------
   // Handlers
@@ -494,35 +445,20 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     setValue('nodeSpecs', nodeSpecs)
   }, [nodeSpecs, setValue])
 
-  // @note: Set streamCost
-  useEffect(() => {
-    if (!cost) return
-    if (formValues.streamCost === cost.cost) return
-
-    setValue('streamCost', cost.cost)
-  }, [cost, setValue, formValues])
-
-  // Sync form payment method with global state
-  useSyncPaymentMethod({
-    formPaymentMethod: formValues.paymentMethod,
-    setValue,
-  })
-
   return {
     address,
     accountBalance,
     blockchainName,
     createInstanceDisabled,
-    createInstanceDisabledMessage,
     createInstanceButtonTitle,
+    manuallySelectCRNDisabled,
+    manuallySelectCRNDisabledMessage,
     values: formValues,
     control,
     errors,
     cost,
     node,
     nodeSpecs,
-    streamDisabled,
-    disabledStreamDisabledMessage,
     selectedModal,
     setSelectedModal,
     selectedNode,

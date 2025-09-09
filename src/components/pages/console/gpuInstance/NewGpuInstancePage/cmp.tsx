@@ -94,10 +94,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
     address,
     accountBalance,
     blockchainName,
-    streamDisabled,
-    disabledStreamDisabledMessage,
+    manuallySelectCRNDisabled,
+    manuallySelectCRNDisabledMessage,
     createInstanceDisabled,
-    createInstanceDisabledMessage,
     createInstanceButtonTitle,
     values,
     control,
@@ -123,12 +122,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
     handleCheckTermsAndConditions,
   } = useNewGpuInstancePage()
 
-  const sectionNumber = useCallback(
-    (n: number) => (values.paymentMethod === PaymentMethod.Stream ? 1 : 0) + n,
-    [values.paymentMethod],
-  )
-
-  // ------------------
   // Handle modals
   useEffect(
     () => {
@@ -307,15 +300,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             <NewEntityTab selected="gpu-instance" />
           </CenteredContainer>
         </section>
-        {createInstanceDisabledMessage && (
-          <section tw="px-0 pt-20 pb-6 md:py-10">
-            <CenteredContainer>
-              <BorderBox $color="warning">
-                {createInstanceDisabledMessage}
-              </BorderBox>
-            </CenteredContainer>
-          </section>
-        )}
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
             <CompositeSectionTitle number={1}>
@@ -345,6 +329,8 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
                         kind="functional"
                         variant="warning"
                         size="md"
+                        disabled={manuallySelectCRNDisabled}
+                        tooltipContent={manuallySelectCRNDisabledMessage}
                         onClick={handleManuallySelectCRN}
                       >
                         Manually select GPU
@@ -358,26 +344,14 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(1)}>
+            <CompositeSectionTitle number={1}>
               Select your tier
             </CompositeSectionTitle>
-            {values.paymentMethod === PaymentMethod.Hold ? (
-              <p>
-                Your instance is ready to be configured using our{' '}
-                <Strong>automated CRN selection</Strong>, set to run on{' '}
-                <Strong>{blockchainName}</Strong> with the{' '}
-                <Strong>Holder-tier payment</Strong> method, allowing you
-                seamless access while you hold ALEPH tokens. If you wish to
-                customize your Compute Resource Node (CRN) or use a different
-                payment approach, you can change your selection below.
-              </p>
-            ) : (
-              <p>
-                Please select one of the available instance tiers as a base for
-                your VM. You will be able to customize the volumes further below
-                in the form.
-              </p>
-            )}
+            <p>
+              Please select one of the available instance tiers as a base for
+              your VM. You will be able to customize the volumes further below
+              in the form.
+            </p>
 
             <div tw="px-0 my-6 relative">
               <SpinnerOverlay show={!!node && !nodeSpecs} />
@@ -387,7 +361,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
                 type={EntityType.GpuInstance}
                 gpuModel={node?.selectedGpu?.model}
                 isPersistent
-                paymentMethod={values.paymentMethod}
                 nodeSpecs={nodeSpecs}
               >
                 {!node && (
@@ -401,7 +374,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(2)}>
+            <CompositeSectionTitle number={2}>
               Choose an image
             </CompositeSectionTitle>
             <p>
@@ -415,7 +388,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(3)}>
+            <CompositeSectionTitle number={3}>
               Configure SSH Key
             </CompositeSectionTitle>
             <p>
@@ -431,7 +404,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(4)}>
+            <CompositeSectionTitle number={4}>
               Name and tags
             </CompositeSectionTitle>
             <p tw="mb-6">
@@ -448,7 +421,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={sectionNumber(5)}>
+            <CompositeSectionTitle number={5}>
               Advanced Configuration Options
             </CompositeSectionTitle>
             <p tw="mb-6">
@@ -498,10 +471,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
           cost={cost}
           receiverAddress={node?.reward}
           unlockedAmount={accountBalance}
-          paymentMethod={values.paymentMethod}
-          streamDuration={values.streamDuration}
-          disablePaymentMethod={streamDisabled}
-          disabledStreamTooltip={disabledStreamDisabledMessage}
           mainRef={mainRef}
           description={
             <>
@@ -517,7 +486,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             <CheckoutButton
               disabled={createInstanceDisabled}
               title={createInstanceButtonTitle}
-              tooltipContent={createInstanceDisabledMessage}
               isFooter={false}
               shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
@@ -530,7 +498,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             <CheckoutButton
               disabled={createInstanceDisabled}
               title={createInstanceButtonTitle}
-              tooltipContent={createInstanceDisabledMessage}
               isFooter={true}
               shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
