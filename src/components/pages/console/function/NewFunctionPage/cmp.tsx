@@ -24,7 +24,8 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
   const {
     address,
     accountBalance,
-    isCreateButtonDisabled,
+    createFunctionDisabled,
+    createFunctionButtonTitle,
     values,
     control,
     errors,
@@ -173,7 +174,6 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
           address={address}
           cost={cost}
           unlockedAmount={accountBalance}
-          paymentMethod={values.paymentMethod}
           mainRef={mainRef}
           description={
             <>
@@ -189,11 +189,11 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
               kind="default"
               size="lg"
               variant="primary"
-              disabled={isCreateButtonDisabled}
+              disabled={createFunctionDisabled}
               // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
               onClick={handleSubmit}
             >
-              Create function
+              {createFunctionButtonTitle || 'Create function'}
             </Button>
           }
         />

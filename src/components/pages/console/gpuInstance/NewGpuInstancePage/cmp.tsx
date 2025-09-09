@@ -1,5 +1,5 @@
 import React from 'react'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
 import {
@@ -21,12 +21,7 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import {
-  EntityDomainType,
-  EntityType,
-  PaymentMethod,
-  apiServer,
-} from '@/helpers/constants'
+import { EntityDomainType, EntityType, apiServer } from '@/helpers/constants'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
@@ -38,7 +33,6 @@ import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
 import CRNList from '../../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
-import BorderBox from '@/components/common/BorderBox'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useNewGpuInstancePage, UseNewGpuInstancePageReturn } from './hook'
 
