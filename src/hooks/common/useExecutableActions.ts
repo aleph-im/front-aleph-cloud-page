@@ -223,7 +223,7 @@ export function useExecutableActions({
   const isAllocated = !!status?.ipv6Parsed
 
   const stopDisabled = useMemo(() => {
-    if (isPAYG || !crn) return true
+    if (!isPAYG || !crn) return true
 
     switch (calculatedStatus) {
       case 'v1':
