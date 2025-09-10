@@ -9,7 +9,6 @@ import {
   NodeScore,
   TableColumn,
   NoisyContainer,
-  TooltipProps,
   Checkbox,
 } from '@aleph-front/core'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
@@ -34,54 +33,8 @@ import Strong from '@/components/common/Strong'
 import CRNList from '../../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ExternalLink from '@/components/common/ExternalLink'
-import { useNewGpuInstancePage, UseNewGpuInstancePageReturn } from './hook'
-
-const CheckoutButton = React.memo(
-  ({
-    disabled,
-    title = 'Create instance',
-    tooltipContent,
-    isFooter,
-    shouldRequestTermsAndConditions,
-    handleRequestTermsAndConditionsAgreement,
-    handleSubmit,
-  }: {
-    disabled: boolean
-    title?: string
-    tooltipContent?: TooltipProps['content']
-    isFooter: boolean
-    shouldRequestTermsAndConditions?: boolean
-    handleRequestTermsAndConditionsAgreement: UseNewGpuInstancePageReturn['handleRequestTermsAndConditionsAgreement']
-    handleSubmit: UseNewGpuInstancePageReturn['handleSubmit']
-  }) => {
-    const checkoutButtonRef = useRef<HTMLButtonElement>(null)
-
-    return (
-      <ButtonWithInfoTooltip
-        ref={checkoutButtonRef}
-        type={shouldRequestTermsAndConditions ? 'button' : 'submit'}
-        color="main0"
-        kind="default"
-        size="lg"
-        variant="primary"
-        disabled={disabled}
-        tooltipContent={tooltipContent}
-        tooltipPosition={{
-          my: isFooter ? 'bottom-right' : 'bottom-center',
-          at: isFooter ? 'top-right' : 'top-center',
-        }}
-        onClick={
-          shouldRequestTermsAndConditions
-            ? handleRequestTermsAndConditionsAgreement
-            : handleSubmit
-        }
-      >
-        {title}
-      </ButtonWithInfoTooltip>
-    )
-  },
-)
-CheckoutButton.displayName = 'CheckoutButton'
+import { useNewGpuInstancePage } from './hook'
+import CheckoutButton from '@/components/form/CheckoutButton'
 
 export default function NewGpuInstancePage({ mainRef }: PageProps) {
   const {
@@ -463,7 +416,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
           control={control}
           address={address}
           cost={cost}
-          receiverAddress={node?.reward}
           unlockedAmount={accountBalance}
           mainRef={mainRef}
           description={
@@ -481,18 +433,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
               disabled={createInstanceDisabled}
               title={createInstanceButtonTitle}
               isFooter={false}
-              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
-              handleRequestTermsAndConditionsAgreement={
-                handleRequestTermsAndConditionsAgreement
-              }
-              handleSubmit={handleSubmit}
-            />
-          }
-          footerButton={
-            <CheckoutButton
-              disabled={createInstanceDisabled}
-              title={createInstanceButtonTitle}
-              isFooter={true}
               shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement

@@ -79,7 +79,7 @@ export type UseNewInstancePageReturn = {
   manuallySelectCRNDisabled: boolean
   manuallySelectCRNDisabledMessage?: TooltipProps['content']
   createInstanceDisabled: boolean
-  createInstanceButtonTitle?: string
+  createInstanceButtonTitle: string
   values: any
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>

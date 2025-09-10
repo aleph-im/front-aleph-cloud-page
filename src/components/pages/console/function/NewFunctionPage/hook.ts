@@ -51,7 +51,7 @@ export type UseNewFunctionPage = {
   address: string
   accountBalance: number
   createFunctionDisabled: boolean
-  createFunctionButtonTitle?: string
+  createFunctionButtonTitle: string
   values: any
   control: Control<any>
   errors: FieldErrors<NewFunctionFormState>

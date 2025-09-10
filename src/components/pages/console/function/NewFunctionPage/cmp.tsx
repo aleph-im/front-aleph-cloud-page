@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { Button, TextGradient } from '@aleph-front/core'
+import { TextGradient } from '@aleph-front/core'
 import { EntityType, EntityDomainType } from '@/helpers/constants'
 import { useNewFunctionPage } from './hook'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
@@ -19,6 +19,7 @@ import NewEntityTab from '@/components/common/NewEntityTab'
 import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import { PageProps } from '@/types/types'
 import BackButtonSection from '@/components/common/BackButtonSection'
+import CheckoutButton from '@/components/form/CheckoutButton'
 
 export default function NewFunctionPage({ mainRef }: PageProps) {
   const {
@@ -183,18 +184,12 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
             </>
           }
           button={
-            <Button
-              type="submit"
-              color="main0"
-              kind="default"
-              size="lg"
-              variant="primary"
+            <CheckoutButton
               disabled={createFunctionDisabled}
-              // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
-              onClick={handleSubmit}
-            >
-              {createFunctionButtonTitle || 'Create function'}
-            </Button>
+              title={createFunctionButtonTitle}
+              isFooter={false}
+              handleSubmit={handleSubmit}
+            />
           }
         />
       </Form>

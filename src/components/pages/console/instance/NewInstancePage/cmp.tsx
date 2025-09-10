@@ -10,7 +10,6 @@ import {
   NodeScore,
   TableColumn,
   NoisyContainer,
-  TooltipProps,
   Checkbox,
 } from '@aleph-front/core'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
@@ -24,7 +23,7 @@ import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import { EntityDomainType, EntityType, apiServer } from '@/helpers/constants'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
-import { useNewInstancePage, UseNewInstancePageReturn } from './hook'
+import { useNewInstancePage } from './hook'
 import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import NewEntityTab from '@/components/common/NewEntityTab'
@@ -36,53 +35,7 @@ import Strong from '@/components/common/Strong'
 import CRNList from '../../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ExternalLink from '@/components/common/ExternalLink'
-
-const CheckoutButton = React.memo(
-  ({
-    disabled,
-    title = 'Create instance',
-    tooltipContent,
-    isFooter,
-    shouldRequestTermsAndConditions,
-    handleRequestTermsAndConditionsAgreement,
-    handleSubmit,
-  }: {
-    disabled: boolean
-    title?: string
-    tooltipContent?: TooltipProps['content']
-    isFooter: boolean
-    shouldRequestTermsAndConditions?: boolean
-    handleRequestTermsAndConditionsAgreement: UseNewInstancePageReturn['handleRequestTermsAndConditionsAgreement']
-    handleSubmit: UseNewInstancePageReturn['handleSubmit']
-  }) => {
-    const checkoutButtonRef = useRef<HTMLButtonElement>(null)
-
-    return (
-      <ButtonWithInfoTooltip
-        ref={checkoutButtonRef}
-        type={shouldRequestTermsAndConditions ? 'button' : 'submit'}
-        color="main0"
-        kind="default"
-        size="lg"
-        variant="primary"
-        disabled={disabled}
-        tooltipContent={tooltipContent}
-        tooltipPosition={{
-          my: isFooter ? 'bottom-right' : 'bottom-center',
-          at: isFooter ? 'top-right' : 'top-center',
-        }}
-        onClick={
-          shouldRequestTermsAndConditions
-            ? handleRequestTermsAndConditionsAgreement
-            : handleSubmit
-        }
-      >
-        {title}
-      </ButtonWithInfoTooltip>
-    )
-  },
-)
-CheckoutButton.displayName = 'CheckoutButton'
+import CheckoutButton from '@/components/form/CheckoutButton'
 
 export default function NewInstancePage({ mainRef }: PageProps) {
   const {
@@ -473,7 +426,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           control={control}
           address={address}
           cost={cost}
-          receiverAddress={node?.reward}
           unlockedAmount={accountBalance}
           mainRef={mainRef}
           description={
@@ -485,24 +437,11 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               feature, enabling real-time payment for resources as you use them.
             </>
           }
-          // Duplicate buttons to have different references for the tooltip on each one
           button={
             <CheckoutButton
               disabled={createInstanceDisabled}
               title={createInstanceButtonTitle}
               isFooter={false}
-              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
-              handleRequestTermsAndConditionsAgreement={
-                handleRequestTermsAndConditionsAgreement
-              }
-              handleSubmit={handleSubmit}
-            />
-          }
-          footerButton={
-            <CheckoutButton
-              disabled={createInstanceDisabled}
-              title={createInstanceButtonTitle}
-              isFooter={true}
               shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement

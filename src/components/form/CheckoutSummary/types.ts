@@ -23,7 +23,6 @@ export type CheckoutSummaryProps = {
   description?: ReactNode
   mainRef?: RefObject<HTMLElement>
   control?: Control
-  receiverAddress?: string
 }
 
 export type CheckoutSummarySpecsLineProps = {
