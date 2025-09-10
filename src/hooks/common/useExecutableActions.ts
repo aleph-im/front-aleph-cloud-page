@@ -236,7 +236,7 @@ export function useExecutableActions({
   }, [calculatedStatus, crn, isAllocated, isPAYG])
 
   const startDisabled = useMemo(() => {
-    if (isPAYG || !crn) return true
+    if (!crn) return true
 
     switch (calculatedStatus) {
       case 'v1':
@@ -248,7 +248,7 @@ export function useExecutableActions({
       default:
         return true
     }
-  }, [calculatedStatus, crn, isAllocated, isPAYG])
+  }, [calculatedStatus, crn, isAllocated])
 
   const rebootDisabled = useMemo(() => {
     if (!crn) return true
