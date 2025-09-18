@@ -51,10 +51,13 @@ export function usePaymentMethod({
     if (!account) return
 
     try {
-      const balance = await getAccountBalance(account, paymentMethod)
+      const { balance, creditBalance } = await getAccountBalance(
+        account,
+        paymentMethod,
+      )
 
-      if (balance !== undefined) {
-        dispatch(new ConnectionSetBalanceAction({ balance }))
+      if (balance !== undefined || creditBalance !== undefined) {
+        dispatch(new ConnectionSetBalanceAction({ balance, creditBalance }))
       }
     } catch (error) {
       console.error('Error fetching balance:', error)

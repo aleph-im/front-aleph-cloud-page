@@ -20,6 +20,7 @@ import { useAccountRewards as useNodeRewards } from '../../../hooks/common/node/
 export type UseHeaderReturn = UseRoutesReturn & {
   accountAddress?: string
   accountBalance?: number
+  accountCreditBalance?: number
   accountVouchers?: AccountPickerProps['accountVouchers'] | undefined
   networks: Network[]
   pathname: string
@@ -41,6 +42,7 @@ export function useHeader(): UseHeaderReturn {
     blockchain,
     account,
     balance: accountBalance,
+    creditBalance: accountCreditBalance,
   } = state.connection
   const { voucherManager } = state.manager
 
@@ -227,6 +229,7 @@ export function useHeader(): UseHeaderReturn {
   return {
     accountAddress: account?.address,
     accountBalance,
+    accountCreditBalance,
     accountVouchers,
     networks,
     pathname,

@@ -74,7 +74,7 @@ export type Modal = 'node-list' | 'terms-and-conditions'
 
 export type UseNewGpuInstancePageReturn = {
   address: string
-  accountBalance: number
+  accountCreditBalance: number
   blockchainName: string
   manuallySelectCRNDisabled: boolean
   manuallySelectCRNDisabledMessage?: TooltipProps['content']
@@ -110,7 +110,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   const {
     blockchain,
     account,
-    balance: accountBalance = 0,
+    creditBalance: accountCreditBalance = 0,
     handleConnect,
   } = useConnection({
     triggerOnMount: false,
@@ -344,7 +344,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
 
   const { canAfford, isCreateButtonDisabled } = useCanAfford({
     cost,
-    accountBalance,
+    accountCreditBalance,
   })
 
   // Checks if user can afford with current balance
@@ -447,7 +447,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
 
   return {
     address,
-    accountBalance,
+    accountCreditBalance,
     blockchainName,
     createInstanceDisabled,
     createInstanceButtonTitle,

@@ -40,7 +40,7 @@ import CheckoutButton from '@/components/form/CheckoutButton'
 export default function NewInstancePage({ mainRef }: PageProps) {
   const {
     address,
-    accountBalance,
+    accountCreditBalance,
     blockchainName,
     manuallySelectCRNDisabled,
     manuallySelectCRNDisabledMessage,
@@ -426,7 +426,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           control={control}
           address={address}
           cost={cost}
-          unlockedAmount={accountBalance}
+          unlockedAmount={accountCreditBalance}
           mainRef={mainRef}
           description={
             <>

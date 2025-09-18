@@ -2,6 +2,7 @@ import {
   ellipseAddress,
   convertByteUnits,
   humanReadableSize,
+  humanReadableCurrency,
 } from '@/helpers/utils'
 import { Label, StyledHoldingSummaryLine } from './styles'
 import {
@@ -206,10 +207,7 @@ export const CheckoutSummary = ({
                 <StyledHoldingSummaryLine $isHeader className="tp-body3 fs-12">
                   <div>AVAILABLE CREDITS</div>
                   <div>CURRENT WALLET {ellipseAddress(address)}</div>
-                  <div>
-                    {unlockedAmount}
-                    {/* <Price value={unlockedAmount} /> */}
-                  </div>
+                  <div>{humanReadableCurrency(unlockedAmount)}</div>
                 </StyledHoldingSummaryLine>
                 {nftVoucherBalance > 0 && (
                   <StyledHoldingSummaryLine
@@ -294,7 +292,7 @@ export const CheckoutSummary = ({
                     <span className="text-main0">
                       {/* <Price value={cost?.cost} /> */}
                       <div tw="flex gap-1">
-                        <span>{cost?.cost}</span>
+                        <span>{humanReadableCurrency(cost?.cost)}</span>
                         <span>/ h</span>
                       </div>
                     </span>
@@ -307,7 +305,7 @@ export const CheckoutSummary = ({
                     <span className="text-main0 tp-body3">
                       {/* <Price value={cost?.cost * 4} /> */}
                       <div tw="flex gap-1">
-                        <span>{cost?.cost * 4}</span>
+                        <span>{humanReadableCurrency(cost?.cost * 4)}</span>
                       </div>
                     </span>
                   </div>

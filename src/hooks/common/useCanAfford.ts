@@ -1,7 +1,7 @@
 import { CostSummary } from '@/domain/cost'
 
 export type UseCanAffordProps = {
-  accountBalance: number
+  accountCreditBalance: number
   cost?: CostSummary
 }
 
@@ -11,11 +11,11 @@ export type UseCanAffordReturn = {
 }
 
 export function useCanAfford({
-  accountBalance,
+  accountCreditBalance,
   cost,
 }: UseCanAffordProps): UseCanAffordReturn {
   const canAfford =
-    accountBalance >= (cost ? cost.cost : Number.MAX_SAFE_INTEGER)
+    accountCreditBalance >= (cost ? cost.cost : Number.MAX_SAFE_INTEGER)
 
   const isCreateButtonDisabled =
     process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true'

@@ -52,7 +52,7 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
   // Use useMemo to prevent the object from being recreated on every render
   const emptyCost = useMemo(
     () => ({
-      paymentMethod: PaymentMethod.Hold,
+      paymentMethod: PaymentMethod.Credit,
       cost: Number.POSITIVE_INFINITY,
       lines: [],
     }),
@@ -108,9 +108,11 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
             result = await gpuInstanceManager.getCost(props)
           break
         case EntityType.Program:
+          console.log('Fetching program cost with props:', props)
           if (programManager) result = await programManager.getCost(props)
           break
         case EntityType.Website:
+          console.log('Fetching website cost with props:', props)
           if (websiteManager) result = await websiteManager.getCost(props)
           break
       }

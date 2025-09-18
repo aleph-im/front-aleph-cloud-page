@@ -93,7 +93,8 @@ export class CostManager {
   ) {}
 
   protected static readonly aggregateSourceAddress =
-    '0xFba561a84A537fCaa567bb7A2257e7142701ae2A'
+    // '0xFba561a84A537fCaa567bb7A2257e7142701ae2A'
+    '0xA07B1214bAe0D5ccAA25449C3149c0aC83658874'
 
   async getSettingsAggregate(): Promise<SettingsAggregate> {
     const response = await this.sdkClient.fetchAggregate(

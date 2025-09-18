@@ -61,11 +61,12 @@ export function useSelectInstanceSpecs({
 
   const filterValidNodeSpecs = useCallback(
     (option: Tier) => {
+      if (type === EntityType.Program) return true
       if (!nodeSpecs) return false
 
       return nodeManager.validateMinNodeSpecs(option, nodeSpecs)
     },
-    [nodeManager, nodeSpecs],
+    [nodeManager, nodeSpecs, type],
   )
 
   // Process and cache valid voucher configurations

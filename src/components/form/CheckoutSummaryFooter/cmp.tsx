@@ -3,6 +3,7 @@ import { Button, ButtonProps } from '@aleph-front/core'
 import { StyledSeparator } from './styles'
 import { CheckoutSummaryFooterProps } from './types'
 import FloatingFooter from '../FloatingFooter'
+import { humanReadableCurrency } from '@/helpers/utils'
 
 // ------------------------------------------
 
@@ -35,22 +36,21 @@ export const CheckoutSummaryFooter = ({
             <div tw="flex flex-col md:flex-row gap-4">
               <div>
                 <div tw="flex items-center justify-center gap-2 whitespace-nowrap">
-                  <span className="text-main0 fs-24 tp-body3">3</span>
+                  <span className="text-main0 fs-24 tp-body3">
+                    {humanReadableCurrency(totalCost)}
+                  </span>
                   <span className="tp-body2" tw="mt-1">
                     Credits / h
                   </span>
                 </div>
-                <div
+                {/* TODO: Uncomment and implement when credits top up is available */}
+                {/* <div
                   className="fs-14"
                   tw="flex items-center justify-center md:justify-start whitespace-nowrap opacity-40 -mt-2"
                 >
                   $0.30/h
-                </div>
+                </div> */}
               </div>
-              {/* <Price
-                  value={totalCost}
-                  className="text-main0 fs-24 tp-body3"
-                /> */}
               <StyledSeparator />
               {footerSubmitButtonNode}
             </div>

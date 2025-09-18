@@ -74,7 +74,7 @@ export type Modal = 'node-list' | 'terms-and-conditions'
 
 export type UseNewInstancePageReturn = {
   address: string
-  accountBalance: number
+  accountCreditBalance: number
   blockchainName: string
   manuallySelectCRNDisabled: boolean
   manuallySelectCRNDisabledMessage?: TooltipProps['content']
@@ -111,7 +111,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const {
     blockchain,
     account,
-    balance: accountBalance = 0,
+    creditBalance: accountCreditBalance = 0,
     handleConnect,
   } = useConnection({
     triggerOnMount: false,
@@ -329,7 +329,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const { canAfford, isCreateButtonDisabled } = useCanAfford({
     cost,
-    accountBalance,
+    accountCreditBalance,
   })
 
   // Checks if user can afford with current balance
@@ -436,7 +436,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   return {
     address,
-    accountBalance,
+    accountCreditBalance,
     blockchainName,
     createInstanceDisabled,
     createInstanceButtonTitle,

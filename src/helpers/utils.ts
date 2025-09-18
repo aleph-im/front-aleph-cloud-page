@@ -56,7 +56,7 @@ export const ellipseAddress = (address: string) => {
  * Get the Aleph balance for a given blockchain address
  *
  * @param address An blockchain address
- * returns The Aleph balance of the address
+ * returns The Aleph Tokens and Credit balance of the address
  */
 export const getAddressBalance = async (address: string) => {
   try {
@@ -65,10 +65,14 @@ export const getAddressBalance = async (address: string) => {
     )
 
     // @note: 404 means the balance is 0, don't throw error in that case
-    if (query.status === 404) return 0
+    if (query.status === 404) return { balance: 0, creditBalance: 0 }
 
-    const { balance } = await query.json()
-    return balance
+    const { balance, credit_balance } = await query.json()
+
+    return {
+      balance: balance as number,
+      creditBalance: (credit_balance as number) || 150000, // @todo: temporary hack to give free credit balance
+    }
   } catch (error) {
     throw Err.RequestFailed(error)
   }
@@ -78,7 +82,7 @@ export async function getAccountBalance(
   account: Account,
   paymentMethod: PaymentMethod,
 ) {
-  let balance: number
+  let balance = 0
 
   if (paymentMethod === PaymentMethod.Stream && isAccountSupported(account)) {
     try {
@@ -92,12 +96,14 @@ export async function getAccountBalance(
       console.error(e)
       balance = 0
     }
-  } else {
-    // For Hold payment method, fetch balance from pyaleph API
-    balance = await getAddressBalance(account.address)
   }
 
-  return balance
+  const addressBalance = await getAddressBalance(account.address)
+
+  return {
+    balance: balance || addressBalance.balance,
+    creditBalance: addressBalance.creditBalance || 0,
+  }
 }
 
 export function round(num: number, decimals = 2) {

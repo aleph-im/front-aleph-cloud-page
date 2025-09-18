@@ -31,7 +31,10 @@ import Err from '@/helpers/errors'
 import { useDefaultTiers } from '@/hooks/common/pricing/useDefaultTiers'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
 import { useConnection } from '@/hooks/common/useConnection'
-import { CreditPaymentConfiguration } from '@/domain/executable'
+import {
+  CreditPaymentConfiguration,
+  PaymentConfiguration,
+} from '@/domain/executable'
 import { BlockchainId } from '@/domain/connect/base'
 
 export type NewFunctionFormState = NameAndTagsField & {
@@ -49,7 +52,7 @@ export type NewFunctionFormState = NameAndTagsField & {
 
 export type UseNewFunctionPage = {
   address: string
-  accountBalance: number
+  accountCreditBalance: number
   createFunctionDisabled: boolean
   createFunctionButtonTitle: string
   values: any
@@ -66,7 +69,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const {
     blockchain,
     account,
-    balance: accountBalance = 0,
+    creditBalance: accountCreditBalance = 0,
     handleConnect,
   } = useConnection({
     triggerOnMount: false,
@@ -152,6 +155,13 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as NewFunctionFormState
 
+  const payment: PaymentConfiguration = useMemo(() => {
+    return {
+      chain: blockchain,
+      type: PaymentMethod.Credit,
+    } as CreditPaymentConfiguration
+  }, [blockchain])
+
   const costProps: UseProgramCostProps = useMemo(
     () => ({
       entityType: EntityType.Program,
@@ -162,17 +172,18 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         volumes: values.volumes,
         domains: values.domains,
         paymentMethod: values.paymentMethod,
+        payment,
         code: values.code,
       },
     }),
-    [values],
+    [payment, values],
   )
 
   const cost = useEntityCost(costProps)
 
   const { canAfford, isCreateButtonDisabled } = useCanAfford({
     cost,
-    accountBalance,
+    accountCreditBalance,
   })
 
   // Checks if user can afford with current balance
@@ -200,7 +211,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
 
   return {
     address: account?.address || '',
-    accountBalance,
+    accountCreditBalance,
     createFunctionDisabled,
     createFunctionButtonTitle,
     values,

@@ -15,7 +15,7 @@ export function NewVolumePage() {
   const {
     control,
     address,
-    accountBalance,
+    accountCreditBalance,
     isCreateButtonDisabled,
     errors,
     cost,
@@ -43,8 +43,7 @@ export function NewVolumePage() {
         <CheckoutSummary
           address={address}
           cost={cost}
-          unlockedAmount={accountBalance}
-          paymentMethod={PaymentMethod.Hold}
+          unlockedAmount={accountCreditBalance}
           description={
             <>
               This amount needs to be present in your wallet until the volume is

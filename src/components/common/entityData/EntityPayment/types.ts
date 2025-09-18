@@ -16,6 +16,11 @@ export interface HoldingPaymentData extends BasePaymentData {
   paymentType: PaymentType.hold
 }
 
+// Credit payment data (credit payment)
+export interface CreditPaymentData extends BasePaymentData {
+  paymentType: PaymentType.credit
+}
+
 // Stream payment data (pay-as-you-go)
 export interface StreamPaymentData extends BasePaymentData {
   paymentType: PaymentType.superfluid
@@ -23,7 +28,10 @@ export interface StreamPaymentData extends BasePaymentData {
 }
 
 // Union type for all payment data types
-export type PaymentData = HoldingPaymentData | StreamPaymentData
+export type PaymentData =
+  | HoldingPaymentData
+  | CreditPaymentData
+  | StreamPaymentData
 
 // Props for the EntityPayment component - just an array of payment data
 export interface EntityPaymentProps {
@@ -33,6 +41,7 @@ export interface EntityPaymentProps {
 // Formatted data returned by the hook for display
 export interface FormattedPaymentData {
   isStream: boolean
+  isCredit: boolean
   totalSpent?: string
   formattedBlockchain?: string
   formattedFlowRate?: string

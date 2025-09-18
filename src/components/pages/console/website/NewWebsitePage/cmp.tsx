@@ -22,7 +22,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
   const {
     control,
     address,
-    accountBalance,
+    accountCreditBalance,
     isCreateButtonDisabled,
     errors,
     cost,
@@ -133,8 +133,7 @@ export default function NewWebsitePage({ mainRef }: PageProps) {
           control={control}
           address={address}
           cost={cost}
-          unlockedAmount={accountBalance}
-          paymentMethod={PaymentMethod.Hold}
+          unlockedAmount={accountCreditBalance}
           mainRef={mainRef}
           description={
             <>

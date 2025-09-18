@@ -304,7 +304,6 @@ export abstract class ExecutableManager<T extends Executable> {
       const nodes = await this.nodeManager.getAllCRNsSpecs()
 
       // @note: 1) Try to filter the node by the requirements field on the executable message (legacy messages doesn't contain it)
-
       let node = nodes.find(
         (node) => node.hash === executable.requirements?.node?.node_hash,
       )
@@ -314,6 +313,17 @@ export abstract class ExecutableManager<T extends Executable> {
       // @note: 2) Try to filter the node by the stream receiver address (we took the assumption that reward addresses whould be unique in the CRN collection)
 
       node = nodes.find((node) => node.stream_reward === receiver)
+
+      return node
+    }
+
+    if (executable.payment?.type === PaymentType.credit) {
+      const nodes = await this.nodeManager.getAllCRNsSpecs()
+
+      // Try to filter the node by the requirements field on the executable message (legacy messages doesn't contain it)
+      const node = nodes.find(
+        (node) => node.hash === executable.requirements?.node?.node_hash,
+      )
 
       return node
     }
@@ -866,9 +876,13 @@ export abstract class ExecutableManager<T extends Executable> {
         receiver: payment.receiver,
       }
     } else {
+      console.log('Parsing payment for cost estimation:', payment)
       return {
         chain: payment?.chain || BlockchainId.ETH,
-        type: SDKPaymentType.hold,
+        type:
+          payment?.type === PaymentMethod.Credit
+            ? SDKPaymentType.credit
+            : SDKPaymentType.hold,
       }
     }
   }
@@ -888,6 +902,12 @@ export abstract class ExecutableManager<T extends Executable> {
           receiver: payment.receiver,
         }
       throw Err.StreamNotSupported
+    }
+    if (payment.type === PaymentMethod.Credit) {
+      return {
+        chain: payment.chain,
+        type: SDKPaymentType.credit,
+      }
     }
     return {
       chain: payment.chain,
@@ -927,13 +947,22 @@ export abstract class ExecutableManager<T extends Executable> {
       {} as Record<MessageCostType, MessageCostLine>,
     )
 
-    const paymentMethod =
-      costs.payment_type === PaymentType.hold
-        ? PaymentMethod.Hold
-        : PaymentMethod.Stream
+    let paymentMethod: PaymentMethod
+    let costProp: 'cost_hold' | 'cost_stream' | 'cost_credit'
 
-    const costProp =
-      paymentMethod === PaymentMethod.Hold ? 'cost_hold' : 'cost_stream'
+    switch (costs.payment_type) {
+      case PaymentType.hold:
+        paymentMethod = PaymentMethod.Hold
+        costProp = 'cost_hold'
+        break
+      case PaymentType.superfluid:
+        paymentMethod = PaymentMethod.Stream
+        costProp = 'cost_stream'
+        break
+      default:
+        paymentMethod = PaymentMethod.Credit
+        costProp = 'cost_credit'
+    }
 
     // Execution
 

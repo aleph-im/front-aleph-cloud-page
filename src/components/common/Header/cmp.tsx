@@ -25,6 +25,7 @@ export const Header = () => {
     networks,
     accountAddress,
     accountBalance,
+    accountCreditBalance,
     accountVouchers,
     rewards,
     selectedNetwork,
@@ -54,6 +55,7 @@ export const Header = () => {
                 isMobile
                 accountAddress={accountAddress}
                 accountBalance={accountBalance}
+                accountCredits={accountCreditBalance}
                 accountVouchers={accountVouchers}
                 blockchains={blockchains}
                 networks={networks}
@@ -63,6 +65,11 @@ export const Header = () => {
                 handleConnect={handleConnect}
                 handleDisconnect={handleDisconnect}
                 handleSwitchNetwork={handleSwitchNetwork}
+                Link={CustomLinkMemo}
+                externalUrl={{
+                  text: 'Legacy console',
+                  url: 'https://app.aleph.cloud/',
+                }}
               />
             ),
             logoHref: websiteUrl,
@@ -74,6 +81,7 @@ export const Header = () => {
           <AccountPicker
             accountAddress={accountAddress}
             accountBalance={accountBalance}
+            accountCredits={accountCreditBalance}
             accountVouchers={accountVouchers}
             blockchains={blockchains}
             networks={networks}
@@ -83,6 +91,11 @@ export const Header = () => {
             handleConnect={handleConnect}
             handleDisconnect={handleDisconnect}
             handleSwitchNetwork={handleSwitchNetwork}
+            Link={CustomLinkMemo}
+            externalUrl={{
+              text: 'Legacy console',
+              url: 'https://app.aleph.cloud/',
+            }}
           />
         </StyledNavbarDesktop>
       </StyledHeader>
