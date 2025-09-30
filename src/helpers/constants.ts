@@ -198,6 +198,53 @@ export enum WebsiteFrameworkId {
 export const EXTRA_WEI = 3600 / 10 ** 18
 
 export const NAVIGATION_URLS = {
+  legacyConsole: {
+    home: 'https://app.aleph.cloud/console',
+    settings: {
+      home: 'https://app.aleph.cloud/console/settings',
+      ssh: {
+        home: 'https://app.aleph.cloud/console/settings/ssh',
+        new: 'https://app.aleph.cloud/console/settings/ssh/new',
+      },
+      domain: {
+        home: 'https://app.aleph.cloud/console/settings/domain',
+        new: 'https://app.aleph.cloud/console/settings/domain/new',
+      },
+    },
+    web3Hosting: {
+      home: 'https://app.aleph.cloud/console/hosting/',
+      website: {
+        home: 'https://app.aleph.cloud/console/hosting/website',
+        new: 'https://app.aleph.cloud/console/hosting/website/new',
+      },
+    },
+    computing: {
+      home: 'https://app.aleph.cloud/console/computing',
+      functions: {
+        home: 'https://app.aleph.cloud/console/computing/function',
+        new: 'https://app.aleph.cloud/console/computing/function/new',
+      },
+      instances: {
+        home: 'https://app.aleph.cloud/console/computing/instance',
+        new: 'https://app.aleph.cloud/console/computing/instance/new',
+      },
+      gpus: {
+        home: 'https://app.aleph.cloud/console/computing/gpu-instance',
+        new: 'https://app.aleph.cloud/console/computing/gpu-instance/new',
+      },
+      confidentials: {
+        home: 'https://app.aleph.cloud/console/computing/confidential',
+        new: 'https://app.aleph.cloud/console/computing/confidential/new',
+      },
+    },
+    storage: {
+      home: 'https://app.aleph.cloud/console/storage',
+      volumes: {
+        home: 'https://app.aleph.cloud/console/storage/volume',
+        new: 'https://app.aleph.cloud/console/storage/volume/new',
+      },
+    },
+  },
   console: {
     home: '/console',
     settings: {

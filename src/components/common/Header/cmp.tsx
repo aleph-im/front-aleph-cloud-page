@@ -4,7 +4,7 @@ import { AccountPicker, RenderLinkProps } from '@aleph-front/core'
 import { StyledHeader, StyledNavbarDesktop, StyledNavbarMobile } from './styles'
 import { useHeader } from '@/components/common/Header/hook'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
-import { websiteUrl } from '@/helpers/constants'
+import { NAVIGATION_URLS, websiteUrl } from '@/helpers/constants'
 import { blockchains } from '@/domain/connect/base'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
@@ -94,7 +94,7 @@ export const Header = () => {
             Link={CustomLinkMemo}
             externalUrl={{
               text: 'Legacy console',
-              url: 'https://app.aleph.cloud/',
+              url: NAVIGATION_URLS.legacyConsole.home,
             }}
           />
         </StyledNavbarDesktop>

@@ -22,11 +22,11 @@ export default function ManageVolume() {
         <CenteredContainer>
           <VolumeDetail volumeId={volumeId} showDelete />
 
-          <div tw="mt-20 text-center">
+          {/* <div tw="mt-20 text-center">
             <ButtonLink variant="primary" href="/console/storage/volume/new">
               Create new volume
             </ButtonLink>
-          </div>
+          </div> */}
         </CenteredContainer>
       </section>
     </>

@@ -372,14 +372,14 @@ export function ManageWebsite() {
             <UpdateWebsiteFolder control={state.control} />
           </NoisyContainer>
 
-          <div tw="mt-20 text-center">
+          {/* <div tw="mt-20 text-center">
             <ButtonLink
               variant="primary"
               href={NAVIGATION_URLS.console.web3Hosting.website.new}
             >
               Create new website
             </ButtonLink>
-          </div>
+          </div> */}
         </CenteredContainer>
       </section>
     </>

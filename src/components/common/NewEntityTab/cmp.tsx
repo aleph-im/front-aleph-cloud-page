@@ -14,6 +14,7 @@ export default function NewEntityTab(props: NewEntityTabProps) {
         {
           id: 'function',
           name: 'Function',
+          disabled: true,
         },
         {
           id: 'instance',

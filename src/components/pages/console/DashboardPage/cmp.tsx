@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import Head from 'next/head'
-import { Button, Icon, NoisyContainer, ObjectImg } from '@aleph-front/core'
+import { Icon } from '@aleph-front/core'
 import { useDashboardPage } from '@/components/pages/console/DashboardPage/hook'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
@@ -17,8 +17,8 @@ import {
   EntityTypeObject,
   NAVIGATION_URLS,
 } from '@/helpers/constants'
-import ToggleDashboard from '@/components/common/ToggleDashboard'
 import CreditsDashboard from './CreditsDashboard'
+import { ExternalLink } from '@/components/common/ExternalLink/cmp'
 
 export default function DashboardPage() {
   const {
@@ -123,6 +123,20 @@ export default function DashboardPage() {
                     introductionButtonText="Create your function"
                     dashboardPath="/console/computing/function"
                     createPath="/console/computing/function/new"
+                    createDisabled
+                    createDisabledMessage={
+                      <p>
+                        To create a Function, navigate to the{' '}
+                        <ExternalLink
+                          text="Legacy Console."
+                          color="main0"
+                          href={
+                            NAVIGATION_URLS.legacyConsole.computing.functions
+                              .home
+                          }
+                        />
+                      </p>
+                    }
                     information={{
                       type: 'amount',
                       data: programAggregatedStatus.total,
@@ -225,6 +239,20 @@ export default function DashboardPage() {
                     introductionButtonText="Deploy your website"
                     dashboardPath="/console/hosting/website"
                     createPath={NAVIGATION_URLS.console.web3Hosting.website.new}
+                    createDisabled
+                    createDisabledMessage={
+                      <p>
+                        To deploy a Website, navigate to the{' '}
+                        <ExternalLink
+                          text="Legacy Console."
+                          color="main0"
+                          href={
+                            NAVIGATION_URLS.legacyConsole.computing.functions
+                              .home
+                          }
+                        />
+                      </p>
+                    }
                     information={{
                       type: 'amount',
                       data: websitesAggregatedStatus.total,
@@ -262,6 +290,20 @@ export default function DashboardPage() {
                     img={EntityTypeObject[EntityType.Volume]}
                     dashboardPath="/console/storage"
                     createPath="/console/storage/volume/new"
+                    createDisabled
+                    createDisabledMessage={
+                      <p>
+                        To create a new volume, navigate to the{' '}
+                        <ExternalLink
+                          text="Legacy Console."
+                          color="main0"
+                          href={
+                            NAVIGATION_URLS.legacyConsole.computing.functions
+                              .home
+                          }
+                        />
+                      </p>
+                    }
                     description="Secure and reliable immutable volumes for your data storage needs. Ideal for dependency volumes and critical data, ensuring consistency and integrity."
                     introductionButtonText="Create your volume"
                     information={{

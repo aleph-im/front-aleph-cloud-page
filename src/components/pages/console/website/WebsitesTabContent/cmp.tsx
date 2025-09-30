@@ -68,14 +68,14 @@ export const WebsitesTabContent = React.memo(
                 ]}
               />
             </div>
-            <div tw="mt-20 text-center">
+            {/* <div tw="mt-20 text-center">
               <ButtonLink
                 variant="primary"
                 href={NAVIGATION_URLS.console.web3Hosting.website.new}
               >
                 Create website
               </ButtonLink>
-            </div>
+            </div> */}
           </>
         ) : (
           <div tw="mt-10 text-center">

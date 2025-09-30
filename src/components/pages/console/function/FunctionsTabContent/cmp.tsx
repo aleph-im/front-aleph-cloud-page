@@ -88,14 +88,14 @@ export const FunctionsTabContent = React.memo(
                 ]}
               />
             </div>
-            <div tw="mt-20 text-center">
+            {/* <div tw="mt-20 text-center">
               <ButtonLink
                 variant="primary"
                 href={NAVIGATION_URLS.console.computing.functions.new}
               >
                 Create function
               </ButtonLink>
-            </div>
+            </div> */}
           </>
         ) : (
           <div tw="mt-10 text-center">

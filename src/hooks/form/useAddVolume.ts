@@ -4,7 +4,7 @@ import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 export type NewVolumeStandaloneField = {
-  volumeType: VolumeType.New
+  volumeType: VolumeType.Existing
   file?: File
 }
 
@@ -32,7 +32,7 @@ export type InstanceSystemVolumeField = {
 }
 
 export const defaultVolume: NewVolumeStandaloneField = {
-  volumeType: VolumeType.New,
+  volumeType: VolumeType.Existing,
 }
 
 export type VolumeField =
@@ -313,7 +313,7 @@ export function useAddVolume({
   const volumeTypeCtrl = useController({
     control,
     name: `${n}.volumeType`,
-    defaultValue: VolumeType.New,
+    defaultValue: VolumeType.Existing,
   })
 
   const handleRemove = useCallback(() => {

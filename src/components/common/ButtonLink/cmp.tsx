@@ -1,7 +1,8 @@
-import { memo } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@aleph-front/core'
 import { ButtonLinkProps } from './types'
+import ResponsiveTooltip from '../ResponsiveTooltip'
 
 /**
  * A wrapper for the nextjs links that are styled as buttons
@@ -14,9 +15,19 @@ export const ButtonLink = ({
   kind = 'default',
   size = 'md',
   disabled,
+  disabledMessage,
+  tooltipPosition,
   children,
   ...rest
 }: ButtonLinkProps) => {
+  const targetRef = useRef<HTMLButtonElement>(null)
+
+  // Wait until after client-side hydration to show tooltip
+  const [renderTooltip, setRenderTooltip] = useState(false)
+  useEffect(() => {
+    setRenderTooltip(true)
+  }, [])
+
   const buttonNode = (
     <Button
       {...{
@@ -26,6 +37,7 @@ export const ButtonLink = ({
         kind,
         size,
         disabled,
+        ref: targetRef,
         ...rest,
       }}
     >
@@ -38,7 +50,17 @@ export const ButtonLink = ({
       {buttonNode}
     </Link>
   ) : (
-    buttonNode
+    <span>
+      {buttonNode}
+      {renderTooltip && disabledMessage && (
+        <ResponsiveTooltip
+          my={tooltipPosition?.my || 'bottom-center'}
+          at={tooltipPosition?.at || 'top-right'}
+          targetRef={targetRef}
+          content={disabledMessage}
+        />
+      )}
+    </span>
   )
 }
 ButtonLink.displayName = 'ButtonLink'
