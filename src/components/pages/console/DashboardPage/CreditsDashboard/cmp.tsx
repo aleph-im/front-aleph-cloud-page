@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import {
   Button,
   Icon,
@@ -9,40 +9,37 @@ import {
 import { SectionTitle } from '@/components/common/CompositeTitle'
 
 import ToggleDashboard from '@/components/common/ToggleDashboard'
-import StyledTable from '@/components/common/Table'
-import tw from 'twin.macro'
-import DetailsMenuButton from '@/components/common/DetailsMenuButton'
-import { useConnection } from '@/hooks/common/useConnection'
+import Skeleton from '@/components/common/Skeleton'
+import { useCreditsDashboard } from './hook'
 
 export default function CreditsDashboard() {
-  const [creditsDashboardOpen, setCreditsDashboardOpen] = useState(false)
-  const { account } = useConnection({ triggerOnMount: false })
-  const isConnected = !!account
+  const {
+    runRateDays,
+    creditsDashboardOpen,
+    setCreditsDashboardOpen,
+    isConnected,
+    accountCreditBalance,
+    isCalculatingCosts,
+  } = useCreditsDashboard()
 
-  useEffect(() => {
-    if (!isConnected && creditsDashboardOpen) {
-      setCreditsDashboardOpen(false)
-    }
-  }, [isConnected, creditsDashboardOpen])
-
-  const data = [
-    {
-      id: 1,
-      status: 'finished',
-      date: 1756121519678,
-      amount: 100,
-      asset: 'USDC',
-      credits: 120,
-    },
-    {
-      id: 2,
-      status: 'ongoing',
-      date: 1756121546481,
-      amount: 80,
-      asset: 'USDC',
-      credits: 95,
-    },
-  ]
+  // const data = [
+  //   {
+  //     id: 1,
+  //     status: 'finished',
+  //     date: 1756121519678,
+  //     amount: 100,
+  //     asset: 'USDC',
+  //     credits: 120,
+  //   },
+  //   {
+  //     id: 2,
+  //     status: 'ongoing',
+  //     date: 1756121546481,
+  //     amount: 80,
+  //     asset: 'USDC',
+  //     credits: 95,
+  //   },
+  // ]
 
   return (
     <section tw="px-0 pb-6 pt-12 lg:pb-5">
@@ -71,19 +68,27 @@ export default function CreditsDashboard() {
                     tw="flex flex-col items-start justify-between px-3 py-2 min-w-[6.875rem] min-h-[3.8125rem]"
                   >
                     <p className="tp-info text-base2">AVAILABLE</p>
-                    <p className="text-main0 tp-h7">1080</p>
+                    {accountCreditBalance !== undefined ? (
+                      <p className="text-main0 tp-h7">{accountCreditBalance}</p>
+                    ) : (
+                      <Skeleton width="3rem" height="1.5rem" />
+                    )}
                   </div>
                   <div
                     className="bg-base1"
                     tw="flex flex-col items-start justify-between px-3 py-2 min-w-[6.875rem] min-h-[3.8125rem]"
                   >
                     <p className="tp-info text-base2">RUN-RATE</p>
-                    <div tw="flex items-end gap-0.5">
-                      <p className="text-main0 tp-h7">34</p>
-                      <p className="text-main0 tp-info" tw="mb-1">
-                        DAYS
-                      </p>
-                    </div>
+                    {isCalculatingCosts ? (
+                      <Skeleton width="4rem" height="1.5rem" />
+                    ) : (
+                      <div tw="flex items-end gap-0.5">
+                        <p className="text-main0 tp-h7">{runRateDays || '∞'}</p>
+                        <p className="text-main0 tp-info" tw="mb-1 ml-1">
+                          {runRateDays === 1 ? 'DAY' : 'DAYS'}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -106,7 +111,7 @@ export default function CreditsDashboard() {
                 History <Icon name="chevron-square-right" tw="ml-1" />
               </Button>
             </div>
-            <div tw="overflow-x-auto">
+            {/* <div tw="overflow-x-auto">
               <StyledTable
                 // borderType="none"
                 // rowNoise
@@ -162,18 +167,18 @@ export default function CreditsDashboard() {
                     sortable: true,
                     render: (row) => row.date,
                   },
-                  {
-                    label: 'AMOUNT',
-                    align: 'left',
-                    sortable: true,
-                    render: (row) => row.amount,
-                  },
-                  {
-                    label: 'ASSET',
-                    align: 'left',
-                    sortable: true,
-                    render: (row) => row.asset,
-                  },
+                  // {
+                  //   label: 'AMOUNT',
+                  //   align: 'left',
+                  //   sortable: true,
+                  //   render: (row) => row.amount,
+                  // },
+                  // {
+                  //   label: 'ASSET',
+                  //   align: 'left',
+                  //   sortable: true,
+                  //   render: (row) => row.asset,
+                  // },
                   {
                     label: 'CREDITS',
                     align: 'left',
@@ -187,13 +192,7 @@ export default function CreditsDashboard() {
                     render: (row) => {
                       return (
                         <DetailsMenuButton
-                          menuItems={[
-                            {
-                              label: 'Details',
-                              href: `/credits/detail/${row.id}`,
-                            },
-                            { label: 'Report issue', href: '/' },
-                          ]}
+                          menuItems={[{ label: 'Report issue', href: '/' }]}
                         />
                       )
                     },
@@ -203,7 +202,7 @@ export default function CreditsDashboard() {
                   },
                 ]}
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </ToggleDashboard>
