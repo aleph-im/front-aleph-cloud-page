@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  Button,
-  Icon,
-  NoisyContainer,
-  ObjectImg,
-  TextGradient,
-} from '@aleph-front/core'
+import { Button, Icon, NoisyContainer, ObjectImg } from '@aleph-front/core'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 
 import ToggleDashboard from '@/components/common/ToggleDashboard'
@@ -101,7 +95,7 @@ export default function CreditsDashboard() {
             </div>
           </NoisyContainer>
 
-          <div>
+          {/* <div>
             <div tw="flex gap-6 items-center">
               <TextGradient as="h3" type="h7">
                 Purchases
@@ -111,7 +105,7 @@ export default function CreditsDashboard() {
                 History <Icon name="chevron-square-right" tw="ml-1" />
               </Button>
             </div>
-            {/* <div tw="overflow-x-auto">
+            <div tw="overflow-x-auto">
               <StyledTable
                 // borderType="none"
                 // rowNoise
@@ -202,8 +196,8 @@ export default function CreditsDashboard() {
                   },
                 ]}
               />
-            </div> */}
-          </div>
+            </div>
+          </div> */}
         </div>
       </ToggleDashboard>
     </section>
