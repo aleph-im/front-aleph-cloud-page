@@ -11,14 +11,14 @@
     "lint:fix": "next lint --fix"
   },
   "dependencies": {
-    "@aleph-front/core": "file:/../front-core/aleph-front-core-1.29.1-beta-0.tgz",
+    "@aleph-front/core": "^1.30.1",
     "@aleph-sdk/account": "^1.2.0",
     "@aleph-sdk/avalanche": "^1.5.0",
     "@aleph-sdk/client": "^1.4.5",
     "@aleph-sdk/core": "^1.6.2",
     "@aleph-sdk/ethereum": "^1.5.0",
     "@aleph-sdk/evm": "^1.6.2",
-    "@aleph-sdk/message": "file:/../aleph-sdk-ts/packages/message/aleph-sdk-message-1.6.2-beta-2.tgz",
+    "@aleph-sdk/message": "^1.6.3",
     "@aleph-sdk/solana": "^1.6.2",
     "@aleph-sdk/superfluid": "^1.4.5",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
