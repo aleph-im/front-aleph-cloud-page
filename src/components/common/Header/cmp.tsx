@@ -8,7 +8,7 @@ import {
 import { StyledHeader, StyledNavbarDesktop, StyledNavbarMobile } from './styles'
 import { useHeader } from '@/components/common/Header/hook'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
-import { websiteUrl } from '@/helpers/constants'
+import { NAVIGATION_URLS, websiteUrl } from '@/helpers/constants'
 import { blockchains } from '@/domain/connect/base'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
@@ -94,7 +94,7 @@ export const Header = () => {
             handleDisconnect={handleDisconnect}
             handleSwitchNetwork={handleSwitchNetwork}
             externalUrl={{
-              url: 'https://new-app.aleph.cloud/',
+              url: NAVIGATION_URLS.newConsole.home,
               text: 'New credit console',
             }}
           />
