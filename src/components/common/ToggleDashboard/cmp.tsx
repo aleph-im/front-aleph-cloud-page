@@ -5,7 +5,6 @@ import {
   memo,
   useCallback,
   useRef,
-  useState,
 } from 'react'
 import tw from 'twin.macro'
 import { Button, Icon, useTransition, useBounds } from '@aleph-front/core'
@@ -36,7 +35,7 @@ export const ToggleDashboard = ({
   },
   ...rest
 }: ToggleDashboardProps) => {
-  const handleToogle = useCallback(() => setOpen((prev) => !prev), [])
+  const handleToogle = useCallback(() => setOpen((prev) => !prev), [setOpen])
 
   const ref = useRef<HTMLDivElement>(null)
 

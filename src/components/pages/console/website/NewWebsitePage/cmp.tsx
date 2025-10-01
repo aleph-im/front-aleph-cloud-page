@@ -1,9 +1,5 @@
 import Head from 'next/head'
-import {
-  EntityType,
-  EntityDomainType,
-  PaymentMethod,
-} from '@/helpers/constants'
+import { EntityType, EntityDomainType } from '@/helpers/constants'
 import { useNewWebsitePage } from '@/components/pages/console/website/NewWebsitePage/hook'
 import { Button, TextGradient } from '@aleph-front/core'
 import CheckoutSummary from '@/components/form/CheckoutSummary'

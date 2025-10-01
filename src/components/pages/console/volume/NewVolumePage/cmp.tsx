@@ -1,6 +1,5 @@
 import React from 'react'
 import Head from 'next/head'
-import { PaymentMethod } from '@/helpers/constants'
 import { useNewVolumePage } from './hook'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import { CenteredContainer } from '@/components/common/CenteredContainer'

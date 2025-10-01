@@ -24,7 +24,7 @@ import CheckoutButton from '@/components/form/CheckoutButton'
 export default function NewFunctionPage({ mainRef }: PageProps) {
   const {
     address,
-    accountBalance,
+    accountCreditBalance,
     createFunctionDisabled,
     createFunctionButtonTitle,
     values,
@@ -174,7 +174,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
           control={control}
           address={address}
           cost={cost}
-          unlockedAmount={accountBalance}
+          unlockedAmount={accountCreditBalance}
           mainRef={mainRef}
           description={
             <>

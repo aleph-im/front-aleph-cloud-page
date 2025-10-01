@@ -4,8 +4,15 @@ import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 
 export type NewVolumeStandaloneField = {
-  volumeType: VolumeType.Existing
+  volumeType: VolumeType.New
   file?: File
+}
+
+export type ExistingVolumeStandaloneField = {
+  volumeType: VolumeType.Existing
+  mountPath?: string
+  refHash?: string
+  useLatest?: boolean
 }
 
 export type NewVolumeField = NewVolumeStandaloneField & {
@@ -13,8 +20,7 @@ export type NewVolumeField = NewVolumeStandaloneField & {
   useLatest: boolean
 }
 
-export type ExistingVolumeField = {
-  volumeType: VolumeType.Existing
+export type ExistingVolumeField = ExistingVolumeStandaloneField & {
   mountPath: string
   refHash: string
   useLatest: boolean
@@ -31,7 +37,7 @@ export type InstanceSystemVolumeField = {
   size: number
 }
 
-export const defaultVolume: NewVolumeStandaloneField = {
+export const defaultVolume: ExistingVolumeStandaloneField = {
   volumeType: VolumeType.Existing,
 }
 
