@@ -1,6 +1,10 @@
 import { memo } from 'react'
 import Link from 'next/link'
-import { AccountPicker, RenderLinkProps } from '@aleph-front/core'
+import {
+  AccountPicker,
+  LinkComponent,
+  RenderLinkProps,
+} from '@aleph-front/core'
 import { StyledHeader, StyledNavbarDesktop, StyledNavbarMobile } from './styles'
 import { useHeader } from '@/components/common/Header/hook'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
@@ -52,6 +56,7 @@ export const Header = () => {
             mobileTopContent: (
               <AccountPicker
                 isMobile
+                Link={Link as LinkComponent}
                 accountAddress={accountAddress}
                 accountBalance={accountBalance}
                 accountVouchers={accountVouchers}
@@ -63,6 +68,10 @@ export const Header = () => {
                 handleConnect={handleConnect}
                 handleDisconnect={handleDisconnect}
                 handleSwitchNetwork={handleSwitchNetwork}
+                externalUrl={{
+                  url: 'https://new-app.aleph.cloud/',
+                  text: 'New credit console',
+                }}
               />
             ),
             logoHref: websiteUrl,
@@ -72,6 +81,7 @@ export const Header = () => {
         <StyledNavbarDesktop $breakpoint={breakpoint}>
           <AutoBreadcrumb names={breadcrumbNames} />
           <AccountPicker
+            Link={Link as LinkComponent}
             accountAddress={accountAddress}
             accountBalance={accountBalance}
             accountVouchers={accountVouchers}
@@ -83,6 +93,10 @@ export const Header = () => {
             handleConnect={handleConnect}
             handleDisconnect={handleDisconnect}
             handleSwitchNetwork={handleSwitchNetwork}
+            externalUrl={{
+              url: 'https://new-app.aleph.cloud/',
+              text: 'New credit console',
+            }}
           />
         </StyledNavbarDesktop>
       </StyledHeader>
