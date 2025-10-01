@@ -68,7 +68,7 @@ export const Header = () => {
                 Link={CustomLinkMemo}
                 externalUrl={{
                   text: 'Legacy console',
-                  url: 'https://app.aleph.cloud/',
+                  url: NAVIGATION_URLS.legacyConsole.home,
                 }}
               />
             ),

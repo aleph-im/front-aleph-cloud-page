@@ -197,51 +197,52 @@ export enum WebsiteFrameworkId {
 
 export const EXTRA_WEI = 3600 / 10 ** 18
 
+const LEGACY_CONSOLE_DOMAIN = 'https://app.aleph.cloud/console'
 export const NAVIGATION_URLS = {
   legacyConsole: {
-    home: 'https://app.aleph.cloud/console',
+    home: `${LEGACY_CONSOLE_DOMAIN}`,
     settings: {
-      home: 'https://app.aleph.cloud/console/settings',
+      home: `${LEGACY_CONSOLE_DOMAIN}/settings`,
       ssh: {
-        home: 'https://app.aleph.cloud/console/settings/ssh',
-        new: 'https://app.aleph.cloud/console/settings/ssh/new',
+        home: `${LEGACY_CONSOLE_DOMAIN}/settings/ssh`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/settings/ssh/new`,
       },
       domain: {
-        home: 'https://app.aleph.cloud/console/settings/domain',
-        new: 'https://app.aleph.cloud/console/settings/domain/new',
+        home: `${LEGACY_CONSOLE_DOMAIN}/settings/domain`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/settings/domain/new`,
       },
     },
     web3Hosting: {
-      home: 'https://app.aleph.cloud/console/hosting/',
+      home: `${LEGACY_CONSOLE_DOMAIN}/hosting/`,
       website: {
-        home: 'https://app.aleph.cloud/console/hosting/website',
-        new: 'https://app.aleph.cloud/console/hosting/website/new',
+        home: `${LEGACY_CONSOLE_DOMAIN}/hosting/website`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/hosting/website/new`,
       },
     },
     computing: {
-      home: 'https://app.aleph.cloud/console/computing',
+      home: `${LEGACY_CONSOLE_DOMAIN}/computing`,
       functions: {
-        home: 'https://app.aleph.cloud/console/computing/function',
-        new: 'https://app.aleph.cloud/console/computing/function/new',
+        home: `${LEGACY_CONSOLE_DOMAIN}/computing/function`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/computing/function/new`,
       },
       instances: {
-        home: 'https://app.aleph.cloud/console/computing/instance',
-        new: 'https://app.aleph.cloud/console/computing/instance/new',
+        home: `${LEGACY_CONSOLE_DOMAIN}/computing/instance`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/computing/instance/new`,
       },
       gpus: {
-        home: 'https://app.aleph.cloud/console/computing/gpu-instance',
-        new: 'https://app.aleph.cloud/console/computing/gpu-instance/new',
+        home: `${LEGACY_CONSOLE_DOMAIN}/computing/gpu-instance`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/computing/gpu-instance/new`,
       },
       confidentials: {
-        home: 'https://app.aleph.cloud/console/computing/confidential',
-        new: 'https://app.aleph.cloud/console/computing/confidential/new',
+        home: `${LEGACY_CONSOLE_DOMAIN}/computing/confidential`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/computing/confidential/new`,
       },
     },
     storage: {
-      home: 'https://app.aleph.cloud/console/storage',
+      home: `${LEGACY_CONSOLE_DOMAIN}/storage`,
       volumes: {
-        home: 'https://app.aleph.cloud/console/storage/volume',
-        new: 'https://app.aleph.cloud/console/storage/volume/new',
+        home: `${LEGACY_CONSOLE_DOMAIN}/storage/volume`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/storage/volume/new`,
       },
     },
   },
