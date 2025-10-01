@@ -45,17 +45,24 @@ export function useFormatPayment(
     [paymentType],
   )
 
+  // Determine if payment is pay-as-you-go
+  const isCredit = useMemo(
+    () => paymentType === PaymentType.credit,
+    [paymentType],
+  )
+
   // Format total spent amount using the time components for PAYG type
   const totalSpent = useMemo(() => {
     if (!cost) return
-    if (!isStream) return cost.toString()
+    if (!isStream && !isCredit) return cost.toString()
     if (!runningTime) return
 
     // Use only the remainder (hours, minutes, seconds) from runningTime
     const { days, hours, minutes } = getTimeComponents(runningTime)
     const runningTimeInHours = days * 24 + hours + minutes / 60
+
     return (cost * runningTimeInHours).toFixed(6)
-  }, [cost, isStream, runningTime])
+  }, [cost, isStream, isCredit, runningTime])
 
   // Format blockchain name
   const formattedBlockchain = useMemo(() => {
@@ -65,12 +72,12 @@ export function useFormatPayment(
 
   // Format flow rate to show daily cost
   const formattedFlowRate = useMemo(() => {
-    if (!isStream) return
+    if (!isStream && !isCredit) return
     if (!cost) return
 
     const dailyRate = cost * 24
     return `~${dailyRate.toFixed(4)}/day`
-  }, [cost, isStream])
+  }, [cost, isCredit, isStream])
 
   // Format start date
   const formattedStartDate = useMemo(() => {
@@ -108,8 +115,6 @@ export function useFormatPayment(
   const receiverType = useMemo(() => {
     if (!receiver) return undefined
 
-    console.log('Receiver address:', receiver)
-    console.log('communityWalletAddress:', communityWalletAddress)
     if (receiver == (communityWalletAddress as string)) {
       return 'Community Wallet (20%)'
     }
@@ -120,6 +125,7 @@ export function useFormatPayment(
 
   return {
     isStream,
+    isCredit,
     totalSpent,
     formattedBlockchain,
     formattedFlowRate,

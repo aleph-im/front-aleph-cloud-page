@@ -15,6 +15,7 @@ import InfoTitle from '../InfoTitle'
 const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
   const {
     isStream,
+    isCredit,
     totalSpent,
     formattedBlockchain,
     formattedFlowRate,
@@ -36,7 +37,9 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
             tw="flex items-center gap-1 px-3 py-1"
           >
             <Logo img="aleph" color="base0" byAleph={false} />
-            <div tw="uppercase font-bold leading-relaxed">ALEPH</div>
+            <div tw="uppercase font-bold leading-relaxed -mt-0.5">
+              {isCredit ? 'CREDITS' : 'ALEPH'}
+            </div>
           </div>
           <p className="text-base2 fs-18" tw="font-bold">
             {totalSpent ? totalSpent : <Skeleton width="5rem" />}
@@ -50,6 +53,8 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
             <Text>
               {loading ? (
                 <Skeleton width="5rem" />
+              ) : isCredit ? (
+                'Credit'
               ) : isStream ? (
                 'Stream'
               ) : (
@@ -96,29 +101,29 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
             </Text>
           </div>
 
-          {isStream && (
-            <>
-              <div>
-                <InfoTitle>FLOW RATE</InfoTitle>
-                <Text>
-                  {formattedFlowRate ? (
-                    formattedFlowRate
-                  ) : (
-                    <Skeleton width="5rem" />
-                  )}
-                </Text>
-              </div>
-              <div>
-                <InfoTitle>TIME ELAPSED</InfoTitle>
-                <Text>
-                  {formattedDuration ? (
-                    formattedDuration
-                  ) : (
-                    <Skeleton width="4rem" />
-                  )}
-                </Text>
-              </div>
-            </>
+          {(isStream || isCredit) && (
+            <div>
+              <InfoTitle>FLOW RATE</InfoTitle>
+              <Text>
+                {formattedFlowRate ? (
+                  formattedFlowRate
+                ) : (
+                  <Skeleton width="5rem" />
+                )}
+              </Text>
+            </div>
+          )}
+          {(isStream || isCredit) && (
+            <div>
+              <InfoTitle>TIME ELAPSED</InfoTitle>
+              <Text>
+                {formattedDuration ? (
+                  formattedDuration
+                ) : (
+                  <Skeleton width="4rem" />
+                )}
+              </Text>
+            </div>
           )}
         </div>
       </div>
@@ -131,6 +136,7 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
  * Takes an array of payment data objects and renders a card for each one
  */
 export const EntityPayment = ({ payments }: EntityPaymentProps) => {
+  console.log('Rendering EntityPayment with payments:', payments)
   return (
     <>
       <div className="tp-h7 fs-24" tw="uppercase mb-2">
