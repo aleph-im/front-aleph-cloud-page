@@ -196,7 +196,55 @@ export enum WebsiteFrameworkId {
 
 export const EXTRA_WEI = 3600 / 10 ** 18
 
+const NEW_CONSOLE_DOMAIN = 'https://new-console.aleph.cloud'
 export const NAVIGATION_URLS = {
+  newConsole: {
+    home: `${NEW_CONSOLE_DOMAIN}/console`,
+    settings: {
+      home: `${NEW_CONSOLE_DOMAIN}/console/settings`,
+      ssh: {
+        home: `${NEW_CONSOLE_DOMAIN}/console/settings/ssh`,
+        new: `${NEW_CONSOLE_DOMAIN}/console/settings/ssh/new`,
+      },
+      domain: {
+        home: `${NEW_CONSOLE_DOMAIN}/console/settings/domain`,
+        new: `${NEW_CONSOLE_DOMAIN}/console/settings/domain/new`,
+      },
+    },
+    web3Hosting: {
+      home: `${NEW_CONSOLE_DOMAIN}/console/hosting`,
+      website: {
+        home: `${NEW_CONSOLE_DOMAIN}/console/hosting/website`,
+        new: `${NEW_CONSOLE_DOMAIN}/console/hosting/website/new`,
+      },
+    },
+    computing: {
+      home: `${NEW_CONSOLE_DOMAIN}/console/computing`,
+      functions: {
+        home: `${NEW_CONSOLE_DOMAIN}/console/computing/function`,
+        new: `${NEW_CONSOLE_DOMAIN}/console/computing/function/new`,
+      },
+      instances: {
+        home: `${NEW_CONSOLE_DOMAIN}/console/computing/instance`,
+        new: `${NEW_CONSOLE_DOMAIN}/console/computing/instance/new`,
+      },
+      gpus: {
+        home: `${NEW_CONSOLE_DOMAIN}/console/computing/gpu-instance`,
+        new: `${NEW_CONSOLE_DOMAIN}/console/computing/gpu-instance/new`,
+      },
+      confidentials: {
+        home: `${NEW_CONSOLE_DOMAIN}/console/computing/confidential`,
+        new: `${NEW_CONSOLE_DOMAIN}/console/computing/confidential/new`,
+      },
+    },
+    storage: {
+      home: `${NEW_CONSOLE_DOMAIN}/console/storage`,
+      volumes: {
+        home: `${NEW_CONSOLE_DOMAIN}/console/storage/volume`,
+        new: `${NEW_CONSOLE_DOMAIN}/console/storage/volume/new`,
+      },
+    },
+  },
   console: {
     home: '/console',
     settings: {

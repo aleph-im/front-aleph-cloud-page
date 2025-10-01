@@ -9,6 +9,9 @@ import {
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon } from '@aleph-front/core'
+import ExternalLink from '@/components/common/ExternalLink'
+import { PaymentType } from '@aleph-sdk/message'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 const CreateConfidentialButton = ({
   children,
@@ -77,15 +80,39 @@ export const ConfidentialsTabContent = memo(
                   {
                     label: '',
                     align: 'right',
-                    render: (row) => (
-                      <ButtonLink
-                        kind="functional"
-                        variant="secondary"
-                        href={`/console/computing/confidential/${row.id}`}
-                      >
-                        <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
-                    ),
+                    render: (row) => {
+                      const isCredit = row.payment?.type === PaymentType.credit
+
+                      return (
+                        <ButtonLink
+                          kind="functional"
+                          variant="secondary"
+                          href={`/console/computing/confidential/${row.id}`}
+                          disabled={isCredit}
+                          disabledMessage={
+                            isCredit && (
+                              <p>
+                                To manage this instance, go to the{' '}
+                                <ExternalLink
+                                  text="New Credit Console."
+                                  color="main0"
+                                  href={
+                                    NAVIGATION_URLS.newConsole.computing
+                                      .confidentials.home
+                                  }
+                                />
+                              </p>
+                            )
+                          }
+                          tooltipPosition={{
+                            my: 'bottom-right',
+                            at: 'bottom-center',
+                          }}
+                        >
+                          <Icon name="angle-right" size="lg" />
+                        </ButtonLink>
+                      )
+                    },
                     cellProps: () => ({
                       css: tw`pl-3!`,
                     }),
