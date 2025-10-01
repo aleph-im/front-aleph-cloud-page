@@ -197,7 +197,8 @@ export enum WebsiteFrameworkId {
 
 export const EXTRA_WEI = 3600 / 10 ** 18
 
-const LEGACY_CONSOLE_DOMAIN = 'https://app.aleph.cloud/console'
+const LEGACY_CONSOLE_DOMAIN =
+  'https://aleph-cloud-explorer-test.gerardmolina.com/console'
 export const NAVIGATION_URLS = {
   legacyConsole: {
     home: `${LEGACY_CONSOLE_DOMAIN}`,

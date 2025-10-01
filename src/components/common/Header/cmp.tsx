@@ -55,6 +55,7 @@ export const Header = () => {
                 isMobile
                 accountAddress={accountAddress}
                 accountBalance={accountBalance}
+                showCredits
                 accountCredits={accountCreditBalance}
                 accountVouchers={accountVouchers}
                 blockchains={blockchains}
@@ -81,6 +82,7 @@ export const Header = () => {
           <AccountPicker
             accountAddress={accountAddress}
             accountBalance={accountBalance}
+            showCredits
             accountCredits={accountCreditBalance}
             accountVouchers={accountVouchers}
             blockchains={blockchains}
