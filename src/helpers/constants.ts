@@ -196,7 +196,7 @@ export enum WebsiteFrameworkId {
 
 export const EXTRA_WEI = 3600 / 10 ** 18
 
-const NEW_CONSOLE_DOMAIN = 'https://new-console.aleph.cloud'
+const NEW_CONSOLE_DOMAIN = 'https://aleph-cloud-app-test.gerardmolina.com'
 export const NAVIGATION_URLS = {
   newConsole: {
     home: `${NEW_CONSOLE_DOMAIN}/console`,
