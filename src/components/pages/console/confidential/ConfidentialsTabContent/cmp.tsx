@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useCallback } from 'react'
 import tw from 'twin.macro'
 import { ConfidentialsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
@@ -12,6 +12,7 @@ import { Icon } from '@aleph-front/core'
 import ExternalLink from '@/components/common/ExternalLink'
 import { PaymentType } from '@aleph-sdk/message'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+import { Confidential } from '@/domain/confidential'
 
 const CreateConfidentialButton = ({
   children,
@@ -30,6 +31,10 @@ CreateConfidentialButton.displayName = 'CreateConfidentialButton'
 
 export const ConfidentialsTabContent = memo(
   ({ data }: ConfidentialsTabContentProps) => {
+    const isCredit = useCallback((row: Confidential) => {
+      return row.payment?.type === PaymentType.credit
+    }, [])
+
     return (
       <>
         {data.length > 0 ? (
@@ -39,6 +44,9 @@ export const ConfidentialsTabContent = memo(
                 borderType="none"
                 rowNoise
                 rowKey={(row) => row.id}
+                rowProps={(row) => ({
+                  css: !isCredit(row) ? '' : tw`opacity-40`,
+                })}
                 data={data}
                 columns={[
                   {
@@ -81,16 +89,16 @@ export const ConfidentialsTabContent = memo(
                     label: '',
                     align: 'right',
                     render: (row) => {
-                      const isCredit = row.payment?.type === PaymentType.credit
+                      const disabled = isCredit(row)
 
                       return (
                         <ButtonLink
                           kind="functional"
                           variant="secondary"
                           href={`/console/computing/confidential/${row.id}`}
-                          disabled={isCredit}
+                          disabled={disabled}
                           disabledMessage={
-                            isCredit && (
+                            disabled && (
                               <p>
                                 To manage this instance, go to the{' '}
                                 <ExternalLink

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import tw from 'twin.macro'
 import { GpuInstancesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
@@ -12,9 +12,14 @@ import { Icon } from '@aleph-front/core'
 import ExternalLink from '@/components/common/ExternalLink'
 import { PaymentType } from '@aleph-sdk/message'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+import { GpuInstance } from '@/domain/gpuInstance'
 
 export const GpuInstancesTabContent = React.memo(
   ({ data }: GpuInstancesTabContentProps) => {
+    const isCredit = useCallback((row: GpuInstance) => {
+      return row.payment?.type === PaymentType.credit
+    }, [])
+
     return (
       <>
         {data.length > 0 ? (
@@ -24,6 +29,9 @@ export const GpuInstancesTabContent = React.memo(
                 borderType="none"
                 rowNoise
                 rowKey={(row) => row.id}
+                rowProps={(row) => ({
+                  css: !isCredit(row) ? '' : tw`opacity-40`,
+                })}
                 data={data}
                 columns={[
                   {
@@ -66,16 +74,16 @@ export const GpuInstancesTabContent = React.memo(
                     label: '',
                     align: 'right',
                     render: (row) => {
-                      const isCredit = row.payment?.type === PaymentType.credit
+                      const disabled = isCredit(row)
 
                       return (
                         <ButtonLink
                           kind="functional"
                           variant="secondary"
                           href={`/console/computing/gpu-instance/${row.id}`}
-                          disabled={isCredit}
+                          disabled={disabled}
                           disabledMessage={
-                            isCredit && (
+                            disabled && (
                               <p>
                                 To manage this instance, go to the{' '}
                                 <ExternalLink
