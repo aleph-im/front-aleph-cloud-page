@@ -6,6 +6,7 @@ import { convertByteUnits, ellipseAddress } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+import ExternalLink from '@/components/common/ExternalLink'
 
 export const FunctionsTabContent = React.memo(
   ({ data }: FunctionsTabContentProps) => {
@@ -19,8 +20,10 @@ export const FunctionsTabContent = React.memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 data={data}
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 rowProps={(row) => ({
-                  css: row.confirmed ? '' : tw`opacity-60`,
+                  // css: row.confirmed ? '' : tw`opacity-60`,
+                  css: tw`opacity-40`,
                 })}
                 columns={[
                   {
@@ -77,6 +80,24 @@ export const FunctionsTabContent = React.memo(
                         kind="functional"
                         variant="secondary"
                         href={`${NAVIGATION_URLS.console.computing.functions.home}/${row.id}`}
+                        disabled={true}
+                        disabledMessage={
+                          <p>
+                            To manage this function, go to the{' '}
+                            <ExternalLink
+                              text="Legacy console App."
+                              color="main0"
+                              href={
+                                NAVIGATION_URLS.legacyConsole.computing
+                                  .instances.home
+                              }
+                            />
+                          </p>
+                        }
+                        tooltipPosition={{
+                          my: 'bottom-right',
+                          at: 'bottom-center',
+                        }}
                       >
                         <Icon name="angle-right" size="lg" />
                       </ButtonLink>
