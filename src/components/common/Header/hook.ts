@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useCallback, useState, useMemo, useEffect } from 'react'
+import { useCallback, useState, useMemo } from 'react'
 import { useAppState } from '@/contexts/appState'
 import {
   AccountPickerProps,
@@ -21,7 +21,6 @@ export type UseHeaderReturn = UseRoutesReturn & {
   accountAddress?: string
   accountBalance?: number
   accountCreditBalance?: number
-  accountVouchers?: AccountPickerProps['accountVouchers'] | undefined
   networks: Network[]
   pathname: string
   breadcrumbNames: UseBreadcrumbNamesReturn['names']
@@ -44,7 +43,6 @@ export function useHeader(): UseHeaderReturn {
     balance: accountBalance,
     creditBalance: accountCreditBalance,
   } = state.connection
-  const { voucherManager } = state.manager
 
   const { handleConnect: connect, handleDisconnect: disconnect } =
     useConnection({ triggerOnMount: true })
@@ -120,46 +118,6 @@ export function useHeader(): UseHeaderReturn {
   )
 
   // --------------------
-  const [accountVouchers, setAccountVouchers] = useState<
-    AccountPickerProps['accountVouchers']
-  >([])
-
-  useEffect(() => {
-    const fetchAndFormatVouchers = async () => {
-      if (!account || !voucherManager) return
-
-      const vouchers = await voucherManager.getAll()
-      const groupedVouchers = vouchers.reduce(
-        (grouped, voucher) => {
-          const { metadataId } = voucher
-          if (!grouped[metadataId]) grouped[metadataId] = []
-          grouped[metadataId].push(voucher)
-          return grouped
-        },
-        {} as Record<string, typeof vouchers>,
-      )
-
-      const formattedVouchers = Object.values(groupedVouchers).flatMap(
-        (vouchers) => {
-          if (!vouchers.length) return []
-
-          const { name, icon } = vouchers[0]
-          return {
-            name: name,
-            image: icon,
-            imageAlt: name,
-            amount: vouchers.length,
-          }
-        },
-      )
-
-      setAccountVouchers(formattedVouchers)
-    }
-
-    fetchAndFormatVouchers()
-  }, [account, voucherManager])
-
-  // --------------------
 
   const handleConnect = useCallback(
     async (wallet: Wallet, network: Network) => {
@@ -230,7 +188,6 @@ export function useHeader(): UseHeaderReturn {
     accountAddress: account?.address,
     accountBalance,
     accountCreditBalance,
-    accountVouchers,
     networks,
     pathname,
     routes,

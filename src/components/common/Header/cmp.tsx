@@ -26,7 +26,6 @@ export const Header = () => {
     accountAddress,
     accountBalance,
     accountCreditBalance,
-    accountVouchers,
     rewards,
     selectedNetwork,
     handleToggle,
@@ -57,7 +56,6 @@ export const Header = () => {
                 accountBalance={accountBalance}
                 showCredits
                 accountCredits={accountCreditBalance}
-                accountVouchers={accountVouchers}
                 blockchains={blockchains}
                 networks={networks}
                 selectedNetwork={selectedNetwork}
@@ -84,7 +82,6 @@ export const Header = () => {
             accountBalance={accountBalance}
             showCredits
             accountCredits={accountCreditBalance}
-            accountVouchers={accountVouchers}
             blockchains={blockchains}
             networks={networks}
             selectedNetwork={selectedNetwork}
