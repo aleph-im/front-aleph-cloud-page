@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import tw from 'twin.macro'
 import { InstancesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
@@ -9,9 +9,31 @@ import {
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon } from '@aleph-front/core'
+import { PaymentType } from '@aleph-sdk/message'
+import ExternalLink from '@/components/common/ExternalLink'
+import { NAVIGATION_URLS } from '@/helpers/constants'
+import { Instance } from '@/domain/instance'
 
 export const InstancesTabContent = React.memo(
   ({ data }: InstancesTabContentProps) => {
+    const isCredit = useCallback((row: Instance) => {
+      return row.payment?.type === PaymentType.credit
+    }, [])
+
+    const isDisabled = useCallback(
+      (row: Instance) => {
+        return !isCredit(row)
+      },
+      [isCredit],
+    )
+
+    const defaultCellProps = useCallback(
+      (row: Instance) => {
+        return isDisabled(row) ? { css: tw`opacity-40!` } : {}
+      },
+      [isDisabled],
+    )
+
     return (
       <>
         {data.length > 0 ? (
@@ -29,12 +51,14 @@ export const InstancesTabContent = React.memo(
                     sortable: true,
                     render: (row) =>
                       (row?.metadata?.name as string) || ellipseAddress(row.id),
+                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
                     label: 'Cores',
                     align: 'right',
                     sortable: true,
                     render: (row) => row?.resources?.vcpus || 0,
+                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
                     label: 'RAM',
@@ -46,31 +70,58 @@ export const InstancesTabContent = React.memo(
                         to: 'GiB',
                         displayUnit: true,
                       }),
+                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
-                    label: 'HDD',
+                    label: 'date',
                     align: 'right',
                     sortable: true,
                     render: (row) => humanReadableSize(row.size, 'MiB'),
+                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
                     label: 'Date',
                     align: 'right',
                     sortable: true,
                     render: (row) => row.date,
+                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
                     label: '',
                     align: 'right',
-                    render: (row) => (
-                      <ButtonLink
-                        kind="functional"
-                        variant="secondary"
-                        href={`/console/computing/instance/${row.id}`}
-                      >
-                        <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
-                    ),
+                    render: (row) => {
+                      const disabled = isDisabled(row)
+
+                      return (
+                        <ButtonLink
+                          kind="functional"
+                          variant="secondary"
+                          href={`/console/computing/instance/${row.id}`}
+                          disabled={disabled}
+                          disabledMessage={
+                            disabled && (
+                              <p>
+                                To manage this instance, go to the{' '}
+                                <ExternalLink
+                                  text="Legacy Credit Console."
+                                  color="main0"
+                                  href={
+                                    NAVIGATION_URLS.legacyConsole.computing
+                                      .instances.home
+                                  }
+                                />
+                              </p>
+                            )
+                          }
+                          tooltipPosition={{
+                            my: 'bottom-right',
+                            at: 'bottom-center',
+                          }}
+                        >
+                          <Icon name="angle-right" size="lg" />
+                        </ButtonLink>
+                      )
+                    },
                     cellProps: () => ({
                       css: tw`pl-3!`,
                     }),
