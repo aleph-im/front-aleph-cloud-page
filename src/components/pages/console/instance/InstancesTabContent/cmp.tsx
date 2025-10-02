@@ -20,20 +20,6 @@ export const InstancesTabContent = React.memo(
       return row.payment?.type === PaymentType.credit
     }, [])
 
-    const isDisabled = useCallback(
-      (row: Instance) => {
-        return !isCredit(row)
-      },
-      [isCredit],
-    )
-
-    const defaultCellProps = useCallback(
-      (row: Instance) => {
-        return isDisabled(row) ? { css: tw`opacity-40!` } : {}
-      },
-      [isDisabled],
-    )
-
     return (
       <>
         {data.length > 0 ? (
@@ -43,6 +29,9 @@ export const InstancesTabContent = React.memo(
                 borderType="none"
                 rowNoise
                 rowKey={(row) => row.id}
+                rowProps={(row) => ({
+                  css: isCredit(row) ? '' : tw`opacity-40`,
+                })}
                 data={data}
                 columns={[
                   {
@@ -51,14 +40,12 @@ export const InstancesTabContent = React.memo(
                     sortable: true,
                     render: (row) =>
                       (row?.metadata?.name as string) || ellipseAddress(row.id),
-                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
                     label: 'Cores',
                     align: 'right',
                     sortable: true,
                     render: (row) => row?.resources?.vcpus || 0,
-                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
                     label: 'RAM',
@@ -70,27 +57,24 @@ export const InstancesTabContent = React.memo(
                         to: 'GiB',
                         displayUnit: true,
                       }),
-                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
                     label: 'date',
                     align: 'right',
                     sortable: true,
                     render: (row) => humanReadableSize(row.size, 'MiB'),
-                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
                     label: 'Date',
                     align: 'right',
                     sortable: true,
                     render: (row) => row.date,
-                    cellProps: (row) => defaultCellProps(row),
                   },
                   {
                     label: '',
                     align: 'right',
                     render: (row) => {
-                      const disabled = isDisabled(row)
+                      const disabled = !isCredit(row)
 
                       return (
                         <ButtonLink
@@ -103,7 +87,7 @@ export const InstancesTabContent = React.memo(
                               <p>
                                 To manage this instance, go to the{' '}
                                 <ExternalLink
-                                  text="Legacy Credit Console."
+                                  text="Legacy console App."
                                   color="main0"
                                   href={
                                     NAVIGATION_URLS.legacyConsole.computing

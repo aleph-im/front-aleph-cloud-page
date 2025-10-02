@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useCallback } from 'react'
 import tw from 'twin.macro'
 import { ConfidentialsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
@@ -9,6 +9,10 @@ import {
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon } from '@aleph-front/core'
+import { Confidential } from '@/domain/confidential'
+import { PaymentType } from '@aleph-sdk/message'
+import ExternalLink from '@/components/common/ExternalLink'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 const CreateConfidentialButton = ({
   children,
@@ -27,6 +31,10 @@ CreateConfidentialButton.displayName = 'CreateConfidentialButton'
 
 export const ConfidentialsTabContent = memo(
   ({ data }: ConfidentialsTabContentProps) => {
+    const isCredit = useCallback((row: Confidential) => {
+      return row.payment?.type === PaymentType.credit
+    }, [])
+
     return (
       <>
         {data.length > 0 ? (
@@ -36,6 +44,9 @@ export const ConfidentialsTabContent = memo(
                 borderType="none"
                 rowNoise
                 rowKey={(row) => row.id}
+                rowProps={(row) => ({
+                  css: isCredit(row) ? '' : tw`opacity-40`,
+                })}
                 data={data}
                 columns={[
                   {
@@ -77,15 +88,39 @@ export const ConfidentialsTabContent = memo(
                   {
                     label: '',
                     align: 'right',
-                    render: (row) => (
-                      <ButtonLink
-                        kind="functional"
-                        variant="secondary"
-                        href={`/console/computing/confidential/${row.id}`}
-                      >
-                        <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
-                    ),
+                    render: (row) => {
+                      const disabled = !isCredit(row)
+
+                      return (
+                        <ButtonLink
+                          kind="functional"
+                          variant="secondary"
+                          href={`/console/computing/confidential/${row.id}`}
+                          disabled={disabled}
+                          disabledMessage={
+                            disabled && (
+                              <p>
+                                To manage this confidential instance, go to the{' '}
+                                <ExternalLink
+                                  text="Legacy console App."
+                                  color="main0"
+                                  href={
+                                    NAVIGATION_URLS.legacyConsole.computing
+                                      .instances.home
+                                  }
+                                />
+                              </p>
+                            )
+                          }
+                          tooltipPosition={{
+                            my: 'bottom-right',
+                            at: 'bottom-center',
+                          }}
+                        >
+                          <Icon name="angle-right" size="lg" />
+                        </ButtonLink>
+                      )
+                    },
                     cellProps: () => ({
                       css: tw`pl-3!`,
                     }),

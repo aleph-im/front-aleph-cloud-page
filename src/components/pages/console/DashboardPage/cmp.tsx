@@ -128,7 +128,7 @@ export default function DashboardPage() {
                       <p>
                         To create a Function, navigate to the{' '}
                         <ExternalLink
-                          text="Legacy Console."
+                          text="Legacy console App."
                           color="main0"
                           href={
                             NAVIGATION_URLS.legacyConsole.computing.functions
@@ -244,7 +244,7 @@ export default function DashboardPage() {
                       <p>
                         To deploy a Website, navigate to the{' '}
                         <ExternalLink
-                          text="Legacy Console."
+                          text="Legacy console App."
                           color="main0"
                           href={
                             NAVIGATION_URLS.legacyConsole.computing.functions
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                       <p>
                         To create a new volume, navigate to the{' '}
                         <ExternalLink
-                          text="Legacy Console."
+                          text="Legacy console App."
                           color="main0"
                           href={
                             NAVIGATION_URLS.legacyConsole.computing.functions
