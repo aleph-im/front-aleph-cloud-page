@@ -61,7 +61,7 @@ export function useFormatPayment(
     const { days, hours, minutes } = getTimeComponents(runningTime)
     const runningTimeInHours = days * 24 + hours + minutes / 60
 
-    return (cost * runningTimeInHours).toFixed(6)
+    return Math.round(cost * runningTimeInHours)
   }, [cost, isStream, isCredit, runningTime])
 
   // Format blockchain name
@@ -75,8 +75,9 @@ export function useFormatPayment(
     if (!isStream && !isCredit) return
     if (!cost) return
 
-    const dailyRate = cost * 24
-    return `~${dailyRate.toFixed(4)}/day`
+    const dailyRate = Math.round(cost * 24)
+
+    return `~${dailyRate}/day`
   }, [cost, isCredit, isStream])
 
   // Format start date

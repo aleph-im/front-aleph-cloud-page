@@ -42,7 +42,7 @@ export interface EntityPaymentProps {
 export interface FormattedPaymentData {
   isStream: boolean
   isCredit: boolean
-  totalSpent?: string
+  totalSpent?: string | number
   formattedBlockchain?: string
   formattedFlowRate?: string
   formattedStartDate?: string

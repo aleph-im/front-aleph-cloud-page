@@ -223,7 +223,9 @@ export const CheckoutSummary = ({
                       <span>
                         {line.cost !== 0 ? (
                           <div tw="flex gap-1">
-                            <span className="tp-body3">{line.cost}</span>
+                            <span className="tp-body3">
+                              {humanReadableCurrency(line.cost)}
+                            </span>
                             <span className="tp-body">/ h</span>
                           </div>
                         ) : (
