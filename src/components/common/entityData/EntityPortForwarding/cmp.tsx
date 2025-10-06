@@ -63,7 +63,7 @@ export const EntityPortForwarding = ({
       <div className="tp-h7 fs-24" tw="flex items-center uppercase mb-2">
         <InfoTooltipButton
           plain
-          my="top-left"
+          my="top-right"
           at="top-right"
           vAlign="bottom"
           iconSize="0.9em"
