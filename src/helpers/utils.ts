@@ -71,7 +71,7 @@ export const getAddressBalance = async (address: string) => {
 
     return {
       balance: balance as number,
-      creditBalance: (credit_balance as number) || 150000, // @todo: temporary hack to give free credit balance
+      creditBalance: credit_balance as number,
     }
   } catch (error) {
     throw Err.RequestFailed(error)
