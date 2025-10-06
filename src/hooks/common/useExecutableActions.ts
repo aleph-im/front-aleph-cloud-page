@@ -179,7 +179,6 @@ export function useExecutableActions({
   )
 
   const handleStart = useCallback(async () => {
-    console.log('starting')
     if (!manager) throw Err.ConnectYourWallet
     if (!executable) throw Err.InstanceNotFound
 
@@ -254,7 +253,7 @@ export function useExecutableActions({
   const isAllocated = !!status?.ipv6Parsed
 
   const stopDisabled = useMemo(() => {
-    if (isPAYG || !crn) return true
+    if (!crn) return true
 
     switch (calculatedStatus) {
       case 'v1':
@@ -264,10 +263,10 @@ export function useExecutableActions({
       default:
         return true
     }
-  }, [calculatedStatus, crn, isAllocated, isPAYG])
+  }, [calculatedStatus, crn, isAllocated])
 
   const startDisabled = useMemo(() => {
-    if (isPAYG || !crn) return true
+    if (!crn) return true
 
     switch (calculatedStatus) {
       case 'v1':
@@ -279,7 +278,7 @@ export function useExecutableActions({
       default:
         return true
     }
-  }, [calculatedStatus, crn, isAllocated, isPAYG])
+  }, [calculatedStatus, crn, isAllocated])
 
   const rebootDisabled = useMemo(() => {
     if (!crn) return true
