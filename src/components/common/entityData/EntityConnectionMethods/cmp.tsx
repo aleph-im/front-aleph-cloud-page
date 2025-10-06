@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import { NoisyContainer } from '@aleph-front/core'
+import { NoisyContainer, Tabs } from '@aleph-front/core'
 import { EntityConnectionMethodsProps } from './types'
 import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
@@ -9,16 +9,21 @@ import InfoTitle from '../InfoTitle'
 
 export const EntityConnectionMethods = ({
   executableStatus,
+  sshForwardedPort,
 }: EntityConnectionMethodsProps) => {
   const {
     isLoading,
     formattedIPv4,
     formattedIPv6,
-    formattedSSHCommand,
+    formattedIpv4SSHCommand,
+    formattedIpv6SSHCommand,
     handleCopyIpv4,
     handleCopyIpv6,
-    handleCopyCommand,
-  } = useEntityConnectionMethods({ executableStatus })
+    handleCopyIpv4Command,
+    handleCopyIpv6Command,
+  } = useEntityConnectionMethods({ executableStatus, sshForwardedPort })
+
+  const [tabSelected, setTabSelected] = React.useState<'ipv4' | 'ipv6'>('ipv4')
 
   return (
     <>
@@ -27,39 +32,67 @@ export const EntityConnectionMethods = ({
       </div>
       <NoisyContainer>
         <div tw="flex flex-col gap-4">
+          <Tabs
+            selected={tabSelected}
+            onTabChange={() => {
+              setTabSelected(tabSelected === 'ipv4' ? 'ipv6' : 'ipv4')
+            }}
+            align="left"
+            tabs={[
+              {
+                id: 'ipv4',
+                name: 'ipv4',
+              },
+              {
+                id: 'ipv6',
+                name: 'ipv6',
+              },
+            ]}
+            tw="overflow-hidden -mt-3"
+          />
           <div>
             <InfoTitle>SSH COMMAND</InfoTitle>
             <div>
               {!isLoading ? (
-                <IconText iconName="copy" onClick={handleCopyCommand}>
-                  <Text>&gt;_ {formattedSSHCommand}</Text>
+                <IconText
+                  iconName="copy"
+                  onClick={() => {
+                    if (tabSelected === 'ipv4') {
+                      handleCopyIpv4Command()
+                    } else {
+                      handleCopyIpv6Command()
+                    }
+                  }}
+                >
+                  <Text>
+                    &gt;_{' '}
+                    {tabSelected === 'ipv4'
+                      ? formattedIpv4SSHCommand
+                      : formattedIpv6SSHCommand}
+                  </Text>
                 </IconText>
               ) : (
                 <Skeleton width="20rem" />
               )}
             </div>
           </div>
-          {(isLoading || formattedIPv4 !== '') && (
-            <div>
-              <InfoTitle>IPV4</InfoTitle>
-              <div>
-                {!isLoading ? (
-                  <IconText iconName="copy" onClick={handleCopyIpv4}>
-                    <Text>{formattedIPv4}</Text>
-                  </IconText>
-                ) : (
-                  <Skeleton width="9rem" />
-                )}
-              </div>
-            </div>
-          )}
-
           <div>
-            <InfoTitle>IPV6</InfoTitle>
+            <InfoTitle>{tabSelected === 'ipv4' ? 'IPV4' : 'IPV6'}</InfoTitle>
             <div>
               {!isLoading ? (
-                <IconText iconName="copy" onClick={handleCopyIpv6}>
-                  <Text>{formattedIPv6}</Text>
+                <IconText
+                  iconName="copy"
+                  onClick={() => {
+                    if (tabSelected === 'ipv4') {
+                      handleCopyIpv4()
+                    } else {
+                      handleCopyIpv6()
+                    }
+                  }}
+                >
+                  <Text>
+                    {tabSelected === 'ipv4' ? formattedIPv4 : formattedIPv6}
+                  </Text>
                 </IconText>
               ) : (
                 <Skeleton width="10rem" />

@@ -27,4 +27,6 @@ export type EntityPortForwardingProps = {
   entityHash?: string
   executableStatus?: ExecutableStatus
   executableManager?: ExecutableManager<any>
+  ports: ForwardedPort[]
+  onPortsChange?: (ports: ForwardedPort[]) => void
 }
