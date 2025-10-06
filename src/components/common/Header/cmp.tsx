@@ -55,6 +55,7 @@ export const Header = () => {
                 accountAddress={accountAddress}
                 accountBalance={accountBalance}
                 showCredits
+                disabledTopUp
                 accountCredits={accountCreditBalance}
                 blockchains={blockchains}
                 networks={networks}
@@ -81,6 +82,7 @@ export const Header = () => {
             accountAddress={accountAddress}
             accountBalance={accountBalance}
             showCredits
+            disabledTopUp
             accountCredits={accountCreditBalance}
             blockchains={blockchains}
             networks={networks}
