@@ -83,6 +83,11 @@ export default function ManageGpuInstance() {
 
     // Navigation handlers
     handleBack,
+
+    // Ports
+    ports,
+    sshForwardedPort,
+    handlePortsChange,
   } = useManageGpuInstance()
 
   return (
@@ -162,6 +167,7 @@ export default function ManageGpuInstance() {
               <EntityConnectionMethods
                 key="gpuInstance-connection-methods"
                 executableStatus={status}
+                sshForwardedPort={sshForwardedPort}
               />,
               immutableVolumes.length && (
                 <EntityLinkedVolumes
@@ -188,6 +194,8 @@ export default function ManageGpuInstance() {
                 entityHash={gpuInstance?.id}
                 executableStatus={status}
                 executableManager={gpuInstanceManager}
+                ports={ports}
+                onPortsChange={handlePortsChange}
               />,
             ]}
           />
