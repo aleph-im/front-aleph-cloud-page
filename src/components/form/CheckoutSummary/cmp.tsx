@@ -166,7 +166,6 @@ export const CheckoutSummary = ({
 
   return (
     <>
-      <div tw="md:mt-32" />
       <CheckoutSummaryFooter
         {...{
           submitButton: footerButton,
