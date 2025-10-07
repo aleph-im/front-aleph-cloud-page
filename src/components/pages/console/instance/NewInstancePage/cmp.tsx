@@ -41,7 +41,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   const {
     address,
     accountCreditBalance,
-    blockchainName,
     manuallySelectCRNDisabled,
     manuallySelectCRNDisabledMessage,
     createInstanceDisabled,

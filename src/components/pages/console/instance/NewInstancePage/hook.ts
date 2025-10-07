@@ -43,7 +43,7 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { BlockchainId } from '@/domain/connect/base'
 import {
   CreditPaymentConfiguration,
   PaymentConfiguration,
@@ -75,7 +75,6 @@ export type Modal = 'node-list' | 'terms-and-conditions'
 export type UseNewInstancePageReturn = {
   address: string
   accountCreditBalance: number
-  blockchainName: string
   manuallySelectCRNDisabled: boolean
   manuallySelectCRNDisabledMessage?: TooltipProps['content']
   createInstanceDisabled: boolean
@@ -309,10 +308,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return !!node?.terms_and_conditions
   }, [node])
 
-  const blockchainName = useMemo(() => {
-    return blockchain ? blockchains[blockchain]?.name : 'Current network'
-  }, [blockchain])
-
   const address = useMemo(() => account?.address || '', [account])
 
   const manuallySelectCRNDisabledMessage: UseNewInstancePageReturn['manuallySelectCRNDisabledMessage'] =
@@ -437,7 +432,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   return {
     address,
     accountCreditBalance,
-    blockchainName,
     createInstanceDisabled,
     createInstanceButtonTitle,
     manuallySelectCRNDisabled,
