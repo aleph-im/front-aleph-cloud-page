@@ -420,11 +420,11 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
           mainRef={mainRef}
           description={
             <>
-              You can either leverage the traditional method of holding tokens
-              in your wallet for resource access, or opt for the Pay-As-You-Go
-              (PAYG) system, which allows you to pay precisely for what you use,
-              for the duration you need. The PAYG option includes a token stream
-              feature, enabling real-time payment for resources as you use them.
+              Aleph Cloud runs on a <strong>credit-based system</strong>,
+              designed for flexibility and transparency. You can top up credits
+              with <strong>fiat, USDC, or ALEPH</strong>. Your credits are
+              deducted only as you consume resources, ensuring you pay exactly
+              for what you use.
             </>
           }
           // Duplicate buttons to have different references for the tooltip on each one

@@ -261,12 +261,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             </CompositeSectionTitle>
             <p>
               Your instance is set up with your manually selected Compute
-              Resource Node (CRN), operating under the{' '}
-              <Strong>Pay-as-you-go</Strong> payment method on{' '}
-              <Strong>{blockchainName}</Strong>. This setup gives you direct
-              control over your resource allocation and costs, requiring active
-              management of your instance. To adjust your CRN or explore
-              different payment options, you can modify your selection below.
+              Resource Node (CRN) and powered by{' '}
+              <Strong>Aleph Cloud Credits</Strong>. Credits are pre-purchased
+              using fiat, USDC, or ALEPH and automatically deducted as your
+              instance consumes resources. This setup gives you full control
+              over your node selection, cost, and balance. To adjust your CRN or
+              add more credits, you can update your configuration below.
             </p>
             <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
               <NoisyContainer>
@@ -430,11 +430,11 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           mainRef={mainRef}
           description={
             <>
-              You can either leverage the traditional method of holding tokens
-              in your wallet for resource access, or opt for the Pay-As-You-Go
-              (PAYG) system, which allows you to pay precisely for what you use,
-              for the duration you need. The PAYG option includes a token stream
-              feature, enabling real-time payment for resources as you use them.
+              Aleph Cloud runs on a <strong>credit-based system</strong>,
+              designed for flexibility and transparency. You can top up credits
+              with <strong>fiat, USDC, or ALEPH</strong>. Your credits are
+              deducted only as you consume resources, ensuring you pay exactly
+              for what you use.
             </>
           }
           button={
