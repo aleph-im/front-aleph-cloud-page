@@ -171,7 +171,8 @@ export const CheckoutSummary = ({
         {...{
           submitButton: footerButton,
           mainRef,
-          totalCost: cost?.cost,
+          totalCost: cost?.cost?.cost,
+          loading: cost.loading,
         }}
       />
       <section
@@ -211,7 +212,7 @@ export const CheckoutSummary = ({
                   </StyledHoldingSummaryLine>
                 )}
 
-                {cost?.lines?.map((line) => (
+                {cost?.cost?.lines?.map((line) => (
                   <StyledHoldingSummaryLine key={line.id}>
                     <div>
                       {line.name}
@@ -227,6 +228,7 @@ export const CheckoutSummary = ({
                             value={line.cost}
                             duration="h"
                             className="tp-body3"
+                            loading={cost.loading}
                           />
                         ) : (
                           '-'
@@ -271,7 +273,12 @@ export const CheckoutSummary = ({
                   <div className="text-main0 tp-body2">Total credits / h</div>
                   <div>
                     <span className="text-main0">
-                      <Price type="credit" value={cost?.cost} duration="h" />
+                      <Price
+                        type="credit"
+                        value={cost?.cost?.cost}
+                        duration="h"
+                        loading={cost.loading}
+                      />
                     </span>
                   </div>
                 </StyledHoldingSummaryLine>
@@ -282,7 +289,10 @@ export const CheckoutSummary = ({
                     <span className="text-main0 tp-body3">
                       <Price
                         type="credit"
-                        value={cost?.cost ? cost.cost * 4 : undefined}
+                        value={
+                          cost?.cost?.cost ? cost.cost.cost * 4 : undefined
+                        }
+                        loading={cost.loading}
                       />
                     </span>
                   </div>

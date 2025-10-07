@@ -8,4 +8,5 @@ export type CheckoutSummaryFooterProps = Pick<
   submitButton?: ReactNode
   mainRef?: RefObject<HTMLElement>
   totalCost?: number
+  loading?: boolean
 }

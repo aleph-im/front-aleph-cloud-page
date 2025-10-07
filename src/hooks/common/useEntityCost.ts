@@ -46,7 +46,10 @@ export type UseEntityCostProps =
   | UseProgramCostProps
   | UseWebsiteCostProps
 
-export type UseEntityCostReturn = CostSummary
+export type UseEntityCostReturn = {
+  cost: CostSummary
+  loading: boolean
+}
 
 export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
   // Use useMemo to prevent the object from being recreated on every render
@@ -59,7 +62,8 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
     [],
   )
 
-  const [cost, setCost] = useState<UseEntityCostReturn>(emptyCost)
+  const [cost, setCost] = useState<CostSummary>(emptyCost)
+  const [loading, setLoading] = useState<boolean>(false)
 
   const volumeManager = useVolumeManager()
   const instanceManager = useInstanceManager()
@@ -76,6 +80,12 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
   // Store previous debounced string to detect changes
   const prevDebouncedPropsString = usePrevious(debouncedPropsString)
 
+  // Track if we're waiting for debounce or actively fetching
+  const isDebouncing = useMemo(
+    () => propsString !== debouncedPropsString,
+    [debouncedPropsString, propsString],
+  )
+
   // Return the original props only when the debounced string changes
   const debouncedProps = useMemo(() => {
     // Check if the debounced string has changed
@@ -90,34 +100,42 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
   // Only make the API call when the debounced props change
   useEffect(() => {
     async function load() {
+      console.log('Loading entity cost with props:', debouncedProps)
       // Skip if debouncedProps is undefined (no change detected)
       if (!debouncedProps) return
 
-      let result: CostSummary = emptyCost
-      const { entityType, props } = debouncedProps
+      try {
+        setLoading(true)
+        let result: CostSummary = emptyCost
+        const { entityType, props } = debouncedProps
 
-      switch (entityType) {
-        case EntityType.Volume:
-          if (volumeManager) result = await volumeManager.getCost(props)
-          break
-        case EntityType.Instance:
-          if (instanceManager) result = await instanceManager.getCost(props)
-          break
-        case EntityType.GpuInstance:
-          if (gpuInstanceManager)
-            result = await gpuInstanceManager.getCost(props)
-          break
-        case EntityType.Program:
-          console.log('Fetching program cost with props:', props)
-          if (programManager) result = await programManager.getCost(props)
-          break
-        case EntityType.Website:
-          console.log('Fetching website cost with props:', props)
-          if (websiteManager) result = await websiteManager.getCost(props)
-          break
+        switch (entityType) {
+          case EntityType.Volume:
+            if (volumeManager) result = await volumeManager.getCost(props)
+            break
+          case EntityType.Instance:
+            if (instanceManager) result = await instanceManager.getCost(props)
+            break
+          case EntityType.GpuInstance:
+            if (gpuInstanceManager)
+              result = await gpuInstanceManager.getCost(props)
+            break
+          case EntityType.Program:
+            console.log('Fetching program cost with props:', props)
+            if (programManager) result = await programManager.getCost(props)
+            break
+          case EntityType.Website:
+            console.log('Fetching website cost with props:', props)
+            if (websiteManager) result = await websiteManager.getCost(props)
+            break
+        }
+
+        setCost(result)
+      } catch (e) {
+        console.error('Error fetching entity cost:', e)
+      } finally {
+        setLoading(false)
       }
-
-      setCost(result)
     }
 
     load()
@@ -131,5 +149,14 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
     websiteManager,
   ])
 
-  return cost
+  const isLoading = loading || isDebouncing
+
+  console.log('loading', {
+    cost,
+    loading: isLoading,
+    isDebouncing,
+    fetchingData: loading,
+  })
+
+  return { cost, loading: isLoading }
 }

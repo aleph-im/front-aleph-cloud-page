@@ -8,4 +8,5 @@ export type PriceProps = HTMLAttributes<HTMLSpanElement> & {
   type?: PriceType
   duration?: StreamDurationUnit
   iconSize?: string
+  loading?: boolean
 }
