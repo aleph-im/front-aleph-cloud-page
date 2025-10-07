@@ -276,7 +276,6 @@ export class ProgramManager
     const parsedProgram: ProgramPublishConfiguration =
       await this.parseProgramForCostEstimation(newProgram)
 
-    console.log('Parsed program for cost estimation:', parsedProgram)
     const costs =
       await this.sdkClient.programClient.getEstimatedCost(parsedProgram)
 
@@ -354,7 +353,6 @@ export class ProgramManager
   ): Promise<ProgramPublishConfiguration> {
     const { account = mockAccount, channel } = this
     const { isPersistent, specs } = newProgram
-    console.log('Parsing program for cost estimation:', newProgram)
 
     const parsedSpecs = this.parseSpecs(specs)
     const memory = parsedSpecs?.memory

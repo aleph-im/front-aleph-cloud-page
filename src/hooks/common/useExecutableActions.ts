@@ -121,7 +121,6 @@ export function useExecutableActions({
   }, [executable, manager])
 
   const nodeDetails = useMemo(() => {
-    console.log('crn', crn)
     if (!crn) return
     return {
       name: crn.name || crn.hash,

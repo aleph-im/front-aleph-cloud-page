@@ -136,7 +136,6 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
  * Takes an array of payment data objects and renders a card for each one
  */
 export const EntityPayment = ({ payments }: EntityPaymentProps) => {
-  console.log('Rendering EntityPayment with payments:', payments)
   return (
     <>
       <div className="tp-h7 fs-24" tw="uppercase mb-2">

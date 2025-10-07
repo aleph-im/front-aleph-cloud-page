@@ -876,7 +876,6 @@ export abstract class ExecutableManager<T extends Executable> {
         receiver: payment.receiver,
       }
     } else {
-      console.log('Parsing payment for cost estimation:', payment)
       return {
         chain: payment?.chain || BlockchainId.ETH,
         type:

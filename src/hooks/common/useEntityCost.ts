@@ -100,7 +100,6 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
   // Only make the API call when the debounced props change
   useEffect(() => {
     async function load() {
-      console.log('Loading entity cost with props:', debouncedProps)
       // Skip if debouncedProps is undefined (no change detected)
       if (!debouncedProps) return
 
@@ -121,11 +120,9 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
               result = await gpuInstanceManager.getCost(props)
             break
           case EntityType.Program:
-            console.log('Fetching program cost with props:', props)
             if (programManager) result = await programManager.getCost(props)
             break
           case EntityType.Website:
-            console.log('Fetching website cost with props:', props)
             if (websiteManager) result = await websiteManager.getCost(props)
             break
         }
@@ -150,13 +147,6 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
   ])
 
   const isLoading = loading || isDebouncing
-
-  console.log('loading', {
-    cost,
-    loading: isLoading,
-    isDebouncing,
-    fetchingData: loading,
-  })
 
   return { cost, loading: isLoading }
 }
