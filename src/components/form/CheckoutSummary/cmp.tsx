@@ -9,6 +9,7 @@ import CheckoutSummaryFooter from '../CheckoutSummaryFooter'
 import { useConnection } from '@/hooks/common/useConnection'
 import { Blockchain } from '@aleph-sdk/core'
 import { useNFTVoucherBalance } from '@/hooks/common/useNFTVoucherBalance'
+import Price from '@/components/common/Price'
 
 // const CheckoutSummaryVolumeLine = ({
 //   volume,
@@ -221,21 +222,13 @@ export const CheckoutSummary = ({
                     <div>
                       <span>
                         {line.cost !== 0 ? (
-                          <div tw="flex gap-1">
-                            <span className="tp-body3">
-                              {humanReadableCurrency(line.cost)}
-                            </span>
-                            <span className="tp-body">/ h</span>
-                          </div>
+                          <Price
+                            type="credit"
+                            value={line.cost}
+                            duration="h"
+                            className="tp-body3"
+                          />
                         ) : (
-                          // <Price
-                          //   value={line.cost}
-                          //   duration={
-                          //     cost?.paymentMethod === PaymentMethod.Stream
-                          //       ? 'h'
-                          //       : undefined
-                          //   }
-                          // />
                           '-'
                         )}
                       </span>
@@ -278,11 +271,7 @@ export const CheckoutSummary = ({
                   <div className="text-main0 tp-body2">Total credits / h</div>
                   <div>
                     <span className="text-main0">
-                      {/* <Price value={cost?.cost} /> */}
-                      <div tw="flex gap-1">
-                        <span>{humanReadableCurrency(cost?.cost)}</span>
-                        <span>/ h</span>
-                      </div>
+                      <Price type="credit" value={cost?.cost} duration="h" />
                     </span>
                   </div>
                 </StyledHoldingSummaryLine>
@@ -291,10 +280,10 @@ export const CheckoutSummary = ({
                   <div className="text-main0 tp-body2">Min. required</div>
                   <div>
                     <span className="text-main0 tp-body3">
-                      {/* <Price value={cost?.cost * 4} /> */}
-                      <div tw="flex gap-1">
-                        <span>{humanReadableCurrency(cost?.cost * 4)}</span>
-                      </div>
+                      <Price
+                        type="credit"
+                        value={cost?.cost ? cost.cost * 4 : undefined}
+                      />
                     </span>
                   </div>
                 </StyledHoldingSummaryLine>

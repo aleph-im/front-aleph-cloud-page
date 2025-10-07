@@ -6,6 +6,7 @@ import { humanReadableCurrency } from '@/helpers/utils'
 
 export const Price = ({
   value,
+  type = 'token',
   duration,
   iconSize = '0.75em',
   ...rest
@@ -13,7 +14,9 @@ export const Price = ({
   return (
     <StyledPrice {...rest}>
       {humanReadableCurrency(value)}
-      <Logo color="currentColor" img="aleph" size={iconSize} />
+      {type === 'token' && (
+        <Logo color="currentColor" img="aleph" size={iconSize} />
+      )}
       {duration && <span>/ {duration}</span>}
     </StyledPrice>
   )

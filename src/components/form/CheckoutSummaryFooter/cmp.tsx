@@ -3,7 +3,7 @@ import { Button, ButtonProps } from '@aleph-front/core'
 import { StyledSeparator } from './styles'
 import { CheckoutSummaryFooterProps } from './types'
 import FloatingFooter from '../FloatingFooter'
-import { humanReadableCurrency } from '@/helpers/utils'
+import Price from '@/components/common/Price'
 
 // ------------------------------------------
 
@@ -37,7 +37,7 @@ export const CheckoutSummaryFooter = ({
               <div>
                 <div tw="flex items-center justify-center gap-2 whitespace-nowrap">
                   <span className="text-main0 fs-24 tp-body3">
-                    {humanReadableCurrency(totalCost)}
+                    <Price type="credit" value={totalCost} />
                   </span>
                   <span className="tp-body2" tw="mt-1">
                     Credits / h
