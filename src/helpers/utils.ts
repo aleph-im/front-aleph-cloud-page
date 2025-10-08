@@ -658,6 +658,34 @@ export function getVersionNumber(version: string): number {
 }
 
 /**
+ * Compares two semantic version strings to determine if the first version
+ * is greater than or equal to the second version.
+ *
+ * @param version - The version to check (e.g., "1.8.5")
+ * @param minVersion - The minimum required version (e.g., "1.7.2")
+ * @returns true if version >= minVersion, false otherwise
+ *
+ * @example
+ * compareVersion("1.8.5", "1.7.2") // true
+ * compareVersion("1.7.0", "1.7.2") // false
+ * compareVersion("2.0.0", "1.7.2") // true
+ */
+export function compareVersion(version: string, minVersion: string): boolean {
+  const v1Parts = version.split('.').map(Number)
+  const v2Parts = minVersion.split('.').map(Number)
+
+  for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
+    const v1 = v1Parts[i] || 0
+    const v2 = v2Parts[i] || 0
+
+    if (v1 > v2) return true
+    if (v1 < v2) return false
+  }
+
+  return true
+}
+
+/**
  * An util for controlling concurrency (lock / unlock) forcing sequential access
  * to some region of the code
  *

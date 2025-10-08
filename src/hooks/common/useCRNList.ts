@@ -9,6 +9,7 @@ import { CRNSpecs, StreamNotSupportedIssue } from '@/domain/node'
 import {
   DropdownProps,
   useDebounceState,
+  useLocalRequest,
   usePaginatedList,
 } from '@aleph-front/core'
 import {
@@ -18,6 +19,8 @@ import {
 import { useDefaultTiers } from './pricing/useDefaultTiers'
 import { useRequestCRNLastVersion } from './useRequestEntity/useRequestCRNLastVersion'
 import { EntityType } from '@/helpers/constants'
+import { useCostManager } from './useManager/useCostManager'
+import { compareVersion } from '@/helpers/utils'
 
 export type StreamSupportedIssues = Record<string, StreamNotSupportedIssue>
 
@@ -59,17 +62,36 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   const { enableGpu } = props
 
   const nodeManager = useNodeManager()
+  const costManager = useCostManager()
   const { specs: crnSpecs, loading: isLoadingSpecs } = useRequestCRNSpecs()
   const { lastVersion, loading: isLoadingLastVersion } =
     useRequestCRNLastVersion()
   const [isLoadingList, setIsLoadingList] = useState(true)
 
+  const { data: settingsAggregate, loading: isLoadingSettings } =
+    useLocalRequest({
+      doRequest: () => {
+        return costManager
+          ? costManager.getSettingsAggregate()
+          : Promise.resolve(undefined)
+      },
+      onSuccess: () => null,
+      onError: () => null,
+      flushData: true,
+      triggerOnMount: true,
+      triggerDeps: [costManager],
+    })
+
   // -----------------------------
   // Loading CRN List
 
   const loading = useMemo(
-    () => isLoadingSpecs || isLoadingLastVersion || isLoadingList,
-    [isLoadingLastVersion, isLoadingList, isLoadingSpecs],
+    () =>
+      isLoadingSpecs ||
+      isLoadingLastVersion ||
+      isLoadingList ||
+      isLoadingSettings,
+    [isLoadingLastVersion, isLoadingList, isLoadingSpecs, isLoadingSettings],
   )
 
   // -----------------------------
@@ -228,16 +250,26 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
 
   // -----------------------------
 
-  const validPAYGNodes = useMemo(() => {
+  const validCreditNodes = useMemo(() => {
     if (!baseFilteredNodes) return
     if (!nodesIssues) return baseFilteredNodes
+    if (!settingsAggregate?.lastCrnVersion) return baseFilteredNodes
 
-    return baseFilteredNodes.filter((node) => !nodesIssues[node.hash])
-  }, [baseFilteredNodes, nodesIssues])
+    const minVersion = settingsAggregate.lastCrnVersion
+
+    return baseFilteredNodes.filter((node) => {
+      if (nodesIssues[node.hash]) return false
+
+      const nodeVersion = node.version || ''
+      if (!nodeVersion) return false
+
+      return compareVersion(nodeVersion, minVersion)
+    })
+  }, [baseFilteredNodes, nodesIssues, settingsAggregate])
 
   const filteredNodes = useMemo(() => {
     try {
-      return validPAYGNodes?.filter((node) => {
+      return validCreditNodes?.filter((node) => {
         if (gpuFilter) {
           if (node.selectedGpu?.model !== gpuFilter) return false
         }
@@ -261,7 +293,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     } finally {
       setIsLoadingList(false)
     }
-  }, [gpuFilter, cpuFilter, hddFilter, ramFilter, validPAYGNodes])
+  }, [gpuFilter, cpuFilter, hddFilter, ramFilter, validCreditNodes])
 
   const sortedNodes = useMemo(() => {
     if (!filteredNodes) return

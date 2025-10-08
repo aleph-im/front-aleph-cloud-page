@@ -83,6 +83,7 @@ export type PricingAggregate = Record<PriceType, PriceTypeObject>
 
 export type SettingsAggregate = {
   compatibleGpus: GPUDevice[]
+  lastCrnVersion: string
   communityWalletAddress: string
   communityWalletTimestamp: number
 }
