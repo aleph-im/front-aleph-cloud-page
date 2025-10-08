@@ -40,7 +40,7 @@ export const Footer = () => {
         },
         {
           label: 'Telegram Developers',
-          href: 'https://t.me/alephim/119590',
+          href: 'https://t.me/alephcloud',
           target: '_blank',
         },
       ]}
