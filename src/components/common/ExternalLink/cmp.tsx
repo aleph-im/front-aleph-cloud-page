@@ -9,6 +9,7 @@ export const ExternalLink = ({
   color,
   typo,
   underline,
+  disabled = false,
   ...props
 }: ExternalLinkProps) => {
   return (
@@ -19,10 +20,11 @@ export const ExternalLink = ({
         $color={color}
         $typo={typo}
         $underline={underline}
+        $disabled={disabled}
         {...props}
       >
         {text ? text : href}
-        <Icon name="square-up-right" tw="ml-2.5" />
+        <Icon name="square-up-right" tw="ml-1" />
       </StyledExternalLink>
     </>
   )

@@ -10,6 +10,7 @@ import {
 import { useForwardedPorts } from '@/hooks/common/useForwardedPorts'
 import { getSSHForwardedPort } from '@/components/common/entityData/EntityPortForwarding/utils'
 import { ForwardedPort } from '@/components/common/entityData/EntityPortForwarding/types'
+import { useAppState } from '@/contexts/appState'
 
 export type UseManageInstanceReturn = UseManageInstanceEntityReturn & {
   instance?: Instance
@@ -17,11 +18,15 @@ export type UseManageInstanceReturn = UseManageInstanceEntityReturn & {
   ports: ForwardedPort[]
   sshForwardedPort?: string
   handlePortsChange: (ports: ForwardedPort[]) => void
+  creditBalance?: number
 }
 
 export function useManageInstance(): UseManageInstanceReturn {
   const router = useRouter()
   const { hash } = router.query
+
+  const [state] = useAppState()
+  const { creditBalance } = state.connection
 
   const { entities } = useRequestInstances({ ids: hash as string })
   const [instance] = entities || []
@@ -68,6 +73,7 @@ export function useManageInstance(): UseManageInstanceReturn {
     ports,
     sshForwardedPort,
     handlePortsChange,
+    creditBalance,
     ...manageInstanceEntityProps,
   }
 }
