@@ -92,6 +92,7 @@ export const ManageEntityHeader = ({
               entity={entity}
               isAllocated={isAllocated}
               theme={theme}
+              cannotStart={cannotStart}
             />
             <div className="tp-h7 fs-18" tw="uppercase">
               {entity ? name : <Skeleton width="20rem" />}
@@ -232,9 +233,7 @@ export const ManageEntityHeader = ({
           <BorderBox $color="error">
             <p>
               ⛔️ <strong>This resource can&apos;t be started</strong> due to
-              insufficiency of credits.
-            </p>
-            <p>
+              insufficiency of credits.{' '}
               <ExternalLink text="Top-up" color="disabled" underline disabled />{' '}
               your wallet to reactivate your instance again.
             </p>
