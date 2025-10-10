@@ -374,3 +374,14 @@ export function applyPendingRemovals(
 
   return filteredPorts
 }
+
+/**
+ * Extracts the SSH forwarded port (port 22's destination) from the ports array
+ * Returns the destination port or undefined if not mapped yet
+ */
+export function getSSHForwardedPort(
+  ports: ForwardedPort[],
+): string | undefined {
+  const sshPort = ports.find((port) => port.source === '22')
+  return sshPort?.destination
+}

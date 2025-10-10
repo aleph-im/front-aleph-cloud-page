@@ -17,11 +17,12 @@ export const EntityPortForwarding = ({
   entityHash,
   executableStatus,
   executableManager,
+  ports,
+  onPortsChange,
 }: EntityPortForwardingProps) => {
   const {
     // State
     showPortForm,
-    ports,
     // Actions
     handleAddPort,
     handleCancelAddPort,
@@ -31,6 +32,8 @@ export const EntityPortForwarding = ({
     entityHash,
     executableStatus,
     executableManager,
+    ports,
+    onPortsChange,
   })
 
   const tooltipContent = (
@@ -60,7 +63,7 @@ export const EntityPortForwarding = ({
       <div className="tp-h7 fs-24" tw="flex items-center uppercase mb-2">
         <InfoTooltipButton
           plain
-          my="top-left"
+          my="top-right"
           at="top-right"
           vAlign="bottom"
           iconSize="0.9em"

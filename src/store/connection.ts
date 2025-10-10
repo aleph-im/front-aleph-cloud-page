@@ -10,6 +10,7 @@ import { PaymentMethod } from '@/helpers/constants'
 export type ConnectionState = {
   account?: Account
   balance?: number
+  creditBalance?: number
   blockchain?: BlockchainId
   provider?: ProviderId
   paymentMethod: PaymentMethod
@@ -59,6 +60,7 @@ export class ConnectionUpdateAction {
       provider: ProviderId
       blockchain: BlockchainId
       balance?: number
+      creditBalance?: number
     },
   ) {}
 }
@@ -68,6 +70,7 @@ export class ConnectionSetBalanceAction {
   constructor(
     public payload: {
       balance: number
+      creditBalance?: number
     },
   ) {}
 }
@@ -113,6 +116,9 @@ export function getConnectionReducer(): ConnectionReducer {
         let newProvider = provider
         let newBalance =
           (action as ConnectionUpdateAction).payload.balance || state.balance
+        let newCreditBalance =
+          (action as ConnectionUpdateAction).payload.creditBalance ||
+          state.creditBalance
 
         // If we are switching between EVM and Solana, hardcode the provider
         if (currentProvider) {
@@ -130,14 +136,17 @@ export function getConnectionReducer(): ConnectionReducer {
         }
 
         // If we are switching blockchains, reset the balance
-        if (currentBlockchain && currentBlockchain !== blockchain)
+        if (currentBlockchain && currentBlockchain !== blockchain) {
           newBalance = undefined
+          newCreditBalance = undefined
+        }
 
         return {
           ...state,
           ...action.payload,
           provider: newProvider,
           balance: newBalance,
+          creditBalance: newCreditBalance,
         }
       }
       case ConnectionActionType.CONNECTION_SET_BALANCE: {

@@ -283,6 +283,7 @@ export const AddVolume = memo((props: AddVolumeProps) => {
       {
         id: VolumeType.New,
         name: 'New volume',
+        disabled: true,
       },
       {
         id: VolumeType.Existing,

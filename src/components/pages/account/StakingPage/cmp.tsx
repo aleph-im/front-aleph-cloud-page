@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import Head from 'next/head'
 import {
   Checkbox,
@@ -41,6 +41,7 @@ export const StakingPage = (props: UseStakingPageProps) => {
   } = useStakingPage(props)
 
   const { render } = useLazyRender()
+  const [dashboardOpen, setDashboardOpen] = useState(true)
 
   return (
     <>
@@ -57,7 +58,7 @@ export const StakingPage = (props: UseStakingPageProps) => {
           <TextGradient type="h5" forwardedAs="h1" tw="mb-8">
             Staking
           </TextGradient>
-          <ToggleDashboard>
+          <ToggleDashboard open={dashboardOpen} setOpen={setDashboardOpen}>
             <div tw="flex items-start gap-6 flex-wrap 2xl:flex-nowrap">
               <div tw="flex-auto self-stretch">
                 <h2 className="tp-h7" tw="mb-0">

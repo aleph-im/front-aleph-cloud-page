@@ -1,5 +1,5 @@
 import React from 'react'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
 import {
@@ -9,7 +9,6 @@ import {
   NodeScore,
   TableColumn,
   NoisyContainer,
-  TooltipProps,
   Checkbox,
 } from '@aleph-front/core'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
@@ -21,83 +20,30 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import {
-  EntityDomainType,
-  EntityType,
-  PaymentMethod,
-  apiServer,
-} from '@/helpers/constants'
+import { EntityDomainType, EntityType, apiServer } from '@/helpers/constants'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import NewEntityTab from '@/components/common/NewEntityTab'
 import NodesTable from '@/components/common/NodesTable'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
 import CRNList from '../../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
-import BorderBox from '@/components/common/BorderBox'
 import ExternalLink from '@/components/common/ExternalLink'
-import { useNewGpuInstancePage, UseNewGpuInstancePageReturn } from './hook'
-
-const CheckoutButton = React.memo(
-  ({
-    disabled,
-    title = 'Create instance',
-    tooltipContent,
-    isFooter,
-    shouldRequestTermsAndConditions,
-    handleRequestTermsAndConditionsAgreement,
-    handleSubmit,
-  }: {
-    disabled: boolean
-    title?: string
-    tooltipContent?: TooltipProps['content']
-    isFooter: boolean
-    shouldRequestTermsAndConditions?: boolean
-    handleRequestTermsAndConditionsAgreement: UseNewGpuInstancePageReturn['handleRequestTermsAndConditionsAgreement']
-    handleSubmit: UseNewGpuInstancePageReturn['handleSubmit']
-  }) => {
-    const checkoutButtonRef = useRef<HTMLButtonElement>(null)
-
-    return (
-      <ButtonWithInfoTooltip
-        ref={checkoutButtonRef}
-        type={shouldRequestTermsAndConditions ? 'button' : 'submit'}
-        color="main0"
-        kind="default"
-        size="lg"
-        variant="primary"
-        disabled={disabled}
-        tooltipContent={tooltipContent}
-        tooltipPosition={{
-          my: isFooter ? 'bottom-right' : 'bottom-center',
-          at: isFooter ? 'top-right' : 'top-center',
-        }}
-        onClick={
-          shouldRequestTermsAndConditions
-            ? handleRequestTermsAndConditionsAgreement
-            : handleSubmit
-        }
-      >
-        {title}
-      </ButtonWithInfoTooltip>
-    )
-  },
-)
-CheckoutButton.displayName = 'CheckoutButton'
+import { useNewGpuInstancePage } from './hook'
+import CheckoutButton from '@/components/form/CheckoutButton'
 
 export default function NewGpuInstancePage({ mainRef }: PageProps) {
   const {
     address,
-    accountBalance,
+    accountCreditBalance,
     blockchainName,
-    streamDisabled,
-    disabledStreamDisabledMessage,
+    manuallySelectCRNDisabled,
+    manuallySelectCRNDisabledMessage,
     createInstanceDisabled,
-    createInstanceDisabledMessage,
     createInstanceButtonTitle,
     values,
     control,
@@ -123,12 +69,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
     handleCheckTermsAndConditions,
   } = useNewGpuInstancePage()
 
-  const sectionNumber = useCallback(
-    (n: number) => (values.paymentMethod === PaymentMethod.Stream ? 1 : 0) + n,
-    [values.paymentMethod],
-  )
-
-  // ------------------
   // Handle modals
   useEffect(
     () => {
@@ -307,18 +247,11 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             <NewEntityTab selected="gpu-instance" />
           </CenteredContainer>
         </section>
-        {createInstanceDisabledMessage && (
-          <section tw="px-0 pt-20 pb-6 md:py-10">
-            <CenteredContainer>
-              <BorderBox $color="warning">
-                {createInstanceDisabledMessage}
-              </BorderBox>
-            </CenteredContainer>
-          </section>
-        )}
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={1}>Selected GPU</SectionTitle>
+            <CompositeSectionTitle number={1}>
+              Selected GPU
+            </CompositeSectionTitle>
             <p>
               Your instance is configured with your manually selected GPU,
               operating under the <Strong>Pay-as-you-go</Strong> payment method
@@ -343,6 +276,8 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
                         kind="functional"
                         variant="warning"
                         size="md"
+                        disabled={manuallySelectCRNDisabled}
+                        tooltipContent={manuallySelectCRNDisabledMessage}
                         onClick={handleManuallySelectCRN}
                       >
                         Manually select GPU
@@ -356,26 +291,14 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(1)}>
+            <CompositeSectionTitle number={1}>
               Select your tier
-            </SectionTitle>
-            {values.paymentMethod === PaymentMethod.Hold ? (
-              <p>
-                Your instance is ready to be configured using our{' '}
-                <Strong>automated CRN selection</Strong>, set to run on{' '}
-                <Strong>{blockchainName}</Strong> with the{' '}
-                <Strong>Holder-tier payment</Strong> method, allowing you
-                seamless access while you hold ALEPH tokens. If you wish to
-                customize your Compute Resource Node (CRN) or use a different
-                payment approach, you can change your selection below.
-              </p>
-            ) : (
-              <p>
-                Please select one of the available instance tiers as a base for
-                your VM. You will be able to customize the volumes further below
-                in the form.
-              </p>
-            )}
+            </CompositeSectionTitle>
+            <p>
+              Please select one of the available instance tiers as a base for
+              your VM. You will be able to customize the volumes further below
+              in the form.
+            </p>
 
             <div tw="px-0 my-6 relative">
               <SpinnerOverlay show={!!node && !nodeSpecs} />
@@ -385,7 +308,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
                 type={EntityType.GpuInstance}
                 gpuModel={node?.selectedGpu?.model}
                 isPersistent
-                paymentMethod={values.paymentMethod}
                 nodeSpecs={nodeSpecs}
               >
                 {!node && (
@@ -399,9 +321,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(2)}>
+            <CompositeSectionTitle number={2}>
               Choose an image
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p>
               Chose a base image for your GPU Instance. It&apos;s the base
               system that you will be able to customize.
@@ -413,9 +335,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(3)}>
+            <CompositeSectionTitle number={3}>
               Configure SSH Key
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p>
               Access your cloud instances securely. Give existing key&apos;s
               below access to this instance or add new keys. Remember, storing
@@ -429,7 +351,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(4)}>Name and tags</SectionTitle>
+            <CompositeSectionTitle number={4}>
+              Name and tags
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Organize and identify your instances more effectively by assigning
               a unique name, obtaining a hash reference, and defining multiple
@@ -444,9 +368,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(5)}>
+            <CompositeSectionTitle number={5}>
               Advanced Configuration Options
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Customize your GPU Instance with our Advanced Configuration
               Options. Add volumes and custom domains to meet your specific
@@ -492,20 +416,15 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
           control={control}
           address={address}
           cost={cost}
-          receiverAddress={node?.reward}
-          unlockedAmount={accountBalance}
-          paymentMethod={values.paymentMethod}
-          streamDuration={values.streamDuration}
-          disablePaymentMethod={streamDisabled}
-          disabledStreamTooltip={disabledStreamDisabledMessage}
+          unlockedAmount={accountCreditBalance}
           mainRef={mainRef}
           description={
             <>
-              You can either leverage the traditional method of holding tokens
-              in your wallet for resource access, or opt for the Pay-As-You-Go
-              (PAYG) system, which allows you to pay precisely for what you use,
-              for the duration you need. The PAYG option includes a token stream
-              feature, enabling real-time payment for resources as you use them.
+              Aleph Cloud runs on a <strong>credit-based system</strong>,
+              designed for flexibility and transparency. You can top up credits
+              with <strong>fiat, USDC, or ALEPH</strong>. Your credits are
+              deducted only as you consume resources, ensuring you pay exactly
+              for what you use.
             </>
           }
           // Duplicate buttons to have different references for the tooltip on each one
@@ -513,21 +432,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             <CheckoutButton
               disabled={createInstanceDisabled}
               title={createInstanceButtonTitle}
-              tooltipContent={createInstanceDisabledMessage}
               isFooter={false}
-              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
-              handleRequestTermsAndConditionsAgreement={
-                handleRequestTermsAndConditionsAgreement
-              }
-              handleSubmit={handleSubmit}
-            />
-          }
-          footerButton={
-            <CheckoutButton
-              disabled={createInstanceDisabled}
-              title={createInstanceButtonTitle}
-              tooltipContent={createInstanceDisabledMessage}
-              isFooter={true}
               shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement

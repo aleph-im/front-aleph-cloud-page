@@ -11,6 +11,7 @@ import {
 import { ellipseAddress } from '@/helpers/utils'
 import useDownloadLogs from '@/hooks/common/useDownloadLogs'
 import {
+  CreditPaymentData,
   HoldingPaymentData,
   PaymentData,
 } from '@/components/common/entityData/EntityPayment/types'
@@ -195,12 +196,27 @@ export function useManageFunction(): ManageFunction {
             loading,
           } as HoldingPaymentData,
         ]
+      case PaymentType.credit:
+        return [
+          {
+            cost,
+            paymentType: PaymentType.credit,
+            runningTime,
+            startTime: program.time,
+            blockchain: program.payment.chain,
+            loading,
+          } as CreditPaymentData,
+        ]
       default:
         return [
           {
+            cost,
             paymentType: PaymentType.hold,
+            runningTime,
+            startTime: program?.time,
+            blockchain: program?.payment?.chain,
             loading: true,
-          } as PaymentData,
+          } as HoldingPaymentData,
         ]
     }
   }, [cost, program?.payment, runningTime, program?.time, loading])

@@ -174,6 +174,7 @@ export const targetSchema = z.enum([
 export const paymentMethodSchema = z.enum([
   PaymentMethod.Hold,
   PaymentMethod.Stream,
+  PaymentMethod.Credit,
 ])
 
 export const blockchainSchema = z.enum([

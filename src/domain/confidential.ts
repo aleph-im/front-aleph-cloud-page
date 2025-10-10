@@ -23,7 +23,7 @@ import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 export type Confidential = Omit<Instance, 'type'> & {
   type: EntityType.GpuInstance
   payment: Payment & {
-    type: PaymentType.superfluid
+    type: PaymentType.superfluid | PaymentType.credit
   }
 }
 

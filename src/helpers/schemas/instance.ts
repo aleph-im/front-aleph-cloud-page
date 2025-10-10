@@ -107,15 +107,6 @@ export const addSSHKeysSchema = z
     path: ['0.isSelected'],
   })
 
-// STREAM DURATION
-
-export const streamDurationUnitSchema = z.enum(['h', 'd', 'm', 'y'])
-
-export const streamDurationSchema = z.object({
-  duration: z.coerce.number(),
-  unit: streamDurationUnitSchema,
-})
-
 export const systemVolumeSchema = z.object({
   size: z
     .number()
@@ -146,16 +137,10 @@ export const instanceBaseSchema = z
   })
   .merge(addNameAndTagsSchema)
 
-export const instanceSchema = instanceBaseSchema.superRefine(
-  checkMinInstanceSystemVolumeSize,
-)
-
-export const instanceStreamSchema = instanceBaseSchema
+export const instanceSchema = instanceBaseSchema
   .merge(
     z.object({
       nodeSpecs: nodeSpecsSchema,
-      streamDuration: streamDurationSchema,
-      streamCost: z.number(),
     }),
   )
   .refine(
