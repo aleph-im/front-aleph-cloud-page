@@ -9,8 +9,8 @@ export const channel = 'FOUNDATION'
 export const tags = ['mainnet']
 export const postType = 'corechan-operation'
 
-export const apiServer = 'http://51.159.106.166:4024'
-export const wsServer = 'ws://51.159.106.166:4024'
+export const apiServer = 'https://api.aleph.im'
+export const wsServer = 'wss://api.aleph.im'
 export const mbPerAleph = 3
 
 export const communityWalletAddress =
@@ -197,8 +197,7 @@ export enum WebsiteFrameworkId {
 
 export const EXTRA_WEI = 3600 / 10 ** 18
 
-const LEGACY_CONSOLE_DOMAIN =
-  'https://aleph-cloud-explorer-test.gerardmolina.com/console'
+const LEGACY_CONSOLE_DOMAIN = 'https://app.aleph.cloud/console'
 export const NAVIGATION_URLS = {
   legacyConsole: {
     home: `${LEGACY_CONSOLE_DOMAIN}`,
