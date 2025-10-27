@@ -96,7 +96,6 @@ export function useRoutes(): UseRoutesReturn {
                     icon: 'gpu',
                     label: '(BETA)',
                     href: NAVIGATION_URLS.console.computing.gpus.home,
-                    disabled: true,
                   },
                   {
                     name: 'Confidentials',
