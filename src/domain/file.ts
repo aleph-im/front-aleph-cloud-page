@@ -1,4 +1,5 @@
-import { apiServer, channel, defaultConsoleChannel } from '@/helpers/constants'
+import { channel, defaultConsoleChannel } from '@/helpers/constants'
+import { apiServer } from '@/helpers/server'
 import { Mutex, convertByteUnits } from '@/helpers/utils'
 import { Account } from '@aleph-sdk/account'
 import {

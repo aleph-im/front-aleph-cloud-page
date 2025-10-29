@@ -1,6 +1,6 @@
-import { apiServer } from '@/helpers/constants'
 import { fileToImg } from '@/helpers/utils'
 import { useEffect, useState } from 'react'
+import { useSettings } from '@/hooks/common/useSettings'
 
 export type UseFileToImgProps = {
   file?: File | string
@@ -11,6 +11,7 @@ export type UseFileToImgReturn = {
 }
 
 export function useFileToImg({ file }: UseFileToImgProps): UseFileToImgReturn {
+  const { apiServer } = useSettings()
   const [img, setImg] = useState<HTMLImageElement>()
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export function useFileToImg({ file }: UseFileToImgProps): UseFileToImgReturn {
     }
 
     load()
-  }, [file])
+  }, [file, apiServer])
 
   return { img }
 }

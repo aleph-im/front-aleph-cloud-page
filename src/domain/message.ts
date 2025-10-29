@@ -4,7 +4,8 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
-import { defaultConsoleChannel, apiServer } from '@/helpers/constants'
+import { defaultConsoleChannel } from '@/helpers/constants'
+import { apiServer } from '@/helpers/server'
 import Err from '@/helpers/errors'
 import { GetMessagesConfiguration, MessageType } from '@aleph-sdk/message'
 
