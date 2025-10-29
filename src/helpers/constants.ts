@@ -9,8 +9,8 @@ export const channel = 'FOUNDATION'
 export const tags = ['mainnet']
 export const postType = 'corechan-operation'
 
-export const apiServer = 'http://51.159.106.166:4024'
-export const wsServer = 'ws://51.159.106.166:4024'
+export const apiServer = 'https://api.aleph.im'
+export const wsServer = 'wss://api.aleph.im'
 export const mbPerAleph = 3
 
 export const communityWalletAddress =
@@ -196,7 +196,7 @@ export enum WebsiteFrameworkId {
 
 export const EXTRA_WEI = 3600 / 10 ** 18
 
-const NEW_CONSOLE_DOMAIN = 'https://aleph-cloud-app-test.gerardmolina.com'
+const NEW_CONSOLE_DOMAIN = 'https://credits.app.aleph.im'
 export const NAVIGATION_URLS = {
   newConsole: {
     home: `${NEW_CONSOLE_DOMAIN}/console`,
