@@ -1,6 +1,7 @@
 // ------------------------ @todo: Refactor in domain package --------------------
 
 import { ObjectImgProps } from '@aleph-front/core'
+import { apiServer } from './server'
 
 export const defaultAccountChannel = 'ALEPH-ACCOUNT'
 
@@ -9,8 +10,6 @@ export const channel = 'FOUNDATION'
 export const tags = ['mainnet']
 export const postType = 'corechan-operation'
 
-export const apiServer = 'https://api.aleph.im'
-export const wsServer = 'wss://api.aleph.im'
 export const mbPerAleph = 3
 
 export const communityWalletAddress =

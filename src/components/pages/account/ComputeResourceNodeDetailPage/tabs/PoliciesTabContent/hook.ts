@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { UseComputeResourceNodeDetailPageReturn } from '@/components/pages/account/ComputeResourceNodeDetailPage/hook'
-import { apiServer } from '@/helpers/constants'
 import { MessageManager } from '@/domain/message'
 import { MessageType } from '@aleph-sdk/message'
 import { FileManager } from '@/domain/file'
+import { useSettings } from '@/hooks/common/useSettings'
 
 export type usePoliciesTabContentProps = Pick<
   UseComputeResourceNodeDetailPageReturn,
@@ -39,6 +39,8 @@ export function usePoliciesTabContent({
   handleRemovePolicies,
   ...props
 }: usePoliciesTabContentProps): usePoliciesTabContentReturn {
+  const { apiServer } = useSettings()
+
   const {
     field: { onChange, value },
   } = termsAndConditionsCtrl
@@ -88,7 +90,7 @@ export function usePoliciesTabContent({
         : currentPolicies
           ? `${apiServer}/api/v0/storage/raw/${currentPolicies?.cid}`
           : ' ',
-    [isLoadingHistoryMessages, currentPolicies],
+    [isLoadingHistoryMessages, currentPolicies, apiServer],
   )
 
   const removePoliciesDisabled = useMemo(

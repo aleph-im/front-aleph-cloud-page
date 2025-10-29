@@ -20,7 +20,8 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import { EntityDomainType, EntityType, apiServer } from '@/helpers/constants'
+import { EntityDomainType, EntityType } from '@/helpers/constants'
+import { useSettings } from '@/hooks/common/useSettings'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
@@ -69,6 +70,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
     handleCheckTermsAndConditions,
   } = useNewGpuInstancePage()
 
+  const { apiServer } = useSettings()
+
+  // ------------------
   // Handle modals
   useEffect(
     () => {
@@ -226,7 +230,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         ),
       },
     ] as TableColumn<CRNSpecs>[]
-  }, [setSelectedModal])
+  }, [apiServer, setSelectedModal])
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
   const manuallySelectButtonRef = useRef<HTMLButtonElement>(null)

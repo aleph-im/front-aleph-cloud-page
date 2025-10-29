@@ -9,7 +9,8 @@ import {
   StoreMessage,
 } from '@aleph-sdk/message'
 import { MachineVolume } from '@aleph-sdk/message'
-import { EntityType, PaymentMethod, apiServer } from './constants'
+import { EntityType, PaymentMethod } from './constants'
+import { apiServer } from './server'
 import { SSHKey } from '../domain/ssh'
 import { Instance } from '../domain/instance'
 import { Volume } from '@/domain/volume'

@@ -21,7 +21,8 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import { EntityDomainType, EntityType, apiServer } from '@/helpers/constants'
+import { EntityDomainType, EntityType } from '@/helpers/constants'
+import { useSettings } from '@/hooks/common/useSettings'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useNewInstancePage } from './hook'
 import Form from '@/components/form/Form'
@@ -69,6 +70,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleAcceptTermsAndConditions,
     handleCheckTermsAndConditions,
   } = useNewInstancePage()
+
+  const { apiServer } = useSettings()
 
   // ------------------
   // Handle modals
@@ -232,7 +235,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         ),
       },
     ] as TableColumn<CRNSpecs>[]
-  }, [lastVersion, setSelectedModal])
+  }, [apiServer, lastVersion, setSelectedModal])
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
   const manuallySelectButtonRef = useRef<HTMLButtonElement>(null)
