@@ -12,7 +12,7 @@ import {
   TableColumn,
   TextInput,
 } from '@aleph-front/core'
-import { apiServer } from '@/helpers/constants'
+import { useSettings } from '@/hooks/common/useSettings'
 import { useCRNList } from '@/hooks/common/useCRNList'
 import NodesTable from '@/components/common/NodesTable'
 import { humanReadableSize } from '@/helpers/utils'
@@ -47,6 +47,7 @@ export default function CRNList(props: CRNListProps) {
     onSelectedChange,
   } = useCRNList(props)
 
+  const { apiServer } = useSettings()
   const theme = useTheme()
 
   const columns = useMemo(() => {
@@ -184,7 +185,7 @@ export default function CRNList(props: CRNListProps) {
         },
       ] as TableColumn<CRNItem>[]
     ).filter((c) => c !== undefined)
-  }, [enableGpu, specs, lastVersion])
+  }, [apiServer, enableGpu, specs, lastVersion])
 
   const data: CRNItem[] = useMemo(() => {
     if (!filteredNodes) return []

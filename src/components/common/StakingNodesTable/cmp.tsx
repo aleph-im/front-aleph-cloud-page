@@ -14,7 +14,7 @@ import StakeButton from '@/components/common/StakeButton'
 import { Account } from '@aleph-sdk/account'
 import NodeAmount from '@/components/common/NodeAmount'
 import ButtonLink from '../ButtonLink'
-import { apiServer } from '@/helpers/constants'
+import { useSettings } from '@/hooks/common/useSettings'
 import Image from 'next/image'
 import { UseSortedListReturn } from '@/hooks/common/useSortedList'
 
@@ -45,6 +45,8 @@ export const StakingNodesTable = ({
   handleStake: onStake,
   handleUnstake: onUnstake,
 }: StakingNodesTableProps) => {
+  const { apiServer } = useSettings()
+
   const columns = useMemo(() => {
     const cols = [
       {
@@ -140,6 +142,7 @@ export const StakingNodesTable = ({
   }, [
     account,
     accountBalance,
+    apiServer,
     nodes,
     nodesIssues,
     onStake,

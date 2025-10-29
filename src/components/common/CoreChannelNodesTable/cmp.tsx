@@ -12,7 +12,7 @@ import NodeLinkedNodes from '@/components/common/NodeLinkedNodes'
 import APYCell from '@/components/common/NodeAPY'
 import NodeStaked from '@/components/common/NodeStaked'
 import ButtonLink from '../ButtonLink'
-import { apiServer } from '@/helpers/constants'
+import { useSettings } from '@/hooks/common/useSettings'
 import Image from 'next/image'
 import { UseSortedListReturn } from '@/hooks/common/useSortedList'
 
@@ -35,6 +35,8 @@ export const CoreChannelNodesTable = ({
   handleLoadItems,
   handleSortItems,
 }: CoreChannelNodesTableProps) => {
+  const { apiServer } = useSettings()
+
   const columns = useMemo(() => {
     return [
       {
@@ -117,7 +119,7 @@ export const CoreChannelNodesTable = ({
         ),
       },
     ] as TableColumn<CCN>[]
-  }, [lastVersion, nodes, nodesIssues])
+  }, [apiServer, lastVersion, nodes, nodesIssues])
 
   return (
     <NodesTable
