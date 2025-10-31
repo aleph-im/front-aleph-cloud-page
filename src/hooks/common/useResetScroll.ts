@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useEffect, RefObject } from 'react'
+import { useEffect, RefObject, useRef } from 'react'
 
 /**
  * Hook to reset scroll positions when navigating between pages
@@ -11,6 +11,7 @@ export default function useResetScroll(
   behavior: ScrollBehavior = 'smooth',
 ) {
   const router = useRouter()
+  const prevPathnameRef = useRef<string>()
 
   useEffect(() => {
     const resetScroll = () => {
@@ -43,14 +44,25 @@ export default function useResetScroll(
       })
     }
 
-    // Reset scroll on initial load
-    resetScroll()
+    const handleRouteChange = () => {
+      // Only reset scroll if the pathname has changed (avoid scroll on query or hash changes)
+      if (prevPathnameRef.current !== router.pathname) {
+        resetScroll()
+        prevPathnameRef.current = router.pathname
+      }
+    }
+
+    // Set initial pathname and reset scroll on mount
+    if (prevPathnameRef.current === undefined) {
+      prevPathnameRef.current = router.pathname
+      resetScroll()
+    }
 
     // Listen for route changes
-    router.events.on('routeChangeComplete', resetScroll)
+    router.events.on('routeChangeComplete', handleRouteChange)
 
     return () => {
-      router.events.off('routeChangeComplete', resetScroll)
+      router.events.off('routeChangeComplete', handleRouteChange)
     }
   }, [router, refs, behavior])
 }
