@@ -40,10 +40,14 @@ function FunctionDashboardPage() {
               info="WHAT ARE..."
               title="Functions"
               description="Deploy and manage serverless functions effortlessly with our robust computing platform. Run code on-demand or persistently, with seamless integration and scalability."
-              withButton={programs?.length === 0}
-              buttonUrl="/console/computing/function/new"
-              buttonText="Create function"
-              externalLinkUrl={NAVIGATION_URLS.docs.functions}
+              // withButton={programs?.length === 0}
+              // buttonUrl="/console/computing/function/new"
+              // buttonText="Create function"
+              // externalLinkUrl={NAVIGATION_URLS.docs.functions}
+              externalLinkText="Create on Legacy console"
+              externalLinkUrl={
+                NAVIGATION_URLS.legacyConsole.computing.functions.home
+              }
             />
           </>
         ) : tabId === 'volume' ? (

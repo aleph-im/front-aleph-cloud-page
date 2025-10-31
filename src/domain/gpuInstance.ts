@@ -21,7 +21,7 @@ export type GpuInstanceCost = CostSummary
 export type GpuInstance = Omit<Instance, 'type'> & {
   type: EntityType.GpuInstance
   payment: Payment & {
-    type: PaymentType.superfluid
+    type: PaymentType.superfluid | PaymentType.credit
   }
 }
 

@@ -11,6 +11,7 @@ import {
  */
 export function useEntityConnectionMethods({
   executableStatus,
+  sshForwardedPort = '????',
 }: EntityConnectionMethodsProps): UseEntityConnectionMethodsReturn {
   // Check if data is still loading
   const isLoading = !executableStatus
@@ -25,23 +26,35 @@ export function useEntityConnectionMethods({
     return executableStatus?.hostIpv4 || ''
   }, [executableStatus?.hostIpv4])
 
-  // Format the SSH command
-  const formattedSSHCommand = useMemo(() => {
+  // Format the IPV6 SSH command
+  const formattedIpv4SSHCommand = useMemo(() => {
+    return `ssh root@${formattedIPv4} -p ${sshForwardedPort}`
+  }, [formattedIPv4, sshForwardedPort])
+
+  // Format the IPV4 SSH command
+  const formattedIpv6SSHCommand = useMemo(() => {
     return `ssh root@${formattedIPv6}`
   }, [formattedIPv6])
 
   // Create clipboard handlers
   const handleCopyIpv4 = useCopyToClipboardAndNotify(formattedIPv4)
   const handleCopyIpv6 = useCopyToClipboardAndNotify(formattedIPv6)
-  const handleCopyCommand = useCopyToClipboardAndNotify(formattedSSHCommand)
+  const handleCopyIpv4Command = useCopyToClipboardAndNotify(
+    formattedIpv4SSHCommand,
+  )
+  const handleCopyIpv6Command = useCopyToClipboardAndNotify(
+    formattedIpv6SSHCommand,
+  )
 
   return {
     isLoading,
     formattedIPv6,
     formattedIPv4,
-    formattedSSHCommand,
+    formattedIpv4SSHCommand,
+    formattedIpv6SSHCommand,
     handleCopyIpv6,
     handleCopyIpv4,
-    handleCopyCommand,
+    handleCopyIpv4Command,
+    handleCopyIpv6Command,
   }
 }

@@ -14,9 +14,9 @@ import CRNRewardsCell from '../CRNRewardsCell'
 import LinkCRNButton from '../LinkCRNButton'
 import ButtonLink from '../ButtonLink'
 import Image from 'next/image'
-import { apiServer } from '@/helpers/constants'
 import { UseSortedListReturn } from '@/hooks/common/useSortedList'
 import { UseLinkingReturn } from '@/hooks/common/node/useLinking'
+import { useSettings } from '@/hooks/common/useSettings'
 
 export type ComputeResourceNodesTableProps = Pick<
   UseLinkingReturn,
@@ -44,6 +44,8 @@ export const ComputeResourceNodesTable = ({
   handleLink: onLink,
   handleUnlink: onUnlink,
 }: ComputeResourceNodesTableProps) => {
+  const { apiServer } = useSettings()
+
   const columns = useMemo(() => {
     return [
       {
@@ -147,7 +149,7 @@ export const ComputeResourceNodesTable = ({
         ),
       },
     ] as TableColumn<CRN>[]
-  }, [account, lastVersion, nodesIssues, onLink, onUnlink, userNode])
+  }, [account, apiServer, lastVersion, nodesIssues, onLink, onUnlink, userNode])
 
   return (
     <NodesTable

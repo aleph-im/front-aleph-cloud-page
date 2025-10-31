@@ -12,7 +12,7 @@ import NodeDetailStatus from '@/components/common/NodeDetailStatus'
 import NodeDecentralization from '@/components/common/NodeDecentralization'
 import NodeDetailEditableField from '@/components/common/NodeDetailEditableField'
 import NodeDetailLink from '@/components/common/NodeDetailLink'
-import { apiServer } from '@/helpers/constants'
+import { useSettings } from '@/hooks/common/useSettings'
 import Image from 'next/image'
 import Price from '@/components/common/Price'
 import ButtonLink from '@/components/common/ButtonLink'
@@ -71,6 +71,7 @@ export const OverviewTabContent = ({
   handleLink,
   handleUnlink,
 }: OverviewTabContentProps) => {
+  const { apiServer } = useSettings()
   const [state] = useAppState()
   const { blockchain } = state.connection
 

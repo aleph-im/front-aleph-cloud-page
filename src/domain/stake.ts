@@ -1,14 +1,13 @@
 import { Account } from '@aleph-sdk/account'
 import {
-  apiServer,
   channel,
   defaultConsoleChannel,
   monitorAddress,
   postType,
   senderAddress,
   tags,
-  wsServer,
 } from '@/helpers/constants'
+import { apiServer, wsServer } from '@/helpers/server'
 import { AlephNode, CCN, CRN } from './node'
 import { normalizeValue } from '@/helpers/utils'
 import { ItemType, PostMessage } from '@aleph-sdk/message'

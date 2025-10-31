@@ -1,14 +1,13 @@
 import {
-  apiServer,
   crnListProgramUrl,
   defaultAccountChannel,
   monitorAddress,
   postType,
   scoringAddress,
   tags,
-  wsServer,
   channel,
 } from '@/helpers/constants'
+import { apiServer, wsServer } from '@/helpers/server'
 import { Account } from '@aleph-sdk/account'
 import {
   AlephHttpClient,

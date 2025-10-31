@@ -196,7 +196,7 @@ export abstract class BaseConnectionProviderManager {
 
     const blockchain = blockchainId || (await this.getBlockchain())
     const account = await this.getAccount()
-    const balance = await this.getBalance(account)
+    const { balance } = await this.getBalance(account)
 
     this.events.emit('update', {
       provider: this.providerId,
@@ -279,7 +279,9 @@ export abstract class BaseConnectionProviderManager {
     return account
   }
 
-  async getBalance(account: Account): Promise<number> {
+  async getBalance(
+    account: Account,
+  ): Promise<{ balance: number; creditBalance: number }> {
     return getAccountBalance(account, PaymentMethod.Hold)
   }
 

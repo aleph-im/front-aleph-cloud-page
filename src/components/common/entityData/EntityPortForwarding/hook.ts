@@ -5,9 +5,6 @@ import { NodeManager } from '@/domain/node'
 import { useForwardedPortsManager } from '@/hooks/common/useManager/useForwardedPortsManager'
 import { useAppState } from '@/contexts/appState'
 import {
-  getSystemPorts,
-  transformAPIPortsToUI,
-  mergePortsWithMappings,
   filterOutSystemPorts,
   validatePortBatch,
   isSystemPort,
@@ -16,9 +13,7 @@ import {
   hasUnmappedPorts,
   addPendingPorts,
   transformPortsToAPIFormat,
-  mergePendingPortsWithAggregate,
   addPendingPortRemoval,
-  applyPendingRemovals,
   getPendingRemovalsForEntity,
 } from './utils'
 
@@ -26,12 +21,13 @@ export type UseEntityPortForwardingProps = {
   entityHash?: string
   executableStatus?: ExecutableStatus
   executableManager?: ExecutableManager<any>
+  ports: ForwardedPort[]
+  onPortsChange?: (ports: ForwardedPort[]) => void
 }
 
 export type UseEntityPortForwardingReturn = {
   // State
   showPortForm: boolean
-  ports: ForwardedPort[]
   isLoading: boolean
   error: string | null
 
@@ -319,100 +315,55 @@ export function useEntityPortForwarding({
   entityHash,
   executableStatus,
   executableManager,
-}: UseEntityPortForwardingProps = {}): UseEntityPortForwardingReturn {
+  ports,
+  onPortsChange,
+}: UseEntityPortForwardingProps): UseEntityPortForwardingReturn {
   // Get account address from app state
   const [appState] = useAppState()
   const { account } = appState.connection
   const accountAddress = account?.address
 
   // State
-  const [ports, setPorts] = useState<ForwardedPort[]>(getSystemPorts())
   const [showPortForm, setShowPortForm] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const forwardedPortsManager = useForwardedPortsManager()
-
-  // Load existing ports for the entity
-  const loadPorts = useCallback(async () => {
-    if (!entityHash || !accountAddress || !forwardedPortsManager) {
-      setPorts(getSystemPorts())
-      return
-    }
-
-    try {
-      const existingPorts =
-        await forwardedPortsManager.getByEntityHash(entityHash)
-
-      const aggregatePorts = existingPorts?.ports || {}
-
-      // Merge aggregate ports with cached pending additions
-      const portsWithAdditions = mergePendingPortsWithAggregate(
-        entityHash,
-        accountAddress,
-        aggregatePorts,
-      )
-
-      // Apply pending removals
-      const finalPorts = applyPendingRemovals(
-        entityHash,
-        accountAddress,
-        portsWithAdditions,
-      )
-      const userPorts: ForwardedPort[] = transformAPIPortsToUI(finalPorts)
-
-      const allPorts = [...getSystemPorts(), ...userPorts]
-      setPorts(allPorts)
-      setError(null)
-    } catch (error) {
-      console.error('Failed to load ports:', error)
-      setError('Failed to load ports')
-      setPorts(getSystemPorts())
-    }
-  }, [entityHash, accountAddress, forwardedPortsManager])
-
-  // Load ports when entityHash changes
-  useEffect(() => {
-    loadPorts()
-  }, [loadPorts])
-
-  // Update ports when executable status changes (mapped ports)
-  useEffect(() => {
-    if (executableStatus?.mappedPorts) {
-      setPorts((currentPorts) =>
-        mergePortsWithMappings(currentPorts, executableStatus.mappedPorts),
-      )
-    }
-  }, [executableStatus?.mappedPorts])
-
   // State management helpers
-  const addPortsToState = useCallback((newPorts: ForwardedPort[]) => {
-    setPorts((prev) => [...prev, ...newPorts])
-    setShowPortForm(false)
-    setError(null)
-  }, [])
+  const addPortsToState = useCallback(
+    (newPorts: ForwardedPort[]) => {
+      const updatedPorts = [...ports, ...newPorts]
+      onPortsChange?.(updatedPorts)
+      setShowPortForm(false)
+      setError(null)
+    },
+    [ports, onPortsChange],
+  )
 
-  const removePortFromState = useCallback((portSource: string) => {
-    setPorts((prev) => prev.filter((port) => port.source !== portSource))
-    setError(null)
-  }, [])
+  const removePortFromState = useCallback(
+    (portSource: string) => {
+      const updatedPorts = ports.filter((port) => port.source !== portSource)
+      onPortsChange?.(updatedPorts)
+      setError(null)
+    },
+    [ports, onPortsChange],
+  )
 
   const setPortRemovalState = useCallback(
     (portSource: string, isRemoving: boolean) => {
-      setPorts((prev) =>
-        prev.map((port) =>
-          port.source === portSource ? { ...port, isRemoving } : port,
-        ),
+      const updatedPorts = ports.map((port) =>
+        port.source === portSource ? { ...port, isRemoving } : port,
       )
+      onPortsChange?.(updatedPorts)
     },
-    [],
+    [ports, onPortsChange],
   )
 
   const updatePorts = useCallback(
     (updater: (currentPorts: ForwardedPort[]) => ForwardedPort[]) => {
-      setPorts(updater)
+      const updatedPorts = updater(ports)
+      onPortsChange?.(updatedPorts)
     },
-    [],
+    [ports, onPortsChange],
   )
 
   const toggleForm = useCallback((show?: boolean) => {
@@ -479,7 +430,6 @@ export function useEntityPortForwarding({
   return {
     // State
     showPortForm,
-    ports,
     isLoading,
     error,
 

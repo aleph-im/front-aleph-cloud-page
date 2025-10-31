@@ -88,6 +88,14 @@ export default function ManageInstance() {
 
     // Navigation handlers
     handleBack,
+
+    // Ports
+    ports,
+    sshForwardedPort,
+    handlePortsChange,
+
+    // Credit balance
+    creditBalance,
   } = useManageInstance()
 
   return (
@@ -105,6 +113,8 @@ export default function ManageInstance() {
         type={EntityType.Instance}
         isAllocated={isAllocated}
         calculatedStatus={calculatedStatus}
+        creditBalance={creditBalance}
+        paymentData={paymentData}
         // Start action
         showStart
         startDisabled={startDisabled}
@@ -163,6 +173,7 @@ export default function ManageInstance() {
               <EntityConnectionMethods
                 key="instance-connection-methods"
                 executableStatus={status}
+                sshForwardedPort={sshForwardedPort}
               />,
               immutableVolumes.length && (
                 <EntityLinkedVolumes
@@ -189,6 +200,8 @@ export default function ManageInstance() {
                 entityHash={instance?.id}
                 executableStatus={status}
                 executableManager={instanceManager}
+                ports={ports}
+                onPortsChange={handlePortsChange}
               />,
             ]}
           />

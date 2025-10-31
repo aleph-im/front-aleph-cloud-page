@@ -1,6 +1,7 @@
 // ------------------------ @todo: Refactor in domain package --------------------
 
 import { ObjectImgProps } from '@aleph-front/core'
+import { apiServer } from './server'
 
 export const defaultAccountChannel = 'ALEPH-ACCOUNT'
 
@@ -9,8 +10,6 @@ export const channel = 'FOUNDATION'
 export const tags = ['mainnet']
 export const postType = 'corechan-operation'
 
-export const apiServer = 'https://api.aleph.im'
-export const wsServer = 'wss://api.aleph.im'
 export const mbPerAleph = 3
 
 export const communityWalletAddress =
@@ -179,6 +178,7 @@ export const EntityTypeObject: Record<EntityType, ObjectImgProps['id']> = {
 export enum PaymentMethod {
   Hold = 'hold',
   Stream = 'stream',
+  Credit = 'credit',
 }
 
 export const superToken = '0x1290248E01ED2F9f863A9752A8aAD396ef3a1B00'
@@ -196,7 +196,55 @@ export enum WebsiteFrameworkId {
 
 export const EXTRA_WEI = 3600 / 10 ** 18
 
+const LEGACY_CONSOLE_DOMAIN = 'https://app.aleph.cloud/console'
 export const NAVIGATION_URLS = {
+  legacyConsole: {
+    home: `${LEGACY_CONSOLE_DOMAIN}`,
+    settings: {
+      home: `${LEGACY_CONSOLE_DOMAIN}/settings`,
+      ssh: {
+        home: `${LEGACY_CONSOLE_DOMAIN}/settings/ssh`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/settings/ssh/new`,
+      },
+      domain: {
+        home: `${LEGACY_CONSOLE_DOMAIN}/settings/domain`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/settings/domain/new`,
+      },
+    },
+    web3Hosting: {
+      home: `${LEGACY_CONSOLE_DOMAIN}/hosting/`,
+      website: {
+        home: `${LEGACY_CONSOLE_DOMAIN}/hosting/website`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/hosting/website/new`,
+      },
+    },
+    computing: {
+      home: `${LEGACY_CONSOLE_DOMAIN}/computing`,
+      functions: {
+        home: `${LEGACY_CONSOLE_DOMAIN}/computing/function`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/computing/function/new`,
+      },
+      instances: {
+        home: `${LEGACY_CONSOLE_DOMAIN}/computing/instance`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/computing/instance/new`,
+      },
+      gpus: {
+        home: `${LEGACY_CONSOLE_DOMAIN}/computing/gpu-instance`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/computing/gpu-instance/new`,
+      },
+      confidentials: {
+        home: `${LEGACY_CONSOLE_DOMAIN}/computing/confidential`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/computing/confidential/new`,
+      },
+    },
+    storage: {
+      home: `${LEGACY_CONSOLE_DOMAIN}/storage`,
+      volumes: {
+        home: `${LEGACY_CONSOLE_DOMAIN}/storage/volume`,
+        new: `${LEGACY_CONSOLE_DOMAIN}/storage/volume/new`,
+      },
+    },
+  },
   console: {
     home: '/console',
     settings: {

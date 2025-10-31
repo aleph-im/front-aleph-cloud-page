@@ -17,11 +17,12 @@ export const EntityPortForwarding = ({
   entityHash,
   executableStatus,
   executableManager,
+  ports,
+  onPortsChange,
 }: EntityPortForwardingProps) => {
   const {
     // State
     showPortForm,
-    ports,
     // Actions
     handleAddPort,
     handleCancelAddPort,
@@ -31,6 +32,8 @@ export const EntityPortForwarding = ({
     entityHash,
     executableStatus,
     executableManager,
+    ports,
+    onPortsChange,
   })
 
   const tooltipContent = (

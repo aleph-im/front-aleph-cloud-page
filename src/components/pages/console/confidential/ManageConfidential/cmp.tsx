@@ -83,6 +83,11 @@ export default function ManageConfidential() {
 
     // Navigation handlers
     handleBack,
+
+    // Ports
+    ports,
+    sshForwardedPort,
+    handlePortsChange,
   } = useManageGpuInstance()
 
   return (
@@ -162,6 +167,7 @@ export default function ManageConfidential() {
               <EntityConnectionMethods
                 key="confidentialInstance-connection-methods"
                 executableStatus={status}
+                sshForwardedPort={sshForwardedPort}
               />,
               immutableVolumes.length && (
                 <EntityLinkedVolumes
@@ -188,6 +194,8 @@ export default function ManageConfidential() {
                 entityHash={confidentialInstance?.id}
                 executableStatus={status}
                 executableManager={confidentialInstanceManager}
+                ports={ports}
+                onPortsChange={handlePortsChange}
               />,
             ]}
           />

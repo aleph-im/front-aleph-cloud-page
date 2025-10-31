@@ -40,7 +40,6 @@ export function useSyncPaymentMethod({
     if (isUpdatingRef.current) return
     isUpdatingRef.current = true
 
-    console.log('Update global state when form changes', formPaymentMethod)
     setPaymentMethod(formPaymentMethod)
 
     setTimeout(() => (isUpdatingRef.current = false), 0)
@@ -50,7 +49,6 @@ export function useSyncPaymentMethod({
   useEffect(() => {
     if (isUpdatingRef.current) return
 
-    console.log('Update form when global state changes', globalPaymentMethod)
     setValue(fieldName, globalPaymentMethod)
   }, [fieldName, globalPaymentMethod, setValue])
 }
