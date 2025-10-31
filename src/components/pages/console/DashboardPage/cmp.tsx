@@ -196,6 +196,20 @@ export default function DashboardPage() {
                     img={EntityTypeObject[EntityType.Confidential]}
                     dashboardPath="/console/computing/confidential"
                     createPath="/console/computing/confidential/new"
+                    createDisabled
+                    createDisabledMessage={
+                      <p>
+                        To create a confidential instance, navigate to the{' '}
+                        <ExternalLink
+                          text="Legacy console App."
+                          color="main0"
+                          href={
+                            NAVIGATION_URLS.legacyConsole.computing
+                              .confidentials.home
+                          }
+                        />
+                      </p>
+                    }
                     description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your data stays safe."
                     introductionButtonText="Create your confidential"
                     information={{
