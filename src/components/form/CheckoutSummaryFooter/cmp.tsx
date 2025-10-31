@@ -4,6 +4,9 @@ import { StyledSeparator } from './styles'
 import { CheckoutSummaryFooterProps } from './types'
 import FloatingFooter from '../FloatingFooter'
 import Price from '@/components/common/Price'
+import { humanReadableCurrency } from '@/helpers/utils'
+import { useCreditToToken } from './useCreditToToken'
+import Skeleton from '@/components/common/Skeleton'
 
 // ------------------------------------------
 
@@ -21,6 +24,9 @@ export const CheckoutSummaryFooter = ({
     (isValidElement(submitButtonNode) && submitButtonNode.type === Button
       ? cloneElement(submitButtonNode, { size: 'md' } as ButtonProps)
       : submitButtonNode)
+
+  const { tokenAmount, isLoading: isLoadingConversion } =
+    useCreditToToken(totalCost)
 
   return (
     <>
@@ -44,13 +50,16 @@ export const CheckoutSummaryFooter = ({
                     Credits / h
                   </span>
                 </div>
-                {/* TODO: Uncomment and implement when credits top up is available */}
-                {/* <div
+                <div
                   className="fs-14"
                   tw="flex items-center justify-center md:justify-start whitespace-nowrap opacity-40 -mt-2"
                 >
-                  $0.30/h
-                </div> */}
+                  {isLoadingConversion || tokenAmount === null ? (
+                    <Skeleton width="4rem" />
+                  ) : (
+                    <span>${humanReadableCurrency(tokenAmount)}/ h</span>
+                  )}
+                </div>
               </div>
               <StyledSeparator />
               {footerSubmitButtonNode}
