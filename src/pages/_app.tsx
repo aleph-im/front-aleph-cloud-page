@@ -14,9 +14,11 @@ import Content from '@/components/common/Content'
 import Viewport from '@/components/common/Viewport'
 import Sidebar from '@/components/common/Sidebar'
 import { AppStateProvider } from '@/contexts/appState'
+import { ReownProvider } from '@/contexts/reownContext'
 import useResetScroll from '@/hooks/common/useResetScroll'
 import { useRef } from 'react'
 import Head from 'next/head'
+import '@/config/reown'
 
 export default function App({ Component, pageProps }: AppProps) {
   const mainRef = useRef<HTMLDivElement>(null)
@@ -35,28 +37,30 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <GlobalStyles />
       <GlobalStylesOverride />
-      <AppStateProvider>
-        <ModalProvider>
-          <NotificationProvider max={10} timeout={2000}>
-            <Viewport>
-              <Sidebar />
-              <Main ref={mainRef}>
-                <Header />
-                <Content ref={contentRef}>
-                  <Component
-                    {...{
-                      ...pageProps,
-                      mainRef,
-                      contentRef,
-                    }}
-                  />
-                </Content>
-                <Footer />
-              </Main>
-            </Viewport>
-          </NotificationProvider>
-        </ModalProvider>
-      </AppStateProvider>
+      <ReownProvider>
+        <AppStateProvider>
+          <ModalProvider>
+            <NotificationProvider max={10} timeout={2000}>
+              <Viewport>
+                <Sidebar />
+                <Main ref={mainRef}>
+                  <Header />
+                  <Content ref={contentRef}>
+                    <Component
+                      {...{
+                        ...pageProps,
+                        mainRef,
+                        contentRef,
+                      }}
+                    />
+                  </Content>
+                  <Footer />
+                </Main>
+              </Viewport>
+            </NotificationProvider>
+          </ModalProvider>
+        </AppStateProvider>
+      </ReownProvider>
     </ThemeProvider>
   )
 }

@@ -27,7 +27,7 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
-import { BlockchainId } from '@/domain/connect/base'
+import { BlockchainId } from '@/domain/connect'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {

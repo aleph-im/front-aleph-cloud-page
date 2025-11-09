@@ -15,7 +15,6 @@ export const InfoTooltipButton = ({
   iconSize = '1em',
   ...rest
 }: InfoTooltipButtonProps) => {
-  // @note: https://reactjs.org/link/uselayouteffect-ssr
   // Wait until after client-side hydration to show
   const [renderTooltip, setRenderTooltip] = useState(false)
   useEffect(() => {

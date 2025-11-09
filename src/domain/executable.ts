@@ -41,7 +41,6 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import Err from '@/helpers/errors'
-import { BlockchainId } from './connect/base'
 import { CRN, CRNSpecs, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
 import {
@@ -53,6 +52,7 @@ import {
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import { isBlockchainPAYGCompatible } from './blockchain'
 import { CostLine } from './cost'
+import { BlockchainId } from './connect'
 
 export type HoldPaymentConfiguration = {
   chain: BlockchainId

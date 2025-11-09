@@ -9,7 +9,7 @@ import {
   getMultiaddressUrl,
 } from '@/helpers/utils'
 import { useAppState } from '@/contexts/appState'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { unsupportedNetworkDisabledMessage } from '@/components/pages/account/disabledMessages'
 import NodeDetailHeader from '@/components/common/NodeDetailHeader'

@@ -1,10 +1,6 @@
 import { Account } from '@aleph-sdk/account'
 import { StoreReducer } from './store'
-import {
-  BlockchainId,
-  defaultBlockchainProviders,
-  ProviderId,
-} from '@/domain/connect/base'
+import { BlockchainId, ProviderId } from '@/domain/connect'
 import { PaymentMethod } from '@/helpers/constants'
 
 export type ConnectionState = {
@@ -106,37 +102,21 @@ export function getConnectionReducer(): ConnectionReducer {
 
       case ConnectionActionType.CONNECTION_CONNECT:
       case ConnectionActionType.CONNECTION_UPDATE: {
-        const { provider: currentProvider, blockchain: currentBlockchain } =
-          state
-        const { provider, blockchain } = action.payload
+        const { blockchain: currentBlockchain } = state
+        const { blockchain } = action.payload
 
-        let newProvider = provider
+        // Use ?? instead of || to properly handle 0 balance
         let newBalance =
-          (action as ConnectionUpdateAction).payload.balance || state.balance
+          (action as ConnectionUpdateAction).payload.balance ?? state.balance
 
-        // If we are switching between EVM and Solana, hardcode the provider
-        if (currentProvider) {
-          const isSwitchingToSolana =
-            currentBlockchain !== BlockchainId.SOL &&
-            blockchain === BlockchainId.SOL
-          const isSwitchingToEVM =
-            currentBlockchain === BlockchainId.SOL &&
-            blockchain !== BlockchainId.SOL
-
-          newProvider =
-            isSwitchingToSolana || isSwitchingToEVM
-              ? defaultBlockchainProviders[blockchain]
-              : newProvider
-        }
-
-        // If we are switching blockchains, reset the balance
-        if (currentBlockchain && currentBlockchain !== blockchain)
+        // Reset balance when switching blockchains
+        if (currentBlockchain && currentBlockchain !== blockchain) {
           newBalance = undefined
+        }
 
         return {
           ...state,
           ...action.payload,
-          provider: newProvider,
           balance: newBalance,
         }
       }

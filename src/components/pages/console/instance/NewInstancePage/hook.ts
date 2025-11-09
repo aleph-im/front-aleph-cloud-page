@@ -54,7 +54,7 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect'
 import { PaymentConfiguration } from '@/domain/executable'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { isBlockchainHoldingCompatible } from '@/domain/blockchain'

@@ -13,7 +13,7 @@ import {
 } from '../../../hooks/common/useBreadcrumbNames'
 import { UseRoutesReturn, useRoutes } from '../../../hooks/common/useRoutes'
 import { useConnection } from '../../../hooks/common/useConnection'
-import { BlockchainId, ProviderId, blockchains } from '@/domain/connect/base'
+import { BlockchainId, ProviderId, blockchains } from '@/domain/connect'
 import { usePaymentMethod } from '../../../hooks/common/usePaymentMethod'
 import { useAccountRewards as useNodeRewards } from '../../../hooks/common/node/useRewards'
 
@@ -36,12 +36,7 @@ export type UseHeaderReturn = UseRoutesReturn & {
 
 export function useHeader(): UseHeaderReturn {
   const [state] = useAppState()
-  const {
-    provider,
-    blockchain,
-    account,
-    balance: accountBalance,
-  } = state.connection
+  const { blockchain, account, balance: accountBalance } = state.connection
   const { voucherManager } = state.manager
 
   const { handleConnect: connect, handleDisconnect: disconnect } =
@@ -72,15 +67,9 @@ export function useHeader(): UseHeaderReturn {
   const wallets: Wallet[] = useMemo(
     () => [
       {
-        id: ProviderId.WalletConnect,
-        name: 'Wallet Connect',
+        id: ProviderId.Reown,
+        name: 'Connect Wallet',
         icon: 'walletConnect',
-        color: 'main0',
-      },
-      {
-        id: ProviderId.Phantom,
-        name: 'Phantom',
-        icon: 'phantom',
         color: 'main0',
       },
     ],
@@ -161,9 +150,9 @@ export function useHeader(): UseHeaderReturn {
 
   const handleConnect = useCallback(
     async (wallet: Wallet, network: Network) => {
-      const provider = (wallet as any).id as ProviderId
       const blockchain = (network as any).id as BlockchainId
-      connect({ provider, blockchain })
+
+      connect({ blockchain })
     },
     [connect],
   )
@@ -171,9 +160,9 @@ export function useHeader(): UseHeaderReturn {
   const handleSwitchNetwork = useCallback(
     (network: Network) => {
       const blockchain = (network as any).id as BlockchainId
-      connect({ provider, blockchain })
+      connect({ blockchain })
     },
-    [connect, provider],
+    [connect],
   )
 
   const handleDisconnect = useCallback(async () => {

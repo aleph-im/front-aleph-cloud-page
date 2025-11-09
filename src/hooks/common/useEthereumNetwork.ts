@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useAppState } from '@/contexts/appState'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect'
 import { TooltipProps } from '@aleph-front/core'
 import { unsupportedNetworkDisabledMessage } from '@/components/pages/account/disabledMessages'
 

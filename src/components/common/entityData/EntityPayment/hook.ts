@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { PaymentType } from '@aleph-sdk/message'
 import { PaymentData, StreamPaymentData, UseEntityPaymentReturn } from './types'
-import { blockchains } from '@/domain/connect/base'
+import { blockchains } from '@/domain/connect'
 import { communityWalletAddress } from '@/helpers/constants'
 import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 
