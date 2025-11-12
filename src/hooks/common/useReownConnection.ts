@@ -120,7 +120,7 @@ export const useReownConnection = () => {
    * Opens Reown modal for wallet connection
    */
   const handleConnect = useCallback(() => {
-    reown.openModal()
+    if (!reown.isConnected) reown.openModal()
   }, [reown])
 
   /**

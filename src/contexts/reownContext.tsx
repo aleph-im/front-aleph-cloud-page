@@ -4,6 +4,7 @@ import {
   useAppKitAccount,
   useAppKitNetwork,
   useAppKitProvider,
+  useDisconnect,
 } from '@reown/appkit/react'
 import { mainnet, avalanche, base, solana } from '@reown/appkit/networks'
 import { Account } from '@aleph-sdk/account'
@@ -50,6 +51,7 @@ const ReownContext = createContext<ReownContextValue | undefined>(undefined)
 export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
   const appKit = useAppKit()
   const { address, isConnected } = useAppKitAccount()
+  const { disconnect } = useDisconnect()
   const { chainId, switchNetwork: reownSwitchNetwork } = useAppKitNetwork()
   const { walletProvider: eip155Provider } = useAppKitProvider('eip155')
   const { walletProvider: solanaProvider } = useAppKitProvider('solana')
@@ -213,14 +215,17 @@ export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
    */
   const handleDisconnect = useCallback(async () => {
     try {
-      // Close modal and disconnect wallet
+      // Disconnect from all namespaces
+      await disconnect()
+
+      // Close modal
       await appKit.close()
       // Note: Reown's disconnect is handled through the modal
       // Simply closing should trigger the disconnect flow
     } catch (error) {
       console.error('Failed to disconnect:', error)
     }
-  }, [appKit])
+  }, [disconnect, appKit])
 
   const value: ReownContextValue = {
     isConnected,

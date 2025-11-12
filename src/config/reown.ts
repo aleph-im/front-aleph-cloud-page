@@ -56,4 +56,5 @@ export const appKit = createAppKit({
     socials: false,
     pay: false,
   },
+  allowUnsupportedChain: true,
 })

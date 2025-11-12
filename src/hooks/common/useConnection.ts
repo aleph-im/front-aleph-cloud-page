@@ -1,8 +1,12 @@
 import { useCallback, useEffect } from 'react'
-import { ConnectionConnectAction, ConnectionState } from '@/store/connection'
+import {
+  ConnectionConnectAction,
+  ConnectionDisconnectAction,
+  ConnectionState,
+} from '@/store/connection'
 import { useAppState } from '@/contexts/appState'
 import { useReownConnection } from './useReownConnection'
-import { BlockchainId } from '@/domain/connect'
+import { BlockchainId, ProviderId } from '@/domain/connect'
 
 export type UseConnectionProps = {
   triggerOnMount?: boolean
@@ -41,6 +45,7 @@ export const useConnection = ({
         // Store desired blockchain for after connection
         dispatch(new ConnectionConnectAction(payload))
       }
+
       openReownModal()
     },
     [openReownModal, dispatch],
@@ -51,7 +56,9 @@ export const useConnection = ({
    */
   const handleDisconnect = useCallback(async () => {
     await disconnectReown()
-  }, [disconnectReown])
+
+    dispatch(new ConnectionDisconnectAction({ provider: ProviderId.Reown }))
+  }, [disconnectReown, dispatch])
 
   /**
    * Auto-connect on mount if wallet was previously connected
