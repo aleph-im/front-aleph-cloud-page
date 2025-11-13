@@ -68,7 +68,7 @@ export function useHeader(): UseHeaderReturn {
     () => [
       {
         id: ProviderId.Reown,
-        name: 'Connect Wallet',
+        name: 'Wallet Connect',
         icon: 'walletConnect',
         color: 'main0',
       },

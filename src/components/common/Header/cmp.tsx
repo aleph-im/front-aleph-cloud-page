@@ -63,6 +63,9 @@ export const Header = () => {
                 handleConnect={handleConnect}
                 handleDisconnect={handleDisconnect}
                 handleSwitchNetwork={handleSwitchNetwork}
+                showCredits={false}
+                showSettings={false}
+                Link={CustomLinkMemo}
               />
             ),
             logoHref: websiteUrl,
@@ -83,6 +86,9 @@ export const Header = () => {
             handleConnect={handleConnect}
             handleDisconnect={handleDisconnect}
             handleSwitchNetwork={handleSwitchNetwork}
+            showCredits={false}
+            showSettings={false}
+            Link={CustomLinkMemo}
           />
         </StyledNavbarDesktop>
       </StyledHeader>
