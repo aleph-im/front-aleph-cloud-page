@@ -26,7 +26,7 @@ export type ReownContextValue = {
   chainId?: number | string
 
   // Actions
-  openModal: () => void
+  openModal: (blockchain?: BlockchainId) => void
   closeModal: () => void
   switchNetwork: (chainId: number) => Promise<void>
   disconnect: () => Promise<void>
@@ -220,18 +220,42 @@ export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Close modal
       await appKit.close()
-      // Note: Reown's disconnect is handled through the modal
-      // Simply closing should trigger the disconnect flow
     } catch (error) {
       console.error('Failed to disconnect:', error)
     }
   }, [disconnect, appKit])
 
+  /**
+   * Opens the Reown modal with Connect view and appropriate namespace
+   */
+  const handleOpenModal = useCallback(
+    (blockchain?: BlockchainId) => {
+      // Determine blockchain to use (provided or current)
+      const targetBlockchain = blockchain || getBlockchainId()
+
+      // Determine namespace based on blockchain
+      let namespace: 'eip155' | 'solana' = 'eip155'
+      if (targetBlockchain === BlockchainId.SOL) {
+        namespace = 'solana'
+      }
+
+      console.log('reownContext - handleOpenModal - namespace:', namespace)
+      console.log(
+        'reownContext - handleOpenModal - blockchain:',
+        targetBlockchain,
+      )
+
+      // Open modal with Connect view and appropriate namespace
+      appKit.open({ view: 'Connect', namespace })
+    },
+    [appKit, getBlockchainId],
+  )
+
   const value: ReownContextValue = {
     isConnected,
     address,
     chainId,
-    openModal: appKit.open,
+    openModal: handleOpenModal,
     closeModal: appKit.close,
     switchNetwork: handleSwitchNetwork,
     disconnect: handleDisconnect,

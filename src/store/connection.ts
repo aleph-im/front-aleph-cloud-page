@@ -93,10 +93,11 @@ export function getConnectionReducer(): ConnectionReducer {
         if (action.payload && action.payload.provider !== state.provider)
           return state
 
-        // Keep the current payment method but reset everything else
+        // Keep the current payment method and blockchain selection but reset everything else
         return {
           ...initialState,
           paymentMethod: state.paymentMethod,
+          blockchain: state.blockchain,
         }
       }
 

@@ -41,14 +41,18 @@ export const useConnection = ({
    */
   const handleConnect = useCallback(
     (payload?: ConnectionConnectAction['payload']) => {
+      // Determine which blockchain to use for the modal
+      const targetBlockchain = payload?.blockchain || blockchain
+
       if (payload?.blockchain) {
         // Store desired blockchain for after connection
         dispatch(new ConnectionConnectAction(payload))
       }
 
-      openReownModal()
+      // Open modal with the target blockchain to set correct namespace
+      openReownModal(targetBlockchain)
     },
-    [openReownModal, dispatch],
+    [openReownModal, dispatch, blockchain],
   )
 
   /**

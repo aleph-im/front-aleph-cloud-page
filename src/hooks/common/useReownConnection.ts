@@ -6,13 +6,13 @@ import {
 } from '@/store/connection'
 import { useAppState } from '@/contexts/appState'
 import { useReown } from '@/contexts/reownContext'
-import { ProviderId } from '@/domain/connect'
+import { ProviderId, BlockchainId } from '@/domain/connect'
 import { getAccountBalance } from '@/helpers/utils'
 import { PaymentMethod } from '@/helpers/constants'
 
 /**
- * Hook that integrates Reown connection with Redux store
- * Syncs Reown state changes with the app's Redux connection state
+ * Hook that integrates Reown connection with App store
+ * Syncs Reown state changes with the app's App connection state
  */
 export const useReownConnection = () => {
   const [, dispatch] = useAppState()
@@ -31,7 +31,7 @@ export const useReownConnection = () => {
   }, [noti?.add])
 
   /**
-   * Syncs Reown connection state with Redux store
+   * Syncs Reown connection state with App store
    * Triggers when connection status or chain changes
    */
   useEffect(() => {
@@ -114,14 +114,17 @@ export const useReownConnection = () => {
     }
 
     syncConnection()
-  }, [reown.isConnected, reown.chainId, reown.address, reown, dispatch])
+  }, [reown, dispatch])
 
   /**
    * Opens Reown modal for wallet connection
    */
-  const handleConnect = useCallback(() => {
-    if (!reown.isConnected) reown.openModal()
-  }, [reown])
+  const handleConnect = useCallback(
+    (blockchain?: BlockchainId) => {
+      if (!reown.isConnected) reown.openModal(blockchain)
+    },
+    [reown],
+  )
 
   /**
    * Disconnects wallet and clears Redux store
