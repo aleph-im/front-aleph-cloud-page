@@ -13,6 +13,10 @@ export const InfoTooltipButton = ({
   align = 'right',
   vAlign = 'center',
   iconSize = '1em',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  forwardedAs,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  as,
   ...rest
 }: InfoTooltipButtonProps) => {
   // Wait until after client-side hydration to show

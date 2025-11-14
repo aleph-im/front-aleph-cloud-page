@@ -7,7 +7,8 @@ export const StyledCodeContainer = styled.div`
   ${({ theme }) => {
     return css`
       color: ${theme.color.white};
-      background: linear-gradient(91.23deg, #ffffff11 11.38%, #ffffff00 96.5%),
+      background:
+        linear-gradient(91.23deg, #ffffff11 11.38%, #ffffff00 96.5%),
         linear-gradient(84.86deg, #2260ff0c 65.23%, #1859ff00 99.89%), #141327;
     `
   }}

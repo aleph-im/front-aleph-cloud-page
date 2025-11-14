@@ -1,10 +1,11 @@
 import { memo } from 'react'
 import { CompositeTitle, CompositeTitleProps } from '@aleph-front/core'
 
-export const SectionTitle = (props: CompositeTitleProps) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const SectionTitle = ({ forwardedAs, ...rest }: CompositeTitleProps) => {
   return (
     <CompositeTitle
-      {...{ as: 'h2', color: 'main0', numberColor: 'main0', ...props }}
+      {...{ as: 'h2', color: 'main0', numberColor: 'main0', ...rest }}
     />
   )
 }
