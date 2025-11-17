@@ -3,7 +3,8 @@ import { PaymentType } from '@aleph-sdk/message'
 import { PaymentData, StreamPaymentData, UseEntityPaymentReturn } from './types'
 import { blockchains } from '@/domain/connect/base'
 import { communityWalletAddress } from '@/helpers/constants'
-import { useCopyToClipboardAndNotify } from '@aleph-front/core'
+import { useCopyToClipboardAndNotify, useLocalRequest } from '@aleph-front/core'
+import { getApiServer } from '@/helpers/server'
 
 // Helper to convert seconds into days, hours, minutes, and seconds
 function getTimeComponents(totalSeconds: number) {
@@ -30,6 +31,7 @@ export function useFormatPayment(
     startTime,
     blockchain,
     loading = false,
+    itemHash,
   } = paymentData
 
   // Get stream-specific data if this is a stream payment
@@ -51,8 +53,37 @@ export function useFormatPayment(
     [paymentType],
   )
 
-  // Format total spent amount using the time components for PAYG type
-  const totalSpent = useMemo(() => {
+  // Fetch consumed credits for credit payment type using useLocalRequest
+  const {
+    data: consumedCreditsData,
+    loading: creditsLoading,
+    error: creditsError,
+  } = useLocalRequest<{ item_hash: string; consumed_credits: number }>({
+    doRequest: async () => {
+      if (!itemHash) throw new Error('No item hash provided')
+
+      const apiServer = getApiServer()
+      const response = await fetch(
+        `${apiServer}/api/v0/messages/${itemHash}/consumed_credits`,
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      return response.json()
+    },
+    onSuccess: () => null,
+    onError: () => null,
+    flushData: false,
+    triggerOnMount: isCredit && !!itemHash,
+    triggerDeps: [isCredit, itemHash],
+  })
+
+  const consumedCredits = consumedCreditsData?.consumed_credits
+
+  // Calculate fallback totalSpent using original logic
+  const fallbackTotalSpent = useMemo(() => {
     if (!cost) return
     if (!isStream && !isCredit) return cost.toString()
     if (!runningTime) return
@@ -63,6 +94,32 @@ export function useFormatPayment(
 
     return Math.round(cost * runningTimeInHours)
   }, [cost, isStream, isCredit, runningTime])
+
+  // Format total spent amount - use consumed credits for credit type, fallback to calculation
+  const totalSpent = useMemo(() => {
+    // For credit payment type, try to use consumed credits from API
+    if (isCredit) {
+      // If we have consumed credits data, use it
+      if (consumedCredits !== undefined) {
+        return consumedCredits
+      }
+      // If API request failed or is loading, use fallback calculation
+      if (creditsError || creditsLoading) {
+        return fallbackTotalSpent
+      }
+      // If no data and no error/loading, return undefined
+      return undefined
+    }
+
+    // For non-credit types, use fallback calculation
+    return fallbackTotalSpent
+  }, [
+    isCredit,
+    consumedCredits,
+    creditsError,
+    creditsLoading,
+    fallbackTotalSpent,
+  ])
 
   // Format blockchain name
   const formattedBlockchain = useMemo(() => {
@@ -132,7 +189,7 @@ export function useFormatPayment(
     formattedFlowRate,
     formattedStartDate,
     formattedDuration,
-    loading,
+    loading: loading || (isCredit && creditsLoading && !creditsError),
     receiverAddress: receiver,
     receiverType,
     handleCopyReceiverAddress,
