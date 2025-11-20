@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { EntityDomainType, PaymentMethod } from '../constants'
-import { BlockchainId } from '@/domain/connect/base'
+import { BlockchainId } from '@/domain/connect'
 
 export const requiredStringSchema = z
   .string()

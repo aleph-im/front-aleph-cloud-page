@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTransition } from '@aleph-front/core'
 import { FakeProgressBarHookReturn, FakeProgressBarProps } from './types'
 
@@ -34,7 +34,7 @@ export const useFakeProgressBar = ({
   }, [loading])
 
   // Handle progress animation
-  useLayoutEffect(() => {
+  useEffect(() => {
     // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current)

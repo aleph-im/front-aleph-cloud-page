@@ -6,7 +6,7 @@ import {
   JsonRPCWallet,
   RpcId,
 } from '@aleph-sdk/evm'
-import { BlockchainId, blockchains } from './base'
+import { BlockchainId, blockchains } from './index'
 import { providers } from 'ethers'
 
 // @note: This is a helper class for being able to query blockchain data using

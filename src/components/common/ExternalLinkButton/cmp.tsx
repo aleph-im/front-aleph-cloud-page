@@ -7,6 +7,8 @@ export const ExternalLinkButton = ({
   children,
   href,
   size = 'md',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  forwardedAs,
   ...rest
 }: ExternalLinkButtonProps) => {
   return (
