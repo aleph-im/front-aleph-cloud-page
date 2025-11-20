@@ -5,6 +5,7 @@ import {
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
 import { Blockchain } from '@aleph-sdk/core'
+import { vouchersAddress } from '@/helpers/constants'
 
 export type VoucherMetadata = {
   name: string
@@ -96,6 +97,7 @@ export class VoucherManager {
     const vouchers: Voucher[] = []
     const { content } = await this.sdkClient.getPost({
       types: 'vouchers-update',
+      addresses: [vouchersAddress],
     })
 
     for (const voucherId in content.nft_vouchers) {
