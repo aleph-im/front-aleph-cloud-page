@@ -21,9 +21,9 @@ export const EntityLogsControl = ({
           <div>
             <InfoTitle>INFO</InfoTitle>
             <Text>
-              Real-time logs of the virtual machine. Use this to debug
-              any issue with the boot of your instance and to monitor the
-              behavior of your instance while it is running.
+              Real-time logs of the virtual machine. Use this to debug any issue
+              with the boot of your instance and to monitor the behavior of your
+              instance while it is running.
             </Text>
           </div>
 
