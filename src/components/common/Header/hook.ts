@@ -17,7 +17,7 @@ import { BlockchainId, ProviderId, blockchains } from '@/domain/connect'
 import { usePaymentMethod } from '../../../hooks/common/usePaymentMethod'
 import { useAccountRewards as useNodeRewards } from '../../../hooks/common/node/useRewards'
 
-export type UseHeaderReturn = UseRoutesReturn & {
+export type UseHeaderReturn = Pick<UseRoutesReturn, 'routes'> & {
   accountAddress?: string
   accountBalance?: number
   accountVouchers?: AccountPickerProps['accountVouchers'] | undefined
