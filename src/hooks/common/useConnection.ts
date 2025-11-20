@@ -108,12 +108,6 @@ export const useConnection = ({
           return
       }
 
-      console.log(
-        'useConnection - useEffect - currentBlockchain',
-        currentBlockchain,
-      )
-      console.log('useConnection - useEffect - desired blockchain', blockchain)
-      console.log('useConnection - useEffect - targetChainId', targetChainId)
       handleSwitchNetwork(targetChainId)
     }
   }, [blockchain, reown, handleSwitchNetwork])

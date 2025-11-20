@@ -147,10 +147,6 @@ export const useReownConnection = () => {
   const handleSwitchNetwork = useCallback(
     async (chainId: number) => {
       try {
-        console.log(
-          'useReownConnection - handleSwitchNetwork - chainId',
-          chainId,
-        )
         await reown.switchNetwork(chainId)
       } catch (error) {
         addNotificationRef.current?.({

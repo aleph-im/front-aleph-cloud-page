@@ -60,11 +60,6 @@ export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
    * Maps Reown chain ID to Aleph blockchain ID
    */
   const getBlockchainId = useCallback((): BlockchainId | undefined => {
-    console.log(
-      'reownContext - getBlockchainId - chainId',
-      chainId,
-      typeof chainId,
-    )
     if (!chainId) return undefined
 
     // Handle Solana string-based chain ID
@@ -76,7 +71,6 @@ export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
         chainId.toLowerCase().includes('solana') ||
         chainId === '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'
       ) {
-        console.log('reownContext - getBlockchainId - detected Solana')
         return BlockchainId.SOL
       }
       // Try parsing as number for EVM chains
@@ -84,10 +78,6 @@ export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
       if (!isNaN(parsed)) {
         return getBlockchainIdFromNumber(parsed)
       }
-      console.log(
-        'reownContext - getBlockchainId - string chainId not recognized:',
-        chainId,
-      )
       return undefined
     }
 
@@ -202,9 +192,6 @@ export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
           throw new Error(`Unsupported chain ID: ${chainId}`)
       }
 
-      console.log('reownContext - handleSwitchNetwork - network', network)
-      console.log('reownContext - handleSwitchNetwork - chainId', chainId)
-
       await reownSwitchNetwork(network)
     },
     [reownSwitchNetwork],
@@ -238,12 +225,6 @@ export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
       if (targetBlockchain === BlockchainId.SOL) {
         namespace = 'solana'
       }
-
-      console.log('reownContext - handleOpenModal - namespace:', namespace)
-      console.log(
-        'reownContext - handleOpenModal - blockchain:',
-        targetBlockchain,
-      )
 
       // Open modal with Connect view and appropriate namespace
       appKit.open({ view: 'Connect', namespace })

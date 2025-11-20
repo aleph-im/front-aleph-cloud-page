@@ -108,8 +108,6 @@ export function useFormatPayment(
   const receiverType = useMemo(() => {
     if (!receiver) return undefined
 
-    console.log('Receiver address:', receiver)
-    console.log('communityWalletAddress:', communityWalletAddress)
     if (receiver == (communityWalletAddress as string)) {
       return 'Community Wallet (20%)'
     }
