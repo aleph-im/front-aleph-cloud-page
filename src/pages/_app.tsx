@@ -8,7 +8,6 @@ import {
 } from '@aleph-front/core'
 import { GlobalStylesOverride } from '@/styles/global'
 import Header from '@/components/common/Header'
-import Footer from '@/components/common/Footer'
 import Main from '@/components/common/Main'
 import Content from '@/components/common/Content'
 import Viewport from '@/components/common/Viewport'
@@ -54,7 +53,6 @@ export default function App({ Component, pageProps }: AppProps) {
                       }}
                     />
                   </Content>
-                  <Footer />
                 </Main>
               </Viewport>
             </NotificationProvider>

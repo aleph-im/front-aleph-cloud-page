@@ -278,6 +278,11 @@ export const NAVIGATION_URLS = {
       home: 'https://docs.aleph.cloud/devhub/sdks-and-tools/aleph-cli/',
     },
   },
+  social: {
+    telegram: 'https://t.me/alephim/119590',
+    x: 'https://x.com/aleph_im',
+    blog: 'https://www.aleph.cloud/blog',
+  },
   external: {
     vrf: 'https://docs.aleph.cloud/devhub/tools/vrf/',
     indexingFramework:
