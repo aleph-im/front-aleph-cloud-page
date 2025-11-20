@@ -26,8 +26,8 @@ import {
   EntityDomainType,
   EntityType,
   PaymentMethod,
-  apiServer,
 } from '@/helpers/constants'
+import { useSettings } from '@/hooks/common/useSettings'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useNewInstancePage, UseNewInstancePageReturn } from './hook'
 import Form from '@/components/form/Form'
@@ -126,6 +126,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleAcceptTermsAndConditions,
     handleCheckTermsAndConditions,
   } = useNewInstancePage()
+
+  const { apiServer } = useSettings()
 
   const sectionNumber = useCallback(
     (n: number) => (values.paymentMethod === PaymentMethod.Stream ? 1 : 0) + n,
@@ -294,7 +296,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         ),
       },
     ] as TableColumn<CRNSpecs>[]
-  }, [lastVersion, setSelectedModal])
+  }, [apiServer, lastVersion, setSelectedModal])
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
   const manuallySelectButtonRef = useRef<HTMLButtonElement>(null)

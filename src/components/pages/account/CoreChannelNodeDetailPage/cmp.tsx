@@ -23,7 +23,7 @@ import NodeDetailLockSwitch from '@/components/common/NodeDetailLockSwitch'
 import NodeDetailStatus from '@/components/common/NodeDetailStatus'
 import NodeDetailEditableField from '@/components/common/NodeDetailEditableField'
 import NodeDetailLink from '@/components/common/NodeDetailLink'
-import { apiServer } from '@/helpers/constants'
+import { useSettings } from '@/hooks/common/useSettings'
 import Image from 'next/image'
 import Price from '@/components/common/Price'
 import { NodeManager } from '@/domain/node'
@@ -57,6 +57,7 @@ export const CoreChannelNodeDetailPage = () => {
     handleSubmit,
   } = useCoreChannelNodeDetailPage()
 
+  const { apiServer } = useSettings()
   const [state] = useAppState()
   const { blockchain } = state.connection
 

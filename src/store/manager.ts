@@ -8,7 +8,7 @@ import { MessageManager } from '@/domain/message'
 import { DomainManager } from '@/domain/domain'
 import { WebsiteManager } from '@/domain/website'
 import { NodeManager } from '@/domain/node'
-import { apiServer } from '@/helpers/constants'
+import { apiServer } from '@/helpers/server'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
