@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router'
+import { useMemo, useState } from 'react'
 import { Instance, InstanceManager } from '@/domain/instance'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
@@ -6,10 +7,16 @@ import {
   useManageInstanceEntity,
   UseManageInstanceEntityReturn,
 } from '@/hooks/common/useEntity/useManageInstanceEntity'
+import { useForwardedPorts } from '@/hooks/common/useForwardedPorts'
+import { getSSHForwardedPort } from '@/components/common/entityData/EntityPortForwarding/utils'
+import { ForwardedPort } from '@/components/common/entityData/EntityPortForwarding/types'
 
 export type UseManageInstanceReturn = UseManageInstanceEntityReturn & {
   instance?: Instance
   instanceManager?: InstanceManager
+  ports: ForwardedPort[]
+  sshForwardedPort?: string
+  handlePortsChange: (ports: ForwardedPort[]) => void
 }
 
 export function useManageInstance(): UseManageInstanceReturn {
@@ -29,9 +36,38 @@ export function useManageInstance(): UseManageInstanceReturn {
     entityManager: instanceManager,
   })
 
+  const { status } = manageInstanceEntityProps
+
+  // Fetch forwarded ports
+  const { ports: fetchedPorts } = useForwardedPorts({
+    entityHash: instance?.id,
+    executableStatus: status,
+  })
+
+  // Local state for ports to allow updates
+  const [ports, setPorts] = useState<ForwardedPort[]>(fetchedPorts)
+
+  // Update local ports state when fetched ports change
+  useMemo(() => {
+    setPorts(fetchedPorts)
+  }, [fetchedPorts])
+
+  // Extract SSH forwarded port
+  const sshForwardedPort = useMemo(() => {
+    return getSSHForwardedPort(ports)
+  }, [ports])
+
+  // Handler to update ports
+  const handlePortsChange = (updatedPorts: ForwardedPort[]) => {
+    setPorts(updatedPorts)
+  }
+
   return {
     instance,
     instanceManager,
+    ports,
+    sshForwardedPort,
+    handlePortsChange,
     ...manageInstanceEntityProps,
   }
 }
