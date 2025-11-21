@@ -12,7 +12,7 @@ import { StyledHeader, StyledNavbarDesktop, StyledNavbarMobile } from './styles'
 import { useHeader } from '@/components/common/Header/hook'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import { NAVIGATION_URLS, websiteUrl } from '@/helpers/constants'
-import { blockchains } from '@/domain/connect/base'
+import { blockchains } from '@/domain/connect'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
 import { useSettings } from '@/hooks/common/useSettings'
@@ -180,7 +180,6 @@ export const Header = () => {
             mobileTopContent: (
               <AccountPicker
                 isMobile
-                Link={Link as LinkComponent}
                 accountAddress={accountAddress}
                 accountBalance={accountBalance}
                 accountVouchers={accountVouchers}
@@ -197,6 +196,9 @@ export const Header = () => {
                   url: 'https://new-app.aleph.cloud/',
                   text: 'New credit console',
                 }}
+                showCredits={false}
+                showSettings
+                Link={CustomLinkMemo}
               />
             ),
             logoHref: websiteUrl,
@@ -206,7 +208,6 @@ export const Header = () => {
         <StyledNavbarDesktop $breakpoint={breakpoint}>
           <AutoBreadcrumb names={breadcrumbNames} />
           <AccountPicker
-            Link={Link as LinkComponent}
             accountAddress={accountAddress}
             accountBalance={accountBalance}
             accountVouchers={accountVouchers}
@@ -223,6 +224,9 @@ export const Header = () => {
               url: NAVIGATION_URLS.newConsole.home,
               text: 'New credit console',
             }}
+            showCredits={false}
+            showSettings
+            Link={CustomLinkMemo}
           />
         </StyledNavbarDesktop>
       </StyledHeader>

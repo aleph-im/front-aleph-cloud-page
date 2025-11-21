@@ -22,6 +22,7 @@ jobs:
         uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
         with:
           fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+          node-version: 25.1.0
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4

@@ -1,5 +1,5 @@
 import { isBlockchainSupported as isPAYGCompatible } from '@aleph-sdk/superfluid'
-import { BlockchainId } from './connect/base'
+import { BlockchainId } from './connect'
 
 export function isBlockchainPAYGCompatible(blockchain?: BlockchainId): boolean {
   return isPAYGCompatible(blockchain)

@@ -11,7 +11,7 @@ import {
 } from '@/domain/executable'
 import Err from '@/helpers/errors'
 import { PaymentType } from '@aleph-sdk/message'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect'
 import { useAppState } from '@/contexts/appState'
 import { createFromEVMAccount } from '@aleph-sdk/superfluid'
 import { useExecutableStatus } from './useExecutableStatus'

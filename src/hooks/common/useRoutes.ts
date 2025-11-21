@@ -1,12 +1,25 @@
 import { useAppState } from '@/contexts/appState'
-import { Route } from '@aleph-front/core'
+import { IconProps, Route } from '@aleph-front/core'
 import { useMemo } from 'react'
 import { useFilterUserStakeNodes } from './node/useFilterUserStakeNodes'
 import { useFilterUserNodes } from './node/useFilterUserNodes'
 import { useFilterNodeIssues } from './node/useFilterNodeIssues'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+
+type FooterLink = {
+  href: string
+  icon?: IconProps['name']
+  label?: string
+  target?: string
+  rel?: string
+}
+
 export type UseRoutesReturn = {
   routes: Route[]
+  footerLinks: {
+    main?: FooterLink
+    social?: FooterLink[]
+  }
 }
 
 export function useRoutes(): UseRoutesReturn {
@@ -193,5 +206,33 @@ export function useRoutes(): UseRoutesReturn {
     ] as Route[]
   }, [stakeNodesWarningFlag, userCCNsWarningFlag, userCRNsWarningFlag])
 
-  return { routes }
+  const footerLinks = useMemo(() => {
+    return {
+      main: {
+        href: NAVIGATION_URLS.docs.home,
+        label: 'Documentation',
+        icon: 'arrow-up-right-from-square',
+        target: '_blank',
+      },
+      social: [
+        {
+          href: NAVIGATION_URLS.social.telegram,
+          icon: 'telegram',
+          target: '_blank',
+        },
+        {
+          href: NAVIGATION_URLS.social.x,
+          icon: 'x',
+          target: '_blank',
+        },
+        {
+          href: NAVIGATION_URLS.social.blog,
+          icon: 'globe',
+          target: '_blank',
+        },
+      ],
+    } as UseRoutesReturn['footerLinks']
+  }, [])
+
+  return { routes, footerLinks }
 }

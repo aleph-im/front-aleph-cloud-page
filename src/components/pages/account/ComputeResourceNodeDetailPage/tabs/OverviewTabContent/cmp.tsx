@@ -21,7 +21,7 @@ import { ThreeDots } from 'react-loader-spinner'
 import { LinkedStatusDotIcon } from '@/components/common/NodeLinkedNodes'
 import { UseComputeResourceNodeDetailPageReturn } from '@/components/pages/account/ComputeResourceNodeDetailPage/hook'
 import { useAppState } from '@/contexts/appState'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { unsupportedNetworkDisabledMessage } from '@/components/pages/account/disabledMessages'
 

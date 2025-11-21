@@ -13,9 +13,12 @@ export const InfoTooltipButton = ({
   align = 'right',
   vAlign = 'center',
   iconSize = '1em',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  forwardedAs,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  as,
   ...rest
 }: InfoTooltipButtonProps) => {
-  // @note: https://reactjs.org/link/uselayouteffect-ssr
   // Wait until after client-side hydration to show
   const [renderTooltip, setRenderTooltip] = useState(false)
   useEffect(() => {

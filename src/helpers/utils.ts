@@ -22,7 +22,7 @@ import Err from './errors'
 import { Account } from '@aleph-sdk/account'
 import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
 import { EVMAccount } from '@aleph-sdk/evm'
-import { blockchains } from '@/domain/connect/base'
+import { blockchains } from '@/domain/connect'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'

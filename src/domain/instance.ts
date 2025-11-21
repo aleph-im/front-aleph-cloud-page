@@ -52,7 +52,7 @@ import {
 import Err from '@/helpers/errors'
 import { CostManager, CostSummary } from './cost'
 import { EVMAccount } from '@aleph-sdk/evm'
-import { BlockchainId } from './connect/base'
+import { BlockchainId } from './connect'
 import { mockAccount } from './account'
 
 export type AddInstance = Omit<

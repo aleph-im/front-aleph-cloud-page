@@ -19,6 +19,7 @@ export const monitorAddress = '0xa1B3bb7d2332383D96b7796B908fB7f7F3c2Be10'
 export const senderAddress = '0x3a5CC6aBd06B601f4654035d125F9DD2FC992C25'
 export const erc20Address = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
 export const splTokenAddress = '3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x'
+export const vouchersAddress = '0xB34f25f2c935bCA437C061547eA12851d719dEFb'
 
 export const crnListProgramUrl = 'https://crns-list.aleph.sh/crns.json'
 
@@ -324,6 +325,11 @@ export const NAVIGATION_URLS = {
     cli: {
       home: 'https://docs.aleph.cloud/devhub/sdks-and-tools/aleph-cli/',
     },
+  },
+  social: {
+    telegram: 'https://t.me/alephim/119590',
+    x: 'https://x.com/aleph_im',
+    blog: 'https://www.aleph.cloud/blog',
   },
   external: {
     vrf: 'https://docs.aleph.cloud/devhub/tools/vrf/',

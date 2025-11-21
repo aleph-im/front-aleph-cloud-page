@@ -14,7 +14,7 @@ export type SidebarLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
 }
 
 const Sidebar = memo(() => {
-  const { routes } = useRoutes()
+  const { routes, footerLinks } = useRoutes()
   const { pathname } = useRouter()
   const [open, setOpen] = useState<boolean>()
 
@@ -33,6 +33,7 @@ const Sidebar = memo(() => {
     <RouterSidebar
       breakpoint={breakpoint}
       routes={routes}
+      footerLinks={footerLinks}
       pathname={pathname}
       open={open}
       onToggle={setOpen}
