@@ -52,6 +52,7 @@ export const defaultFileExtension: Record<LanguageType, string> = {
 export const defaultDomainAggregateKey = 'domains'
 export const defaultWebsiteAggregateKey = 'websites'
 export const defaultPortForwardingAggregateKey = 'port-forwarding'
+export const defaultPermissionsAggregateKey = 'security'
 export const defaultSSHPostType = 'ALEPH-SSH'
 
 export const defaultConsoleChannel = 'ALEPH-CLOUDSOLUTIONS'
@@ -88,6 +89,7 @@ type CheckoutAddStepType =
   | 'reserve'
   | 'allocate'
   | 'portForwarding'
+  | 'permissions'
 
 type CheckoutDelStepType =
   | 'sshDel'
@@ -98,6 +100,7 @@ type CheckoutDelStepType =
   | 'programDel'
   | 'websiteDel'
   | 'portForwardingDel'
+  | 'permissionsDel'
 
 type CheckoutUpStepType =
   | 'sshUp'
@@ -199,6 +202,9 @@ export const EXTRA_WEI = 3600 / 10 ** 18
 export const NAVIGATION_URLS = {
   console: {
     home: '/console',
+    permissions: {
+      home: '/console/permissions',
+    },
     settings: {
       home: '/console/settings',
       ssh: {
