@@ -271,7 +271,7 @@ export class ProgramManager
 
   async getCost(newProgram: ProgramCostProps): Promise<ProgramCost> {
     let totalCost = Number.POSITIVE_INFINITY
-    const paymentMethod = newProgram.payment?.type || PaymentMethod.Hold
+    const paymentMethod = newProgram.payment?.type || PaymentMethod.Credit
 
     const parsedProgram: ProgramPublishConfiguration =
       await this.parseProgramForCostEstimation(newProgram)

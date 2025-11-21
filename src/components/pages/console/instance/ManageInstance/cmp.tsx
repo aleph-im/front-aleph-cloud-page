@@ -93,6 +93,9 @@ export default function ManageInstance() {
     ports,
     sshForwardedPort,
     handlePortsChange,
+
+    // Credit balance
+    creditBalance,
   } = useManageInstance()
 
   return (
@@ -110,6 +113,8 @@ export default function ManageInstance() {
         type={EntityType.Instance}
         isAllocated={isAllocated}
         calculatedStatus={calculatedStatus}
+        creditBalance={creditBalance}
+        paymentData={paymentData}
         // Start action
         showStart
         startDisabled={startDisabled}

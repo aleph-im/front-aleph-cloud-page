@@ -1,4 +1,5 @@
 import { Executable, ExecutableCalculatedStatus } from '@/domain/executable'
+import { PaymentData } from '@/components/common/entityData/EntityPayment/types'
 
 export type ManageEntityHeaderProps = {
   name: string
@@ -7,6 +8,12 @@ export type ManageEntityHeaderProps = {
   type: 'instance' | 'function' | 'GPU instance' | 'confidential instance'
 
   calculatedStatus: ExecutableCalculatedStatus
+
+  // Credit balance
+  creditBalance?: number
+
+  // Payment data
+  paymentData?: PaymentData[]
 
   // Stop action
   showStop?: boolean

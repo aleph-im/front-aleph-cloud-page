@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import {
@@ -72,6 +72,8 @@ export const ComputeResourceNodesPage = (
     </Link>
   )
 
+  const [dashboardOpen, setDashboardOpen] = useState(true)
+
   return (
     <>
       <Head>
@@ -84,7 +86,11 @@ export const ComputeResourceNodesPage = (
           <TextGradient type="h5" forwardedAs="h1" tw="mb-8">
             Compute nodes
           </TextGradient>
-          <ToggleDashboard buttons={CreateNode}>
+          <ToggleDashboard
+            open={dashboardOpen}
+            setOpen={setDashboardOpen}
+            buttons={CreateNode}
+          >
             <div tw="flex items-start gap-6 flex-wrap 2xl:flex-nowrap">
               <div tw="flex-auto 2xl:flex-none max-w-full flex items-stretch gap-6 flex-wrap 2xl:flex-nowrap order-2 2xl:order-none">
                 <div tw="flex-auto 2xl:flex-none max-w-full">

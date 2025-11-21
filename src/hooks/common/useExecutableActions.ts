@@ -71,6 +71,7 @@ export function useExecutableActions({
   subscribeLogs,
 }: UseExecutableActionsProps): UseExecutableActionsReturn {
   const isPAYG = executable?.payment?.type === PaymentType.superfluid
+  const isCredit = executable?.payment?.type === PaymentType.credit
   const executableId = executable?.id
 
   const { status, calculatedStatus } = useExecutableStatus({
@@ -179,51 +180,79 @@ export function useExecutableActions({
   const handleStart = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
     if (!executable) throw Err.InstanceNotFound
-    if (!isPAYG) throw Err.StreamNotSupported
 
-    try {
-      setStartLoading(true)
+    if (isPAYG) {
+      try {
+        setStartLoading(true)
 
-      const instanceNetwork = executable.payment?.chain
-      const incompatibleNetwork = checkNetworkCompatibility(instanceNetwork)
+        const instanceNetwork = executable.payment?.chain
+        const incompatibleNetwork = checkNetworkCompatibility(instanceNetwork)
 
-      if (incompatibleNetwork) {
-        throw Err.NetworkMismatch(incompatibleNetwork)
+        if (incompatibleNetwork) {
+          throw Err.NetworkMismatch(incompatibleNetwork)
+        }
+
+        if (isPAYG && !isAccountPAYGCompatible(account)) {
+          throw Err.ConnectYourPaymentWallet
+        }
+
+        if (!crn) throw Err.InvalidCRNAddress
+
+        // For PAYG, notify CRN
+        if (isPAYG) {
+          await manager.notifyCRNAllocation(crn, executable.id)
+        }
+      } catch (e) {
+        noti?.add({
+          variant: 'error',
+          title: 'Error',
+          text: (e as Error)?.message,
+        })
+      } finally {
+        setStartLoading(false)
       }
+    } else if (!isCredit) {
+      throw Err.StreamNotSupported
+    } else if (isCredit) {
+      try {
+        setStartLoading(true)
 
-      if (isPAYG && !isAccountPAYGCompatible(account)) {
-        throw Err.ConnectYourPaymentWallet
-      }
+        const instanceNetwork = executable.payment?.chain
+        const incompatibleNetwork = checkNetworkCompatibility(instanceNetwork)
 
-      if (!crn) throw Err.ConnectYourPaymentWallet
+        if (incompatibleNetwork) {
+          throw Err.NetworkMismatch(incompatibleNetwork)
+        }
 
-      // For PAYG, notify CRN
-      if (isPAYG) {
+        if (!crn) throw Err.InvalidCRNAddress
+
+        // For PAYG, notify CRN
         await manager.notifyCRNAllocation(crn, executable.id)
+      } catch (e) {
+        noti?.add({
+          variant: 'error',
+          title: 'Error',
+          text: (e as Error)?.message,
+        })
+      } finally {
+        setStartLoading(false)
       }
-    } catch (e) {
-      noti?.add({
-        variant: 'error',
-        title: 'Error',
-        text: (e as Error)?.message,
-      })
-    } finally {
-      setStartLoading(false)
     }
   }, [
-    crn,
+    manager,
     executable,
     isPAYG,
-    manager,
-    noti,
+    isCredit,
     checkNetworkCompatibility,
     account,
+    crn,
+    noti,
   ])
 
   const isAllocated = !!status?.ipv6Parsed
 
   const stopDisabled = useMemo(() => {
-    if (!isPAYG || !crn) return true
+    if (!crn) return true
 
     switch (calculatedStatus) {
       case 'v1':
@@ -233,7 +262,7 @@ export function useExecutableActions({
       default:
         return true
     }
-  }, [calculatedStatus, crn, isAllocated, isPAYG])
+  }, [calculatedStatus, crn, isAllocated])
 
   const startDisabled = useMemo(() => {
     if (!crn) return true

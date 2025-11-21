@@ -7,6 +7,7 @@ import {
   useExecutableActions,
 } from '@/hooks/common/useExecutableActions'
 import {
+  CreditPaymentData,
   HoldingPaymentData,
   PaymentData,
   StreamPaymentData,
@@ -217,6 +218,17 @@ export function useManageInstanceEntity<
               }) as StreamPaymentData,
           )
         }
+      case PaymentType.credit:
+        return [
+          {
+            cost,
+            paymentType: PaymentType.credit,
+            runningTime,
+            startTime: entity.time,
+            blockchain: entity.payment.chain,
+            loading: loadingPaymentData,
+          } as CreditPaymentData,
+        ]
       default:
         return [
           {

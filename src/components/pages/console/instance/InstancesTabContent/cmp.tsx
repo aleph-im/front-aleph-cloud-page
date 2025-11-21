@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import tw from 'twin.macro'
 import { InstancesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
@@ -9,9 +9,17 @@ import {
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon } from '@aleph-front/core'
+import { PaymentType } from '@aleph-sdk/message'
+import ExternalLink from '@/components/common/ExternalLink'
+import { NAVIGATION_URLS } from '@/helpers/constants'
+import { Instance } from '@/domain/instance'
 
 export const InstancesTabContent = React.memo(
   ({ data }: InstancesTabContentProps) => {
+    const isCredit = useCallback((row: Instance) => {
+      return row.payment?.type === PaymentType.credit
+    }, [])
+
     return (
       <>
         {data.length > 0 ? (
@@ -21,6 +29,9 @@ export const InstancesTabContent = React.memo(
                 borderType="none"
                 rowNoise
                 rowKey={(row) => row.id}
+                rowProps={(row) => ({
+                  css: isCredit(row) ? '' : tw`opacity-40`,
+                })}
                 data={data}
                 columns={[
                   {
@@ -48,7 +59,7 @@ export const InstancesTabContent = React.memo(
                       }),
                   },
                   {
-                    label: 'HDD',
+                    label: 'date',
                     align: 'right',
                     sortable: true,
                     render: (row) => humanReadableSize(row.size, 'MiB'),
@@ -62,15 +73,39 @@ export const InstancesTabContent = React.memo(
                   {
                     label: '',
                     align: 'right',
-                    render: (row) => (
-                      <ButtonLink
-                        kind="functional"
-                        variant="secondary"
-                        href={`/console/computing/instance/${row.id}`}
-                      >
-                        <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
-                    ),
+                    render: (row) => {
+                      const disabled = !isCredit(row)
+
+                      return (
+                        <ButtonLink
+                          kind="functional"
+                          variant="secondary"
+                          href={`/console/computing/instance/${row.id}`}
+                          disabled={disabled}
+                          disabledMessage={
+                            disabled && (
+                              <p>
+                                To manage this instance, go to the{' '}
+                                <ExternalLink
+                                  text="Legacy console App."
+                                  color="main0"
+                                  href={
+                                    NAVIGATION_URLS.legacyConsole.computing
+                                      .instances.home
+                                  }
+                                />
+                              </p>
+                            )
+                          }
+                          tooltipPosition={{
+                            my: 'bottom-right',
+                            at: 'bottom-center',
+                          }}
+                        >
+                          <Icon name="angle-right" size="lg" />
+                        </ButtonLink>
+                      )
+                    },
                     cellProps: () => ({
                       css: tw`pl-3!`,
                     }),
