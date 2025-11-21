@@ -16,7 +16,6 @@ export function useSettings(): UseSettingsReturn {
 
   useEffect(() => {
     const handleStorageChange = () => {
-      console.log('Storage changed, updating apiServer')
       setApiServer(getApiServer())
     }
 

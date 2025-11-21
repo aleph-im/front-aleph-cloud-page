@@ -10,7 +10,7 @@ import {
   Spinner,
 } from '@aleph-front/core'
 import { useAppState } from '@/contexts/appState'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { unsupportedNetworkDisabledMessage } from '@/components/pages/account/disabledMessages'
 import ExternalLink from '@/components/common/ExternalLink'

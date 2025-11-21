@@ -11,7 +11,7 @@ import { StyledHeader, StyledNavbarDesktop, StyledNavbarMobile } from './styles'
 import { useHeader } from '@/components/common/Header/hook'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import { NAVIGATION_URLS, websiteUrl } from '@/helpers/constants'
-import { blockchains } from '@/domain/connect/base'
+import { blockchains } from '@/domain/connect'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
 import { useSettings } from '@/hooks/common/useSettings'
@@ -193,11 +193,12 @@ export const Header = () => {
                 handleConnect={handleConnect}
                 handleDisconnect={handleDisconnect}
                 handleSwitchNetwork={handleSwitchNetwork}
-                Link={CustomLinkMemo}
                 externalUrl={{
                   text: 'Legacy console',
                   url: NAVIGATION_URLS.legacyConsole.home,
                 }}
+                showSettings
+                Link={CustomLinkMemo}
               />
             ),
             logoHref: websiteUrl,
@@ -221,11 +222,12 @@ export const Header = () => {
             handleConnect={handleConnect}
             handleDisconnect={handleDisconnect}
             handleSwitchNetwork={handleSwitchNetwork}
-            Link={CustomLinkMemo}
             externalUrl={{
               text: 'Legacy console',
               url: NAVIGATION_URLS.legacyConsole.home,
             }}
+            showSettings
+            Link={CustomLinkMemo}
           />
         </StyledNavbarDesktop>
       </StyledHeader>

@@ -1,10 +1,6 @@
 import { Account } from '@aleph-sdk/account'
 import { StoreReducer } from './store'
-import {
-  BlockchainId,
-  defaultBlockchainProviders,
-  ProviderId,
-} from '@/domain/connect/base'
+import { BlockchainId, ProviderId } from '@/domain/connect'
 import { PaymentMethod } from '@/helpers/constants'
 
 export type ConnectionState = {
@@ -100,42 +96,27 @@ export function getConnectionReducer(): ConnectionReducer {
         if (action.payload && action.payload.provider !== state.provider)
           return state
 
-        // Keep the current payment method but reset everything else
+        // Keep the current payment method and blockchain selection but reset everything else
         return {
           ...initialState,
           paymentMethod: state.paymentMethod,
+          blockchain: state.blockchain,
         }
       }
 
       case ConnectionActionType.CONNECTION_CONNECT:
       case ConnectionActionType.CONNECTION_UPDATE: {
-        const { provider: currentProvider, blockchain: currentBlockchain } =
-          state
-        const { provider, blockchain } = action.payload
+        const { blockchain: currentBlockchain } = state
+        const { blockchain } = action.payload
 
-        let newProvider = provider
+        // Use ?? instead of || to properly handle 0 balance
         let newBalance =
-          (action as ConnectionUpdateAction).payload.balance || state.balance
+          (action as ConnectionUpdateAction).payload.balance ?? state.balance
         let newCreditBalance =
           (action as ConnectionUpdateAction).payload.creditBalance ||
           state.creditBalance
 
-        // If we are switching between EVM and Solana, hardcode the provider
-        if (currentProvider) {
-          const isSwitchingToSolana =
-            currentBlockchain !== BlockchainId.SOL &&
-            blockchain === BlockchainId.SOL
-          const isSwitchingToEVM =
-            currentBlockchain === BlockchainId.SOL &&
-            blockchain !== BlockchainId.SOL
-
-          newProvider =
-            isSwitchingToSolana || isSwitchingToEVM
-              ? defaultBlockchainProviders[blockchain]
-              : newProvider
-        }
-
-        // If we are switching blockchains, reset the balance
+        // Reset balance when switching blockchains
         if (currentBlockchain && currentBlockchain !== blockchain) {
           newBalance = undefined
           newCreditBalance = undefined
@@ -144,7 +125,6 @@ export function getConnectionReducer(): ConnectionReducer {
         return {
           ...state,
           ...action.payload,
-          provider: newProvider,
           balance: newBalance,
           creditBalance: newCreditBalance,
         }

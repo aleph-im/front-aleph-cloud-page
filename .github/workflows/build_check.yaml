@@ -18,3 +18,4 @@ jobs:
         with:
           fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
           export: false
+          node-version: 25.1.0

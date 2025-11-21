@@ -5,10 +5,14 @@ import {
   TextGradient,
 } from '@aleph-front/core'
 
-export const CompositeSectionTitle = (props: CompositeTitleProps) => {
+export const CompositeSectionTitle = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  forwardedAs,
+  ...rest
+}: CompositeTitleProps) => {
   return (
     <CompositeTitle
-      {...{ as: 'h2', color: 'main0', numberColor: 'main0', ...props }}
+      {...{ as: 'h2', color: 'main0', numberColor: 'main0', ...rest }}
     />
   )
 }

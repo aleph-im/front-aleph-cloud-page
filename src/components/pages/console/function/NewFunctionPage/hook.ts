@@ -35,7 +35,7 @@ import {
   CreditPaymentConfiguration,
   PaymentConfiguration,
 } from '@/domain/executable'
-import { BlockchainId } from '@/domain/connect/base'
+import { BlockchainId } from '@/domain/connect'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField

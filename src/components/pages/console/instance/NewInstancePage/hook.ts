@@ -43,7 +43,7 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
-import { BlockchainId } from '@/domain/connect/base'
+import { BlockchainId } from '@/domain/connect'
 import {
   CreditPaymentConfiguration,
   PaymentConfiguration,

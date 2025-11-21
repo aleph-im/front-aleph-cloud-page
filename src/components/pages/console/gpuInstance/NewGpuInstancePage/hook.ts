@@ -42,7 +42,7 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
-import { BlockchainId, blockchains } from '@/domain/connect/base'
+import { BlockchainId, blockchains } from '@/domain/connect'
 import {
   CreditPaymentConfiguration,
   PaymentConfiguration,

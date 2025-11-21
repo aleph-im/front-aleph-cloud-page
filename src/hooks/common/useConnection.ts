@@ -1,145 +1,116 @@
-import { useCallback, useEffect, useRef } from 'react'
-import { useNotification } from '@aleph-front/core'
+import { useCallback, useEffect } from 'react'
 import {
   ConnectionConnectAction,
   ConnectionDisconnectAction,
   ConnectionState,
-  ConnectionUpdateAction,
 } from '@/store/connection'
-import { connectionProviderManager } from '@/domain/connect'
 import { useAppState } from '@/contexts/appState'
-import { useSessionStorage } from 'usehooks-ts'
-import { BaseConnectionProviderManager } from '@/domain/connect/base'
+import { useReownConnection } from './useReownConnection'
+import { BlockchainId, ProviderId } from '@/domain/connect'
 
 export type UseConnectionProps = {
   triggerOnMount?: boolean
-  confirmSwitchModal?: React.ReactNode
 }
 
 export type UseConnectionReturn = ConnectionState & {
-  handleConnect: (payload: ConnectionConnectAction['payload']) => void
+  handleConnect: (payload?: ConnectionConnectAction['payload']) => void
   handleDisconnect: () => void
 }
 
+/**
+ * Main connection hook for the app
+ * Provides wallet connection state and actions
+ * Now powered by Reown hooks instead of custom provider manager
+ */
 export const useConnection = ({
   triggerOnMount,
-}: UseConnectionProps): UseConnectionReturn => {
+}: UseConnectionProps = {}): UseConnectionReturn => {
   const [state, dispatch] = useAppState()
-  const { blockchain, provider } = state.connection
+  const { blockchain } = state.connection
 
-  const prevConnectionProviderRef = useRef<
-    BaseConnectionProviderManager | undefined
-  >()
+  const {
+    handleConnect: openReownModal,
+    handleDisconnect: disconnectReown,
+    handleSwitchNetwork,
+    reown,
+  } = useReownConnection()
 
-  const noti = useNotification()
-  const addNotification = noti?.add
-
+  /**
+   * Opens Reown modal for wallet connection
+   * Optionally accepts a blockchain to switch to after connection
+   */
   const handleConnect = useCallback(
-    (payload: ConnectionConnectAction['payload']) =>
-      dispatch(new ConnectionConnectAction(payload)),
-    [dispatch],
+    (payload?: ConnectionConnectAction['payload']) => {
+      // Determine which blockchain to use for the modal
+      const targetBlockchain = payload?.blockchain || blockchain
+
+      if (payload?.blockchain) {
+        // Store desired blockchain for after connection
+        dispatch(new ConnectionConnectAction(payload))
+      }
+
+      // Open modal with the target blockchain to set correct namespace
+      openReownModal(targetBlockchain)
+    },
+    [openReownModal, dispatch, blockchain],
   )
 
-  const handleDisconnect = useCallback(
-    () => dispatch(new ConnectionDisconnectAction({ provider })),
-    [dispatch, provider],
-  )
+  /**
+   * Disconnects wallet
+   */
+  const handleDisconnect = useCallback(async () => {
+    await disconnectReown()
 
-  const [storedConnection, setStoredConnection] = useSessionStorage<
-    ConnectionConnectAction['payload'] | undefined
-  >('connection', undefined)
+    dispatch(new ConnectionDisconnectAction({ provider: ProviderId.Reown }))
+  }, [disconnectReown, dispatch])
 
-  // @note: Loads the stored connection in case page is refreshed
+  /**
+   * Auto-connect on mount if wallet was previously connected
+   * Reown handles session persistence automatically
+   */
   useEffect(() => {
     if (!triggerOnMount) return
-    if (!storedConnection) return
 
-    dispatch(new ConnectionConnectAction(storedConnection))
-  }, [dispatch, storedConnection, triggerOnMount])
+    // Reown automatically restores previous session
+    // No need to manage session storage manually
+  }, [triggerOnMount])
 
+  /**
+   * Sync blockchain switching with Reown
+   * When Redux store blockchain changes, switch network in Reown
+   */
   useEffect(() => {
-    const handleUpdate = (payload: ConnectionUpdateAction['payload']) => {
-      dispatch(new ConnectionUpdateAction(payload))
-    }
+    if (!reown.isConnected) return
+    if (!blockchain) return
 
-    const handleDisconnect = ({
-      provider,
-      error,
-    }: ConnectionDisconnectAction['payload']) => {
-      dispatch(new ConnectionDisconnectAction({ provider, error }))
-      if (!error) return
-      addNotification &&
-        addNotification({
-          variant: 'error',
-          title: 'Error',
-          text: error?.message,
-        })
-    }
+    // Check if current Reown blockchain matches desired blockchain
+    const currentBlockchain = reown.getBlockchainId()
 
-    async function exec() {
-      if (!triggerOnMount) return
+    // Only switch if different from current
+    if (currentBlockchain !== blockchain) {
+      // Map blockchain ID to chain ID for switching
+      let targetChainId: number
 
-      // Load connection providers
-      const prevConnectionProvider = prevConnectionProviderRef.current
-      const connectionProvider = provider
-        ? connectionProviderManager.of(provider)
-        : undefined
-
-      // If there's a previous connection provider and it's different from the current one
-      // then disconnect from the previous provider
-      if (
-        prevConnectionProvider &&
-        connectionProvider !== prevConnectionProvider
-      ) {
-        prevConnectionProvider.events.off('update', handleUpdate)
-        prevConnectionProvider.events.off('disconnect', handleDisconnect)
-
-        await prevConnectionProvider.disconnect()
+      switch (blockchain) {
+        case BlockchainId.ETH:
+          targetChainId = 1
+          break
+        case BlockchainId.AVAX:
+          targetChainId = 43114
+          break
+        case BlockchainId.BASE:
+          targetChainId = 8453
+          break
+        case BlockchainId.SOL:
+          targetChainId = 900
+          break
+        default:
+          return
       }
 
-      // Update refs
-      prevConnectionProviderRef.current = connectionProvider
-
-      // If no blockchain or provider => Do not connect or switch
-      if (!connectionProvider) return
-      if (!blockchain) return
-
-      if (connectionProvider !== prevConnectionProvider) {
-        connectionProvider.events.on('update', handleUpdate)
-        connectionProvider.events.on('disconnect', handleDisconnect)
-
-        try {
-          await connectionProvider.connect(blockchain)
-
-          setStoredConnection({ provider, blockchain })
-        } catch (error) {
-          handleDisconnect({ error: error as Error })
-        }
-      } else {
-        try {
-          await connectionProvider.switchBlockchain(blockchain)
-
-          setStoredConnection({ provider, blockchain })
-        } catch (error) {
-          addNotification &&
-            addNotification({
-              variant: 'error',
-              title: 'Error',
-              text: (error as Error)?.message,
-            })
-        }
-      }
+      handleSwitchNetwork(targetChainId)
     }
-
-    exec()
-  }, [
-    triggerOnMount,
-    provider,
-    blockchain,
-    dispatch,
-    addNotification,
-    setStoredConnection,
-  ])
+  }, [blockchain, reown, handleSwitchNetwork])
 
   return {
     ...state.connection,

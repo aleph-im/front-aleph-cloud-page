@@ -48,7 +48,7 @@ import {
 import Err from '@/helpers/errors'
 import { CostManager, CostSummary } from './cost'
 import { EVMAccount } from '@aleph-sdk/evm'
-import { BlockchainId } from './connect/base'
+import { BlockchainId } from './connect'
 import { mockAccount } from './account'
 
 export type AddInstance = Omit<
@@ -234,6 +234,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
   async *addSteps(
     newInstance: AddInstance,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     account?: SuperfluidAccount,
   ): AsyncGenerator<void, T, void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
