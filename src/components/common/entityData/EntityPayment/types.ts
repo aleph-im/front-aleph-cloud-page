@@ -9,6 +9,7 @@ export interface BasePaymentData {
   startTime?: number // timestamp in milliseconds
   blockchain?: Blockchain
   loading?: boolean
+  itemHash?: string // Hash of the entity for API calls
 }
 
 // Holding payment data (standard payment)
