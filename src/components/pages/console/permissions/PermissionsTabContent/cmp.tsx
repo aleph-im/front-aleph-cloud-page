@@ -5,6 +5,7 @@ import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Icon } from '@aleph-front/core'
+import { CopytoClipboardIcon } from '@/components/common/CopyToClipboardIcon/cmp'
 
 export const PermissionsTabContent = React.memo(
   ({ data }: PermissionsTabContentProps) => {
@@ -16,22 +17,38 @@ export const PermissionsTabContent = React.memo(
               <EntityTable
                 borderType="none"
                 rowNoise
-                rowKey={(row) => row.address}
+                rowKey={({ address }) => address}
                 data={data}
                 columns={[
                   {
                     label: 'Address',
                     sortable: true,
-                    render: (row) => ellipseAddress(row.address),
+                    render: ({ alias }) => alias || '-',
                   },
                   {
-                    label: 'Types',
+                    label: 'Alias',
                     sortable: true,
-                    render: (row) => row.types?.join(', '),
+                    render: ({ address }) => {
+                      return (
+                        <>
+                          {ellipseAddress(address)}{' '}
+                          <CopytoClipboardIcon text={address} />
+                        </>
+                      )
+                    },
                   },
                   {
                     label: 'Channels',
-                    render: (row) => row.channels?.join(', '),
+                    render: ({ channels }) => {
+                      if (!channels?.length) return 'All'
+
+                      return channels?.join(', ')
+                    },
+                  },
+                  {
+                    label: 'Permissions',
+                    sortable: true,
+                    render: ({ types }) => types?.join(', '),
                   },
                   {
                     label: '',
