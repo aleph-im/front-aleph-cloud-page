@@ -22,25 +22,30 @@ type StyledPortalProps = {
   $isOpen: boolean
 }
 
-export const StyledPortal = styled.div<StyledPortalProps>`
+const StyledPortal = styled.div<StyledPortalProps>`
   ${({ theme, $position: { x, y }, $isOpen }) => {
     const { background, shadow } = theme.component.walletPicker
 
-    console.log('$isOpen:', $isOpen)
-    console.log('$x, $y:', x, y)
-
     return css`
-      ${tw`fixed top-0 left-0 z-20 mt-4`}
-      min-width: 20rem;
-      border-radius: 1.875rem;
+      ${tw`fixed -top-1 left-1 z-20`}
+      min-width: 8rem;
       background: ${background};
-      padding: 1.5rem;
       box-shadow: ${shadow};
       backdrop-filter: blur(50px);
       transform: ${`translate3d(${x}px, ${y}px, 0)`};
       opacity: ${$isOpen ? 1 : 0};
       will-change: opacity transform;
       transition: opacity ease-in-out 250ms 0s;
+    `
+  }}
+`
+
+const ActionButton = styled.button`
+  ${({ theme }) => {
+    return css`
+      &:hover {
+        background-color: ${theme.color.purple2};
+      }
     `
   }}
 `
@@ -101,9 +106,13 @@ const RowActionsButton = React.memo(({ row }: { row: unknown }) => {
             $position={rowActionsPosition}
             ref={rowActionsRef}
           >
-            <div tw="flex flex-col">
-              <button>Configure</button>
-              <button>Revoke</button>
+            <div tw="flex flex-col items-start w-full">
+              <ActionButton tw="px-4 py-3 w-full text-left">
+                Configure
+              </ActionButton>
+              <ActionButton tw="px-4 py-3 w-full text-left">
+                Revoke
+              </ActionButton>
             </div>
           </StyledPortal>
         )}
@@ -150,13 +159,17 @@ export const PermissionsTabContent = React.memo(
                     render: ({ channels }) => {
                       if (!channels?.length) return 'All'
 
-                      return channels?.join(', ')
+                      return <>channels.length</>
                     },
                   },
                   {
                     label: 'Permissions',
                     sortable: true,
-                    render: ({ types }) => types?.join(', '),
+                    render: ({ types }) => {
+                      if (!types?.length) return 'All'
+
+                      return types?.join(', ')
+                    },
                   },
                   {
                     label: '',

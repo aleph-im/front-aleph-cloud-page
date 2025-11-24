@@ -10,9 +10,9 @@ export const CopytoClipboardIcon = ({
   const handleCopy = useCopyToClipboardAndNotify(textToCopy || '')
 
   return (
-    <StyledCopytoClipboard>
+    <StyledCopytoClipboard onClick={handleCopy}>
       {text}
-      <Icon name="copy" onClick={handleCopy} />
+      <Icon name="copy" />
     </StyledCopytoClipboard>
   )
 }
