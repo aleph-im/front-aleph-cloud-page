@@ -175,8 +175,7 @@ export const PermissionsTabContent = React.memo(
                   {
                     label: 'Permissions',
                     sortable: true,
-                    render: ({ types: old, post_types, aggregate_keys }) => {
-                      const types = ['POST', 'AGGREGATE']
+                    render: ({ types, post_types, aggregate_keys }) => {
                       if (!types?.length)
                         return <div className="tp-info fs-12">All</div>
 
@@ -184,13 +183,16 @@ export const PermissionsTabContent = React.memo(
                       const aggregateKeysCount = aggregate_keys?.length || 0
 
                       return (
-                        <div tw="flex gap-x-2">
-                          {types.map((type) => {
+                        <div tw="flex items-center gap-x-0.5">
+                          {types.map((type, index) => {
+                            const isLast = index === types.length - 1
+                            let content
+
                             if (
                               type.toLowerCase() === 'post' &&
                               postTypesCount
                             ) {
-                              return (
+                              content = (
                                 <div
                                   key={type}
                                   className="tp-info fs-12"
@@ -209,7 +211,7 @@ export const PermissionsTabContent = React.memo(
                               type.toLowerCase() === 'aggregate' &&
                               aggregateKeysCount
                             ) {
-                              return (
+                              content = (
                                 <div
                                   key={type}
                                   className="tp-info fs-12"
@@ -225,12 +227,23 @@ export const PermissionsTabContent = React.memo(
                                 </div>
                               )
                             } else {
-                              return (
+                              content = (
                                 <div key={type} className="tp-info fs-12">
                                   {type}
                                 </div>
                               )
                             }
+
+                            return (
+                              <React.Fragment key={type}>
+                                {content}
+                                {!isLast && (
+                                  <span className="tp-info fs-12" tw="mr-0.5">
+                                    ,
+                                  </span>
+                                )}
+                              </React.Fragment>
+                            )
                           })}
                         </div>
                       )
