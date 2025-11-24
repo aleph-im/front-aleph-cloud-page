@@ -152,23 +152,88 @@ export const PermissionsTabContent = React.memo(
                   {
                     label: 'Alias',
                     sortable: true,
-                    render: ({ alias }) => alias || '-',
+                    render: ({ alias }) => (
+                      <div className="tp-info fs-12">{alias || '-'}</div>
+                    ),
                   },
                   {
                     label: 'Channels',
                     render: ({ channels }) => {
-                      if (!channels?.length) return 'All'
+                      if (!channels?.length)
+                        return <div className="tp-info fs-12">All</div>
 
-                      return <>channels.length</>
+                      return (
+                        <div
+                          tw="flex items-center min-w-4 min-h-4 w-fit py-1 px-1.5 rounded-md"
+                          className="bg-purple4 fs-10 tp-info"
+                        >
+                          {channels.length}
+                        </div>
+                      )
                     },
                   },
                   {
                     label: 'Permissions',
                     sortable: true,
-                    render: ({ types }) => {
-                      if (!types?.length) return 'All'
+                    render: ({ types: old, post_types, aggregate_keys }) => {
+                      const types = ['POST', 'AGGREGATE']
+                      if (!types?.length)
+                        return <div className="tp-info fs-12">All</div>
 
-                      return types?.join(', ')
+                      const postTypesCount = post_types?.length || 0
+                      const aggregateKeysCount = aggregate_keys?.length || 0
+
+                      return (
+                        <div tw="flex gap-x-2">
+                          {types.map((type) => {
+                            if (
+                              type.toLowerCase() === 'post' &&
+                              postTypesCount
+                            ) {
+                              return (
+                                <div
+                                  key={type}
+                                  className="tp-info fs-12"
+                                  tw="flex items-center gap-x-1"
+                                >
+                                  {type}
+                                  <div
+                                    tw="flex items-center min-w-4 min-h-4 w-fit py-1 px-1.5 rounded-md"
+                                    className="bg-purple4 fs-10 tp-info"
+                                  >
+                                    {postTypesCount}
+                                  </div>
+                                </div>
+                              )
+                            } else if (
+                              type.toLowerCase() === 'aggregate' &&
+                              aggregateKeysCount
+                            ) {
+                              return (
+                                <div
+                                  key={type}
+                                  className="tp-info fs-12"
+                                  tw="flex items-center gap-x-1"
+                                >
+                                  {type}
+                                  <div
+                                    tw="flex items-center min-w-4 min-h-4 w-fit py-1 px-1.5 rounded-md"
+                                    className="bg-purple4 fs-10 tp-info"
+                                  >
+                                    {aggregateKeysCount}
+                                  </div>
+                                </div>
+                              )
+                            } else {
+                              return (
+                                <div key={type} className="tp-info fs-12">
+                                  {type}
+                                </div>
+                              )
+                            }
+                          })}
+                        </div>
+                      )
                     },
                   },
                   {
