@@ -57,10 +57,6 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
 
           &:hover,
           &._active {
-            td {
-              color: ${theme.color.main0};
-            }
-
             .check-button {
               visibility: visible;
               opacity: 1;

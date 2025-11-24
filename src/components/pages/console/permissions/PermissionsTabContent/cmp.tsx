@@ -1,11 +1,117 @@
-import React from 'react'
-import tw from 'twin.macro'
+import React, { useRef } from 'react'
+import tw, { css } from 'twin.macro'
 import { PermissionsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
-import { CopytoClipboardIcon } from '@/components/common/CopyToClipboardIcon/cmp'
+import {
+  FloatPosition,
+  Icon,
+  useClickOutside,
+  useFloatPosition,
+  useTransition,
+  useWindowScroll,
+  useWindowSize,
+} from '@aleph-front/core'
+import CopyToClipboard from '@/components/common/CopyToClipboard'
+import { Portal } from '@/components/common/Portal'
+import styled from 'styled-components'
+
+type StyledPortalProps = {
+  $position: FloatPosition
+  $isOpen: boolean
+}
+
+export const StyledPortal = styled.div<StyledPortalProps>`
+  ${({ theme, $position: { x, y }, $isOpen }) => {
+    const { background, shadow } = theme.component.walletPicker
+
+    console.log('$isOpen:', $isOpen)
+    console.log('$x, $y:', x, y)
+
+    return css`
+      ${tw`fixed top-0 left-0 z-20 mt-4`}
+      min-width: 20rem;
+      border-radius: 1.875rem;
+      background: ${background};
+      padding: 1.5rem;
+      box-shadow: ${shadow};
+      backdrop-filter: blur(50px);
+      transform: ${`translate3d(${x}px, ${y}px, 0)`};
+      opacity: ${$isOpen ? 1 : 0};
+      will-change: opacity transform;
+      transition: opacity ease-in-out 250ms 0s;
+    `
+  }}
+`
+
+const RowActionsButton = React.memo(({ row }: { row: unknown }) => {
+  const [showRowActions, setShowRowActions] = React.useState(false)
+
+  const rowActionsElementRef = useRef<HTMLDivElement>(null)
+  const rowActionsButtonRef = useRef<HTMLButtonElement>(null)
+
+  const windowSize = useWindowSize(0)
+  const windowScroll = useWindowScroll(0)
+
+  const { shouldMount: shouldMountRowActions, stage: stageRowActions } =
+    useTransition(showRowActions, 250)
+
+  const rowActionsOpen = stageRowActions === 'enter'
+
+  const {
+    myRef: rowActionsRef,
+    atRef: rowActionsTriggerRef,
+    position: rowActionsPosition,
+  } = useFloatPosition({
+    my: 'top-right',
+    at: 'bottom-right',
+    myRef: rowActionsElementRef,
+    atRef: rowActionsButtonRef,
+    deps: [windowSize, windowScroll, shouldMountRowActions],
+  })
+
+  useClickOutside(() => {
+    if (showRowActions) setShowRowActions(false)
+  }, [rowActionsRef, rowActionsTriggerRef])
+
+  return (
+    <span onClick={(e) => e.stopPropagation()}>
+      <button
+        ref={rowActionsButtonRef}
+        tw="px-4 py-1.5"
+        className="bg-background"
+        onClick={() => {
+          setShowRowActions(!showRowActions)
+        }}
+      >
+        <Icon name="ellipsis" />
+      </button>
+      {/* <ButtonLink
+                          kind="functional"
+                          variant="secondary"
+                          href={`#`}
+                        >
+                          <Icon name="angle-right" size="lg" />
+                        </ButtonLink> */}
+      <Portal>
+        {showRowActions && (
+          <StyledPortal
+            $isOpen={rowActionsOpen}
+            $position={rowActionsPosition}
+            ref={rowActionsRef}
+          >
+            <div tw="flex flex-col">
+              <button>Configure</button>
+              <button>Revoke</button>
+            </div>
+          </StyledPortal>
+        )}
+      </Portal>
+    </span>
+  )
+})
+RowActionsButton.displayName = 'RowActionsButton'
 
 export const PermissionsTabContent = React.memo(
   ({ data }: PermissionsTabContentProps) => {
@@ -23,19 +129,21 @@ export const PermissionsTabContent = React.memo(
                   {
                     label: 'Address',
                     sortable: true,
-                    render: ({ alias }) => alias || '-',
+                    render: ({ address }) => {
+                      return (
+                        <span onClick={(e) => e.stopPropagation()}>
+                          <CopyToClipboard
+                            text={ellipseAddress(address)}
+                            textToCopy={address}
+                          />
+                        </span>
+                      )
+                    },
                   },
                   {
                     label: 'Alias',
                     sortable: true,
-                    render: ({ address }) => {
-                      return (
-                        <>
-                          {ellipseAddress(address)}{' '}
-                          <CopytoClipboardIcon text={address} />
-                        </>
-                      )
-                    },
+                    render: ({ alias }) => alias || '-',
                   },
                   {
                     label: 'Channels',
@@ -54,20 +162,17 @@ export const PermissionsTabContent = React.memo(
                     label: '',
                     width: '100%',
                     align: 'right',
-                    render: (row) => (
-                      <ButtonLink
-                        kind="functional"
-                        variant="secondary"
-                        href={`#`}
-                      >
-                        <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
-                    ),
+                    render: (row) => <RowActionsButton row={row} />,
                     cellProps: () => ({
                       css: tw`pl-3!`,
                     }),
                   },
                 ]}
+                rowProps={(row, i) => ({
+                  onClick: () => {
+                    alert(`row click ${i}`)
+                  },
+                })}
               />
             </div>
 
