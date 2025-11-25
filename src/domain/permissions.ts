@@ -32,7 +32,9 @@ export type PermissionsConfig = {
   authorizations: PermissionsAggregateItem[]
 }
 
-export type Permission = PermissionsAggregateItem
+export type Permission = PermissionsAggregateItem & {
+  id: string
+}
 
 export class PermissionsManager extends AggregateManager<
   Permission,

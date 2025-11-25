@@ -1,18 +1,19 @@
 import { memo } from 'react'
-import { Icon, useCopyToClipboardAndNotify } from '@aleph-front/core'
-import { StyledCopytoClipboard } from './styles'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
+import { StyledCopytoClipboard, StyledIcon } from './styles'
 import { CopyToClipboardProps } from './types'
 
 export const CopytoClipboardIcon = ({
   text,
   textToCopy,
+  iconColor = 'purple3',
 }: CopyToClipboardProps) => {
   const handleCopy = useCopyToClipboardAndNotify(textToCopy || '')
 
   return (
     <StyledCopytoClipboard onClick={handleCopy}>
       {text}
-      <Icon name="copy" />
+      <StyledIcon name="copy" $color={iconColor} />
     </StyledCopytoClipboard>
   )
 }

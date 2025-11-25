@@ -1,129 +1,29 @@
-import React, { useRef } from 'react'
-import tw, { css } from 'twin.macro'
+import React from 'react'
 import { PermissionsTabContentProps } from './types'
+import { getPermissionsTableColumns } from './columns'
 import ButtonLink from '@/components/common/ButtonLink'
-import { ellipseAddress } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import {
-  FloatPosition,
-  Icon,
-  useClickOutside,
-  useFloatPosition,
-  useTransition,
-  useWindowScroll,
-  useWindowSize,
-} from '@aleph-front/core'
-import CopyToClipboard from '@/components/common/CopyToClipboard'
-import { Portal } from '@/components/common/Portal'
-import styled from 'styled-components'
-
-type StyledPortalProps = {
-  $position: FloatPosition
-  $isOpen: boolean
-}
-
-const StyledPortal = styled.div<StyledPortalProps>`
-  ${({ theme, $position: { x, y }, $isOpen }) => {
-    const { background, shadow } = theme.component.walletPicker
-
-    return css`
-      ${tw`fixed -top-1 left-1 z-20`}
-      min-width: 8rem;
-      background: ${background};
-      box-shadow: ${shadow};
-      backdrop-filter: blur(50px);
-      transform: ${`translate3d(${x}px, ${y}px, 0)`};
-      opacity: ${$isOpen ? 1 : 0};
-      will-change: opacity transform;
-      transition: opacity ease-in-out 250ms 0s;
-    `
-  }}
-`
-
-const ActionButton = styled.button`
-  ${({ theme }) => {
-    return css`
-      &:hover {
-        background-color: ${theme.color.purple2};
-      }
-    `
-  }}
-`
-
-const RowActionsButton = React.memo(({ row }: { row: unknown }) => {
-  const [showRowActions, setShowRowActions] = React.useState(false)
-
-  const rowActionsElementRef = useRef<HTMLDivElement>(null)
-  const rowActionsButtonRef = useRef<HTMLButtonElement>(null)
-
-  const windowSize = useWindowSize(0)
-  const windowScroll = useWindowScroll(0)
-
-  const { shouldMount: shouldMountRowActions, stage: stageRowActions } =
-    useTransition(showRowActions, 250)
-
-  const rowActionsOpen = stageRowActions === 'enter'
-
-  const {
-    myRef: rowActionsRef,
-    atRef: rowActionsTriggerRef,
-    position: rowActionsPosition,
-  } = useFloatPosition({
-    my: 'top-right',
-    at: 'bottom-right',
-    myRef: rowActionsElementRef,
-    atRef: rowActionsButtonRef,
-    deps: [windowSize, windowScroll, shouldMountRowActions],
-  })
-
-  useClickOutside(() => {
-    if (showRowActions) setShowRowActions(false)
-  }, [rowActionsRef, rowActionsTriggerRef])
-
-  return (
-    <span onClick={(e) => e.stopPropagation()}>
-      <button
-        ref={rowActionsButtonRef}
-        tw="px-4 py-1.5"
-        className="bg-background"
-        onClick={() => {
-          setShowRowActions(!showRowActions)
-        }}
-      >
-        <Icon name="ellipsis" />
-      </button>
-      {/* <ButtonLink
-                          kind="functional"
-                          variant="secondary"
-                          href={`#`}
-                        >
-                          <Icon name="angle-right" size="lg" />
-                        </ButtonLink> */}
-      <Portal>
-        {showRowActions && (
-          <StyledPortal
-            $isOpen={rowActionsOpen}
-            $position={rowActionsPosition}
-            ref={rowActionsRef}
-          >
-            <div tw="flex flex-col items-start w-full">
-              <ActionButton tw="px-4 py-3 w-full text-left">
-                Configure
-              </ActionButton>
-              <ActionButton tw="px-4 py-3 w-full text-left">
-                Revoke
-              </ActionButton>
-            </div>
-          </StyledPortal>
-        )}
-      </Portal>
-    </span>
-  )
-})
-RowActionsButton.displayName = 'RowActionsButton'
+import { Permission } from '@/domain/permissions'
 
 export const PermissionsTabContent = React.memo(
   ({ data }: PermissionsTabContentProps) => {
+    const handleRowConfigure = (row: Permission) => {
+      console.log('Configure permission:', row)
+    }
+
+    const handleRowRevoke = (row: Permission) => {
+      console.log('Revoke permission:', row)
+    }
+
+    const handleRowClick = (row: Permission, index: number) => {
+      alert(`row click ${index}`)
+    }
+
+    const columns = getPermissionsTableColumns({
+      onRowConfigure: handleRowConfigure,
+      onRowRevoke: handleRowRevoke,
+    })
+
     return (
       <>
         {data.length > 0 ? (
@@ -132,137 +32,11 @@ export const PermissionsTabContent = React.memo(
               <EntityTable
                 borderType="none"
                 rowNoise
-                rowKey={({ address }) => address}
+                rowKey={({ address }: Permission) => address}
                 data={data}
-                columns={[
-                  {
-                    label: 'Address',
-                    sortable: true,
-                    render: ({ address }) => {
-                      return (
-                        <span onClick={(e) => e.stopPropagation()}>
-                          <CopyToClipboard
-                            text={ellipseAddress(address)}
-                            textToCopy={address}
-                          />
-                        </span>
-                      )
-                    },
-                  },
-                  {
-                    label: 'Alias',
-                    sortable: true,
-                    render: ({ alias }) => (
-                      <div className="tp-info fs-12">{alias || '-'}</div>
-                    ),
-                  },
-                  {
-                    label: 'Channels',
-                    render: ({ channels }) => {
-                      if (!channels?.length)
-                        return <div className="tp-info fs-12">All</div>
-
-                      return (
-                        <div
-                          tw="flex items-center min-w-4 min-h-4 w-fit py-1 px-1.5 rounded-md"
-                          className="bg-purple4 fs-10 tp-info"
-                        >
-                          {channels.length}
-                        </div>
-                      )
-                    },
-                  },
-                  {
-                    label: 'Permissions',
-                    sortable: true,
-                    render: ({ types, post_types, aggregate_keys }) => {
-                      if (!types?.length)
-                        return <div className="tp-info fs-12">All</div>
-
-                      const postTypesCount = post_types?.length || 0
-                      const aggregateKeysCount = aggregate_keys?.length || 0
-
-                      return (
-                        <div tw="flex items-center gap-x-0.5">
-                          {types.map((type, index) => {
-                            const isLast = index === types.length - 1
-                            let content
-
-                            if (
-                              type.toLowerCase() === 'post' &&
-                              postTypesCount
-                            ) {
-                              content = (
-                                <div
-                                  key={type}
-                                  className="tp-info fs-12"
-                                  tw="flex items-center gap-x-1"
-                                >
-                                  {type}
-                                  <div
-                                    tw="flex items-center min-w-4 min-h-4 w-fit py-1 px-1.5 rounded-md"
-                                    className="bg-purple4 fs-10 tp-info"
-                                  >
-                                    {postTypesCount}
-                                  </div>
-                                </div>
-                              )
-                            } else if (
-                              type.toLowerCase() === 'aggregate' &&
-                              aggregateKeysCount
-                            ) {
-                              content = (
-                                <div
-                                  key={type}
-                                  className="tp-info fs-12"
-                                  tw="flex items-center gap-x-1"
-                                >
-                                  {type}
-                                  <div
-                                    tw="flex items-center min-w-4 min-h-4 w-fit py-1 px-1.5 rounded-md"
-                                    className="bg-purple4 fs-10 tp-info"
-                                  >
-                                    {aggregateKeysCount}
-                                  </div>
-                                </div>
-                              )
-                            } else {
-                              content = (
-                                <div key={type} className="tp-info fs-12">
-                                  {type}
-                                </div>
-                              )
-                            }
-
-                            return (
-                              <React.Fragment key={type}>
-                                {content}
-                                {!isLast && (
-                                  <span className="tp-info fs-12" tw="mr-0.5">
-                                    ,
-                                  </span>
-                                )}
-                              </React.Fragment>
-                            )
-                          })}
-                        </div>
-                      )
-                    },
-                  },
-                  {
-                    label: '',
-                    width: '100%',
-                    align: 'right',
-                    render: (row) => <RowActionsButton row={row} />,
-                    cellProps: () => ({
-                      css: tw`pl-3!`,
-                    }),
-                  },
-                ]}
-                rowProps={(row, i) => ({
-                  onClick: () => {
-                    alert(`row click ${i}`)
-                  },
+                columns={columns}
+                rowProps={(row: Permission, i: number) => ({
+                  onClick: () => handleRowClick(row, i),
                 })}
               />
             </div>
