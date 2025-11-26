@@ -12,7 +12,7 @@ import { AggregateManager } from './aggregateManager'
 import { MessageType } from '@aleph-sdk/message'
 
 // API types (from Aleph backend)
-export type PermissionsAggregateItem = {
+export type PermissionsAggregateItemApi = {
   address: string
   alias?: string
   channels?: string[]
@@ -23,63 +23,52 @@ export type PermissionsAggregateItem = {
   created_at?: string
 }
 
-export type AddPermissions = PermissionsAggregateItem & {
+export type AddPermissionsApi = PermissionsAggregateItemApi & {
   alias: string
   updated_at: string
   created_at: string
 }
 
-export type PermissionsConfig = {
-  authorizations: PermissionsAggregateItem[]
+export type PermissionsConfigApi = {
+  authorizations: PermissionsAggregateItemApi[]
 }
 
 // Domain types (used by the app)
-export type DomainBaseMessageTypePermissions = {
+export type BaseMessageTypePermissions = {
   type: Exclude<MessageType, MessageType.post | MessageType.aggregate>
   authorized: boolean
 }
 
-export type DomainPostPermissionsItem = {
+export type PostPermissions = {
   type: MessageType.post
   postTypes: string[] | []
   authorized: boolean
 }
 
-export type DomainAggregatePermissionsItem = {
+export type AggregatePermissions = {
   type: MessageType.aggregate
   aggregateKeys: string[] | []
   authorized: boolean
 }
 
-export type DomainMessageTypePermissionsItem =
-  | DomainPostPermissionsItem
-  | DomainAggregatePermissionsItem
-  | DomainBaseMessageTypePermissions
+export type MessageTypePermissions =
+  | PostPermissions
+  | AggregatePermissions
+  | BaseMessageTypePermissions
 
-export type DomainAccountPermissions = {
+export type AccountPermissions = {
   id: string // account address
   alias?: string
   channels: string[] | []
-  messageTypes: DomainMessageTypePermissionsItem[]
+  messageTypes: MessageTypePermissions[]
 }
 
-export type DomainPermissions = DomainAccountPermissions[]
-
-// Domain Permission type (used throughout the app)
-export type Permission = {
-  id: string
-  address: string
-  alias?: string
-  channels: string[] | null
-  messageTypes: DomainMessageTypePermissionsItem[]
-  updated_at?: string
-  created_at?: string
-}
+export type Permissions = AccountPermissions[]
 
 export class PermissionsManager extends AggregateManager<
-  Permission,
-  AddPermissions,
-  PermissionsAggregateItem
+  AccountPermissions,
+  AddPermissionsApi,
+  PermissionsAggregateItemApi
 > {
   protected addStepType: CheckoutStepType = 'permissions'
   protected delStepType: CheckoutStepType = 'permissionsDel'
@@ -93,29 +82,27 @@ export class PermissionsManager extends AggregateManager<
     super(account, sdkClient, key, channel)
   }
 
-  async getAll(): Promise<Permission[]> {
+  async getAll(): Promise<AccountPermissions[]> {
     if (!this.account) return []
 
     try {
-      const response: PermissionsConfig = await this.sdkClient.fetchAggregate(
-        this.account.address,
-        this.key,
-      )
+      const response: PermissionsConfigApi =
+        await this.sdkClient.fetchAggregate(this.account.address, this.key)
 
-      return this.parsePermissionsConfig(response)
+      return this.mapPermissionsConfigApiToAccountPermissions(response)
     } catch (err) {
       return []
     }
   }
 
   /**
-   * Helper method to parse API message types into domain format
+   * Maps API message types to domain format
    */
-  private parseMessageTypesToDomain(
+  private mapMessageTypesApiToMessageTypePermissions(
     types: MessageType[] | undefined,
     postTypes: string[] | undefined,
     aggregateKeys: string[] | undefined,
-  ): DomainMessageTypePermissionsItem[] {
+  ): MessageTypePermissions[] {
     const allMessageTypes = [
       MessageType.post,
       MessageType.aggregate,
@@ -125,7 +112,7 @@ export class PermissionsManager extends AggregateManager<
     ]
 
     const authorizedTypes = new Set(types || [])
-    const messageTypes: DomainMessageTypePermissionsItem[] = []
+    const messageTypes: MessageTypePermissions[] = []
 
     // Process each message type
     for (const type of allMessageTypes) {
@@ -134,58 +121,57 @@ export class PermissionsManager extends AggregateManager<
       if (type === MessageType.post) {
         messageTypes.push({
           type: MessageType.post,
-          postTypes:
-            authorized && postTypes && postTypes.length > 0 ? postTypes : null,
+          postTypes: authorized && postTypes?.length ? postTypes : [],
           authorized,
         })
       } else if (type === MessageType.aggregate) {
         messageTypes.push({
           type: MessageType.aggregate,
           aggregateKeys:
-            authorized && aggregateKeys && aggregateKeys.length > 0
-              ? aggregateKeys
-              : null,
+            authorized && aggregateKeys?.length ? aggregateKeys : [],
           authorized,
         })
       } else {
         messageTypes.push({
           type,
           authorized,
-        } as DomainBaseMessageTypePermissions)
+        } as BaseMessageTypePermissions)
       }
     }
 
     return messageTypes
   }
 
-  protected parsePermissionsConfig(config: PermissionsConfig): Permission[] {
+  protected mapPermissionsConfigApiToAccountPermissions(
+    config: PermissionsConfigApi,
+  ): AccountPermissions[] {
     if (!config.authorizations || !Array.isArray(config.authorizations)) {
       return []
     }
 
-    return config.authorizations.map((auth, index) => {
-      return {
-        id: auth.address || `permission-${index}`,
-        address: auth.address,
-        alias: auth.alias,
-        channels:
-          auth.channels && auth.channels.length > 0 ? auth.channels : null,
-        messageTypes: this.parseMessageTypesToDomain(
-          auth.types,
-          auth.post_types,
-          auth.aggregate_keys,
-        ),
-        updated_at: auth.updated_at,
-        created_at: auth.created_at,
-      }
-    })
+    return config.authorizations.map(
+      (auth: PermissionsAggregateItemApi, index: number) => {
+        return {
+          id: auth.address || `permission-${index}`,
+          alias: auth.alias,
+          channels: auth.channels?.length ? auth.channels : [],
+          messageTypes: this.mapMessageTypesApiToMessageTypePermissions(
+            auth.types,
+            auth.post_types,
+            auth.aggregate_keys,
+          ),
+        }
+      },
+    )
   }
 
-  getKeyFromAddEntity(entity: AddPermissions): string {
+  getKeyFromAddEntity(entity: AddPermissionsApi): string {
     return entity.address
   }
 
-  buildAggregateItemContent(entity: AddPermissions): PermissionsAggregateItem {
+  buildAggregateItemContent(
+    entity: AddPermissionsApi,
+  ): PermissionsAggregateItemApi {
     return {
       types: entity.types,
       address: entity.address,
@@ -197,22 +183,18 @@ export class PermissionsManager extends AggregateManager<
 
   parseEntityFromAggregateItem(
     _address: string,
-    content: PermissionsAggregateItem,
-  ): Partial<Permission> {
+    content: PermissionsAggregateItemApi,
+  ): Partial<AccountPermissions> {
     return {
-      address: content.address,
+      id: content.address,
       alias: content.alias,
       channels:
-        content.channels && content.channels.length > 0
-          ? content.channels
-          : null,
-      messageTypes: this.parseMessageTypesToDomain(
+        content.channels && content.channels.length > 0 ? content.channels : [],
+      messageTypes: this.mapMessageTypesApiToMessageTypePermissions(
         content.types,
         content.post_types,
         content.aggregate_keys,
       ),
-      updated_at: content.updated_at,
-      created_at: content.created_at,
     }
   }
 }
