@@ -3,7 +3,7 @@ import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 import { StyledCopytoClipboard, StyledIcon } from './styles'
 import { CopyToClipboardProps } from './types'
 
-export const CopytoClipboardIcon = ({
+export const CopytoClipboard = ({
   text,
   textToCopy,
   iconColor = 'purple3',
@@ -13,10 +13,10 @@ export const CopytoClipboardIcon = ({
   return (
     <StyledCopytoClipboard onClick={handleCopy}>
       {text}
-      <StyledIcon name="copy" $color={iconColor} />
+      <StyledIcon name="copy" $color={iconColor} size="0.8em" />
     </StyledCopytoClipboard>
   )
 }
-CopytoClipboardIcon.displayName = 'CopytoClipboardIcon'
+CopytoClipboard.displayName = 'CopytoClipboard'
 
-export default memo(CopytoClipboardIcon)
+export default memo(CopytoClipboard)
