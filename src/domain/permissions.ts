@@ -11,6 +11,7 @@ import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { AggregateManager } from './aggregateManager'
 import { MessageType } from '@aleph-sdk/message'
 
+// API types (from Aleph backend)
 export type PermissionsAggregateItem = {
   address: string
   alias?: string
@@ -32,8 +33,47 @@ export type PermissionsConfig = {
   authorizations: PermissionsAggregateItem[]
 }
 
-export type Permission = PermissionsAggregateItem & {
+// Domain types (used by the app)
+export type DomainBaseMessageTypePermissions = {
+  type: Exclude<MessageType, MessageType.post | MessageType.aggregate>
+  authorized: boolean
+}
+
+export type DomainPostPermissionsItem = {
+  type: MessageType.post
+  postTypes: string[] | []
+  authorized: boolean
+}
+
+export type DomainAggregatePermissionsItem = {
+  type: MessageType.aggregate
+  aggregateKeys: string[] | []
+  authorized: boolean
+}
+
+export type DomainMessageTypePermissionsItem =
+  | DomainPostPermissionsItem
+  | DomainAggregatePermissionsItem
+  | DomainBaseMessageTypePermissions
+
+export type DomainAccountPermissions = {
+  id: string // account address
+  alias?: string
+  channels: string[] | []
+  messageTypes: DomainMessageTypePermissionsItem[]
+}
+
+export type DomainPermissions = DomainAccountPermissions[]
+
+// Domain Permission type (used throughout the app)
+export type Permission = {
   id: string
+  address: string
+  alias?: string
+  channels: string[] | null
+  messageTypes: DomainMessageTypePermissionsItem[]
+  updated_at?: string
+  created_at?: string
 }
 
 export class PermissionsManager extends AggregateManager<
@@ -68,6 +108,56 @@ export class PermissionsManager extends AggregateManager<
     }
   }
 
+  /**
+   * Helper method to parse API message types into domain format
+   */
+  private parseMessageTypesToDomain(
+    types: MessageType[] | undefined,
+    postTypes: string[] | undefined,
+    aggregateKeys: string[] | undefined,
+  ): DomainMessageTypePermissionsItem[] {
+    const allMessageTypes = [
+      MessageType.post,
+      MessageType.aggregate,
+      MessageType.instance,
+      MessageType.program,
+      MessageType.store,
+    ]
+
+    const authorizedTypes = new Set(types || [])
+    const messageTypes: DomainMessageTypePermissionsItem[] = []
+
+    // Process each message type
+    for (const type of allMessageTypes) {
+      const authorized = authorizedTypes.has(type)
+
+      if (type === MessageType.post) {
+        messageTypes.push({
+          type: MessageType.post,
+          postTypes:
+            authorized && postTypes && postTypes.length > 0 ? postTypes : null,
+          authorized,
+        })
+      } else if (type === MessageType.aggregate) {
+        messageTypes.push({
+          type: MessageType.aggregate,
+          aggregateKeys:
+            authorized && aggregateKeys && aggregateKeys.length > 0
+              ? aggregateKeys
+              : null,
+          authorized,
+        })
+      } else {
+        messageTypes.push({
+          type,
+          authorized,
+        } as DomainBaseMessageTypePermissions)
+      }
+    }
+
+    return messageTypes
+  }
+
   protected parsePermissionsConfig(config: PermissionsConfig): Permission[] {
     if (!config.authorizations || !Array.isArray(config.authorizations)) {
       return []
@@ -77,10 +167,14 @@ export class PermissionsManager extends AggregateManager<
       return {
         id: auth.address || `permission-${index}`,
         address: auth.address,
-        types: auth.types || [],
-        channels: auth.channels || [],
-        post_types: auth.post_types || [],
-        aggregate_keys: auth.aggregate_keys || [],
+        alias: auth.alias,
+        channels:
+          auth.channels && auth.channels.length > 0 ? auth.channels : null,
+        messageTypes: this.parseMessageTypesToDomain(
+          auth.types,
+          auth.post_types,
+          auth.aggregate_keys,
+        ),
         updated_at: auth.updated_at,
         created_at: auth.created_at,
       }
@@ -107,10 +201,16 @@ export class PermissionsManager extends AggregateManager<
   ): Partial<Permission> {
     return {
       address: content.address,
-      types: content.types,
-      channels: content.channels,
-      post_types: content.post_types,
-      aggregate_keys: content.aggregate_keys,
+      alias: content.alias,
+      channels:
+        content.channels && content.channels.length > 0
+          ? content.channels
+          : null,
+      messageTypes: this.parseMessageTypesToDomain(
+        content.types,
+        content.post_types,
+        content.aggregate_keys,
+      ),
       updated_at: content.updated_at,
       created_at: content.created_at,
     }
