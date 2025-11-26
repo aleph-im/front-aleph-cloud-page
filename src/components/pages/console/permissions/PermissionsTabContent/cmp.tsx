@@ -3,7 +3,7 @@ import { PermissionsTabContentProps } from './types'
 import { getPermissionsTableColumns } from './columns'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
-import { Permission } from '@/domain/permissions'
+import { AccountPermissions } from '@/domain/permissions'
 import SidePanel from '@/components/common/SidePanel'
 import PermissionsDetail from '@/components/common/PermissionsDetail'
 
@@ -12,7 +12,7 @@ type SidePanelContent = {
   isOpen: boolean
   title: string
   type?: 'configure'
-  selectedRow?: Permission
+  selectedRow?: AccountPermissions
 }
 
 export const PermissionsTabContent = React.memo(
@@ -22,7 +22,7 @@ export const PermissionsTabContent = React.memo(
       title: '',
     })
 
-    const handleRowConfigure = (row: Permission) => {
+    const handleRowConfigure = (row: AccountPermissions) => {
       console.log('Configure permission:', row)
       setSidePanel({
         isOpen: true,
@@ -32,11 +32,11 @@ export const PermissionsTabContent = React.memo(
       })
     }
 
-    const handleRowRevoke = (row: Permission) => {
+    const handleRowRevoke = (row: AccountPermissions) => {
       console.log('Revoke permission:', row)
     }
 
-    const handleRowClick = (row: Permission, index: number) => {
+    const handleRowClick = (row: AccountPermissions, index: number) => {
       console.log(`row click ${index}`)
       setSidePanel({
         isOpen: true,
@@ -59,10 +59,10 @@ export const PermissionsTabContent = React.memo(
               <EntityTable
                 borderType="none"
                 rowNoise
-                rowKey={({ address }: Permission) => address}
+                rowKey={({ id }: AccountPermissions) => id}
                 data={data}
                 columns={columns}
-                rowProps={(row: Permission, i: number) => ({
+                rowProps={(row: AccountPermissions, i: number) => ({
                   onClick: () => handleRowClick(row, i),
                 })}
               />

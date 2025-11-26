@@ -1,5 +1,5 @@
-import { Permission } from '@/domain/permissions'
+import { AccountPermissions } from '@/domain/permissions'
 
 export type PermissionsDetailProps = {
-  permissions: Permission
+  permissions: AccountPermissions
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 import tw from 'twin.macro'
-import { Permission } from '@/domain/permissions'
+import { AccountPermissions } from '@/domain/permissions'
 import { ellipseText } from '@/helpers/utils'
 import CopyToClipboard from '@/components/common/CopyToClipboard'
 import CountBadge from '@/components/common/CountBadge'
@@ -15,13 +15,11 @@ export const getPermissionsTableColumns = ({
   {
     label: 'Address',
     sortable: true,
-    render: ({ address }: Permission) => (
+    render: ({ id }: AccountPermissions) => (
       <span onClick={(e) => e.stopPropagation()}>
         <CopyToClipboard
-          text={
-            <span className="tp-body1 fs-14">{ellipseText(address, 7, 8)}</span>
-          }
-          textToCopy={address}
+          text={<span className="tp-body1 fs-14">{ellipseText(id, 7, 8)}</span>}
+          textToCopy={id}
         />
       </span>
     ),
@@ -29,14 +27,14 @@ export const getPermissionsTableColumns = ({
   {
     label: 'Alias',
     sortable: true,
-    render: ({ alias }: Permission) => (
+    render: ({ alias }: AccountPermissions) => (
       <div className="tp-info fs-12">{alias || '-'}</div>
     ),
   },
   {
     label: 'Channels',
-    render: ({ channels }: Permission) => {
-      if (!channels?.length) {
+    render: ({ channels }: AccountPermissions) => {
+      if (!channels.length) {
         return <div className="tp-info fs-12">All</div>
       }
 
@@ -45,24 +43,15 @@ export const getPermissionsTableColumns = ({
   },
   {
     label: 'Permissions',
-    render: ({ types, post_types, aggregate_keys }: Permission) => {
-      const postTypesCount = post_types?.length || 10
-      const aggregateKeysCount = aggregate_keys?.length || 5
-
-      return (
-        <PermissionsList
-          types={types}
-          postTypesCount={postTypesCount}
-          aggregateKeysCount={aggregateKeysCount}
-        />
-      )
+    render: ({ messageTypes }: AccountPermissions) => {
+      return <PermissionsList messageTypes={messageTypes} />
     },
   },
   {
     label: '',
     width: '100%',
     align: 'right' as const,
-    render: (row: Permission) => (
+    render: (row: AccountPermissions) => (
       <PermissionsRowActions
         onConfigure={() => onRowConfigure(row)}
         onRevoke={() => onRowRevoke(row)}

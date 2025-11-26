@@ -1,7 +1,5 @@
-import { MessageType } from '@aleph-sdk/message'
+import { MessageTypePermissions } from '@/domain/permissions'
 
 export type PermissionsListProps = {
-  types?: MessageType[]
-  postTypesCount: number
-  aggregateKeysCount: number
+  messageTypes: MessageTypePermissions[]
 }

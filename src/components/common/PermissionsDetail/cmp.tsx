@@ -9,12 +9,13 @@ import {
   Tabs,
 } from '@aleph-front/core'
 import CopyToClipboard from '../CopyToClipboard'
+import { MessageType } from '@aleph-sdk/message'
 
 export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = React.useState<string>('credits')
 
   const authorizedChannels = useMemo(() => {
-    if (!permissions.channels?.length) return 'All'
+    if (!permissions.channels.length) return 'All'
 
     const maxchannelsToShow = 2
 
@@ -28,22 +29,29 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
   }, [permissions.channels])
 
   const messagesPermissionsData = useMemo(() => {
-    // This is a placeholder. Replace with actual permissions data structure.
-    return [
-      {
-        type: 'Type A',
-        isAllowed: true,
-        canFilter: true,
-        scope: ['Channel 1', 'Channel 2'],
-      },
-      {
-        type: 'Type B',
-        isAllowed: false,
-        canFilter: false,
-        scope: [],
-      },
-    ]
-  }, [])
+    return permissions.messageTypes.map((mt) => {
+      let scope: string | number = 'N/A'
+      const canFilter =
+        mt.type === MessageType.post || mt.type === MessageType.aggregate
+
+      if (mt.authorized && canFilter) {
+        if (mt.type === MessageType.post) {
+          scope = mt.postTypes.length || 'All'
+        } else if (mt.type === MessageType.aggregate) {
+          scope = mt.aggregateKeys.length || 'All'
+        } else {
+          scope = 'All'
+        }
+      }
+
+      return {
+        type: mt.type.toUpperCase(),
+        isAllowed: mt.authorized,
+        canFilter,
+        scope,
+      }
+    })
+  }, [permissions.messageTypes])
 
   return (
     <div tw="flex flex-col gap-y-12">
@@ -68,11 +76,9 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                 <div>
                   <CopyToClipboard
                     text={
-                      <span className="tp-body1 fs-12">
-                        {permissions.address}
-                      </span>
+                      <span className="tp-body1 fs-12">{permissions.id}</span>
                     }
-                    textToCopy={permissions.address}
+                    textToCopy={permissions.id}
                   />
                 </div>
               </div>
@@ -123,27 +129,45 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                   <Table
                     borderType="none"
                     rowNoise
-                    rowKey={({ type }: unknown) => type}
+                    rowKey={(row: {
+                      type: string
+                      isAllowed: boolean
+                      canFilter: boolean
+                      scope: string | number
+                    }) => row.type}
                     data={messagesPermissionsData}
                     columns={[
                       {
                         label: 'Message type',
-                        render: ({ type }: unknown) => type,
+                        render: (row: {
+                          type: string
+                          isAllowed: boolean
+                          canFilter: boolean
+                          scope: string | number
+                        }) => row.type,
                       },
                       {
                         label: 'Allowed',
-                        render: ({ isAllowed }: unknown) => (
-                          <Checkbox checked={isAllowed} readOnly />
-                        ),
+                        render: (row: {
+                          type: string
+                          isAllowed: boolean
+                          canFilter: boolean
+                          scope: string | number
+                        }) => <Checkbox checked={row.isAllowed} readOnly />,
                       },
                       {
                         label: 'Filters / scope',
-                        render: ({ isAllowed, canFilter, scope }: unknown) => {
-                          if (!canFilter) return 'N/A'
+                        render: (row: {
+                          type: string
+                          isAllowed: boolean
+                          canFilter: boolean
+                          scope: string | number
+                        }) => {
+                          if (!row.canFilter) return 'N/A'
 
-                          if (!isAllowed) return '...'
+                          if (!row.isAllowed) return '...'
 
-                          return scope?.length || 'All'
+                          return row.scope
                         },
                       },
                     ]}
