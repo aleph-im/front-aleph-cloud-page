@@ -5,8 +5,10 @@ import { usePermissionsDashboardPage } from './hook'
 import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import PermissionsTabContent from '../PermissionsTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
+import FloatingFooter from '@/components/form/FloatingFooter'
+import { PageProps } from '@/types/types'
 
-export default function PermissionsDashboardPage() {
+export default function PermissionsDashboardPage({ mainRef }: PageProps) {
   const { permissions } = usePermissionsDashboardPage()
 
   return (
@@ -47,6 +49,13 @@ export default function PermissionsDashboardPage() {
       <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
       </CenteredContainer>
+      <FloatingFooter
+        containerRef={mainRef}
+        // hide if no change on the account permissions
+        shouldHide={false}
+      >
+        <div tw="w-full h-24">Probando</div>
+      </FloatingFooter>
     </>
   )
 }
