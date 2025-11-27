@@ -28,7 +28,19 @@ export const StyledBackdrop = styled.div<StyledSidePanelProps>`
 
 export const StyledHeader = styled.div`
   ${({ theme }) => css`
-    ${tw`sticky top-0 pt-10 pb-4`}
+    ${tw`top-0 pt-10 pb-4`}
+
+    background: ${theme.color.background};
+  `}
+`
+
+export const StyledContent = styled.div`
+  ${tw`p-12 flex-1`}
+`
+
+export const StyledFooter = styled.div`
+  ${({ theme }) => css`
+    ${tw`sticky bottom-0 p-6`}
 
     background: ${theme.color.background};
   `}
@@ -39,6 +51,8 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     position: fixed;
     background-color: ${theme.color.background};
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 
     /* Desktop Styles */
     top: 1rem;

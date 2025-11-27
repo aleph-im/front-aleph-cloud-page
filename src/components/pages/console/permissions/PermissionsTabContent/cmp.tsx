@@ -6,6 +6,7 @@ import EntityTable from '@/components/common/EntityTable'
 import { AccountPermissions } from '@/domain/permissions'
 import SidePanel from '@/components/common/SidePanel'
 import PermissionsDetail from '@/components/common/PermissionsDetail'
+import { Button } from '@aleph-front/core'
 
 // Type for side panel content
 type SidePanelContent = {
@@ -88,10 +89,40 @@ export const PermissionsTabContent = React.memo(
             setSidePanel((prev) => ({ ...prev, isOpen: false }))
           }}
           title={sidePanel.title}
+          footer={
+            sidePanel.type === 'configure' &&
+            sidePanel.selectedRow && (
+              <div tw="flex justify-start gap-x-4">
+                <Button
+                  type="submit"
+                  color="main0"
+                  kind="functional"
+                  variant="warning"
+                  form="permissions-detail-form"
+                >
+                  Continue
+                </Button>
+                <button
+                  type="submit"
+                  color="main0"
+                  // kind="textOnly"
+                  // variant="warning"
+                  form="permissions-detail-form"
+                  className="tp-header fs-14"
+                  tw="not-italic font-bold"
+                >
+                  Cancel
+                </button>
+              </div>
+            )
+          }
         >
           {sidePanel.type === 'configure' ? (
             sidePanel.selectedRow && (
-              <PermissionsDetail permissions={sidePanel.selectedRow} />
+              <PermissionsDetail
+                permissions={sidePanel.selectedRow}
+                renderFooter={() => null}
+              />
             )
           ) : (
             <>ERROR</>

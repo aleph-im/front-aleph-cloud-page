@@ -8,7 +8,6 @@ export type UsePermissionsDashboardPageReturn = {
 export function usePermissionsDashboardPage(): UsePermissionsDashboardPageReturn {
   const { entities: permissions = [] } = useRequestPermissions()
 
-  console.log('permissions', permissions)
   return {
     permissions,
   }
