@@ -59,6 +59,7 @@ export const PermissionsTabContent = React.memo(
               <EntityTable
                 borderType="none"
                 rowNoise
+                clickableRows
                 rowKey={({ id }: AccountPermissions) => id}
                 data={data}
                 columns={columns}

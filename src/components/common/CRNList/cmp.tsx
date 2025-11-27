@@ -335,6 +335,7 @@ export default function CRNList(props: CRNListProps) {
             onSort: handleSortItems,
             rowProps: handleRowProps,
             loadingPlaceholder,
+            clickableRows: true,
           }}
         />
       </div>

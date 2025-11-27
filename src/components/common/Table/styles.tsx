@@ -1,9 +1,12 @@
 import tw from 'twin.macro'
 import styled, { css } from 'styled-components'
 import { Table, addClasses } from '@aleph-front/core'
+import { StyledTableProps } from './types'
 
-export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
-  ${({ theme }) => {
+export const StyledTable = styled(Table<any>).attrs(
+  addClasses('tp-body3'),
+)<StyledTableProps>`
+  ${({ theme, clickableRows = false }) => {
     const { duration, timing } = theme.transition
 
     return css`
@@ -42,7 +45,7 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
 
       tbody {
         tr {
-          cursor: pointer;
+          cursor: ${clickableRows ? 'pointer' : 'default'};
           background: ${({ theme }) => theme.color.purple1};
           height: 4rem;
 

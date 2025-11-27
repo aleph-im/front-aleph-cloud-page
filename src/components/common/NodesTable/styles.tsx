@@ -3,11 +3,13 @@ import { TableProps } from '@aleph-front/core'
 import styled from 'styled-components'
 import tw from 'twin.macro'
 import Table from '../Table'
+import { StyledTableProps as StyledTablePropsBase } from '../Table/types'
 
 export type StyledTableProps<T extends AlephNode> = Omit<
   TableProps<T>,
   'borderType' | 'rowNoise' | 'stickyHeader'
->
+> &
+  StyledTablePropsBase
 
 export const StyledTable = styled(Table as any).attrs(
   (props: StyledTableProps<any>) => {
@@ -24,7 +26,7 @@ export const StyledTable = styled(Table as any).attrs(
     ${tw`whitespace-nowrap`}
   }
 
-  /* 
+  /*
   tbody tr {
     cursor: default;
   } */

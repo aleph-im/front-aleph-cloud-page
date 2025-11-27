@@ -12,6 +12,7 @@ import {
 import CopyToClipboard from '../CopyToClipboard'
 import { MessageType } from '@aleph-sdk/message'
 import { RowActionsButton } from '@/components/pages/console/permissions/PermissionsRowActions/styles'
+import StyledTable from '../Table'
 
 export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = React.useState<string>('credits')
@@ -107,7 +108,7 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                   </Button>
                 </div>
                 <div>
-                  <Table
+                  <StyledTable
                     borderType="none"
                     rowNoise
                     rowKey={(row) => row.type}
@@ -133,7 +134,7 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                           if (row.type === MessageType.post) {
                             return (
                               <RowActionsButton
-                                disabled={!row.authorized}
+                                // disabled={!row.authorized}
                                 onClick={() => {
                                   // @todo: open Portal with list to filter
                                   return null
@@ -151,7 +152,7 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                           } else if (row.type === MessageType.aggregate) {
                             return (
                               <RowActionsButton
-                                disabled={!row.authorized}
+                                // disabled={!row.authorized}
                                 onClick={() => {
                                   // @todo: open Portal with list to filter
                                   return null
@@ -173,7 +174,7 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                       },
                     ]}
                     rowProps={() => ({
-                      className: 'tp-info fs-12',
+                      className: 'tp-info',
                     })}
                   />
                 </div>
