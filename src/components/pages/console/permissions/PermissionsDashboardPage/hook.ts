@@ -1,8 +1,8 @@
+import { AccountPermissions } from '@/domain/permissions'
 import { useRequestPermissions } from '@/hooks/common/useRequestEntity/useRequestPermissions'
-import { Permission } from '@/domain/permissions'
 
 export type UsePermissionsDashboardPageReturn = {
-  permissions: Permission[]
+  permissions: AccountPermissions[]
 }
 
 export function usePermissionsDashboardPage(): UsePermissionsDashboardPageReturn {

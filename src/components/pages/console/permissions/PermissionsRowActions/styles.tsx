@@ -24,7 +24,7 @@ export const StyledPortal = styled.div<StyledPortalProps>`
 `
 
 export const RowActionsButton = styled.button`
-  ${tw`px-4 py-1.5`};
+  ${tw`px-4 py-3 `};
 
   ${({ theme, disabled }) => css`
     background: ${theme.color.background};

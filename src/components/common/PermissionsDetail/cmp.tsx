@@ -112,6 +112,7 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                     borderType="none"
                     rowNoise
                     rowKey={(row) => row.type}
+                    rowBackgroundColors={['purple2', 'purple3']}
                     data={permissions.messageTypes}
                     columns={[
                       {

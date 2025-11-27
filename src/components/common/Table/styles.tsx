@@ -6,8 +6,13 @@ import { StyledTableProps } from './types'
 export const StyledTable = styled(Table<any>).attrs(
   addClasses('tp-body3'),
 )<StyledTableProps>`
-  ${({ theme, clickableRows = false }) => {
+  ${({
+    theme,
+    clickableRows = false,
+    rowBackgroundColors = ['light0', 'purple1'],
+  }) => {
     const { duration, timing } = theme.transition
+    const [color1, color2] = rowBackgroundColors
 
     return css`
       .check-button {
@@ -46,12 +51,12 @@ export const StyledTable = styled(Table<any>).attrs(
       tbody {
         tr {
           cursor: ${clickableRows ? 'pointer' : 'default'};
-          background: ${({ theme }) => theme.color.purple1};
+          background: ${theme.color[color2]};
           height: 4rem;
 
           td {
             transition: all ${timing} ${duration.fast}ms 0ms;
-            background: ${theme.color.light0};
+            background: ${theme.color[color1]};
 
             &.fx-noise-light {
               background: ${theme.color.light1};
@@ -94,6 +99,8 @@ export const StyledTable = styled(Table<any>).attrs(
       td,
       th {
         ${tw`py-1 px-6 w-0 whitespace-nowrap text-ellipsis`}
+
+        font-size: 0.75rem;
       }
     `
   }}
