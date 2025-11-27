@@ -22,6 +22,7 @@ export const PermissionsTabContent = React.memo(
       isOpen: false,
       title: '',
     })
+    const [isFormDirty, setIsFormDirty] = React.useState(false)
 
     const handleRowConfigure = (row: AccountPermissions) => {
       console.log('Configure permission:', row)
@@ -90,6 +91,7 @@ export const PermissionsTabContent = React.memo(
           }}
           title={sidePanel.title}
           footer={
+            isFormDirty &&
             sidePanel.type === 'configure' &&
             sidePanel.selectedRow && (
               <div tw="flex justify-start gap-x-4">
@@ -122,6 +124,7 @@ export const PermissionsTabContent = React.memo(
               <PermissionsDetail
                 permissions={sidePanel.selectedRow}
                 renderFooter={() => null}
+                onDirtyChange={setIsFormDirty}
               />
             )
           ) : (

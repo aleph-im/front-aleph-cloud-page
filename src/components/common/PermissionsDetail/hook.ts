@@ -19,6 +19,7 @@ export type UsePermissionsDetailFormReturn = {
   control: ReturnType<typeof useForm>['control']
   handleSubmit: ReturnType<typeof useForm>['handleSubmit']
   errors: ReturnType<typeof useForm>['formState']['errors']
+  isDirty: boolean
   channelsCtrl: ReturnType<typeof useController>
   messageTypesCtrl: ReturnType<typeof useController>
 }
@@ -45,7 +46,7 @@ export function usePermissionsDetailForm({
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm({
     defaultValues,
     onSubmit,
@@ -65,6 +66,7 @@ export function usePermissionsDetailForm({
     control,
     handleSubmit,
     errors,
+    isDirty,
     channelsCtrl,
     messageTypesCtrl,
   }

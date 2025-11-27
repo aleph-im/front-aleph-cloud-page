@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react'
+import React, { memo, useMemo, useEffect } from 'react'
 import { PermissionsDetailProps } from './types'
 import {
   Button,
@@ -18,12 +18,18 @@ import { usePermissionsDetailForm } from './hook'
 export const PermissionsDetail = ({
   permissions,
   renderFooter,
+  onDirtyChange,
 }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = React.useState<string>('credits')
 
-  const { handleSubmit, errors, messageTypesCtrl } = usePermissionsDetailForm({
-    permissions,
-  })
+  const { handleSubmit, errors, isDirty, messageTypesCtrl } =
+    usePermissionsDetailForm({
+      permissions,
+    })
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty)
+  }, [isDirty, onDirtyChange])
 
   const authorizedChannels = useMemo(() => {
     if (!permissions.channels.length) return 'All'

@@ -43,6 +43,19 @@ export const StyledFooter = styled.div`
     ${tw`sticky bottom-0 p-6`}
 
     background: ${theme.color.background};
+    animation: slideUp ${theme.transition.duration.normal}ms
+      ${theme.transition.timing} forwards;
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
   `}
 `
 
