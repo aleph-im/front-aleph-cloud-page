@@ -4,4 +4,5 @@ export type PermissionsDetailProps = {
   permissions: AccountPermissions
   renderFooter?: (handleSubmit: () => void) => React.ReactNode
   onDirtyChange?: (isDirty: boolean) => void
+  onSubmitSuccess?: (updatedPermission: AccountPermissions) => void
 }

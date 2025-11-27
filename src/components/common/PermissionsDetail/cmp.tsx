@@ -19,12 +19,14 @@ export const PermissionsDetail = ({
   permissions,
   renderFooter,
   onDirtyChange,
+  onSubmitSuccess,
 }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = React.useState<string>('credits')
 
   const { handleSubmit, errors, isDirty, messageTypesCtrl } =
     usePermissionsDetailForm({
       permissions,
+      onSubmitSuccess,
     })
 
   useEffect(() => {
@@ -123,6 +125,7 @@ export const PermissionsDetail = ({
                       <span className="tp-body2">{authorizedChannels}</span>
                     </div>
                     <Button
+                      type="button"
                       size="sm"
                       kind="functional"
                       variant="warning"
@@ -166,6 +169,7 @@ export const PermissionsDetail = ({
                             if (row.type === MessageType.post) {
                               return (
                                 <RowActionsButton
+                                  type="button"
                                   disabled={!row.authorized}
                                   onClick={() => {
                                     // @todo: open Portal with list to filter
@@ -184,6 +188,7 @@ export const PermissionsDetail = ({
                             } else if (row.type === MessageType.aggregate) {
                               return (
                                 <RowActionsButton
+                                  type="button"
                                   disabled={!row.authorized}
                                   onClick={() => {
                                     // @todo: open Portal with list to filter

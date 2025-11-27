@@ -13,6 +13,7 @@ export type PermissionsDetailFormState = {
 
 export type UsePermissionsDetailFormProps = {
   permissions: AccountPermissions
+  onSubmitSuccess?: (updatedPermission: AccountPermissions) => void
 }
 
 export type UsePermissionsDetailFormReturn = {
@@ -26,6 +27,7 @@ export type UsePermissionsDetailFormReturn = {
 
 export function usePermissionsDetailForm({
   permissions,
+  onSubmitSuccess,
 }: UsePermissionsDetailFormProps): UsePermissionsDetailFormReturn {
   const defaultValues: PermissionsDetailFormState = {
     channels: permissions.channels,
@@ -34,13 +36,17 @@ export function usePermissionsDetailForm({
 
   const onSubmit = useCallback(
     async (state: PermissionsDetailFormState) => {
-      console.log('Updated permissions:', {
+      const updatedPermission: AccountPermissions = {
         id: permissions.id,
         alias: permissions.alias,
         ...state,
-      })
+      }
+      console.log('Updated permissions:', updatedPermission)
+      onSubmitSuccess?.(updatedPermission)
+      // Return void to avoid triggering success notification
+      return
     },
-    [permissions.id, permissions.alias],
+    [permissions.id, permissions.alias, onSubmitSuccess],
   )
 
   const {
@@ -50,6 +56,8 @@ export function usePermissionsDetailForm({
   } = useForm({
     defaultValues,
     onSubmit,
+    // Don't pass onSuccess to avoid showing notification on form submit
+    // The notification will be shown later when saving all changes
   })
 
   const channelsCtrl = useController({

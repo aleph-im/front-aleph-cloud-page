@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import Head from 'next/head'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { usePermissionsDashboardPage } from './hook'
@@ -7,9 +7,31 @@ import PermissionsTabContent from '../PermissionsTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 import FloatingFooter from '@/components/form/FloatingFooter'
 import { PageProps } from '@/types/types'
+import { AccountPermissions } from '@/domain/permissions'
+import { Button } from '@aleph-front/core'
 
 export default function PermissionsDashboardPage({ mainRef }: PageProps) {
   const { permissions } = usePermissionsDashboardPage()
+  const [pendingChanges, setPendingChanges] = useState<
+    Map<string, AccountPermissions>
+  >(new Map())
+
+  const handlePermissionChange = useCallback(
+    (updatedPermission: AccountPermissions) => {
+      setPendingChanges((prev) => {
+        const newChanges = new Map(prev)
+        newChanges.set(updatedPermission.id, updatedPermission)
+        return newChanges
+      })
+    },
+    [],
+  )
+
+  const handleSaveAllChanges = useCallback(() => {
+    console.log('Saving all changes:', Array.from(pendingChanges.values()))
+    // @todo: implement actual save logic here
+    setPendingChanges(new Map())
+  }, [pendingChanges])
 
   return (
     <>
@@ -23,7 +45,10 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
       <div>
         {!!permissions?.length && (
           <CenteredContainer $variant="xl" tw="my-10">
-            <PermissionsTabContent data={permissions} />
+            <PermissionsTabContent
+              data={permissions}
+              onPermissionChange={handlePermissionChange}
+            />
           </CenteredContainer>
         )}
         <DashboardCardWithSideImage
@@ -51,10 +76,21 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
       </CenteredContainer>
       <FloatingFooter
         containerRef={mainRef}
-        // hide if no change on the account permissions
-        shouldHide={false}
+        shouldHide={pendingChanges.size === 0}
       >
-        <div tw="w-full h-24">Probando</div>
+        <div tw="flex justify-end items-center gap-x-4 w-full py-4 px-6">
+          <span className="tp-body1">
+            {pendingChanges.size} permission
+            {pendingChanges.size !== 1 ? 's' : ''} modified
+          </span>
+          <Button
+            color="main0"
+            variant="primary"
+            onClick={handleSaveAllChanges}
+          >
+            Save changes
+          </Button>
+        </div>
       </FloatingFooter>
     </>
   )

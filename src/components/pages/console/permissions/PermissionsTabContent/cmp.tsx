@@ -17,7 +17,7 @@ type SidePanelContent = {
 }
 
 export const PermissionsTabContent = React.memo(
-  ({ data }: PermissionsTabContentProps) => {
+  ({ data, onPermissionChange }: PermissionsTabContentProps) => {
     const [sidePanel, setSidePanel] = React.useState<SidePanelContent>({
       isOpen: false,
       title: '',
@@ -47,6 +47,14 @@ export const PermissionsTabContent = React.memo(
         selectedRow: row,
       })
     }
+
+    const handlePermissionSubmit = React.useCallback(
+      (updatedPermission: AccountPermissions) => {
+        onPermissionChange?.(updatedPermission)
+        setSidePanel((prev) => ({ ...prev, isOpen: false }))
+      },
+      [onPermissionChange],
+    )
 
     const columns = getPermissionsTableColumns({
       onRowConfigure: handleRowConfigure,
@@ -105,11 +113,10 @@ export const PermissionsTabContent = React.memo(
                   Continue
                 </Button>
                 <button
-                  type="submit"
-                  color="main0"
-                  // kind="textOnly"
-                  // variant="warning"
-                  form="permissions-detail-form"
+                  type="button"
+                  onClick={() => {
+                    setSidePanel((prev) => ({ ...prev, isOpen: false }))
+                  }}
                   className="tp-header fs-14"
                   tw="not-italic font-bold"
                 >
@@ -125,6 +132,7 @@ export const PermissionsTabContent = React.memo(
                 permissions={sidePanel.selectedRow}
                 renderFooter={() => null}
                 onDirtyChange={setIsFormDirty}
+                onSubmitSuccess={handlePermissionSubmit}
               />
             )
           ) : (
