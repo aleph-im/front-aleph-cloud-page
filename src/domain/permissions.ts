@@ -11,29 +11,31 @@ import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { AggregateManager } from './aggregateManager'
 import { MessageType } from '@aleph-sdk/message'
 
-// API types (from Aleph backend)
-export type PermissionsAggregateItemApi = {
+// ==================================
+// = API types (from Aleph backend) =
+// ==================================
+
+type PermissionsAggregateItemApi = {
   address: string
   alias?: string
   channels?: string[]
   types?: MessageType[]
   post_types?: string[]
   aggregate_keys?: string[]
-  updated_at?: string
-  created_at?: string
 }
 
-export type AddPermissionsApi = PermissionsAggregateItemApi & {
+type AddPermissionsApi = PermissionsAggregateItemApi & {
   alias: string
-  updated_at: string
-  created_at: string
 }
 
-export type PermissionsConfigApi = {
+type PermissionsConfigApi = {
   authorizations: PermissionsAggregateItemApi[]
 }
 
-// Domain types (used by the app)
+// ==================================
+// = Domain types (used by the app) =
+// ==================================
+
 export type BaseMessageTypePermissions = {
   type: Exclude<MessageType, MessageType.post | MessageType.aggregate>
   authorized: boolean
@@ -109,6 +111,8 @@ export class PermissionsManager extends AggregateManager<
       MessageType.instance,
       MessageType.program,
       MessageType.store,
+      // @todo: should we include the forget message type?
+      // MessageType.forget,
     ]
 
     const authorizedTypes = new Set(types || [])
@@ -148,7 +152,6 @@ export class PermissionsManager extends AggregateManager<
     if (!config.authorizations || !Array.isArray(config.authorizations)) {
       return []
     }
-
     return config.authorizations.map(
       (auth: PermissionsAggregateItemApi, index: number) => {
         return {

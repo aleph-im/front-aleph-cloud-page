@@ -49,7 +49,7 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     /* For sliding effect on desktop */
     transform: translateX(100%);
     transition: transform ${theme.transition.duration.normal}ms ease-in-out;
-    z-index: 50;
+    z-index: 29; /* above the backdrop */
 
     ${$isOpen
       ? css`

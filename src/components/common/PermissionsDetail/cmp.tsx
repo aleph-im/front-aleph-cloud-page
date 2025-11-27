@@ -3,6 +3,7 @@ import { PermissionsDetailProps } from './types'
 import {
   Button,
   Checkbox,
+  Icon,
   NoisyContainer,
   ObjectImg,
   Table,
@@ -10,6 +11,7 @@ import {
 } from '@aleph-front/core'
 import CopyToClipboard from '../CopyToClipboard'
 import { MessageType } from '@aleph-sdk/message'
+import { RowActionsButton } from '@/components/pages/console/permissions/PermissionsRowActions/styles'
 
 export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = React.useState<string>('credits')
@@ -27,31 +29,6 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
       ? `${channelsToShow}, ...`
       : channelsToShow
   }, [permissions.channels])
-
-  const messagesPermissionsData = useMemo(() => {
-    return permissions.messageTypes.map((mt) => {
-      let scope: string | number = 'N/A'
-      const canFilter =
-        mt.type === MessageType.post || mt.type === MessageType.aggregate
-
-      if (mt.authorized && canFilter) {
-        if (mt.type === MessageType.post) {
-          scope = mt.postTypes.length || 'All'
-        } else if (mt.type === MessageType.aggregate) {
-          scope = mt.aggregateKeys.length || 'All'
-        } else {
-          scope = 'All'
-        }
-      }
-
-      return {
-        type: mt.type.toUpperCase(),
-        isAllowed: mt.authorized,
-        canFilter,
-        scope,
-      }
-    })
-  }, [permissions.messageTypes])
 
   return (
     <div tw="flex flex-col gap-y-12">
@@ -104,8 +81,12 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
           />
           <div role="tabpanel" tw="mt-6 p-6" className="bg-background">
             {selectedTabId === 'credits' ? (
-              // this should be a checkbox in the real implementation
-              <div>Allow this account to spend credits on my behalf</div>
+              <Checkbox
+                checked={false}
+                readOnly
+                size="sm"
+                label="Allow this account to spend credits on my behalf"
+              />
             ) : selectedTabId === 'messages' ? (
               <div tw="flex flex-col gap-y-8">
                 <div tw="flex justify-between">
@@ -118,7 +99,7 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                     kind="functional"
                     variant="warning"
                     onClick={() =>
-                      // should open another side panel to filter channels
+                      // @todo: should open another side panel to filter channels
                       null
                     }
                   >
@@ -129,51 +110,70 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                   <Table
                     borderType="none"
                     rowNoise
-                    rowKey={(row: {
-                      type: string
-                      isAllowed: boolean
-                      canFilter: boolean
-                      scope: string | number
-                    }) => row.type}
-                    data={messagesPermissionsData}
+                    rowKey={(row) => row.type}
+                    data={permissions.messageTypes}
                     columns={[
                       {
                         label: 'Message type',
-                        render: (row: {
-                          type: string
-                          isAllowed: boolean
-                          canFilter: boolean
-                          scope: string | number
-                        }) => row.type,
+                        render: (row) => row.type,
                       },
                       {
                         label: 'Allowed',
-                        render: (row: {
-                          type: string
-                          isAllowed: boolean
-                          canFilter: boolean
-                          scope: string | number
-                        }) => <Checkbox checked={row.isAllowed} readOnly />,
+                        render: (row) => (
+                          <Checkbox
+                            checked={row.authorized}
+                            readOnly
+                            size="sm"
+                          />
+                        ),
                       },
                       {
                         label: 'Filters / scope',
-                        render: (row: {
-                          type: string
-                          isAllowed: boolean
-                          canFilter: boolean
-                          scope: string | number
-                        }) => {
-                          if (!row.canFilter) return 'N/A'
-
-                          if (!row.isAllowed) return '...'
-
-                          return row.scope
+                        render: (row) => {
+                          if (row.type === MessageType.post) {
+                            return (
+                              <RowActionsButton
+                                disabled={!row.authorized}
+                                onClick={() => {
+                                  // @todo: open Portal with list to filter
+                                  return null
+                                }}
+                              >
+                                {!row.authorized ? (
+                                  <Icon name="ellipsis" />
+                                ) : row.postTypes.length ? (
+                                  row.postTypes.length
+                                ) : (
+                                  'All'
+                                )}
+                              </RowActionsButton>
+                            )
+                          } else if (row.type === MessageType.aggregate) {
+                            return (
+                              <RowActionsButton
+                                disabled={!row.authorized}
+                                onClick={() => {
+                                  // @todo: open Portal with list to filter
+                                  return null
+                                }}
+                              >
+                                {!row.authorized ? (
+                                  <Icon name="ellipsis" />
+                                ) : row.aggregateKeys.length ? (
+                                  row.aggregateKeys.length
+                                ) : (
+                                  'All'
+                                )}
+                              </RowActionsButton>
+                            )
+                          } else {
+                            return <span tw="opacity-40 ml-2">N/A</span>
+                          }
                         },
                       },
                     ]}
                     rowProps={() => ({
                       className: 'tp-info fs-12',
-                      // onClick: () => handleRowClick(row, i),
                     })}
                   />
                 </div>

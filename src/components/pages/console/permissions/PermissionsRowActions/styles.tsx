@@ -26,7 +26,7 @@ export const StyledPortal = styled.div<StyledPortalProps>`
 export const RowActionsButton = styled.button`
   ${tw`px-4 py-1.5`};
 
-  ${({ theme }) => css`
+  ${({ theme, disabled }) => css`
     background: ${theme.color.background};
     transition: all 0.2s ease-in-out;
 
@@ -34,6 +34,8 @@ export const RowActionsButton = styled.button`
       box-shadow: 0px 4px 24px ${theme.color.main0}26;
       backdrop-filter: blur(50px);
     }
+
+    ${disabled && tw`opacity-40 cursor-not-allowed`}
   `})
 `
 
