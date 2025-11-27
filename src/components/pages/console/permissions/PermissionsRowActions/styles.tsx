@@ -10,7 +10,7 @@ export type StyledPortalProps = {
 export const StyledPortal = styled.div<StyledPortalProps>`
   ${({ theme, $position: { x, y }, $isOpen }) => {
     return css`
-      ${tw`fixed -top-1 left-1 z-20`}
+      ${tw`fixed -top-1.5 left-1.5 z-20`}
       min-width: 8rem;
       background: ${theme.color.background};
       box-shadow: 0px 4px 24px ${theme.color.main0}26;
@@ -24,7 +24,7 @@ export const StyledPortal = styled.div<StyledPortalProps>`
 `
 
 export const RowActionsButton = styled.button`
-  ${tw`px-4 py-3 `};
+  ${tw`w-12 h-10`};
 
   ${({ theme, disabled }) => css`
     background: ${theme.color.background};

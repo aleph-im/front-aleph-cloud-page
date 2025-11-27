@@ -6,7 +6,6 @@ import {
   Icon,
   NoisyContainer,
   ObjectImg,
-  Table,
   Tabs,
 } from '@aleph-front/core'
 import CopyToClipboard from '../CopyToClipboard'
@@ -113,11 +112,14 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                     rowNoise
                     rowKey={(row) => row.type}
                     rowBackgroundColors={['purple2', 'purple3']}
+                    hoverHighlight={false}
                     data={permissions.messageTypes}
                     columns={[
                       {
                         label: 'Message type',
-                        render: (row) => row.type,
+                        render: (row) => (
+                          <span className="fs-12">{row.type}</span>
+                        ),
                       },
                       {
                         label: 'Allowed',
@@ -135,7 +137,7 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                           if (row.type === MessageType.post) {
                             return (
                               <RowActionsButton
-                                // disabled={!row.authorized}
+                                disabled={!row.authorized}
                                 onClick={() => {
                                   // @todo: open Portal with list to filter
                                   return null
@@ -153,7 +155,7 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                           } else if (row.type === MessageType.aggregate) {
                             return (
                               <RowActionsButton
-                                // disabled={!row.authorized}
+                                disabled={!row.authorized}
                                 onClick={() => {
                                   // @todo: open Portal with list to filter
                                   return null
@@ -169,7 +171,11 @@ export const PermissionsDetail = ({ permissions }: PermissionsDetailProps) => {
                               </RowActionsButton>
                             )
                           } else {
-                            return <span tw="opacity-40 ml-2">N/A</span>
+                            return (
+                              <span tw="opacity-40 ml-3" className="fs-12">
+                                N/A
+                              </span>
+                            )
                           }
                         },
                       },

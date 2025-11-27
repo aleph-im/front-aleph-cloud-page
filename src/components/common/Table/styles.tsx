@@ -10,6 +10,7 @@ export const StyledTable = styled(Table<any>).attrs(
     theme,
     clickableRows = false,
     rowBackgroundColors = ['light0', 'purple1'],
+    hoverHighlight = true,
   }) => {
     const { duration, timing } = theme.transition
     const [color1, color2] = rowBackgroundColors
@@ -71,11 +72,14 @@ export const StyledTable = styled(Table<any>).attrs(
             }
           }
 
-          &:hover {
-            td {
-              background: ${theme.color.purple4}50;
+          ${hoverHighlight &&
+          css`
+            &:hover {
+              td {
+                background: ${theme.color.purple4}50;
+              }
             }
-          }
+          `}
 
           &._active {
             cursor: not-allowed;
@@ -99,8 +103,6 @@ export const StyledTable = styled(Table<any>).attrs(
       td,
       th {
         ${tw`py-1 px-6 w-0 whitespace-nowrap text-ellipsis`}
-
-        font-size: 0.75rem;
       }
     `
   }}

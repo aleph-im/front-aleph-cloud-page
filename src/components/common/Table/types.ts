@@ -28,4 +28,5 @@ type ThemeColorKey =
 export type StyledTableProps = {
   clickableRows?: boolean
   rowBackgroundColors?: [ThemeColorKey, ThemeColorKey]
+  hoverHighlight?: boolean
 }
