@@ -27,7 +27,6 @@ import { Portal } from '../Portal'
 type FilterScopeButtonProps = {
   authorized: boolean
   count: number
-  onClick?: () => void
 }
 
 const FilterScopeButton = ({ authorized, count }: FilterScopeButtonProps) => {

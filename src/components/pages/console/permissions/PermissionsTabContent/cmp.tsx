@@ -33,8 +33,7 @@ export const PermissionsTabContent = React.memo(
     const modalOpen = modal?.open
     const modalClose = modal?.close
 
-    const handleRowConfigure = (row: AccountPermissions) => {
-      console.log('Configure permission:', row)
+    const openPanel = React.useCallback((row: AccountPermissions) => {
       if (shouldResetRef.current) {
         setFormResetKey((prev) => prev + 1)
         shouldResetRef.current = false
@@ -45,6 +44,11 @@ export const PermissionsTabContent = React.memo(
         type: 'configure',
         selectedRow: row,
       })
+    }, [])
+
+    const handleRowConfigure = (row: AccountPermissions) => {
+      console.log('Configure permission:', row)
+      openPanel(row)
     }
 
     const handleRowRevoke = (row: AccountPermissions) => {
@@ -53,16 +57,7 @@ export const PermissionsTabContent = React.memo(
 
     const handleRowClick = (row: AccountPermissions, index: number) => {
       console.log(`row click ${index}`)
-      if (shouldResetRef.current) {
-        setFormResetKey((prev) => prev + 1)
-        shouldResetRef.current = false
-      }
-      setSidePanel({
-        isOpen: true,
-        title: 'Permissions',
-        type: 'configure',
-        selectedRow: row,
-      })
+      openPanel(row)
     }
 
     const handlePermissionSubmit = React.useCallback(
@@ -100,13 +95,6 @@ export const PermissionsTabContent = React.memo(
       onRowConfigure: handleRowConfigure,
       onRowRevoke: handleRowRevoke,
     })
-
-    React.useEffect(() => {
-      if (sidePanel.isOpen && shouldResetRef.current) {
-        setFormResetKey((prev) => prev + 1)
-        shouldResetRef.current = false
-      }
-    }, [sidePanel.isOpen])
 
     React.useEffect(
       () => {
