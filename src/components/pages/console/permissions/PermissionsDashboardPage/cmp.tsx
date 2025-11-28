@@ -28,7 +28,7 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
   )
 
   const handleSaveAllChanges = useCallback(() => {
-    console.log('Saving all changes:', Array.from(pendingChanges.values()))
+    console.log('Saving all changes:', pendingChanges)
     // @todo: implement actual save logic here
     setPendingChanges(new Map())
   }, [pendingChanges])

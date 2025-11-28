@@ -42,9 +42,8 @@ export function usePermissionsDetailForm({
         ...state,
       }
       console.log('Updated permissions:', updatedPermission)
+
       onSubmitSuccess?.(updatedPermission)
-      // Return void to avoid triggering success notification
-      return
     },
     [permissions.id, permissions.alias, onSubmitSuccess],
   )
@@ -56,8 +55,7 @@ export function usePermissionsDetailForm({
   } = useForm({
     defaultValues,
     onSubmit,
-    // Don't pass onSuccess to avoid showing notification on form submit
-    // The notification will be shown later when saving all changes
+    onSuccess: () => Promise.resolve(),
   })
 
   const channelsCtrl = useController({

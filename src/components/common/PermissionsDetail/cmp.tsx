@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useEffect } from 'react'
+import React, { memo, useMemo, useEffect, useState } from 'react'
 import { PermissionsDetailProps } from './types'
 import {
   Button,
@@ -21,7 +21,7 @@ export const PermissionsDetail = ({
   onDirtyChange,
   onSubmitSuccess,
 }: PermissionsDetailProps) => {
-  const [selectedTabId, setSelectedTabId] = React.useState<string>('credits')
+  const [selectedTabId, setSelectedTabId] = useState<string>('messages')
 
   const { handleSubmit, errors, isDirty, messageTypesCtrl } =
     usePermissionsDetailForm({
@@ -101,23 +101,13 @@ export const PermissionsDetail = ({
           <div className="tp-info fs-14">Permissions details</div>
           <NoisyContainer>
             <Tabs
-              tabs={[
-                { id: 'credits', name: 'Credits' },
-                { id: 'messages', name: 'Messages' },
-              ]}
+              tabs={[{ id: 'messages', name: 'Messages' }]}
               selected={selectedTabId}
               onTabChange={(id) => setSelectedTabId(id)}
               align="left"
             />
             <div role="tabpanel" tw="mt-6 p-6" className="bg-background">
-              {selectedTabId === 'credits' ? (
-                <Checkbox
-                  checked={false}
-                  readOnly
-                  size="sm"
-                  label="Allow this account to spend credits on my behalf"
-                />
-              ) : selectedTabId === 'messages' ? (
+              {selectedTabId === 'messages' ? (
                 <div tw="flex flex-col gap-y-8">
                   <div tw="flex justify-between">
                     <div className="tp-body1">
