@@ -6,7 +6,7 @@ import EntityTable from '@/components/common/EntityTable'
 import { AccountPermissions } from '@/domain/permissions'
 import SidePanel from '@/components/common/SidePanel'
 import PermissionsDetail from '@/components/common/PermissionsDetail'
-import { Button } from '@aleph-front/core'
+import { Button, TextGradient, useModal } from '@aleph-front/core'
 
 // Type for side panel content
 type SidePanelContent = {
@@ -24,6 +24,13 @@ export const PermissionsTabContent = React.memo(
     })
     const [isFormDirty, setIsFormDirty] = React.useState(false)
     const [isChannelsPanelOpen, setIsChannelsPanelOpen] = React.useState(false)
+    const [showUnsavedChangesModal, setShowUnsavedChangesModal] =
+      React.useState(false)
+    const [formResetKey, setFormResetKey] = React.useState(0)
+
+    const modal = useModal()
+    const modalOpen = modal?.open
+    const modalClose = modal?.close
 
     const handleRowConfigure = (row: AccountPermissions) => {
       console.log('Configure permission:', row)
@@ -53,14 +60,96 @@ export const PermissionsTabContent = React.memo(
       (updatedPermission: AccountPermissions) => {
         onPermissionChange?.(updatedPermission)
         setSidePanel((prev) => ({ ...prev, isOpen: false }))
+        setIsFormDirty(false)
       },
       [onPermissionChange],
     )
+
+    const handleClosePanel = React.useCallback(() => {
+      if (isFormDirty) {
+        setSidePanel((prev) => ({ ...prev, isOpen: false }))
+        setShowUnsavedChangesModal(true)
+      }
+    }, [isFormDirty])
+
+    const handleDiscardChanges = React.useCallback(() => {
+      setShowUnsavedChangesModal(false)
+      setIsFormDirty(false)
+      modalClose?.()
+    }, [modalClose])
+
+    const handleCancelDiscard = React.useCallback(() => {
+      setShowUnsavedChangesModal(false)
+      setSidePanel((prev) => ({ ...prev, isOpen: true }))
+      setFormResetKey((prev) => prev + 1)
+      modalClose?.()
+    }, [modalClose])
 
     const columns = getPermissionsTableColumns({
       onRowConfigure: handleRowConfigure,
       onRowRevoke: handleRowRevoke,
     })
+
+    React.useEffect(
+      () => {
+        if (!modalOpen) return
+        if (!modalClose) return
+
+        if (showUnsavedChangesModal) {
+          return modalOpen({
+            header: <TextGradient type="h6">Unsaved Changes</TextGradient>,
+            width: '34rem',
+            onClose: () => modalClose?.(),
+            content: (
+              <div tw="mb-8">
+                <p className="tp-body">
+                  You&apos;ve made updates to your permission settings.
+                </p>
+                <p className="tp-body">
+                  If you leave now, these changes won&apos;t be saved.
+                </p>
+              </div>
+            ),
+            footer: (
+              <div tw="w-full flex justify-between">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  onClick={handleCancelDiscard}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={handleDiscardChanges}
+                >
+                  Discard Changes
+                </Button>
+              </div>
+            ),
+          })
+        } else {
+          return modalClose()
+        }
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [
+        showUnsavedChangesModal,
+        handleDiscardChanges,
+        handleCancelDiscard,
+        /*
+        Both modalOpen and modalClose are not included in the dependencies because there's
+        an infinite refresh loop when they are included. This is because the modalOpen
+        and modalClose functions are being redefined on every render, causing the
+        useEffect to run again and again.
+         */
+        // modalOpen,
+        // modalClose,
+      ],
+    )
 
     return (
       <>
@@ -95,9 +184,7 @@ export const PermissionsTabContent = React.memo(
         )}
         <SidePanel
           isOpen={sidePanel.isOpen}
-          onClose={() => {
-            setSidePanel((prev) => ({ ...prev, isOpen: false }))
-          }}
+          onClose={handleClosePanel}
           title={sidePanel.title}
           width="60vw"
           mobileHeight="80vh"
@@ -117,9 +204,7 @@ export const PermissionsTabContent = React.memo(
                 </Button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setSidePanel((prev) => ({ ...prev, isOpen: false }))
-                  }}
+                  onClick={handleClosePanel}
                   className="tp-header fs-14"
                   tw="not-italic font-bold"
                 >
@@ -132,6 +217,7 @@ export const PermissionsTabContent = React.memo(
           {sidePanel.type === 'configure' ? (
             sidePanel.selectedRow && (
               <PermissionsDetail
+                key={`${sidePanel.selectedRow.id}-${formResetKey}`}
                 permissions={sidePanel.selectedRow}
                 onDirtyChange={setIsFormDirty}
                 onSubmitSuccess={handlePermissionSubmit}
