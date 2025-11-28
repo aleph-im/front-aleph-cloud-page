@@ -27,6 +27,7 @@ export const PermissionsTabContent = React.memo(
     const [showUnsavedChangesModal, setShowUnsavedChangesModal] =
       React.useState(false)
     const [formResetKey, setFormResetKey] = React.useState(0)
+    const shouldResetRef = React.useRef(false)
 
     const modal = useModal()
     const modalOpen = modal?.open
@@ -34,6 +35,10 @@ export const PermissionsTabContent = React.memo(
 
     const handleRowConfigure = (row: AccountPermissions) => {
       console.log('Configure permission:', row)
+      if (shouldResetRef.current) {
+        setFormResetKey((prev) => prev + 1)
+        shouldResetRef.current = false
+      }
       setSidePanel({
         isOpen: true,
         title: 'Permissions',
@@ -48,6 +53,10 @@ export const PermissionsTabContent = React.memo(
 
     const handleRowClick = (row: AccountPermissions, index: number) => {
       console.log(`row click ${index}`)
+      if (shouldResetRef.current) {
+        setFormResetKey((prev) => prev + 1)
+        shouldResetRef.current = false
+      }
       setSidePanel({
         isOpen: true,
         title: 'Permissions',
@@ -66,8 +75,9 @@ export const PermissionsTabContent = React.memo(
     )
 
     const handleClosePanel = React.useCallback(() => {
+      setSidePanel((prev) => ({ ...prev, isOpen: false }))
+
       if (isFormDirty) {
-        setSidePanel((prev) => ({ ...prev, isOpen: false }))
         setShowUnsavedChangesModal(true)
       }
     }, [isFormDirty])
@@ -75,13 +85,14 @@ export const PermissionsTabContent = React.memo(
     const handleDiscardChanges = React.useCallback(() => {
       setShowUnsavedChangesModal(false)
       setIsFormDirty(false)
+      shouldResetRef.current = true
       modalClose?.()
     }, [modalClose])
 
     const handleCancelDiscard = React.useCallback(() => {
       setShowUnsavedChangesModal(false)
+      shouldResetRef.current = false
       setSidePanel((prev) => ({ ...prev, isOpen: true }))
-      setFormResetKey((prev) => prev + 1)
       modalClose?.()
     }, [modalClose])
 
@@ -89,6 +100,13 @@ export const PermissionsTabContent = React.memo(
       onRowConfigure: handleRowConfigure,
       onRowRevoke: handleRowRevoke,
     })
+
+    React.useEffect(() => {
+      if (sidePanel.isOpen && shouldResetRef.current) {
+        setFormResetKey((prev) => prev + 1)
+        shouldResetRef.current = false
+      }
+    }, [sidePanel.isOpen])
 
     React.useEffect(
       () => {
@@ -99,7 +117,8 @@ export const PermissionsTabContent = React.memo(
           return modalOpen({
             header: <TextGradient type="h6">Unsaved Changes</TextGradient>,
             width: '34rem',
-            onClose: () => modalClose?.(),
+            closeOnClickOutside: false,
+            closeOnCloseButton: false,
             content: (
               <div tw="mb-8">
                 <p className="tp-body">
