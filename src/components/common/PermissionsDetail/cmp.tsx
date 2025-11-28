@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useEffect, useState, useRef } from 'react'
+import React, { memo, useMemo, useState, useRef } from 'react'
 import { PermissionsDetailProps } from './types'
 import {
   Button,
@@ -85,21 +85,15 @@ const FilterScopeButton = ({ authorized, count }: FilterScopeButtonProps) => {
 
 export const PermissionsDetail = ({
   permissions,
-  onDirtyChange,
-  onSubmitSuccess,
+  onUpdate,
   onOpenChannelsPanel,
 }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string>('messages')
 
-  const { handleSubmit, errors, isDirty, messageTypesCtrl } =
-    usePermissionsDetailForm({
-      permissions,
-      onSubmitSuccess,
-    })
-
-  useEffect(() => {
-    onDirtyChange?.(isDirty)
-  }, [isDirty, onDirtyChange])
+  const { handleSubmit, errors, messageTypesCtrl } = usePermissionsDetailForm({
+    permissions,
+    onSubmitSuccess: onUpdate,
+  })
 
   const authorizedChannels = useMemo(() => {
     if (!permissions.channels.length) return 'All'

@@ -22,49 +22,66 @@ export const PermissionsTabContent = React.memo(
       isOpen: false,
       title: '',
     })
-    const [isFormDirty, setIsFormDirty] = React.useState(false)
+    const [originalPermissions, setOriginalPermissions] =
+      React.useState<AccountPermissions[]>(data)
+    const [updatedPermissions, setUpdatedPermissions] = React.useState<
+      AccountPermissions[]
+    >(structuredClone(data))
     const [isChannelsPanelOpen, setIsChannelsPanelOpen] = React.useState(false)
     const [showUnsavedChangesModal, setShowUnsavedChangesModal] =
       React.useState(false)
-    const [formResetKey, setFormResetKey] = React.useState(0)
-    const shouldResetRef = React.useRef(false)
 
     const modal = useModal()
     const modalOpen = modal?.open
     const modalClose = modal?.close
 
-    const openPanel = React.useCallback((row: AccountPermissions) => {
-      if (shouldResetRef.current) {
-        setFormResetKey((prev) => prev + 1)
-        shouldResetRef.current = false
-      }
+    // Sync with data prop changes
+    React.useEffect(() => {
+      setOriginalPermissions(data)
+      setUpdatedPermissions(structuredClone(data))
+    }, [data])
+
+    const handleRowConfigure = (row: AccountPermissions) => {
+      console.log('Configure permission:', row)
+      // Find corresponding permission from updatedPermissions
+      const permission = updatedPermissions.find((p) => p.id === row.id) || row
       setSidePanel({
         isOpen: true,
         title: 'Permissions',
         type: 'configure',
-        selectedRow: row,
+        selectedRow: permission,
       })
-    }, [])
-
-    const handleRowConfigure = (row: AccountPermissions) => {
-      console.log('Configure permission:', row)
-      openPanel(row)
     }
 
     const handleRowRevoke = (row: AccountPermissions) => {
       console.log('Revoke permission:', row)
+      // @todo: strike text elements in the row to indicate revocation, disable
+      // "configure" action, and switch "revoke" to "restore" action.
+      // Also add opacity to the row.
     }
 
     const handleRowClick = (row: AccountPermissions, index: number) => {
       console.log(`row click ${index}`)
-      openPanel(row)
+      handleRowConfigure(row)
     }
 
-    const handlePermissionSubmit = React.useCallback(
+    const handlePermissionUpdate = React.useCallback(
       (updatedPermission: AccountPermissions) => {
+        // Update the specific permission in updatedPermissions
+        setUpdatedPermissions((prev) =>
+          prev.map((p) =>
+            p.id === updatedPermission.id ? updatedPermission : p,
+          ),
+        )
+        // Call the parent's onPermissionChange immediately
         onPermissionChange?.(updatedPermission)
+        // Sync original with updated after successful update
+        setOriginalPermissions((prev) =>
+          prev.map((p) =>
+            p.id === updatedPermission.id ? updatedPermission : p,
+          ),
+        )
         setSidePanel((prev) => ({ ...prev, isOpen: false }))
-        setIsFormDirty(false)
       },
       [onPermissionChange],
     )
@@ -72,21 +89,25 @@ export const PermissionsTabContent = React.memo(
     const handleClosePanel = React.useCallback(() => {
       setSidePanel((prev) => ({ ...prev, isOpen: false }))
 
-      if (isFormDirty) {
+      // Compare original vs updated to check for unsaved changes
+      const hasUnsavedChanges =
+        JSON.stringify(originalPermissions) !==
+        JSON.stringify(updatedPermissions)
+
+      if (hasUnsavedChanges) {
         setShowUnsavedChangesModal(true)
       }
-    }, [isFormDirty])
+    }, [originalPermissions, updatedPermissions])
 
     const handleDiscardChanges = React.useCallback(() => {
       setShowUnsavedChangesModal(false)
-      setIsFormDirty(false)
-      shouldResetRef.current = true
+      // Reset updated to match original
+      setUpdatedPermissions(structuredClone(originalPermissions))
       modalClose?.()
-    }, [modalClose])
+    }, [originalPermissions, modalClose])
 
     const handleCancelDiscard = React.useCallback(() => {
       setShowUnsavedChangesModal(false)
-      shouldResetRef.current = false
       setSidePanel((prev) => ({ ...prev, isOpen: true }))
       modalClose?.()
     }, [modalClose])
@@ -168,7 +189,7 @@ export const PermissionsTabContent = React.memo(
                 rowNoise
                 clickableRows
                 rowKey={({ id }: AccountPermissions) => id}
-                data={data}
+                data={updatedPermissions}
                 columns={columns}
                 rowProps={(row: AccountPermissions, i: number) => ({
                   onClick: () => handleRowClick(row, i),
@@ -196,7 +217,6 @@ export const PermissionsTabContent = React.memo(
           width="60vw"
           mobileHeight="80vh"
           footer={
-            isFormDirty &&
             sidePanel.type === 'configure' &&
             sidePanel.selectedRow && (
               <div tw="flex justify-start gap-x-4">
@@ -224,10 +244,8 @@ export const PermissionsTabContent = React.memo(
           {sidePanel.type === 'configure' ? (
             sidePanel.selectedRow && (
               <PermissionsDetail
-                key={`${sidePanel.selectedRow.id}-${formResetKey}`}
                 permissions={sidePanel.selectedRow}
-                onDirtyChange={setIsFormDirty}
-                onSubmitSuccess={handlePermissionSubmit}
+                onUpdate={handlePermissionUpdate}
                 onOpenChannelsPanel={() => setIsChannelsPanelOpen(true)}
               />
             )
