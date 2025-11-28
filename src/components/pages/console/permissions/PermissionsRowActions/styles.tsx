@@ -10,7 +10,7 @@ export type StyledPortalProps = {
 export const StyledPortal = styled.div<StyledPortalProps>`
   ${({ theme, $position: { x, y }, $isOpen }) => {
     return css`
-      ${tw`fixed -top-1.5 left-1.5 z-20`}
+      ${tw`fixed -top-1.5 left-1.5 z-40`}
       min-width: 8rem;
       background: ${theme.color.background};
       box-shadow: 0px 4px 24px ${theme.color.main0}26;

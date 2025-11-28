@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useEffect, useState } from 'react'
+import React, { memo, useMemo, useEffect, useState, useRef } from 'react'
 import { PermissionsDetailProps } from './types'
 import {
   Button,
@@ -7,19 +7,88 @@ import {
   NoisyContainer,
   ObjectImg,
   Tabs,
+  useClickOutside,
+  useFloatPosition,
+  useTransition,
+  useWindowScroll,
+  useWindowSize,
 } from '@aleph-front/core'
 import CopyToClipboard from '../CopyToClipboard'
 import { MessageType } from '@aleph-sdk/message'
-import { RowActionsButton } from '@/components/pages/console/permissions/PermissionsRowActions/styles'
+import {
+  RowActionsButton,
+  StyledPortal,
+} from '@/components/pages/console/permissions/PermissionsRowActions/styles'
 import StyledTable from '../Table'
 import Form from '@/components/form/Form'
 import { usePermissionsDetailForm } from './hook'
+import { Portal } from '../Portal'
+
+type FilterScopeButtonProps = {
+  authorized: boolean
+  count: number
+  onClick?: () => void
+}
+
+const FilterScopeButton = ({ authorized, count }: FilterScopeButtonProps) => {
+  const [showPortal, setShowPortal] = useState(false)
+
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const portalRef = useRef<HTMLDivElement>(null)
+
+  const windowSize = useWindowSize(0)
+  const windowScroll = useWindowScroll(0)
+
+  const { shouldMount, stage } = useTransition(showPortal, 250)
+
+  const isOpen = stage === 'enter'
+
+  const {
+    myRef: floatRef,
+    atRef: triggerRef,
+    position: portalPosition,
+  } = useFloatPosition({
+    my: 'top-right',
+    at: 'bottom-right',
+    myRef: portalRef,
+    atRef: buttonRef,
+    deps: [windowSize, windowScroll, shouldMount],
+  })
+
+  useClickOutside(() => {
+    if (showPortal) setShowPortal(false)
+  }, [floatRef, triggerRef])
+
+  return (
+    <>
+      <RowActionsButton
+        type="button"
+        ref={buttonRef}
+        disabled={!authorized}
+        onClick={() => setShowPortal(!showPortal)}
+      >
+        {!authorized ? <Icon name="ellipsis" /> : count ? count : 'All'}
+      </RowActionsButton>
+      <Portal>
+        {shouldMount && (
+          <StyledPortal
+            $isOpen={isOpen}
+            $position={portalPosition}
+            ref={floatRef}
+          >
+            <div tw="p-4">TEST</div>
+          </StyledPortal>
+        )}
+      </Portal>
+    </>
+  )
+}
 
 export const PermissionsDetail = ({
   permissions,
-  renderFooter,
   onDirtyChange,
   onSubmitSuccess,
+  onOpenChannelsPanel,
 }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string>('messages')
 
@@ -119,10 +188,7 @@ export const PermissionsDetail = ({
                       size="sm"
                       kind="functional"
                       variant="warning"
-                      onClick={() =>
-                        // @todo: should open another side panel to filter channels
-                        null
-                      }
+                      onClick={onOpenChannelsPanel}
                     >
                       Filter channels
                     </Button>
@@ -158,41 +224,17 @@ export const PermissionsDetail = ({
                           render: (row) => {
                             if (row.type === MessageType.post) {
                               return (
-                                <RowActionsButton
-                                  type="button"
-                                  disabled={!row.authorized}
-                                  onClick={() => {
-                                    // @todo: open Portal with list to filter
-                                    return null
-                                  }}
-                                >
-                                  {!row.authorized ? (
-                                    <Icon name="ellipsis" />
-                                  ) : row.postTypes.length ? (
-                                    row.postTypes.length
-                                  ) : (
-                                    'All'
-                                  )}
-                                </RowActionsButton>
+                                <FilterScopeButton
+                                  authorized={row.authorized}
+                                  count={row.postTypes.length}
+                                />
                               )
                             } else if (row.type === MessageType.aggregate) {
                               return (
-                                <RowActionsButton
-                                  type="button"
-                                  disabled={!row.authorized}
-                                  onClick={() => {
-                                    // @todo: open Portal with list to filter
-                                    return null
-                                  }}
-                                >
-                                  {!row.authorized ? (
-                                    <Icon name="ellipsis" />
-                                  ) : row.aggregateKeys.length ? (
-                                    row.aggregateKeys.length
-                                  ) : (
-                                    'All'
-                                  )}
-                                </RowActionsButton>
+                                <FilterScopeButton
+                                  authorized={row.authorized}
+                                  count={row.aggregateKeys.length}
+                                />
                               )
                             } else {
                               return (
@@ -214,13 +256,6 @@ export const PermissionsDetail = ({
             </div>
           </NoisyContainer>
         </div>
-        {!renderFooter && (
-          <div tw="flex justify-end gap-x-4">
-            <Button type="submit" color="main0" variant="primary">
-              Save Changes
-            </Button>
-          </div>
-        )}
       </div>
     </Form>
   )

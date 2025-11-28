@@ -14,11 +14,19 @@ export const SidePanel = ({
   isOpen,
   onClose,
   footer,
+  order = 0,
+  width = '50vw',
+  mobileHeight = '80vh',
 }: SidePanelProps) => {
   return (
     <>
-      <StyledBackdrop $isOpen={isOpen} onClick={onClose} />
-      <StyledSidePanel $isOpen={isOpen}>
+      <StyledBackdrop $isOpen={isOpen} $order={order} onClick={onClose} />
+      <StyledSidePanel
+        $isOpen={isOpen}
+        $order={order}
+        $width={width}
+        $mobileHeight={mobileHeight}
+      >
         {/* Side Panel Header */}
         <StyledHeader>
           <div

@@ -3,7 +3,7 @@ import { StyledSidePanelProps } from './types'
 import tw from 'twin.macro'
 
 export const StyledBackdrop = styled.div<StyledSidePanelProps>`
-  ${({ theme, $isOpen }) => css`
+  ${({ theme, $isOpen, $order = 0 }) => css`
     position: fixed;
     top: 0;
     left: 0;
@@ -16,7 +16,7 @@ export const StyledBackdrop = styled.div<StyledSidePanelProps>`
       visibility ${theme.transition.duration.normal}ms ease-in-out;
     opacity: 0;
     visibility: hidden;
-    z-index: 28; /* just below the side panel */
+    z-index: ${28 + $order}; /* just below the side panel */
 
     ${$isOpen &&
     css`
@@ -60,7 +60,13 @@ export const StyledFooter = styled.div`
 `
 
 export const StyledSidePanel = styled.div<StyledSidePanelProps>`
-  ${({ theme, $isOpen }) => css`
+  ${({
+    theme,
+    $isOpen,
+    $order = 0,
+    $width = '50vw',
+    $mobileHeight = '80vh',
+  }) => css`
     position: fixed;
     background-color: ${theme.color.background};
     overflow-y: auto;
@@ -71,12 +77,12 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     top: 1rem;
     right: 1rem;
     bottom: 1rem;
-    width: 50vw;
+    width: ${$width};
 
     /* For sliding effect on desktop */
     transform: translateX(100%);
     transition: transform ${theme.transition.duration.normal}ms ease-in-out;
-    z-index: 29; /* above the backdrop */
+    z-index: ${29 + $order}; /* above the backdrop */
 
     ${$isOpen
       ? css`
@@ -92,7 +98,7 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
       bottom: 0;
       left: 0.5rem;
       right: 0.5 rem;
-      height: 80vh;
+      height: ${$mobileHeight};
       width: initial;
       border-radius: 1.5rem 1.5rem 0 0;
 

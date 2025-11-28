@@ -23,6 +23,7 @@ export const PermissionsTabContent = React.memo(
       title: '',
     })
     const [isFormDirty, setIsFormDirty] = React.useState(false)
+    const [isChannelsPanelOpen, setIsChannelsPanelOpen] = React.useState(false)
 
     const handleRowConfigure = (row: AccountPermissions) => {
       console.log('Configure permission:', row)
@@ -98,6 +99,8 @@ export const PermissionsTabContent = React.memo(
             setSidePanel((prev) => ({ ...prev, isOpen: false }))
           }}
           title={sidePanel.title}
+          width="60vw"
+          mobileHeight="80vh"
           footer={
             isFormDirty &&
             sidePanel.type === 'configure' &&
@@ -130,14 +133,24 @@ export const PermissionsTabContent = React.memo(
             sidePanel.selectedRow && (
               <PermissionsDetail
                 permissions={sidePanel.selectedRow}
-                renderFooter={() => null}
                 onDirtyChange={setIsFormDirty}
                 onSubmitSuccess={handlePermissionSubmit}
+                onOpenChannelsPanel={() => setIsChannelsPanelOpen(true)}
               />
             )
           ) : (
             <>ERROR</>
           )}
+        </SidePanel>
+        <SidePanel
+          isOpen={isChannelsPanelOpen}
+          onClose={() => setIsChannelsPanelOpen(false)}
+          title="Channels"
+          order={1}
+          width="50vw"
+          mobileHeight="70vh"
+        >
+          <div>test</div>
         </SidePanel>
       </>
     )
