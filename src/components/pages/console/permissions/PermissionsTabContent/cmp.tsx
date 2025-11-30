@@ -27,6 +27,7 @@ export const PermissionsTabContent = React.memo(
     const [updatedPermissions, setUpdatedPermissions] = React.useState<
       AccountPermissions[]
     >(structuredClone(data))
+    const [isCurrentFormDirty, setIsCurrentFormDirty] = React.useState(false)
     const [isChannelsPanelOpen, setIsChannelsPanelOpen] = React.useState(false)
     const [showUnsavedChangesModal, setShowUnsavedChangesModal] =
       React.useState(false)
@@ -82,29 +83,30 @@ export const PermissionsTabContent = React.memo(
           ),
         )
         setSidePanel((prev) => ({ ...prev, isOpen: false }))
+        setIsCurrentFormDirty(false)
       },
       [onPermissionChange],
     )
 
+    const handleCancelClick = React.useCallback(() => {
+      // Just close panel - form changes are discarded automatically
+      setSidePanel((prev) => ({ ...prev, isOpen: false }))
+      setIsCurrentFormDirty(false)
+    }, [])
+
     const handleClosePanel = React.useCallback(() => {
       setSidePanel((prev) => ({ ...prev, isOpen: false }))
 
-      // Compare original vs updated to check for unsaved changes
-      const hasUnsavedChanges =
-        JSON.stringify(originalPermissions) !==
-        JSON.stringify(updatedPermissions)
-
-      if (hasUnsavedChanges) {
+      if (isCurrentFormDirty) {
         setShowUnsavedChangesModal(true)
       }
-    }, [originalPermissions, updatedPermissions])
+    }, [isCurrentFormDirty])
 
     const handleDiscardChanges = React.useCallback(() => {
       setShowUnsavedChangesModal(false)
-      // Reset updated to match original
-      setUpdatedPermissions(structuredClone(originalPermissions))
+      setIsCurrentFormDirty(false)
       modalClose?.()
-    }, [originalPermissions, modalClose])
+    }, [modalClose])
 
     const handleCancelDiscard = React.useCallback(() => {
       setShowUnsavedChangesModal(false)
@@ -218,7 +220,8 @@ export const PermissionsTabContent = React.memo(
           mobileHeight="80vh"
           footer={
             sidePanel.type === 'configure' &&
-            sidePanel.selectedRow && (
+            sidePanel.selectedRow &&
+            isCurrentFormDirty && (
               <div tw="flex justify-start gap-x-4">
                 <Button
                   type="submit"
@@ -231,7 +234,7 @@ export const PermissionsTabContent = React.memo(
                 </Button>
                 <button
                   type="button"
-                  onClick={handleClosePanel}
+                  onClick={handleCancelClick}
                   className="tp-header fs-14"
                   tw="not-italic font-bold"
                 >
@@ -245,6 +248,7 @@ export const PermissionsTabContent = React.memo(
             sidePanel.selectedRow && (
               <PermissionsDetail
                 permissions={sidePanel.selectedRow}
+                onDirtyChange={setIsCurrentFormDirty}
                 onUpdate={handlePermissionUpdate}
                 onOpenChannelsPanel={() => setIsChannelsPanelOpen(true)}
               />
