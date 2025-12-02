@@ -2,7 +2,7 @@ import { AccountPermissions } from '@/domain/permissions'
 
 export type PermissionsDetailProps = {
   permissions: AccountPermissions
-  onDirtyChange?: (isDirty: boolean) => void
+  onSubmit?: (updatedPermission: AccountPermissions) => void
   onUpdate?: (updatedPermission: AccountPermissions) => void
   onOpenChannelsPanel?: () => void
   onCancel?: () => void

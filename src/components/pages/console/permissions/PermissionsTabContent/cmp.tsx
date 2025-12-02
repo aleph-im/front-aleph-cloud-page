@@ -22,12 +22,11 @@ export const PermissionsTabContent = React.memo(
       isOpen: false,
       title: '',
     })
-    const [originalPermissions, setOriginalPermissions] =
-      React.useState<AccountPermissions[]>(data)
     const [updatedPermissions, setUpdatedPermissions] = React.useState<
       AccountPermissions[]
     >(structuredClone(data))
-    const [isCurrentFormDirty, setIsCurrentFormDirty] = React.useState(false)
+    const [editingOriginalPermission, setEditingOriginalPermission] =
+      React.useState<AccountPermissions | null>(null)
     const [isChannelsPanelOpen, setIsChannelsPanelOpen] = React.useState(false)
     const [showUnsavedChangesModal, setShowUnsavedChangesModal] =
       React.useState(false)
@@ -38,7 +37,6 @@ export const PermissionsTabContent = React.memo(
 
     // Sync with data prop changes
     React.useEffect(() => {
-      setOriginalPermissions(data)
       setUpdatedPermissions(structuredClone(data))
     }, [data])
 
@@ -46,6 +44,8 @@ export const PermissionsTabContent = React.memo(
       console.log('Configure permission:', row)
       // Find corresponding permission from updatedPermissions
       const permission = updatedPermissions.find((p) => p.id === row.id) || row
+      // Store the original permission for comparison when closing
+      setEditingOriginalPermission(structuredClone(permission))
       setSidePanel({
         isOpen: true,
         title: 'Permissions',
@@ -66,7 +66,20 @@ export const PermissionsTabContent = React.memo(
       handleRowConfigure(row)
     }
 
+    // Real-time update handler - updates local state as form changes
     const handlePermissionUpdate = React.useCallback(
+      (updatedPermission: AccountPermissions) => {
+        setUpdatedPermissions((prev) =>
+          prev.map((p) =>
+            p.id === updatedPermission.id ? updatedPermission : p,
+          ),
+        )
+      },
+      [],
+    )
+
+    // Submit handler - called when user clicks "Continue"
+    const handlePermissionSubmit = React.useCallback(
       (updatedPermission: AccountPermissions) => {
         // Update the specific permission in updatedPermissions
         setUpdatedPermissions((prev) =>
@@ -76,37 +89,54 @@ export const PermissionsTabContent = React.memo(
         )
         // Call the parent's onPermissionChange immediately
         onPermissionChange?.(updatedPermission)
-        // Sync original with updated after successful update
-        setOriginalPermissions((prev) =>
-          prev.map((p) =>
-            p.id === updatedPermission.id ? updatedPermission : p,
-          ),
-        )
+        // Clear the editing original and close panel
+        setEditingOriginalPermission(null)
         setSidePanel((prev) => ({ ...prev, isOpen: false }))
-        setIsCurrentFormDirty(false)
       },
       [onPermissionChange],
     )
 
     const handleCancelClick = React.useCallback(() => {
       // Just close panel - form changes are discarded automatically
+      setEditingOriginalPermission(null)
       setSidePanel((prev) => ({ ...prev, isOpen: false }))
-      setIsCurrentFormDirty(false)
     }, [])
 
     const handleClosePanel = React.useCallback(() => {
       setSidePanel((prev) => ({ ...prev, isOpen: false }))
 
-      if (isCurrentFormDirty) {
-        setShowUnsavedChangesModal(true)
+      // Compare current permission with original to detect changes
+      if (editingOriginalPermission) {
+        const currentPermission = updatedPermissions.find(
+          (p) => p.id === editingOriginalPermission.id,
+        )
+        const hasChanges =
+          JSON.stringify(currentPermission) !==
+          JSON.stringify(editingOriginalPermission)
+
+        if (hasChanges) {
+          setShowUnsavedChangesModal(true)
+        } else {
+          setEditingOriginalPermission(null)
+        }
       }
-    }, [isCurrentFormDirty])
+    }, [editingOriginalPermission, updatedPermissions])
 
     const handleDiscardChanges = React.useCallback(() => {
+      // Revert the permission to its original state
+      if (editingOriginalPermission) {
+        setUpdatedPermissions((prev) =>
+          prev.map((p) =>
+            p.id === editingOriginalPermission.id
+              ? editingOriginalPermission
+              : p,
+          ),
+        )
+      }
+      setEditingOriginalPermission(null)
       setShowUnsavedChangesModal(false)
-      setIsCurrentFormDirty(false)
       modalClose?.()
-    }, [modalClose])
+    }, [editingOriginalPermission, modalClose])
 
     const handleCancelDiscard = React.useCallback(() => {
       setShowUnsavedChangesModal(false)
@@ -223,7 +253,7 @@ export const PermissionsTabContent = React.memo(
             sidePanel.selectedRow && (
               <PermissionsDetail
                 permissions={sidePanel.selectedRow}
-                onDirtyChange={setIsCurrentFormDirty}
+                onSubmit={handlePermissionSubmit}
                 onUpdate={handlePermissionUpdate}
                 onOpenChannelsPanel={() => setIsChannelsPanelOpen(true)}
                 onCancel={handleCancelClick}

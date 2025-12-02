@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useEffect, useState, useRef } from 'react'
+import React, { memo, useMemo, useState, useRef } from 'react'
 import styled, { css } from 'styled-components'
 import tw from 'twin.macro'
 import { PermissionsDetailProps } from './types'
@@ -108,22 +108,18 @@ const FilterScopeButton = ({ authorized, count }: FilterScopeButtonProps) => {
 
 export const PermissionsDetail = ({
   permissions,
-  onDirtyChange,
+  onSubmit,
   onUpdate,
   onOpenChannelsPanel,
   onCancel,
 }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string>('messages')
 
-  const { handleSubmit, errors, isDirty, messageTypesCtrl } =
-    usePermissionsDetailForm({
-      permissions,
-      onSubmitSuccess: onUpdate,
-    })
-
-  useEffect(() => {
-    onDirtyChange?.(isDirty)
-  }, [isDirty, onDirtyChange])
+  const { handleSubmit, errors, messageTypesCtrl } = usePermissionsDetailForm({
+    permissions,
+    onSubmitSuccess: onSubmit,
+    onUpdate,
+  })
 
   const authorizedChannels = useMemo(() => {
     if (!permissions.channels.length) return 'All'

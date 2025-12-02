@@ -1,5 +1,5 @@
-import { useCallback } from 'react'
-import { useController } from 'react-hook-form'
+import { useCallback, useEffect } from 'react'
+import { useController, useWatch } from 'react-hook-form'
 import { useForm } from '@/hooks/common/useForm'
 import {
   AccountPermissions,
@@ -14,6 +14,7 @@ export type PermissionsDetailFormState = {
 export type UsePermissionsDetailFormProps = {
   permissions: AccountPermissions
   onSubmitSuccess?: (updatedPermission: AccountPermissions) => void
+  onUpdate?: (updatedPermission: AccountPermissions) => void
 }
 
 export type UsePermissionsDetailFormReturn = {
@@ -28,6 +29,7 @@ export type UsePermissionsDetailFormReturn = {
 export function usePermissionsDetailForm({
   permissions,
   onSubmitSuccess,
+  onUpdate,
 }: UsePermissionsDetailFormProps): UsePermissionsDetailFormReturn {
   const defaultValues: PermissionsDetailFormState = {
     channels: permissions.channels,
@@ -67,6 +69,30 @@ export function usePermissionsDetailForm({
     control,
     name: 'messageTypes',
   })
+
+  // Watch form values for real-time updates
+  const watchedValues = useWatch({ control })
+
+  useEffect(() => {
+    if (onUpdate) {
+      const updatedPermission: AccountPermissions = {
+        id: permissions.id,
+        alias: permissions.alias,
+        channels: watchedValues.channels ?? permissions.channels,
+        messageTypes:
+          (watchedValues.messageTypes as MessageTypePermissions[]) ??
+          permissions.messageTypes,
+      }
+      onUpdate(updatedPermission)
+    }
+  }, [
+    watchedValues,
+    permissions.id,
+    permissions.alias,
+    permissions.channels,
+    permissions.messageTypes,
+    onUpdate,
+  ])
 
   return {
     control,
