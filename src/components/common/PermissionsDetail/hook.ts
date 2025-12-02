@@ -17,20 +17,11 @@ export type UsePermissionsDetailFormProps = {
   onUpdate?: (updatedPermission: AccountPermissions) => void
 }
 
-export type UsePermissionsDetailFormReturn = {
-  control: ReturnType<typeof useForm>['control']
-  handleSubmit: ReturnType<typeof useForm>['handleSubmit']
-  errors: ReturnType<typeof useForm>['formState']['errors']
-  isDirty: boolean
-  channelsCtrl: ReturnType<typeof useController>
-  messageTypesCtrl: ReturnType<typeof useController>
-}
-
 export function usePermissionsDetailForm({
   permissions,
   onSubmitSuccess,
   onUpdate,
-}: UsePermissionsDetailFormProps): UsePermissionsDetailFormReturn {
+}: UsePermissionsDetailFormProps) {
   const defaultValues: PermissionsDetailFormState = {
     channels: permissions.channels,
     messageTypes: permissions.messageTypes,

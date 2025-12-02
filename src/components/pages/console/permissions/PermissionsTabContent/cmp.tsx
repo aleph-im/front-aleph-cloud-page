@@ -1,12 +1,12 @@
-import React from 'react'
-import { PermissionsTabContentProps } from './types'
-import { getPermissionsTableColumns } from './columns'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
-import { AccountPermissions } from '@/domain/permissions'
-import SidePanel from '@/components/common/SidePanel'
 import PermissionsDetail from '@/components/common/PermissionsDetail'
-import { TextGradient, Button, useModal } from '@aleph-front/core'
+import SidePanel from '@/components/common/SidePanel'
+import { AccountPermissions } from '@/domain/permissions'
+import { Button, TextGradient, useModal } from '@aleph-front/core'
+import { memo, useCallback, useEffect, useState } from 'react'
+import { getPermissionsTableColumns } from './columns'
+import { PermissionsTabContentProps } from './types'
 
 // Type for side panel content
 type SidePanelContent = {
@@ -16,27 +16,36 @@ type SidePanelContent = {
   selectedRow?: AccountPermissions
 }
 
-export const PermissionsTabContent = React.memo(
+export const PermissionsTabContent = memo(
   ({ data, onPermissionChange }: PermissionsTabContentProps) => {
-    const [sidePanel, setSidePanel] = React.useState<SidePanelContent>({
+    const [sidePanel, setSidePanel] = useState<SidePanelContent>({
       isOpen: false,
       title: '',
     })
-    const [updatedPermissions, setUpdatedPermissions] = React.useState<
-      AccountPermissions[]
-    >(structuredClone(data))
-    const [editingOriginalPermission, setEditingOriginalPermission] =
-      React.useState<AccountPermissions | null>(null)
-    const [isChannelsPanelOpen, setIsChannelsPanelOpen] = React.useState(false)
+
+    const [isChannelsPanelOpen, setIsChannelsPanelOpen] = useState(false)
+
     const [showUnsavedChangesModal, setShowUnsavedChangesModal] =
-      React.useState(false)
+      useState(false)
+
+    // State to hold the original permissions data for comparison
+    const [originalPermissions, setOriginalPermissions] =
+      useState<AccountPermissions[]>(data)
+
+    // State to track pending changes in permissions
+    const [updatedPermissions, setUpdatedPermissions] =
+      useState<AccountPermissions[]>(data)
+
+    // Track currently editing permission to detect unsaved changes
+    const [editingOriginalPermission, setEditingOriginalPermission] =
+      useState<AccountPermissions | null>(null)
 
     const modal = useModal()
     const modalOpen = modal?.open
     const modalClose = modal?.close
 
     // Sync with data prop changes
-    React.useEffect(() => {
+    useEffect(() => {
       setUpdatedPermissions(structuredClone(data))
     }, [data])
 
@@ -67,7 +76,7 @@ export const PermissionsTabContent = React.memo(
     }
 
     // Real-time update handler - updates local state as form changes
-    const handlePermissionUpdate = React.useCallback(
+    const handlePermissionUpdate = useCallback(
       (updatedPermission: AccountPermissions) => {
         setUpdatedPermissions((prev) =>
           prev.map((p) =>
@@ -79,7 +88,7 @@ export const PermissionsTabContent = React.memo(
     )
 
     // Submit handler - called when user clicks "Continue"
-    const handlePermissionSubmit = React.useCallback(
+    const handlePermissionSubmit = useCallback(
       (updatedPermission: AccountPermissions) => {
         // Update the specific permission in updatedPermissions
         setUpdatedPermissions((prev) =>
@@ -96,13 +105,22 @@ export const PermissionsTabContent = React.memo(
       [onPermissionChange],
     )
 
-    const handleCancelClick = React.useCallback(() => {
-      // Just close panel - form changes are discarded automatically
+    const handleCancelClick = useCallback(() => {
+      // Revert the permission to its original state (discard changes)
+      if (editingOriginalPermission) {
+        setUpdatedPermissions((prev) =>
+          prev.map((p) =>
+            p.id === editingOriginalPermission.id
+              ? editingOriginalPermission
+              : p,
+          ),
+        )
+      }
       setEditingOriginalPermission(null)
       setSidePanel((prev) => ({ ...prev, isOpen: false }))
-    }, [])
+    }, [editingOriginalPermission])
 
-    const handleClosePanel = React.useCallback(() => {
+    const handleClosePanel = useCallback(() => {
       setSidePanel((prev) => ({ ...prev, isOpen: false }))
 
       // Compare current permission with original to detect changes
@@ -122,7 +140,7 @@ export const PermissionsTabContent = React.memo(
       }
     }, [editingOriginalPermission, updatedPermissions])
 
-    const handleDiscardChanges = React.useCallback(() => {
+    const handleDiscardChanges = useCallback(() => {
       // Revert the permission to its original state
       if (editingOriginalPermission) {
         setUpdatedPermissions((prev) =>
@@ -138,7 +156,7 @@ export const PermissionsTabContent = React.memo(
       modalClose?.()
     }, [editingOriginalPermission, modalClose])
 
-    const handleCancelDiscard = React.useCallback(() => {
+    const handleCancelDiscard = useCallback(() => {
       setShowUnsavedChangesModal(false)
       setSidePanel((prev) => ({ ...prev, isOpen: true }))
       modalClose?.()
@@ -149,7 +167,7 @@ export const PermissionsTabContent = React.memo(
       onRowRevoke: handleRowRevoke,
     })
 
-    React.useEffect(
+    useEffect(
       () => {
         if (!modalOpen) return
         if (!modalClose) return
