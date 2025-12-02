@@ -2,7 +2,6 @@ import React, { memo } from 'react'
 import {
   StyledBackdrop,
   StyledContent,
-  StyledFooter,
   StyledHeader,
   StyledSidePanel,
 } from './styles'
@@ -13,7 +12,6 @@ export const SidePanel = ({
   title,
   isOpen,
   onClose,
-  footer,
   order = 0,
   width = '50vw',
   mobileHeight = '80vh',
@@ -37,7 +35,6 @@ export const SidePanel = ({
           </div>
         </StyledHeader>
         <StyledContent>{children}</StyledContent>
-        {footer && <StyledFooter>{footer}</StyledFooter>}
       </StyledSidePanel>
     </>
   )

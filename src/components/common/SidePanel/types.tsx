@@ -3,7 +3,6 @@ export type SidePanelProps = {
   isOpen: boolean
   onClose?: () => void
   children?: React.ReactNode
-  footer?: React.ReactNode
   order?: number
   width?: string
   mobileHeight?: string

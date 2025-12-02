@@ -35,28 +35,7 @@ export const StyledHeader = styled.div`
 `
 
 export const StyledContent = styled.div`
-  ${tw`p-12 flex-1`}
-`
-
-export const StyledFooter = styled.div`
-  ${({ theme }) => css`
-    ${tw`sticky bottom-0 p-6`}
-
-    background: ${theme.color.background};
-    animation: slideUp ${theme.transition.duration.normal}ms
-      ${theme.transition.timing} forwards;
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-  `}
+  ${tw`p-12 pb-0 flex-1`}
 `
 
 export const StyledSidePanel = styled.div<StyledSidePanelProps>`

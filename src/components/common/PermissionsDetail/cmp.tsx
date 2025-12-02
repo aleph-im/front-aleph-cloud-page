@@ -1,4 +1,6 @@
 import React, { memo, useMemo, useEffect, useState, useRef } from 'react'
+import styled, { css } from 'styled-components'
+import tw from 'twin.macro'
 import { PermissionsDetailProps } from './types'
 import {
   Button,
@@ -23,6 +25,27 @@ import StyledTable from '../Table'
 import Form from '@/components/form/Form'
 import { usePermissionsDetailForm } from './hook'
 import { Portal } from '../Portal'
+
+const StyledFooter = styled.div`
+  ${({ theme }) => css`
+    ${tw`sticky bottom-0 p-6`}
+
+    background: ${theme.color.background}D5;
+    animation: slideUp ${theme.transition.duration.normal}ms
+      ${theme.transition.timing} forwards;
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  `}
+`
 
 type FilterScopeButtonProps = {
   authorized: boolean
@@ -88,6 +111,7 @@ export const PermissionsDetail = ({
   onDirtyChange,
   onUpdate,
   onOpenChannelsPanel,
+  onCancel,
 }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string>('messages')
 
@@ -256,6 +280,26 @@ export const PermissionsDetail = ({
           </NoisyContainer>
         </div>
       </div>
+      <StyledFooter>
+        <div tw="flex justify-start gap-x-4">
+          <Button
+            type="submit"
+            color="main0"
+            kind="functional"
+            variant="warning"
+          >
+            Continue
+          </Button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="tp-header fs-14"
+            tw="not-italic font-bold"
+          >
+            Cancel
+          </button>
+        </div>
+      </StyledFooter>
     </Form>
   )
 }

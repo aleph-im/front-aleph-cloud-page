@@ -5,4 +5,5 @@ export type PermissionsDetailProps = {
   onDirtyChange?: (isDirty: boolean) => void
   onUpdate?: (updatedPermission: AccountPermissions) => void
   onOpenChannelsPanel?: () => void
+  onCancel?: () => void
 }
