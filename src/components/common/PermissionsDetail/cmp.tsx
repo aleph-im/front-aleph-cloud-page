@@ -9,6 +9,7 @@ import {
   NoisyContainer,
   ObjectImg,
   Tabs,
+  TextInput,
   useClickOutside,
   useFloatPosition,
   useTransition,
@@ -98,7 +99,26 @@ const FilterScopeButton = ({ authorized, count }: FilterScopeButtonProps) => {
             $position={portalPosition}
             ref={floatRef}
           >
-            <div tw="p-4">TEST</div>
+            <div tw="p-3">
+              <TextInput placeholder="Search" icon={<Icon name="search" />} />
+              <div tw="flex items-center justify-end w-full my-3">
+                <Button variant="textOnly">Clear all</Button>
+              </div>
+              <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
+                <div tw="flex items-center gap-x-2.5">
+                  <Checkbox checked={true} onChange={() => null} size="sm" />
+                  Type 1
+                </div>
+                <div tw="flex items-center gap-x-2.5">
+                  <Checkbox checked={true} onChange={() => null} size="sm" />
+                  Type 2
+                </div>
+                <div tw="flex items-center gap-x-2.5">
+                  <Checkbox checked={true} onChange={() => null} size="sm" />
+                  Type 3
+                </div>
+              </div>
+            </div>
           </StyledPortal>
         )}
       </Portal>
