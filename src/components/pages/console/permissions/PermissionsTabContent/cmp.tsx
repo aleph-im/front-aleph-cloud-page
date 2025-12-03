@@ -28,10 +28,6 @@ export const PermissionsTabContent = memo(
     const [showUnsavedChangesModal, setShowUnsavedChangesModal] =
       useState(false)
 
-    // State to hold the original permissions data for comparison
-    const [originalPermissions, setOriginalPermissions] =
-      useState<AccountPermissions[]>(data)
-
     // State to track pending changes in permissions
     const [updatedPermissions, setUpdatedPermissions] =
       useState<AccountPermissions[]>(data)
@@ -46,7 +42,7 @@ export const PermissionsTabContent = memo(
 
     // Sync with data prop changes
     useEffect(() => {
-      setUpdatedPermissions(structuredClone(data))
+      setUpdatedPermissions(data)
     }, [data])
 
     const handleRowConfigure = (row: AccountPermissions) => {
@@ -54,7 +50,7 @@ export const PermissionsTabContent = memo(
       // Find corresponding permission from updatedPermissions
       const permission = updatedPermissions.find((p) => p.id === row.id) || row
       // Store the original permission for comparison when closing
-      setEditingOriginalPermission(structuredClone(permission))
+      setEditingOriginalPermission(permission)
       setSidePanel({
         isOpen: true,
         title: 'Permissions',
@@ -98,9 +94,9 @@ export const PermissionsTabContent = memo(
         )
         // Call the parent's onPermissionChange immediately
         onPermissionChange?.(updatedPermission)
-        // Clear the editing original and close panel
+        // Clear state and close panel
         setEditingOriginalPermission(null)
-        setSidePanel((prev) => ({ ...prev, isOpen: false }))
+        setSidePanel({ isOpen: false, title: '' })
       },
       [onPermissionChange],
     )
@@ -117,7 +113,7 @@ export const PermissionsTabContent = memo(
         )
       }
       setEditingOriginalPermission(null)
-      setSidePanel((prev) => ({ ...prev, isOpen: false }))
+      setSidePanel({ isOpen: false, title: '' })
     }, [editingOriginalPermission])
 
     const handleClosePanel = useCallback(() => {
@@ -135,7 +131,9 @@ export const PermissionsTabContent = memo(
         if (hasChanges) {
           setShowUnsavedChangesModal(true)
         } else {
+          // No changes - clear state completely
           setEditingOriginalPermission(null)
+          setSidePanel({ isOpen: false, title: '' })
         }
       }
     }, [editingOriginalPermission, updatedPermissions])
@@ -151,7 +149,9 @@ export const PermissionsTabContent = memo(
           ),
         )
       }
+
       setEditingOriginalPermission(null)
+      setSidePanel({ isOpen: false, title: '' })
       setShowUnsavedChangesModal(false)
       modalClose?.()
     }, [editingOriginalPermission, modalClose])
@@ -231,7 +231,7 @@ export const PermissionsTabContent = memo(
 
     return (
       <>
-        {data.length > 0 ? (
+        {updatedPermissions.length ? (
           <>
             <div tw="overflow-auto max-w-full">
               <EntityTable
