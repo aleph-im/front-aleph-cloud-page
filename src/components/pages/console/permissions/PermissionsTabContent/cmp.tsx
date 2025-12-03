@@ -3,10 +3,41 @@ import EntityTable from '@/components/common/EntityTable'
 import PermissionsDetail from '@/components/common/PermissionsDetail'
 import SidePanel from '@/components/common/SidePanel'
 import { AccountPermissions } from '@/domain/permissions'
-import { Button, TextGradient, useModal } from '@aleph-front/core'
+import {
+  Button,
+  Checkbox,
+  Icon,
+  NoisyContainer,
+  TextGradient,
+  TextInput,
+  useModal,
+} from '@aleph-front/core'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { getPermissionsTableColumns } from './columns'
 import { PermissionsTabContentProps } from './types'
+import styled, { css } from 'styled-components'
+import tw from 'twin.macro'
+
+const StyledFooter = styled.div`
+  ${({ theme }) => css`
+    ${tw`sticky bottom-0 left-0 right-0 p-6`}
+
+    background: ${theme.color.background}D5;
+    animation: slideUp ${theme.transition.duration.normal}ms
+      ${theme.transition.timing} forwards;
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  `}
+`
 
 // Type for side panel content
 type SidePanelContent = {
@@ -289,7 +320,49 @@ export const PermissionsTabContent = memo(
           width="50vw"
           mobileHeight="70vh"
         >
-          <div>test</div>
+          <div tw="flex flex-col gap-y-2.5">
+            <div className="tp-info fs-14">Permissions details</div>
+            <NoisyContainer>
+              <TextInput placeholder="Search" icon={<Icon name="search" />} />
+              <div tw="flex items-center justify-end w-full my-3">
+                <Button variant="textOnly">Clear all</Button>
+              </div>
+              <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
+                <div tw="flex items-center gap-x-2.5">
+                  <Checkbox checked={true} onChange={() => null} size="sm" />
+                  Type 1
+                </div>
+                <div tw="flex items-center gap-x-2.5">
+                  <Checkbox checked={true} onChange={() => null} size="sm" />
+                  Type 2
+                </div>
+                <div tw="flex items-center gap-x-2.5">
+                  <Checkbox checked={true} onChange={() => null} size="sm" />
+                  Type 3
+                </div>
+              </div>
+            </NoisyContainer>
+          </div>
+          <StyledFooter>
+            <div tw="flex justify-start gap-x-4">
+              <Button
+                type="submit"
+                color="main0"
+                kind="functional"
+                variant="warning"
+              >
+                Continue
+              </Button>
+              <button
+                type="button"
+                onClick={() => null}
+                className="tp-header fs-14"
+                tw="not-italic font-bold"
+              >
+                Cancel
+              </button>
+            </div>
+          </StyledFooter>
         </SidePanel>
       </>
     )

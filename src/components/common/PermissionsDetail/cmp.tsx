@@ -29,7 +29,7 @@ import { Portal } from '../Portal'
 
 const StyledFooter = styled.div`
   ${({ theme }) => css`
-    ${tw`sticky bottom-0 p-6`}
+    ${tw`sticky bottom-0 left-0 right-0 p-6`}
 
     background: ${theme.color.background}D5;
     animation: slideUp ${theme.transition.duration.normal}ms
