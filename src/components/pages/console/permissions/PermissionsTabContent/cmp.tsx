@@ -323,7 +323,11 @@ export const PermissionsTabContent = memo(
           <div tw="flex flex-col gap-y-2.5">
             <div className="tp-info fs-14">Permissions details</div>
             <NoisyContainer>
-              <TextInput placeholder="Search" icon={<Icon name="search" />} />
+              <TextInput
+                name="channels-search"
+                placeholder="Search"
+                icon={<Icon name="search" />}
+              />
               <div tw="flex items-center justify-end w-full my-3">
                 <Button variant="textOnly">Clear all</Button>
               </div>

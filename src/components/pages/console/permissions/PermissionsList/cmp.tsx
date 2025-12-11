@@ -1,4 +1,5 @@
 import React, { memo } from 'react'
+import { MessageType } from '@aleph-sdk/message'
 import { PermissionsListProps } from './types'
 import PermissionTypeItem from '../PermissionTypeItem'
 
@@ -19,10 +20,13 @@ export const PermissionsList = ({ messageTypes }: PermissionsListProps) => {
         let count: number | undefined
 
         // For POST and AGGREGATE, show count if there are filters
-        if (messageType.type === 'post' && 'postTypes' in messageType) {
+        if (
+          messageType.type === MessageType.post &&
+          'postTypes' in messageType
+        ) {
           count = messageType.postTypes.length || undefined
         } else if (
-          messageType.type === 'aggregate' &&
+          messageType.type === MessageType.aggregate &&
           'aggregateKeys' in messageType
         ) {
           count = messageType.aggregateKeys.length || undefined

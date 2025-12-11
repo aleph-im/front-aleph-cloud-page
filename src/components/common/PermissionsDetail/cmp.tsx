@@ -26,6 +26,7 @@ import StyledTable from '../Table'
 import Form from '@/components/form/Form'
 import { usePermissionsDetailForm } from './hook'
 import { Portal } from '../Portal'
+import { usePostTypes } from '@/hooks/common/usePostTypes'
 
 const StyledFooter = styled.div`
   ${({ theme }) => css`
@@ -50,11 +51,21 @@ const StyledFooter = styled.div`
 
 type FilterScopeButtonProps = {
   authorized: boolean
-  count: number
+  availableItems: string[]
+  selectedItems: string[]
+  onSelectionChange: (items: string[]) => void
+  isLoading?: boolean
 }
 
-const FilterScopeButton = ({ authorized, count }: FilterScopeButtonProps) => {
+const FilterScopeButton = ({
+  authorized,
+  availableItems,
+  selectedItems,
+  onSelectionChange,
+  isLoading = false,
+}: FilterScopeButtonProps) => {
   const [showPortal, setShowPortal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const buttonRef = useRef<HTMLButtonElement>(null)
   const portalRef = useRef<HTMLDivElement>(null)
@@ -82,15 +93,49 @@ const FilterScopeButton = ({ authorized, count }: FilterScopeButtonProps) => {
     if (showPortal) setShowPortal(false)
   }, [floatRef, triggerRef])
 
+  const filteredItems = useMemo(() => {
+    if (!searchQuery) return availableItems
+    return availableItems.filter((item) =>
+      item.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+  }, [availableItems, searchQuery])
+
+  const handleToggleItem = (item: string) => {
+    const isSelected = selectedItems.includes(item)
+    if (isSelected) {
+      onSelectionChange(selectedItems.filter((i) => i !== item))
+    } else {
+      onSelectionChange([...selectedItems, item])
+    }
+  }
+
+  const handleClearAll = () => {
+    onSelectionChange([])
+  }
+
+  const handleSelectAll = () => {
+    onSelectionChange([...availableItems])
+  }
+
+  const count = selectedItems.length
+
   return (
     <>
       <RowActionsButton
         type="button"
         ref={buttonRef}
-        disabled={!authorized}
+        disabled={!authorized || isLoading}
         onClick={() => setShowPortal(!showPortal)}
       >
-        {!authorized ? <Icon name="ellipsis" /> : count ? count : 'All'}
+        {!authorized ? (
+          <Icon name="ellipsis" />
+        ) : isLoading ? (
+          '...'
+        ) : count > 0 ? (
+          count
+        ) : (
+          'All'
+        )}
       </RowActionsButton>
       <Portal>
         {shouldMount && (
@@ -100,23 +145,40 @@ const FilterScopeButton = ({ authorized, count }: FilterScopeButtonProps) => {
             ref={floatRef}
           >
             <div tw="p-3">
-              <TextInput placeholder="Search" icon={<Icon name="search" />} />
-              <div tw="flex items-center justify-end w-full my-3">
-                <Button variant="textOnly">Clear all</Button>
+              <TextInput
+                name="filter-search"
+                placeholder="Search"
+                icon={<Icon name="search" />}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <div tw="flex items-center justify-between w-full my-3">
+                <Button variant="textOnly" onClick={handleSelectAll}>
+                  Select all
+                </Button>
+                <Button variant="textOnly" onClick={handleClearAll}>
+                  Clear all
+                </Button>
               </div>
               <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
-                <div tw="flex items-center gap-x-2.5">
-                  <Checkbox checked={true} onChange={() => null} size="sm" />
-                  Type 1
-                </div>
-                <div tw="flex items-center gap-x-2.5">
-                  <Checkbox checked={true} onChange={() => null} size="sm" />
-                  Type 2
-                </div>
-                <div tw="flex items-center gap-x-2.5">
-                  <Checkbox checked={true} onChange={() => null} size="sm" />
-                  Type 3
-                </div>
+                {isLoading ? (
+                  <div className="tp-info fs-12">Loading...</div>
+                ) : filteredItems.length > 0 ? (
+                  filteredItems.map((item) => (
+                    <div key={item} tw="flex items-center gap-x-2.5">
+                      <Checkbox
+                        checked={selectedItems.includes(item)}
+                        onChange={() => handleToggleItem(item)}
+                        size="sm"
+                      />
+                      <span className="fs-12">{item}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="tp-info fs-12">
+                    {searchQuery ? 'No matches found' : 'No items available'}
+                  </div>
+                )}
               </div>
             </div>
           </StyledPortal>
@@ -163,6 +225,38 @@ export const PermissionsDetail = ({
       authorized: !updatedTypes[index].authorized,
     }
     messageTypesCtrl.field.onChange(updatedTypes)
+  }
+
+  const { postTypes: availablePostTypes, isLoading: isLoadingPostTypes } =
+    usePostTypes(permissions.id)
+
+  const handlePostTypesChange = (rowIndex: number, newPostTypes: string[]) => {
+    const currentTypes = messageTypesCtrl.field.value
+    const updatedTypes = [...currentTypes]
+    const currentRow = updatedTypes[rowIndex]
+    if (currentRow.type === MessageType.post) {
+      updatedTypes[rowIndex] = {
+        ...currentRow,
+        postTypes: newPostTypes,
+      }
+      messageTypesCtrl.field.onChange(updatedTypes)
+    }
+  }
+
+  const handleAggregateKeysChange = (
+    rowIndex: number,
+    newAggregateKeys: string[],
+  ) => {
+    const currentTypes = messageTypesCtrl.field.value
+    const updatedTypes = [...currentTypes]
+    const currentRow = updatedTypes[rowIndex]
+    if (currentRow.type === MessageType.aggregate) {
+      updatedTypes[rowIndex] = {
+        ...currentRow,
+        aggregateKeys: newAggregateKeys,
+      }
+      messageTypesCtrl.field.onChange(updatedTypes)
+    }
   }
 
   return (
@@ -260,19 +354,28 @@ export const PermissionsDetail = ({
                         },
                         {
                           label: 'Filters / scope',
-                          render: (row) => {
+                          render: (row, _col, rowIndex) => {
                             if (row.type === MessageType.post) {
                               return (
                                 <FilterScopeButton
                                   authorized={row.authorized}
-                                  count={row.postTypes.length}
+                                  availableItems={availablePostTypes}
+                                  selectedItems={row.postTypes}
+                                  onSelectionChange={(items) =>
+                                    handlePostTypesChange(rowIndex, items)
+                                  }
+                                  isLoading={isLoadingPostTypes}
                                 />
                               )
                             } else if (row.type === MessageType.aggregate) {
                               return (
                                 <FilterScopeButton
                                   authorized={row.authorized}
-                                  count={row.aggregateKeys.length}
+                                  availableItems={row.aggregateKeys}
+                                  selectedItems={row.aggregateKeys}
+                                  onSelectionChange={(items) =>
+                                    handleAggregateKeysChange(rowIndex, items)
+                                  }
                                 />
                               )
                             } else {

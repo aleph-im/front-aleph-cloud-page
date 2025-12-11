@@ -1,4 +1,4 @@
-import { Permission } from '@/domain/permissions'
+import { AccountPermissions } from '@/domain/permissions'
 import { usePermissionsManager } from '../useManager/usePermissionManager'
 
 import {
@@ -8,11 +8,12 @@ import {
 } from './useRequestEntities'
 
 export type UseRequestPermissionsProps = Omit<
-  UseRequestEntitiesProps<Permission>,
+  UseRequestEntitiesProps<AccountPermissions>,
   'name'
 >
 
-export type UseRequestPermissionsReturn = UseRequestEntitiesReturn<Permission>
+export type UseRequestPermissionsReturn =
+  UseRequestEntitiesReturn<AccountPermissions>
 
 export function useRequestPermissions(
   props: UseRequestPermissionsProps = {},
