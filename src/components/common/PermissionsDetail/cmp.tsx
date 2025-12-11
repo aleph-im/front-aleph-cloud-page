@@ -503,6 +503,7 @@ export const PermissionsDetail = ({
               kind="functional"
               variant="warning"
             >
+              <Icon name="arrow-left" />
               Continue
             </Button>
             <button
@@ -576,6 +577,7 @@ export const PermissionsDetail = ({
                 variant="warning"
                 onClick={handleApplyChannels}
               >
+                <Icon name="arrow-left" />
                 Continue
               </Button>
               <button

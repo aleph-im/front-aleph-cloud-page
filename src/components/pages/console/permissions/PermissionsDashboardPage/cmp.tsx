@@ -78,11 +78,7 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
         containerRef={mainRef}
         shouldHide={pendingChanges.size === 0}
       >
-        <div tw="flex justify-end items-center gap-x-4 w-full py-4 px-6">
-          <span className="tp-body1">
-            {pendingChanges.size} permission
-            {pendingChanges.size !== 1 ? 's' : ''} modified
-          </span>
+        <div tw="flex justify-end items-center w-full py-4 px-6">
           <Button
             color="main0"
             variant="primary"
