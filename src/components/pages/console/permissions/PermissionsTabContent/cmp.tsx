@@ -12,11 +12,12 @@ import {
   TextInput,
   useModal,
 } from '@aleph-front/core'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { getPermissionsTableColumns } from './columns'
 import { PermissionsTabContentProps } from './types'
 import styled, { css } from 'styled-components'
 import tw from 'twin.macro'
+import { useChannels } from '@/hooks/common/useChannels'
 
 const StyledFooter = styled.div`
   ${({ theme }) => css`
@@ -59,6 +60,9 @@ export const PermissionsTabContent = memo(
     const [showUnsavedChangesModal, setShowUnsavedChangesModal] =
       useState(false)
 
+    const [channelsSearchQuery, setChannelsSearchQuery] = useState('')
+    const [selectedChannels, setSelectedChannels] = useState<string[]>([])
+
     // State to track pending changes in permissions
     const [updatedPermissions, setUpdatedPermissions] =
       useState<AccountPermissions[]>(data)
@@ -71,10 +75,23 @@ export const PermissionsTabContent = memo(
     const modalOpen = modal?.open
     const modalClose = modal?.close
 
+    // Get currently editing permission's address for fetching channels
+    const currentEditingAddress = sidePanel.selectedRow?.id
+
+    const { channels: availableChannels, isLoading: isLoadingChannels } =
+      useChannels(currentEditingAddress)
+
     // Sync with data prop changes
     useEffect(() => {
       setUpdatedPermissions(data)
     }, [data])
+
+    // Initialize selected channels when channels panel opens
+    useEffect(() => {
+      if (isChannelsPanelOpen && sidePanel.selectedRow) {
+        setSelectedChannels(sidePanel.selectedRow.channels)
+      }
+    }, [isChannelsPanelOpen, sidePanel.selectedRow])
 
     const handleRowConfigure = (row: AccountPermissions) => {
       console.log('Configure permission:', row)
@@ -192,6 +209,49 @@ export const PermissionsTabContent = memo(
       setSidePanel((prev) => ({ ...prev, isOpen: true }))
       modalClose?.()
     }, [modalClose])
+
+    const filteredChannels = useMemo(() => {
+      if (!channelsSearchQuery) return availableChannels
+      return availableChannels.filter((channel) =>
+        channel.toLowerCase().includes(channelsSearchQuery.toLowerCase()),
+      )
+    }, [availableChannels, channelsSearchQuery])
+
+    const handleToggleChannel = useCallback((channel: string) => {
+      setSelectedChannels((prev) =>
+        prev.includes(channel)
+          ? prev.filter((c) => c !== channel)
+          : [...prev, channel],
+      )
+    }, [])
+
+    const handleClearAllChannels = useCallback(() => {
+      setSelectedChannels([])
+    }, [])
+
+    const handleSelectAllChannels = useCallback(() => {
+      setSelectedChannels([...availableChannels])
+    }, [availableChannels])
+
+    const handleApplyChannels = useCallback(() => {
+      if (sidePanel.selectedRow) {
+        const updatedPermission: AccountPermissions = {
+          ...sidePanel.selectedRow,
+          channels: selectedChannels,
+        }
+        handlePermissionUpdate(updatedPermission)
+        setIsChannelsPanelOpen(false)
+        setChannelsSearchQuery('')
+      }
+    }, [sidePanel.selectedRow, selectedChannels, handlePermissionUpdate])
+
+    const handleCancelChannels = useCallback(() => {
+      setIsChannelsPanelOpen(false)
+      setChannelsSearchQuery('')
+      if (sidePanel.selectedRow) {
+        setSelectedChannels(sidePanel.selectedRow.channels)
+      }
+    }, [sidePanel.selectedRow])
 
     const columns = getPermissionsTableColumns({
       onRowConfigure: handleRowConfigure,
@@ -327,39 +387,55 @@ export const PermissionsTabContent = memo(
                 name="channels-search"
                 placeholder="Search"
                 icon={<Icon name="search" />}
+                value={channelsSearchQuery}
+                onChange={(e) => setChannelsSearchQuery(e.target.value)}
               />
-              <div tw="flex items-center justify-end w-full my-3">
-                <Button variant="textOnly">Clear all</Button>
+              <div tw="flex items-center justify-between w-full my-3">
+                <Button variant="textOnly" onClick={handleSelectAllChannels}>
+                  Select all
+                </Button>
+                <Button variant="textOnly" onClick={handleClearAllChannels}>
+                  Clear all
+                </Button>
               </div>
               <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
-                <div tw="flex items-center gap-x-2.5">
-                  <Checkbox checked={true} onChange={() => null} size="sm" />
-                  Type 1
-                </div>
-                <div tw="flex items-center gap-x-2.5">
-                  <Checkbox checked={true} onChange={() => null} size="sm" />
-                  Type 2
-                </div>
-                <div tw="flex items-center gap-x-2.5">
-                  <Checkbox checked={true} onChange={() => null} size="sm" />
-                  Type 3
-                </div>
+                {isLoadingChannels ? (
+                  <div className="tp-info fs-12">Loading...</div>
+                ) : filteredChannels.length > 0 ? (
+                  filteredChannels.map((channel) => (
+                    <div key={channel} tw="flex items-center gap-x-2.5">
+                      <Checkbox
+                        checked={selectedChannels.includes(channel)}
+                        onChange={() => handleToggleChannel(channel)}
+                        size="sm"
+                      />
+                      <span className="fs-12">{channel}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="tp-info fs-12">
+                    {channelsSearchQuery
+                      ? 'No matches found'
+                      : 'No channels available'}
+                  </div>
+                )}
               </div>
             </NoisyContainer>
           </div>
           <StyledFooter>
             <div tw="flex justify-start gap-x-4">
               <Button
-                type="submit"
+                type="button"
                 color="main0"
                 kind="functional"
                 variant="warning"
+                onClick={handleApplyChannels}
               >
                 Continue
               </Button>
               <button
                 type="button"
-                onClick={() => null}
+                onClick={handleCancelChannels}
                 className="tp-header fs-14"
                 tw="not-italic font-bold"
               >
