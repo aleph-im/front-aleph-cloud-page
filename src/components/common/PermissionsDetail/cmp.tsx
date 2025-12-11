@@ -1,4 +1,11 @@
-import React, { memo, useMemo, useState, useRef } from 'react'
+import React, {
+  memo,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+} from 'react'
 import styled, { css } from 'styled-components'
 import tw from 'twin.macro'
 import { PermissionsDetailProps } from './types'
@@ -28,6 +35,8 @@ import { usePermissionsDetailForm } from './hook'
 import { Portal } from '../Portal'
 import { usePostTypes } from '@/hooks/common/usePostTypes'
 import { useAppState } from '@/contexts/appState'
+import { useChannels } from '@/hooks/common/useChannels'
+import SidePanel from '../SidePanel'
 
 const StyledFooter = styled.div`
   ${({ theme }) => css`
@@ -193,10 +202,14 @@ export const PermissionsDetail = ({
   permissions,
   onSubmit,
   onUpdate,
-  onOpenChannelsPanel,
+  channelsPanelOrder = 1,
   onCancel,
 }: PermissionsDetailProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string>('messages')
+  const [isChannelsPanelOpen, setIsChannelsPanelOpen] = useState(false)
+  const [channelsSearchQuery, setChannelsSearchQuery] = useState('')
+  const [selectedChannels, setSelectedChannels] = useState<string[]>([])
+  const [originalChannels, setOriginalChannels] = useState<string[]>([])
 
   const { handleSubmit, errors, messageTypesCtrl } = usePermissionsDetailForm({
     permissions,
@@ -237,6 +250,33 @@ export const PermissionsDetail = ({
   const { postTypes: availablePostTypes, isLoading: isLoadingPostTypes } =
     usePostTypes(connectedAccountAddress)
 
+  const { channels: availableChannels, isLoading: isLoadingChannels } =
+    useChannels(connectedAccountAddress)
+
+  // Merge available channels with permission's existing channels
+  const allChannels = useMemo(() => {
+    const permissionChannels = permissions.channels || []
+    const merged = Array.from(
+      new Set([...availableChannels, ...permissionChannels]),
+    )
+    return merged.sort()
+  }, [availableChannels, permissions.channels])
+
+  const filteredChannels = useMemo(() => {
+    if (!channelsSearchQuery) return allChannels
+    return allChannels.filter((channel) =>
+      channel.toLowerCase().includes(channelsSearchQuery.toLowerCase()),
+    )
+  }, [allChannels, channelsSearchQuery])
+
+  // Initialize selected channels when panel opens
+  useEffect(() => {
+    if (isChannelsPanelOpen) {
+      setSelectedChannels(permissions.channels)
+      setOriginalChannels(permissions.channels)
+    }
+  }, [isChannelsPanelOpen, permissions.channels])
+
   const handlePostTypesChange = (rowIndex: number, newPostTypes: string[]) => {
     const currentTypes = messageTypesCtrl.field.value
     const updatedTypes = [...currentTypes]
@@ -266,167 +306,292 @@ export const PermissionsDetail = ({
     }
   }
 
+  const handleOpenChannelsPanel = useCallback(() => {
+    setIsChannelsPanelOpen(true)
+  }, [])
+
+  const handleToggleChannel = useCallback((channel: string) => {
+    setSelectedChannels((prev) =>
+      prev.includes(channel)
+        ? prev.filter((c) => c !== channel)
+        : [...prev, channel],
+    )
+  }, [])
+
+  const handleClearAllChannels = useCallback(() => {
+    setSelectedChannels([])
+  }, [])
+
+  const handleSelectAllChannels = useCallback(() => {
+    setSelectedChannels([...allChannels])
+  }, [allChannels])
+
+  const handleApplyChannels = useCallback(() => {
+    if (onUpdate) {
+      onUpdate({
+        ...permissions,
+        channels: selectedChannels,
+      })
+    }
+    setIsChannelsPanelOpen(false)
+    setChannelsSearchQuery('')
+  }, [permissions, selectedChannels, onUpdate])
+
+  const handleCancelChannels = useCallback(() => {
+    setSelectedChannels(originalChannels)
+    setIsChannelsPanelOpen(false)
+    setChannelsSearchQuery('')
+  }, [originalChannels])
+
+  const handleCloseChannelsPanel = useCallback(() => {
+    handleApplyChannels()
+  }, [handleApplyChannels])
+
   return (
-    <Form id="permissions-detail-form" onSubmit={handleSubmit} errors={errors}>
-      <div tw="flex flex-col gap-y-12">
-        <div tw="flex flex-col gap-y-2">
-          <div className="tp-info fs-14">Recipient details</div>
-          <NoisyContainer>
-            <div tw="flex gap-x-4">
-              <div>
-                <ObjectImg id="Object12" size={90} color="main0" />
-              </div>
-              <div tw="flex flex-col gap-y-2">
-                {/* <div>
+    <>
+      <Form
+        tw="overflow-y-auto"
+        id="permissions-detail-form"
+        onSubmit={handleSubmit}
+        errors={errors}
+      >
+        <div tw="flex flex-col gap-y-12">
+          <div tw="flex flex-col gap-y-2">
+            <div className="tp-info fs-14">Recipient details</div>
+            <NoisyContainer>
+              <div tw="flex gap-x-4">
+                <div>
+                  <ObjectImg id="Object12" size={90} color="main0" />
+                </div>
+                <div tw="flex flex-col gap-y-2">
+                  {/* <div>
                 <div className="tp-info fs-10 text-main0">Created at</div>
                 <div className="tp-body2">
                   {permissions.created_at || 'Unknown'}
                 </div>
               </div> */}
-                <div>
-                  <div className="tp-info fs-10 text-main0">
-                    Recipient account address
+                  <div>
+                    <div className="tp-info fs-10 text-main0">
+                      Recipient account address
+                    </div>
+                    <div>
+                      <CopyToClipboard
+                        text={
+                          <span className="tp-body1 fs-12">
+                            {permissions.id}
+                          </span>
+                        }
+                        textToCopy={permissions.id}
+                      />
+                    </div>
                   </div>
                   <div>
-                    <CopyToClipboard
-                      text={
-                        <span className="tp-body1 fs-12">{permissions.id}</span>
-                      }
-                      textToCopy={permissions.id}
-                    />
+                    <div className="tp-info fs-10 text-main0">
+                      Recipient alias
+                    </div>
+                    <div className="tp-body2">{permissions.alias || '-'}</div>
                   </div>
-                </div>
-                <div>
-                  <div className="tp-info fs-10 text-main0">
-                    Recipient alias
-                  </div>
-                  <div className="tp-body2">{permissions.alias || '-'}</div>
                 </div>
               </div>
-            </div>
-          </NoisyContainer>
+            </NoisyContainer>
+          </div>
+          <div tw="flex flex-col gap-y-2">
+            <div className="tp-info fs-14">Permissions details</div>
+            <NoisyContainer>
+              <Tabs
+                tabs={[{ id: 'messages', name: 'Messages' }]}
+                selected={selectedTabId}
+                onTabChange={(id) => setSelectedTabId(id)}
+                align="left"
+              />
+              <div role="tabpanel" tw="mt-6 p-6" className="bg-background">
+                {selectedTabId === 'messages' ? (
+                  <div tw="flex flex-col gap-y-8">
+                    <div tw="flex justify-between">
+                      <div className="tp-body1">
+                        Channels:{' '}
+                        <span className="tp-body2">{authorizedChannels}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        kind="functional"
+                        variant="warning"
+                        onClick={handleOpenChannelsPanel}
+                      >
+                        Filter channels
+                      </Button>
+                    </div>
+                    <div>
+                      <StyledTable
+                        borderType="none"
+                        rowNoise
+                        rowKey={(row) => row.type}
+                        rowBackgroundColors={['purple2', 'purple3']}
+                        hoverHighlight={false}
+                        clickableRows={false}
+                        data={messageTypesCtrl.field.value}
+                        columns={[
+                          {
+                            label: 'Message type',
+                            render: (row) => (
+                              <span className="fs-12">{row.type}</span>
+                            ),
+                          },
+                          {
+                            label: 'Allowed',
+                            render: (row, _col, rowIndex) => (
+                              <Checkbox
+                                checked={row.authorized}
+                                onChange={() =>
+                                  handleToggleMessageType(rowIndex)
+                                }
+                                size="sm"
+                              />
+                            ),
+                          },
+                          {
+                            label: 'Filters / scope',
+                            render: (row, _col, rowIndex) => {
+                              if (row.type === MessageType.post) {
+                                return (
+                                  <FilterScopeButton
+                                    authorized={row.authorized}
+                                    availableItems={availablePostTypes}
+                                    selectedItems={row.postTypes}
+                                    onSelectionChange={(items) =>
+                                      handlePostTypesChange(rowIndex, items)
+                                    }
+                                    isLoading={isLoadingPostTypes}
+                                  />
+                                )
+                              } else if (row.type === MessageType.aggregate) {
+                                return (
+                                  <FilterScopeButton
+                                    authorized={row.authorized}
+                                    availableItems={row.aggregateKeys}
+                                    selectedItems={row.aggregateKeys}
+                                    onSelectionChange={(items) =>
+                                      handleAggregateKeysChange(rowIndex, items)
+                                    }
+                                  />
+                                )
+                              } else {
+                                return (
+                                  <span tw="opacity-40 ml-3" className="fs-12">
+                                    N/A
+                                  </span>
+                                )
+                              }
+                            },
+                          },
+                        ]}
+                        rowProps={() => ({
+                          className: 'tp-info',
+                        })}
+                      />
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </NoisyContainer>
+          </div>
         </div>
-        <div tw="flex flex-col gap-y-2">
+
+        <StyledFooter>
+          <div tw="flex justify-start gap-x-4">
+            <Button
+              type="submit"
+              color="main0"
+              kind="functional"
+              variant="warning"
+            >
+              Continue
+            </Button>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="tp-header fs-14"
+              tw="not-italic font-bold"
+            >
+              Cancel
+            </button>
+          </div>
+        </StyledFooter>
+      </Form>
+      <SidePanel
+        isOpen={isChannelsPanelOpen}
+        onClose={handleCloseChannelsPanel}
+        title="Channels"
+        order={channelsPanelOrder}
+        width="50vw"
+        mobileHeight="70vh"
+      >
+        <div tw="flex flex-col gap-y-2.5">
           <div className="tp-info fs-14">Permissions details</div>
           <NoisyContainer>
-            <Tabs
-              tabs={[{ id: 'messages', name: 'Messages' }]}
-              selected={selectedTabId}
-              onTabChange={(id) => setSelectedTabId(id)}
-              align="left"
+            <TextInput
+              name="channels-search"
+              placeholder="Search"
+              icon={<Icon name="search" />}
+              value={channelsSearchQuery}
+              onChange={(e) => setChannelsSearchQuery(e.target.value)}
             />
-            <div role="tabpanel" tw="mt-6 p-6" className="bg-background">
-              {selectedTabId === 'messages' ? (
-                <div tw="flex flex-col gap-y-8">
-                  <div tw="flex justify-between">
-                    <div className="tp-body1">
-                      Channels:{' '}
-                      <span className="tp-body2">{authorizedChannels}</span>
-                    </div>
-                    <Button
-                      type="button"
+            <div tw="flex items-center justify-between w-full my-3">
+              <Button variant="textOnly" onClick={handleSelectAllChannels}>
+                Select all
+              </Button>
+              <Button variant="textOnly" onClick={handleClearAllChannels}>
+                Clear all
+              </Button>
+            </div>
+            <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
+              {isLoadingChannels ? (
+                <div className="tp-info fs-12">Loading...</div>
+              ) : filteredChannels.length > 0 ? (
+                filteredChannels.map((channel) => (
+                  <div key={channel} tw="flex items-center gap-x-2.5">
+                    <Checkbox
+                      checked={selectedChannels.includes(channel)}
+                      onChange={() => handleToggleChannel(channel)}
                       size="sm"
-                      kind="functional"
-                      variant="warning"
-                      onClick={onOpenChannelsPanel}
-                    >
-                      Filter channels
-                    </Button>
-                  </div>
-                  <div>
-                    <StyledTable
-                      borderType="none"
-                      rowNoise
-                      rowKey={(row) => row.type}
-                      rowBackgroundColors={['purple2', 'purple3']}
-                      hoverHighlight={false}
-                      clickableRows={false}
-                      data={messageTypesCtrl.field.value}
-                      columns={[
-                        {
-                          label: 'Message type',
-                          render: (row) => (
-                            <span className="fs-12">{row.type}</span>
-                          ),
-                        },
-                        {
-                          label: 'Allowed',
-                          render: (row, _col, rowIndex) => (
-                            <Checkbox
-                              checked={row.authorized}
-                              onChange={() => handleToggleMessageType(rowIndex)}
-                              size="sm"
-                            />
-                          ),
-                        },
-                        {
-                          label: 'Filters / scope',
-                          render: (row, _col, rowIndex) => {
-                            if (row.type === MessageType.post) {
-                              return (
-                                <FilterScopeButton
-                                  authorized={row.authorized}
-                                  availableItems={availablePostTypes}
-                                  selectedItems={row.postTypes}
-                                  onSelectionChange={(items) =>
-                                    handlePostTypesChange(rowIndex, items)
-                                  }
-                                  isLoading={isLoadingPostTypes}
-                                />
-                              )
-                            } else if (row.type === MessageType.aggregate) {
-                              return (
-                                <FilterScopeButton
-                                  authorized={row.authorized}
-                                  availableItems={row.aggregateKeys}
-                                  selectedItems={row.aggregateKeys}
-                                  onSelectionChange={(items) =>
-                                    handleAggregateKeysChange(rowIndex, items)
-                                  }
-                                />
-                              )
-                            } else {
-                              return (
-                                <span tw="opacity-40 ml-3" className="fs-12">
-                                  N/A
-                                </span>
-                              )
-                            }
-                          },
-                        },
-                      ]}
-                      rowProps={() => ({
-                        className: 'tp-info',
-                      })}
                     />
+                    <span className="fs-12">{channel}</span>
                   </div>
+                ))
+              ) : (
+                <div className="tp-info fs-12">
+                  {channelsSearchQuery
+                    ? 'No matches found'
+                    : 'No channels available'}
                 </div>
-              ) : null}
+              )}
             </div>
           </NoisyContainer>
         </div>
-      </div>
-      <StyledFooter>
-        <div tw="flex justify-start gap-x-4">
-          <Button
-            type="submit"
-            color="main0"
-            kind="functional"
-            variant="warning"
-          >
-            Continue
-          </Button>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="tp-header fs-14"
-            tw="not-italic font-bold"
-          >
-            Cancel
-          </button>
-        </div>
-      </StyledFooter>
-    </Form>
+        <StyledFooter>
+          <div tw="flex justify-start gap-x-4">
+            <Button
+              type="button"
+              color="main0"
+              kind="functional"
+              variant="warning"
+              onClick={handleApplyChannels}
+            >
+              Continue
+            </Button>
+            <button
+              type="button"
+              onClick={handleCancelChannels}
+              className="tp-header fs-14"
+              tw="not-italic font-bold"
+            >
+              Cancel
+            </button>
+          </div>
+        </StyledFooter>
+      </SidePanel>
+    </>
   )
 }
 PermissionsDetail.displayName = 'PermissionsDetail'

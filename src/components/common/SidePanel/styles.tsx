@@ -48,7 +48,7 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
   }) => css`
     position: fixed;
     background-color: ${theme.color.background};
-    overflow-y: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 
@@ -61,7 +61,7 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     /* For sliding effect on desktop */
     transform: translateX(100%);
     transition: transform ${theme.transition.duration.normal}ms ease-in-out;
-    z-index: ${29 + $order}; /* above the backdrop */
+    z-index: ${29 + $order * 2}; /* above the backdrop */
 
     ${$isOpen
       ? css`
