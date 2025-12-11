@@ -27,6 +27,7 @@ import Form from '@/components/form/Form'
 import { usePermissionsDetailForm } from './hook'
 import { Portal } from '../Portal'
 import { usePostTypes } from '@/hooks/common/usePostTypes'
+import { useAppState } from '@/contexts/appState'
 
 const StyledFooter = styled.div`
   ${({ theme }) => css`
@@ -227,8 +228,14 @@ export const PermissionsDetail = ({
     messageTypesCtrl.field.onChange(updatedTypes)
   }
 
+  const [appState] = useAppState()
+  const { account } = appState.connection
+
+  // Get currently connected account's address for fetching post types
+  const connectedAccountAddress = account?.address
+
   const { postTypes: availablePostTypes, isLoading: isLoadingPostTypes } =
-    usePostTypes(permissions.id)
+    usePostTypes(connectedAccountAddress)
 
   const handlePostTypesChange = (rowIndex: number, newPostTypes: string[]) => {
     const currentTypes = messageTypesCtrl.field.value

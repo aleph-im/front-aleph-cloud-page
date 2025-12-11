@@ -18,6 +18,7 @@ import { PermissionsTabContentProps } from './types'
 import styled, { css } from 'styled-components'
 import tw from 'twin.macro'
 import { useChannels } from '@/hooks/common/useChannels'
+import { useAppState } from '@/contexts/appState'
 
 const StyledFooter = styled.div`
   ${({ theme }) => css`
@@ -75,11 +76,14 @@ export const PermissionsTabContent = memo(
     const modalOpen = modal?.open
     const modalClose = modal?.close
 
-    // Get currently editing permission's address for fetching channels
-    const currentEditingAddress = sidePanel.selectedRow?.id
+    const [appState] = useAppState()
+    const { account } = appState.connection
+
+    // Get currently connected account's address for fetching channels
+    const connectedAccountAddress = account?.address
 
     const { channels: availableChannels, isLoading: isLoadingChannels } =
-      useChannels(currentEditingAddress)
+      useChannels(connectedAccountAddress)
 
     // Sync with data prop changes
     useEffect(() => {
@@ -92,6 +96,21 @@ export const PermissionsTabContent = memo(
         setSelectedChannels(sidePanel.selectedRow.channels)
       }
     }, [isChannelsPanelOpen, sidePanel.selectedRow])
+
+    // Keep sidePanel.selectedRow in sync with updatedPermissions
+    useEffect(() => {
+      if (sidePanel.selectedRow && sidePanel.isOpen) {
+        const currentPermission = updatedPermissions.find(
+          (p) => p.id === sidePanel.selectedRow?.id,
+        )
+        if (currentPermission && currentPermission !== sidePanel.selectedRow) {
+          setSidePanel((prev) => ({
+            ...prev,
+            selectedRow: currentPermission,
+          }))
+        }
+      }
+    }, [updatedPermissions, sidePanel.selectedRow, sidePanel.isOpen])
 
     const handleRowConfigure = (row: AccountPermissions) => {
       console.log('Configure permission:', row)
@@ -210,12 +229,21 @@ export const PermissionsTabContent = memo(
       modalClose?.()
     }, [modalClose])
 
+    // Merge available channels with permission's existing channels
+    const allChannels = useMemo(() => {
+      const permissionChannels = sidePanel.selectedRow?.channels || []
+      const merged = Array.from(
+        new Set([...availableChannels, ...permissionChannels]),
+      )
+      return merged.sort()
+    }, [availableChannels, sidePanel.selectedRow])
+
     const filteredChannels = useMemo(() => {
-      if (!channelsSearchQuery) return availableChannels
-      return availableChannels.filter((channel) =>
+      if (!channelsSearchQuery) return allChannels
+      return allChannels.filter((channel) =>
         channel.toLowerCase().includes(channelsSearchQuery.toLowerCase()),
       )
-    }, [availableChannels, channelsSearchQuery])
+    }, [allChannels, channelsSearchQuery])
 
     const handleToggleChannel = useCallback((channel: string) => {
       setSelectedChannels((prev) =>
@@ -230,8 +258,8 @@ export const PermissionsTabContent = memo(
     }, [])
 
     const handleSelectAllChannels = useCallback(() => {
-      setSelectedChannels([...availableChannels])
-    }, [availableChannels])
+      setSelectedChannels([...allChannels])
+    }, [allChannels])
 
     const handleApplyChannels = useCallback(() => {
       if (sidePanel.selectedRow) {
@@ -239,7 +267,13 @@ export const PermissionsTabContent = memo(
           ...sidePanel.selectedRow,
           channels: selectedChannels,
         }
+        // Update the permissions in the main state
         handlePermissionUpdate(updatedPermission)
+        // Also update the currently editing permission in the side panel
+        setSidePanel((prev) => ({
+          ...prev,
+          selectedRow: updatedPermission,
+        }))
         setIsChannelsPanelOpen(false)
         setChannelsSearchQuery('')
       }
