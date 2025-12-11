@@ -211,25 +211,27 @@ export const PermissionsDetail = ({
   const [selectedChannels, setSelectedChannels] = useState<string[]>([])
   const [originalChannels, setOriginalChannels] = useState<string[]>([])
 
-  const { handleSubmit, errors, messageTypesCtrl } = usePermissionsDetailForm({
-    permissions,
-    onSubmitSuccess: onSubmit,
-    onUpdate,
-  })
+  const { handleSubmit, errors, messageTypesCtrl, channelsCtrl } =
+    usePermissionsDetailForm({
+      permissions,
+      onSubmitSuccess: onSubmit,
+      onUpdate,
+    })
 
   const authorizedChannels = useMemo(() => {
-    if (!permissions.channels.length) return 'All'
+    const currentChannels = channelsCtrl.field.value
+    if (!currentChannels.length) return 'All'
 
     const maxchannelsToShow = 2
 
-    const channelsToShow = permissions.channels
+    const channelsToShow = currentChannels
       .slice(0, maxchannelsToShow)
       .join(', ')
 
-    return permissions.channels.length > maxchannelsToShow
+    return currentChannels.length > maxchannelsToShow
       ? `${channelsToShow}, ...`
       : channelsToShow
-  }, [permissions.channels])
+  }, [channelsCtrl.field.value])
 
   const handleToggleMessageType = (index: number) => {
     const currentTypes = messageTypesCtrl.field.value
@@ -255,12 +257,12 @@ export const PermissionsDetail = ({
 
   // Merge available channels with permission's existing channels
   const allChannels = useMemo(() => {
-    const permissionChannels = permissions.channels || []
+    const permissionChannels = channelsCtrl.field.value || []
     const merged = Array.from(
       new Set([...availableChannels, ...permissionChannels]),
     )
     return merged.sort()
-  }, [availableChannels, permissions.channels])
+  }, [availableChannels, channelsCtrl.field.value])
 
   const filteredChannels = useMemo(() => {
     if (!channelsSearchQuery) return allChannels
@@ -272,10 +274,11 @@ export const PermissionsDetail = ({
   // Initialize selected channels when panel opens
   useEffect(() => {
     if (isChannelsPanelOpen) {
-      setSelectedChannels(permissions.channels)
-      setOriginalChannels(permissions.channels)
+      const currentChannels = channelsCtrl.field.value
+      setSelectedChannels(currentChannels)
+      setOriginalChannels(currentChannels)
     }
-  }, [isChannelsPanelOpen, permissions.channels])
+  }, [isChannelsPanelOpen, channelsCtrl.field.value])
 
   const handlePostTypesChange = (rowIndex: number, newPostTypes: string[]) => {
     const currentTypes = messageTypesCtrl.field.value
@@ -327,15 +330,10 @@ export const PermissionsDetail = ({
   }, [allChannels])
 
   const handleApplyChannels = useCallback(() => {
-    if (onUpdate) {
-      onUpdate({
-        ...permissions,
-        channels: selectedChannels,
-      })
-    }
+    channelsCtrl.field.onChange(selectedChannels)
     setIsChannelsPanelOpen(false)
     setChannelsSearchQuery('')
-  }, [permissions, selectedChannels, onUpdate])
+  }, [selectedChannels, channelsCtrl])
 
   const handleCancelChannels = useCallback(() => {
     setSelectedChannels(originalChannels)
