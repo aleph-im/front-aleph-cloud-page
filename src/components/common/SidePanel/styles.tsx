@@ -36,6 +36,7 @@ export const StyledHeader = styled.div`
 
 export const StyledContent = styled.div`
   ${tw`p-12 pb-0 flex-1`}
+  overflow-y: auto;
 `
 
 export const StyledSidePanel = styled.div<StyledSidePanelProps>`
