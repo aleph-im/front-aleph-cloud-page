@@ -661,78 +661,80 @@ export const PermissionsDetail = ({
           </div>
         </StyledFooter>
       </Form>
-      <SidePanel
-        isOpen={isChannelsPanelOpen}
-        onClose={handleCloseChannelsPanel}
-        title="Channels"
-        order={channelsPanelOrder}
-        width="50vw"
-        mobileHeight="70vh"
-      >
-        <div tw="flex flex-col gap-y-2.5">
-          <div className="tp-info fs-14">Permissions details</div>
-          <NoisyContainer>
-            <TextInput
-              name="channels-search"
-              placeholder="Search"
-              icon={<Icon name="search" />}
-              value={channelsSearchQuery}
-              onChange={(e) => setChannelsSearchQuery(e.target.value)}
-            />
-            <div tw="flex items-center justify-between w-full my-3">
-              <Button variant="textOnly" onClick={handleSelectAllChannels}>
-                Select all
-              </Button>
-              <Button variant="textOnly" onClick={handleClearAllChannels}>
-                Clear all
-              </Button>
-            </div>
-            <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
-              {isLoadingChannels ? (
-                <div className="tp-info fs-12">Loading...</div>
-              ) : filteredChannels.length > 0 ? (
-                filteredChannels.map((channel) => (
-                  <div key={channel} tw="flex items-center gap-x-2.5">
-                    <Checkbox
-                      checked={selectedChannels.includes(channel)}
-                      onChange={() => handleToggleChannel(channel)}
-                      size="sm"
-                    />
-                    <span className="fs-12">{channel}</span>
+      <Portal>
+        <SidePanel
+          isOpen={isChannelsPanelOpen}
+          onClose={handleCloseChannelsPanel}
+          title="Channels"
+          order={channelsPanelOrder}
+          width="50vw"
+          mobileHeight="70vh"
+        >
+          <div tw="flex flex-col gap-y-2.5">
+            <div className="tp-info fs-14">Permissions details</div>
+            <NoisyContainer>
+              <TextInput
+                name="channels-search"
+                placeholder="Search"
+                icon={<Icon name="search" />}
+                value={channelsSearchQuery}
+                onChange={(e) => setChannelsSearchQuery(e.target.value)}
+              />
+              <div tw="flex items-center justify-between w-full my-3">
+                <Button variant="textOnly" onClick={handleSelectAllChannels}>
+                  Select all
+                </Button>
+                <Button variant="textOnly" onClick={handleClearAllChannels}>
+                  Clear all
+                </Button>
+              </div>
+              <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
+                {isLoadingChannels ? (
+                  <div className="tp-info fs-12">Loading...</div>
+                ) : filteredChannels.length > 0 ? (
+                  filteredChannels.map((channel) => (
+                    <div key={channel} tw="flex items-center gap-x-2.5">
+                      <Checkbox
+                        checked={selectedChannels.includes(channel)}
+                        onChange={() => handleToggleChannel(channel)}
+                        size="sm"
+                      />
+                      <span className="fs-12">{channel}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="tp-info fs-12">
+                    {channelsSearchQuery
+                      ? 'No matches found'
+                      : 'No channels available'}
                   </div>
-                ))
-              ) : (
-                <div className="tp-info fs-12">
-                  {channelsSearchQuery
-                    ? 'No matches found'
-                    : 'No channels available'}
-                </div>
-              )}
-            </div>
-          </NoisyContainer>
-        </div>
-        <StyledFooter>
-          <div tw="flex justify-start gap-x-4">
-            <Button
-              type="button"
-              color="main0"
-              kind="functional"
-              variant="warning"
-              onClick={handleApplyChannels}
-            >
-              Continue
-            </Button>
-            <button
-              type="button"
-              onClick={handleCancelChannels}
-              className="tp-header fs-14"
-              tw="not-italic font-bold"
-            >
-              Cancel
-            </button>
+                )}
+              </div>
+            </NoisyContainer>
           </div>
-        </StyledFooter>
-      </SidePanel>
+          <StyledFooter>
+            <div tw="flex justify-start gap-x-4">
+              <Button
+                type="button"
+                color="main0"
+                kind="functional"
+                variant="warning"
+                onClick={handleApplyChannels}
+              >
+                Continue
+              </Button>
+              <button
+                type="button"
+                onClick={handleCancelChannels}
+                className="tp-header fs-14"
+                tw="not-italic font-bold"
+              >
+                Cancel
+              </button>
+            </div>
+          </StyledFooter>
+        </SidePanel>
+      </Portal>
     </>
   )
 }
