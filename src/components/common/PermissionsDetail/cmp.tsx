@@ -221,16 +221,7 @@ export const PermissionsDetail = ({
   const authorizedChannels = useMemo(() => {
     const currentChannels = channelsCtrl.field.value
     if (!currentChannels.length) return 'All'
-
-    const maxchannelsToShow = 2
-
-    const channelsToShow = currentChannels
-      .slice(0, maxchannelsToShow)
-      .join(', ')
-
-    return currentChannels.length > maxchannelsToShow
-      ? `${channelsToShow}, ...`
-      : channelsToShow
+    return currentChannels.join(', ')
   }, [channelsCtrl.field.value])
 
   const handleToggleMessageType = (index: number) => {
@@ -405,10 +396,18 @@ export const PermissionsDetail = ({
               <div role="tabpanel" tw="mt-6 p-6" className="bg-background">
                 {selectedTabId === 'messages' ? (
                   <div tw="flex flex-col gap-y-8">
-                    <div tw="flex justify-between">
-                      <div className="tp-body1">
-                        Channels:{' '}
-                        <span className="tp-body2">{authorizedChannels}</span>
+                    <div tw="flex justify-between items-center gap-x-4">
+                      <div
+                        className="tp-body1"
+                        tw="flex-1 flex items-center min-w-12"
+                      >
+                        Channels:
+                        <span
+                          className="tp-body2"
+                          tw="inline-block max-w-full overflow-hidden whitespace-nowrap text-ellipsis px-1"
+                        >
+                          {authorizedChannels}
+                        </span>
                       </div>
                       <Button
                         type="button"
