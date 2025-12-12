@@ -25,7 +25,6 @@ import { Portal } from '@/components/common/Portal'
 import SidePanel from '@/components/common/SidePanel'
 import { usePermissionsConfiguration } from './hook'
 import { PermissionsConfigurationProps } from './types'
-import { RotatingLines } from 'react-loader-spinner'
 
 const StyledFooter = styled.div`
   ${({ theme }) => css`

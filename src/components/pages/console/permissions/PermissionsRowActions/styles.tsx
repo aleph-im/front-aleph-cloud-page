@@ -39,12 +39,18 @@ export const RowActionsButton = styled.button`
   `})
 `
 
-export const ActionButton = styled.button`
-  ${({ theme }) => {
+export const ActionButton = styled.button<{ $disabled?: boolean }>`
+  ${({ theme, $disabled }) => {
     return css`
       &:hover {
         background-color: ${theme.color.purple2};
       }
+
+      ${$disabled &&
+      css`
+        background-color: ${theme.color.purple2};
+        opacity: 60%;
+      `}
     `
   }}
 `

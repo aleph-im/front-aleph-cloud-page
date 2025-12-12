@@ -11,6 +11,7 @@ import { PermissionsTableColumnsProps } from './types'
 export const getPermissionsTableColumns = ({
   onRowConfigure,
   onRowRevoke,
+  onRowRestore,
 }: PermissionsTableColumnsProps) => [
   {
     label: 'Address',
@@ -53,8 +54,10 @@ export const getPermissionsTableColumns = ({
     align: 'right' as const,
     render: (row: AccountPermissions) => (
       <PermissionsRowActions
+        isRevoked={row.revoked}
         onConfigure={() => onRowConfigure(row)}
         onRevoke={() => onRowRevoke(row)}
+        onRestore={() => onRowRestore(row)}
       />
     ),
     cellProps: () => ({

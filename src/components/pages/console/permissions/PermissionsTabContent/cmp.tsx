@@ -7,6 +7,7 @@ import { Button, TextGradient, useModal } from '@aleph-front/core'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { getPermissionsTableColumns } from './columns'
 import { PermissionsTabContentProps } from './types'
+import tw from 'twin.macro'
 
 // Type for side panel content
 type SidePanelContent = {
@@ -73,10 +74,23 @@ export const PermissionsTabContent = memo(
     }
 
     const handleRowRevoke = (row: AccountPermissions) => {
-      console.log('Revoke permission:', row)
-      // @todo: strike text elements in the row to indicate revocation, disable
-      // "configure" action, and switch "revoke" to "restore" action.
-      // Also add opacity to the row.
+      // Set revoked to true for this permission
+      const updatedPermission = { ...row, revoked: true }
+      setUpdatedPermissions((prev) =>
+        prev.map((p) => (p.id === row.id ? updatedPermission : p)),
+      )
+      // Notify parent component of the change
+      onPermissionChange?.(updatedPermission)
+    }
+
+    const handleRowRestore = (row: AccountPermissions) => {
+      // Set revoked to false for this permission
+      const updatedPermission = { ...row, revoked: false }
+      setUpdatedPermissions((prev) =>
+        prev.map((p) => (p.id === row.id ? updatedPermission : p)),
+      )
+      // Notify parent component of the change
+      onPermissionChange?.(updatedPermission)
     }
 
     const handleRowClick = (row: AccountPermissions, index: number) => {
@@ -178,6 +192,7 @@ export const PermissionsTabContent = memo(
     const columns = getPermissionsTableColumns({
       onRowConfigure: handleRowConfigure,
       onRowRevoke: handleRowRevoke,
+      onRowRestore: handleRowRestore,
     })
 
     useEffect(
@@ -256,6 +271,7 @@ export const PermissionsTabContent = memo(
                 columns={columns}
                 rowProps={(row: AccountPermissions, i: number) => ({
                   onClick: () => handleRowClick(row, i),
+                  css: row.revoked ? tw`opacity-60 line-through` : '',
                 })}
               />
             </div>

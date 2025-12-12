@@ -12,8 +12,10 @@ import {
 import { Portal } from '@/components/common/Portal'
 
 export const PermissionsRowActions = ({
+  isRevoked = false,
   onConfigure,
   onRevoke,
+  onRestore,
 }: PermissionsRowActionsProps) => {
   const [showActions, setShowActions] = React.useState(false)
 
@@ -53,13 +55,18 @@ export const PermissionsRowActions = ({
     onRevoke()
   }
 
+  const handleRestore = () => {
+    setShowActions(false)
+    onRestore()
+  }
+
   return (
     <span onClick={(e) => e.stopPropagation()}>
       <RowActionsButton
         ref={actionsButtonRef}
         onClick={() => setShowActions(!showActions)}
       >
-        <Icon name="ellipsis" />
+        {isRevoked ? <Icon name="plus-circle" /> : <Icon name="ellipsis" />}
       </RowActionsButton>
       <Portal>
         {showActions && (
@@ -70,17 +77,28 @@ export const PermissionsRowActions = ({
           >
             <div tw="flex flex-col items-start w-full">
               <ActionButton
+                $disabled={isRevoked}
                 tw="px-4 py-3 w-full text-left"
                 onClick={handleConfigure}
               >
                 Configure
               </ActionButton>
-              <ActionButton
-                tw="px-4 py-3 w-full text-left"
-                onClick={handleRevoke}
-              >
-                Revoke
-              </ActionButton>
+              {/* check if row is revoked */}
+              {isRevoked ? (
+                <ActionButton
+                  tw="px-4 py-3 w-full text-left"
+                  onClick={handleRestore}
+                >
+                  Restore
+                </ActionButton>
+              ) : (
+                <ActionButton
+                  tw="px-4 py-3 w-full text-left"
+                  onClick={handleRevoke}
+                >
+                  Revoke
+                </ActionButton>
+              )}
             </div>
           </StyledPortal>
         )}

@@ -63,6 +63,7 @@ export type AccountPermissions = {
   alias?: string
   channels: string[] | []
   messageTypes: MessageTypePermissions[]
+  revoked?: boolean
 }
 
 export type Permissions = AccountPermissions[]
