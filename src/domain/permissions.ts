@@ -10,6 +10,7 @@ import {
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { AggregateContent, AggregateManager } from './aggregateManager'
 import { MessageType } from '@aleph-sdk/message'
+import { newPermissionSchema } from '@/helpers/schemas/permissions'
 
 // ==================================
 // = API types (from Aleph backend) =
@@ -74,6 +75,8 @@ export class PermissionsManager extends AggregateManager<
   AddPermissionsApi,
   PermissionsAggregateItemApi
 > {
+  static addSchema = newPermissionSchema
+
   protected addStepType: CheckoutStepType = 'permissions'
   protected delStepType: CheckoutStepType = 'permissionsDel'
 

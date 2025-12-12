@@ -11,8 +11,12 @@ import Err from '@/helpers/errors'
 import { TooltipProps } from '@aleph-front/core'
 import { accountConnectionRequiredDisabledMessage } from './disabledMessages'
 import { usePermissionsManager } from '@/hooks/common/useManager/usePermissionManager'
-import { MessageTypePermissions } from '@/domain/permissions'
+import {
+  MessageTypePermissions,
+  PermissionsManager,
+} from '@/domain/permissions'
 import { MessageType } from '@aleph-sdk/message'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 export type NewPermissionFormState = {
   address: string
@@ -122,6 +126,7 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
   } = useForm({
     defaultValues,
     onSubmit,
+    resolver: zodResolver(PermissionsManager.addSchema),
     readyDeps: [],
   })
 
