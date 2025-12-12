@@ -310,4 +310,53 @@ export class PermissionsManager extends AggregateManager<
     const addPermissionsApi = this.convertToAddPermissionsApi(permission)
     return this.add(addPermissionsApi)
   }
+
+  /**
+   * Updates multiple permissions at once.
+   * Permissions with revoked=true are removed from the authorizations list.
+   * Other permissions are updated/added.
+   */
+  async updatePermissions(
+    permissions: AccountPermissions[],
+  ): Promise<AccountPermissions[]> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient)) {
+      throw new Error('Authenticated client required')
+    }
+
+    const existingConfig = await this.fetchRawAggregate()
+    const existingAuthorizations = existingConfig?.authorizations || []
+
+    const updatedAuthorizations = [...existingAuthorizations]
+
+    for (const permission of permissions) {
+      const existingIndex = updatedAuthorizations.findIndex(
+        (auth) => auth.address === permission.id,
+      )
+
+      if (permission.revoked) {
+        if (existingIndex >= 0) {
+          updatedAuthorizations.splice(existingIndex, 1)
+        }
+      } else {
+        const apiPermission = this.convertToAddPermissionsApi(permission)
+        const newItem = this.buildAggregateItemContent(apiPermission)
+
+        if (existingIndex >= 0) {
+          updatedAuthorizations[existingIndex] = newItem
+        } else {
+          updatedAuthorizations.push(newItem)
+        }
+      }
+    }
+
+    await this.sdkClient.createAggregate({
+      key: this.key,
+      channel: this.channel,
+      content: {
+        authorizations: updatedAuthorizations,
+      },
+    })
+
+    return this.getAll()
+  }
 }

@@ -11,7 +11,7 @@ import { AccountPermissions } from '@/domain/permissions'
 import { Button } from '@aleph-front/core'
 
 export default function PermissionsDashboardPage({ mainRef }: PageProps) {
-  const { permissions } = usePermissionsDashboardPage()
+  const { permissions, manager } = usePermissionsDashboardPage()
   const [pendingChanges, setPendingChanges] = useState<
     Map<string, AccountPermissions>
   >(new Map())
@@ -27,11 +27,14 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
     [],
   )
 
-  const handleSaveAllChanges = useCallback(() => {
-    console.log('Saving all changes:', pendingChanges)
-    // @todo: implement actual save logic here
+  const handleSaveAllChanges = useCallback(async () => {
+    if (!manager) return
+
+    const permissionsToUpdate = Array.from(pendingChanges.values())
+    await manager.updatePermissions(permissionsToUpdate)
+
     setPendingChanges(new Map())
-  }, [pendingChanges])
+  }, [manager, pendingChanges])
 
   return (
     <>
