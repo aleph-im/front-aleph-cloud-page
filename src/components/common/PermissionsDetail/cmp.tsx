@@ -94,6 +94,7 @@ export const PermissionsDetail = ({
             <div className="tp-info fs-14">Permissions details</div>
             <PermissionsConfiguration
               control={control}
+              name=""
               channelsPanelOrder={channelsPanelOrder}
             />
           </div>
