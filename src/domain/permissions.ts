@@ -26,6 +26,7 @@ type PermissionsAggregateItemApi = {
 
 type AddPermissionsApi = PermissionsAggregateItemApi & {
   alias: string
+  revoked?: boolean
 }
 
 type PermissionsConfigApi = {
@@ -179,6 +180,7 @@ export class PermissionsManager extends AggregateManager<
     return {
       types: entity.types,
       address: entity.address,
+      alias: entity.alias,
       channels: entity.channels,
       post_types: entity.post_types || [],
       aggregate_keys: entity.aggregate_keys || [],
@@ -231,6 +233,7 @@ export class PermissionsManager extends AggregateManager<
       types: authorizedTypes.length > 0 ? authorizedTypes : [],
       post_types: postTypes,
       aggregate_keys: aggregateKeys,
+      revoked: permission.revoked,
     }
   }
 
@@ -248,7 +251,8 @@ export class PermissionsManager extends AggregateManager<
   }
 
   /**
-   * Builds the aggregate content merging with existing permissions
+   * Builds the aggregate content merging with existing permissions.
+   * Items with revoked=true are removed from the authorizations list.
    */
   private async buildPermissionsAggregateContent(
     entity: AddPermissionsApi | AddPermissionsApi[],
@@ -265,12 +269,18 @@ export class PermissionsManager extends AggregateManager<
         (auth) => auth.address === item.address,
       )
 
-      const newItem = this.buildAggregateItemContent(item)
-
-      if (existingIndex >= 0) {
-        updatedAuthorizations[existingIndex] = newItem
+      if (item.revoked) {
+        if (existingIndex >= 0) {
+          updatedAuthorizations.splice(existingIndex, 1)
+        }
       } else {
-        updatedAuthorizations.push(newItem)
+        const newItem = this.buildAggregateItemContent(item)
+
+        if (existingIndex >= 0) {
+          updatedAuthorizations[existingIndex] = newItem
+        } else {
+          updatedAuthorizations.push(newItem)
+        }
       }
     }
 
@@ -319,44 +329,9 @@ export class PermissionsManager extends AggregateManager<
   async updatePermissions(
     permissions: AccountPermissions[],
   ): Promise<AccountPermissions[]> {
-    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient)) {
-      throw new Error('Authenticated client required')
-    }
-
-    const existingConfig = await this.fetchRawAggregate()
-    const existingAuthorizations = existingConfig?.authorizations || []
-
-    const updatedAuthorizations = [...existingAuthorizations]
-
-    for (const permission of permissions) {
-      const existingIndex = updatedAuthorizations.findIndex(
-        (auth) => auth.address === permission.id,
-      )
-
-      if (permission.revoked) {
-        if (existingIndex >= 0) {
-          updatedAuthorizations.splice(existingIndex, 1)
-        }
-      } else {
-        const apiPermission = this.convertToAddPermissionsApi(permission)
-        const newItem = this.buildAggregateItemContent(apiPermission)
-
-        if (existingIndex >= 0) {
-          updatedAuthorizations[existingIndex] = newItem
-        } else {
-          updatedAuthorizations.push(newItem)
-        }
-      }
-    }
-
-    await this.sdkClient.createAggregate({
-      key: this.key,
-      channel: this.channel,
-      content: {
-        authorizations: updatedAuthorizations,
-      },
-    })
-
-    return this.getAll()
+    const addPermissionsApi = permissions.map((p) =>
+      this.convertToAddPermissionsApi(p),
+    )
+    return this.add(addPermissionsApi)
   }
 }
