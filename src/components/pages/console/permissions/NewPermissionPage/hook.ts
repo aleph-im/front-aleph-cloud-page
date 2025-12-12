@@ -2,7 +2,10 @@ import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { Control, FieldErrors, useController, useWatch } from 'react-hook-form'
-import { useCheckoutNotification } from '@/hooks/form/useCheckoutNotification'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
 import { TooltipProps } from '@aleph-front/core'
@@ -46,23 +49,45 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
   // Checkout flow
 
   const manager = usePermissionsManager()
-  useCheckoutNotification({})
+  const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewPermissionFormState) => {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
 
-      await manager.addNewAccountPermission({
+      const permission = {
         id: state.address,
         alias: state.alias,
         channels: state.permissions.channels,
         messageTypes: state.permissions.messageTypes,
-      })
+      }
 
-      router.push('.')
+      const iSteps = await manager.getAddSteps()
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
+
+      const steps = manager.addNewAccountPermissionSteps(permission)
+
+      try {
+        let result
+
+        while (!result) {
+          const { value, done } = await steps.next()
+
+          if (done) {
+            result = value
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        router.push('.')
+      } finally {
+        await stop()
+      }
     },
-    [manager, account, router],
+    [manager, account, router, next, stop],
   )
 
   // -------------------------

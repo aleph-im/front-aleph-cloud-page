@@ -9,9 +9,14 @@ import FloatingFooter from '@/components/form/FloatingFooter'
 import { PageProps } from '@/types/types'
 import { AccountPermissions } from '@/domain/permissions'
 import { Button } from '@aleph-front/core'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
 
 export default function PermissionsDashboardPage({ mainRef }: PageProps) {
   const { permissions, manager } = usePermissionsDashboardPage()
+  const { next, stop } = useCheckoutNotification({})
   const [pendingChanges, setPendingChanges] = useState<
     Map<string, AccountPermissions>
   >(new Map())
@@ -31,10 +36,31 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
     if (!manager) return
 
     const permissionsToUpdate = Array.from(pendingChanges.values())
-    await manager.updatePermissions(permissionsToUpdate)
 
-    setPendingChanges(new Map())
-  }, [manager, pendingChanges])
+    const iSteps = await manager.getAddSteps()
+    const nSteps = iSteps.map((i) => stepsCatalog[i])
+
+    const steps = manager.updatePermissionsSteps(permissionsToUpdate)
+
+    try {
+      let result
+
+      while (!result) {
+        const { value, done } = await steps.next()
+
+        if (done) {
+          result = value
+          break
+        }
+
+        await next(nSteps)
+      }
+
+      setPendingChanges(new Map())
+    } finally {
+      await stop()
+    }
+  }, [manager, pendingChanges, next, stop])
 
   return (
     <>

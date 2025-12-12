@@ -322,6 +322,17 @@ export class PermissionsManager extends AggregateManager<
   }
 
   /**
+   * Returns the steps generator for adding a new account permission.
+   * Use this with checkout notification flow.
+   */
+  addNewAccountPermissionSteps(
+    permission: AccountPermissions,
+  ): AsyncGenerator<void, AccountPermissions[], void> {
+    const addPermissionsApi = this.convertToAddPermissionsApi(permission)
+    return this.addSteps(addPermissionsApi)
+  }
+
+  /**
    * Updates multiple permissions at once.
    * Permissions with revoked=true are removed from the authorizations list.
    * Other permissions are updated/added.
@@ -333,5 +344,18 @@ export class PermissionsManager extends AggregateManager<
       this.convertToAddPermissionsApi(p),
     )
     return this.add(addPermissionsApi)
+  }
+
+  /**
+   * Returns the steps generator for updating permissions.
+   * Use this with checkout notification flow.
+   */
+  updatePermissionsSteps(
+    permissions: AccountPermissions[],
+  ): AsyncGenerator<void, AccountPermissions[], void> {
+    const addPermissionsApi = permissions.map((p) =>
+      this.convertToAddPermissionsApi(p),
+    )
+    return this.addSteps(addPermissionsApi)
   }
 }
