@@ -8,7 +8,7 @@ import {
   defaultPermissionsAggregateKey,
 } from '@/helpers/constants'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
-import { AggregateManager } from './aggregateManager'
+import { AggregateContent, AggregateManager } from './aggregateManager'
 import { MessageType } from '@aleph-sdk/message'
 
 // ==================================
@@ -203,11 +203,11 @@ export class PermissionsManager extends AggregateManager<
   }
 
   /**
-   * Converts domain AccountPermissions to API format
+   * Converts domain AccountPermissions to AddPermissionsApi format
    */
-  private convertToApiFormat(
+  private convertToAddPermissionsApi(
     permission: AccountPermissions,
-  ): PermissionsAggregateItemApi {
+  ): AddPermissionsApi {
     const authorizedTypes: MessageType[] = []
     let postTypes: string[] = []
     let aggregateKeys: string[] = []
@@ -226,7 +226,7 @@ export class PermissionsManager extends AggregateManager<
 
     return {
       address: permission.id,
-      alias: permission.alias,
+      alias: permission.alias || '',
       channels: permission.channels.length > 0 ? permission.channels : [],
       types: authorizedTypes.length > 0 ? authorizedTypes : [],
       post_types: postTypes,
@@ -248,39 +248,66 @@ export class PermissionsManager extends AggregateManager<
   }
 
   /**
-   * Adds a new account permission, merging with existing permissions
+   * Builds the aggregate content merging with existing permissions
    */
-  async addNewAccountPermission(permission: AccountPermissions): Promise<void> {
-    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient)) {
-      throw new Error('Authenticated client required')
-    }
+  private async buildPermissionsAggregateContent(
+    entity: AddPermissionsApi | AddPermissionsApi[],
+  ): Promise<AggregateContent<PermissionsAggregateItemApi>> {
+    const items = Array.isArray(entity) ? entity : [entity]
 
     const existingConfig = await this.fetchRawAggregate()
     const existingAuthorizations = existingConfig?.authorizations || []
 
-    const newPermissionApi = this.convertToApiFormat(permission)
+    const updatedAuthorizations = [...existingAuthorizations]
 
-    const existingIndex = existingAuthorizations.findIndex(
-      (auth) => auth.address === permission.id,
-    )
+    for (const item of items) {
+      const existingIndex = updatedAuthorizations.findIndex(
+        (auth) => auth.address === item.address,
+      )
 
-    let updatedAuthorizations: PermissionsAggregateItemApi[]
-    if (existingIndex >= 0) {
-      updatedAuthorizations = [...existingAuthorizations]
-      updatedAuthorizations[existingIndex] = newPermissionApi
-    } else {
-      updatedAuthorizations = [...existingAuthorizations, newPermissionApi]
+      const newItem = this.buildAggregateItemContent(item)
+
+      if (existingIndex >= 0) {
+        updatedAuthorizations[existingIndex] = newItem
+      } else {
+        updatedAuthorizations.push(newItem)
+      }
     }
 
-    console.log('content', {
+    return {
       authorizations: updatedAuthorizations,
-    })
+    } as unknown as AggregateContent<PermissionsAggregateItemApi>
+  }
+
+  /**
+   * Overrides addSteps to handle the permissions-specific aggregate structure
+   */
+  async *addSteps(
+    entity: AddPermissionsApi | AddPermissionsApi[],
+  ): AsyncGenerator<void, AccountPermissions[], void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient)) {
+      throw new Error('Authenticated client required')
+    }
+
+    const content = await this.buildPermissionsAggregateContent(entity)
+
+    yield
     await this.sdkClient.createAggregate({
       key: this.key,
       channel: this.channel,
-      content: {
-        authorizations: updatedAuthorizations,
-      },
+      content,
     })
+
+    return this.getAll()
+  }
+
+  /**
+   * Adds a new account permission, merging with existing permissions
+   */
+  async addNewAccountPermission(
+    permission: AccountPermissions,
+  ): Promise<AccountPermissions[]> {
+    const addPermissionsApi = this.convertToAddPermissionsApi(permission)
+    return this.add(addPermissionsApi)
   }
 }
