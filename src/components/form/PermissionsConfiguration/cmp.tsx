@@ -6,6 +6,7 @@ import {
   Checkbox,
   Icon,
   NoisyContainer,
+  Spinner,
   Tabs,
   TextInput,
   useClickOutside,
@@ -24,6 +25,7 @@ import { Portal } from '@/components/common/Portal'
 import SidePanel from '@/components/common/SidePanel'
 import { usePermissionsConfiguration } from './hook'
 import { PermissionsConfigurationProps } from './types'
+import { RotatingLines } from 'react-loader-spinner'
 
 const StyledFooter = styled.div`
   ${({ theme }) => css`
@@ -127,7 +129,7 @@ const FilterScopeButton = ({
         {!authorized ? (
           <Icon name="ellipsis" />
         ) : isLoading ? (
-          '...'
+          <Spinner size="xs" tw="-mt-1" color="black" />
         ) : count > 0 ? (
           count
         ) : (
