@@ -7,7 +7,6 @@ import { Button, TextGradient, useModal } from '@aleph-front/core'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { getPermissionsTableColumns } from './columns'
 import { PermissionsTabContentProps } from './types'
-import tw from 'twin.macro'
 
 // Type for side panel content
 type SidePanelContent = {
