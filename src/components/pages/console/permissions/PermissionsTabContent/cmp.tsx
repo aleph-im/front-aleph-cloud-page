@@ -270,8 +270,9 @@ export const PermissionsTabContent = memo(
                 data={updatedPermissions}
                 columns={columns}
                 rowProps={(row: AccountPermissions, i: number) => ({
-                  onClick: () => handleRowClick(row, i),
-                  css: row.revoked ? tw`opacity-60 line-through` : '',
+                  onClick: () => {
+                    !row.revoked && handleRowClick(row, i)
+                  },
                 })}
               />
             </div>

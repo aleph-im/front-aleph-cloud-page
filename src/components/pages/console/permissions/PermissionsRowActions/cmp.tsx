@@ -77,7 +77,7 @@ export const PermissionsRowActions = ({
           >
             <div tw="flex flex-col items-start w-full">
               <ActionButton
-                $disabled={isRevoked}
+                disabled={isRevoked}
                 tw="px-4 py-3 w-full text-left"
                 onClick={handleConfigure}
               >
