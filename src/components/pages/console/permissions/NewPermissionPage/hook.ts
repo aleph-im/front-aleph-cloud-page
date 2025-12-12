@@ -53,10 +53,16 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
 
-      console.log('Saving all changes:', state)
-      // @todo: implement actual save logic here
+      await manager.addNewAccountPermission({
+        id: state.address,
+        alias: state.alias,
+        channels: state.permissions.channels,
+        messageTypes: state.permissions.messageTypes,
+      })
+
+      router.push('.')
     },
-    [manager, account],
+    [manager, account, router],
   )
 
   // -------------------------

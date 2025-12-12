@@ -201,4 +201,86 @@ export class PermissionsManager extends AggregateManager<
       ),
     }
   }
+
+  /**
+   * Converts domain AccountPermissions to API format
+   */
+  private convertToApiFormat(
+    permission: AccountPermissions,
+  ): PermissionsAggregateItemApi {
+    const authorizedTypes: MessageType[] = []
+    let postTypes: string[] = []
+    let aggregateKeys: string[] = []
+
+    for (const mt of permission.messageTypes) {
+      if (!mt.authorized) continue
+
+      authorizedTypes.push(mt.type)
+
+      if (mt.type === MessageType.post) {
+        postTypes = (mt as PostPermissions).postTypes || []
+      } else if (mt.type === MessageType.aggregate) {
+        aggregateKeys = (mt as AggregatePermissions).aggregateKeys || []
+      }
+    }
+
+    return {
+      address: permission.id,
+      alias: permission.alias,
+      channels: permission.channels.length > 0 ? permission.channels : [],
+      types: authorizedTypes.length > 0 ? authorizedTypes : [],
+      post_types: postTypes,
+      aggregate_keys: aggregateKeys,
+    }
+  }
+
+  /**
+   * Fetches the raw aggregate data from the API
+   */
+  private async fetchRawAggregate(): Promise<PermissionsConfigApi | null> {
+    if (!this.account) return null
+
+    try {
+      return await this.sdkClient.fetchAggregate(this.account.address, this.key)
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * Adds a new account permission, merging with existing permissions
+   */
+  async addNewAccountPermission(permission: AccountPermissions): Promise<void> {
+    if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient)) {
+      throw new Error('Authenticated client required')
+    }
+
+    const existingConfig = await this.fetchRawAggregate()
+    const existingAuthorizations = existingConfig?.authorizations || []
+
+    const newPermissionApi = this.convertToApiFormat(permission)
+
+    const existingIndex = existingAuthorizations.findIndex(
+      (auth) => auth.address === permission.id,
+    )
+
+    let updatedAuthorizations: PermissionsAggregateItemApi[]
+    if (existingIndex >= 0) {
+      updatedAuthorizations = [...existingAuthorizations]
+      updatedAuthorizations[existingIndex] = newPermissionApi
+    } else {
+      updatedAuthorizations = [...existingAuthorizations, newPermissionApi]
+    }
+
+    console.log('content', {
+      authorizations: updatedAuthorizations,
+    })
+    await this.sdkClient.createAggregate({
+      key: this.key,
+      channel: this.channel,
+      content: {
+        authorizations: updatedAuthorizations,
+      },
+    })
+  }
 }
