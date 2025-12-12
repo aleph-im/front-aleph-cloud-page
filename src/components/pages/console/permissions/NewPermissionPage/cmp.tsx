@@ -11,6 +11,7 @@ import { PageProps } from '@/types/types'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import BorderBox from '@/components/common/BorderBox'
 import FloatingFooter from '@/components/form/FloatingFooter'
+import PermissionsConfiguration from '@/components/form/PermissionsConfiguration'
 
 const CheckoutButton = React.memo(
   ({
@@ -56,11 +57,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     createPermissionDisabled,
     createPermissionDisabledMessage,
     createPermissionButtonTitle,
-    values,
     control,
     errors,
     handleSubmit,
     handleBack,
+    addressCtrl,
+    aliasCtrl,
   } = useNewPermissionPage()
 
   return (
@@ -91,11 +93,15 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               <NoisyContainer>
                 <div className="bg-light1" tw="p-6 flex flex-col gap-y-4">
                   <TextInput
+                    {...addressCtrl.field}
+                    {...addressCtrl.fieldState}
                     label="Recipient account address"
                     required
                     placeholder="Wallet address 0x..."
                   />
                   <TextInput
+                    {...aliasCtrl.field}
+                    {...aliasCtrl.fieldState}
                     label="Account alias"
                     required
                     placeholder="Alias (for your reference)"
@@ -111,7 +117,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <p className="tp-body1">
               Select what this account may do and revoke access at any time.
             </p>
-            {/* @todo: add permissions list (same as in PermissionsDetail) */}
+            <div tw="mt-6">
+              <PermissionsConfiguration control={control} />
+            </div>
           </CenteredContainer>
         </section>
         <FloatingFooter containerRef={mainRef} shouldHide={false}>

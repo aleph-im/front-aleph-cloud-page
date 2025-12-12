@@ -1,40 +1,23 @@
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
-import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
-import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
-import {
-  InstanceSystemVolumeField,
-  VolumeField,
-} from '@/hooks/form/useAddVolume'
-import { InstanceImageField } from '@/hooks/form/useSelectInstanceImage'
-import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
-import { DomainField } from '@/hooks/form/useAddDomains'
-import { Control, FieldErrors, useWatch } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { PaymentMethod } from '@/helpers/constants'
-import { CRNSpecs } from '@/domain/node'
-import { StreamDurationField } from '@/hooks/form/useSelectStreamDuration'
+import { Control, FieldErrors, useController, useWatch } from 'react-hook-form'
 import { useCheckoutNotification } from '@/hooks/form/useCheckoutNotification'
 import { useConnection } from '@/hooks/common/useConnection'
 import Err from '@/helpers/errors'
 import { TooltipProps } from '@aleph-front/core'
 import { accountConnectionRequiredDisabledMessage } from './disabledMessages'
 import { usePermissionsManager } from '@/hooks/common/useManager/usePermissionManager'
-import { PermissionsManager } from '@/domain/permissions'
+import { MessageTypePermissions } from '@/domain/permissions'
+import { MessageType } from '@aleph-sdk/message'
 
-export type NewPermissionFormState = NameAndTagsField & {
-  image: InstanceImageField
-  specs: InstanceSpecsField
-  sshKeys: SSHKeyField[]
-  volumes?: VolumeField[]
-  domains?: DomainField[]
-  systemVolume: InstanceSystemVolumeField
-  nodeSpecs?: CRNSpecs
-  paymentMethod: PaymentMethod
-  streamDuration: StreamDurationField
-  streamCost: number
-  termsAndConditions?: string
+export type NewPermissionFormState = {
+  address: string
+  alias: string
+  permissions: {
+    channels: string[]
+    messageTypes: MessageTypePermissions[]
+  }
 }
 
 export type Modal = 'node-list' | 'terms-and-conditions'
@@ -48,6 +31,8 @@ export type UseNewPermissionPageReturn = {
   errors: FieldErrors<NewPermissionFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
   handleBack: () => void
+  addressCtrl: any
+  aliasCtrl: any
 }
 
 export function useNewPermissionPage(): UseNewPermissionPageReturn {
@@ -61,7 +46,7 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
   // Checkout flow
 
   const manager = usePermissionsManager()
-  const { next, stop } = useCheckoutNotification({})
+  useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewPermissionFormState) => {
@@ -77,7 +62,27 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
   // -------------------------
   // Setup form
 
-  const defaultValues: Partial<NewPermissionFormState> = useMemo(() => ({}), [])
+  const defaultValues: Partial<NewPermissionFormState> = useMemo(
+    () => ({
+      address: '',
+      alias: '',
+      permissions: {
+        channels: [],
+        messageTypes: [
+          { type: MessageType.post, postTypes: [], authorized: false },
+          {
+            type: MessageType.aggregate,
+            aggregateKeys: [],
+            authorized: false,
+          },
+          { type: MessageType.instance, authorized: false },
+          { type: MessageType.program, authorized: false },
+          { type: MessageType.store, authorized: false },
+        ],
+      },
+    }),
+    [],
+  )
 
   const {
     control,
@@ -86,11 +91,20 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
   } = useForm({
     defaultValues,
     onSubmit,
-    resolver: zodResolver(PermissionsManager.addSchema),
     readyDeps: [],
   })
 
   const formValues = useWatch({ control }) as NewPermissionFormState
+
+  const addressCtrl = useController({
+    control,
+    name: 'address',
+  })
+
+  const aliasCtrl = useController({
+    control,
+    name: 'alias',
+  })
 
   // -------------------------
   // Memos
@@ -131,5 +145,7 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
     errors,
     handleSubmit,
     handleBack,
+    addressCtrl,
+    aliasCtrl,
   }
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react'
-import { useController, useWatch } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 import { useForm } from '@/hooks/common/useForm'
 import {
   AccountPermissions,
@@ -51,16 +51,6 @@ export function usePermissionsDetailForm({
     onSuccess: () => Promise.resolve(),
   })
 
-  const channelsCtrl = useController({
-    control,
-    name: 'channels',
-  })
-
-  const messageTypesCtrl = useController({
-    control,
-    name: 'messageTypes',
-  })
-
   // Watch form values for real-time updates
   const watchedValues = useWatch({ control })
 
@@ -90,7 +80,5 @@ export function usePermissionsDetailForm({
     handleSubmit,
     errors,
     isDirty,
-    channelsCtrl,
-    messageTypesCtrl,
   }
 }
