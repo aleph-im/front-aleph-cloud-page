@@ -3,6 +3,7 @@ import { Control, useController, UseControllerReturn } from 'react-hook-form'
 import { useAppState } from '@/contexts/appState'
 import { useChannels } from '@/hooks/common/useChannels'
 import { usePostTypes } from '@/hooks/common/usePostTypes'
+import { useAggregateKeys } from '@/hooks/common/useAggregateKeys'
 import { MessageType } from '@aleph-sdk/message'
 
 export type UsePermissionsConfigurationProps = {
@@ -25,6 +26,9 @@ export type UsePermissionsConfigurationReturn = {
   filteredChannels: string[]
   availablePostTypes: string[]
   isLoadingPostTypes: boolean
+  availableAggregateKeys: string[]
+  isLoadingAggregateKeys: boolean
+  getAllAggregateKeysForRow: (rowAggregateKeys: string[]) => string[]
   selectedTabId: string
   setSelectedTabId: (id: string) => void
   handleToggleMessageType: (index: number) => void
@@ -64,6 +68,11 @@ export function usePermissionsConfiguration({
   const { channels: availableChannels, isLoading: isLoadingChannels } =
     useChannels(connectedAccountAddress)
 
+  const {
+    aggregateKeys: availableAggregateKeys,
+    isLoading: isLoadingAggregateKeys,
+  } = useAggregateKeys(connectedAccountAddress)
+
   const [isChannelsPanelOpen, setIsChannelsPanelOpen] = useState(false)
   const [channelsSearchQuery, setChannelsSearchQuery] = useState('')
   const [selectedChannels, setSelectedChannels] = useState<string[]>([])
@@ -91,6 +100,16 @@ export function usePermissionsConfiguration({
       channel.toLowerCase().includes(channelsSearchQuery.toLowerCase()),
     )
   }, [allChannels, channelsSearchQuery])
+
+  const getAllAggregateKeysForRow = useCallback(
+    (rowAggregateKeys: string[]) => {
+      const merged = Array.from(
+        new Set([...availableAggregateKeys, ...(rowAggregateKeys || [])]),
+      )
+      return merged.sort()
+    },
+    [availableAggregateKeys],
+  )
 
   useEffect(() => {
     if (isChannelsPanelOpen) {
@@ -196,6 +215,9 @@ export function usePermissionsConfiguration({
     filteredChannels,
     availablePostTypes,
     isLoadingPostTypes,
+    availableAggregateKeys,
+    isLoadingAggregateKeys,
+    getAllAggregateKeysForRow,
     selectedTabId,
     setSelectedTabId,
     handleToggleMessageType,

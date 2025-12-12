@@ -201,6 +201,8 @@ export const PermissionsConfiguration = ({
     filteredChannels,
     availablePostTypes,
     isLoadingPostTypes,
+    isLoadingAggregateKeys,
+    getAllAggregateKeysForRow,
     selectedTabId,
     setSelectedTabId,
     handleToggleMessageType,
@@ -295,11 +297,14 @@ export const PermissionsConfiguration = ({
                           return (
                             <FilterScopeButton
                               authorized={row.authorized}
-                              availableItems={row.aggregateKeys}
+                              availableItems={getAllAggregateKeysForRow(
+                                row.aggregateKeys,
+                              )}
                               selectedItems={row.aggregateKeys}
                               onSelectionChange={(items) =>
                                 handleAggregateKeysChange(rowIndex, items)
                               }
+                              isLoading={isLoadingAggregateKeys}
                             />
                           )
                         } else {
