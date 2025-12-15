@@ -13,7 +13,10 @@ export type UseRequestProgramDomainsProps = Omit<
   'name'
 >
 
-export type UseRequestProgramDomainsReturn = UseRequestEntitiesReturn<Domain>
+export type UseRequestProgramDomainsReturn = Omit<
+  UseRequestEntitiesReturn<Domain>,
+  'refetch'
+>
 
 export function useRequestProgramDomains(
   props: UseRequestProgramDomainsProps = {},
