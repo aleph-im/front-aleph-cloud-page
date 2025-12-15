@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useLocalRequest } from '@aleph-front/core'
 import { apiServer } from '@/helpers/server'
 
 type ChannelsResponse = {
@@ -7,41 +7,31 @@ type ChannelsResponse = {
 }
 
 export function useChannels(address: string | undefined) {
-  const [channels, setChannels] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
+  const {
+    data: channels = [],
+    loading: isLoading,
+    error,
+  } = useLocalRequest({
+    doRequest: async () => {
+      if (!address) return []
 
-  useEffect(() => {
-    if (!address) {
-      setChannels([])
-      return
-    }
+      const response = await fetch(
+        `${apiServer}/api/v0/addresses/${address}/channels`,
+      )
 
-    const fetchChannels = async () => {
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        const response = await fetch(
-          `${apiServer}/api/v0/addresses/${address}/channels`,
-        )
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch channels: ${response.statusText}`)
-        }
-
-        const data: ChannelsResponse = await response.json()
-        setChannels(data.channels || [])
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Unknown error'))
-        setChannels([])
-      } finally {
-        setIsLoading(false)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch channels: ${response.statusText}`)
       }
-    }
 
-    fetchChannels()
-  }, [address])
+      const data: ChannelsResponse = await response.json()
+      return data.channels || []
+    },
+    onSuccess: () => null,
+    onError: () => null,
+    flushData: true,
+    triggerOnMount: true,
+    triggerDeps: [address],
+  })
 
   return { channels, isLoading, error }
 }
