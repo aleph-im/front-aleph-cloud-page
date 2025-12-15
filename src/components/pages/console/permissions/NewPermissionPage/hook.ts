@@ -12,11 +12,13 @@ import { TooltipProps } from '@aleph-front/core'
 import { accountConnectionRequiredDisabledMessage } from './disabledMessages'
 import { usePermissionsManager } from '@/hooks/common/useManager/usePermissionManager'
 import {
+  AccountPermissions,
   MessageTypePermissions,
   PermissionsManager,
 } from '@/domain/permissions'
 import { MessageType } from '@aleph-sdk/message'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRequestPermissions } from '@/hooks/common/useRequestEntity/useRequestPermissions'
 
 export type NewPermissionFormState = {
   address: string
@@ -50,9 +52,19 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
   const router = useRouter()
 
   // -------------------------
+  // Handlers
+
+  const handleBack = useCallback(() => {
+    router.push('.')
+  }, [router])
+
+  // -------------------------
   // Checkout flow
 
   const manager = usePermissionsManager()
+  const { refetch: refetchPermissions } = useRequestPermissions({
+    triggerOnMount: false,
+  })
   const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
@@ -60,11 +72,12 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
 
-      const permission = {
+      const permission: AccountPermissions = {
         id: state.address,
         alias: state.alias,
         channels: state.permissions.channels,
         messageTypes: state.permissions.messageTypes,
+        revoked: false,
       }
 
       const iSteps = await manager.getAddSteps()
@@ -86,12 +99,19 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
           await next(nSteps)
         }
 
-        router.push('.')
+        // Wait 1 second to refetch latest data from backend before navigating back
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        // Refresh permissions data from backend
+        refetchPermissions()
+
+        // Navigate to permissions page
+        handleBack()
       } finally {
         await stop()
       }
     },
-    [manager, account, router, next, stop],
+    [manager, account, refetchPermissions, handleBack, next, stop],
   )
 
   // -------------------------
@@ -164,13 +184,6 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
 
     return !!createPermissionDisabledMessage
   }, [createPermissionButtonTitle, createPermissionDisabledMessage])
-
-  // -------------------------
-  // Handlers
-
-  const handleBack = () => {
-    router.push('.')
-  }
 
   return {
     createPermissionDisabled,

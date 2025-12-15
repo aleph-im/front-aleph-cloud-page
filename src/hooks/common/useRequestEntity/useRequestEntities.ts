@@ -22,6 +22,7 @@ export type UseRequestEntitiesProps<Entity> = {
 export type UseRequestEntitiesReturn<Entity> = {
   entities?: Entity[]
   loading: boolean
+  refetch: () => void
 }
 
 type RequestType = 'single' | 'multiple' | 'all'
@@ -33,9 +34,10 @@ const handleSingleEntityRequest = async <
   manager: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>,
   entityId: string,
   currentState: { entities?: Entity[] },
+  force = false,
 ): Promise<Entity[]> => {
-  // Check cache for single entity
-  if (currentState?.entities?.length) {
+  // Check cache for single entity (skip if force is true)
+  if (!force && currentState?.entities?.length) {
     const cachedEntity = currentState.entities.find(
       (entity) => entity.id === entityId,
     )
@@ -57,11 +59,12 @@ const handleMultipleEntitiesRequest = async <
   manager: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>,
   entityIds: string[],
   currentState: { entities?: Entity[] },
+  force = false,
 ): Promise<Entity[]> => {
   if (!entityIds.length) return []
 
-  // Check cache for multiple entities
-  if (currentState?.entities?.length) {
+  // Check cache for multiple entities (skip if force is true)
+  if (!force && currentState?.entities?.length) {
     const existingIds = currentState.entities.map((entity) => entity.id)
     const allEntitiesCached = entityIds.every((id) => existingIds.includes(id))
 
@@ -82,9 +85,10 @@ const handleAllEntitiesRequest = async <
 >(
   manager: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>,
   currentState: { entities?: Entity[] },
+  force = false,
 ): Promise<Entity[]> => {
-  // Check cache for all entities
-  if (currentState?.entities?.length) {
+  // Check cache for all entities (skip if force is true)
+  if (!force && currentState?.entities?.length) {
     return currentState.entities
   }
 
@@ -153,6 +157,40 @@ export function useRequestEntities<
     cacheStrategy,
   })
 
+  // Force request handler for refetch (bypasses cache)
+  const { request: forceRequest } = useAppStoreEntityRequest({
+    name,
+    doRequest: async () => {
+      if (!manager) return []
+
+      const currentState = state[name] as { entities?: Entity[] }
+
+      switch (requestType) {
+        case 'single':
+          return handleSingleEntityRequest(
+            manager,
+            ids as string,
+            currentState,
+            true,
+          )
+        case 'multiple':
+          return handleMultipleEntitiesRequest(
+            manager,
+            ids as string[],
+            currentState,
+            true,
+          )
+        case 'all':
+          return handleAllEntitiesRequest(manager, currentState, true)
+      }
+    },
+    onSuccess: () => null,
+    flushData: true,
+    triggerOnMount: false,
+    triggerDeps: [],
+    cacheStrategy,
+  })
+
   // Filter entities based on request type
   const filteredEntities = useMemo(() => {
     if (!allEntities) return allEntities
@@ -180,5 +218,6 @@ export function useRequestEntities<
   return {
     entities: filteredEntities,
     loading,
+    refetch: forceRequest,
   }
 }
