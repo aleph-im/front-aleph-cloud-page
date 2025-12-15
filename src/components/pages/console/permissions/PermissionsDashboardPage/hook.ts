@@ -5,14 +5,17 @@ import { useRequestPermissions } from '@/hooks/common/useRequestEntity/useReques
 export type UsePermissionsDashboardPageReturn = {
   permissions: AccountPermissions[]
   manager: PermissionsManager | undefined
+  refetchPermissions: () => Promise<void>
 }
 
 export function usePermissionsDashboardPage(): UsePermissionsDashboardPageReturn {
-  const { entities: permissions = [] } = useRequestPermissions()
+  const { entities: permissions = [], refetch: refetchPermissions } =
+    useRequestPermissions()
   const manager = usePermissionsManager()
 
   return {
     permissions,
     manager,
+    refetchPermissions,
   }
 }

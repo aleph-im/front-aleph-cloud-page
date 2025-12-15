@@ -15,8 +15,9 @@ import {
 } from '@/hooks/form/useCheckoutNotification'
 
 export default function PermissionsDashboardPage({ mainRef }: PageProps) {
-  const { permissions, manager } = usePermissionsDashboardPage()
-  const { next, stop } = useCheckoutNotification({})
+  const { permissions, manager, refetchPermissions } =
+    usePermissionsDashboardPage()
+  const { noti, next, stop } = useCheckoutNotification({})
   const [pendingChanges, setPendingChanges] = useState<
     Map<string, AccountPermissions>
   >(new Map())
@@ -78,9 +79,9 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
 
     const steps = manager.updatePermissionsSteps(permissionsToUpdate)
 
-    try {
-      let result
+    let result
 
+    try {
       while (!result) {
         const { value, done } = await steps.next()
 
@@ -95,8 +96,22 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
       setPendingChanges(new Map())
     } finally {
       await stop()
+
+      if (result) {
+        noti?.add({
+          variant: 'info',
+          title: 'Permissions updated',
+          text: 'Refreshing permissions data...',
+        })
+
+        // Wait 2 seconds to refetch latest data from backend
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        // Refresh permissions data from backend
+        await refetchPermissions()
+      }
     }
-  }, [manager, pendingChanges, next, stop])
+  }, [manager, pendingChanges, next, stop, noti, refetchPermissions])
 
   return (
     <>
