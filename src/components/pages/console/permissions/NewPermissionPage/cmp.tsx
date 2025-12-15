@@ -63,6 +63,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     handleBack,
     addressCtrl,
     aliasCtrl,
+    isDirty,
   } = useNewPermissionPage()
 
   return (
@@ -122,7 +123,11 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             </div>
           </CenteredContainer>
         </section>
-        <FloatingFooter containerRef={mainRef} shouldHide={false}>
+        <FloatingFooter
+          containerRef={mainRef}
+          shouldHide={false}
+          shouldRender={isDirty}
+        >
           <div tw="flex justify-end items-center w-full py-4 px-6">
             <CheckoutButton
               disabled={createPermissionDisabled}

@@ -42,6 +42,7 @@ export type UseNewPermissionPageReturn = {
   handleBack: () => void
   addressCtrl: any
   aliasCtrl: any
+  isDirty: boolean
 }
 
 export function useNewPermissionPage(): UseNewPermissionPageReturn {
@@ -150,7 +151,7 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm({
     defaultValues,
     onSubmit,
@@ -205,5 +206,6 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
     handleBack,
     addressCtrl,
     aliasCtrl,
+    isDirty,
   }
 }
