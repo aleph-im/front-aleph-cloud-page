@@ -151,10 +151,10 @@ const FilterScopeButton = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <div tw="flex items-center justify-between w-full my-3">
-                <Button variant="textOnly" onClick={handleSelectAll}>
+                <Button variant="textOnly" onClick={handleSelectAll} size="sm">
                   Select all
                 </Button>
-                <Button variant="textOnly" onClick={handleClearAll}>
+                <Button variant="textOnly" onClick={handleClearAll} size="sm">
                   Clear all
                 </Button>
               </div>
@@ -348,10 +348,18 @@ export const PermissionsConfiguration = ({
                 onChange={(e) => setChannelsSearchQuery(e.target.value)}
               />
               <div tw="flex items-center justify-between w-full my-3">
-                <Button variant="textOnly" onClick={handleSelectAllChannels}>
+                <Button
+                  variant="textOnly"
+                  onClick={handleSelectAllChannels}
+                  size="sm"
+                >
                   Select all
                 </Button>
-                <Button variant="textOnly" onClick={handleClearAllChannels}>
+                <Button
+                  variant="textOnly"
+                  onClick={handleClearAllChannels}
+                  size="sm"
+                >
                   Clear all
                 </Button>
               </div>
