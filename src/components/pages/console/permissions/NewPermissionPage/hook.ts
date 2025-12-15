@@ -65,7 +65,7 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
   const { refetch: refetchPermissions } = useRequestPermissions({
     triggerOnMount: false,
   })
-  const { next, stop } = useCheckoutNotification({})
+  const { noti, next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
     async (state: NewPermissionFormState) => {
@@ -98,21 +98,29 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
 
           await next(nSteps)
         }
-
-        // Wait 1 second to refetch latest data from backend before navigating back
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Refresh permissions data from backend
-        refetchPermissions()
-
-        // Navigate to permissions page
-        handleBack()
       } finally {
         await stop()
       }
     },
-    [manager, account, refetchPermissions, handleBack, next, stop],
+    [manager, account, next, stop],
   )
+
+  const handleSubmissionSuccess = useCallback(async () => {
+    noti?.add({
+      variant: 'info',
+      title: 'Permission created',
+      text: 'Redirecting to permissions page...',
+    })
+
+    // Wait 2 second to refetch latest data from backend before navigating back
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    // Refresh permissions data from backend
+    await refetchPermissions()
+
+    // Navigate to permissions page
+    handleBack()
+  }, [handleBack, noti, refetchPermissions])
 
   // -------------------------
   // Setup form
@@ -146,6 +154,7 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
   } = useForm({
     defaultValues,
     onSubmit,
+    onSuccess: handleSubmissionSuccess,
     resolver: zodResolver(PermissionsManager.addSchema),
     readyDeps: [],
   })

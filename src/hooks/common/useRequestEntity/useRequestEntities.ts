@@ -22,7 +22,7 @@ export type UseRequestEntitiesProps<Entity> = {
 export type UseRequestEntitiesReturn<Entity> = {
   entities?: Entity[]
   loading: boolean
-  refetch: () => void
+  refetch: () => Promise<void>
 }
 
 type RequestType = 'single' | 'multiple' | 'all'
