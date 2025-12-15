@@ -103,20 +103,19 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
       <CenteredContainer $variant="xl">
         <HoldTokenDisclaimer />
       </CenteredContainer>
-      <FloatingFooter
-        containerRef={mainRef}
-        shouldHide={pendingChanges.size === 0}
-      >
-        <div tw="flex justify-end items-center w-full py-4 px-6">
-          <Button
-            color="main0"
-            variant="primary"
-            onClick={handleSaveAllChanges}
-          >
-            Save changes
-          </Button>
-        </div>
-      </FloatingFooter>
+      {pendingChanges.size && (
+        <FloatingFooter containerRef={mainRef} shouldHide={false}>
+          <div tw="flex justify-end items-center w-full py-4 px-6">
+            <Button
+              color="main0"
+              variant="primary"
+              onClick={handleSaveAllChanges}
+            >
+              Save changes
+            </Button>
+          </div>
+        </FloatingFooter>
+      )}
     </>
   )
 }
