@@ -9,6 +9,7 @@ import {
 export type PermissionsDetailFormState = {
   channels: string[]
   messageTypes: MessageTypePermissions[]
+  revoked: boolean
 }
 
 export type UsePermissionsDetailFormProps = {
@@ -25,6 +26,7 @@ export function usePermissionsDetailForm({
   const defaultValues: PermissionsDetailFormState = {
     channels: permissions.channels,
     messageTypes: permissions.messageTypes,
+    revoked: permissions.revoked,
   }
 
   const onSubmit = useCallback(
@@ -63,6 +65,7 @@ export function usePermissionsDetailForm({
         messageTypes:
           (watchedValues.messageTypes as MessageTypePermissions[]) ??
           permissions.messageTypes,
+        revoked: permissions.revoked,
       }
       onUpdate(updatedPermission)
     }
@@ -72,6 +75,7 @@ export function usePermissionsDetailForm({
     permissions.alias,
     permissions.channels,
     permissions.messageTypes,
+    permissions.revoked,
     onUpdate,
   ])
 

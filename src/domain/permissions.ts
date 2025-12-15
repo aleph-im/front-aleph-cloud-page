@@ -65,7 +65,7 @@ export type AccountPermissions = {
   alias?: string
   channels: string[] | []
   messageTypes: MessageTypePermissions[]
-  revoked?: boolean
+  revoked: boolean
 }
 
 export type Permissions = AccountPermissions[]
@@ -168,6 +168,7 @@ export class PermissionsManager extends AggregateManager<
             auth.post_types,
             auth.aggregate_keys,
           ),
+          revoked: false,
         }
       },
     )

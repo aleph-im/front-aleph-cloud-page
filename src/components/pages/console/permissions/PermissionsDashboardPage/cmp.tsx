@@ -20,16 +20,52 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
   const [pendingChanges, setPendingChanges] = useState<
     Map<string, AccountPermissions>
   >(new Map())
+  const [originalPermissions, setOriginalPermissions] = useState<
+    AccountPermissions[]
+  >([])
+
+  // Sync original permissions and clear pending changes when permissions load
+  React.useEffect(() => {
+    if (permissions) {
+      setOriginalPermissions(permissions)
+      setPendingChanges(new Map())
+    }
+  }, [permissions])
 
   const handlePermissionChange = useCallback(
     (updatedPermission: AccountPermissions) => {
+      // Find the original permission to compare
+      const originalPermission = originalPermissions.find(
+        (p) => p.id === updatedPermission.id,
+      )
+
+      // @ts-expect-error TS7053 - Ignore 'key' property added by Table component
+      delete updatedPermission['key'] // Remove key added by Table
+
       setPendingChanges((prev) => {
         const newChanges = new Map(prev)
-        newChanges.set(updatedPermission.id, updatedPermission)
+
+        // Compare updated vs original using JSON.stringify
+        const hasRealChanges =
+          JSON.stringify(updatedPermission) !==
+          JSON.stringify(originalPermission)
+
+        console.log('original', originalPermission)
+        console.log('updated', updatedPermission)
+        console.log('hasRealChanges', hasRealChanges)
+
+        if (hasRealChanges) {
+          // Add to pending changes if different from original
+          newChanges.set(updatedPermission.id, updatedPermission)
+        } else {
+          // Remove from pending changes if reverted to original
+          newChanges.delete(updatedPermission.id)
+        }
+
         return newChanges
       })
     },
-    [],
+    [originalPermissions],
   )
 
   const handleSaveAllChanges = useCallback(async () => {

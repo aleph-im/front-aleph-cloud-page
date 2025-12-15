@@ -59,7 +59,6 @@ export const PermissionsTabContent = memo(
     }, [updatedPermissions, sidePanel.selectedRow, sidePanel.isOpen])
 
     const handleRowConfigure = (row: AccountPermissions) => {
-      console.log('Configure permission:', row)
       // Find corresponding permission from updatedPermissions
       const permission = updatedPermissions.find((p) => p.id === row.id) || row
       // Store the original permission for comparison when closing
@@ -92,8 +91,7 @@ export const PermissionsTabContent = memo(
       onPermissionChange?.(updatedPermission)
     }
 
-    const handleRowClick = (row: AccountPermissions, index: number) => {
-      console.log(`row click ${index}`)
+    const handleRowClick = (row: AccountPermissions) => {
       handleRowConfigure(row)
     }
 
@@ -268,9 +266,9 @@ export const PermissionsTabContent = memo(
                 rowKey={({ id }: AccountPermissions) => id}
                 data={updatedPermissions}
                 columns={columns}
-                rowProps={(row: AccountPermissions, i: number) => ({
+                rowProps={(row: AccountPermissions) => ({
                   onClick: () => {
-                    !row.revoked && handleRowClick(row, i)
+                    !row.revoked && handleRowClick(row)
                   },
                 })}
               />

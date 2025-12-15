@@ -123,10 +123,26 @@ export function usePermissionsConfiguration({
     (index: number) => {
       const currentTypes = messageTypesCtrl.field.value
       const updatedTypes = [...currentTypes]
+
+      const newAuthorized = !updatedTypes[index].authorized
+
       updatedTypes[index] = {
         ...updatedTypes[index],
-        authorized: !updatedTypes[index].authorized,
+        authorized: newAuthorized,
       }
+
+      // If deauthorizing, clear specific filters/scopes
+      if (!newAuthorized) {
+        switch (updatedTypes[index].type) {
+          case MessageType.post:
+            updatedTypes[index].postTypes = []
+            break
+          case MessageType.aggregate:
+            updatedTypes[index].aggregateKeys = []
+            break
+        }
+      }
+
       messageTypesCtrl.field.onChange(updatedTypes)
     },
     [messageTypesCtrl],
