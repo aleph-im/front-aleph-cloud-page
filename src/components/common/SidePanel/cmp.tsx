@@ -36,8 +36,15 @@ export const SidePanel = ({
             {title}
           </div>
         </StyledHeader>
-        <StyledContent>{children}</StyledContent>
-        {footer && <StyledFooter $isOpen={isOpen}>{footer}</StyledFooter>}
+        <StyledContent>
+          {children}
+          {footer && <div tw="h-[5.375rem]" />}
+        </StyledContent>
+        {footer && (
+          <>
+            <StyledFooter $isOpen={isOpen}>{footer}</StyledFooter>
+          </>
+        )}
       </StyledSidePanel>
     </>
   )

@@ -41,9 +41,10 @@ export const StyledContent = styled.div`
 
 export const StyledFooter = styled.div<StyledFooterProps>`
   ${({ theme, $isOpen }) => css`
-    ${tw`sticky bottom-0 left-0 right-0 p-6`}
+    ${tw`fixed bottom-0 left-0 right-0 p-6`}
 
-    background: ${theme.color.background}A2;
+    background: ${theme.color.background}99;
+    max-height: 5.375rem;
 
     ${$isOpen &&
     css`
