@@ -167,7 +167,6 @@ const FilterScopeButton = ({
                     onChange={() => handleSelectAll(allSelected)}
                     size="sm"
                   />
-                  {/* <span className="fs-12">Select all</span> */}
                 </div>
                 <Button
                   variant="textOnly"
@@ -239,6 +238,22 @@ export const PermissionsConfiguration = ({
     handleCancelChannels,
     handleCloseChannelsPanel,
   } = usePermissionsConfiguration({ control, name })
+
+  const [allChannelsSelected, setAllChannelsSelected] = useState(
+    selectedChannels.length === 0,
+  )
+
+  const handleSelectAllChannelsToggle = useCallback(
+    (isAllSelected: boolean) => {
+      if (isAllSelected) {
+        handleSelectAllChannels()
+      } else {
+        handleClearAllChannels()
+      }
+      setAllChannelsSelected(!isAllSelected)
+    },
+    [handleSelectAllChannels, handleClearAllChannels],
+  )
 
   return (
     <>
@@ -363,6 +378,7 @@ export const PermissionsConfiguration = ({
             <div className="tp-info fs-14">Permissions details</div>
             <NoisyContainer>
               <TextInput
+                disabled={allChannelsSelected}
                 name="channels-search"
                 placeholder="Search"
                 icon={<Icon name="search" />}
@@ -370,43 +386,49 @@ export const PermissionsConfiguration = ({
                 onChange={(e) => setChannelsSearchQuery(e.target.value)}
               />
               <div tw="flex items-center justify-between w-full my-3">
-                <Button
-                  variant="textOnly"
-                  onClick={handleSelectAllChannels}
-                  size="sm"
-                >
-                  Select all
-                </Button>
+                <div tw="flex items-center gap-x-2.5">
+                  <Checkbox
+                    label="Select all"
+                    checked={allChannelsSelected}
+                    onChange={() =>
+                      handleSelectAllChannelsToggle(allChannelsSelected)
+                    }
+                    size="sm"
+                  />
+                </div>
                 <Button
                   variant="textOnly"
                   onClick={handleClearAllChannels}
                   size="sm"
+                  disabled={allChannelsSelected}
                 >
                   Clear all
                 </Button>
               </div>
-              <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
-                {isLoadingChannels ? (
-                  <div className="tp-info fs-12">Loading...</div>
-                ) : filteredChannels.length > 0 ? (
-                  filteredChannels.map((channel) => (
-                    <div key={channel} tw="flex items-center gap-x-2.5">
-                      <Checkbox
-                        checked={selectedChannels.includes(channel)}
-                        onChange={() => handleToggleChannel(channel)}
-                        size="sm"
-                      />
-                      <span className="fs-12">{channel}</span>
+              {!allChannelsSelected && (
+                <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
+                  {isLoadingChannels ? (
+                    <div className="tp-info fs-12">Loading...</div>
+                  ) : filteredChannels.length > 0 ? (
+                    filteredChannels.map((channel) => (
+                      <div key={channel} tw="flex items-center gap-x-2.5">
+                        <Checkbox
+                          checked={selectedChannels.includes(channel)}
+                          onChange={() => handleToggleChannel(channel)}
+                          size="sm"
+                        />
+                        <span className="fs-14">{channel}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="tp-info fs-12">
+                      {channelsSearchQuery
+                        ? 'No matches found'
+                        : 'No channels available'}
                     </div>
-                  ))
-                ) : (
-                  <div className="tp-info fs-12">
-                    {channelsSearchQuery
-                      ? 'No matches found'
-                      : 'No channels available'}
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </NoisyContainer>
           </div>
           <StyledFooter>
