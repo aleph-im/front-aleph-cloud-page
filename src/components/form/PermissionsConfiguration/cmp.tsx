@@ -47,6 +47,21 @@ const StyledFooter = styled.div`
   `}
 `
 
+const CollapsibleList = styled.div<{
+  $isCollapsed: boolean
+  $maxHeight?: string
+}>`
+  ${({ theme, $isCollapsed, $maxHeight = '13rem' }) => css`
+    ${tw`flex flex-col gap-y-3 overflow-y-auto`}
+    max-height: ${$isCollapsed ? '0' : $maxHeight};
+    opacity: ${$isCollapsed ? '0' : '1'};
+    transition:
+      max-height ${theme.transition.duration.normal}ms
+        ${theme.transition.timing},
+      opacity ${theme.transition.duration.normal}ms ${theme.transition.timing};
+  `}
+`
+
 type FilterScopeButtonProps = {
   authorized: boolean
   availableItems: string[]
@@ -177,28 +192,26 @@ const FilterScopeButton = ({
                   Clear all
                 </Button>
               </div>
-              {!allSelected && (
-                <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
-                  {isLoading ? (
-                    <div className="tp-info fs-12">Loading...</div>
-                  ) : filteredItems.length > 0 ? (
-                    filteredItems.map((item) => (
-                      <div key={item} tw="flex items-center gap-x-2.5">
-                        <Checkbox
-                          checked={selectedItems.includes(item)}
-                          onChange={() => handleToggleItem(item)}
-                          size="sm"
-                        />
-                        <span className="fs-14">{item}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="tp-info fs-12">
-                      {searchQuery ? 'No matches found' : 'No items available'}
+              <CollapsibleList $isCollapsed={allSelected}>
+                {isLoading ? (
+                  <div className="tp-info fs-12">Loading...</div>
+                ) : filteredItems.length > 0 ? (
+                  filteredItems.map((item) => (
+                    <div key={item} tw="flex items-center gap-x-2.5">
+                      <Checkbox
+                        checked={selectedItems.includes(item)}
+                        onChange={() => handleToggleItem(item)}
+                        size="sm"
+                      />
+                      <span className="fs-14">{item}</span>
                     </div>
-                  )}
-                </div>
-              )}
+                  ))
+                ) : (
+                  <div className="tp-info fs-12">
+                    {searchQuery ? 'No matches found' : 'No items available'}
+                  </div>
+                )}
+              </CollapsibleList>
             </div>
           </StyledPortal>
         )}
@@ -405,30 +418,31 @@ export const PermissionsConfiguration = ({
                   Clear all
                 </Button>
               </div>
-              {!allChannelsSelected && (
-                <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
-                  {isLoadingChannels ? (
-                    <div className="tp-info fs-12">Loading...</div>
-                  ) : filteredChannels.length > 0 ? (
-                    filteredChannels.map((channel) => (
-                      <div key={channel} tw="flex items-center gap-x-2.5">
-                        <Checkbox
-                          checked={selectedChannels.includes(channel)}
-                          onChange={() => handleToggleChannel(channel)}
-                          size="sm"
-                        />
-                        <span className="fs-14">{channel}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="tp-info fs-12">
-                      {channelsSearchQuery
-                        ? 'No matches found'
-                        : 'No channels available'}
+              <CollapsibleList
+                $isCollapsed={allChannelsSelected}
+                $maxHeight="500vh"
+              >
+                {isLoadingChannels ? (
+                  <div className="tp-info fs-12">Loading...</div>
+                ) : filteredChannels.length > 0 ? (
+                  filteredChannels.map((channel) => (
+                    <div key={channel} tw="flex items-center gap-x-2.5">
+                      <Checkbox
+                        checked={selectedChannels.includes(channel)}
+                        onChange={() => handleToggleChannel(channel)}
+                        size="sm"
+                      />
+                      <span className="fs-14">{channel}</span>
                     </div>
-                  )}
-                </div>
-              )}
+                  ))
+                ) : (
+                  <div className="tp-info fs-12">
+                    {channelsSearchQuery
+                      ? 'No matches found'
+                      : 'No channels available'}
+                  </div>
+                )}
+              </CollapsibleList>
             </NoisyContainer>
           </div>
           <StyledFooter>
