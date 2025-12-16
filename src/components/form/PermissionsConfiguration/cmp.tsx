@@ -26,27 +26,6 @@ import SidePanel from '@/components/common/SidePanel'
 import { usePermissionsConfiguration } from './hook'
 import { PermissionsConfigurationProps } from './types'
 
-const StyledFooter = styled.div`
-  ${({ theme }) => css`
-    ${tw`sticky bottom-0 left-0 right-0 p-6`}
-
-    background: ${theme.color.background}D5;
-    animation: slideUp ${theme.transition.duration.normal}ms
-      ${theme.transition.timing} forwards;
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-  `}
-`
-
 const CollapsibleList = styled.div<{
   $isCollapsed: boolean
   $maxHeight?: string
@@ -268,6 +247,29 @@ export const PermissionsConfiguration = ({
     [handleSelectAllChannels, handleClearAllChannels],
   )
 
+  const channelsPanelFooter = (
+    <div tw="flex justify-start gap-x-4">
+      <Button
+        type="button"
+        color="main0"
+        kind="functional"
+        variant="warning"
+        onClick={handleApplyChannels}
+      >
+        <Icon name="arrow-left" />
+        Continue
+      </Button>
+      <button
+        type="button"
+        onClick={handleCancelChannels}
+        className="tp-header fs-14"
+        tw="not-italic font-bold"
+      >
+        Cancel
+      </button>
+    </div>
+  )
+
   return (
     <>
       <NoisyContainer>
@@ -386,6 +388,7 @@ export const PermissionsConfiguration = ({
           order={channelsPanelOrder}
           width="50vw"
           mobileHeight="70vh"
+          footer={channelsPanelFooter}
         >
           <div tw="flex flex-col gap-y-2.5">
             <div className="tp-info fs-14">Permissions details</div>
@@ -445,28 +448,6 @@ export const PermissionsConfiguration = ({
               </CollapsibleList>
             </NoisyContainer>
           </div>
-          <StyledFooter>
-            <div tw="flex justify-start gap-x-4">
-              <Button
-                type="button"
-                color="main0"
-                kind="functional"
-                variant="warning"
-                onClick={handleApplyChannels}
-              >
-                <Icon name="arrow-left" />
-                Continue
-              </Button>
-              <button
-                type="button"
-                onClick={handleCancelChannels}
-                className="tp-header fs-14"
-                tw="not-italic font-bold"
-              >
-                Cancel
-              </button>
-            </div>
-          </StyledFooter>
         </SidePanel>
       </Portal>
     </>

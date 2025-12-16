@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { StyledSidePanelProps } from './types'
+import { StyledSidePanelProps, StyledFooterProps } from './types'
 import tw from 'twin.macro'
 
 export const StyledBackdrop = styled.div<StyledSidePanelProps>`
@@ -37,6 +37,31 @@ export const StyledHeader = styled.div`
 export const StyledContent = styled.div`
   ${tw`p-12 pb-0 flex-1`}
   overflow-y: auto;
+`
+
+export const StyledFooter = styled.div<StyledFooterProps>`
+  ${({ theme, $isOpen }) => css`
+    ${tw`sticky bottom-0 left-0 right-0 p-6`}
+
+    background: ${theme.color.background}A2;
+
+    ${$isOpen &&
+    css`
+      animation: slideUp ${theme.transition.duration.normal}ms
+        ${theme.transition.timing} forwards;
+    `}
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  `}
 `
 
 export const StyledSidePanel = styled.div<StyledSidePanelProps>`

@@ -1,40 +1,16 @@
 import React, { memo } from 'react'
-import styled, { css } from 'styled-components'
-import tw from 'twin.macro'
 import { PermissionsDetailProps } from './types'
-import { Button, Icon, NoisyContainer, ObjectImg } from '@aleph-front/core'
+import { NoisyContainer, ObjectImg } from '@aleph-front/core'
 import CopyToClipboard from '../CopyToClipboard'
 import Form from '@/components/form/Form'
 import { usePermissionsDetailForm } from './hook'
 import PermissionsConfiguration from '@/components/form/PermissionsConfiguration'
-
-const StyledFooter = styled.div`
-  ${({ theme }) => css`
-    ${tw`sticky bottom-0 left-0 right-0 p-6`}
-
-    background: ${theme.color.background}D5;
-    animation: slideUp ${theme.transition.duration.normal}ms
-      ${theme.transition.timing} forwards;
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-  `}
-`
 
 export const PermissionsDetail = ({
   permissions,
   onSubmit,
   onUpdate,
   channelsPanelOrder = 1,
-  onCancel,
 }: PermissionsDetailProps) => {
   const { handleSubmit, errors, control } = usePermissionsDetailForm({
     permissions,
@@ -99,28 +75,6 @@ export const PermissionsDetail = ({
             />
           </div>
         </div>
-
-        <StyledFooter>
-          <div tw="flex justify-start gap-x-4">
-            <Button
-              type="submit"
-              color="main0"
-              kind="functional"
-              variant="warning"
-            >
-              <Icon name="arrow-left" />
-              Continue
-            </Button>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="tp-header fs-14"
-              tw="not-italic font-bold"
-            >
-              Cancel
-            </button>
-          </div>
-        </StyledFooter>
       </Form>
     </>
   )

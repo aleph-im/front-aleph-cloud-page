@@ -3,7 +3,7 @@ import EntityTable from '@/components/common/EntityTable'
 import PermissionsDetail from '@/components/common/PermissionsDetail'
 import SidePanel from '@/components/common/SidePanel'
 import { AccountPermissions } from '@/domain/permissions'
-import { Button, TextGradient, useModal } from '@aleph-front/core'
+import { Button, Icon, TextGradient, useModal } from '@aleph-front/core'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { getPermissionsTableColumns } from './columns'
 import { PermissionsTabContentProps } from './types'
@@ -255,6 +255,29 @@ export const PermissionsTabContent = memo(
       ],
     )
 
+    const permissionsDetailFooter = sidePanel.selectedRow ? (
+      <div tw="flex justify-start gap-x-4">
+        <Button
+          type="submit"
+          form="permissions-detail-form"
+          color="main0"
+          kind="functional"
+          variant="warning"
+        >
+          <Icon name="arrow-left" />
+          Continue
+        </Button>
+        <button
+          type="button"
+          onClick={handleCancelClick}
+          className="tp-header fs-14"
+          tw="not-italic font-bold"
+        >
+          Cancel
+        </button>
+      </div>
+    ) : null
+
     return (
       <>
         {updatedPermissions.length ? (
@@ -300,6 +323,7 @@ export const PermissionsTabContent = memo(
           title={sidePanel.title}
           width="60vw"
           mobileHeight="80vh"
+          footer={permissionsDetailFooter}
         >
           {sidePanel.type === 'configure' ? (
             sidePanel.selectedRow && (
@@ -308,7 +332,6 @@ export const PermissionsTabContent = memo(
                 onSubmit={handlePermissionSubmit}
                 onUpdate={handlePermissionUpdate}
                 channelsPanelOrder={2}
-                onCancel={handleCancelClick}
               />
             )
           ) : (
