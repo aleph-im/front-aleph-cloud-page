@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState, useRef } from 'react'
+import React, { memo, useMemo, useState, useRef, useCallback } from 'react'
 import styled, { css } from 'styled-components'
 import tw from 'twin.macro'
 import {
@@ -64,6 +64,7 @@ const FilterScopeButton = ({
 }: FilterScopeButtonProps) => {
   const [showPortal, setShowPortal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [allSelected, setAllSelected] = useState(selectedItems.length === 0)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
   const portalRef = useRef<HTMLDivElement>(null)
@@ -111,9 +112,16 @@ const FilterScopeButton = ({
     onSelectionChange([])
   }
 
-  const handleSelectAll = () => {
-    onSelectionChange([...availableItems])
-  }
+  const handleSelectAll = useCallback(
+    (isAllSelected: boolean) => {
+      isAllSelected
+        ? onSelectionChange([...availableItems])
+        : onSelectionChange([])
+
+      setAllSelected(!isAllSelected)
+    },
+    [availableItems, onSelectionChange],
+  )
 
   const count = selectedItems.length
 
@@ -144,6 +152,7 @@ const FilterScopeButton = ({
           >
             <div tw="p-3">
               <TextInput
+                disabled={allSelected}
                 name="filter-search"
                 placeholder="Search"
                 icon={<Icon name="search" />}
@@ -151,33 +160,46 @@ const FilterScopeButton = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <div tw="flex items-center justify-between w-full my-3">
-                <Button variant="textOnly" onClick={handleSelectAll} size="sm">
-                  Select all
-                </Button>
-                <Button variant="textOnly" onClick={handleClearAll} size="sm">
+                <div tw="flex items-center gap-x-2.5">
+                  <Checkbox
+                    label="Select all"
+                    checked={allSelected}
+                    onChange={() => handleSelectAll(allSelected)}
+                    size="sm"
+                  />
+                  {/* <span className="fs-12">Select all</span> */}
+                </div>
+                <Button
+                  variant="textOnly"
+                  onClick={handleClearAll}
+                  size="sm"
+                  disabled={allSelected}
+                >
                   Clear all
                 </Button>
               </div>
-              <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
-                {isLoading ? (
-                  <div className="tp-info fs-12">Loading...</div>
-                ) : filteredItems.length > 0 ? (
-                  filteredItems.map((item) => (
-                    <div key={item} tw="flex items-center gap-x-2.5">
-                      <Checkbox
-                        checked={selectedItems.includes(item)}
-                        onChange={() => handleToggleItem(item)}
-                        size="sm"
-                      />
-                      <span className="fs-12">{item}</span>
+              {!allSelected && (
+                <div tw="flex flex-col gap-y-3 max-h-52 overflow-y-auto">
+                  {isLoading ? (
+                    <div className="tp-info fs-12">Loading...</div>
+                  ) : filteredItems.length > 0 ? (
+                    filteredItems.map((item) => (
+                      <div key={item} tw="flex items-center gap-x-2.5">
+                        <Checkbox
+                          checked={selectedItems.includes(item)}
+                          onChange={() => handleToggleItem(item)}
+                          size="sm"
+                        />
+                        <span className="fs-14">{item}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="tp-info fs-12">
+                      {searchQuery ? 'No matches found' : 'No items available'}
                     </div>
-                  ))
-                ) : (
-                  <div className="tp-info fs-12">
-                    {searchQuery ? 'No matches found' : 'No items available'}
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           </StyledPortal>
         )}
