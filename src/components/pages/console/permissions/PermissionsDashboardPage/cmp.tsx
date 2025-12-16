@@ -13,6 +13,7 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export default function PermissionsDashboardPage({ mainRef }: PageProps) {
   const { permissions, manager, refetchPermissions } =
@@ -147,7 +148,7 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
             </>
           }
           withButton={permissions?.length === 0}
-          buttonUrl="/console/permissions/new"
+          buttonUrl={NAVIGATION_URLS.console.permissions.new}
           buttonText="Create permissions"
         />
       </div>

@@ -204,6 +204,7 @@ export const NAVIGATION_URLS = {
     home: '/console',
     permissions: {
       home: '/console/permissions',
+      new: '/console/permissions/new',
     },
     settings: {
       home: '/console/settings',

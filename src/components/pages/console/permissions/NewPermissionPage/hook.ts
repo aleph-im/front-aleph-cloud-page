@@ -19,6 +19,7 @@ import {
 import { MessageType } from '@aleph-sdk/message'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRequestPermissions } from '@/hooks/common/useRequestEntity/useRequestPermissions'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export type NewPermissionFormState = {
   address: string
@@ -120,8 +121,8 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
     await refetchPermissions()
 
     // Navigate to permissions page
-    handleBack()
-  }, [handleBack, noti, refetchPermissions])
+    router.push(NAVIGATION_URLS.console.permissions.home)
+  }, [router, noti, refetchPermissions])
 
   // -------------------------
   // Setup form

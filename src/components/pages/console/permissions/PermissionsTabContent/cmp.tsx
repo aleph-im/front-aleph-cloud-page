@@ -7,6 +7,7 @@ import { Button, TextGradient, useModal } from '@aleph-front/core'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { getPermissionsTableColumns } from './columns'
 import { PermissionsTabContentProps } from './types'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 // Type for side panel content
 type SidePanelContent = {
@@ -275,14 +276,20 @@ export const PermissionsTabContent = memo(
             </div>
 
             <div tw="mt-20 text-center">
-              <ButtonLink variant="primary" href="/console/permissions/new">
+              <ButtonLink
+                variant="primary"
+                href={NAVIGATION_URLS.console.permissions.new}
+              >
                 Create permissions
               </ButtonLink>
             </div>
           </>
         ) : (
           <div tw="mt-10 text-center">
-            <ButtonLink variant="primary" href="/console/permissions/new">
+            <ButtonLink
+              variant="primary"
+              href={NAVIGATION_URLS.console.permissions.new}
+            >
               Create permissions
             </ButtonLink>
           </div>
