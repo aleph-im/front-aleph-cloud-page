@@ -805,3 +805,37 @@ export async function consumeIterator<S, R>(
 
   return result
 }
+
+export type RetryOptions = {
+  attempts: number
+  delay: number
+}
+
+/**
+ * Generic retry utility that executes an async function with retry logic
+ *
+ * @param fn - The async function to execute with retry logic
+ * @param options - Retry configuration with attempts and delay
+ * @returns Promise that resolves with the function result or rejects with the last error
+ */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  { attempts = 5, delay = 1000 }: RetryOptions = { attempts: 5, delay: 1000 },
+): Promise<T> {
+  let lastError: Error = new Error('Unknown error')
+
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error as Error
+
+      // Don't sleep after the last attempt
+      if (i < attempts - 1) {
+        await sleep(delay)
+      }
+    }
+  }
+
+  throw lastError
+}

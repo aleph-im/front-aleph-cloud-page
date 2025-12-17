@@ -1,10 +1,26 @@
 import React from 'react'
-import { Button, Icon, NoisyContainer, ObjectImg } from '@aleph-front/core'
+import {
+  Button,
+  Icon,
+  NoisyContainer,
+  ObjectImg,
+  TextGradient,
+  useModal,
+} from '@aleph-front/core'
+
 import { SectionTitle } from '@/components/common/CompositeTitle'
+import { StyledTable } from '@/components/common/EntityTable/styles'
+import DetailsMenuButton from '@/components/common/DetailsMenuButton'
+import tw from 'twin.macro'
 
 import ToggleDashboard from '@/components/common/ToggleDashboard'
 import Skeleton from '@/components/common/Skeleton'
+import PaymentStatusModal from '@/components/modals/PaymentStatusModal/cmp'
+import PaymentHistoryPanel from './PaymentHistoryPanel/cmp'
 import { useCreditsDashboard } from './hook'
+import { useCreditPaymentHistory } from '@/hooks/common/useCreditPaymentHistory'
+import { PaymentStatus, CreditPaymentHistoryItem } from '@/domain/credit'
+import { useTopUpCreditsModal } from '@/hooks/common/useTopUpCreditsModal'
 
 export default function CreditsDashboard() {
   const {
@@ -16,24 +32,21 @@ export default function CreditsDashboard() {
     isCalculatingCosts,
   } = useCreditsDashboard()
 
-  // const data = [
-  //   {
-  //     id: 1,
-  //     status: 'finished',
-  //     date: 1756121519678,
-  //     amount: 100,
-  //     asset: 'USDC',
-  //     credits: 120,
-  //   },
-  //   {
-  //     id: 2,
-  //     status: 'ongoing',
-  //     date: 1756121546481,
-  //     amount: 80,
-  //     asset: 'USDC',
-  //     credits: 95,
-  //   },
-  // ]
+  const modal = useModal()
+  const { history, loading: historyLoading } = useCreditPaymentHistory()
+  const [isHistoryPanelOpen, setIsHistoryPanelOpen] = React.useState(false)
+  const { open: openTopUpCreditsModal } = useTopUpCreditsModal()
+
+  // Show only latest 5 payments in dashboard
+  const recentHistory = history.slice(0, 5)
+
+  const handleOpenPaymentStatusModal = (payment: CreditPaymentHistoryItem) => {
+    modal?.open({
+      width: '28rem',
+      onClose: modal?.close,
+      content: <PaymentStatusModal payment={payment} onClose={modal?.close} />,
+    })
+  }
 
   return (
     <section tw="px-0 pb-6 pt-12 lg:pb-5">
@@ -87,7 +100,13 @@ export default function CreditsDashboard() {
                 </div>
               </div>
               <div>
-                <Button variant="secondary" kind="flat" tw="bg-white!" disabled>
+                <Button
+                  variant="secondary"
+                  kind="flat"
+                  tw="bg-white!"
+                  disabled={!isConnected}
+                  onClick={openTopUpCreditsModal}
+                >
                   Top-up Credits
                   <Icon name="credit-card" />
                 </Button>
@@ -95,13 +114,19 @@ export default function CreditsDashboard() {
             </div>
           </NoisyContainer>
 
-          {/* <div>
+          <div>
             <div tw="flex gap-6 items-center">
               <TextGradient as="h3" type="h7">
                 Purchases
               </TextGradient>
 
-              <Button variant="textOnly" size="sm" tw="mb-7!" disabled>
+              <Button
+                variant="textOnly"
+                size="sm"
+                tw="mb-7!"
+                onClick={() => setIsHistoryPanelOpen(true)}
+                disabled={!isConnected}
+              >
                 History <Icon name="chevron-square-right" tw="ml-1" />
               </Button>
             </div>
@@ -110,24 +135,29 @@ export default function CreditsDashboard() {
                 // borderType="none"
                 // rowNoise
                 rowKey={(row) => row.id}
-                data={data}
+                data={recentHistory}
+                rowProps={(row) => ({
+                  onClick: () => handleOpenPaymentStatusModal(row),
+                })}
                 columns={[
                   {
                     label: 'STATUS',
                     align: 'left',
                     sortable: true,
                     render: (row) => {
+                      console.log(row)
                       let color = 'warning'
 
                       switch (row.status) {
-                        case 'finished':
+                        case PaymentStatus.Completed:
                           color = 'success'
                           break
-                        case 'ongoing':
-                          color = 'warning'
-                          break
-                        case 'failed':
+                        case PaymentStatus.Cancelled:
+                        case PaymentStatus.Failed:
                           color = 'error'
+                          break
+                        default:
+                          color = 'warning'
                           break
                       }
 
@@ -183,7 +213,7 @@ export default function CreditsDashboard() {
                     label: '',
                     width: '100%',
                     align: 'right',
-                    render: (row) => {
+                    render: () => {
                       return (
                         <DetailsMenuButton
                           menuItems={[{ label: 'Report issue', href: '/' }]}
@@ -197,9 +227,18 @@ export default function CreditsDashboard() {
                 ]}
               />
             </div>
-          </div> */}
+          </div>
         </div>
       </ToggleDashboard>
+
+      {/* Payment History Panel */}
+      <PaymentHistoryPanel
+        isOpen={isHistoryPanelOpen}
+        onClose={() => setIsHistoryPanelOpen(false)}
+        payments={history}
+        loading={historyLoading}
+        onPaymentClick={handleOpenPaymentStatusModal}
+      />
     </section>
   )
 }

@@ -21,6 +21,7 @@ import { VoucherManager } from '@/domain/voucher'
 import { GpuInstanceManager } from '@/domain/gpuInstance'
 import { CostManager } from '@/domain/cost'
 import { ForwardedPortsManager } from '@/domain/forwardedPorts'
+import { CreditManager } from '@/domain/credit'
 
 function createDefaultManagers(account?: Account) {
   const sdkClient = !account
@@ -85,6 +86,7 @@ function createDefaultManagers(account?: Account) {
     domainManager,
   )
   const voucherManager = new VoucherManager(account, sdkClient)
+  const creditManager = new CreditManager(account)
 
   return {
     sdkClient,
@@ -101,6 +103,7 @@ function createDefaultManagers(account?: Account) {
     confidentialManager,
     websiteManager,
     voucherManager,
+    creditManager,
     forwardedPortsManager,
   }
 }
@@ -119,6 +122,7 @@ const {
   confidentialManager,
   websiteManager,
   voucherManager,
+  creditManager,
   forwardedPortsManager,
 } = createDefaultManagers()
 
@@ -135,6 +139,7 @@ export type ManagerState = {
   confidentialManager?: ConfidentialManager
   websiteManager?: WebsiteManager
   voucherManager?: VoucherManager
+  creditManager?: CreditManager
   costManager?: CostManager
   forwardedPortsManager?: ForwardedPortsManager
 }
@@ -153,6 +158,7 @@ export const initialState: ManagerState = {
   confidentialManager,
   websiteManager,
   voucherManager,
+  creditManager,
   forwardedPortsManager,
 }
 
@@ -178,6 +184,7 @@ export function getManagerReducer(): ManagerReducer {
           confidentialManager,
           websiteManager,
           voucherManager,
+          creditManager,
           forwardedPortsManager,
         } = createDefaultManagers()
 
@@ -196,6 +203,7 @@ export function getManagerReducer(): ManagerReducer {
           confidentialManager,
           websiteManager,
           voucherManager,
+          creditManager,
           forwardedPortsManager,
         }
       }
@@ -217,6 +225,7 @@ export function getManagerReducer(): ManagerReducer {
           confidentialManager,
           websiteManager,
           voucherManager,
+          creditManager,
           forwardedPortsManager,
         } = createDefaultManagers(account)
 
@@ -234,6 +243,7 @@ export function getManagerReducer(): ManagerReducer {
           confidentialManager,
           websiteManager,
           voucherManager,
+          creditManager,
           costManager,
           forwardedPortsManager,
         }

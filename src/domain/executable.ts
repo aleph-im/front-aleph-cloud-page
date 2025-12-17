@@ -43,12 +43,8 @@ import {
 import Err from '@/helpers/errors'
 import { CRN, CRNSpecs, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
-import {
-  convertByteUnits,
-  humanReadableSize,
-  round,
-  sleep,
-} from '@aleph-front/core'
+import { convertByteUnits, humanReadableSize, round } from '@aleph-front/core'
+import { withRetry } from '@/helpers/utils'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import { isBlockchainPAYGCompatible } from './blockchain'
 import { CostLine } from './cost'
@@ -441,34 +437,36 @@ export abstract class ExecutableManager<T extends Executable> {
   ): Promise<void> {
     if (!node.address) throw Err.InvalidCRNAddress
 
-    let errorMsg = ''
+    const nodeUrl = NodeManager.normalizeUrl(node.address)
 
-    for (let i = 0; i < retry.attemps; i++) {
-      try {
-        const nodeUrl = NodeManager.normalizeUrl(node.address)
+    try {
+      await withRetry(
+        async () => {
+          const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              instance: instanceId,
+            }),
+          })
+          const resp = await req.json()
 
-        const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            instance: instanceId,
-          }),
-        })
-        const resp = await req.json()
-        if (resp.success) return
+          if (resp.success) return
 
-        errorMsg = resp.errors[instanceId]
-      } catch (e) {
-        errorMsg = (e as Error).message
-      } finally {
-        if (!retry.attemps) break
-        await sleep(retry.await)
-      }
+          const errorMsg = resp.errors[instanceId]
+          throw new Error(errorMsg || 'Unknown error occurred')
+        },
+        {
+          attempts: retry.attemps,
+          delay: retry.await,
+        },
+      )
+    } catch (error) {
+      const errorMsg = (error as Error).message
+      throw Err.InstanceStartupFailed(node.hash, errorMsg)
     }
-
-    throw Err.InstanceStartupFailed(node.hash, errorMsg)
   }
 
   async getKeyPair(): Promise<KeyPair> {

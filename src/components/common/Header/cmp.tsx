@@ -15,6 +15,7 @@ import { blockchains } from '@/domain/connect'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
 import { useSettings } from '@/hooks/common/useSettings'
+import { useTopUpCreditsModal } from '@/hooks/common/useTopUpCreditsModal'
 
 const CustomLink = (props: RenderLinkProps) => {
   return props.route.children ? <span {...props} /> : <Link {...props} />
@@ -162,6 +163,7 @@ export const Header = () => {
   } = useHeader()
 
   const ensName = useEnsNameLookup(accountAddress)
+  const { open: openTopUpCreditsModal } = useTopUpCreditsModal()
 
   return (
     <>
@@ -182,7 +184,6 @@ export const Header = () => {
                 accountAddress={accountAddress}
                 accountBalance={accountBalance}
                 showCredits
-                disabledTopUp
                 accountCredits={accountCreditBalance}
                 blockchains={blockchains}
                 networks={networks}
@@ -193,6 +194,7 @@ export const Header = () => {
                 handleConnect={handleConnect}
                 handleDisconnect={handleDisconnect}
                 handleSwitchNetwork={handleSwitchNetwork}
+                handleTopUpClick={openTopUpCreditsModal}
                 externalUrl={{
                   text: 'Legacy console',
                   url: NAVIGATION_URLS.legacyConsole.home,
@@ -211,7 +213,6 @@ export const Header = () => {
             accountAddress={accountAddress}
             accountBalance={accountBalance}
             showCredits
-            disabledTopUp
             accountCredits={accountCreditBalance}
             blockchains={blockchains}
             networks={networks}
@@ -222,6 +223,7 @@ export const Header = () => {
             handleConnect={handleConnect}
             handleDisconnect={handleDisconnect}
             handleSwitchNetwork={handleSwitchNetwork}
+            handleTopUpClick={openTopUpCreditsModal}
             externalUrl={{
               text: 'Legacy console',
               url: NAVIGATION_URLS.legacyConsole.home,

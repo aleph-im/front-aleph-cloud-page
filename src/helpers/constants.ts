@@ -88,6 +88,7 @@ type CheckoutAddStepType =
   | 'reserve'
   | 'allocate'
   | 'portForwarding'
+  | 'creditTransaction'
 
 type CheckoutDelStepType =
   | 'sshDel'

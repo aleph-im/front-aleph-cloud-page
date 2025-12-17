@@ -14,6 +14,7 @@ import { CCN, CRN, NodeLastVersions } from '@/domain/node'
 import { RequestState, getRequestReducer } from './request'
 import { RewardsResponse } from '@/domain/stake'
 import { FilterState, getFilterReducer } from './filter'
+import { UIState, getUIReducer } from './ui'
 
 export type StoreSubstate = Record<string, unknown>
 
@@ -87,6 +88,9 @@ export type StoreState = {
 
   // Filtering
   filter: FilterState
+
+  // UI state
+  ui: UIState
 }
 
 export const storeReducer = mergeReducers<StoreState>({
@@ -127,6 +131,9 @@ export const storeReducer = mergeReducers<StoreState>({
 
   // Filtering
   filter: getFilterReducer(),
+
+  // UI state
+  ui: getUIReducer(),
 })
 
 export const storeInitialState: StoreState = getInitialState(storeReducer)
