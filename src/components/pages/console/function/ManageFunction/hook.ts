@@ -194,6 +194,7 @@ export function useManageFunction(): ManageFunction {
             startTime: program.time,
             blockchain: program.payment.chain,
             loading,
+            itemHash: program.id,
           } as HoldingPaymentData,
         ]
       case PaymentType.credit:
@@ -205,6 +206,7 @@ export function useManageFunction(): ManageFunction {
             startTime: program.time,
             blockchain: program.payment.chain,
             loading,
+            itemHash: program.id,
           } as CreditPaymentData,
         ]
       default:
@@ -216,10 +218,11 @@ export function useManageFunction(): ManageFunction {
             startTime: program?.time,
             blockchain: program?.payment?.chain,
             loading: true,
+            itemHash: program?.id,
           } as HoldingPaymentData,
         ]
     }
-  }, [cost, program?.payment, runningTime, program?.time, loading])
+  }, [cost, program?.payment, program?.id, runningTime, program?.time, loading])
 
   const handleDownload = useCallback(async () => {
     if (!programManager) throw Err.ConnectYourWallet
