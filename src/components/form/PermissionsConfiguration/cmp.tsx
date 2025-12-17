@@ -386,8 +386,6 @@ export const PermissionsConfiguration = ({
           onClose={handleCloseChannelsPanel}
           title="Channels"
           order={channelsPanelOrder}
-          width="50vw"
-          mobileHeight="70vh"
           footer={channelsPanelFooter}
         >
           <div tw="flex flex-col gap-y-2.5">

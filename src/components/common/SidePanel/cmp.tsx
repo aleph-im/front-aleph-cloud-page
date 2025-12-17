@@ -15,8 +15,8 @@ export const SidePanel = ({
   onClose,
   footer,
   order = 0,
-  width = '50vw',
-  mobileHeight = '80vh',
+  width,
+  mobileHeight,
 }: SidePanelProps) => {
   return (
     <>

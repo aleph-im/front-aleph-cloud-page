@@ -321,8 +321,6 @@ export const PermissionsTabContent = memo(
           isOpen={sidePanel.isOpen}
           onClose={handleClosePanel}
           title={sidePanel.title}
-          width="60vw"
-          mobileHeight="80vh"
           footer={permissionsDetailFooter}
         >
           {sidePanel.type === 'configure' ? (

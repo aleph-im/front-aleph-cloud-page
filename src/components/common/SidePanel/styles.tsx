@@ -70,7 +70,7 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     theme,
     $isOpen,
     $order = 0,
-    $width = '50vw',
+    $width = '43rem',
     $mobileHeight = '80vh',
   }) => css`
     position: fixed;
@@ -83,7 +83,7 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     top: 1rem;
     right: 1rem;
     bottom: 1rem;
-    width: ${$width};
+    width: calc(${$width} - ${$order * 20}px);
 
     /* For sliding effect on desktop */
     transform: translateX(100%);
@@ -104,7 +104,7 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
       bottom: 0;
       left: 0.5rem;
       right: 0.5 rem;
-      height: ${$mobileHeight};
+      height: calc(${$mobileHeight} - ${$order * 20}px);
       width: initial;
       border-radius: 1.5rem 1.5rem 0 0;
 
