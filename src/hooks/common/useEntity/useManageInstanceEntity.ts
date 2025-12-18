@@ -28,7 +28,7 @@ import { useRequestSSHKeys } from '../useRequestEntity/useRequestSSHKeys'
 // Type for side panel content
 type SidePanelContent = {
   isOpen: boolean
-  type?: 'sshKey' | 'volume' | 'domain'
+  type?: 'sshKey' | 'volume' | 'domain' | 'logs'
   selectedDomain?: Domain
   selectedVolume?: any
   selectedSSHKey?: SSHKey
@@ -56,15 +56,14 @@ export type UseManageInstanceEntityReturn = UseExecutableActionsReturn & {
 
   // UI state
   mappedKeys: (SSHKey | undefined)[]
-  sliderActiveIndex: number
   sidePanel: SidePanelContent
   isDownloadingLogs: boolean
 
   // Actions
-  setTabId: (tabId: string) => void
   handleBack: () => void
   handleImmutableVolumeClick: (volume: any) => void
   handleSSHKeyClick: (sshKey: SSHKey) => void
+  handleViewLogs: () => void
   closeSidePanel: () => void
   handleDownloadLogs: () => void
 
@@ -259,6 +258,14 @@ export function useManageInstanceEntity<
     })
   }, [])
 
+  const handleViewLogs = useCallback(() => {
+    setTabId('log')
+    setSidePanel({
+      isOpen: true,
+      type: 'logs',
+    })
+  }, [])
+
   const closeSidePanel = useCallback(() => {
     setSidePanel((prev) => ({
       ...prev,
@@ -268,20 +275,11 @@ export function useManageInstanceEntity<
 
   // -----------------
 
-  // === SLIDER ===
-
-  const sliderActiveIndex = useMemo(() => {
-    return tabId === 'log' ? 1 : 0
-  }, [tabId])
-
-  // -----------------
-
   return {
     ...executableActions,
     mappedKeys,
     customDomains,
     handleCustomDomainClick,
-    setTabId,
     handleBack,
     handleDownloadLogs,
     isDownloadingLogs,
@@ -289,10 +287,10 @@ export function useManageInstanceEntity<
     immutableVolumes,
     persistentVolumes,
     name,
-    sliderActiveIndex,
     sidePanel,
     handleImmutableVolumeClick,
     handleSSHKeyClick,
+    handleViewLogs,
     closeSidePanel,
   }
 }
