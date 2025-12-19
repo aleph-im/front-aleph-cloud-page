@@ -3,6 +3,12 @@ import { Control, FieldErrors, UseControllerReturn } from 'react-hook-form'
 import { TopUpCreditsFormData } from '@/helpers/schemas/credit'
 
 export type UseTopUpCreditsModalReturn = {
+  isOpen: boolean
+  handleOpen: () => void
+  handleClose: () => void
+}
+
+export type UseTopUpCreditsModalFormReturn = {
   values: TopUpCreditsFormData
   control: Control<TopUpCreditsFormData>
   amountCtrl: UseControllerReturn<TopUpCreditsFormData, 'amount'>
@@ -12,4 +18,6 @@ export type UseTopUpCreditsModalReturn = {
   resetForm: () => void
   bonus: number
   totalBalance: number
+  isLoadingEstimation: boolean
+  isSubmitLoading: boolean
 }

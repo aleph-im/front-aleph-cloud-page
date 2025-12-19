@@ -9,20 +9,13 @@ export const StyledBackdrop = styled.div<StyledSidePanelProps>`
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
+    z-index: 20;
 
-    transition:
-      opacity ${theme.transition.duration.normal}ms ease-in-out,
-      visibility ${theme.transition.duration.normal}ms ease-in-out;
-    opacity: 0;
-    visibility: hidden;
-    z-index: 28; /* just below the side panel */
-
-    ${$isOpen &&
-    css`
-      opacity: 1;
-      visibility: visible;
-    `}
+    background-color: ${$isOpen ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)'};
+    visibility: ${$isOpen ? 'inherit' : 'hidden'};
+    transition-property: background-color, visibility;
+    transition-duration: ${theme.transition.duration.normal}ms;
+    transition-timing-function: ${theme.transition.timing};
   `}
 `
 
@@ -36,7 +29,7 @@ export const StyledHeader = styled.div`
 
 export const StyledSidePanel = styled.div<StyledSidePanelProps>`
   ${({ theme, $isOpen }) => css`
-    position: fixed;
+    position: absolute;
     background-color: ${theme.color.background};
     overflow-y: auto;
 
@@ -49,7 +42,6 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     /* For sliding effect on desktop */
     transform: translateX(100%);
     transition: transform ${theme.transition.duration.normal}ms ease-in-out;
-    z-index: 50;
 
     ${$isOpen
       ? css`
@@ -64,7 +56,7 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
       top: auto;
       bottom: 0;
       left: 0.5rem;
-      right: 0.5 rem;
+      right: 0.5rem;
       height: 80vh;
       width: initial;
       border-radius: 1.5rem 1.5rem 0 0;

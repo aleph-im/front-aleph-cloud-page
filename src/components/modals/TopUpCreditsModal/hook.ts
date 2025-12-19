@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react'
+import { useDebounceState, useLocalRequest } from '@aleph-front/core'
 import { useForm } from '@/hooks/common/useForm'
 import { useController, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,9 +11,13 @@ import Err from '@/helpers/errors'
 import {
   TopUpCreditsFormData,
   topUpCreditsSchema,
+  TokenEstimationResponse,
 } from '@/helpers/schemas/credit'
 import { useCreditManager } from '@/hooks/common/useManager/useCreditManager'
-import { UseTopUpCreditsModalReturn } from './types'
+import {
+  UseTopUpCreditsModalFormReturn,
+  UseTopUpCreditsModalReturn,
+} from './types'
 
 export const defaultValues: TopUpCreditsFormData = {
   amount: 100,
@@ -20,8 +25,30 @@ export const defaultValues: TopUpCreditsFormData = {
   chain: 'ethereum', // 'ethereum-sepolia',
   provider: 'WALLET',
 }
+import { useAppState } from '@/contexts/appState'
+import { openTopUpCreditsModal, closeTopUpCreditsModal } from '@/store/ui'
 
 export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
+  const [state, dispatch] = useAppState()
+
+  const isOpen = state.ui.isTopUpCreditsModalOpen
+
+  const handleOpen = useCallback(() => {
+    dispatch(openTopUpCreditsModal())
+  }, [dispatch])
+
+  const handleClose = useCallback(() => {
+    dispatch(closeTopUpCreditsModal())
+  }, [dispatch])
+
+  return {
+    isOpen,
+    handleOpen,
+    handleClose,
+  }
+}
+
+export function useTopUpCreditsModalForm(): UseTopUpCreditsModalFormReturn {
   const creditManager = useCreditManager()
   const { next, stop } = useCheckoutNotification({})
 
@@ -59,6 +86,7 @@ export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
     handleSubmit,
     formState: { errors },
     reset,
+    requestState: { loading: isSubmitLoading },
   } = useForm({
     defaultValues,
     onSubmit,
@@ -82,21 +110,36 @@ export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
     reset(defaultValues)
   }, [reset])
 
-  // Calculate bonus based on amount
-  // TODO: Replace with actual API call
-  const bonus = useMemo(() => {
-    const amount = values.amount || 0
-    if (amount >= 1000) return amount * 0.2 // 20% bonus for $1000+
-    if (amount >= 500) return amount * 0.1 // 10% bonus for $500+
-    if (amount >= 100) return amount * 0.05 // 5% bonus for $100+
-    return 0
-  }, [values.amount])
+  const debouncedAmount = useDebounceState(values.amount, 500)
 
-  // Calculate total balance (amount + bonus)
+  const { data: estimation, loading: isLoadingEstimation } = useLocalRequest({
+    doRequest: async (): Promise<TokenEstimationResponse | null> => {
+      if (!creditManager || !debouncedAmount || debouncedAmount < 100)
+        return null
+
+      return await creditManager.getTokenToCreditsEstimation(values)
+    },
+    onSuccess: () => null,
+    onError: (error) => {
+      console.error('Failed to fetch estimation:', error)
+    },
+    flushData: true,
+    triggerOnMount: true,
+    triggerDeps: [
+      creditManager,
+      debouncedAmount,
+      values.currency,
+      values.chain,
+    ],
+  })
+
+  const bonus = useMemo(() => {
+    return estimation?.creditBonusAmount || 0
+  }, [estimation])
+
   const totalBalance = useMemo(() => {
-    const amount = values.amount || 0
-    return amount + bonus
-  }, [values.amount, bonus])
+    return estimation?.creditAmount || 0
+  }, [estimation])
 
   return {
     values,
@@ -108,5 +151,7 @@ export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
     resetForm,
     bonus,
     totalBalance,
+    isLoadingEstimation,
+    isSubmitLoading,
   }
 }

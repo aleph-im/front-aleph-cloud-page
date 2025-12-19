@@ -18,7 +18,7 @@ import useResetScroll from '@/hooks/common/useResetScroll'
 import { useRef } from 'react'
 import Head from 'next/head'
 import '@/config/reown'
-import GlobalTopUpCreditsModal from '@/components/common/GlobalTopUpCreditsModal'
+import TopUpCreditsModal from '@/components/modals/TopUpCreditsModal'
 
 export default function App({ Component, pageProps }: AppProps) {
   const mainRef = useRef<HTMLDivElement>(null)
@@ -41,7 +41,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <AppStateProvider>
           <NotificationProvider max={10} timeout={2000}>
             <ModalProvider>
-              <GlobalTopUpCreditsModal />
+              <TopUpCreditsModal />
               <Viewport>
                 <Sidebar />
                 <Main ref={mainRef}>

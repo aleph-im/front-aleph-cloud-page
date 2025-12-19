@@ -15,7 +15,7 @@ import { blockchains } from '@/domain/connect'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
 import { useSettings } from '@/hooks/common/useSettings'
-import { useTopUpCreditsModal } from '@/hooks/common/useTopUpCreditsModal'
+import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook'
 
 const CustomLink = (props: RenderLinkProps) => {
   return props.route.children ? <span {...props} /> : <Link {...props} />
@@ -163,7 +163,7 @@ export const Header = () => {
   } = useHeader()
 
   const ensName = useEnsNameLookup(accountAddress)
-  const { open: openTopUpCreditsModal } = useTopUpCreditsModal()
+  const { handleOpen } = useTopUpCreditsModal()
 
   return (
     <>
@@ -194,7 +194,7 @@ export const Header = () => {
                 handleConnect={handleConnect}
                 handleDisconnect={handleDisconnect}
                 handleSwitchNetwork={handleSwitchNetwork}
-                handleTopUpClick={openTopUpCreditsModal}
+                handleTopUpClick={handleOpen}
                 externalUrl={{
                   text: 'Legacy console',
                   url: NAVIGATION_URLS.legacyConsole.home,
@@ -223,7 +223,7 @@ export const Header = () => {
             handleConnect={handleConnect}
             handleDisconnect={handleDisconnect}
             handleSwitchNetwork={handleSwitchNetwork}
-            handleTopUpClick={openTopUpCreditsModal}
+            handleTopUpClick={handleOpen}
             externalUrl={{
               text: 'Legacy console',
               url: NAVIGATION_URLS.legacyConsole.home,

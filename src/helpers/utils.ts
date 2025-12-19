@@ -23,6 +23,7 @@ import { Account } from '@aleph-sdk/account'
 import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { blockchains } from '@/domain/connect'
+import BN from 'bn.js'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -838,4 +839,45 @@ export async function withRetry<T>(
   }
 
   throw lastError
+}
+
+/**
+ * Formats payment amounts for display, handling token decimal conversion
+ * ALEPH and USDC tokens have 18 decimals that need to be converted to human-readable format
+ * Uses BN.js for precise decimal handling, reversing the conversion done in getTokenToCreditsEstimation
+ *
+ * @param amount - The raw amount from the API (with 18 decimals for ALEPH/USDC)
+ * @param asset - The asset type (ALEPH, USDC, etc.)
+ * @param decimals - Number of decimal places to show (default: 6)
+ * @returns Formatted amount string
+ */
+export function formatPaymentAmount(
+  amount: number | string,
+  asset: string,
+  decimals = 6,
+): string {
+  if (!amount || amount === 0) return '0'
+
+  // ALEPH and USDC have 18 decimals
+  const isTokenWith18Decimals = ['ALEPH', 'USDC'].includes(asset.toUpperCase())
+
+  if (isTokenWith18Decimals) {
+    // Convert from 18-decimal precision back to regular number using BN
+    // This reverses: amount.mul(new BN('1000000000000000000'))
+    const amountBN = new BN(amount.toString())
+    const divisor = new BN('1000000000000000000') // 10^18
+    const convertedAmount = amountBN.div(divisor)
+
+    // Handle remainder for decimal places
+    const remainder = amountBN.mod(divisor)
+    const decimalPart = remainder.toString().padStart(18, '0')
+    const trimmedDecimal = decimalPart.substring(0, decimals).replace(/0+$/, '')
+
+    const wholePart = convertedAmount.toString()
+    return trimmedDecimal ? `${wholePart}.${trimmedDecimal}` : wholePart
+  }
+
+  // For other assets, format as is
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
+  return numAmount.toFixed(decimals).replace(/\.?0+$/, '')
 }

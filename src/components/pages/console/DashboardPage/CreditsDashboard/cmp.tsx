@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import {
   Button,
   Icon,
@@ -15,12 +15,16 @@ import tw from 'twin.macro'
 
 import ToggleDashboard from '@/components/common/ToggleDashboard'
 import Skeleton from '@/components/common/Skeleton'
-import PaymentStatusModal from '@/components/modals/PaymentStatusModal/cmp'
-import PaymentHistoryPanel from './PaymentHistoryPanel/cmp'
+import PaymentStatusModal, {
+  PaymentStatusModalHeader,
+  PaymentStatusModalFooter,
+} from '@/components/modals/PaymentStatusModal'
+import PaymentHistoryPanel from './PaymentHistoryPanel'
 import { useCreditsDashboard } from './hook'
 import { useCreditPaymentHistory } from '@/hooks/common/useCreditPaymentHistory'
 import { PaymentStatus, CreditPaymentHistoryItem } from '@/domain/credit'
-import { useTopUpCreditsModal } from '@/hooks/common/useTopUpCreditsModal'
+import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook'
+import { getDate, formatPaymentAmount } from '@/helpers/utils'
 
 export default function CreditsDashboard() {
   const {
@@ -33,31 +37,41 @@ export default function CreditsDashboard() {
   } = useCreditsDashboard()
 
   const modal = useModal()
+  const modalOpen = modal?.open
+  const modalClose = modal?.close
+
   const { history, loading: historyLoading } = useCreditPaymentHistory()
   const [isHistoryPanelOpen, setIsHistoryPanelOpen] = React.useState(false)
-  const { open: openTopUpCreditsModal } = useTopUpCreditsModal()
+  const { handleOpen } = useTopUpCreditsModal()
 
   // Show only latest 5 payments in dashboard
   const recentHistory = history.slice(0, 5)
 
-  const handleOpenPaymentStatusModal = (payment: CreditPaymentHistoryItem) => {
-    modal?.open({
-      width: '28rem',
-      onClose: modal?.close,
-      content: <PaymentStatusModal payment={payment} onClose={modal?.close} />,
-    })
-  }
+  const handleOpenPaymentStatusModal = useCallback(
+    (payment: CreditPaymentHistoryItem) => {
+      modalOpen?.({
+        width: '40rem',
+        closeOnCloseButton: false,
+        header: <PaymentStatusModalHeader payment={payment} />,
+        content: <PaymentStatusModal payment={payment} />,
+        footer: (
+          <PaymentStatusModalFooter payment={payment} onClose={modalClose} />
+        ),
+      })
+    },
+    [modalOpen, modalClose],
+  )
 
   return (
     <section tw="px-0 pb-6 pt-12 lg:pb-5">
-      <SectionTitle>Credits</SectionTitle>
+      <SectionTitle>Balance</SectionTitle>
       <ToggleDashboard
         open={creditsDashboardOpen}
         setOpen={setCreditsDashboardOpen}
         toggleButton={{
           children: (
             <>
-              Open credits <Icon name="credit-card" />
+              Open balance <Icon name="credit-card" />
             </>
           ),
           disabled: !isConnected,
@@ -105,9 +119,9 @@ export default function CreditsDashboard() {
                   kind="flat"
                   tw="bg-white!"
                   disabled={!isConnected}
-                  onClick={openTopUpCreditsModal}
+                  onClick={handleOpen}
                 >
-                  Top-up Credits
+                  Top-up Balance
                   <Icon name="credit-card" />
                 </Button>
               </div>
@@ -189,20 +203,21 @@ export default function CreditsDashboard() {
                     label: 'DATE',
                     align: 'left',
                     sortable: true,
-                    render: (row) => row.date,
+                    render: (row) =>
+                      row.createdAt && getDate(row.createdAt / 1000),
                   },
-                  // {
-                  //   label: 'AMOUNT',
-                  //   align: 'left',
-                  //   sortable: true,
-                  //   render: (row) => row.amount,
-                  // },
-                  // {
-                  //   label: 'ASSET',
-                  //   align: 'left',
-                  //   sortable: true,
-                  //   render: (row) => row.asset,
-                  // },
+                  {
+                    label: 'AMOUNT',
+                    align: 'left',
+                    sortable: true,
+                    render: (row) => formatPaymentAmount(row.amount, row.asset),
+                  },
+                  {
+                    label: 'ASSET',
+                    align: 'left',
+                    sortable: true,
+                    render: (row) => row.asset,
+                  },
                   {
                     label: 'CREDITS',
                     align: 'left',

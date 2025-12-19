@@ -1,2 +1,11 @@
-export { default, default as PaymentStatusModal } from './cmp'
-export type { PaymentStatusModalProps } from './types'
+export {
+  default,
+  default as PaymentStatusModal,
+  PaymentStatusModalHeader,
+  PaymentStatusModalFooter,
+} from './cmp'
+export type {
+  PaymentStatusModalContentProps,
+  PaymentStatusModalHeaderProps,
+  PaymentStatusModalFooterProps,
+} from './types'

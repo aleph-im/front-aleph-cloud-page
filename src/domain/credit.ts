@@ -1,18 +1,23 @@
 import { Account } from '@aleph-sdk/account'
 import { ETHAccount } from '@aleph-sdk/ethereum'
 import { v4 as uuidv4 } from 'uuid'
+import BN from 'bn.js'
 import { CheckoutStepType } from '@/helpers/constants'
 import {
   TopUpCreditsFormData,
   PaymentCurrency,
   topUpCreditsSchema,
   PaymentChain,
+  TokenEstimationRequest,
+  TokenEstimationResponse,
 } from '@/helpers/schemas/credit'
-import { getDate, withRetry } from '@/helpers/utils'
+import { withRetry } from '@/helpers/utils'
 
-const ALEPH_CREDIT_API_URL = 'http://localhost:8080/api/v0'
-// const ALEPH_CREDIT_API_URL = 'https://credit.aleph.im/api/v0'
+// const ALEPH_CREDIT_API_URL = 'http://localhost:8080/api/v0'
+const ALEPH_CREDIT_API_URL = 'https://credit.aleph.im/api/v0'
 const ALEPH_CREDIT_PAYMENT_ENDPOINT = `${ALEPH_CREDIT_API_URL}/payment`
+const ALEPH_CREDIT_ESTIMATION_ENDPOINT = `${ALEPH_CREDIT_API_URL}/estimation/token-to-credit`
+export const ALEPH_CREDIT_SENDER = '0x6aeaEEb08720DEc9d6dae1A8fc49344Dd99391Ac'
 
 export enum PaymentStatus {
   Created = 'CREATED',
@@ -59,12 +64,19 @@ export type PaymentResponse = {
 
 export type CreditPaymentHistoryItem = {
   id: string
+  chain: string
   status: PaymentStatus
-  date: string
+  createdAt: number
+  updatedAt: number
   amount: number
   asset: string
   credits: number
+  bonus: number
+  price: number
+  provider: string
+  paymentMethod: string
   txHash?: string
+  itemHash: string
 }
 
 export class CreditManager {
@@ -116,10 +128,11 @@ export class CreditManager {
     return txHash
   }
 
-  private async createPaymentRequest(
+  private async upsertPaymentRequest(
     data: TopUpCreditsFormData,
     paymentId: string,
-  ): Promise<PaymentResponse> {
+    txHash?: string,
+  ): Promise<PaymentResponse | void> {
     if (!this.account) {
       throw new Error('Account is required for payment requests')
     }
@@ -131,27 +144,52 @@ export class CreditManager {
       address: this.account.address,
       currency: data.currency,
       amount: data.amount,
+      ...(txHash && { txHash }),
     }
 
-    const response = await fetch(ALEPH_CREDIT_PAYMENT_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(paymentRequest),
-    })
+    const fetchOperation = async () => {
+      const response = await fetch(ALEPH_CREDIT_PAYMENT_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentRequest),
+      })
 
-    if (!response.ok) {
-      const error = await response.json().catch((e) => e)
+      if (!response.ok) {
+        const error = await response.json().catch((e) => e)
 
-      if (error.description) {
-        throw new Error(`${error.description}`)
+        if (error.description) {
+          throw new Error(`${error.description}`)
+        }
+
+        throw new Error(`API error: ${response.status} ${response.statusText}`)
       }
 
-      throw new Error(`API error: ${response.status} ${response.statusText}`)
+      return response.json()
     }
 
-    return response.json()
+    // If updating with txHash, use retry logic
+    if (txHash) {
+      await withRetry(fetchOperation, {
+        attempts: 5,
+        delay: 1000,
+      })
+      return
+    }
+
+    // If creating (no txHash), return the response
+    return fetchOperation()
+  }
+
+  private async createPaymentRequest(
+    data: TopUpCreditsFormData,
+    paymentId: string,
+  ): Promise<PaymentResponse> {
+    return this.upsertPaymentRequest(
+      data,
+      paymentId,
+    ) as Promise<PaymentResponse>
   }
 
   private async sendTransaction(
@@ -163,15 +201,6 @@ export class CreditManager {
       if (!wallet) {
         throw new Error('No wallet provider available')
       }
-
-      console.log(txData, {
-        from: txData.from,
-        to: txData.to,
-        gas: `0x${parseInt(txData.gasLimit).toString(16)}`,
-        gasPrice: `0x${parseInt(txData.gasPrice).toString(16)}`,
-        value: txData.value,
-        data: txData.data,
-      })
 
       const txHash = await wallet.request({
         method: 'eth_sendTransaction',
@@ -200,47 +229,51 @@ export class CreditManager {
     paymentId: string,
     txHash: string,
   ): Promise<void> {
-    if (!this.account) {
-      throw new Error('Account is required for payment requests')
+    await this.upsertPaymentRequest(data, paymentId, txHash)
+  }
+
+  // Token estimation functionality
+  async getTokenToCreditsEstimation(
+    data: TopUpCreditsFormData,
+  ): Promise<TokenEstimationResponse> {
+    const blockchain = data.chain
+    const token = data.currency
+
+    // Convert amount to 18-decimal precision string using BN
+    const amount = new BN(data.amount.toString())
+      .mul(new BN('1000000000000000000'))
+      .toString()
+
+    const estimationRequest: TokenEstimationRequest = {
+      blockchain,
+      token,
+      amount,
     }
 
-    const updateRequest: PaymentRequest = {
-      id: paymentId,
-      provider: data.provider,
-      chain: data.chain,
-      address: this.account.address,
-      currency: data.currency,
-      amount: data.amount,
-      txHash,
-    }
+    try {
+      const response = await fetch(ALEPH_CREDIT_ESTIMATION_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(estimationRequest),
+      })
 
-    await withRetry(
-      async () => {
-        const updateResponse = await fetch(ALEPH_CREDIT_PAYMENT_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updateRequest),
-        })
+      if (!response.ok) {
+        const error = await response.json().catch((e) => e)
 
-        if (!updateResponse.ok) {
-          let errorMsg = 'Failed to update transaction hash in backend'
-
-          const error = await updateResponse.json().catch((e) => e)
-
-          if (error.description) {
-            errorMsg = error.description
-          }
-
-          throw new Error(errorMsg)
+        if (error.description) {
+          throw new Error(`${error.description}`)
         }
-      },
-      {
-        attempts: 5,
-        delay: 1000,
-      },
-    )
+
+        throw new Error(`API error: ${response.status} ${response.statusText}`)
+      }
+
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching token estimation:', error)
+      throw new Error('Failed to fetch token estimation')
+    }
   }
 
   // Payment history functionality
@@ -272,14 +305,23 @@ export class CreditManager {
 
       const payments = await response.json()
 
+      console.log('payments', payments)
+
       return payments.map((payment: any) => ({
         id: payment.id,
+        chain: payment.chain,
         status: payment.status,
-        date: getDate(payment.created_at / 1000),
+        createdAt: payment.created_at,
+        updatedAt: payment.updated_at,
         amount: payment.in_amount,
         asset: payment.in_currency,
-        credits: payment.out_amount || 0,
+        credits: payment.prices.credit_amount,
+        bonus: payment.prices.credit_bonus_amount,
+        price: payment.prices.credit_price_aleph,
+        provider: payment.provider_id,
+        paymentMethod: payment.payment_method,
         txHash: payment.tx_hash,
+        itemHash: payment.item_hash,
       }))
     } catch (error) {
       console.error('Error fetching credit payment history:', error)

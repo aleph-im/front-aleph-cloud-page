@@ -26,3 +26,20 @@ export type TopUpCreditsFormData = z.infer<typeof topUpCreditsSchema>
 export type PaymentChain = z.infer<typeof paymentChainSchema>
 export type PaymentProvider = z.infer<typeof paymentProviderSchema>
 export type PaymentCurrency = z.infer<typeof paymentCurrencySchema>
+
+export type TokenEstimationRequest = {
+  blockchain: string
+  token: string
+  amount: string
+}
+
+export type TokenEstimationResponse = {
+  tokenAmount: string
+  tokenSymbol: string
+  creditAmount: number
+  creditBonusAmount: number
+  totalPrice: number
+  price: number
+  bonusRatio: number
+  timestamp: number
+}

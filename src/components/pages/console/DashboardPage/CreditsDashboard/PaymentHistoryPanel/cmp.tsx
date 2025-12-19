@@ -5,6 +5,7 @@ import { StyledTable } from '@/components/common/EntityTable/styles'
 import DetailsMenuButton from '@/components/common/DetailsMenuButton'
 import { PaymentStatus } from '@/domain/credit'
 import { PaymentHistoryPanelProps } from './types'
+import { formatPaymentAmount, getDate } from '@/helpers/utils'
 import tw from 'twin.macro'
 
 export const PaymentHistoryPanel = ({
@@ -125,13 +126,19 @@ export const PaymentHistoryPanel = ({
                 label: 'DATE',
                 align: 'left',
                 sortable: true,
-                render: (row) => row.date,
+                render: (row) => row.createdAt && getDate(row.createdAt / 1000),
               },
               {
                 label: 'AMOUNT',
                 align: 'left',
                 sortable: true,
-                render: (row) => `${row.amount} ${row.asset}`,
+                render: (row) => formatPaymentAmount(row.amount, row.asset),
+              },
+              {
+                label: 'ASSET',
+                align: 'left',
+                sortable: true,
+                render: (row) => row.asset,
               },
               {
                 label: 'CREDITS',
