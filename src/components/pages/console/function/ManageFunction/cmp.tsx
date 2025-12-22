@@ -185,15 +185,13 @@ export default function ManageFunction() {
                   persistentVolumes={persistentVolumes}
                 />
               ),
-              customDomains.length && (
-                <EntityCustomDomains
-                  key={'function-custom-domains'}
-                  isLoadingCustomDomains={isLoadingCustomDomains}
-                  customDomains={customDomains}
-                  onCustomDomainClick={handleCustomDomainClick}
-                  onAddDomain={handleAddDomain}
-                />
-              ),
+              <EntityCustomDomains
+                key={'function-custom-domains'}
+                isLoadingCustomDomains={isLoadingCustomDomains}
+                customDomains={customDomains}
+                onCustomDomainClick={handleCustomDomainClick}
+                onAddDomain={handleAddDomain}
+              />,
             ]}
           />
         </Slide>

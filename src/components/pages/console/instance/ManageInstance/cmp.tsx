@@ -174,7 +174,6 @@ export default function ManageInstance() {
               persistentVolumes={persistentVolumes}
             />
           ),
-
           <EntityCustomDomains
             key={'instance-custom-domains'}
             isLoadingCustomDomains={isLoadingCustomDomains}

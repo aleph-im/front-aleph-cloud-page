@@ -177,15 +177,13 @@ export default function ManageConfidential() {
               persistentVolumes={persistentVolumes}
             />
           ),
-          customDomains.length && (
-            <EntityCustomDomains
-              key={'confidentialInstance-custom-domains'}
-              isLoadingCustomDomains={isLoadingCustomDomains}
-              customDomains={customDomains}
-              onCustomDomainClick={handleCustomDomainClick}
-              onAddDomain={handleAddDomain}
-            />
-          ),
+          <EntityCustomDomains
+            key={'confidentialInstance-custom-domains'}
+            isLoadingCustomDomains={isLoadingCustomDomains}
+            customDomains={customDomains}
+            onCustomDomainClick={handleCustomDomainClick}
+            onAddDomain={handleAddDomain}
+          />,
           <EntityPortForwarding
             key="port-forwarding"
             entityHash={confidentialInstance?.id}

@@ -174,15 +174,13 @@ export default function ManageGpuInstance() {
               persistentVolumes={persistentVolumes}
             />
           ),
-          customDomains.length && (
-            <EntityCustomDomains
-              key={'gpuInstance-custom-domains'}
-              isLoadingCustomDomains={isLoadingCustomDomains}
-              customDomains={customDomains}
-              onCustomDomainClick={handleCustomDomainClick}
-              onAddDomain={handleAddDomain}
-            />
-          ),
+          <EntityCustomDomains
+            key={'gpuInstance-custom-domains'}
+            isLoadingCustomDomains={isLoadingCustomDomains}
+            customDomains={customDomains}
+            onCustomDomainClick={handleCustomDomainClick}
+            onAddDomain={handleAddDomain}
+          />,
           <EntityPortForwarding
             key="port-forwarding"
             entityHash={gpuInstance?.id}
