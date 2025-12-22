@@ -20,6 +20,7 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import FunctionalButton from '@/components/common/FunctionalButton'
+import { EntityDomainType } from '@/helpers/constants'
 
 export default function ManageFunction() {
   const {
@@ -185,6 +186,8 @@ export default function ManageFunction() {
               customDomains.length && (
                 <EntityCustomDomains
                   key={'function-custom-domains'}
+                  entityId={program?.id}
+                  entityType={EntityDomainType.Program}
                   isLoadingCustomDomains={isLoadingCustomDomains}
                   customDomains={customDomains}
                   onCustomDomainClick={handleCustomDomainClick}

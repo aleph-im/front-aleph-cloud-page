@@ -15,6 +15,7 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
+import { EntityDomainType } from '@/helpers/constants'
 import SidePanel from '@/components/common/SidePanel'
 import VolumeDetail from '@/components/common/VolumeDetail'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
@@ -177,6 +178,8 @@ export default function ManageConfidential() {
           customDomains.length && (
             <EntityCustomDomains
               key={'confidentialInstance-custom-domains'}
+              entityId={confidentialInstance?.id}
+              entityType={EntityDomainType.Confidential}
               isLoadingCustomDomains={isLoadingCustomDomains}
               customDomains={customDomains}
               onCustomDomainClick={handleCustomDomainClick}

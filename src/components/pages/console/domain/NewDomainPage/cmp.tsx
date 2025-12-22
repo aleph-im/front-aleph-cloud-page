@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Button,
   Dropdown,
@@ -34,9 +34,29 @@ export default function NewDomain() {
     handleBack,
     setTarget,
     setRef,
+    initialTarget,
   } = useNewDomainPage()
 
-  const [tabId, setTabId] = useState('website')
+  const [tabId, setTabId] = useState(() => {
+    if (
+      initialTarget === EntityDomainType.Instance ||
+      initialTarget === EntityDomainType.Program ||
+      initialTarget === EntityDomainType.Confidential
+    ) {
+      return 'compute'
+    }
+    return 'website'
+  })
+
+  useEffect(() => {
+    if (
+      initialTarget === EntityDomainType.Instance ||
+      initialTarget === EntityDomainType.Program ||
+      initialTarget === EntityDomainType.Confidential
+    ) {
+      setTabId('compute')
+    }
+  }, [initialTarget])
   const labelResourceType =
     targetCtrl.field.value == EntityDomainType.Instance
       ? 'instance'

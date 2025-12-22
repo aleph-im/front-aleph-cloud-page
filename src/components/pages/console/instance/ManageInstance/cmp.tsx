@@ -14,7 +14,7 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityConnectionMethods from '@/components/common/entityData/EntityConnectionMethods'
 import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
 import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
-import { EntityType } from '@/helpers/constants'
+import { EntityDomainType, EntityType } from '@/helpers/constants'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
 import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
@@ -175,6 +175,8 @@ export default function ManageInstance() {
 
           <EntityCustomDomains
             key={'instance-custom-domains'}
+            entityId={instance?.id}
+            entityType={EntityDomainType.Instance}
             isLoadingCustomDomains={isLoadingCustomDomains}
             customDomains={customDomains}
             onCustomDomainClick={handleCustomDomainClick}

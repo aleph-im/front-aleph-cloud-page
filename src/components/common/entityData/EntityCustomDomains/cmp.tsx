@@ -1,4 +1,5 @@
-import React, { memo, useRef } from 'react'
+import React, { memo, useCallback, useRef } from 'react'
+import { useRouter } from 'next/router'
 import { Icon, NoisyContainer, ObjectImg, Spinner } from '@aleph-front/core'
 import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
@@ -7,6 +8,7 @@ import { EntityCustomDomainsProps } from './types'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
 import ResponsiveTooltip from '../../ResponsiveTooltip'
 import InfoTitle from '../InfoTitle'
+import FunctionalButton from '../../FunctionalButton'
 
 const DomainCard = ({
   domain,
@@ -62,10 +64,25 @@ const DomainCard = ({
 }
 
 export const EntityCustomDomains = ({
+  entityId,
+  entityType,
   isLoadingCustomDomains,
   customDomains,
   onCustomDomainClick: handleCustomDomainClick,
 }: EntityCustomDomainsProps) => {
+  const router = useRouter()
+
+  const handleSetCustomDomain = useCallback(() => {
+    const query: Record<string, string> = {}
+    if (entityType) query.target = entityType
+    if (entityId) query.ref = entityId
+
+    router.push({
+      pathname: '/console/settings/domain/new',
+      query,
+    })
+  }, [router, entityId, entityType])
+
   return (
     <>
       <div className="tp-h7 fs-24" tw="uppercase mb-2">
@@ -105,7 +122,10 @@ export const EntityCustomDomains = ({
                 ),
             )
           ) : (
-            'EMPTY'
+            <FunctionalButton onClick={handleSetCustomDomain}>
+              <Icon name="globe" />
+              set custom domain
+            </FunctionalButton>
           )}
         </div>
       </NoisyContainer>

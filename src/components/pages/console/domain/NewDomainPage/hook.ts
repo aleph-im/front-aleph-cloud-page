@@ -44,11 +44,12 @@ export type UseNewDomainPageReturn = {
   handleBack: () => void
   setTarget: (target: EntityDomainType) => void
   setRef: (ref: string) => void
+  initialTarget?: EntityDomainType
 }
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
   const router = useRouter()
-  const { name } = router.query
+  const { name, target: queryTarget, ref: queryRef } = router.query
   const [
     {
       instance: { entities: instances },
@@ -66,8 +67,23 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     return {
       ...defaultValues,
       ...(typeof name === 'string' ? { name } : {}),
+      ...(typeof queryTarget === 'string' &&
+      Object.values(EntityDomainType).includes(queryTarget as EntityDomainType)
+        ? { target: queryTarget as EntityDomainType }
+        : {}),
+      ...(typeof queryRef === 'string' ? { ref: queryRef } : {}),
     }
-  }, [name])
+  }, [name, queryTarget, queryRef])
+
+  const initialTarget = useMemo(() => {
+    if (
+      typeof queryTarget === 'string' &&
+      Object.values(EntityDomainType).includes(queryTarget as EntityDomainType)
+    ) {
+      return queryTarget as EntityDomainType
+    }
+    return undefined
+  }, [queryTarget])
 
   const onSubmit = useCallback(
     async (state: NewDomainFormState) => {
@@ -219,5 +235,6 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
     handleBack,
     setTarget,
     setRef,
+    initialTarget,
   }
 }

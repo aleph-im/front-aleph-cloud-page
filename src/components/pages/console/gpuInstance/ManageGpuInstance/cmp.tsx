@@ -15,6 +15,7 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
+import { EntityDomainType } from '@/helpers/constants'
 import SidePanel from '@/components/common/SidePanel'
 import VolumeDetail from '@/components/common/VolumeDetail'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
@@ -174,6 +175,8 @@ export default function ManageGpuInstance() {
           customDomains.length && (
             <EntityCustomDomains
               key={'gpuInstance-custom-domains'}
+              entityId={gpuInstance?.id}
+              entityType={EntityDomainType.Instance}
               isLoadingCustomDomains={isLoadingCustomDomains}
               customDomains={customDomains}
               onCustomDomainClick={handleCustomDomainClick}
