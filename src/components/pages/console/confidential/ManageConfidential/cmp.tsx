@@ -44,6 +44,7 @@ export default function ManageConfidential() {
 
     // Custom domains
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
 
     // Payment data
@@ -176,6 +177,7 @@ export default function ManageConfidential() {
           customDomains.length && (
             <EntityCustomDomains
               key={'confidentialInstance-custom-domains'}
+              isLoadingCustomDomains={isLoadingCustomDomains}
               customDomains={customDomains}
               onCustomDomainClick={handleCustomDomainClick}
             />

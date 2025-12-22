@@ -52,6 +52,7 @@ export type UseManageInstanceEntityReturn = UseExecutableActionsReturn & {
 
   // Custom domains
   customDomains: DomainWithStatus[]
+  isLoadingCustomDomains: boolean
   handleCustomDomainClick: (domain: Domain) => void
 
   // UI state
@@ -146,9 +147,10 @@ export function useManageInstanceEntity<
   // === CUSTOM DOMAINS ===
 
   // Use the custom hook and override the handleCustomDomainClick function
-  const { customDomains } = useEntityCustomDomains({
-    entityId: entity?.id,
-  })
+  const { customDomains, isLoading: isLoadingCustomDomains } =
+    useEntityCustomDomains({
+      entityId: entity?.id,
+    })
 
   const handleCustomDomainClick = useCallback((domain: Domain) => {
     setSidePanel({
@@ -279,6 +281,7 @@ export function useManageInstanceEntity<
     ...executableActions,
     mappedKeys,
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
     handleBack,
     handleDownloadLogs,

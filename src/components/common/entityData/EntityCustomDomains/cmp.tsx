@@ -62,6 +62,7 @@ const DomainCard = ({
 }
 
 export const EntityCustomDomains = ({
+  isLoadingCustomDomains,
   customDomains,
   onCustomDomainClick: handleCustomDomainClick,
 }: EntityCustomDomainsProps) => {
@@ -72,18 +73,7 @@ export const EntityCustomDomains = ({
       </div>
       <NoisyContainer>
         <div tw="flex flex-wrap gap-4">
-          {customDomains.length ? (
-            customDomains.map(
-              (domain) =>
-                domain && (
-                  <DomainCard
-                    key={domain.id}
-                    domain={domain}
-                    onDomainClick={handleCustomDomainClick}
-                  />
-                ),
-            )
-          ) : (
+          {isLoadingCustomDomains ? (
             <RelatedEntityCard disabled onClick={() => null}>
               <ObjectImg
                 id={EntityTypeObject[EntityType.Domain]}
@@ -103,6 +93,19 @@ export const EntityCustomDomains = ({
                 className="openEntityIcon"
               />
             </RelatedEntityCard>
+          ) : customDomains.length ? (
+            customDomains.map(
+              (domain) =>
+                domain && (
+                  <DomainCard
+                    key={domain.id}
+                    domain={domain}
+                    onDomainClick={handleCustomDomainClick}
+                  />
+                ),
+            )
+          ) : (
+            'EMPTY'
           )}
         </div>
       </NoisyContainer>

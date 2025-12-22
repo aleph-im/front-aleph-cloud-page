@@ -5,6 +5,7 @@ export type DomainWithStatus = Domain & {
 }
 
 export type EntityCustomDomainsProps = {
+  isLoadingCustomDomains: boolean
   customDomains: DomainWithStatus[]
   onCustomDomainClick: (customDomain: Domain) => void
 }

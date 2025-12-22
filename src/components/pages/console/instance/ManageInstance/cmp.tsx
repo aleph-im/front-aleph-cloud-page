@@ -49,6 +49,7 @@ export default function ManageInstance() {
 
     // Custom domains
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
 
     // Payment data
@@ -171,13 +172,13 @@ export default function ManageInstance() {
               persistentVolumes={persistentVolumes}
             />
           ),
-          customDomains.length && (
-            <EntityCustomDomains
-              key={'instance-custom-domains'}
-              customDomains={customDomains}
-              onCustomDomainClick={handleCustomDomainClick}
-            />
-          ),
+
+          <EntityCustomDomains
+            key={'instance-custom-domains'}
+            isLoadingCustomDomains={isLoadingCustomDomains}
+            customDomains={customDomains}
+            onCustomDomainClick={handleCustomDomainClick}
+          />,
           <EntityPortForwarding
             key="port-forwarding"
             entityHash={instance?.id}

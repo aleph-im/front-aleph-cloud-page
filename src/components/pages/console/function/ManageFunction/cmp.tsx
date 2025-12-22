@@ -41,6 +41,7 @@ export default function ManageFunction() {
 
     // Custom domains
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
 
     // Payment data
@@ -184,6 +185,7 @@ export default function ManageFunction() {
               customDomains.length && (
                 <EntityCustomDomains
                   key={'function-custom-domains'}
+                  isLoadingCustomDomains={isLoadingCustomDomains}
                   customDomains={customDomains}
                   onCustomDomainClick={handleCustomDomainClick}
                 />

@@ -44,6 +44,7 @@ export default function ManageGpuInstance() {
 
     // Custom domains
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
 
     // Payment data
@@ -173,6 +174,7 @@ export default function ManageGpuInstance() {
           customDomains.length && (
             <EntityCustomDomains
               key={'gpuInstance-custom-domains'}
+              isLoadingCustomDomains={isLoadingCustomDomains}
               customDomains={customDomains}
               onCustomDomainClick={handleCustomDomainClick}
             />

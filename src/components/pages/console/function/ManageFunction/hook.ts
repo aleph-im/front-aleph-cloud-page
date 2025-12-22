@@ -45,6 +45,7 @@ export type ManageFunction = UseExecutableActionsReturn & {
 
   // Custom domains
   customDomains: DomainWithStatus[]
+  isLoadingCustomDomains: boolean
   handleCustomDomainClick: (domain: Domain) => void
 
   // UI State
@@ -109,9 +110,10 @@ export function useManageFunction(): ManageFunction {
   // === CUSTOM DOMAINS ===
 
   // Use the custom hook and override the handleCustomDomainClick function
-  const { customDomains } = useEntityCustomDomains({
-    entityId: program?.id,
-  })
+  const { customDomains, isLoading: isLoadingCustomDomains } =
+    useEntityCustomDomains({
+      entityId: program?.id,
+    })
 
   const handleCustomDomainClick = useCallback((domain: Domain) => {
     setSidePanel({
@@ -288,6 +290,7 @@ export function useManageFunction(): ManageFunction {
     persistentVolumes,
 
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
 
     paymentData,
