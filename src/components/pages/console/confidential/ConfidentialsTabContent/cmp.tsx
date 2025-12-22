@@ -96,14 +96,14 @@ export const ConfidentialsTabContent = memo(
 
             <div tw="mt-20 text-center">
               <CreateConfidentialButtonMemo>
-                Create confidential instance
+                Create TEE instance
               </CreateConfidentialButtonMemo>
             </div>
           </>
         ) : (
           <div tw="mt-10 text-center">
             <CreateConfidentialButtonMemo>
-              Create your first confidential instance
+              Create your first TEE instance
             </CreateConfidentialButtonMemo>
           </div>
         )}
