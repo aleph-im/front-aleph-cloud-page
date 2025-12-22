@@ -4,7 +4,7 @@ import BackButtonSection from '@/components/common/BackButtonSection'
 import { NewDomainForm } from '@/components/common/NewDomainForm'
 
 export default function NewDomain() {
-  const { onSuccess, handleBack } = useNewDomainPage()
+  const { name, ref, target, onSuccess, handleBack } = useNewDomainPage()
 
   return (
     <>
@@ -16,7 +16,14 @@ export default function NewDomain() {
         />
       </Head>
       <BackButtonSection handleBack={handleBack} />
-      <NewDomainForm centered showResourceSelection onSuccess={onSuccess} />
+      <NewDomainForm
+        centered
+        showResourceSelection
+        name={name}
+        entityId={ref}
+        entityType={target}
+        onSuccess={onSuccess}
+      />
     </>
   )
 }

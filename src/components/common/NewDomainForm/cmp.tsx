@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react'
+import React, { memo, useMemo, useState } from 'react'
 import {
   Button,
   Dropdown,
@@ -23,6 +23,7 @@ import {
 } from '@/helpers/constants'
 
 export const NewDomainForm = ({
+  name,
   entityId,
   entityType,
   onSuccess,
@@ -39,35 +40,33 @@ export const NewDomainForm = ({
     setTarget,
     setRef,
     initialTarget,
-  } = useNewDomainForm({ entityId, entityType, onSuccess })
+  } = useNewDomainForm({ name, entityId, entityType, onSuccess })
 
   const [tabId, setTabId] = useState(() => {
-    if (
-      initialTarget === EntityDomainType.Instance ||
-      initialTarget === EntityDomainType.Program ||
-      initialTarget === EntityDomainType.Confidential
-    ) {
-      return 'compute'
+    switch (initialTarget) {
+      case EntityDomainType.Instance:
+        return 'compute'
+      case EntityDomainType.Program:
+        return 'compute'
+      case EntityDomainType.Confidential:
+        return 'compute'
+      case EntityDomainType.IPFS:
+        return 'ipfs'
+      default:
+        return 'website'
     }
-    return 'website'
   })
 
-  useEffect(() => {
-    if (
-      initialTarget === EntityDomainType.Instance ||
-      initialTarget === EntityDomainType.Program ||
-      initialTarget === EntityDomainType.Confidential
-    ) {
-      setTabId('compute')
+  const labelResourceType = useMemo(() => {
+    switch (targetCtrl.field.value) {
+      case EntityDomainType.Instance:
+        return 'instance'
+      case EntityDomainType.Confidential:
+        return 'confidential'
+      default:
+        return 'function'
     }
-  }, [initialTarget])
-
-  const labelResourceType =
-    targetCtrl.field.value == EntityDomainType.Instance
-      ? 'instance'
-      : targetCtrl.field.value == EntityDomainType.Confidential
-        ? 'confidential'
-        : 'function'
+  }, [targetCtrl.field.value])
 
   const onTabChange = (newTabId: string) => {
     setRef('')

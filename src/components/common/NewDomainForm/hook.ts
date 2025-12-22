@@ -47,6 +47,7 @@ export type UseNewDomainFormReturn = {
 }
 
 export function useNewDomainForm({
+  name,
   entityId,
   entityType,
   onSuccess,
@@ -67,14 +68,11 @@ export function useNewDomainForm({
   const defaultFields = useMemo(() => {
     return {
       ...defaultValues,
+      ...(name ? { name } : {}),
       ...(entityType ? { target: entityType } : {}),
       ...(entityId ? { ref: entityId } : {}),
     }
-  }, [entityType, entityId])
-
-  const initialTarget = useMemo(() => {
-    return entityType
-  }, [entityType])
+  }, [name, entityType, entityId])
 
   const onSubmit = useCallback(
     async (state: NewDomainFormState) => {
@@ -218,6 +216,6 @@ export function useNewDomainForm({
     handleSubmit,
     setTarget,
     setRef,
-    initialTarget,
+    initialTarget: entityType,
   }
 }

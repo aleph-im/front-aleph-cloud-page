@@ -1,15 +1,19 @@
 import { useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { Domain } from '@/domain/domain'
-import { NAVIGATION_URLS } from '@/helpers/constants'
+import { EntityDomainType, NAVIGATION_URLS } from '@/helpers/constants'
 
 export type UseNewDomainPageReturn = {
+  name?: string
+  ref?: string
+  target?: EntityDomainType
   onSuccess: (domain: Domain) => void
   handleBack: () => void
 }
 
 export function useNewDomainPage(): UseNewDomainPageReturn {
   const router = useRouter()
+  const { name, ref, target } = router.query
 
   const onSuccess = useCallback(
     (domain: Domain) => {
@@ -22,6 +26,10 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
   }, [router])
 
   return {
+    name: typeof name === 'string' ? name : undefined,
+    ref: typeof ref === 'string' ? ref : undefined,
+    target:
+      typeof target === 'string' ? (target as EntityDomainType) : undefined,
     onSuccess,
     handleBack,
   }
