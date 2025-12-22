@@ -1,5 +1,4 @@
-import React, { memo, useCallback, useRef } from 'react'
-import { useRouter } from 'next/router'
+import React, { memo, useRef } from 'react'
 import { Icon, NoisyContainer, ObjectImg, Spinner } from '@aleph-front/core'
 import Skeleton from '../../Skeleton'
 import { Text } from '@/components/pages/console/common'
@@ -64,25 +63,11 @@ const DomainCard = ({
 }
 
 export const EntityCustomDomains = ({
-  entityId,
-  entityType,
   isLoadingCustomDomains,
   customDomains,
   onCustomDomainClick: handleCustomDomainClick,
+  onAddDomain: handleAddDomain,
 }: EntityCustomDomainsProps) => {
-  const router = useRouter()
-
-  const handleSetCustomDomain = useCallback(() => {
-    const query: Record<string, string> = {}
-    if (entityType) query.target = entityType
-    if (entityId) query.ref = entityId
-
-    router.push({
-      pathname: '/console/settings/domain/new',
-      query,
-    })
-  }, [router, entityId, entityType])
-
   return (
     <>
       <div className="tp-h7 fs-24" tw="uppercase mb-2">
@@ -122,7 +107,7 @@ export const EntityCustomDomains = ({
                 ),
             )
           ) : (
-            <FunctionalButton onClick={handleSetCustomDomain}>
+            <FunctionalButton onClick={handleAddDomain}>
               <Icon name="globe" />
               set custom domain
             </FunctionalButton>

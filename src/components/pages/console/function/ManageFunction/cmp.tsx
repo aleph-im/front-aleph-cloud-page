@@ -21,6 +21,7 @@ import EntityPersistentStorage from '@/components/common/entityData/EntityPersis
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import FunctionalButton from '@/components/common/FunctionalButton'
 import { EntityDomainType } from '@/helpers/constants'
+import NewDomainForm from '@/components/common/NewDomainForm'
 
 export default function ManageFunction() {
   const {
@@ -44,6 +45,7 @@ export default function ManageFunction() {
     customDomains,
     isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
 
     // Payment data
     paymentData,
@@ -186,11 +188,10 @@ export default function ManageFunction() {
               customDomains.length && (
                 <EntityCustomDomains
                   key={'function-custom-domains'}
-                  entityId={program?.id}
-                  entityType={EntityDomainType.Program}
                   isLoadingCustomDomains={isLoadingCustomDomains}
                   customDomains={customDomains}
                   onCustomDomainClick={handleCustomDomainClick}
+                  onAddDomain={handleAddDomain}
                 />
               ),
             ]}
@@ -224,6 +225,12 @@ export default function ManageFunction() {
           sidePanel.selectedDomain && (
             <DomainDetail domainId={sidePanel.selectedDomain.id} />
           )
+        ) : sidePanel.type === 'newDomain' ? (
+          <NewDomainForm
+            entityId={program?.id}
+            entityType={EntityDomainType.Program}
+            onSuccess={closeSidePanel}
+          />
         ) : (
           <>ERROR</>
         )}

@@ -28,7 +28,7 @@ import { DomainWithStatus } from '@/components/common/entityData/EntityCustomDom
 type SidePanelContent = {
   title: string
   isOpen: boolean
-  type?: 'volume' | 'domain'
+  type?: 'volume' | 'domain' | 'newDomain'
   selectedVolumeId?: string
   selectedDomain?: Domain
 }
@@ -47,6 +47,7 @@ export type ManageFunction = UseExecutableActionsReturn & {
   customDomains: DomainWithStatus[]
   isLoadingCustomDomains: boolean
   handleCustomDomainClick: (domain: Domain) => void
+  handleAddDomain: () => void
 
   // UI State
   sliderActiveIndex: number
@@ -121,6 +122,14 @@ export function useManageFunction(): ManageFunction {
       isOpen: true,
       type: 'domain',
       selectedDomain: domain,
+    })
+  }, [])
+
+  const handleAddDomain = useCallback(() => {
+    setSidePanel({
+      title: 'New Custom Domain',
+      isOpen: true,
+      type: 'newDomain',
     })
   }, [])
 
@@ -292,6 +301,7 @@ export function useManageFunction(): ManageFunction {
     customDomains,
     isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
 
     paymentData,
 

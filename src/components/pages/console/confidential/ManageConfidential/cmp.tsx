@@ -20,6 +20,7 @@ import SidePanel from '@/components/common/SidePanel'
 import VolumeDetail from '@/components/common/VolumeDetail'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
 import DomainDetail from '@/components/common/DomainDetail'
+import NewDomainForm from '@/components/common/NewDomainForm'
 
 export default function ManageConfidential() {
   const {
@@ -47,6 +48,7 @@ export default function ManageConfidential() {
     customDomains,
     isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
 
     // Payment data
     paymentData,
@@ -178,11 +180,10 @@ export default function ManageConfidential() {
           customDomains.length && (
             <EntityCustomDomains
               key={'confidentialInstance-custom-domains'}
-              entityId={confidentialInstance?.id}
-              entityType={EntityDomainType.Confidential}
               isLoadingCustomDomains={isLoadingCustomDomains}
               customDomains={customDomains}
               onCustomDomainClick={handleCustomDomainClick}
+              onAddDomain={handleAddDomain}
             />
           ),
           <EntityPortForwarding
@@ -205,7 +206,9 @@ export default function ManageConfidential() {
               ? 'SSH Key'
               : sidePanel.type === 'logs'
                 ? 'Logs'
-                : 'Custom Domain'
+                : sidePanel.type === 'newDomain'
+                  ? 'New Custom Domain'
+                  : 'Custom Domain'
         }
         isOpen={sidePanel.isOpen}
         onClose={closeSidePanel}
@@ -224,6 +227,12 @@ export default function ManageConfidential() {
           )
         ) : sidePanel.type === 'logs' ? (
           <EntityLogsContent logs={logs} />
+        ) : sidePanel.type === 'newDomain' ? (
+          <NewDomainForm
+            entityId={confidentialInstance?.id}
+            entityType={EntityDomainType.Confidential}
+            onSuccess={closeSidePanel}
+          />
         ) : (
           <>ERROR</>
         )}

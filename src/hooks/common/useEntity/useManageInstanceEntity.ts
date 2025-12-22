@@ -28,7 +28,7 @@ import { useRequestSSHKeys } from '../useRequestEntity/useRequestSSHKeys'
 // Type for side panel content
 type SidePanelContent = {
   isOpen: boolean
-  type?: 'sshKey' | 'volume' | 'domain' | 'logs'
+  type?: 'sshKey' | 'volume' | 'domain' | 'logs' | 'newDomain'
   selectedDomain?: Domain
   selectedVolume?: any
   selectedSSHKey?: SSHKey
@@ -54,6 +54,7 @@ export type UseManageInstanceEntityReturn = UseExecutableActionsReturn & {
   customDomains: DomainWithStatus[]
   isLoadingCustomDomains: boolean
   handleCustomDomainClick: (domain: Domain) => void
+  handleAddDomain: () => void
 
   // UI state
   mappedKeys: (SSHKey | undefined)[]
@@ -157,6 +158,13 @@ export function useManageInstanceEntity<
       isOpen: true,
       type: 'domain',
       selectedDomain: domain,
+    })
+  }, [])
+
+  const handleAddDomain = useCallback(() => {
+    setSidePanel({
+      isOpen: true,
+      type: 'newDomain',
     })
   }, [])
 
@@ -283,6 +291,7 @@ export function useManageInstanceEntity<
     customDomains,
     isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
     handleBack,
     handleDownloadLogs,
     isDownloadingLogs,

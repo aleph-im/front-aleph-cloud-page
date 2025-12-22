@@ -20,6 +20,7 @@ import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import DomainDetail from '@/components/common/DomainDetail'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
+import NewDomainForm from '@/components/common/NewDomainForm'
 
 /**
  * ManageInstance component - purely presentational
@@ -51,6 +52,7 @@ export default function ManageInstance() {
     customDomains,
     isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
 
     // Payment data
     paymentData,
@@ -175,11 +177,10 @@ export default function ManageInstance() {
 
           <EntityCustomDomains
             key={'instance-custom-domains'}
-            entityId={instance?.id}
-            entityType={EntityDomainType.Instance}
             isLoadingCustomDomains={isLoadingCustomDomains}
             customDomains={customDomains}
             onCustomDomainClick={handleCustomDomainClick}
+            onAddDomain={handleAddDomain}
           />,
           <EntityPortForwarding
             key="port-forwarding"
@@ -201,7 +202,9 @@ export default function ManageInstance() {
               ? 'SSH Key'
               : sidePanel.type === 'logs'
                 ? 'Logs'
-                : 'Custom Domain'
+                : sidePanel.type === 'newDomain'
+                  ? 'New Custom Domain'
+                  : 'Custom Domain'
         }
         isOpen={sidePanel.isOpen}
         onClose={closeSidePanel}
@@ -220,6 +223,12 @@ export default function ManageInstance() {
           )
         ) : sidePanel.type === 'logs' ? (
           <EntityLogsContent logs={logs} />
+        ) : sidePanel.type === 'newDomain' ? (
+          <NewDomainForm
+            entityId={instance?.id}
+            entityType={EntityDomainType.Instance}
+            onSuccess={closeSidePanel}
+          />
         ) : (
           <>ERROR</>
         )}
