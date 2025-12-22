@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from 'react'
+import React, { memo, useEffect, useMemo, useState } from 'react'
 import {
   Button,
   Dropdown,
@@ -42,12 +42,10 @@ export const NewDomainForm = ({
     initialTarget,
   } = useNewDomainForm({ name, entityId, entityType, onSuccess })
 
-  const [tabId, setTabId] = useState(() => {
-    switch (initialTarget) {
+  const getTabIdFromTarget = (target?: EntityDomainType) => {
+    switch (target) {
       case EntityDomainType.Instance:
-        return 'compute'
       case EntityDomainType.Program:
-        return 'compute'
       case EntityDomainType.Confidential:
         return 'compute'
       case EntityDomainType.IPFS:
@@ -55,7 +53,16 @@ export const NewDomainForm = ({
       default:
         return 'website'
     }
-  })
+  }
+
+  const [tabId, setTabId] = useState(() => getTabIdFromTarget(initialTarget))
+
+  // Update tab when initialTarget becomes available (handles async router query)
+  useEffect(() => {
+    if (initialTarget) {
+      setTabId(getTabIdFromTarget(initialTarget))
+    }
+  }, [initialTarget])
 
   const labelResourceType = useMemo(() => {
     switch (targetCtrl.field.value) {

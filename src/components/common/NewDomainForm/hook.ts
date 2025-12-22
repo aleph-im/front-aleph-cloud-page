@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useMemo } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useForm } from '@/hooks/common/useForm'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
@@ -114,12 +114,26 @@ export function useNewDomainForm({
     control,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm({
     defaultValues: defaultFields,
     onSubmit,
     resolver: zodResolver(DomainManager.addSchema),
   })
+
+  // Reset form when initial values become available (handles async router query)
+  const hasInitializedRef = useRef(false)
+  useEffect(() => {
+    if (!hasInitializedRef.current && (entityType || entityId)) {
+      hasInitializedRef.current = true
+      reset({
+        name: name || '',
+        target: entityType || defaultValues.target,
+        ref: entityId || '',
+      })
+    }
+  }, [entityType, entityId, name, reset])
 
   const nameCtrl = useController({
     control,
