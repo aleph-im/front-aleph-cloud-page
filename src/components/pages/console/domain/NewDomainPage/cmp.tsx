@@ -22,6 +22,7 @@ import {
 import { useNewDomainPage } from './hook'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import BackButtonSection from '@/components/common/BackButtonSection'
+import { NewDomainForm } from '@/components/common/NewDomainForm'
 
 export default function NewDomain() {
   const {
@@ -84,7 +85,11 @@ export default function NewDomain() {
         />
       </Head>
       <BackButtonSection handleBack={handleBack} />
-      <Form onSubmit={handleSubmit} errors={errors}>
+      <NewDomainForm
+        centered
+        onSuccess={(accountDomain) => console.log('domain', accountDomain)}
+      />
+      {/* <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
             <SectionTitle number="1">Custom domain</SectionTitle>
@@ -259,7 +264,7 @@ export default function NewDomain() {
             </div>
           </CenteredContainer>
         </section>
-      </Form>
+      </Form> */}
     </>
   )
 }

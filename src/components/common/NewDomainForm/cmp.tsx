@@ -26,6 +26,7 @@ export const NewDomainForm = ({
   entityId,
   entityType,
   onSuccess,
+  centered = false,
 }: NewDomainFormProps) => {
   const {
     entities,
@@ -77,8 +78,10 @@ export const NewDomainForm = ({
     }
   }
 
+  const Wrapper = centered ? CenteredContainer : React.Fragment
+
   return (
-    <CenteredContainer>
+    <Wrapper>
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <SectionTitle number="1">Custom domain</SectionTitle>
@@ -248,7 +251,7 @@ export const NewDomainForm = ({
           </div>
         </section>
       </Form>
-    </CenteredContainer>
+    </Wrapper>
   )
 }
 NewDomainForm.displayName = 'NewDomainForm'

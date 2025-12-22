@@ -103,7 +103,8 @@ export function useNewDomainForm({
           new EntityAddAction({ name: 'domain', entities: accountDomain }),
         )
 
-        onSuccess?.()
+        console.log('accountDomain', accountDomain)
+        onSuccess?.(accountDomain)
       } finally {
         await stop()
       }
