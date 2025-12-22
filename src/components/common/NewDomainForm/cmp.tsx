@@ -27,6 +27,7 @@ export const NewDomainForm = ({
   entityType,
   onSuccess,
   centered = false,
+  showResourceSelection = false,
 }: NewDomainFormProps) => {
   const {
     entities,
@@ -84,7 +85,7 @@ export const NewDomainForm = ({
     <Wrapper>
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
-          <SectionTitle number="1">Custom domain</SectionTitle>
+          <SectionTitle number={1}>Custom domain</SectionTitle>
           <p tw="mb-6">
             Assign a user-friendly domain to your website, instance or function
             to not only simplify access to your web3 application but also
@@ -106,98 +107,59 @@ export const NewDomainForm = ({
               Learn more
             </ExternalLinkButton>
           </div>
+          {!showResourceSelection && (
+            <div tw="mt-10 text-center z-0">
+              <Button
+                type="submit"
+                color="main0"
+                kind="default"
+                size="md"
+                variant="primary"
+              >
+                Create domain
+              </Button>
+            </div>
+          )}
         </section>
-        <section tw="px-0 pt-20 pb-6 md:py-10">
-          <SectionTitle number="2">Select Resource</SectionTitle>
-          <p tw="mb-6">
-            You&apos;ll need to specify the resource your custom domain will be
-            associated with. This could either be a website, an instance or a
-            function, depending on what you want your custom domain to point to.
-          </p>
-          <div tw="my-10">
-            <Tabs
-              align="left"
-              selected={tabId}
-              onTabChange={onTabChange}
-              tabs={[
-                {
-                  id: 'website',
-                  name: 'Website',
-                },
-                {
-                  id: 'compute',
-                  name: 'Compute',
-                },
-                {
-                  id: 'ipfs',
-                  name: 'IPFS',
-                },
-              ]}
-            />
-          </div>
-          <div role="tabpanel">
-            {tabId === 'website' ? (
-              <NoisyContainer tw="z-10!">
-                {entities.length > 0 ? (
-                  <Dropdown
-                    {...refCtrl.field}
-                    {...refCtrl.fieldState}
-                    required
-                    label="Link your custom domain to a specific website"
-                  >
-                    {entities.map(({ label, value }) => (
-                      <DropdownOption key={value} value={value}>
-                        {label}
-                      </DropdownOption>
-                    ))}
-                  </Dropdown>
-                ) : (
-                  <div>
-                    <p tw="mt-0.5 mb-3 text-black">
-                      If you want to link a domain to a website, you need to
-                      deploy one first *
-                    </p>
-                    <ButtonLink
-                      type="button"
-                      kind="functional"
-                      size="md"
-                      variant="warning"
-                      href={NAVIGATION_URLS.console.web3Hosting.website.new}
-                    >
-                      Create your first website
-                    </ButtonLink>
-                  </div>
-                )}
-              </NoisyContainer>
-            ) : tabId === 'compute' ? (
-              <NoisyContainer tw="z-10!">
-                <RadioGroup
-                  {...targetCtrl.field}
-                  {...targetCtrl.fieldState}
-                  required
-                  label="Choose resource type"
-                  direction="row"
-                >
-                  <Radio
-                    label={EntityDomainTypeName[EntityDomainType.Program]}
-                    value={EntityDomainType.Program}
-                  />
-                  <Radio
-                    label={EntityDomainTypeName[EntityDomainType.Instance]}
-                    value={EntityDomainType.Instance}
-                  />
-                  <Radio
-                    label={EntityDomainTypeName[EntityDomainType.Confidential]}
-                    value={EntityDomainType.Confidential}
-                  />
-                </RadioGroup>
-                {entities.length > 0 ? (
-                  <div tw="mt-10">
+        {showResourceSelection && (
+          <section tw="px-0 pt-20 pb-6 md:py-10">
+            <SectionTitle number={2}>Select Resource</SectionTitle>
+            <p tw="mb-6">
+              You&apos;ll need to specify the resource your custom domain will
+              be associated with. This could either be a website, an instance or
+              a function, depending on what you want your custom domain to point
+              to.
+            </p>
+            <div tw="my-10">
+              <Tabs
+                align="left"
+                selected={tabId}
+                onTabChange={onTabChange}
+                tabs={[
+                  {
+                    id: 'website',
+                    name: 'Website',
+                  },
+                  {
+                    id: 'compute',
+                    name: 'Compute',
+                  },
+                  {
+                    id: 'ipfs',
+                    name: 'IPFS',
+                  },
+                ]}
+              />
+            </div>
+            <div role="tabpanel">
+              {tabId === 'website' ? (
+                <NoisyContainer tw="z-10!">
+                  {entities.length > 0 ? (
                     <Dropdown
                       {...refCtrl.field}
                       {...refCtrl.fieldState}
                       required
-                      label="Select the specific resource"
+                      label="Link your custom domain to a specific website"
                     >
                       {entities.map(({ label, value }) => (
                         <DropdownOption key={value} value={value}>
@@ -205,51 +167,108 @@ export const NewDomainForm = ({
                         </DropdownOption>
                       ))}
                     </Dropdown>
-                  </div>
-                ) : (
-                  <div>
-                    <p tw="mt-6 mb-3 text-black">
-                      If you want to link a domain to a {labelResourceType}, you
-                      need to deploy one first *
-                    </p>
-                    <ButtonLink
-                      type="button"
-                      kind="functional"
-                      size="md"
-                      variant="warning"
-                      href={`/console/computing/${labelResourceType}/new`}
-                    >
-                      {`Create your first ${labelResourceType}` as string}
-                    </ButtonLink>
-                  </div>
-                )}
-              </NoisyContainer>
-            ) : tabId === 'ipfs' ? (
-              <NoisyContainer>
-                <TextInput
-                  {...refCtrl.field}
-                  {...refCtrl.fieldState}
-                  required
-                  label="Link your custom domain to an Aleph Message ID"
-                  placeholder="Paste your IPFS Aleph Message ID"
-                />
-              </NoisyContainer>
-            ) : (
-              <></>
-            )}
-          </div>
-          <div tw="mt-10 text-center z-0">
-            <Button
-              type="submit"
-              color="main0"
-              kind="default"
-              size="md"
-              variant="primary"
-            >
-              Create domain
-            </Button>
-          </div>
-        </section>
+                  ) : (
+                    <div>
+                      <p tw="mt-0.5 mb-3 text-black">
+                        If you want to link a domain to a website, you need to
+                        deploy one first *
+                      </p>
+                      <ButtonLink
+                        type="button"
+                        kind="functional"
+                        size="md"
+                        variant="warning"
+                        href={NAVIGATION_URLS.console.web3Hosting.website.new}
+                      >
+                        Create your first website
+                      </ButtonLink>
+                    </div>
+                  )}
+                </NoisyContainer>
+              ) : tabId === 'compute' ? (
+                <NoisyContainer tw="z-10!">
+                  <RadioGroup
+                    {...targetCtrl.field}
+                    {...targetCtrl.fieldState}
+                    required
+                    label="Choose resource type"
+                    direction="row"
+                  >
+                    <Radio
+                      label={EntityDomainTypeName[EntityDomainType.Program]}
+                      value={EntityDomainType.Program}
+                    />
+                    <Radio
+                      label={EntityDomainTypeName[EntityDomainType.Instance]}
+                      value={EntityDomainType.Instance}
+                    />
+                    <Radio
+                      label={
+                        EntityDomainTypeName[EntityDomainType.Confidential]
+                      }
+                      value={EntityDomainType.Confidential}
+                    />
+                  </RadioGroup>
+                  {entities.length > 0 ? (
+                    <div tw="mt-10">
+                      <Dropdown
+                        {...refCtrl.field}
+                        {...refCtrl.fieldState}
+                        required
+                        label="Select the specific resource"
+                      >
+                        {entities.map(({ label, value }) => (
+                          <DropdownOption key={value} value={value}>
+                            {label}
+                          </DropdownOption>
+                        ))}
+                      </Dropdown>
+                    </div>
+                  ) : (
+                    <div>
+                      <p tw="mt-6 mb-3 text-black">
+                        If you want to link a domain to a {labelResourceType},
+                        you need to deploy one first *
+                      </p>
+                      <ButtonLink
+                        type="button"
+                        kind="functional"
+                        size="md"
+                        variant="warning"
+                        href={`/console/computing/${labelResourceType}/new`}
+                      >
+                        {`Create your first ${labelResourceType}` as string}
+                      </ButtonLink>
+                    </div>
+                  )}
+                </NoisyContainer>
+              ) : tabId === 'ipfs' ? (
+                <NoisyContainer>
+                  <TextInput
+                    {...refCtrl.field}
+                    {...refCtrl.fieldState}
+                    required
+                    label="Link your custom domain to an Aleph Message ID"
+                    placeholder="Paste your IPFS Aleph Message ID"
+                  />
+                </NoisyContainer>
+              ) : (
+                <></>
+              )}
+            </div>
+            <div tw="mt-10 text-center z-0">
+              <Button
+                type="submit"
+                color="main0"
+                kind="default"
+                size="md"
+                variant="primary"
+              >
+                Create domain
+              </Button>
+            </div>
+          </section>
+        )}
       </Form>
     </Wrapper>
   )
