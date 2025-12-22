@@ -1,7 +1,7 @@
 import React, { memo, useRef } from 'react'
 import { Icon, NoisyContainer, ObjectImg, Spinner } from '@aleph-front/core'
 import Skeleton from '../../Skeleton'
-import { Text } from '@/components/pages/console/common'
+import { DisabledText, Text } from '@/components/pages/console/common'
 import RelatedEntityCard from '../RelatedEntityCard'
 import { EntityCustomDomainsProps } from './types'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
@@ -107,10 +107,27 @@ export const EntityCustomDomains = ({
                 ),
             )
           ) : (
-            <FunctionalButton onClick={handleAddDomain}>
-              <Icon name="globe" />
-              set custom domain
-            </FunctionalButton>
+            <div tw="flex flex-col gap-4">
+              <div>
+                <FunctionalButton onClick={handleAddDomain}>
+                  <Icon name="globe" />
+                  set custom domain
+                </FunctionalButton>
+              </div>
+              <div tw="flex flex-col gap-2.5">
+                <div>
+                  <InfoTitle>INFO</InfoTitle>
+                  <Text>
+                    You&apos;ll need to add DNS records at your domain provider
+                    to verify ownership and route traffic to this instance.
+                  </Text>
+                </div>
+                <DisabledText>
+                  (Changes usually propagate within a few minutes, but may take
+                  longer depending on your provider).
+                </DisabledText>
+              </div>
+            </div>
           )}
         </div>
       </NoisyContainer>

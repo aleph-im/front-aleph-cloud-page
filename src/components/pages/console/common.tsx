@@ -10,3 +10,6 @@ export const Separator = styled.hr`
 `
 
 export const Text = styled.span.attrs(addClasses('tp-body1 text-text'))``
+export const DisabledText = styled.span.attrs(
+  addClasses('tp-body1 text-disabled'),
+)``
