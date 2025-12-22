@@ -93,7 +93,7 @@ export default function ManageConfidential() {
   return (
     <>
       <Head>
-        <title>Console | Manage Confidential | Aleph Cloud</title>
+        <title>Console | Manage TEE Instance | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your compute instance on Aleph Cloud"
@@ -102,7 +102,7 @@ export default function ManageConfidential() {
       <ManageEntityHeader
         entity={confidentialInstance}
         name={name}
-        type="confidential instance"
+        type="TEE instance"
         isAllocated={isAllocated}
         calculatedStatus={calculatedStatus}
         // Start action
@@ -137,7 +137,7 @@ export default function ManageConfidential() {
               <InstanceEntityDetails
                 key="confidentialInstance-details"
                 entity={confidentialInstance}
-                title="CONFIDENTIAL INSTANCE"
+                title="TEE INSTANCE"
               />,
               <EntityLogsControl
                 key="confidentialInstance-logs-control"

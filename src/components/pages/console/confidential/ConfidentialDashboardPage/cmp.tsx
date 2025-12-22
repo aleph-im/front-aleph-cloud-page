@@ -31,10 +31,10 @@ export default function ConfidentialDashboardPage() {
               imageSrc="/img/dashboard/instance.svg"
               imageAlt="Confidential illustration"
               info="WHAT IS A..."
-              title="Confidential Instance"
-              description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your execution and data stays safe."
+              title="TEE Instance"
+              description="Protect your sensitive workloads with our TEE VMs. Designed for maximum privacy and security, ensuring your execution and data stays safe."
               buttonUrl="/console/computing/confidential/new"
-              buttonText="Create a Confidential Instance"
+              buttonText="Create a TEE Instance"
               externalLinkText="Developer docs"
               externalLinkUrl={NAVIGATION_URLS.docs.confidentials}
             />

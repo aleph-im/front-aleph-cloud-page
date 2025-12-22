@@ -26,7 +26,7 @@ export default function NewEntityTab(props: NewEntityTabProps) {
         },
         {
           id: 'confidential',
-          name: 'Confidential',
+          name: 'TEE Instance',
           label: { label: 'BETA', position: 'top' },
         },
       ]}
