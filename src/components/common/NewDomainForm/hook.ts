@@ -1,4 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
@@ -52,6 +53,8 @@ export function useNewDomainForm({
   entityType,
   onSuccess,
 }: NewDomainFormProps): UseNewDomainFormReturn {
+  const router = useRouter()
+
   const [
     {
       instance: { entities: instances },
@@ -134,6 +137,19 @@ export function useNewDomainForm({
       })
     }
   }, [entityType, entityId, name, reset])
+
+  const cleanedRef = useRef(false)
+
+  // Clear query params from URL after capturing them
+  useEffect(() => {
+    if (cleanedRef.current) return
+    if (typeof window === 'undefined') return
+
+    cleanedRef.current = true
+
+    const cleanUrl = window.location.pathname + window.location.hash
+    window.history.replaceState(window.history.state, '', cleanUrl)
+  }, [router.isReady, router.asPath])
 
   const nameCtrl = useController({
     control,
