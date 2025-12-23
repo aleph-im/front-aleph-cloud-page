@@ -15,10 +15,12 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
+import { EntityDomainType } from '@/helpers/constants'
 import SidePanel from '@/components/common/SidePanel'
 import VolumeDetail from '@/components/common/VolumeDetail'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
 import DomainDetail from '@/components/common/DomainDetail'
+import NewDomainForm from '@/components/common/NewDomainForm'
 
 export default function ManageGpuInstance() {
   const {
@@ -44,7 +46,9 @@ export default function ManageGpuInstance() {
 
     // Custom domains
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
 
     // Payment data
     paymentData,
@@ -170,13 +174,13 @@ export default function ManageGpuInstance() {
               persistentVolumes={persistentVolumes}
             />
           ),
-          customDomains.length && (
-            <EntityCustomDomains
-              key={'gpuInstance-custom-domains'}
-              customDomains={customDomains}
-              onCustomDomainClick={handleCustomDomainClick}
-            />
-          ),
+          <EntityCustomDomains
+            key={'gpuInstance-custom-domains'}
+            isLoadingCustomDomains={isLoadingCustomDomains}
+            customDomains={customDomains}
+            onCustomDomainClick={handleCustomDomainClick}
+            onAddDomain={handleAddDomain}
+          />,
           <EntityPortForwarding
             key="port-forwarding"
             entityHash={gpuInstance?.id}
@@ -197,7 +201,9 @@ export default function ManageGpuInstance() {
               ? 'SSH Key'
               : sidePanel.type === 'logs'
                 ? 'Logs'
-                : 'Custom Domain'
+                : sidePanel.type === 'newDomain'
+                  ? 'New Custom Domain'
+                  : 'Custom Domain'
         }
         isOpen={sidePanel.isOpen}
         onClose={closeSidePanel}
@@ -216,6 +222,12 @@ export default function ManageGpuInstance() {
           )
         ) : sidePanel.type === 'logs' ? (
           <EntityLogsContent logs={logs} />
+        ) : sidePanel.type === 'newDomain' ? (
+          <NewDomainForm
+            entityId={gpuInstance?.id}
+            entityType={EntityDomainType.Instance}
+            onSuccess={closeSidePanel}
+          />
         ) : (
           <>ERROR</>
         )}

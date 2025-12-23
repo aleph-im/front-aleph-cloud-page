@@ -28,7 +28,7 @@ import { useRequestSSHKeys } from '../useRequestEntity/useRequestSSHKeys'
 // Type for side panel content
 type SidePanelContent = {
   isOpen: boolean
-  type?: 'sshKey' | 'volume' | 'domain' | 'logs'
+  type?: 'sshKey' | 'volume' | 'domain' | 'logs' | 'newDomain'
   selectedDomain?: Domain
   selectedVolume?: any
   selectedSSHKey?: SSHKey
@@ -52,7 +52,9 @@ export type UseManageInstanceEntityReturn = UseExecutableActionsReturn & {
 
   // Custom domains
   customDomains: DomainWithStatus[]
+  isLoadingCustomDomains: boolean
   handleCustomDomainClick: (domain: Domain) => void
+  handleAddDomain: () => void
 
   // UI state
   mappedKeys: (SSHKey | undefined)[]
@@ -146,15 +148,23 @@ export function useManageInstanceEntity<
   // === CUSTOM DOMAINS ===
 
   // Use the custom hook and override the handleCustomDomainClick function
-  const { customDomains } = useEntityCustomDomains({
-    entityId: entity?.id,
-  })
+  const { customDomains, isLoading: isLoadingCustomDomains } =
+    useEntityCustomDomains({
+      entityId: entity?.id,
+    })
 
   const handleCustomDomainClick = useCallback((domain: Domain) => {
     setSidePanel({
       isOpen: true,
       type: 'domain',
       selectedDomain: domain,
+    })
+  }, [])
+
+  const handleAddDomain = useCallback(() => {
+    setSidePanel({
+      isOpen: true,
+      type: 'newDomain',
     })
   }, [])
 
@@ -279,7 +289,9 @@ export function useManageInstanceEntity<
     ...executableActions,
     mappedKeys,
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
     handleBack,
     handleDownloadLogs,
     isDownloadingLogs,
