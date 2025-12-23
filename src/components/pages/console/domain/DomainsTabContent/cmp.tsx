@@ -1,18 +1,27 @@
-import React, { memo } from 'react'
+import React, { memo, useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { DomainsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
 import IconText from '@/components/common/IconText'
 import { Text } from '../../common'
 import { EntityDomainType, EntityDomainTypeName } from '@/helpers/constants'
 import { useDomainsEntityNames } from '@/hooks/common/useDomainsEntityNames'
+import { Domain } from '@/domain/domain'
 
 export const DomainsTabContent = ({
   data,
   cta = true,
 }: DomainsTabContentProps) => {
+  const router = useRouter()
+  const handleRowClick = useCallback(
+    (domain: Domain) => {
+      router.push(`/console/settings/domain/${domain.id}`)
+    },
+    [router],
+  )
   const entityNames = useDomainsEntityNames(data)
 
   return (
@@ -24,8 +33,10 @@ export const DomainsTabContent = ({
           rowKey={(row) => row.id}
           data={data}
           rowProps={(row) => ({
+            onClick: () => handleRowClick(row),
             css: row.confirmed ? '' : tw`opacity-60`,
           })}
+          clickableRows
           columns={[
             {
               label: 'Name',
@@ -67,13 +78,13 @@ export const DomainsTabContent = ({
               label: '',
               align: 'right',
               render: (row) => (
-                <ButtonLink
+                <Button
                   kind="functional"
                   variant="secondary"
-                  href={`/console/settings/domain/${row.id}`}
+                  onClick={() => handleRowClick(row)}
                 >
                   <Icon name="angle-right" size="lg" />
-                </ButtonLink>
+                </Button>
               ),
               cellProps: () => ({
                 css: tw`pl-3!`,
