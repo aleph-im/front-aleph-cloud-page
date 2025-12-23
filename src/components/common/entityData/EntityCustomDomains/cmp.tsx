@@ -1,12 +1,13 @@
 import React, { memo, useRef } from 'react'
 import { Icon, NoisyContainer, ObjectImg, Spinner } from '@aleph-front/core'
 import Skeleton from '../../Skeleton'
-import { Text } from '@/components/pages/console/common'
+import { DisabledText, Text } from '@/components/pages/console/common'
 import RelatedEntityCard from '../RelatedEntityCard'
 import { EntityCustomDomainsProps } from './types'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
 import ResponsiveTooltip from '../../ResponsiveTooltip'
 import InfoTitle from '../InfoTitle'
+import FunctionalButton from '../../FunctionalButton'
 
 const DomainCard = ({
   domain,
@@ -62,8 +63,10 @@ const DomainCard = ({
 }
 
 export const EntityCustomDomains = ({
+  isLoadingCustomDomains,
   customDomains,
   onCustomDomainClick: handleCustomDomainClick,
+  onAddDomain: handleAddDomain,
 }: EntityCustomDomainsProps) => {
   return (
     <>
@@ -72,18 +75,7 @@ export const EntityCustomDomains = ({
       </div>
       <NoisyContainer>
         <div tw="flex flex-wrap gap-4">
-          {customDomains.length ? (
-            customDomains.map(
-              (domain) =>
-                domain && (
-                  <DomainCard
-                    key={domain.id}
-                    domain={domain}
-                    onDomainClick={handleCustomDomainClick}
-                  />
-                ),
-            )
-          ) : (
+          {isLoadingCustomDomains ? (
             <RelatedEntityCard disabled onClick={() => null}>
               <ObjectImg
                 id={EntityTypeObject[EntityType.Domain]}
@@ -103,6 +95,39 @@ export const EntityCustomDomains = ({
                 className="openEntityIcon"
               />
             </RelatedEntityCard>
+          ) : customDomains.length ? (
+            customDomains.map(
+              (domain) =>
+                domain && (
+                  <DomainCard
+                    key={domain.id}
+                    domain={domain}
+                    onDomainClick={handleCustomDomainClick}
+                  />
+                ),
+            )
+          ) : (
+            <div tw="flex flex-col gap-4">
+              <div>
+                <FunctionalButton onClick={handleAddDomain}>
+                  <Icon name="globe" />
+                  set custom domain
+                </FunctionalButton>
+              </div>
+              <div tw="flex flex-col gap-2.5">
+                <div>
+                  <InfoTitle>INFO</InfoTitle>
+                  <Text>
+                    You&apos;ll need to add DNS records at your domain provider
+                    to verify ownership and route traffic to this instance.
+                  </Text>
+                </div>
+                <DisabledText>
+                  (Changes usually propagate within a few minutes, but may take
+                  longer depending on your provider).
+                </DisabledText>
+              </div>
+            </div>
           )}
         </div>
       </NoisyContainer>

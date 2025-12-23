@@ -105,13 +105,13 @@ export function useRoutes(): UseRoutesReturn {
                     icon: 'instance',
                   },
                   {
-                    name: 'GPU',
+                    name: 'GPU Instances',
                     icon: 'gpu',
                     label: '(BETA)',
                     href: NAVIGATION_URLS.console.computing.gpus.home,
                   },
                   {
-                    name: 'Confidentials',
+                    name: 'TEE Instances',
                     href: NAVIGATION_URLS.console.computing.confidentials.home,
                     label: '(BETA)',
                     icon: 'confidential',

@@ -1,19 +1,22 @@
 import React, { useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { WebsitesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
-import { NAVIGATION_URLS, PaymentMethod } from '@/helpers/constants'
+import { Button, Icon } from '@aleph-front/core'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 import { Website } from '@/domain/website'
-import ExternalLink from '@/components/common/ExternalLink'
 
 export const WebsitesTabContent = React.memo(
   ({ data }: WebsitesTabContentProps) => {
-    const isCredit = useCallback((row: Website) => {
-      return row.payment?.type === PaymentMethod.Credit
-    }, [])
-
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (website: Website) => {
+        router.push(`/console/hosting/website/${website.id}`)
+      },
+      [router],
+    )
     return (
       <>
         {data.length > 0 ? (
@@ -28,7 +31,9 @@ export const WebsitesTabContent = React.memo(
                 rowProps={(row) => ({
                   // css: row.confirmed ? '' : tw`opacity-60`,
                   css: tw`opacity-40`,
+                  onClick: () => handleRowClick(row),
                 })}
+                clickableRows
                 columns={[
                   {
                     label: 'Name',
@@ -60,39 +65,16 @@ export const WebsitesTabContent = React.memo(
                   {
                     label: '',
                     align: 'right',
-                    render: (row) => {
-                      const disabled = !isCredit(row)
-
-                      return (
-                        <ButtonLink
-                          kind="functional"
-                          variant="secondary"
-                          href={`/console/hosting/website/${row.id}`}
-                          disabled={disabled}
-                          disabledMessage={
-                            disabled && (
-                              <p>
-                                To manage this website, go to the{' '}
-                                <ExternalLink
-                                  text="Legacy console App."
-                                  color="main0"
-                                  href={
-                                    NAVIGATION_URLS.legacyConsole.computing
-                                      .instances.home
-                                  }
-                                />
-                              </p>
-                            )
-                          }
-                          tooltipPosition={{
-                            my: 'bottom-right',
-                            at: 'bottom-center',
-                          }}
-                        >
-                          <Icon name="angle-right" size="lg" />
-                        </ButtonLink>
-                      )
-                    },
+                    render: (row) => (
+                      <Button
+                        kind="functional"
+                        variant="secondary"
+                        onClick={() => handleRowClick(row)}
+                        disabled
+                      >
+                        <Icon name="angle-right" size="lg" />
+                      </Button>
+                    ),
                     cellProps: () => ({
                       css: tw`pl-3!`,
                     }),

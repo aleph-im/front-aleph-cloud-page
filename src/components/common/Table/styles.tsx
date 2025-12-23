@@ -1,10 +1,19 @@
 import tw from 'twin.macro'
 import styled, { css } from 'styled-components'
 import { Table, addClasses } from '@aleph-front/core'
+import { StyledTableProps } from './types'
 
-export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
-  ${({ theme }) => {
+export const StyledTable = styled(Table<any>).attrs(
+  addClasses('tp-body3'),
+)<StyledTableProps>`
+  ${({
+    theme,
+    clickableRows = false,
+    rowBackgroundColors = ['light0', 'purple1'],
+    hoverHighlight = true,
+  }) => {
     const { duration, timing } = theme.transition
+    const [color1, color2] = rowBackgroundColors
 
     return css`
       .check-button {
@@ -42,13 +51,13 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
 
       tbody {
         tr {
-          cursor: pointer;
-          background: ${({ theme }) => theme.color.purple1};
+          cursor: ${clickableRows ? 'pointer' : 'default'};
+          background: ${theme.color[color2]};
           height: 4rem;
 
           td {
             transition: all ${timing} ${duration.fast}ms 0ms;
-            background: ${theme.color.light0};
+            background: ${theme.color[color1]};
 
             &.fx-noise-light {
               background: ${theme.color.light1};
@@ -57,21 +66,20 @@ export const StyledTable = styled(Table<any>).attrs(addClasses('tp-body3'))`
 
           &:hover,
           &._active {
-            td {
-              color: ${theme.color.main0};
-            }
-
             .check-button {
               visibility: visible;
               opacity: 1;
             }
           }
 
-          &:hover {
-            td {
-              background: ${theme.color.purple4}50;
+          ${hoverHighlight &&
+          css`
+            &:hover {
+              td {
+                background: ${theme.color.purple4}50;
+              }
             }
-          }
+          `}
 
           &._active {
             cursor: not-allowed;

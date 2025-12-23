@@ -29,7 +29,7 @@ import { DomainWithStatus } from '@/components/common/entityData/EntityCustomDom
 type SidePanelContent = {
   title: string
   isOpen: boolean
-  type?: 'volume' | 'domain'
+  type?: 'volume' | 'domain' | 'newDomain'
   selectedVolumeId?: string
   selectedDomain?: Domain
 }
@@ -46,7 +46,9 @@ export type ManageFunction = UseExecutableActionsReturn & {
 
   // Custom domains
   customDomains: DomainWithStatus[]
+  isLoadingCustomDomains: boolean
   handleCustomDomainClick: (domain: Domain) => void
+  handleAddDomain: () => void
 
   // UI State
   sliderActiveIndex: number
@@ -110,9 +112,10 @@ export function useManageFunction(): ManageFunction {
   // === CUSTOM DOMAINS ===
 
   // Use the custom hook and override the handleCustomDomainClick function
-  const { customDomains } = useEntityCustomDomains({
-    entityId: program?.id,
-  })
+  const { customDomains, isLoading: isLoadingCustomDomains } =
+    useEntityCustomDomains({
+      entityId: program?.id,
+    })
 
   const handleCustomDomainClick = useCallback((domain: Domain) => {
     setSidePanel({
@@ -120,6 +123,14 @@ export function useManageFunction(): ManageFunction {
       isOpen: true,
       type: 'domain',
       selectedDomain: domain,
+    })
+  }, [])
+
+  const handleAddDomain = useCallback(() => {
+    setSidePanel({
+      title: 'New Custom Domain',
+      isOpen: true,
+      type: 'newDomain',
     })
   }, [])
 
@@ -307,7 +318,9 @@ export function useManageFunction(): ManageFunction {
     persistentVolumes,
 
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
 
     paymentData,
 

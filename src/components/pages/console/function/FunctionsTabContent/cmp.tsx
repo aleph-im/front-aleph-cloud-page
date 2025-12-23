@@ -1,15 +1,25 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { FunctionsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import { convertByteUnits, ellipseAddress } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
-import ExternalLink from '@/components/common/ExternalLink'
+import { Program } from '@/domain/program'
 
 export const FunctionsTabContent = React.memo(
   ({ data }: FunctionsTabContentProps) => {
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (program: Program) => {
+        router.push(
+          `${NAVIGATION_URLS.console.computing.functions.home}/${program.id}`,
+        )
+      },
+      [router],
+    )
     return (
       <>
         {data.length > 0 ? (
@@ -24,7 +34,9 @@ export const FunctionsTabContent = React.memo(
                 rowProps={(row) => ({
                   // css: row.confirmed ? '' : tw`opacity-60`,
                   css: tw`opacity-40`,
+                  onClick: () => handleRowClick(row),
                 })}
+                clickableRows
                 columns={[
                   {
                     label: 'Name',
@@ -76,31 +88,14 @@ export const FunctionsTabContent = React.memo(
                     label: '',
                     align: 'right',
                     render: (row) => (
-                      <ButtonLink
+                      <Button
                         kind="functional"
                         variant="secondary"
-                        href={`${NAVIGATION_URLS.console.computing.functions.home}/${row.id}`}
-                        disabled={true}
-                        disabledMessage={
-                          <p>
-                            To manage this function, go to the{' '}
-                            <ExternalLink
-                              text="Legacy console App."
-                              color="main0"
-                              href={
-                                NAVIGATION_URLS.legacyConsole.computing
-                                  .instances.home
-                              }
-                            />
-                          </p>
-                        }
-                        tooltipPosition={{
-                          my: 'bottom-right',
-                          at: 'bottom-center',
-                        }}
+                        onClick={() => handleRowClick(row)}
+                        disabled
                       >
                         <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
+                      </Button>
                     ),
                     cellProps: () => ({
                       css: tw`pl-3!`,

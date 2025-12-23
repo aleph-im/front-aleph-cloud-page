@@ -192,14 +192,14 @@ export default function DashboardPage() {
                     }
                     isComingSoon={!confidentialsAuthz}
                     isBeta
-                    title="confidentials"
+                    title="TEE instances"
                     img={EntityTypeObject[EntityType.Confidential]}
                     dashboardPath="/console/computing/confidential"
                     createPath="/console/computing/confidential/new"
                     createDisabled
                     createDisabledMessage={
                       <p>
-                        To create a confidential instance, navigate to the{' '}
+                        To create a TEE instance, navigate to the{' '}
                         <ExternalLink
                           text="Legacy console App."
                           color="main0"
@@ -210,8 +210,8 @@ export default function DashboardPage() {
                         />
                       </p>
                     }
-                    description="Protect your sensitive workloads with our Confidential VMs. Designed for maximum privacy and security, ensuring your data stays safe."
-                    introductionButtonText="Create your confidential"
+                    description="Protect your sensitive workloads with our confidential VMs. Designed for maximum privacy and security, ensuring your data stays safe."
+                    introductionButtonText="Create your TEE Instance"
                     information={{
                       type: 'computing',
                       data: confidentialsAggregatedStatus.total,

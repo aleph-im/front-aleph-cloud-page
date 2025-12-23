@@ -20,6 +20,8 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import FunctionalButton from '@/components/common/FunctionalButton'
+import { EntityDomainType } from '@/helpers/constants'
+import NewDomainForm from '@/components/common/NewDomainForm'
 
 export default function ManageFunction() {
   const {
@@ -41,7 +43,9 @@ export default function ManageFunction() {
 
     // Custom domains
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
 
     // Payment data
     paymentData,
@@ -181,13 +185,13 @@ export default function ManageFunction() {
                   persistentVolumes={persistentVolumes}
                 />
               ),
-              customDomains.length && (
-                <EntityCustomDomains
-                  key={'function-custom-domains'}
-                  customDomains={customDomains}
-                  onCustomDomainClick={handleCustomDomainClick}
-                />
-              ),
+              <EntityCustomDomains
+                key={'function-custom-domains'}
+                isLoadingCustomDomains={isLoadingCustomDomains}
+                customDomains={customDomains}
+                onCustomDomainClick={handleCustomDomainClick}
+                onAddDomain={handleAddDomain}
+              />,
             ]}
           />
         </Slide>
@@ -219,6 +223,12 @@ export default function ManageFunction() {
           sidePanel.selectedDomain && (
             <DomainDetail domainId={sidePanel.selectedDomain.id} />
           )
+        ) : sidePanel.type === 'newDomain' ? (
+          <NewDomainForm
+            entityId={program?.id}
+            entityType={EntityDomainType.Program}
+            onSuccess={closeSidePanel}
+          />
         ) : (
           <>ERROR</>
         )}

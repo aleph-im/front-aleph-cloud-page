@@ -5,7 +5,7 @@ export type ManageEntityHeaderProps = {
   name: string
   isAllocated: boolean
   entity?: Executable
-  type: 'instance' | 'function' | 'GPU instance' | 'confidential instance'
+  type: 'instance' | 'function' | 'GPU instance' | 'TEE instance'
 
   calculatedStatus: ExecutableCalculatedStatus
 

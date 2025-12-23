@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { InstancesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import {
@@ -8,14 +9,20 @@ import {
   humanReadableSize,
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
 import { PaymentType } from '@aleph-sdk/message'
-import ExternalLink from '@/components/common/ExternalLink'
-import { NAVIGATION_URLS } from '@/helpers/constants'
+import { Button, Icon } from '@aleph-front/core'
 import { Instance } from '@/domain/instance'
 
 export const InstancesTabContent = React.memo(
   ({ data }: InstancesTabContentProps) => {
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (instance: Instance) => {
+        router.push(`/console/computing/instance/${instance.id}`)
+      },
+      [router],
+    )
+
     const isCredit = useCallback((row: Instance) => {
       return row.payment?.type === PaymentType.credit
     }, [])
@@ -31,6 +38,7 @@ export const InstancesTabContent = React.memo(
                 rowKey={(row) => row.id}
                 rowProps={(row) => ({
                   css: isCredit(row) ? '' : tw`opacity-40`,
+                  onClick: () => handleRowClick(row),
                 })}
                 data={data}
                 columns={[
@@ -77,33 +85,14 @@ export const InstancesTabContent = React.memo(
                       const disabled = !isCredit(row)
 
                       return (
-                        <ButtonLink
+                        <Button
                           kind="functional"
                           variant="secondary"
-                          href={`/console/computing/instance/${row.id}`}
+                          onClick={() => handleRowClick(row)}
                           disabled={disabled}
-                          disabledMessage={
-                            disabled && (
-                              <p>
-                                To manage this instance, go to the{' '}
-                                <ExternalLink
-                                  text="Legacy console App."
-                                  color="main0"
-                                  href={
-                                    NAVIGATION_URLS.legacyConsole.computing
-                                      .instances.home
-                                  }
-                                />
-                              </p>
-                            )
-                          }
-                          tooltipPosition={{
-                            my: 'bottom-right',
-                            at: 'bottom-center',
-                          }}
                         >
                           <Icon name="angle-right" size="lg" />
-                        </ButtonLink>
+                        </Button>
                       )
                     },
                     cellProps: () => ({
