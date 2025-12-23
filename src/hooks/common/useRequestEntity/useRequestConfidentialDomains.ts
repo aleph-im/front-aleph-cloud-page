@@ -12,8 +12,10 @@ export type UseRequestConfidentialDomainsProps = Omit<
   'name'
 >
 
-export type UseRequestConfidentialDomainsReturn =
-  UseRequestEntitiesReturn<Domain>
+export type UseRequestConfidentialDomainsReturn = Omit<
+  UseRequestEntitiesReturn<Domain>,
+  'refetch'
+>
 
 export function useRequestConfidentialDomains(
   props: UseRequestConfidentialDomainsProps = {},

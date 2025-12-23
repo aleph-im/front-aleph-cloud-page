@@ -12,8 +12,10 @@ export type UseRequestGpuInstanceDomainsProps = Omit<
   'name'
 >
 
-export type UseRequestGpuInstanceDomainsReturn =
-  UseRequestEntitiesReturn<Domain>
+export type UseRequestGpuInstanceDomainsReturn = Omit<
+  UseRequestEntitiesReturn<Domain>,
+  'refetch'
+>
 
 export function useRequestGpuInstanceDomains(
   props: UseRequestGpuInstanceDomainsProps = {},

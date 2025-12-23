@@ -13,6 +13,7 @@ export type FloatingFooterProps = {
   children: ReactNode
   containerRef: RefObject<HTMLElement>
   shouldHide?: boolean
+  shouldRender?: boolean
   offset?: number
   thresholdOffset?: number
   deps?: any[]
@@ -24,6 +25,7 @@ export const FloatingFooter = ({
   offset = 0,
   thresholdOffset = offset,
   shouldHide = true,
+  shouldRender = true,
   deps: depsProp = [],
 }: FloatingFooterProps) => {
   const thresholdRef = useRef<HTMLDivElement>(null)
@@ -46,14 +48,19 @@ export const FloatingFooter = ({
 
   const theme = useTheme()
 
-  const { shouldMount, stage } = useTransition(
-    sticked,
-    theme.transition.duration.fast,
+  const { shouldMount: shouldMountSticked, stage: stageSticked } =
+    useTransition(sticked, theme.transition.duration.fast)
+
+  const { shouldMount: shouldMountRender, stage: stageRender } = useTransition(
+    shouldRender,
+    theme.transition.duration.normal,
   )
 
-  const show = stage === 'enter'
+  const show = stageSticked === 'enter'
+  const visible = stageRender === 'enter'
 
   if (!containerBounds) return null
+  if (!shouldMountRender) return null
 
   const position = !shouldHide ? 'sticky' : 'fixed'
   const opacity = !shouldHide ? 1 : show ? 1 : 0
@@ -65,6 +72,7 @@ export const FloatingFooter = ({
   const contentNode = (
     <StyledContainer
       $sticked={show}
+      $visible={visible}
       style={{ position, bottom, left, width, opacity }}
     >
       {children}
@@ -74,7 +82,7 @@ export const FloatingFooter = ({
   return (
     <>
       {shouldHide
-        ? shouldMount &&
+        ? shouldMountSticked &&
           typeof window === 'object' &&
           createPortal(contentNode, window.document.body)
         : contentNode}
