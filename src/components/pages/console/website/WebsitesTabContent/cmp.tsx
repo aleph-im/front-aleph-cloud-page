@@ -1,13 +1,22 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { WebsitesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+import { Website } from '@/domain/website'
 
 export const WebsitesTabContent = React.memo(
   ({ data }: WebsitesTabContentProps) => {
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (website: Website) => {
+        router.push(`/console/hosting/website/${website.id}`)
+      },
+      [router],
+    )
     return (
       <>
         {data.length > 0 ? (
@@ -19,8 +28,10 @@ export const WebsitesTabContent = React.memo(
                 rowKey={(row) => row.id}
                 data={data}
                 rowProps={(row) => ({
+                  onClick: () => handleRowClick(row),
                   css: row.confirmed ? '' : tw`opacity-60`,
                 })}
+                clickableRows
                 columns={[
                   {
                     label: 'Name',
@@ -53,13 +64,13 @@ export const WebsitesTabContent = React.memo(
                     label: '',
                     align: 'right',
                     render: (row) => (
-                      <ButtonLink
+                      <Button
                         kind="functional"
                         variant="secondary"
-                        href={`/console/hosting/website/${row.id}`}
+                        onClick={() => handleRowClick(row)}
                       >
                         <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
+                      </Button>
                     ),
                     cellProps: () => ({
                       css: tw`pl-3!`,

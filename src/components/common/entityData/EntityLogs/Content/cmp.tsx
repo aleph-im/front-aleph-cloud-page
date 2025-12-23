@@ -13,7 +13,7 @@ export const EntityLogsContent = ({ logs }: EntityLogsContentProps) => {
         the boot of your instance and to monitor the behavior of your instance
         while it is running.
       </div>
-      <div tw="w-full">
+      <div tw="w-full py-4">
         <LogsFeed logs={logs} />
       </div>
     </>

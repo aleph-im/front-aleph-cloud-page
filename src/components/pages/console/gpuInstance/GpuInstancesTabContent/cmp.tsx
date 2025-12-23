@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { GpuInstancesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import {
@@ -8,10 +9,18 @@ import {
   humanReadableSize,
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
+import { GpuInstance } from '@/domain/gpuInstance'
 
 export const GpuInstancesTabContent = React.memo(
   ({ data }: GpuInstancesTabContentProps) => {
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (gpuInstance: GpuInstance) => {
+        router.push(`/console/computing/gpu-instance/${gpuInstance.id}`)
+      },
+      [router],
+    )
     return (
       <>
         {data.length > 0 ? (
@@ -21,6 +30,8 @@ export const GpuInstancesTabContent = React.memo(
                 borderType="none"
                 rowNoise
                 rowKey={(row) => row.id}
+                rowProps={(row) => ({ onClick: () => handleRowClick(row) })}
+                clickableRows
                 data={data}
                 columns={[
                   {
@@ -63,13 +74,13 @@ export const GpuInstancesTabContent = React.memo(
                     label: '',
                     align: 'right',
                     render: (row) => (
-                      <ButtonLink
+                      <Button
                         kind="functional"
                         variant="secondary"
-                        href={`/console/computing/gpu-instance/${row.id}`}
+                        onClick={() => handleRowClick(row)}
                       >
                         <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
+                      </Button>
                     ),
                     cellProps: () => ({
                       css: tw`pl-3!`,

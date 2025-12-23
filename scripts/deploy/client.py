@@ -42,7 +42,7 @@ def main(argv: list[str] | None = None) -> None:
 
     # Fail the workflow on HTTP error codes
     if not resp.ok:
-        print(f"HTTP {resp.status_code}: {resp.text}", file=syzs.stderr)
+        print(f"HTTP {resp.status_code}: {resp.text}", file=sys.stderr)
         sys.exit(1)
 
     try:

@@ -110,8 +110,14 @@ export function useDomainDetail({
   const handleUpdate = useCallback(() => {
     if (!domain) throw Err.DomainNotFound
 
+    const params = new URLSearchParams({
+      name: domain.id,
+      target: domain.target,
+      ref: domain.ref,
+    })
+
     router.push(
-      `${NAVIGATION_URLS.console.settings.domain.new}/?name=${domain.id}`,
+      `${NAVIGATION_URLS.console.settings.domain.new}/?${params.toString()}`,
     )
   }, [router, domain])
 

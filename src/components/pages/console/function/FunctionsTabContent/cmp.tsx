@@ -1,14 +1,25 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { FunctionsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import { convertByteUnits, ellipseAddress } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+import { Program } from '@/domain/program'
 
 export const FunctionsTabContent = React.memo(
   ({ data }: FunctionsTabContentProps) => {
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (program: Program) => {
+        router.push(
+          `${NAVIGATION_URLS.console.computing.functions.home}/${program.id}`,
+        )
+      },
+      [router],
+    )
     return (
       <>
         {data.length > 0 ? (
@@ -20,8 +31,10 @@ export const FunctionsTabContent = React.memo(
                 rowKey={(row) => row.id}
                 data={data}
                 rowProps={(row) => ({
+                  onClick: () => handleRowClick(row),
                   css: row.confirmed ? '' : tw`opacity-60`,
                 })}
+                clickableRows
                 columns={[
                   {
                     label: 'Name',
@@ -73,13 +86,13 @@ export const FunctionsTabContent = React.memo(
                     label: '',
                     align: 'right',
                     render: (row) => (
-                      <ButtonLink
+                      <Button
                         kind="functional"
                         variant="secondary"
-                        href={`${NAVIGATION_URLS.console.computing.functions.home}/${row.id}`}
+                        onClick={() => handleRowClick(row)}
                       >
                         <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
+                      </Button>
                     ),
                     cellProps: () => ({
                       css: tw`pl-3!`,

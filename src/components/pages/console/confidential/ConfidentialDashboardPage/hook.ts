@@ -40,7 +40,7 @@ export function useConfidentialDashboardPage(): UseConfidentialDashboardPageRetu
     return [
       {
         id: 'confidential',
-        name: 'Confidentials',
+        name: 'TEE Instances',
         label: { label: getLabel(confidentials), position: 'bottom' },
       },
       {
