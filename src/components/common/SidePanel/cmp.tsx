@@ -1,5 +1,11 @@
 import React, { memo } from 'react'
-import { StyledBackdrop, StyledHeader, StyledSidePanel } from './styles'
+import {
+  StyledBackdrop,
+  StyledContent,
+  StyledFooter,
+  StyledHeader,
+  StyledSidePanel,
+} from './styles'
 import { SidePanelProps } from './types'
 
 export const SidePanel = ({
@@ -7,11 +13,20 @@ export const SidePanel = ({
   title,
   isOpen,
   onClose,
+  footer,
+  order = 0,
+  width,
+  mobileHeight,
 }: SidePanelProps) => {
   return (
     <>
-      <StyledBackdrop $isOpen={isOpen} onClick={onClose} />
-      <StyledSidePanel $isOpen={isOpen}>
+      <StyledBackdrop $isOpen={isOpen} $order={order} onClick={onClose} />
+      <StyledSidePanel
+        $isOpen={isOpen}
+        $order={order}
+        $width={width}
+        $mobileHeight={mobileHeight}
+      >
         {/* Side Panel Header */}
         <StyledHeader>
           <div
@@ -21,7 +36,15 @@ export const SidePanel = ({
             {title}
           </div>
         </StyledHeader>
-        <div tw="p-12">{children}</div>
+        <StyledContent>
+          {children}
+          {footer && <div tw="h-[5.375rem]" />}
+        </StyledContent>
+        {footer && (
+          <>
+            <StyledFooter $isOpen={isOpen}>{footer}</StyledFooter>
+          </>
+        )}
       </StyledSidePanel>
     </>
   )
