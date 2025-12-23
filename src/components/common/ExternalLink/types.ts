@@ -7,4 +7,5 @@ export type ExternalLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   color?: keyof CoreTheme['color']
   typo?: keyof CoreTheme['typo']
   underline?: boolean
+  disabled?: boolean
 }

@@ -13,6 +13,8 @@ export const BorderBox = styled.div<{
       backdrop-filter: blur(50px);
       color: ${theme.color.text}b3;
 
+      background: linear-gradient(90deg, ${g0}1a 0%, ${g1}1a 100%);
+
       &::before {
         content: '';
         position: absolute;
@@ -33,6 +35,7 @@ export const BorderBox = styled.div<{
         -webkit-mask-composite: exclude;
         mask-composite: exclude;
         -webkit-mask-composite: xor;
+
         background-image: linear-gradient(90deg, ${g0} 0%, ${g1} 100%);
       }
     `

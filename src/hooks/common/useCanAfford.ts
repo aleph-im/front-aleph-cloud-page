@@ -1,8 +1,8 @@
-import { CostSummary } from '@/domain/cost'
+import { UseEntityCostReturn } from './useEntityCost'
 
 export type UseCanAffordProps = {
-  accountBalance: number
-  cost?: CostSummary
+  accountCreditBalance: number
+  cost: UseEntityCostReturn
 }
 
 export type UseCanAffordReturn = {
@@ -11,11 +11,12 @@ export type UseCanAffordReturn = {
 }
 
 export function useCanAfford({
-  accountBalance,
+  accountCreditBalance,
   cost,
 }: UseCanAffordProps): UseCanAffordReturn {
   const canAfford =
-    accountBalance >= (cost ? cost.cost : Number.MAX_SAFE_INTEGER)
+    accountCreditBalance >=
+    (cost.cost ? cost.cost.cost : Number.MAX_SAFE_INTEGER)
 
   const isCreateButtonDisabled =
     process.env.NEXT_PUBLIC_OVERRIDE_ALEPH_BALANCE === 'true'

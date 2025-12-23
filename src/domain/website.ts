@@ -616,7 +616,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   async getCost(props: WebsiteCostProps): Promise<WebsiteCost> {
     let totalCost = Number.POSITIVE_INFINITY
 
-    const { website, paymentMethod = PaymentMethod.Hold } = props
+    const { website, paymentMethod = PaymentMethod.Credit } = props
 
     const emptyCost: WebsiteCost = {
       paymentMethod,
@@ -660,7 +660,9 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       cost:
         paymentMethod === PaymentMethod.Hold
           ? +line.cost_hold
-          : +line.cost_stream,
+          : paymentMethod === PaymentMethod.Stream
+            ? +line.cost_stream
+            : +line.cost_credit,
     }))
   }
 

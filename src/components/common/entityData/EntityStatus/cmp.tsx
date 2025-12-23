@@ -7,8 +7,14 @@ import {
 } from './types'
 import { RotatingLines } from 'react-loader-spinner'
 
-const EntityStatusV2 = ({ theme, calculatedStatus }: EntityStatusPropsV2) => {
+const EntityStatusV2 = ({
+  theme,
+  calculatedStatus,
+  cannotStart,
+}: EntityStatusPropsV2) => {
   const labelVariant = useMemo(() => {
+    if (cannotStart) return 'error'
+
     switch (calculatedStatus) {
       case 'not-allocated':
         return 'warning'
@@ -21,9 +27,11 @@ const EntityStatusV2 = ({ theme, calculatedStatus }: EntityStatusPropsV2) => {
       case 'preparing':
         return 'warning'
     }
-  }, [calculatedStatus])
+  }, [calculatedStatus, cannotStart])
 
   const text = useMemo(() => {
+    if (cannotStart) return 'STOPPED'
+
     switch (calculatedStatus) {
       case 'not-allocated':
         return 'NOT ALLLOCATED'
@@ -36,9 +44,11 @@ const EntityStatusV2 = ({ theme, calculatedStatus }: EntityStatusPropsV2) => {
       case 'preparing':
         return 'PREPARING'
     }
-  }, [calculatedStatus])
+  }, [calculatedStatus, cannotStart])
 
   const showSpinner = useMemo(() => {
+    if (cannotStart) return false
+
     switch (calculatedStatus) {
       case 'not-allocated':
         return false
@@ -51,7 +61,7 @@ const EntityStatusV2 = ({ theme, calculatedStatus }: EntityStatusPropsV2) => {
       case 'preparing':
         return true
     }
-  }, [calculatedStatus])
+  }, [calculatedStatus, cannotStart])
 
   return (
     <Label kind="secondary" variant={labelVariant}>
@@ -100,6 +110,7 @@ export const EntityStatus = ({
   entity,
   isAllocated,
   calculatedStatus,
+  cannotStart,
   theme,
 }: EntityStatusProps) => {
   if (calculatedStatus === 'loading' || !entity) {
@@ -116,7 +127,11 @@ export const EntityStatus = ({
   return calculatedStatus === 'v1' ? (
     <EntityStatusV1 entity={entity} isAllocated={isAllocated} theme={theme} />
   ) : (
-    <EntityStatusV2 calculatedStatus={calculatedStatus} theme={theme} />
+    <EntityStatusV2
+      calculatedStatus={calculatedStatus}
+      theme={theme}
+      cannotStart={cannotStart}
+    />
   )
 }
 EntityStatus.displayName = 'EntityStatus'

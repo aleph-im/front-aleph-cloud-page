@@ -1,14 +1,28 @@
-import { memo } from 'react'
-import { CompositeTitle, CompositeTitleProps } from '@aleph-front/core'
+import { ReactNode } from 'react'
+import {
+  CompositeTitle,
+  CompositeTitleProps,
+  TextGradient,
+} from '@aleph-front/core'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const SectionTitle = ({ forwardedAs, ...rest }: CompositeTitleProps) => {
+export const CompositeSectionTitle = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  forwardedAs,
+  ...rest
+}: CompositeTitleProps) => {
   return (
     <CompositeTitle
       {...{ as: 'h2', color: 'main0', numberColor: 'main0', ...rest }}
     />
   )
 }
-SectionTitle.displayName = 'SectionTitle'
+CompositeSectionTitle.displayName = 'CompositeSectionTitle'
 
-export default memo(SectionTitle) as typeof SectionTitle
+export const SectionTitle = ({ children }: { children: ReactNode }) => {
+  return (
+    <TextGradient as="h2" color="main0" type="h5">
+      {children}
+    </TextGradient>
+  )
+}
+SectionTitle.displayName = 'SectionTitle'

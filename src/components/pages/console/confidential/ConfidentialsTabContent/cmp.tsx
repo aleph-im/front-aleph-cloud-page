@@ -9,8 +9,11 @@ import {
   humanReadableSize,
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
+import { PaymentType } from '@aleph-sdk/message'
 import { Button, Icon } from '@aleph-front/core'
 import { Confidential } from '@/domain/confidential'
+import ExternalLink from '@/components/common/ExternalLink'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 const CreateConfidentialButton = ({
   children,
@@ -29,12 +32,18 @@ CreateConfidentialButton.displayName = 'CreateConfidentialButton'
 
 export const ConfidentialsTabContent = memo(
   ({ data }: ConfidentialsTabContentProps) => {
+    const isCredit = useCallback((row: Confidential) => {
+      return row.payment?.type === PaymentType.credit
+    }, [])
+
     const router = useRouter()
     const handleRowClick = useCallback(
       (confidential: Confidential) => {
+        if (!isCredit(confidential)) return
+
         router.push(`/console/computing/confidential/${confidential.id}`)
       },
-      [router],
+      [isCredit, router],
     )
     return (
       <>
@@ -45,7 +54,27 @@ export const ConfidentialsTabContent = memo(
                 borderType="none"
                 rowNoise
                 rowKey={(row) => row.id}
-                rowProps={(row) => ({ onClick: () => handleRowClick(row) })}
+                rowProps={(row) => ({
+                  css: isCredit(row) ? '' : tw`opacity-40 cursor-not-allowed!`,
+                  onClick: () => handleRowClick(row),
+                })}
+                rowTooltip={(row) => {
+                  if (isCredit(row)) return null
+
+                  return (
+                    <p>
+                      To manage this TEE instance, go to the{' '}
+                      <ExternalLink
+                        text="Legacy console App."
+                        color="main0"
+                        href={
+                          NAVIGATION_URLS.legacyConsole.computing.confidentials
+                            .home
+                        }
+                      />
+                    </p>
+                  )
+                }}
                 clickableRows
                 data={data}
                 columns={[
@@ -88,15 +117,20 @@ export const ConfidentialsTabContent = memo(
                   {
                     label: '',
                     align: 'right',
-                    render: (row) => (
-                      <Button
-                        kind="functional"
-                        variant="secondary"
-                        onClick={() => handleRowClick(row)}
-                      >
-                        <Icon name="angle-right" size="lg" />
-                      </Button>
-                    ),
+                    render: (row) => {
+                      const disabled = !isCredit(row)
+
+                      return (
+                        <Button
+                          kind="functional"
+                          variant="secondary"
+                          onClick={() => handleRowClick(row)}
+                          disabled={disabled}
+                        >
+                          <Icon name="angle-right" size="lg" />
+                        </Button>
+                      )
+                    },
                     cellProps: () => ({
                       css: tw`pl-3!`,
                     }),

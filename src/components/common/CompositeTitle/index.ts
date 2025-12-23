@@ -1,1 +1,1 @@
-export { default, default as SectionTitle } from './cmp'
+export { SectionTitle, CompositeSectionTitle } from './cmp'
