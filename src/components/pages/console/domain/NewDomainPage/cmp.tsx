@@ -17,7 +17,7 @@ export default function NewDomain() {
       </Head>
       <BackButtonSection handleBack={handleBack} />
       <NewDomainForm
-        centered
+        variant="standalone"
         showResourceSelection
         name={name}
         entityId={ref}

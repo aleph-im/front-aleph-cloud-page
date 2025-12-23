@@ -21,13 +21,14 @@ import {
   EntityDomainTypeName,
   NAVIGATION_URLS,
 } from '@/helpers/constants'
+import { StyledSection } from './styles'
 
 export const NewDomainForm = ({
   name,
   entityId,
   entityType,
   onSuccess,
-  centered = false,
+  variant = 'embedded',
   showResourceSelection = false,
 }: NewDomainFormProps) => {
   const {
@@ -85,12 +86,13 @@ export const NewDomainForm = ({
     }
   }
 
-  const Wrapper = centered ? CenteredContainer : React.Fragment
+  const isEmbedded = variant === 'embedded'
+  const Wrapper = isEmbedded ? React.Fragment : CenteredContainer
 
   return (
     <Wrapper>
       <Form onSubmit={handleSubmit} errors={errors}>
-        <section tw="px-0 pt-20 pb-6 md:py-10">
+        <StyledSection $isEmbedded={isEmbedded}>
           <SectionTitle number={1}>Custom domain</SectionTitle>
           <p tw="mb-6">
             Assign a user-friendly domain to your website, instance or function
@@ -126,9 +128,9 @@ export const NewDomainForm = ({
               </Button>
             </div>
           )}
-        </section>
+        </StyledSection>
         {showResourceSelection && (
-          <section tw="px-0 pt-20 pb-6 md:py-10">
+          <StyledSection $isEmbedded={isEmbedded}>
             <SectionTitle number={2}>Select Resource</SectionTitle>
             <p tw="mb-6">
               You&apos;ll need to specify the resource your custom domain will
@@ -273,7 +275,7 @@ export const NewDomainForm = ({
                 Create domain
               </Button>
             </div>
-          </section>
+          </StyledSection>
         )}
       </Form>
     </Wrapper>

@@ -6,6 +6,6 @@ export type NewDomainFormProps = {
   entityId?: string
   entityType?: EntityDomainType
   onSuccess?: (accountDomain: Domain) => void
-  centered?: boolean
+  variant?: 'standalone' | 'embedded'
   showResourceSelection?: boolean
 }
