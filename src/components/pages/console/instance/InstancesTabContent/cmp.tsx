@@ -12,20 +12,24 @@ import EntityTable from '@/components/common/EntityTable'
 import { PaymentType } from '@aleph-sdk/message'
 import { Button, Icon } from '@aleph-front/core'
 import { Instance } from '@/domain/instance'
+import ExternalLink from '@/components/common/ExternalLink'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const InstancesTabContent = React.memo(
   ({ data }: InstancesTabContentProps) => {
-    const router = useRouter()
-    const handleRowClick = useCallback(
-      (instance: Instance) => {
-        router.push(`/console/computing/instance/${instance.id}`)
-      },
-      [router],
-    )
-
     const isCredit = useCallback((row: Instance) => {
       return row.payment?.type === PaymentType.credit
     }, [])
+
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (instance: Instance) => {
+        if (!isCredit(instance)) return
+
+        router.push(`/console/computing/instance/${instance.id}`)
+      },
+      [isCredit, router],
+    )
 
     return (
       <>
@@ -37,9 +41,26 @@ export const InstancesTabContent = React.memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 rowProps={(row) => ({
-                  css: isCredit(row) ? '' : tw`opacity-40`,
+                  css: isCredit(row) ? '' : tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}
+                rowTooltip={(row) => {
+                  if (isCredit(row)) return null
+
+                  return (
+                    <p>
+                      To manage this instance, go to the{' '}
+                      <ExternalLink
+                        text="Legacy console App."
+                        color="main0"
+                        href={
+                          NAVIGATION_URLS.legacyConsole.computing.instances.home
+                        }
+                      />
+                    </p>
+                  )
+                }}
+                clickableRows
                 data={data}
                 columns={[
                   {

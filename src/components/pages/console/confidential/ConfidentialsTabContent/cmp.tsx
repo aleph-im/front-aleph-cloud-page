@@ -12,6 +12,8 @@ import EntityTable from '@/components/common/EntityTable'
 import { PaymentType } from '@aleph-sdk/message'
 import { Button, Icon } from '@aleph-front/core'
 import { Confidential } from '@/domain/confidential'
+import ExternalLink from '@/components/common/ExternalLink'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 const CreateConfidentialButton = ({
   children,
@@ -37,7 +39,7 @@ export const ConfidentialsTabContent = memo(
     const router = useRouter()
     const handleRowClick = useCallback(
       (confidential: Confidential) => {
-        if (isCredit(confidential)) return
+        if (!isCredit(confidential)) return
 
         router.push(`/console/computing/confidential/${confidential.id}`)
       },
@@ -53,9 +55,26 @@ export const ConfidentialsTabContent = memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 rowProps={(row) => ({
-                  css: isCredit(row) ? '' : tw`opacity-40`,
+                  css: isCredit(row) ? '' : tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}
+                rowTooltip={(row) => {
+                  if (isCredit(row)) return null
+
+                  return (
+                    <p>
+                      To manage this TEE instance, go to the{' '}
+                      <ExternalLink
+                        text="Legacy console App."
+                        color="main0"
+                        href={
+                          NAVIGATION_URLS.legacyConsole.computing.confidentials
+                            .home
+                        }
+                      />
+                    </p>
+                  )
+                }}
                 clickableRows
                 data={data}
                 columns={[

@@ -7,12 +7,16 @@ import EntityTable from '@/components/common/EntityTable'
 import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 import { Website } from '@/domain/website'
+import ExternalLink from '@/components/common/ExternalLink'
 
 export const WebsitesTabContent = React.memo(
   ({ data }: WebsitesTabContentProps) => {
     const router = useRouter()
     const handleRowClick = useCallback(
       (website: Website) => {
+        // don't allow click until credits support it
+        return
+
         router.push(`/console/hosting/website/${website.id}`)
       },
       [router],
@@ -30,9 +34,23 @@ export const WebsitesTabContent = React.memo(
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 rowProps={(row) => ({
                   // css: row.confirmed ? '' : tw`opacity-60`,
-                  css: tw`opacity-40`,
+                  css: tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}
+                rowTooltip={() => {
+                  return (
+                    <p>
+                      To manage this volume, go to the{' '}
+                      <ExternalLink
+                        text="Legacy console App."
+                        color="main0"
+                        href={
+                          NAVIGATION_URLS.legacyConsole.computing.instances.home
+                        }
+                      />
+                    </p>
+                  )
+                }}
                 clickableRows
                 columns={[
                   {

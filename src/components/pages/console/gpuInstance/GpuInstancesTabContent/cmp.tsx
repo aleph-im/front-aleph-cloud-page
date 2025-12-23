@@ -12,20 +12,24 @@ import EntityTable from '@/components/common/EntityTable'
 import { PaymentType } from '@aleph-sdk/message'
 import { Button, Icon } from '@aleph-front/core'
 import { GpuInstance } from '@/domain/gpuInstance'
+import ExternalLink from '@/components/common/ExternalLink'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const GpuInstancesTabContent = React.memo(
   ({ data }: GpuInstancesTabContentProps) => {
-    const router = useRouter()
-    const handleRowClick = useCallback(
-      (gpuInstance: GpuInstance) => {
-        router.push(`/console/computing/gpu-instance/${gpuInstance.id}`)
-      },
-      [router],
-    )
-
     const isCredit = useCallback((row: GpuInstance) => {
       return row.payment?.type === PaymentType.credit
     }, [])
+
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (gpuInstance: GpuInstance) => {
+        if (!isCredit(gpuInstance)) return
+
+        router.push(`/console/computing/gpu-instance/${gpuInstance.id}`)
+      },
+      [isCredit, router],
+    )
 
     return (
       <>
@@ -37,9 +41,23 @@ export const GpuInstancesTabContent = React.memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 rowProps={(row) => ({
-                  css: isCredit(row) ? '' : tw`opacity-40`,
+                  css: isCredit(row) ? '' : tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}
+                rowTooltip={(row) => {
+                  if (isCredit(row)) return null
+
+                  return (
+                    <p>
+                      To manage this GPU instance, go to the{' '}
+                      <ExternalLink
+                        text="Legacy console App."
+                        color="main0"
+                        href={NAVIGATION_URLS.legacyConsole.computing.gpus.home}
+                      />
+                    </p>
+                  )
+                }}
                 clickableRows
                 data={data}
                 columns={[

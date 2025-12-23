@@ -8,6 +8,7 @@ import EntityTable from '@/components/common/EntityTable'
 import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 import { Program } from '@/domain/program'
+import ExternalLink from '@/components/common/ExternalLink'
 
 export const FunctionsTabContent = React.memo(
   ({ data }: FunctionsTabContentProps) => {
@@ -33,9 +34,23 @@ export const FunctionsTabContent = React.memo(
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 rowProps={(row) => ({
                   // css: row.confirmed ? '' : tw`opacity-60`,
-                  css: tw`opacity-40`,
+                  css: tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}
+                rowTooltip={() => {
+                  return (
+                    <p>
+                      To manage this function, go to the{' '}
+                      <ExternalLink
+                        text="Legacy console App."
+                        color="main0"
+                        href={
+                          NAVIGATION_URLS.legacyConsole.computing.instances.home
+                        }
+                      />
+                    </p>
+                  )
+                }}
                 clickableRows
                 columns={[
                   {
