@@ -1,16 +1,27 @@
-import React, { memo } from 'react'
+import React, { memo, useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { VolumesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+import { Volume } from '@/domain/volume'
 
 export const VolumesTabContent = ({
   data,
   cta = true,
 }: VolumesTabContentProps) => {
+  const router = useRouter()
+  const handleRowClick = useCallback(
+    (volume: Volume) => {
+      router.push(
+        `${NAVIGATION_URLS.console.storage.volumes.home}/${volume.id}`,
+      )
+    },
+    [router],
+  )
   return (
     <>
       <div tw="overflow-auto max-w-full">
@@ -20,8 +31,10 @@ export const VolumesTabContent = ({
           rowKey={(row) => row.id}
           data={data}
           rowProps={(row) => ({
+            onClick: () => handleRowClick(row),
             css: row.confirmed ? '' : tw`opacity-60`,
           })}
+          clickableRows
           columns={[
             {
               label: 'Name',
@@ -45,13 +58,13 @@ export const VolumesTabContent = ({
               label: '',
               align: 'right',
               render: (row) => (
-                <ButtonLink
+                <Button
                   kind="functional"
                   variant="secondary"
-                  href={`${NAVIGATION_URLS.console.storage.volumes.home}/${row.id}`}
+                  onClick={() => handleRowClick(row)}
                 >
                   <Icon name="angle-right" size="lg" />
-                </ButtonLink>
+                </Button>
               ),
               cellProps: () => ({
                 css: tw`pl-3!`,

@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { InstancesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import {
@@ -8,10 +9,19 @@ import {
   humanReadableSize,
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
+import { Instance } from '@/domain/instance'
 
 export const InstancesTabContent = React.memo(
   ({ data }: InstancesTabContentProps) => {
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (instance: Instance) => {
+        router.push(`/console/computing/instance/${instance.id}`)
+      },
+      [router],
+    )
+
     return (
       <>
         {data.length > 0 ? (
@@ -21,6 +31,8 @@ export const InstancesTabContent = React.memo(
                 borderType="none"
                 rowNoise
                 rowKey={(row) => row.id}
+                rowProps={(row) => ({ onClick: () => handleRowClick(row) })}
+                clickableRows
                 data={data}
                 columns={[
                   {
@@ -63,13 +75,13 @@ export const InstancesTabContent = React.memo(
                     label: '',
                     align: 'right',
                     render: (row) => (
-                      <ButtonLink
+                      <Button
                         kind="functional"
                         variant="secondary"
-                        href={`/console/computing/instance/${row.id}`}
+                        onClick={() => handleRowClick(row)}
                       >
                         <Icon name="angle-right" size="lg" />
-                      </ButtonLink>
+                      </Button>
                     ),
                     cellProps: () => ({
                       css: tw`pl-3!`,
