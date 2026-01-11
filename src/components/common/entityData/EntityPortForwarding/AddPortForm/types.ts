@@ -8,6 +8,7 @@ export type AddPortFormProps = {
 
 export type UseAddPortFormProps = {
   onSubmit: (data: NewForwardedPortEntry[]) => void
+  onCancel: () => void
 }
 
 export type UseAddPortFormReturn = {

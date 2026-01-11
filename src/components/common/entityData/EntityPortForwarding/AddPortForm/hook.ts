@@ -81,6 +81,7 @@ export function usePortItem({
 
 export function useAddPortForm({
   onSubmit: onSubmitProp,
+  onCancel,
 }: UseAddPortFormProps): UseAddPortFormReturn {
   const name = 'ports'
 
@@ -111,9 +112,11 @@ export function useAddPortForm({
     (index: number) => {
       if (fields.length > 1) {
         remove(index)
+      } else {
+        onCancel()
       }
     },
-    [remove, fields.length],
+    [remove, fields.length, onCancel],
   )
 
   return {
