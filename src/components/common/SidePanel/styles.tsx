@@ -3,13 +3,13 @@ import { StyledSidePanelProps, StyledFooterProps } from './types'
 import tw from 'twin.macro'
 
 export const StyledBackdrop = styled.div<StyledSidePanelProps>`
-  ${({ theme, $isOpen }) => css`
+  ${({ theme, $isOpen, $order = 0 }) => css`
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 20;
+    z-index: ${20 + $order};
 
     background-color: ${$isOpen ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)'};
     visibility: ${$isOpen ? 'inherit' : 'hidden'};
@@ -81,7 +81,6 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
     /* For sliding effect on desktop */
     transform: translateX(100%);
     transition: transform ${theme.transition.duration.normal}ms ease-in-out;
-    z-index: ${$order};
 
     ${$isOpen
       ? css`

@@ -38,7 +38,7 @@ export const SidePanel = ({
     <>
       <Portal>
         {shouldMount && (
-          <StyledBackdrop $isOpen={open} onClick={onClose}>
+          <StyledBackdrop $isOpen={open} $order={order} onClick={onClose}>
             <StyledSidePanel
               $isOpen={open}
               $order={order}
