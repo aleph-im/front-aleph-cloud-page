@@ -1,5 +1,11 @@
 import React, { memo, useCallback, MouseEvent } from 'react'
-import { StyledBackdrop, StyledHeader, StyledSidePanel } from './styles'
+import {
+  StyledBackdrop,
+  StyledContent,
+  StyledFooter,
+  StyledHeader,
+  StyledSidePanel,
+} from './styles'
 import { SidePanelProps } from './types'
 import { useTransition } from '@aleph-front/core'
 import { useTheme } from 'styled-components'
@@ -10,6 +16,10 @@ export const SidePanel = ({
   title,
   isOpen,
   onClose,
+  footer,
+  order = 0,
+  width,
+  mobileHeight,
 }: SidePanelProps) => {
   const theme = useTheme()
 
@@ -29,7 +39,13 @@ export const SidePanel = ({
       <Portal>
         {shouldMount && (
           <StyledBackdrop $isOpen={open} onClick={onClose}>
-            <StyledSidePanel $isOpen={open} onClick={handlePanelClick}>
+            <StyledSidePanel
+              $isOpen={open}
+              $order={order}
+              $width={width}
+              $mobileHeight={mobileHeight}
+              onClick={handlePanelClick}
+            >
               {/* Side Panel Header */}
               <StyledHeader>
                 <div
@@ -39,7 +55,15 @@ export const SidePanel = ({
                   {title}
                 </div>
               </StyledHeader>
-              <div tw="p-12">{children}</div>
+              <StyledContent>
+                {children}
+                {footer && <div tw="h-[5.375rem]" />}
+              </StyledContent>
+              {footer && (
+                <>
+                  <StyledFooter $isOpen={open}>{footer}</StyledFooter>
+                </>
+              )}
             </StyledSidePanel>
           </StyledBackdrop>
         )}

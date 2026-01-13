@@ -1,8 +1,6 @@
 import Head from 'next/head'
-import { Icon } from '@aleph-front/core'
 import { useManageGpuInstance } from './hook'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
-import { Slide, Slider } from '@/components/common/Slider'
 import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
 import InstanceEntityDetails from '@/components/common/entityData/InstanceEntityDetails'
 import {
@@ -17,11 +15,12 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
-import FunctionalButton from '@/components/common/FunctionalButton'
+import { EntityDomainType } from '@/helpers/constants'
 import SidePanel from '@/components/common/SidePanel'
 import VolumeDetail from '@/components/common/VolumeDetail'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
 import DomainDetail from '@/components/common/DomainDetail'
+import NewDomainForm from '@/components/common/NewDomainForm'
 
 export default function ManageConfidential() {
   const {
@@ -47,7 +46,9 @@ export default function ManageConfidential() {
 
     // Custom domains
     customDomains,
+    isLoadingCustomDomains,
     handleCustomDomainClick,
+    handleAddDomain,
 
     // Payment data
     paymentData,
@@ -75,11 +76,8 @@ export default function ManageConfidential() {
     sidePanel,
     handleImmutableVolumeClick,
     handleSSHKeyClick,
+    handleViewLogs,
     closeSidePanel,
-
-    // UI state
-    setTabId,
-    sliderActiveIndex,
 
     // Navigation handlers
     handleBack,
@@ -93,7 +91,7 @@ export default function ManageConfidential() {
   return (
     <>
       <Head>
-        <title>Console | Manage Confidential | Aleph Cloud</title>
+        <title>Console | Manage TEE Instance | Aleph Cloud</title>
         <meta
           name="description"
           content="Manage your compute instance on Aleph Cloud"
@@ -102,7 +100,7 @@ export default function ManageConfidential() {
       <ManageEntityHeader
         entity={confidentialInstance}
         name={name}
-        type="confidential instance"
+        type="TEE instance"
         isAllocated={isAllocated}
         calculatedStatus={calculatedStatus}
         // Start action
@@ -128,91 +126,74 @@ export default function ManageConfidential() {
         // Go back action
         onBack={handleBack}
       />
-      {/* Slider */}
-      <Slider activeIndex={sliderActiveIndex}>
-        {/* Instance Properties */}
-        <Slide>
-          <EntityDataColumns
-            leftColumnElements={[
-              <InstanceEntityDetails
-                key="confidentialInstance-details"
-                entity={confidentialInstance}
-                title="CONFIDENTIAL INSTANCE"
-              />,
-              <EntityLogsControl
-                key="confidentialInstance-logs-control"
-                onViewLogs={() => setTabId('log')}
-                onDownloadLogs={handleDownloadLogs}
-                downloadingLogs={isDownloadingLogs}
-                disabled={!confidentialInstance || !isAllocated}
-              />,
-              <EntitySSHKeys
-                key="confidentialInstance-ssh-keys"
-                sshKeys={mappedKeys}
-                onSSHKeyClick={handleSSHKeyClick}
-              />,
-              <EntityPayment
-                key="confidentialInstance-payment"
-                payments={paymentData}
-              />,
-            ]}
-            rightColumnElements={[
-              <EntityHostingCRN
-                key={'confidentialInstance-hosting-crn'}
-                nodeDetails={nodeDetails}
-                termsAndConditionsHash={
-                  confidentialInstance?.requirements?.node?.terms_and_conditions
-                }
-              />,
-              <EntityConnectionMethods
-                key="confidentialInstance-connection-methods"
-                executableStatus={status}
-                sshForwardedPort={sshForwardedPort}
-              />,
-              immutableVolumes.length && (
-                <EntityLinkedVolumes
-                  key="confidentialInstance-linked-volumes"
-                  linkedVolumes={immutableVolumes}
-                  onImmutableVolumeClick={handleImmutableVolumeClick}
-                />
-              ),
-              persistentVolumes.length && (
-                <EntityPersistentStorage
-                  key="confidentialInstance-persistent-storage"
-                  persistentVolumes={persistentVolumes}
-                />
-              ),
-              customDomains.length && (
-                <EntityCustomDomains
-                  key={'confidentialInstance-custom-domains'}
-                  customDomains={customDomains}
-                  onCustomDomainClick={handleCustomDomainClick}
-                />
-              ),
-              <EntityPortForwarding
-                key="port-forwarding"
-                entityHash={confidentialInstance?.id}
-                executableStatus={status}
-                executableManager={confidentialInstanceManager}
-                ports={ports}
-                onPortsChange={handlePortsChange}
-              />,
-            ]}
-          />
-        </Slide>
-
-        {/* Instance Logs */}
-        <Slide>
-          <div tw="w-full flex px-12 py-6 gap-8">
-            <FunctionalButton onClick={() => setTabId('detail')}>
-              <Icon name="angle-left" size="1.3em" />
-            </FunctionalButton>
-            <div tw="w-full flex flex-col justify-center items-center gap-3">
-              <EntityLogsContent logs={logs} />
-            </div>
-          </div>
-        </Slide>
-      </Slider>
+      {/* Instance Properties */}
+      <EntityDataColumns
+        leftColumnElements={[
+          <InstanceEntityDetails
+            key="confidentialInstance-details"
+            entity={confidentialInstance}
+            title="TEE INSTANCE"
+          />,
+          <EntityLogsControl
+            key="confidentialInstance-logs-control"
+            onViewLogs={handleViewLogs}
+            onDownloadLogs={handleDownloadLogs}
+            downloadingLogs={isDownloadingLogs}
+            disabled={!confidentialInstance || !isAllocated}
+          />,
+          <EntitySSHKeys
+            key="confidentialInstance-ssh-keys"
+            sshKeys={mappedKeys}
+            onSSHKeyClick={handleSSHKeyClick}
+          />,
+          <EntityPayment
+            key="confidentialInstance-payment"
+            payments={paymentData}
+          />,
+        ]}
+        rightColumnElements={[
+          <EntityHostingCRN
+            key={'confidentialInstance-hosting-crn'}
+            nodeDetails={nodeDetails}
+            termsAndConditionsHash={
+              confidentialInstance?.requirements?.node?.terms_and_conditions
+            }
+          />,
+          <EntityConnectionMethods
+            key="confidentialInstance-connection-methods"
+            executableStatus={status}
+            sshForwardedPort={sshForwardedPort}
+          />,
+          immutableVolumes.length && (
+            <EntityLinkedVolumes
+              key="confidentialInstance-linked-volumes"
+              linkedVolumes={immutableVolumes}
+              onImmutableVolumeClick={handleImmutableVolumeClick}
+            />
+          ),
+          persistentVolumes.length && (
+            <EntityPersistentStorage
+              key="confidentialInstance-persistent-storage"
+              persistentVolumes={persistentVolumes}
+            />
+          ),
+          <EntityCustomDomains
+            key={'confidentialInstance-custom-domains'}
+            isLoadingCustomDomains={isLoadingCustomDomains}
+            customDomains={customDomains}
+            onCustomDomainClick={handleCustomDomainClick}
+            onAddDomain={handleAddDomain}
+          />,
+          <EntityPortForwarding
+            key="port-forwarding"
+            entityHash={confidentialInstance?.id}
+            executableStatus={status}
+            executableManager={confidentialInstanceManager}
+            ports={ports}
+            onPortsChange={handlePortsChange}
+          />,
+        ]}
+      />
 
       {/* Side Panel */}
       <SidePanel
@@ -221,7 +202,11 @@ export default function ManageConfidential() {
             ? 'Volume'
             : sidePanel.type === 'sshKey'
               ? 'SSH Key'
-              : 'Custom Domain'
+              : sidePanel.type === 'logs'
+                ? 'Logs'
+                : sidePanel.type === 'newDomain'
+                  ? 'New Custom Domain'
+                  : 'Custom Domain'
         }
         isOpen={sidePanel.isOpen}
         onClose={closeSidePanel}
@@ -238,6 +223,14 @@ export default function ManageConfidential() {
           sidePanel.selectedDomain && (
             <DomainDetail domainId={sidePanel.selectedDomain.id} />
           )
+        ) : sidePanel.type === 'logs' ? (
+          <EntityLogsContent logs={logs} />
+        ) : sidePanel.type === 'newDomain' ? (
+          <NewDomainForm
+            entityId={confidentialInstance?.id}
+            entityType={EntityDomainType.Confidential}
+            onSuccess={closeSidePanel}
+          />
         ) : (
           <>ERROR</>
         )}

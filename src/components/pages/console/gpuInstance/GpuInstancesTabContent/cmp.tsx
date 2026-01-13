@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { GpuInstancesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import {
@@ -8,9 +9,9 @@ import {
   humanReadableSize,
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
-import { GpuInstance } from '@/domain/gpuInstance'
 import { PaymentType } from '@aleph-sdk/message'
+import { Button, Icon } from '@aleph-front/core'
+import { GpuInstance } from '@/domain/gpuInstance'
 import ExternalLink from '@/components/common/ExternalLink'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 
@@ -19,6 +20,16 @@ export const GpuInstancesTabContent = React.memo(
     const isCredit = useCallback((row: GpuInstance) => {
       return row.payment?.type === PaymentType.credit
     }, [])
+
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (gpuInstance: GpuInstance) => {
+        if (!isCredit(gpuInstance)) return
+
+        router.push(`/console/computing/gpu-instance/${gpuInstance.id}`)
+      },
+      [isCredit, router],
+    )
 
     return (
       <>
@@ -30,8 +41,24 @@ export const GpuInstancesTabContent = React.memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 rowProps={(row) => ({
-                  css: isCredit(row) ? '' : tw`opacity-40`,
+                  css: isCredit(row) ? '' : tw`opacity-40 cursor-not-allowed!`,
+                  onClick: () => handleRowClick(row),
                 })}
+                rowTooltip={(row) => {
+                  if (isCredit(row)) return null
+
+                  return (
+                    <p>
+                      To manage this GPU instance, go to the{' '}
+                      <ExternalLink
+                        text="Legacy console App."
+                        color="main0"
+                        href={NAVIGATION_URLS.legacyConsole.computing.gpus.home}
+                      />
+                    </p>
+                  )
+                }}
+                clickableRows
                 data={data}
                 columns={[
                   {
@@ -77,33 +104,14 @@ export const GpuInstancesTabContent = React.memo(
                       const disabled = !isCredit(row)
 
                       return (
-                        <ButtonLink
+                        <Button
                           kind="functional"
                           variant="secondary"
-                          href={`/console/computing/gpu-instance/${row.id}`}
+                          onClick={() => handleRowClick(row)}
                           disabled={disabled}
-                          disabledMessage={
-                            disabled && (
-                              <p>
-                                To manage this GPU instance, go to the{' '}
-                                <ExternalLink
-                                  text="Legacy console App."
-                                  color="main0"
-                                  href={
-                                    NAVIGATION_URLS.legacyConsole.computing
-                                      .instances.home
-                                  }
-                                />
-                              </p>
-                            )
-                          }
-                          tooltipPosition={{
-                            my: 'bottom-right',
-                            at: 'bottom-center',
-                          }}
                         >
                           <Icon name="angle-right" size="lg" />
-                        </ButtonLink>
+                        </Button>
                       )
                     },
                     cellProps: () => ({

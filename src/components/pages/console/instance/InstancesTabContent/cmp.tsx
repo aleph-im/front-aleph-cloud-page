@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import tw from 'twin.macro'
+import { useRouter } from 'next/router'
 import { InstancesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import {
@@ -8,17 +9,27 @@ import {
   humanReadableSize,
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Icon } from '@aleph-front/core'
 import { PaymentType } from '@aleph-sdk/message'
+import { Button, Icon } from '@aleph-front/core'
+import { Instance } from '@/domain/instance'
 import ExternalLink from '@/components/common/ExternalLink'
 import { NAVIGATION_URLS } from '@/helpers/constants'
-import { Instance } from '@/domain/instance'
 
 export const InstancesTabContent = React.memo(
   ({ data }: InstancesTabContentProps) => {
     const isCredit = useCallback((row: Instance) => {
       return row.payment?.type === PaymentType.credit
     }, [])
+
+    const router = useRouter()
+    const handleRowClick = useCallback(
+      (instance: Instance) => {
+        if (!isCredit(instance)) return
+
+        router.push(`/console/computing/instance/${instance.id}`)
+      },
+      [isCredit, router],
+    )
 
     return (
       <>
@@ -30,8 +41,26 @@ export const InstancesTabContent = React.memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 rowProps={(row) => ({
-                  css: isCredit(row) ? '' : tw`opacity-40`,
+                  css: isCredit(row) ? '' : tw`opacity-40 cursor-not-allowed!`,
+                  onClick: () => handleRowClick(row),
                 })}
+                rowTooltip={(row) => {
+                  if (isCredit(row)) return null
+
+                  return (
+                    <p>
+                      To manage this instance, go to the{' '}
+                      <ExternalLink
+                        text="Legacy console App."
+                        color="main0"
+                        href={
+                          NAVIGATION_URLS.legacyConsole.computing.instances.home
+                        }
+                      />
+                    </p>
+                  )
+                }}
+                clickableRows
                 data={data}
                 columns={[
                   {
@@ -77,33 +106,14 @@ export const InstancesTabContent = React.memo(
                       const disabled = !isCredit(row)
 
                       return (
-                        <ButtonLink
+                        <Button
                           kind="functional"
                           variant="secondary"
-                          href={`/console/computing/instance/${row.id}`}
+                          onClick={() => handleRowClick(row)}
                           disabled={disabled}
-                          disabledMessage={
-                            disabled && (
-                              <p>
-                                To manage this instance, go to the{' '}
-                                <ExternalLink
-                                  text="Legacy console App."
-                                  color="main0"
-                                  href={
-                                    NAVIGATION_URLS.legacyConsole.computing
-                                      .instances.home
-                                  }
-                                />
-                              </p>
-                            )
-                          }
-                          tooltipPosition={{
-                            my: 'bottom-right',
-                            at: 'bottom-center',
-                          }}
                         >
                           <Icon name="angle-right" size="lg" />
-                        </ButtonLink>
+                        </Button>
                       )
                     },
                     cellProps: () => ({

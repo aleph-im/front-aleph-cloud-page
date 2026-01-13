@@ -258,6 +258,7 @@ export const NAVIGATION_URLS = {
       domain: {
         home: '/console/settings/domain',
         new: '/console/settings/domain/new',
+        detail: (id: string) => `/console/settings/domain/${id}`,
       },
     },
     web3Hosting: {

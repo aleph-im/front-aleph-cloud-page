@@ -81,10 +81,10 @@ export default function NewConfidentialPage() {
   return (
     <>
       <Head>
-        <title>Console | New Confidential | Aleph Cloud</title>
+        <title>Console | New TEE Instance | Aleph Cloud</title>
         <meta
           name="description"
-          content="Create a new confidential computing instance on Aleph Cloud"
+          content="Create a new TEE Instance on Aleph Cloud"
         />
       </Head>
       <BackButtonSection handleBack={handleBack} />
@@ -173,7 +173,7 @@ export default function NewConfidentialPage() {
                   <ExternalLink
                     href="https://github.com/aleph-im/aleph-vm/tree/main/examples/example_confidential_image"
                     color="main0"
-                    text="Aleph VM Examples - Confidential Image"
+                    text="Aleph VM Examples - TEE Image"
                   />
                 </p>
                 <CodeBlock
@@ -374,7 +374,7 @@ export default function NewConfidentialPage() {
           <ToggleContainer
             toggleTitle={
               <CompositeSectionTitle number={3}>
-                Create Confidential Instance
+                Create TEE Instance
               </CompositeSectionTitle>
             }
           >
@@ -411,7 +411,7 @@ export default function NewConfidentialPage() {
             href="/computing/confidential"
             animation="icon-to-right-on-hover"
           >
-            Check your Confidentials <Icon name="arrow-right" />
+            Check your TEE Instances <Icon name="arrow-right" />
           </Button>
         </CenteredContainer>
       </section>

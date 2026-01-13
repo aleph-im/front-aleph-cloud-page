@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { StyledSidePanelProps } from './types'
+import { StyledSidePanelProps, StyledFooterProps } from './types'
 import tw from 'twin.macro'
 
 export const StyledBackdrop = styled.div<StyledSidePanelProps>`
@@ -21,27 +21,67 @@ export const StyledBackdrop = styled.div<StyledSidePanelProps>`
 
 export const StyledHeader = styled.div`
   ${({ theme }) => css`
-    ${tw`sticky top-0 pt-10 pb-4`}
+    ${tw`top-0 pt-10 pb-4`}
 
     background: ${theme.color.background};
   `}
 `
 
-export const StyledSidePanel = styled.div<StyledSidePanelProps>`
+export const StyledContent = styled.div`
+  ${tw`p-12 pb-0 flex-1`}
+  overflow-y: auto;
+`
+
+export const StyledFooter = styled.div<StyledFooterProps>`
   ${({ theme, $isOpen }) => css`
-    position: absolute;
+    ${tw`fixed bottom-0 left-0 right-0 p-6`}
+
+    background: ${theme.color.background}99;
+    max-height: 5.375rem;
+
+    ${$isOpen &&
+    css`
+      animation: slideUp ${theme.transition.duration.normal}ms
+        ${theme.transition.timing} forwards;
+    `}
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  `}
+`
+
+export const StyledSidePanel = styled.div<StyledSidePanelProps>`
+  ${({
+    theme,
+    $isOpen,
+    $order = 0,
+    $width = '43rem',
+    $mobileHeight = '80vh',
+  }) => css`
+    position: fixed;
     background-color: ${theme.color.background};
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
     /* Desktop Styles */
     top: 1rem;
     right: 1rem;
     bottom: 1rem;
-    width: 50vw;
+    width: calc(${$width} - ${$order * 20}px);
 
     /* For sliding effect on desktop */
     transform: translateX(100%);
     transition: transform ${theme.transition.duration.normal}ms ease-in-out;
+    z-index: ${$order};
 
     ${$isOpen
       ? css`
@@ -56,8 +96,8 @@ export const StyledSidePanel = styled.div<StyledSidePanelProps>`
       top: auto;
       bottom: 0;
       left: 0.5rem;
-      right: 0.5rem;
-      height: 80vh;
+      right: 0.5 rem;
+      height: calc(${$mobileHeight} - ${$order * 20}px);
       width: initial;
       border-radius: 1.5rem 1.5rem 0 0;
 

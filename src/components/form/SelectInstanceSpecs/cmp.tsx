@@ -232,6 +232,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
           rowProps={handleRowProps}
           columns={columns}
           data={data}
+          clickableRows
         />
         {specsCtrl.fieldState.error && (
           <FormError error={specsCtrl.fieldState.error} />
