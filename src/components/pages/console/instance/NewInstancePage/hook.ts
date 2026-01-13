@@ -261,7 +261,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
           new EntityAddAction({ name: 'instance', entities: accountInstance }),
         )
 
-        await Router.replace('/console')
+        await Router.replace(
+          `/console/computing/instance/${accountInstance.id}`,
+        )
       } finally {
         await stop()
       }

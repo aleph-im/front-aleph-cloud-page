@@ -263,7 +263,9 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
           new EntityAddAction({ name: 'instance', entities: accountInstance }),
         )
 
-        await Router.replace('/console')
+        await Router.replace(
+          `/console/computing/gpu-instance/${accountInstance.id}`,
+        )
       } finally {
         await stop()
       }

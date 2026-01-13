@@ -108,7 +108,9 @@ export function useNewFunctionPage(): UseNewFunctionPage {
           new EntityAddAction({ name: 'program', entities: accountFunction }),
         )
 
-        await router.replace('/console')
+        await router.replace(
+          `/console/computing/function/${accountFunction.id}`,
+        )
       } finally {
         await stop()
       }

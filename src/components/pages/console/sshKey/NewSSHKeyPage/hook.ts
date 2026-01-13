@@ -68,7 +68,7 @@ export function useNewSSHKeyPage(): UseNewSSHKeyPageReturn {
 
         dispatch(new EntityAddAction({ name: 'ssh', entities: accountSSHKey }))
 
-        await router.replace(NAVIGATION_URLS.console.home)
+        await router.replace(`/console/settings/ssh/${accountSSHKey.id}`)
       } finally {
         await stop()
       }

@@ -75,7 +75,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
           new EntityAddAction({ name: 'volume', entities: accountVolume }),
         )
 
-        await router.replace(NAVIGATION_URLS.console.home)
+        await router.replace(`/console/storage/volume/${accountVolume.id}`)
       } finally {
         await stop()
       }
