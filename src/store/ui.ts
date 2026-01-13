@@ -2,10 +2,12 @@ import { StoreReducer } from './store'
 
 export type UIState = {
   isTopUpCreditsModalOpen: boolean
+  topUpCreditsMinimumBalance?: number
 }
 
 export const initialUIState: UIState = {
   isTopUpCreditsModalOpen: false,
+  topUpCreditsMinimumBalance: undefined,
 }
 
 export enum UIActionType {
@@ -15,7 +17,9 @@ export enum UIActionType {
 
 export type OpenTopUpCreditsModalAction = {
   type: UIActionType.OPEN_TOP_UP_CREDITS_MODAL
-  payload: undefined
+  payload: {
+    minimumBalance?: number
+  }
 }
 
 export type CloseTopUpCreditsModalAction = {
@@ -36,6 +40,7 @@ export function getUIReducer(): UIReducer {
         return {
           ...state,
           isTopUpCreditsModalOpen: true,
+          topUpCreditsMinimumBalance: action.payload.minimumBalance,
         }
       }
 
@@ -43,6 +48,7 @@ export function getUIReducer(): UIReducer {
         return {
           ...state,
           isTopUpCreditsModalOpen: false,
+          topUpCreditsMinimumBalance: undefined,
         }
       }
 
@@ -54,10 +60,14 @@ export function getUIReducer(): UIReducer {
 }
 
 // Action creators
-export function openTopUpCreditsModal(): OpenTopUpCreditsModalAction {
+export function openTopUpCreditsModal(
+  minimumBalance?: number,
+): OpenTopUpCreditsModalAction {
   return {
     type: UIActionType.OPEN_TOP_UP_CREDITS_MODAL,
-    payload: undefined,
+    payload: {
+      minimumBalance,
+    },
   }
 }
 

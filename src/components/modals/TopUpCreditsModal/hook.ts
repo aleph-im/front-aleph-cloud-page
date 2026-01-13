@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useEffect, useState } from 'react'
 import { useDebounceState, useLocalRequest } from '@aleph-front/core'
 import { useForm } from '@/hooks/common/useForm'
 import { useController, useWatch } from 'react-hook-form'
@@ -33,9 +33,12 @@ export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
 
   const isOpen = state.ui.isTopUpCreditsModalOpen
 
-  const handleOpen = useCallback(() => {
-    dispatch(openTopUpCreditsModal())
-  }, [dispatch])
+  const handleOpen = useCallback(
+    (minimumBalance?: number) => {
+      dispatch(openTopUpCreditsModal(minimumBalance))
+    },
+    [dispatch],
+  )
 
   const handleClose = useCallback(() => {
     dispatch(closeTopUpCreditsModal())
@@ -49,8 +52,55 @@ export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
 }
 
 export function useTopUpCreditsModalForm(): UseTopUpCreditsModalFormReturn {
+  const [appState] = useAppState()
   const creditManager = useCreditManager()
   const { next, stop } = useCheckoutNotification({})
+  const [initialAmount, setInitialAmount] = useState(defaultValues.amount)
+  const [isCalculatingInitialAmount, setIsCalculatingInitialAmount] =
+    useState(false)
+
+  // Calculate initial token amount based on minimum credit requirement
+  useEffect(() => {
+    const calculateInitialAmount = async () => {
+      if (!creditManager || !appState.ui.topUpCreditsMinimumBalance) {
+        setInitialAmount(defaultValues.amount)
+        return
+      }
+
+      setIsCalculatingInitialAmount(true)
+      try {
+        // Calculate the required token amount for the minimum credits needed
+        const minimumCreditsNeeded = appState.ui.topUpCreditsMinimumBalance
+
+        const estimation = await creditManager.getCreditToTokenEstimation(
+          minimumCreditsNeeded,
+          defaultValues.chain,
+          defaultValues.currency,
+        )
+
+        // Convert token amount from wei to whole tokens
+        // tokenAmount is in wei (18 decimals), convert to whole tokens
+        const tokenAmountInWei = BigInt(estimation.tokenAmount)
+        const tokensNeeded = Number(tokenAmountInWei / BigInt(10 ** 18))
+
+        // Round up and ensure minimum of 100
+        const finalAmount = Math.max(Math.ceil(tokensNeeded), 100)
+        setInitialAmount(finalAmount)
+      } catch (error) {
+        console.error('Error calculating initial token amount:', error)
+        // Fallback to a conservative estimate if API fails
+        const fallbackAmount = Math.max(
+          Math.ceil(appState.ui.topUpCreditsMinimumBalance),
+          100,
+        )
+        setInitialAmount(fallbackAmount)
+      } finally {
+        setIsCalculatingInitialAmount(false)
+      }
+    }
+
+    calculateInitialAmount()
+  }, [creditManager, appState.ui.topUpCreditsMinimumBalance])
 
   const onSubmit = useCallback(
     async (state: TopUpCreditsFormData) => {
@@ -86,12 +136,21 @@ export function useTopUpCreditsModalForm(): UseTopUpCreditsModalFormReturn {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
     requestState: { loading: isSubmitLoading },
   } = useForm({
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      amount: initialAmount,
+    },
     onSubmit,
     resolver: zodResolver(topUpCreditsSchema),
   })
+
+  // Update form value when initial amount is calculated
+  useEffect(() => {
+    setValue('amount', initialAmount)
+  }, [initialAmount, setValue])
 
   // @note: don't use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as TopUpCreditsFormData
@@ -153,5 +212,6 @@ export function useTopUpCreditsModalForm(): UseTopUpCreditsModalFormReturn {
     totalBalance,
     isLoadingEstimation,
     isSubmitLoading,
+    isCalculatingInitialAmount,
   }
 }

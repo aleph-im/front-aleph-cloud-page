@@ -67,7 +67,20 @@ export const TopUpCreditsModal = () => {
         />
       ),
     })
-  }, [modalOpen, isOpen, handleSubmit, values, errors, bonus, totalBalance])
+  }, [
+    modalOpen,
+    isOpen,
+    handleClose,
+    handleSubmit,
+    values,
+    errors,
+    amountCtrl,
+    currencyCtrl,
+    bonus,
+    totalBalance,
+    isLoadingEstimation,
+    isSubmitLoading,
+  ])
 
   return null
 }
@@ -251,6 +264,7 @@ const TopUpCreditsModalContent = memo(
     )
   },
 )
+TopUpCreditsModalContent.displayName = 'TopUpCreditsModalContent'
 
 const TopUpCreditsModalHeader = memo(() => {
   return (
@@ -265,6 +279,7 @@ const TopUpCreditsModalHeader = memo(() => {
     </div>
   )
 })
+TopUpCreditsModalHeader.displayName = 'TopUpCreditsModalHeader'
 
 type TopUpCreditsModalFooterProps = Pick<
   UseTopUpCreditsModalFormReturn,
@@ -291,3 +306,4 @@ const TopUpCreditsModalFooter = memo(
     )
   },
 )
+TopUpCreditsModalFooter.displayName = 'TopUpCreditsModalFooter'

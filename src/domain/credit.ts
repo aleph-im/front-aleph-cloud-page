@@ -10,13 +10,16 @@ import {
   PaymentChain,
   TokenEstimationRequest,
   TokenEstimationResponse,
+  CreditEstimationRequest,
+  CreditEstimationResponse,
 } from '@/helpers/schemas/credit'
 import { withRetry } from '@/helpers/utils'
 
 // const ALEPH_CREDIT_API_URL = 'http://localhost:8080/api/v0'
 const ALEPH_CREDIT_API_URL = 'https://credit.aleph.im/api/v0'
 const ALEPH_CREDIT_PAYMENT_ENDPOINT = `${ALEPH_CREDIT_API_URL}/payment`
-const ALEPH_CREDIT_ESTIMATION_ENDPOINT = `${ALEPH_CREDIT_API_URL}/estimation/token-to-credit`
+const ALEPH_CREDIT_TOKEN_TO_CREDIT_ENDPOINT = `${ALEPH_CREDIT_API_URL}/estimation/token-to-credit`
+const ALEPH_CREDIT_CREDIT_TO_TOKEN_ENDPOINT = `${ALEPH_CREDIT_API_URL}/estimation/credit-to-token`
 export const ALEPH_CREDIT_SENDER = '0x6aeaEEb08720DEc9d6dae1A8fc49344Dd99391Ac'
 
 export enum PaymentStatus {
@@ -251,7 +254,7 @@ export class CreditManager {
     }
 
     try {
-      const response = await fetch(ALEPH_CREDIT_ESTIMATION_ENDPOINT, {
+      const response = await fetch(ALEPH_CREDIT_TOKEN_TO_CREDIT_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -273,6 +276,44 @@ export class CreditManager {
     } catch (error) {
       console.error('Error fetching token estimation:', error)
       throw new Error('Failed to fetch token estimation')
+    }
+  }
+
+  // Credit to token estimation functionality
+  async getCreditToTokenEstimation(
+    creditAmount: number,
+    chain: PaymentChain,
+    currency: PaymentCurrency,
+  ): Promise<CreditEstimationResponse> {
+    const estimationRequest: CreditEstimationRequest = {
+      blockchain: chain,
+      token: currency,
+      creditAmount,
+    }
+
+    try {
+      const response = await fetch(ALEPH_CREDIT_CREDIT_TO_TOKEN_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(estimationRequest),
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch((e) => e)
+
+        if (error.description) {
+          throw new Error(`${error.description}`)
+        }
+
+        throw new Error(`API error: ${response.status} ${response.statusText}`)
+      }
+
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching credit to token estimation:', error)
+      throw new Error('Failed to fetch credit to token estimation')
     }
   }
 

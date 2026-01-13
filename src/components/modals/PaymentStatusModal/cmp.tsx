@@ -53,7 +53,9 @@ export const PaymentStatusModalContent = ({
     return `${txHash.slice(0, 20)}...${txHash.slice(-20)}`
   }
 
-  const showWarning = payment.status !== PaymentStatus.Completed && Date.now() > (payment.createdAt + (60 * 1000))
+  const showWarning =
+    payment.status !== PaymentStatus.Completed &&
+    Date.now() > payment.createdAt + 60 * 1000
 
   return (
     <>
@@ -85,7 +87,7 @@ export const PaymentStatusModalContent = ({
                       item_hash: payment.itemHash,
                       chain: Blockchain.ETH,
                       sender: ALEPH_CREDIT_SENDER,
-                      type: 'POST'
+                      type: 'POST',
                     } as any)}
                     target="_blank"
                     rel="noopener noreferrer"

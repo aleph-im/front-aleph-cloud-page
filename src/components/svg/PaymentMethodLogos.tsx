@@ -1,6 +1,6 @@
 import { memo } from 'react'
 
-export const PaymentMethodLogos = memo(() => {
+const PaymentMethodLogosComponent = () => {
   return (
     <svg
       width="137"
@@ -155,6 +155,9 @@ export const PaymentMethodLogos = memo(() => {
       </defs>
     </svg>
   )
-})
+}
+
+export const PaymentMethodLogos = memo(PaymentMethodLogosComponent)
+PaymentMethodLogos.displayName = 'PaymentMethodLogos'
 
 export default PaymentMethodLogos

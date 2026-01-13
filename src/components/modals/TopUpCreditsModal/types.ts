@@ -4,7 +4,7 @@ import { TopUpCreditsFormData } from '@/helpers/schemas/credit'
 
 export type UseTopUpCreditsModalReturn = {
   isOpen: boolean
-  handleOpen: () => void
+  handleOpen: (minimumBalance?: number) => void
   handleClose: () => void
 }
 
@@ -20,4 +20,5 @@ export type UseTopUpCreditsModalFormReturn = {
   totalBalance: number
   isLoadingEstimation: boolean
   isSubmitLoading: boolean
+  isCalculatingInitialAmount: boolean
 }

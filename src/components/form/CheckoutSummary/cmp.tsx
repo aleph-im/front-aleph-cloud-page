@@ -290,7 +290,7 @@ export const CheckoutSummary = ({
                       <Price
                         type="credit"
                         value={
-                          cost?.cost?.cost ? cost.cost.cost * 4 : undefined
+                          cost?.cost?.cost ? cost.cost.cost * 24 : undefined
                         }
                         loading={cost.loading}
                       />

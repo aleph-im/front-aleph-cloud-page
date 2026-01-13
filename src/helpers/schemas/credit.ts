@@ -43,3 +43,19 @@ export type TokenEstimationResponse = {
   bonusRatio: number
   timestamp: number
 }
+
+export type CreditEstimationRequest = {
+  blockchain: string
+  token: string
+  creditAmount: number
+}
+
+export type CreditEstimationResponse = {
+  tokenAmount: string
+  tokenSymbol: string
+  creditAmount: number
+  creditBonusAmount: number
+  price: number
+  bonusRatio: number
+  timestamp: number
+}
