@@ -55,7 +55,7 @@ export const EntityLinkedRuntime = ({
                   {loading ? (
                     <Skeleton width="12rem" />
                   ) : (
-                    comment ?? ellipseText(runtimeVolumeId, 6, 12)
+                    (comment ?? ellipseText(runtimeVolumeId, 6, 12))
                   )}
                 </div>
               </div>
