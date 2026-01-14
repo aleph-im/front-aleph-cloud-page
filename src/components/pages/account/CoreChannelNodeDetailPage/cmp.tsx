@@ -136,7 +136,7 @@ export const CoreChannelNodeDetailPage = () => {
             <div tw="flex flex-wrap gap-9">
               <div tw="flex-1 w-1/3 min-w-[20rem] flex flex-col gap-9">
                 <Card2 title="GENERAL INFO">
-                  <NodeDetailStatus status={node?.status} />
+                  <NodeDetailStatus status={node?.status} score={node?.score} />
                   <Card2Field name="NAME" value={node?.name} />
                   <Card2Field name="ASN" value={node?.metricsData?.as_name} />
                   <Card2Field
