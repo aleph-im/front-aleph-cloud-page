@@ -97,7 +97,7 @@ export function useNodeDetail<N extends AlephNode>({
   const baseLatency = useMemo(
     () =>
       base_latency
-        ? `${Number((base_latency || 0) * 100).toFixed(2)} %`
+        ? `${Number((base_latency || 0) * 1000).toFixed(0)} ms`
         : undefined,
     [base_latency],
   )

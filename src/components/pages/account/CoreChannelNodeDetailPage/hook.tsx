@@ -68,7 +68,7 @@ export function useCoreChannelNodeDetailPage(): UseCoreChannelNodeDetailPageRetu
   const aggregateLatency = useMemo(
     () =>
       aggregate_latency
-        ? `${Number((aggregate_latency || 0) * 100).toFixed(2)} %`
+        ? `${Number((aggregate_latency || 0) * 1000).toFixed(0)} ms`
         : undefined,
     [aggregate_latency],
   )
@@ -76,7 +76,7 @@ export function useCoreChannelNodeDetailPage(): UseCoreChannelNodeDetailPageRetu
   const fileDownloadLatency = useMemo(
     () =>
       file_download_latency
-        ? `${Number((file_download_latency || 0) * 100).toFixed(2)} %`
+        ? `${Number((file_download_latency || 0) * 1000).toFixed(0)} ms`
         : undefined,
     [file_download_latency],
   )
@@ -84,7 +84,7 @@ export function useCoreChannelNodeDetailPage(): UseCoreChannelNodeDetailPageRetu
   const metricsLatency = useMemo(
     () =>
       metrics_latency
-        ? `${Number((metrics_latency || 0) * 100).toFixed(2)} %`
+        ? `${Number((metrics_latency || 0) * 1000).toFixed(0)} ms`
         : undefined,
     [metrics_latency],
   )
