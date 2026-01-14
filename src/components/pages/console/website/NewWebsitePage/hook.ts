@@ -5,7 +5,7 @@ import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { useAppState } from '@/contexts/appState'
 import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 import { AddWebsite, WebsiteManager, WebsitePayment } from '@/domain/website'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import { EntityType, NAVIGATION_URLS, PaymentMethod } from '@/helpers/constants'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
@@ -100,7 +100,9 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
           new EntityAddAction({ name: 'website', entities: accountWebsite }),
         )
 
-        await router.replace('/console')
+        await router.replace(
+          NAVIGATION_URLS.console.web3Hosting.website.detail(accountWebsite.id),
+        )
       } finally {
         await stop()
       }
