@@ -119,7 +119,7 @@ export default function CreditsDashboard() {
                   kind="flat"
                   tw="bg-white!"
                   disabled={!isConnected}
-                  onClick={handleOpen}
+                  onClick={() => handleOpen()}
                 >
                   Top-up Balance
                   <Icon name="credit-card" />
