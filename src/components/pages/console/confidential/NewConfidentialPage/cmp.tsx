@@ -8,6 +8,7 @@ import {
   Button,
   FileInput,
   Icon,
+  Tooltip,
   useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -19,7 +20,6 @@ import {
 } from './styles'
 import IconText from '@/components/common/IconText'
 import { useNewConfidentialPage } from './hook'
-import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
 import NewEntityTab from '@/components/common/NewEntityTab'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 
@@ -339,7 +339,7 @@ export default function NewConfidentialPage() {
                       </Button>
                     </div>
                     {disabledUploadEncryptedDiskImage && (
-                      <ResponsiveTooltip
+                      <Tooltip
                         my="bottom-left"
                         at="top-right"
                         targetRef={uploadEncryptedDiskImageButtonRef}

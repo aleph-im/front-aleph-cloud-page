@@ -434,10 +434,16 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
           // Duplicate buttons to have different references for the tooltip on each one
           button={
             <CheckoutButton
-              disabled={createInstanceDisabled}
+              disabled={
+                createInstanceDisabled &&
+                createInstanceButtonTitle !== 'Add balance'
+              }
               title={createInstanceButtonTitle}
               isFooter={false}
-              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
+              shouldRequestTermsAndConditions={
+                shouldRequestTermsAndConditions &&
+                createInstanceButtonTitle !== 'Add balance'
+              }
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement
               }

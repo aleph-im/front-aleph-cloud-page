@@ -57,6 +57,7 @@ import { useDefaultTiers } from '@/hooks/common/pricing/useDefaultTiers'
 import { useRequestCRNLastVersion } from '@/hooks/common/useRequestEntity/useRequestCRNLastVersion'
 import usePrevious from '@/hooks/common/usePrevious'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
+import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -118,6 +119,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const modal = useModal()
   const modalOpen = modal?.open
   const modalClose = modal?.close
+
+  const { handleOpen: handleOpenTopUpModal } = useTopUpCreditsModal()
 
   const router = useRouter()
   const { crn: queryCRN } = router.query
@@ -327,7 +330,24 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     accountCreditBalance,
   })
 
-  // Checks if user can afford with current balance
+  // Calculate minimum balance needed for 24 hours of runtime
+  const minimumBalanceNeeded = useMemo(() => {
+    if (!cost?.cost?.cost) return 0
+    return cost.cost.cost * 24 // 24 hours minimum
+  }, [cost?.cost?.cost])
+
+  // Check if user has enough balance for at least 24 hours
+  const hasEnoughBalanceForOneDay = useMemo(() => {
+    return accountCreditBalance >= minimumBalanceNeeded
+  }, [accountCreditBalance, minimumBalanceNeeded])
+
+  // Calculate the amount needed to top up (if insufficient)
+  const topUpAmount = useMemo(() => {
+    if (hasEnoughBalanceForOneDay) return 0
+    return minimumBalanceNeeded - accountCreditBalance
+  }, [hasEnoughBalanceForOneDay, minimumBalanceNeeded, accountCreditBalance])
+
+  // Checks if user can afford with current balance (4 hours as before)
   const hasEnoughBalance = useMemo(() => {
     if (!account) return false
     if (!isCreateButtonDisabled) return true
@@ -337,10 +357,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const createInstanceButtonTitle: UseNewInstancePageReturn['createInstanceButtonTitle'] =
     useMemo(() => {
       if (!account) return 'Connect'
+      if (!hasEnoughBalanceForOneDay) return 'Add balance'
       if (!hasEnoughBalance) return 'Insufficient Credits'
 
       return 'Create instance'
-    }, [account, hasEnoughBalance])
+    }, [account, hasEnoughBalanceForOneDay, hasEnoughBalance])
 
   const createInstanceDisabled = useMemo(() => {
     return createInstanceButtonTitle !== 'Create instance'
@@ -393,6 +414,24 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const handleBack = () => {
     router.push('.')
   }
+
+  // Handle submit - either create instance or open top-up modal
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      if (createInstanceButtonTitle === 'Add balance') {
+        e.preventDefault()
+        handleOpenTopUpModal(topUpAmount)
+        return Promise.resolve()
+      }
+      return handleSubmit(e)
+    },
+    [
+      createInstanceButtonTitle,
+      handleOpenTopUpModal,
+      topUpAmount,
+      handleSubmit,
+    ],
+  )
 
   // -------------------------
   // Effects
@@ -453,7 +492,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     modalClose,
     handleManuallySelectCRN,
     handleSelectNode,
-    handleSubmit,
+    handleSubmit: handleFormSubmit,
     handleCloseModal,
     handleBack,
     handleRequestTermsAndConditionsAgreement,

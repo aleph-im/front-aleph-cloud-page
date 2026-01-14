@@ -441,10 +441,16 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           }
           button={
             <CheckoutButton
-              disabled={createInstanceDisabled}
+              disabled={
+                createInstanceDisabled &&
+                createInstanceButtonTitle !== 'Add balance'
+              }
               title={createInstanceButtonTitle}
               isFooter={false}
-              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
+              shouldRequestTermsAndConditions={
+                shouldRequestTermsAndConditions &&
+                createInstanceButtonTitle !== 'Add balance'
+              }
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement
               }

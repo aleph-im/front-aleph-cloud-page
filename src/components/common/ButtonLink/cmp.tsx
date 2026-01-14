@@ -1,8 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@aleph-front/core'
+import { Button, Tooltip } from '@aleph-front/core'
 import { ButtonLinkProps } from './types'
-import ResponsiveTooltip from '../ResponsiveTooltip'
 
 /**
  * A wrapper for the nextjs links that are styled as buttons
@@ -53,7 +52,7 @@ export const ButtonLink = ({
     <span>
       {buttonNode}
       {renderTooltip && disabledMessage && (
-        <ResponsiveTooltip
+        <Tooltip
           my={tooltipPosition?.my || 'bottom-center'}
           at={tooltipPosition?.at || 'top-right'}
           targetRef={targetRef}

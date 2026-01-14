@@ -23,6 +23,7 @@ import { Account } from '@aleph-sdk/account'
 import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { blockchains } from '@/domain/connect'
+import BN from 'bn.js'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -804,4 +805,79 @@ export async function consumeIterator<S, R>(
   }
 
   return result
+}
+
+export type RetryOptions = {
+  attempts: number
+  delay: number
+}
+
+/**
+ * Generic retry utility that executes an async function with retry logic
+ *
+ * @param fn - The async function to execute with retry logic
+ * @param options - Retry configuration with attempts and delay
+ * @returns Promise that resolves with the function result or rejects with the last error
+ */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  { attempts = 5, delay = 1000 }: RetryOptions = { attempts: 5, delay: 1000 },
+): Promise<T> {
+  let lastError: Error = new Error('Unknown error')
+
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error as Error
+
+      // Don't sleep after the last attempt
+      if (i < attempts - 1) {
+        await sleep(delay)
+      }
+    }
+  }
+
+  throw lastError
+}
+
+/**
+ * Formats payment amounts for display, handling token decimal conversion
+ * ALEPH and USDC tokens have 18 decimals that need to be converted to human-readable format
+ * Uses BN.js for precise decimal handling, reversing the conversion done in getTokenToCreditsEstimation
+ *
+ * @param amount - The raw amount from the API (with 18 decimals for ALEPH/USDC)
+ * @param asset - The asset type (ALEPH, USDC, etc.)
+ * @param decimals - Number of decimal places to show (default: 6)
+ * @returns Formatted amount string
+ */
+export function formatPaymentAmount(
+  amount: number | string,
+  asset: string,
+  decimals = 6,
+): string {
+  if (!amount || amount === 0) return '0'
+
+  // ALEPH and USDC have 18 decimals
+  const isTokenWith18Decimals = ['ALEPH', 'USDC'].includes(asset.toUpperCase())
+
+  if (isTokenWith18Decimals) {
+    // Convert from 18-decimal precision back to regular number using BN
+    // This reverses: amount.mul(new BN('1000000000000000000'))
+    const amountBN = new BN(amount.toString())
+    const divisor = new BN('1000000000000000000') // 10^18
+    const convertedAmount = amountBN.div(divisor)
+
+    // Handle remainder for decimal places
+    const remainder = amountBN.mod(divisor)
+    const decimalPart = remainder.toString().padStart(18, '0')
+    const trimmedDecimal = decimalPart.substring(0, decimals).replace(/0+$/, '')
+
+    const wholePart = convertedAmount.toString()
+    return trimmedDecimal ? `${wholePart}.${trimmedDecimal}` : wholePart
+  }
+
+  // For other assets, format as is
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
+  return numAmount.toFixed(decimals).replace(/\.?0+$/, '')
 }
