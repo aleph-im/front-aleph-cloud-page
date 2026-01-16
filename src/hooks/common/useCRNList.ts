@@ -213,7 +213,11 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
         }
       }
 
-      if (!nodeSpecs?.ipv6_check?.vm) {
+      // @todo: TEMPORARY PATCH - Remove the `result` check once backend fixes
+      // the ipv6_check format issue. The backend is currently returning `result`
+      // instead of `vm` in some cases. Keep both checks to ensure compatibility
+      // when the backend fix is deployed.
+      if (!nodeSpecs?.ipv6_check?.vm && !nodeSpecs?.ipv6_check?.result) {
         ac[node.hash] = StreamNotSupportedIssue.IPV6
         return ac
       }
