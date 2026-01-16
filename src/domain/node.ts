@@ -312,6 +312,8 @@ export type Specs = {
   ipv6_check?: {
     host: boolean
     vm: boolean
+    // @todo: TEMPORARY - Remove `result` once backend fixes the ipv6_check format
+    result?: boolean
   }
   selectedGpu?: GPUDevice
 }
