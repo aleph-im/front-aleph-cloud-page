@@ -5,7 +5,16 @@ on:
   push:
     branches:
       - release/**
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      frontend:
+        description: 'Which frontend to deploy'
+        required: true
+        default: '' # empty by default -> forces manual selection
+        type: choice
+        options:
+          - legacy
+          - credits
 
 jobs:
   build:
@@ -48,6 +57,57 @@ jobs:
         uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.1
         with:
           upload-dir: out
+
+  deploy-app:
+    name: Deploy to production
+    needs: push-to-ipfs
+    runs-on: ubuntu-latest
+    environment: production
+    if: ${{ inputs.frontend != '' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          pip install -r scripts/deploy/requirements.txt
+        shell: bash
+
+      - name: Deploy to Aleph
+        env:
+          FRONTEND: ${{ inputs.frontend }}
+        run: |
+          set -euo pipefail
+          # Determine app based on selected frontend
+          case "${FRONTEND}" in
+            legacy)
+              APP="${{ vars.DEPLOY_APP }}"
+              ;;
+            credits)
+              APP="${{ vars.DEPLOY_CREDITS_APP }}"
+              ;;
+            '')
+              echo "Error: You must select a frontend (legacy or credits) before running."
+              exit 1
+              ;;
+            *)
+              echo "Error: Invalid frontend '${FRONTEND}'. Valid options: legacy, credits."
+              exit 1
+              ;;
+          esac
+
+          python scripts/deploy/client.py \
+            --cid ${{ needs.push-to-ipfs.outputs.cid_v0 }} \
+            --app "${APP}" \
+            --url ${{ vars.DEPLOY_URL }} \
+            --key ${{ secrets.DEPLOY_PRIVATE_KEY }}
 
   preview:
     name: Build preview url
