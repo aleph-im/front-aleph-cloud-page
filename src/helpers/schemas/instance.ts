@@ -83,10 +83,13 @@ export const nodeSpecsSchema = z.object({
   gpu_support: z.boolean().optional().nullable(),
   confidential_support: z.boolean().optional(),
   qemu_support: z.boolean().optional(),
+  // @todo: TEMPORARY - Remove `result` once backend fixes the ipv6_check format
+  // The backend is returning `result` instead of `vm` in some cases
   ipv6_check: z
     .object({
-      host: z.boolean(),
-      vm: z.boolean(),
+      host: z.boolean().optional(),
+      vm: z.boolean().optional(),
+      result: z.boolean().optional(),
     })
     .optional(),
   version: z.string().optional(),
