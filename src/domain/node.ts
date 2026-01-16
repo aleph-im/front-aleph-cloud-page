@@ -309,10 +309,11 @@ export type Specs = {
   gpu_support?: boolean | null
   confidential_support?: boolean
   qemu_support?: boolean
+  // @todo: TEMPORARY - Remove `result` and revert `vm`/`host` to required once
+  // backend fixes the ipv6_check format. Backend returns `result` instead of `vm`
   ipv6_check?: {
-    host: boolean
-    vm: boolean
-    // @todo: TEMPORARY - Remove `result` once backend fixes the ipv6_check format
+    host?: boolean
+    vm?: boolean
     result?: boolean
   }
   selectedGpu?: GPUDevice
