@@ -8,7 +8,7 @@ const PortItem = React.memo((props: UsePortItemProps) => {
   const { portCtrl, tcpCtrl, udpCtrl, handleRemove } = usePortItem(props)
 
   return (
-    <div tw="flex gap-4 items-center flex-wrap">
+    <div tw="flex gap-6 items-center flex-wrap">
       <div tw="flex flex-col gap-3">
         <Text>Port</Text>
         <TextInput
@@ -48,7 +48,7 @@ export const AddPortForm = ({ onSubmit, onCancel }: AddPortFormProps) => {
     useAddPortForm({ onSubmit, onCancel })
 
   return (
-    <form onSubmit={handleSubmit} tw="mt-2">
+    <form onSubmit={handleSubmit} tw="flex flex-col gap-y-4">
       {fields.map((field, index) => (
         <PortItem
           key={field.id}
