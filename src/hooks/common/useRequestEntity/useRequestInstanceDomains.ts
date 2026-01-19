@@ -12,7 +12,10 @@ export type UseRequestInstanceDomainsProps = Omit<
   'name'
 >
 
-export type UseRequestInstanceDomainsReturn = UseRequestEntitiesReturn<Domain>
+export type UseRequestInstanceDomainsReturn = Omit<
+  UseRequestEntitiesReturn<Domain>,
+  'refetch'
+>
 
 export function useRequestInstanceDomains(
   props: UseRequestInstanceDomainsProps = {},

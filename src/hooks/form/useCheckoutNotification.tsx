@@ -185,4 +185,13 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content:
         'By signing this, you confirm the deletion of your port forwarding configuration.',
     },
+    permissions: {
+      title: 'Sign Permissions Creation',
+      content:
+        'By signing this, you confirm the creation of new permissions for delegated access control.',
+    },
+    permissionsDel: {
+      title: 'Sign Permissions Deletion',
+      content: 'By signing this, you confirm the deletion of your permissions.',
+    },
   }
