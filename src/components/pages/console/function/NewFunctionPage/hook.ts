@@ -22,7 +22,7 @@ import {
   UseEntityCostReturn,
   UseProgramCostProps,
 } from '@/hooks/common/useEntityCost'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import { EntityType, NAVIGATION_URLS, PaymentMethod } from '@/helpers/constants'
 import {
   stepsCatalog,
   useCheckoutNotification,
@@ -108,7 +108,11 @@ export function useNewFunctionPage(): UseNewFunctionPage {
           new EntityAddAction({ name: 'program', entities: accountFunction }),
         )
 
-        await router.replace('/console')
+        await router.replace(
+          NAVIGATION_URLS.console.computing.functions.detail(
+            accountFunction.id,
+          ),
+        )
       } finally {
         await stop()
       }
