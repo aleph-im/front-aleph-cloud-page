@@ -190,4 +190,13 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content:
         'By signing this transaction, you confirm the payment for your credit top-up. This will transfer the specified amount from your wallet.',
     },
+    permissions: {
+      title: 'Sign Permissions Creation',
+      content:
+        'By signing this, you confirm the creation of new permissions for delegated access control.',
+    },
+    permissionsDel: {
+      title: 'Sign Permissions Deletion',
+      content: 'By signing this, you confirm the deletion of your permissions.',
+    },
   }

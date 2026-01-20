@@ -69,10 +69,14 @@ export function useRoutes(): UseRoutesReturn {
                 exact: true,
                 icon: 'dashboard',
               },
+              // {
+              //   name: 'Permissions',
+              //   href: NAVIGATION_URLS.console.permissions.home,
+              //   icon: 'settings', // @todo: Change icon
+              // },
               {
                 name: 'Settings',
                 href: NAVIGATION_URLS.console.settings.home,
-                exact: true,
                 icon: 'settings',
               },
               {

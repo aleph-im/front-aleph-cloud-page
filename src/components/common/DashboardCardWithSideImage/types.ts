@@ -1,7 +1,9 @@
+import { ReactNode } from 'react'
+
 export type DashboardCardWithSideImageProps = {
   info: string
   title: string
-  description: string
+  description: ReactNode
   imageSrc: string
   imageAlt: string
   withButton?: boolean

@@ -28,7 +28,7 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { AddInstance, InstanceManager } from '@/domain/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import { EntityType, NAVIGATION_URLS, PaymentMethod } from '@/helpers/constants'
 import {
   useEntityCost,
   UseEntityCostReturn,
@@ -220,7 +220,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
           new EntityAddAction({ name: 'instance', entities: accountInstance }),
         )
 
-        await Router.replace('/console')
+        await Router.replace(
+          NAVIGATION_URLS.console.computing.instances.detail(
+            accountInstance.id,
+          ),
+        )
       } finally {
         await stop()
       }
