@@ -82,7 +82,7 @@ export const EntityPortForwarding = ({
             ({ source, destination, tcp, udp, isDeletable, isRemoving }) => (
               <div
                 key={`port-${source}`}
-                tw="flex gap-4 items-center flex-wrap"
+                tw="flex gap-x-6 gap-y-1 items-center flex-wrap"
               >
                 <div tw="flex gap-4 items-center">
                   <div tw="flex flex-col gap-3">
@@ -116,7 +116,7 @@ export const EntityPortForwarding = ({
                     />
                   </div>
                 </div>
-                <div tw="flex gap-4 items-center">
+                <div tw="flex gap-6 items-center">
                   <div tw="flex flex-col gap-3">
                     <Text>TCP</Text>
                     <Checkbox disabled checked={tcp} />

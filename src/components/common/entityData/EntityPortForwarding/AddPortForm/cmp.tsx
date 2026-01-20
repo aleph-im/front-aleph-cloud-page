@@ -4,56 +4,51 @@ import { Text } from '@/components/pages/console/common'
 import { AddPortFormProps } from './types'
 import { useAddPortForm, usePortItem, UsePortItemProps } from './hook'
 
-const PortItem = React.memo(
-  (props: UsePortItemProps & { disabled?: boolean }) => {
-    const { portCtrl, tcpCtrl, udpCtrl, handleRemove } = usePortItem(props)
+const PortItem = React.memo((props: UsePortItemProps) => {
+  const { portCtrl, tcpCtrl, udpCtrl, handleRemove } = usePortItem(props)
 
-    return (
-      <div tw="mt-2 px-4 py-3 w-fit" className="bg-background">
-        <div tw="flex gap-4 items-center">
-          <div tw="flex flex-col gap-3">
-            <Text>Port</Text>
-            <TextInput
-              {...portCtrl.field}
-              {...portCtrl.fieldState}
-              placeholder="8080"
-              required
-              width="6em"
-              textAlign="center"
-            />
-          </div>
-          <div tw="flex flex-col gap-3">
-            <Text>TCP</Text>
-            <Checkbox {...tcpCtrl.field} {...tcpCtrl.fieldState} />
-          </div>
-          <div tw="flex flex-col gap-3">
-            <Text>UDP</Text>
-            <Checkbox {...udpCtrl.field} {...udpCtrl.fieldState} />
-          </div>
-          <div tw="self-end mb-1">
-            <Button
-              type="button"
-              variant="warning"
-              kind="functional"
-              onClick={handleRemove}
-              disabled={props.disabled}
-            >
-              <Icon name="trash-xmark" />
-            </Button>
-          </div>
-        </div>
+  return (
+    <div tw="flex gap-6 items-center flex-wrap">
+      <div tw="flex flex-col gap-3">
+        <Text>Port</Text>
+        <TextInput
+          {...portCtrl.field}
+          {...portCtrl.fieldState}
+          placeholder="8080"
+          required
+          width="6em"
+          textAlign="center"
+        />
       </div>
-    )
-  },
-)
+      <div tw="flex flex-col gap-3">
+        <Text>TCP</Text>
+        <Checkbox {...tcpCtrl.field} {...tcpCtrl.fieldState} />
+      </div>
+      <div tw="flex flex-col gap-3">
+        <Text>UDP</Text>
+        <Checkbox {...udpCtrl.field} {...udpCtrl.fieldState} />
+      </div>
+      <div tw="self-end">
+        <Button
+          type="button"
+          variant="warning"
+          kind="functional"
+          onClick={handleRemove}
+        >
+          <Icon name="trash-xmark" />
+        </Button>
+      </div>
+    </div>
+  )
+})
 PortItem.displayName = 'PortItem'
 
 export const AddPortForm = ({ onSubmit, onCancel }: AddPortFormProps) => {
   const { name, control, handleSubmit, fields, addPortField, removePortField } =
-    useAddPortForm({ onSubmit })
+    useAddPortForm({ onSubmit, onCancel })
 
   return (
-    <form onSubmit={handleSubmit} tw="mt-2">
+    <form onSubmit={handleSubmit} tw="flex flex-col gap-y-4">
       {fields.map((field, index) => (
         <PortItem
           key={field.id}
@@ -62,7 +57,6 @@ export const AddPortForm = ({ onSubmit, onCancel }: AddPortFormProps) => {
             index,
             control,
             onRemove: removePortField,
-            disabled: fields.length === 1,
           }}
         />
       ))}
@@ -77,9 +71,6 @@ export const AddPortForm = ({ onSubmit, onCancel }: AddPortFormProps) => {
         </Button>
         <Button type="submit" variant="primary" kind="gradient">
           Save
-        </Button>
-        <Button type="button" variant="tertiary" onClick={onCancel}>
-          Cancel
         </Button>
       </div>
     </form>
