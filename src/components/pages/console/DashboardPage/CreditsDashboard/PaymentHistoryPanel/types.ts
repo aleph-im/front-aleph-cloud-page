@@ -1,4 +1,5 @@
 import { CreditPaymentHistoryItem } from '@/domain/credit'
+import { ReportIssueMetadata } from '@/components/modals/ReportIssueModal/types'
 
 export interface PaymentHistoryPanelProps {
   isOpen: boolean
@@ -6,4 +7,5 @@ export interface PaymentHistoryPanelProps {
   payments: CreditPaymentHistoryItem[]
   loading: boolean
   onPaymentClick: (payment: CreditPaymentHistoryItem) => void
+  onReportIssue: (metadata?: ReportIssueMetadata) => void
 }

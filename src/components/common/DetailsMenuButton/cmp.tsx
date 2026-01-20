@@ -11,7 +11,8 @@ import Link from 'next/link'
 
 type MenuItem = {
   label: string
-  href: string
+  href?: string
+  onClick?: () => void
 }
 
 type DetailsMenuButtonProps = {
@@ -56,16 +57,24 @@ export const DetailsMenuButton = ({ menuItems }: DetailsMenuButtonProps) => {
         variant={2}
         content={
           <div tw="flex flex-col min-w-[9.25rem]">
-            {menuItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                tw="py-2 px-3"
-                // tw="block px-4 py-2 text-sm text-base2 hover:bg-base1"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {menuItems.map((item) =>
+              item.href ? (
+                <Link key={item.label} href={item.href} tw="py-2 px-3">
+                  {item.label}
+                </Link>
+              ) : (
+                <button
+                  key={item.label}
+                  onClick={() => {
+                    item.onClick?.()
+                    handleClose()
+                  }}
+                  tw="py-2 px-3 text-left cursor-pointer"
+                >
+                  {item.label}
+                </button>
+              ),
+            )}
           </div>
         }
         my="top-right"
