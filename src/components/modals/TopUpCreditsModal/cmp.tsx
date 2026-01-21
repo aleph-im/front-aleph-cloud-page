@@ -1,5 +1,5 @@
-import React, { memo, useEffect } from 'react'
-import { Button, Icon, Label, TextGradient, useModal } from '@aleph-front/core'
+import React, { memo } from 'react'
+import { Button, Icon, Label, Modal, TextGradient } from '@aleph-front/core'
 import { Form } from '@/components/form/Form'
 import { useTopUpCreditsModal, useTopUpCreditsModalForm } from './hook'
 import {
@@ -35,18 +35,13 @@ export const TopUpCreditsModal = () => {
     isSubmitLoading,
   } = useTopUpCreditsModalForm()
 
-  const modal = useModal()
-  const modalOpen = modal?.open
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    modalOpen?.({
-      width: '30rem',
-      onClose: handleClose,
-      closeOnCloseButton: false,
-      header: <TopUpCreditsModalHeader />,
-      content: (
+  return (
+    <Modal
+      open={isOpen}
+      onClose={handleClose}
+      width="30rem"
+      header={<TopUpCreditsModalHeader />}
+      content={
         <TopUpCreditsModalContent
           {...{
             handleSubmit,
@@ -60,29 +55,14 @@ export const TopUpCreditsModal = () => {
             isSubmitLoading,
           }}
         />
-      ),
-      footer: (
+      }
+      footer={
         <TopUpCreditsModalFooter
           {...{ values, handleSubmit, isSubmitLoading }}
         />
-      ),
-    })
-  }, [
-    modalOpen,
-    isOpen,
-    handleClose,
-    handleSubmit,
-    values,
-    errors,
-    amountCtrl,
-    currencyCtrl,
-    bonus,
-    totalBalance,
-    isLoadingEstimation,
-    isSubmitLoading,
-  ])
-
-  return null
+      }
+    />
+  )
 }
 
 TopUpCreditsModal.displayName = 'TopUpCreditsModal'

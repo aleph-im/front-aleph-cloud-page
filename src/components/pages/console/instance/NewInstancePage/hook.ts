@@ -48,7 +48,7 @@ import {
   CreditPaymentConfiguration,
   PaymentConfiguration,
 } from '@/domain/executable'
-import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
+import { TooltipProps } from '@aleph-front/core'
 import { accountConnectionRequiredDisabledMessage } from './disabledMessages'
 import useFetchTermsAndConditions, {
   TermsAndConditions,
@@ -93,8 +93,6 @@ export type UseNewInstancePageReturn = {
   setSelectedNode: (hash?: CRNSpecs) => void
   termsAndConditions?: TermsAndConditions
   shouldRequestTermsAndConditions: boolean
-  modalOpen?: (info: ModalCardProps) => void
-  modalClose?: () => void
   handleManuallySelectCRN: () => void
   handleSelectNode: () => void
   handleRequestTermsAndConditionsAgreement: () => void
@@ -116,9 +114,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   } = useConnection({
     triggerOnMount: false,
   })
-  const modal = useModal()
-  const modalOpen = modal?.open
-  const modalClose = modal?.close
 
   const { handleOpen: handleOpenTopUpModal } = useTopUpCreditsModal()
 
@@ -488,8 +483,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setSelectedNode,
     termsAndConditions,
     shouldRequestTermsAndConditions,
-    modalOpen,
-    modalClose,
     handleManuallySelectCRN,
     handleSelectNode,
     handleSubmit: handleFormSubmit,

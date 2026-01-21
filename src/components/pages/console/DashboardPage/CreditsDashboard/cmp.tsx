@@ -1,11 +1,11 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import {
   Button,
   Icon,
+  Modal,
   NoisyContainer,
   ObjectImg,
   TextGradient,
-  useModal,
 } from '@aleph-front/core'
 
 import { SectionTitle } from '@/components/common/CompositeTitle'
@@ -36,31 +36,25 @@ export default function CreditsDashboard() {
     isCalculatingCosts,
   } = useCreditsDashboard()
 
-  const modal = useModal()
-  const modalOpen = modal?.open
-  const modalClose = modal?.close
-
   const { history, loading: historyLoading } = useCreditPaymentHistory()
-  const [isHistoryPanelOpen, setIsHistoryPanelOpen] = React.useState(false)
+  const [isHistoryPanelOpen, setIsHistoryPanelOpen] = useState(false)
+  const [selectedPayment, setSelectedPayment] =
+    useState<CreditPaymentHistoryItem | null>(null)
   const { handleOpen } = useTopUpCreditsModal()
 
   // Show only latest 5 payments in dashboard
-  const recentHistory = history.slice(0, 5)
+  const recentHistory = useMemo(() => history.slice(0, 5), [history])
 
   const handleOpenPaymentStatusModal = useCallback(
     (payment: CreditPaymentHistoryItem) => {
-      modalOpen?.({
-        width: '40rem',
-        closeOnCloseButton: false,
-        header: <PaymentStatusModalHeader payment={payment} />,
-        content: <PaymentStatusModal payment={payment} />,
-        footer: (
-          <PaymentStatusModalFooter payment={payment} onClose={modalClose} />
-        ),
-      })
+      setSelectedPayment(payment)
     },
-    [modalOpen, modalClose],
+    [],
   )
+
+  const handleClosePaymentStatusModal = useCallback(() => {
+    setSelectedPayment(null)
+  }, [])
 
   return (
     <section tw="px-0 pb-6 pt-12 lg:pb-5">
@@ -253,6 +247,25 @@ export default function CreditsDashboard() {
         payments={history}
         loading={historyLoading}
         onPaymentClick={handleOpenPaymentStatusModal}
+      />
+
+      {/* Payment Status Modal */}
+      <Modal
+        open={!!selectedPayment}
+        onClose={handleClosePaymentStatusModal}
+        width="40rem"
+        header={
+          <PaymentStatusModalHeader payment={selectedPayment} />
+        }
+        content={
+          <PaymentStatusModal payment={selectedPayment} />
+        }
+        footer={
+          <PaymentStatusModalFooter
+            payment={selectedPayment}
+            onClose={handleClosePaymentStatusModal}
+          />
+        }
       />
     </section>
   )
