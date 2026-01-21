@@ -15,6 +15,7 @@ import { RequestState, getRequestReducer } from './request'
 import { RewardsResponse } from '@/domain/stake'
 import { FilterState, getFilterReducer } from './filter'
 import { UIState, getUIReducer } from './ui'
+import { CreditPaymentHistoryItem } from '@/domain/credit'
 
 export type StoreSubstate = Record<string, unknown>
 
@@ -91,6 +92,9 @@ export type StoreState = {
 
   // UI state
   ui: UIState
+
+  // Credit payments
+  creditPayment: EntityState<CreditPaymentHistoryItem>
 }
 
 export const storeReducer = mergeReducers<StoreState>({
@@ -134,6 +138,12 @@ export const storeReducer = mergeReducers<StoreState>({
 
   // UI state
   ui: getUIReducer(),
+
+  // Credit payments
+  creditPayment: getEntityReducer<CreditPaymentHistoryItem>(
+    'creditPayment',
+    'id',
+  ),
 })
 
 export const storeInitialState: StoreState = getInitialState(storeReducer)

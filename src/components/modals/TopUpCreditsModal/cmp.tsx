@@ -15,14 +15,24 @@ import {
   StyledRadioGroup,
   StyledSendTitle,
 } from './styles'
-import { UseTopUpCreditsModalFormReturn } from './types'
+import {
+  UseTopUpCreditsModalFormProps,
+  UseTopUpCreditsModalFormReturn,
+} from './types'
 import PaymentMethodLogos from '@/components/svg/PaymentMethodLogos'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 import Skeleton from '@/components/common/Skeleton'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
+import { useCreditPaymentHistory } from '@/hooks/common/useCreditPaymentHistory'
 
-export const TopUpCreditsModal = () => {
+export type TopUpCreditsModalProps = Omit<
+  UseTopUpCreditsModalFormProps,
+  'refetchPaymentHistory'
+>
+
+export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
   const { isOpen, handleClose } = useTopUpCreditsModal()
+  const { refetch: refetchPaymentHistory } = useCreditPaymentHistory()
   const {
     handleSubmit,
     errors,
@@ -33,12 +43,13 @@ export const TopUpCreditsModal = () => {
     values,
     isLoadingEstimation,
     isSubmitLoading,
-  } = useTopUpCreditsModalForm()
+  } = useTopUpCreditsModalForm({ onSuccess, refetchPaymentHistory })
 
   return (
     <Modal
       open={isOpen}
       onClose={handleClose}
+      closeOnCloseButton={false}
       width="30rem"
       header={<TopUpCreditsModalHeader />}
       content={

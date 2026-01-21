@@ -1,34 +1,51 @@
-import { useLocalRequest } from '@aleph-front/core'
+import { useCallback } from 'react'
 import { useCreditManager } from '@/hooks/common/useManager/useCreditManager'
 import { CreditPaymentHistoryItem } from '@/domain/credit'
+import { useAppStoreEntityRequest } from '@/hooks/common/useStoreEntitiesRequest'
+import { useAppState } from '@/contexts/appState'
 
 export type UseCreditPaymentHistoryReturn = {
   history: CreditPaymentHistoryItem[]
   loading: boolean
   error?: Error
+  refetch: () => void
 }
 
 export function useCreditPaymentHistory(): UseCreditPaymentHistoryReturn {
   const creditManager = useCreditManager()
+  const [state] = useAppState()
+  const { account } = state.connection
+
+  const fetchPayments = useCallback(async (): Promise<
+    CreditPaymentHistoryItem[]
+  > => {
+    if (!creditManager || !account) {
+      return []
+    }
+
+    const payments = await creditManager.getPaymentHistory()
+    return payments.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+  }, [creditManager, account])
 
   const {
     data: history = [],
     loading,
     error,
-  } = useLocalRequest({
-    doRequest: async (): Promise<CreditPaymentHistoryItem[]> => {
-      if (!creditManager) {
-        return []
-      }
-
-      return await creditManager.getPaymentHistory()
-    },
+    request,
+  } = useAppStoreEntityRequest<CreditPaymentHistoryItem>({
+    name: 'creditPayment',
+    doRequest: fetchPayments,
     onSuccess: () => null,
-    onError: () => null,
-    flushData: true,
-    triggerOnMount: true,
-    triggerDeps: [creditManager],
+    flushData: false,
+    triggerOnMount: !!account,
+    triggerDeps: [creditManager, account],
+    cacheStrategy: 'overwrite',
   })
 
-  return { history, loading, error }
+  return {
+    history,
+    loading,
+    error,
+    refetch: request,
+  }
 }

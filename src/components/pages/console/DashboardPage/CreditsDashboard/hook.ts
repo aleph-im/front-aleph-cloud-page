@@ -5,7 +5,9 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
+  useRef,
 } from 'react'
+import { useNotification } from '@aleph-front/core'
 import { useAccountEntities } from '@/hooks/common/useAccountEntities'
 import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager'
 import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceManager'
@@ -14,15 +16,44 @@ import { PaymentMethod } from '@/helpers/constants'
 import { useRequestExecutableStatus } from '@/hooks/common/useRequestEntity/useRequestExecutableStatus'
 import { PaymentType } from '@aleph-sdk/message'
 import { useConnection } from '@/hooks/common/useConnection'
+import { useCreditPaymentHistory } from '@/hooks/common/useCreditPaymentHistory'
+import { usePaymentTracking } from '@/hooks/common/usePaymentTracking'
+import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook'
+import { useAppState } from '@/contexts/appState'
+import { clearFocusedPayment } from '@/store/ui'
+import { CreditPaymentHistoryItem } from '@/domain/credit'
 
 export type UseCreditsDashboardReturn = {
+  // Balance & costs
   totalCostPerHour: number
   runRateDays: number
+  isCalculatingCosts: boolean
+  accountCreditBalance?: number
+
+  // Connection
+  isConnected: boolean
+
+  // Dashboard toggle
   creditsDashboardOpen: boolean
   setCreditsDashboardOpen: Dispatch<SetStateAction<boolean>>
-  isConnected: boolean
-  accountCreditBalance?: number
-  isCalculatingCosts: boolean
+
+  // Payment history
+  history: CreditPaymentHistoryItem[]
+  historyLoading: boolean
+  recentHistory: CreditPaymentHistoryItem[]
+
+  // History panel
+  isHistoryPanelOpen: boolean
+  setIsHistoryPanelOpen: Dispatch<SetStateAction<boolean>>
+
+  // Payment status modal
+  displayedPayment: CreditPaymentHistoryItem | null
+  shouldModalBeOpen: boolean
+  handleOpenPaymentStatusModal: (payment: CreditPaymentHistoryItem) => void
+  handleClosePaymentStatusModal: () => void
+
+  // Top-up modal
+  handleOpenTopUpModal: (minimumBalance?: number) => void
 }
 
 export function useCreditsDashboard(): UseCreditsDashboardReturn {
@@ -30,11 +61,98 @@ export function useCreditsDashboard(): UseCreditsDashboardReturn {
   const [creditsDashboardOpen, setCreditsDashboardOpen] = useState(false)
   const [isCalculatingCosts, setIsCalculatingCosts] = useState(true)
 
+  const [appState, dispatch] = useAppState()
+  const { focusedPaymentTxHash } = appState.ui
+
+  const noti = useNotification()
+
   const { account, creditBalance: accountCreditBalance } = useConnection({
     triggerOnMount: false,
   })
 
   const isConnected = useMemo(() => !!account, [account])
+
+  // Payment history
+  const { history, loading: historyLoading } = useCreditPaymentHistory()
+  const [isHistoryPanelOpen, setIsHistoryPanelOpen] = useState(false)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+
+  // Top-up modal
+  const { handleOpen: handleOpenTopUpModal } = useTopUpCreditsModal()
+
+  // ID of payment selected manually from history table
+  const [manuallySelectedPaymentId, setManuallySelectedPaymentId] = useState<
+    string | null
+  >(null)
+
+  // Payment tracking callback
+  const handlePaymentCompleted = useCallback(
+    (payment: CreditPaymentHistoryItem) => {
+      noti?.add({
+        variant: 'success',
+        title: 'Purchase complete',
+        text: `Your balance has been credited with ~${payment.credits} credits.`,
+      })
+    },
+    [noti],
+  )
+
+  // Track incomplete payments and get notified when completed
+  usePaymentTracking({
+    onPaymentCompleted: handlePaymentCompleted,
+  })
+
+  // Get the focused payment from history if available
+  const focusedPayment = useMemo(() => {
+    if (!focusedPaymentTxHash) return null
+    return history.find((p) => p.txHash === focusedPaymentTxHash) || null
+  }, [focusedPaymentTxHash, history])
+
+  // Get the manually selected payment from history (always latest data)
+  const manuallySelectedPayment = useMemo(() => {
+    if (!manuallySelectedPaymentId) return null
+    return history.find((p) => p.id === manuallySelectedPaymentId) || null
+  }, [manuallySelectedPaymentId, history])
+
+  // The payment to display in the modal
+  const displayedPayment = focusedPayment || manuallySelectedPayment
+
+  // Open modal when there's a payment to display
+  const shouldModalBeOpen = !!displayedPayment && isPaymentModalOpen
+
+  // Show only latest 5 payments in dashboard
+  const recentHistory = useMemo(() => history.slice(0, 5), [history])
+
+  // Track previous focusedPayment to detect when it appears
+  const prevFocusedPaymentRef = useRef<CreditPaymentHistoryItem | null>(null)
+
+  // Auto-open modal when focusedPayment appears (after top-up)
+  useEffect(() => {
+    if (focusedPayment && !prevFocusedPaymentRef.current) {
+      setIsPaymentModalOpen(true)
+    }
+    prevFocusedPaymentRef.current = focusedPayment
+  }, [focusedPayment])
+
+  const handleOpenPaymentStatusModal = useCallback(
+    (payment: CreditPaymentHistoryItem) => {
+      // User manually selected a payment, clear auto-focus
+      dispatch(clearFocusedPayment())
+      setManuallySelectedPaymentId(payment.id)
+      setIsPaymentModalOpen(true)
+    },
+    [dispatch],
+  )
+
+  const handleClosePaymentStatusModal = useCallback(() => {
+    // Close the modal first (keeps content during animation)
+    setIsPaymentModalOpen(false)
+    // Clear the data after a delay to allow animation to complete
+    setTimeout(() => {
+      setManuallySelectedPaymentId(null)
+      dispatch(clearFocusedPayment())
+    }, 500)
+  }, [dispatch])
 
   // Get all entities
   const { instances, gpuInstances, confidentials } = useAccountEntities()
@@ -189,12 +307,35 @@ export function useCreditsDashboard(): UseCreditsDashboardReturn {
   }, [isConnected, creditsDashboardOpen])
 
   return {
+    // Balance & costs
     totalCostPerHour,
     runRateDays,
+    isCalculatingCosts,
+    accountCreditBalance,
+
+    // Connection
+    isConnected,
+
+    // Dashboard toggle
     creditsDashboardOpen,
     setCreditsDashboardOpen,
-    isConnected,
-    accountCreditBalance,
-    isCalculatingCosts,
+
+    // Payment history
+    history,
+    historyLoading,
+    recentHistory,
+
+    // History panel
+    isHistoryPanelOpen,
+    setIsHistoryPanelOpen,
+
+    // Payment status modal
+    displayedPayment,
+    shouldModalBeOpen,
+    handleOpenPaymentStatusModal,
+    handleClosePaymentStatusModal,
+
+    // Top-up modal
+    handleOpenTopUpModal,
   }
 }

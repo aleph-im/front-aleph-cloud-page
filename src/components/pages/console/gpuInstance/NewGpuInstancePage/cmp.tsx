@@ -368,7 +368,9 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         open={selectedModal === 'terms-and-conditions' && !!termsAndConditions}
         onClose={handleCloseModal}
         width="34rem"
-        header={<TextGradient type="h6">Accept Terms & Conditions</TextGradient>}
+        header={
+          <TextGradient type="h6">Accept Terms & Conditions</TextGradient>
+        }
         content={
           termsAndConditions && (
             <div tw="flex items-center gap-4 max-w-md mb-8">

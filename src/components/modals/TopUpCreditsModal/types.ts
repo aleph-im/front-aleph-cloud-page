@@ -8,6 +8,11 @@ export type UseTopUpCreditsModalReturn = {
   handleClose: () => void
 }
 
+export type UseTopUpCreditsModalFormProps = {
+  onSuccess?: (txHash: string) => void
+  refetchPaymentHistory?: () => void
+}
+
 export type UseTopUpCreditsModalFormReturn = {
   values: TopUpCreditsFormData
   control: Control<TopUpCreditsFormData>

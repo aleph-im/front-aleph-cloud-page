@@ -48,6 +48,74 @@ This is a Next.js-based decentralized cloud platform frontend for the Aleph netw
 - Entity management for VMs, functions, domains, volumes, etc.
 - Connection state for Web3 wallets and Aleph network
 
+## Store and Entity Loading Patterns
+
+### Loading Entity Collections into Store
+
+When loading entity collections that need to be shared across components,
+use `useAppStoreEntityRequest` from `@/hooks/common/useStoreEntitiesRequest`
+instead of `useLocalRequest`. This automatically dispatches the data to the
+store entity, eliminating the need for manual state synchronization.
+
+**Key Requirements**:
+- The entity must be defined in `src/store/store.ts` using `getEntityReducer`
+- The `name` parameter must match the store slice name
+- No need for manual dispatch or state synchronization
+- Data is automatically available via `state.[entityName].entities`
+
+**Cache Strategies**:
+- `'overwrite'` - Replaces all data in the store (use for full refreshes)
+- `'merge'` - Adds to existing data (use for pagination or incremental loads)
+- `'none'` - No caching (fetches fresh data each time)
+
+**Example Hook Implementation**:
+```typescript
+import { useCallback } from 'react'
+import { useCreditManager } from '@/hooks/common/useManager/useCreditManager'
+import { CreditPaymentHistoryItem } from '@/domain/credit'
+import { useAppStoreEntityRequest } from '@/hooks/common/useStoreEntitiesRequest'
+
+export function useCreditPaymentHistory(): UseCreditPaymentHistoryReturn {
+  const creditManager = useCreditManager()
+
+  const fetchPayments = useCallback(async (): Promise<
+    CreditPaymentHistoryItem[]
+  > => {
+    if (!creditManager) return []
+    const payments = await creditManager.getPaymentHistory()
+    return payments.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+  }, [creditManager])
+
+  const {
+    data: history = [],
+    loading,
+    error,
+    request
+  } = useAppStoreEntityRequest<CreditPaymentHistoryItem>({
+    name: 'creditPayment',  // Must match store entity name
+    doRequest: fetchPayments,
+    onSuccess: () => null,
+    flushData: false,
+    triggerOnMount: true,
+    triggerDeps: [creditManager],
+    cacheStrategy: 'overwrite',  // Replace all data on fetch
+  })
+
+  return { history, loading, error, refetch: request }
+}
+```
+
+**When to Use**:
+- Entity collections need to be accessed by multiple components
+- Data should persist across component mount/unmount cycles
+- You want to avoid prop drilling or repeated API calls
+- The entity represents a core resource (VMs, functions, payments, etc.)
+
+**When NOT to Use**:
+- Component-local state that doesn't need sharing
+- One-off API calls that don't represent stored entities
+- Temporary UI state (form inputs, modal visibility, etc.)
+
 ## Build Configuration
 
 - Custom webpack configuration via `withTwin.js` for Twin.macro support
@@ -71,6 +139,7 @@ This is a Next.js-based decentralized cloud platform frontend for the Aleph netw
   export default memo(Component)
   ```
 - **Types**: Separate type files with descriptive naming (ComponentProps, UseHookReturn)
+- **@aleph-front/core Components**: Always verify component props in the type definitions at `node_modules/@aleph-front/core/dist/index.d.ts` before use. Do not guess prop names (e.g., use `closeOnCloseButton` not `showCloseButton` for Modal component)
 
 ## Component Development Patterns
 

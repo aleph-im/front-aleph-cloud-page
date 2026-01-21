@@ -349,10 +349,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         width="80rem"
         header=""
         content={
-          <CRNList
-            selected={selectedNode}
-            onSelectedChange={setSelectedNode}
-          />
+          <CRNList selected={selectedNode} onSelectedChange={setSelectedNode} />
         }
         footer={
           <div tw="w-full flex justify-end">
@@ -375,7 +372,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         open={selectedModal === 'terms-and-conditions' && !!termsAndConditions}
         onClose={handleCloseModal}
         width="34rem"
-        header={<TextGradient type="h6">Accept Terms & Conditions</TextGradient>}
+        header={
+          <TextGradient type="h6">Accept Terms & Conditions</TextGradient>
+        }
         content={
           termsAndConditions && (
             <div tw="flex items-center gap-4 max-w-md mb-8">

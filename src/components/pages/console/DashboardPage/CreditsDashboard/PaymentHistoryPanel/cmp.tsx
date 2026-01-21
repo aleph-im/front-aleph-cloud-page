@@ -2,11 +2,9 @@ import React, { memo, useState, useMemo } from 'react'
 import { Button, Icon } from '@aleph-front/core'
 import { SidePanel } from '@/components/common/SidePanel/cmp'
 import { StyledTable } from '@/components/common/EntityTable/styles'
-import DetailsMenuButton from '@/components/common/DetailsMenuButton'
 import { PaymentStatus } from '@/domain/credit'
 import { PaymentHistoryPanelProps } from './types'
 import { formatPaymentAmount, getDate } from '@/helpers/utils'
-import tw from 'twin.macro'
 
 export const PaymentHistoryPanel = ({
   isOpen,
@@ -82,6 +80,7 @@ export const PaymentHistoryPanel = ({
                 label: 'STATUS',
                 align: 'left',
                 sortable: true,
+                width: 'auto',
                 render: (row) => {
                   let color = 'warning'
 
@@ -115,7 +114,7 @@ export const PaymentHistoryPanel = ({
                       <Icon
                         name="alien-8bit"
                         gradient={color}
-                        tw="absolute top-[4px] left-[2px]"
+                        tw="absolute top-[4px] left-[3px]"
                         size="16px"
                       />
                     </div>
@@ -126,26 +125,37 @@ export const PaymentHistoryPanel = ({
                 label: 'DATE',
                 align: 'left',
                 sortable: true,
+                width: '10rem',
                 render: (row) => row.createdAt && getDate(row.createdAt / 1000),
               },
               {
                 label: 'AMOUNT',
                 align: 'left',
                 sortable: true,
+                width: '8rem',
                 render: (row) => formatPaymentAmount(row.amount, row.asset),
               },
               {
                 label: 'ASSET',
                 align: 'left',
                 sortable: true,
+                width: '6rem',
                 render: (row) => row.asset,
               },
               {
                 label: 'CREDITS',
                 align: 'left',
                 sortable: true,
+                width: '8rem',
                 render: (row) => `~${row.credits}`,
               },
+              {
+                label: '',
+                width: '100%',
+                align: 'right',
+                render: () => <></>,
+              },
+              /* TODO: Re-enable when report issue functionality is implemented
               {
                 label: '',
                 width: '100%',
@@ -161,6 +171,7 @@ export const PaymentHistoryPanel = ({
                   css: tw`pl-3!`,
                 }),
               },
+              */
             ]}
           />
         </div>

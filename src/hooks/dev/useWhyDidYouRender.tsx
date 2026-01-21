@@ -114,7 +114,9 @@ export function useWhyDidYouRenderWithState(
 
         console.groupEnd()
       } else {
-        console.log(`[WhyDidYouRender] ${componentName} - parent re-rendered (no prop/state changes)`)
+        console.log(
+          `[WhyDidYouRender] ${componentName} - parent re-rendered (no prop/state changes)`,
+        )
       }
     }
 
@@ -127,7 +129,11 @@ export function withWhyDidYouRender<P extends object>(
   WrappedComponent: ComponentType<P>,
   displayName?: string,
 ): ComponentType<P> {
-  const name = displayName || WrappedComponent.displayName || WrappedComponent.name || 'Component'
+  const name =
+    displayName ||
+    WrappedComponent.displayName ||
+    WrappedComponent.name ||
+    'Component'
 
   const WithWhyDidYouRender = (props: P) => {
     const previousProps = useRef<P>()
@@ -145,7 +151,9 @@ export function withWhyDidYouRender<P extends object>(
       } else if (Object.keys(changes).length > 0) {
         logChanges(name, changes, 'props')
       } else {
-        console.log(`[WhyDidYouRender] ${name} - re-rendered (no prop changes, likely parent re-render)`)
+        console.log(
+          `[WhyDidYouRender] ${name} - re-rendered (no prop changes, likely parent re-render)`,
+        )
       }
 
       previousProps.current = props

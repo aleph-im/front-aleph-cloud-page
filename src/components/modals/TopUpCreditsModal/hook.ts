@@ -15,6 +15,7 @@ import {
 } from '@/helpers/schemas/credit'
 import { useCreditManager } from '@/hooks/common/useManager/useCreditManager'
 import {
+  UseTopUpCreditsModalFormProps,
   UseTopUpCreditsModalFormReturn,
   UseTopUpCreditsModalReturn,
 } from './types'
@@ -26,7 +27,11 @@ export const defaultValues: TopUpCreditsFormData = {
   provider: 'WALLET',
 }
 import { useAppState } from '@/contexts/appState'
-import { openTopUpCreditsModal, closeTopUpCreditsModal } from '@/store/ui'
+import {
+  openTopUpCreditsModal,
+  closeTopUpCreditsModal,
+  setFocusedPaymentTxHash,
+} from '@/store/ui'
 
 export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
   const [state, dispatch] = useAppState()
@@ -51,8 +56,11 @@ export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
   }
 }
 
-export function useTopUpCreditsModalForm(): UseTopUpCreditsModalFormReturn {
-  const [appState] = useAppState()
+export function useTopUpCreditsModalForm({
+  onSuccess,
+  refetchPaymentHistory,
+}: UseTopUpCreditsModalFormProps = {}): UseTopUpCreditsModalFormReturn {
+  const [appState, dispatch] = useAppState()
   const creditManager = useCreditManager()
   const { next, stop } = useCheckoutNotification({})
   const [initialAmount, setInitialAmount] = useState(defaultValues.amount)
@@ -124,11 +132,18 @@ export function useTopUpCreditsModalForm(): UseTopUpCreditsModalFormReturn {
 
           await next(nSteps)
         }
+
+        if (transactionHash) {
+          dispatch(closeTopUpCreditsModal())
+          dispatch(setFocusedPaymentTxHash(transactionHash))
+          refetchPaymentHistory?.()
+          onSuccess?.(transactionHash)
+        }
       } finally {
         await stop()
       }
     },
-    [creditManager, next, stop],
+    [creditManager, next, stop, onSuccess, refetchPaymentHistory, dispatch],
   )
 
   const {

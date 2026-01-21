@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React from 'react'
 import {
   Button,
   Icon,
@@ -10,8 +10,6 @@ import {
 
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import { StyledTable } from '@/components/common/EntityTable/styles'
-import DetailsMenuButton from '@/components/common/DetailsMenuButton'
-import tw from 'twin.macro'
 
 import ToggleDashboard from '@/components/common/ToggleDashboard'
 import Skeleton from '@/components/common/Skeleton'
@@ -21,9 +19,7 @@ import PaymentStatusModal, {
 } from '@/components/modals/PaymentStatusModal'
 import PaymentHistoryPanel from './PaymentHistoryPanel'
 import { useCreditsDashboard } from './hook'
-import { useCreditPaymentHistory } from '@/hooks/common/useCreditPaymentHistory'
-import { PaymentStatus, CreditPaymentHistoryItem } from '@/domain/credit'
-import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook'
+import { PaymentStatus } from '@/domain/credit'
 import { getDate, formatPaymentAmount } from '@/helpers/utils'
 
 export default function CreditsDashboard() {
@@ -34,27 +30,17 @@ export default function CreditsDashboard() {
     isConnected,
     accountCreditBalance,
     isCalculatingCosts,
+    history,
+    historyLoading,
+    recentHistory,
+    isHistoryPanelOpen,
+    setIsHistoryPanelOpen,
+    displayedPayment,
+    shouldModalBeOpen,
+    handleOpenPaymentStatusModal,
+    handleClosePaymentStatusModal,
+    handleOpenTopUpModal,
   } = useCreditsDashboard()
-
-  const { history, loading: historyLoading } = useCreditPaymentHistory()
-  const [isHistoryPanelOpen, setIsHistoryPanelOpen] = useState(false)
-  const [selectedPayment, setSelectedPayment] =
-    useState<CreditPaymentHistoryItem | null>(null)
-  const { handleOpen } = useTopUpCreditsModal()
-
-  // Show only latest 5 payments in dashboard
-  const recentHistory = useMemo(() => history.slice(0, 5), [history])
-
-  const handleOpenPaymentStatusModal = useCallback(
-    (payment: CreditPaymentHistoryItem) => {
-      setSelectedPayment(payment)
-    },
-    [],
-  )
-
-  const handleClosePaymentStatusModal = useCallback(() => {
-    setSelectedPayment(null)
-  }, [])
 
   return (
     <section tw="px-0 pb-6 pt-12 lg:pb-5">
@@ -113,7 +99,7 @@ export default function CreditsDashboard() {
                   kind="flat"
                   tw="bg-white!"
                   disabled={!isConnected}
-                  onClick={() => handleOpen()}
+                  onClick={() => handleOpenTopUpModal()}
                 >
                   Top-up Balance
                   <Icon name="credit-card" />
@@ -152,8 +138,8 @@ export default function CreditsDashboard() {
                     label: 'STATUS',
                     align: 'left',
                     sortable: true,
+                    width: '1rem',
                     render: (row) => {
-                      console.log(row)
                       let color = 'warning'
 
                       switch (row.status) {
@@ -186,7 +172,7 @@ export default function CreditsDashboard() {
                           <Icon
                             name="alien-8bit"
                             gradient={color}
-                            tw="absolute top-[4px] left-[2px]"
+                            tw="absolute top-[4px] left-[3px]"
                             size="16px"
                           />
                         </div>
@@ -197,6 +183,7 @@ export default function CreditsDashboard() {
                     label: 'DATE',
                     align: 'left',
                     sortable: true,
+                    width: '10rem',
                     render: (row) =>
                       row.createdAt && getDate(row.createdAt / 1000),
                   },
@@ -204,20 +191,30 @@ export default function CreditsDashboard() {
                     label: 'AMOUNT',
                     align: 'left',
                     sortable: true,
+                    width: '8rem',
                     render: (row) => formatPaymentAmount(row.amount, row.asset),
                   },
                   {
                     label: 'ASSET',
                     align: 'left',
                     sortable: true,
+                    width: '6rem',
                     render: (row) => row.asset,
                   },
                   {
                     label: 'CREDITS',
                     align: 'left',
                     sortable: true,
+                    width: '8rem',
                     render: (row) => `~${row.credits}`,
                   },
+                  {
+                    label: '',
+                    width: '100%',
+                    align: 'right',
+                    render: () => <></>,
+                  },
+                  /* TODO: Re-enable when report issue functionality is implemented
                   {
                     label: '',
                     width: '100%',
@@ -233,6 +230,7 @@ export default function CreditsDashboard() {
                       css: tw`pl-3!`,
                     }),
                   },
+                  */
                 ]}
               />
             </div>
@@ -251,20 +249,24 @@ export default function CreditsDashboard() {
 
       {/* Payment Status Modal */}
       <Modal
-        open={!!selectedPayment}
+        open={shouldModalBeOpen}
         onClose={handleClosePaymentStatusModal}
         width="40rem"
         header={
-          <PaymentStatusModalHeader payment={selectedPayment} />
+          displayedPayment && (
+            <PaymentStatusModalHeader payment={displayedPayment} />
+          )
         }
         content={
-          <PaymentStatusModal payment={selectedPayment} />
+          displayedPayment && <PaymentStatusModal payment={displayedPayment} />
         }
         footer={
-          <PaymentStatusModalFooter
-            payment={selectedPayment}
-            onClose={handleClosePaymentStatusModal}
-          />
+          displayedPayment && (
+            <PaymentStatusModalFooter
+              payment={displayedPayment}
+              onClose={handleClosePaymentStatusModal}
+            />
+          )
         }
       />
     </section>

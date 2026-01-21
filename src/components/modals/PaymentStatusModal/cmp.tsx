@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import { Button, Icon, TextGradient } from '@aleph-front/core'
+import { Button, Icon, Spinner, TextGradient } from '@aleph-front/core'
 import { ALEPH_CREDIT_SENDER, PaymentStatus } from '@/domain/credit'
 import {
   PaymentStatusModalContentProps,
@@ -18,29 +18,88 @@ import { getETHExplorerURL, getExplorerURL } from '@/helpers/utils'
 import BorderBox from '@/components/common/BorderBox'
 import { Blockchain } from '@aleph-sdk/core'
 
-const getProgressSteps = (status: PaymentStatus) => {
-  const steps = [
-    { key: 'transaction', label: 'Your transaction', completed: false },
-    { key: 'processing', label: 'Processing', completed: false },
-    { key: 'purchase', label: 'Purchase completed', completed: false },
-    { key: 'credits', label: 'Credits distributed', completed: false },
-  ]
+type ProgressStep = {
+  key: string
+  pendingLabel: string
+  currentLabel: string
+  completedLabel: string
+  completed: boolean
+  current: boolean
+}
 
+type StepDefinition = {
+  key: string
+  pendingLabel: string
+  currentLabel: string
+  completedLabel: string
+}
+
+const stepDefinitions: StepDefinition[] = [
+  {
+    key: 'transaction',
+    pendingLabel: 'Submit transaction',
+    currentLabel: 'Submitting transaction',
+    completedLabel: 'Transaction submitted',
+  },
+  {
+    key: 'processing',
+    pendingLabel: 'Process payment',
+    currentLabel: 'Processing payment',
+    completedLabel: 'Payment processed',
+  },
+  {
+    key: 'purchase',
+    pendingLabel: 'Complete purchase',
+    currentLabel: 'Completing purchase',
+    completedLabel: 'Purchase completed',
+  },
+  {
+    key: 'credits',
+    pendingLabel: 'Distribute credits',
+    currentLabel: 'Distributing credits',
+    completedLabel: 'Credits distributed',
+  },
+]
+
+const getProgressSteps = (status: PaymentStatus): ProgressStep[] => {
+  let completedCount = 0
   switch (status) {
     case PaymentStatus.Completed:
-      return steps.map((step) => ({ ...step, completed: true }))
+      completedCount = 4
+      break
     case PaymentStatus.Indexed:
     case PaymentStatus.Broadcasted:
-      return steps.map((step, index) => ({ ...step, completed: index <= 2 }))
+      completedCount = 3
+      break
     case PaymentStatus.Transfered:
-      return steps.map((step, index) => ({ ...step, completed: index <= 1 }))
+      completedCount = 2
+      break
     case PaymentStatus.Processing:
-      return steps.map((step, index) => ({ ...step, completed: index === 0 }))
+      completedCount = 1
+      break
     case PaymentStatus.Failed:
     case PaymentStatus.Cancelled:
     default:
-      return steps
+      completedCount = 0
+      break
   }
+
+  const isFinalState =
+    status === PaymentStatus.Completed ||
+    status === PaymentStatus.Failed ||
+    status === PaymentStatus.Cancelled
+
+  return stepDefinitions.map((step, index) => ({
+    ...step,
+    completed: index < completedCount,
+    current: !isFinalState && index === completedCount,
+  }))
+}
+
+const getStepLabel = (step: ProgressStep): string => {
+  if (step.completed) return step.completedLabel
+  if (step.current) return step.currentLabel
+  return step.pendingLabel
 }
 
 export const PaymentStatusModalContent = ({
@@ -55,7 +114,7 @@ export const PaymentStatusModalContent = ({
 
   const showWarning =
     payment.status !== PaymentStatus.Completed &&
-    Date.now() > payment.createdAt + 60 * 1000
+    Date.now() > payment.createdAt + 1000 * 60 * 5
 
   return (
     <>
@@ -69,16 +128,20 @@ export const PaymentStatusModalContent = ({
       <StyledProgressContainer>
         {progressSteps.map((step) => (
           <StyledProgressStep key={step.key}>
-            <StyledProgressStepIcon
-              name={step.key}
-              value={step.key}
-              checked={step.completed}
-              disabled={!step.completed}
-              size="xs"
-            />
+            {step.current ? (
+              <Spinner size="3rem" color="main0" tw="-m-4"/>
+            ) : (
+              <StyledProgressStepIcon
+                name={step.key}
+                value={step.key}
+                checked={step.completed}
+                disabled={!step.completed}
+                size="xs"
+              />
+            )}
             <StyledProgressContent>
-              <StyledProgressTitle completed={step.completed}>
-                {step.label}
+              <StyledProgressTitle completed={step.completed || step.current}>
+                {getStepLabel(step)}
               </StyledProgressTitle>
               {step.key === 'transaction' && payment.itemHash && (
                 <StyledProgressDescription>
@@ -156,9 +219,10 @@ PaymentStatusModalHeader.displayName = 'PaymentStatusModalHeader'
 // --------------
 
 export const PaymentStatusModalFooter = memo(
-  ({ payment, onClose }: PaymentStatusModalFooterProps) => {
+  ({ onClose }: PaymentStatusModalFooterProps) => {
     return (
-      <div tw="flex justify-between items-center">
+      <div tw="flex justify-end items-center">
+        {/* TODO: Re-enable when report issue functionality is implemented
         <Button
           variant="textOnly"
           size="sm"
@@ -169,6 +233,7 @@ export const PaymentStatusModalFooter = memo(
         >
           Report issue
         </Button>
+        */}
         <Button variant="primary" size="md" onClick={onClose}>
           Close
         </Button>
