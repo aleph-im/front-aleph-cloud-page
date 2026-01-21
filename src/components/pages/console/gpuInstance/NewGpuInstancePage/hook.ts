@@ -55,7 +55,7 @@ import { BlockchainId, blockchains } from '@/domain/connect'
 import { PaymentConfiguration } from '@/domain/executable'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
-import { ModalCardProps, TooltipProps, useModal } from '@aleph-front/core'
+import { TooltipProps } from '@aleph-front/core'
 import {
   unsupportedHoldingDisabledMessage,
   unsupportedStreamDisabledMessage,
@@ -108,8 +108,6 @@ export type UseNewGpuInstancePageReturn = {
   setSelectedNode: (node?: CRNSpecs) => void
   termsAndConditions?: TermsAndConditions
   shouldRequestTermsAndConditions: boolean
-  modalOpen?: (info: ModalCardProps) => void
-  modalClose?: () => void
   handleManuallySelectCRN: () => void
   handleSelectNode: () => void
   handleRequestTermsAndConditionsAgreement: () => void
@@ -131,9 +129,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   } = useConnection({
     triggerOnMount: false,
   })
-  const modal = useModal()
-  const modalOpen = modal?.open
-  const modalClose = modal?.close
 
   const router = useRouter()
   const { crn: queryCRN, gpu: queryGPU } = router.query
@@ -531,8 +526,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     setSelectedNode,
     termsAndConditions,
     shouldRequestTermsAndConditions,
-    modalOpen,
-    modalClose,
     handleManuallySelectCRN,
     handleSelectNode,
     handleSubmit,

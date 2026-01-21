@@ -1,5 +1,5 @@
 import React from 'react'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
 import {
@@ -12,6 +12,7 @@ import {
   NoisyContainer,
   TooltipProps,
   Checkbox,
+  Modal,
 } from '@aleph-front/core'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { CRNSpecs } from '@/domain/node'
@@ -115,8 +116,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     setSelectedNode,
     termsAndConditions,
     shouldRequestTermsAndConditions,
-    modalOpen,
-    modalClose,
     handleManuallySelectCRN,
     handleSelectNode,
     handleSubmit,
@@ -133,123 +132,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     (n: number) => (values.paymentMethod === PaymentMethod.Stream ? 1 : 0) + n,
     [values.paymentMethod],
   )
-
-  // ------------------
-  // Handle modals
-  useEffect(
-    () => {
-      if (!modalOpen) return
-      if (!modalClose) return
-
-      switch (selectedModal) {
-        case 'node-list':
-          return modalOpen({
-            header: '',
-            width: '80rem',
-            onClose: handleCloseModal,
-            content: (
-              <CRNList
-                selected={selectedNode}
-                onSelectedChange={setSelectedNode}
-              />
-            ),
-            footer: (
-              <>
-                <div tw="w-full flex justify-end">
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="md"
-                    onClick={handleSelectNode}
-                    disabled={!selectedNode}
-                    tw="ml-auto!"
-                  >
-                    Continue
-                  </Button>
-                </div>
-              </>
-            ),
-          })
-        case 'terms-and-conditions':
-          if (!termsAndConditions) return modalClose()
-
-          return modalOpen({
-            header: (
-              <TextGradient type="h6">Accept Terms & Conditions</TextGradient>
-            ),
-            width: '34rem',
-            onClose: handleCloseModal,
-            content: (
-              <>
-                <div tw="flex items-center gap-4 max-w-md mb-8">
-                  <Checkbox
-                    onChange={handleCheckTermsAndConditions}
-                    checked={values.termsAndConditions}
-                  />
-                  <div className="tp-body">
-                    I have read, understood, and agree to the{' '}
-                    <ExternalLink
-                      text="Terms & Conditions"
-                      href={termsAndConditions.url}
-                      color="main0"
-                      typo="body3"
-                      underline
-                    />{' '}
-                    of this Core Resouce Node.
-                  </div>
-                </div>
-              </>
-            ),
-            footer: (
-              <>
-                <div tw="w-full flex justify-between">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="md"
-                    onClick={handleCloseModal}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="md"
-                    onClick={handleAcceptTermsAndConditions}
-                    disabled={!values.termsAndConditions}
-                  >
-                    Confirm & Proceed
-                  </Button>
-                </div>
-              </>
-            ),
-          })
-        default:
-          return modalClose()
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      node,
-      selectedModal,
-      selectedNode,
-      values.termsAndConditions,
-      setSelectedNode,
-      handleSelectNode,
-      handleCloseModal,
-      handleCheckTermsAndConditions,
-      handleAcceptTermsAndConditions,
-      /*
-      Both modalOpen and modalClose are not included in the dependencies because there's
-      an infinite refresh loop when they are included. This is because the modalOpen
-      and modalClose functions are being redefined on every render, causing the
-      useEffect to run again and again.
-       */
-      // modalOpen,
-      // modalClose,
-    ],
-  )
-  // ------------------------
 
   const columns = useMemo(() => {
     return [
@@ -577,6 +459,83 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           }
         />
       </Form>
+
+      {/* Node List Modal */}
+      <Modal
+        open={selectedModal === 'node-list'}
+        onClose={handleCloseModal}
+        width="80rem"
+        header=""
+        content={
+          <CRNList selected={selectedNode} onSelectedChange={setSelectedNode} />
+        }
+        footer={
+          <div tw="w-full flex justify-end">
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={handleSelectNode}
+              disabled={!selectedNode}
+              tw="ml-auto!"
+            >
+              Continue
+            </Button>
+          </div>
+        }
+      />
+
+      {/* Terms and Conditions Modal */}
+      <Modal
+        open={selectedModal === 'terms-and-conditions' && !!termsAndConditions}
+        onClose={handleCloseModal}
+        width="34rem"
+        header={
+          <TextGradient type="h6">Accept Terms & Conditions</TextGradient>
+        }
+        content={
+          termsAndConditions && (
+            <div tw="flex items-center gap-4 max-w-md mb-8">
+              <Checkbox
+                onChange={handleCheckTermsAndConditions}
+                checked={values.termsAndConditions}
+              />
+              <div className="tp-body">
+                I have read, understood, and agree to the{' '}
+                <ExternalLink
+                  text="Terms & Conditions"
+                  href={termsAndConditions.url}
+                  color="main0"
+                  typo="body3"
+                  underline
+                />{' '}
+                of this Core Resouce Node.
+              </div>
+            </div>
+          )
+        }
+        footer={
+          <div tw="w-full flex justify-between">
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={handleCloseModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              onClick={handleAcceptTermsAndConditions}
+              disabled={!values.termsAndConditions}
+            >
+              Confirm & Proceed
+            </Button>
+          </div>
+        }
+      />
     </>
   )
 }
