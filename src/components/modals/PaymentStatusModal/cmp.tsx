@@ -129,7 +129,7 @@ export const PaymentStatusModalContent = ({
         {progressSteps.map((step) => (
           <StyledProgressStep key={step.key}>
             {step.current ? (
-              <Spinner size="3rem" color="main0" tw="-m-4"/>
+              <Spinner size="3rem" color="main0" tw="-m-4" />
             ) : (
               <StyledProgressStepIcon
                 name={step.key}

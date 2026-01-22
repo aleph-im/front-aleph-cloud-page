@@ -3,7 +3,7 @@ import EntityTable from '@/components/common/EntityTable'
 import PermissionsDetail from '@/components/common/PermissionsDetail'
 import SidePanel from '@/components/common/SidePanel'
 import { AccountPermissions } from '@/domain/permissions'
-import { Button, Icon, TextGradient, useModal } from '@aleph-front/core'
+import { Button, Icon, Modal, TextGradient } from '@aleph-front/core'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { getPermissionsTableColumns } from './columns'
 import { PermissionsTabContentProps } from './types'
@@ -34,10 +34,6 @@ export const PermissionsTabContent = memo(
     // Track currently editing permission to detect unsaved changes
     const [editingOriginalPermission, setEditingOriginalPermission] =
       useState<AccountPermissions | null>(null)
-
-    const modal = useModal()
-    const modalOpen = modal?.open
-    const modalClose = modal?.close
 
     // Sync with data prop changes
     useEffect(() => {
@@ -178,82 +174,18 @@ export const PermissionsTabContent = memo(
       setEditingOriginalPermission(null)
       setSidePanel({ isOpen: false, title: '' })
       setShowUnsavedChangesModal(false)
-      modalClose?.()
-    }, [editingOriginalPermission, modalClose])
+    }, [editingOriginalPermission])
 
     const handleCancelDiscard = useCallback(() => {
       setShowUnsavedChangesModal(false)
       setSidePanel((prev) => ({ ...prev, isOpen: true }))
-      modalClose?.()
-    }, [modalClose])
+    }, [])
 
     const columns = getPermissionsTableColumns({
       onRowConfigure: handleRowConfigure,
       onRowRevoke: handleRowRevoke,
       onRowRestore: handleRowRestore,
     })
-
-    useEffect(
-      () => {
-        if (!modalOpen) return
-        if (!modalClose) return
-
-        if (showUnsavedChangesModal) {
-          return modalOpen({
-            header: <TextGradient type="h6">Unsaved Changes</TextGradient>,
-            width: '34rem',
-            closeOnClickOutside: false,
-            closeOnCloseButton: false,
-            content: (
-              <div tw="mb-8">
-                <p className="tp-body">
-                  You&apos;ve made updates to your permission settings.
-                </p>
-                <p className="tp-body">
-                  If you leave now, these changes won&apos;t be saved.
-                </p>
-              </div>
-            ),
-            footer: (
-              <div tw="w-full flex justify-between">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="md"
-                  onClick={handleCancelDiscard}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="md"
-                  onClick={handleDiscardChanges}
-                >
-                  Discard Changes
-                </Button>
-              </div>
-            ),
-          })
-        } else {
-          return modalClose()
-        }
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [
-        showUnsavedChangesModal,
-        handleDiscardChanges,
-        handleCancelDiscard,
-        /*
-        Both modalOpen and modalClose are not included in the dependencies because there's
-        an infinite refresh loop when they are included. This is because the modalOpen
-        and modalClose functions are being redefined on every render, causing the
-        useEffect to run again and again.
-         */
-        // modalOpen,
-        // modalClose,
-      ],
-    )
 
     const permissionsDetailFooter = sidePanel.selectedRow ? (
       <div tw="flex justify-start gap-x-4">
@@ -336,6 +268,44 @@ export const PermissionsTabContent = memo(
             <>ERROR</>
           )}
         </SidePanel>
+
+        {/* Unsaved Changes Modal */}
+        <Modal
+          open={showUnsavedChangesModal}
+          onClose={handleCancelDiscard}
+          width="34rem"
+          header={<TextGradient type="h6">Unsaved Changes</TextGradient>}
+          content={
+            <div tw="mb-8">
+              <p className="tp-body">
+                You&apos;ve made updates to your permission settings.
+              </p>
+              <p className="tp-body">
+                If you leave now, these changes won&apos;t be saved.
+              </p>
+            </div>
+          }
+          footer={
+            <div tw="w-full flex justify-between">
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={handleCancelDiscard}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleDiscardChanges}
+              >
+                Discard Changes
+              </Button>
+            </div>
+          }
+        />
       </>
     )
   },
