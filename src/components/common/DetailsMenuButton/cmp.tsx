@@ -1,111 +1,116 @@
+import { memo, useRef, useState, useCallback } from 'react'
 import {
-  memo,
-  RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import { Button, Icon, Tooltip } from '@aleph-front/core'
+  Icon,
+  useClickOutside,
+  useFloatPosition,
+  useTransition,
+  useWindowScroll,
+  useWindowSize,
+} from '@aleph-front/core'
 import Link from 'next/link'
+import { Portal } from '@/components/common/Portal'
+import { StyledMenuPortal, MenuTriggerButton, MenuItemButton } from './styles'
+import { DetailsMenuButtonProps } from './types'
 
-type MenuItem = {
-  label: string
-  href?: string
-  onClick?: () => void
-}
+export const DetailsMenuButton = ({
+  menuItems,
+  icon,
+  disabled = false,
+}: DetailsMenuButtonProps) => {
+  const [showMenu, setShowMenu] = useState(false)
 
-type DetailsMenuButtonProps = {
-  menuItems: MenuItem[]
-}
+  const menuElementRef = useRef<HTMLDivElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
 
-export const DetailsMenuButton = ({ menuItems }: DetailsMenuButtonProps) => {
-  const [open, setOpen] = useState(false)
-  const tooltipRef: RefObject<HTMLButtonElement> = useRef(null)
+  const windowSize = useWindowSize(0)
+  const windowScroll = useWindowScroll(0)
 
-  const handleClick = useCallback(
+  const { shouldMount, stage } = useTransition(showMenu, 250)
+
+  const isOpen = stage === 'enter'
+
+  const {
+    myRef: menuRef,
+    atRef: triggerRef,
+    position: menuPosition,
+  } = useFloatPosition({
+    my: 'top-right',
+    at: 'bottom-right',
+    myRef: menuElementRef,
+    atRef: menuButtonRef,
+    deps: [windowSize, windowScroll, shouldMount],
+  })
+
+  useClickOutside(() => {
+    if (showMenu) setShowMenu(false)
+  }, [menuRef, triggerRef])
+
+  const handleToggle = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
-      setOpen(!open)
-    },
-    [open, setOpen],
-  )
-  const handleClose = useCallback(() => setOpen(false), [setOpen])
-
-  // Handle click outside of the tooltip to close it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        open &&
-        tooltipRef.current &&
-        !tooltipRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false)
+      if (!disabled) {
+        setShowMenu(!showMenu)
       }
-    }
+    },
+    [disabled, showMenu],
+  )
 
-    if (open) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
+  const handleClose = useCallback(() => setShowMenu(false), [])
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [open])
+  const handleItemClick = useCallback(
+    (onClick?: () => void) => {
+      handleClose()
+      onClick?.()
+    },
+    [handleClose],
+  )
 
   return (
-    <>
-      <Tooltip
-        open={open}
-        targetRef={tooltipRef}
-        onCloseClick={handleClose}
-        onClose={handleClose}
-        variant={2}
-        content={
-          <div
-            tw="flex flex-col min-w-[9.25rem]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {menuItems.map((item) =>
-              item.href ? (
-                <Link key={item.label} href={item.href} tw="py-2 px-3">
-                  {item.label}
-                </Link>
-              ) : (
-                <button
-                  key={item.label}
-                  onClick={() => {
-                    item.onClick?.()
-                    handleClose()
-                  }}
-                  tw="py-2 px-3 text-left cursor-pointer"
-                >
-                  {item.label}
-                </button>
-              ),
-            )}
-          </div>
-        }
-        my="top-right"
-        at="bottom-right"
-        margin={{ x: 0, y: 2 }}
-      />
-      <Button
-        kind="functional"
-        variant="textOnly"
-        onClick={handleClick}
-        ref={tooltipRef}
+    <span onClick={(e) => e.stopPropagation()}>
+      <MenuTriggerButton
+        ref={menuButtonRef}
+        onClick={handleToggle}
+        disabled={disabled}
       >
-        <div
-          className="bg-base0"
-          tw="h-10 w-12 flex items-center justify-center"
-        >
-          <Icon name="ellipsis" size="lg" />
-        </div>
-      </Button>
-    </>
+        {icon || <Icon name="ellipsis" />}
+      </MenuTriggerButton>
+      <Portal>
+        {shouldMount && (
+          <StyledMenuPortal
+            $isOpen={isOpen}
+            $position={menuPosition}
+            ref={menuRef}
+          >
+            <div tw="flex flex-col items-start w-full">
+              {menuItems.map((item) =>
+                item.href ? (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    tw="px-4 py-3 w-full text-left"
+                    onClick={handleClose}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <MenuItemButton
+                    key={item.label}
+                    disabled={item.disabled}
+                    tw="px-4 py-3 w-full text-left"
+                    onClick={() => handleItemClick(item.onClick)}
+                  >
+                    {item.label}
+                  </MenuItemButton>
+                ),
+              )}
+            </div>
+          </StyledMenuPortal>
+        )}
+      </Portal>
+    </span>
   )
 }
+
 DetailsMenuButton.displayName = 'DetailsMenuButton'
 
 export default memo(DetailsMenuButton) as typeof DetailsMenuButton

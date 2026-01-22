@@ -1,2 +1,2 @@
 export { default } from './cmp'
-export type { ButtonLinkProps } from './types'
+export * from './types'

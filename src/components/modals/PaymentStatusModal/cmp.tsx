@@ -224,7 +224,7 @@ export const PaymentStatusModalFooter = memo(
     const { handleOpen: handleOpenReportIssue } = useReportIssueModal()
 
     return (
-      <div tw="flex justify-end items-center">
+      <div tw="flex justify-between items-center">
         <Button
           variant="textOnly"
           size="sm"
