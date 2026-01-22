@@ -191,6 +191,7 @@ export abstract class AggregateManager<Entity, AddEntity, AggregateItem>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseAggregate(response: any): Entity[] {
     const aggregate = response as AggregateContent<AggregateItem>
+    console.log('aggregate', aggregate)
     return this.parseAggregateItems(aggregate).sort((a, b) =>
       this.getEntityDate(b).localeCompare(this.getEntityDate(a)),
     )

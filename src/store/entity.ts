@@ -17,6 +17,7 @@ type CachedEntityName =
   | 'confidentialVolume'
   | 'ccns'
   | 'crns'
+  | 'permissions'
 
 // Entity relationship mapping for cascade invalidation
 // When ANY entity is deleted, clear ALL entity caches for complete consistency
@@ -56,6 +57,7 @@ export const ENTITY_RELATIONSHIPS: Record<
   confidentialVolume: ['volume', 'confidential'],
   ccns: ['crns'],
   crns: ['ccns'],
+  permissions: [],
 }
 
 export type EntityState<T> = {

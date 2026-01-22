@@ -3,9 +3,9 @@ import { StyledForm } from './styles'
 import { FormError, FormErrorProps } from '@aleph-front/core'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 
-export const Form = ({ children, onSubmit, errors }: FormProps) => {
+export const Form = ({ children, onSubmit, errors, id }: FormProps) => {
   return (
-    <StyledForm onSubmit={onSubmit} noValidate>
+    <StyledForm id={id} onSubmit={onSubmit} noValidate>
       {children}
       {errors?.root && (
         <CenteredContainer>

@@ -16,6 +16,7 @@ import { RewardsResponse } from '@/domain/stake'
 import { FilterState, getFilterReducer } from './filter'
 import { UIState, getUIReducer } from './ui'
 import { CreditPaymentHistoryItem } from '@/domain/credit'
+import { AccountPermissions } from '@/domain/permissions'
 
 export type StoreSubstate = Record<string, unknown>
 
@@ -70,6 +71,7 @@ export type StoreState = {
   program: EntityState<Program>
   volume: EntityState<Volume>
   website: EntityState<Website>
+  permissions: EntityState<AccountPermissions>
 
   // Volume relationships
   programVolume: EntityState<Volume>
@@ -112,6 +114,7 @@ export const storeReducer = mergeReducers<StoreState>({
   program: getEntityReducer<Program>('program', 'id'),
   volume: getEntityReducer<Volume>('volume', 'id'),
   website: getEntityReducer<Website>('website', 'id'),
+  permissions: getEntityReducer<AccountPermissions>('permissions', 'id'),
 
   // Volume relationships
   programVolume: getEntityReducer<Volume>('programVolume', 'id'),

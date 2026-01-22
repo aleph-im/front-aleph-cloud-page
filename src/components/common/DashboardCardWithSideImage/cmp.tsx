@@ -33,7 +33,7 @@ export const DashboardCardWithSideImage = ({
             <TextGradient as="h2" type="h3">
               {title}
             </TextGradient>
-            {description}
+            <div className="tp-body1">{description}</div>
           </div>
           {(withButton || externalLinkUrl) && (
             <div tw="mt-6 flex flex-wrap items-center justify-between gap-6">

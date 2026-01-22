@@ -52,6 +52,7 @@ export const defaultFileExtension: Record<LanguageType, string> = {
 export const defaultDomainAggregateKey = 'domains'
 export const defaultWebsiteAggregateKey = 'websites'
 export const defaultPortForwardingAggregateKey = 'port-forwarding'
+export const defaultPermissionsAggregateKey = 'security'
 export const defaultSSHPostType = 'ALEPH-SSH'
 
 export const defaultConsoleChannel = 'ALEPH-CLOUDSOLUTIONS'
@@ -89,6 +90,7 @@ type CheckoutAddStepType =
   | 'allocate'
   | 'portForwarding'
   | 'creditTransaction'
+  | 'permissions'
 
 type CheckoutDelStepType =
   | 'sshDel'
@@ -99,6 +101,7 @@ type CheckoutDelStepType =
   | 'programDel'
   | 'websiteDel'
   | 'portForwardingDel'
+  | 'permissionsDel'
 
 type CheckoutUpStepType =
   | 'sshUp'
@@ -249,11 +252,16 @@ export const NAVIGATION_URLS = {
   },
   console: {
     home: '/console',
+    permissions: {
+      home: '/console/permissions',
+      new: '/console/permissions/new',
+    },
     settings: {
       home: '/console/settings',
       ssh: {
         home: '/console/settings/ssh',
         new: '/console/settings/ssh/new',
+        detail: (id: string) => `/console/settings/ssh/${id}`,
       },
       domain: {
         home: '/console/settings/domain',
@@ -266,6 +274,7 @@ export const NAVIGATION_URLS = {
       website: {
         home: '/console/hosting/website',
         new: '/console/hosting/website/new',
+        detail: (id: string) => `/console/hosting/website/${id}`,
       },
     },
     computing: {
@@ -273,18 +282,22 @@ export const NAVIGATION_URLS = {
       functions: {
         home: '/console/computing/function',
         new: '/console/computing/function/new',
+        detail: (id: string) => `/console/computing/function/${id}`,
       },
       instances: {
         home: '/console/computing/instance',
         new: '/console/computing/instance/new',
+        detail: (id: string) => `/console/computing/instance/${id}`,
       },
       gpus: {
         home: '/console/computing/gpu-instance',
         new: '/console/computing/gpu-instance/new',
+        detail: (id: string) => `/console/computing/gpu-instance/${id}`,
       },
       confidentials: {
         home: '/console/computing/confidential',
         new: '/console/computing/confidential/new',
+        detail: (id: string) => `/console/computing/confidential/${id}`,
       },
     },
     storage: {
@@ -292,6 +305,7 @@ export const NAVIGATION_URLS = {
       volumes: {
         home: '/console/storage/volume',
         new: '/console/storage/volume/new',
+        detail: (id: string) => `/console/storage/volume/${id}`,
       },
     },
   },
