@@ -2,12 +2,12 @@ import styled from 'styled-components'
 import tw, { css } from 'twin.macro'
 import { FloatPosition } from '@aleph-front/core'
 
-export type StyledPortalProps = {
+export type StyledMenuPortalProps = {
   $position: FloatPosition
   $isOpen: boolean
 }
 
-export const StyledPortal = styled.div<StyledPortalProps>`
+export const StyledMenuPortal = styled.div<StyledMenuPortalProps>`
   ${({ theme, $position: { x, y }, $isOpen }) => {
     return css`
       ${tw`fixed -top-1.5 left-1.5 z-40`}
@@ -23,7 +23,7 @@ export const StyledPortal = styled.div<StyledPortalProps>`
   }}
 `
 
-export const RowActionsButton = styled.button`
+export const MenuTriggerButton = styled.button`
   ${tw`w-12 h-10`};
 
   ${({ theme, disabled }) => css`
@@ -39,7 +39,7 @@ export const RowActionsButton = styled.button`
   `})
 `
 
-export const ActionButton = styled.button`
+export const MenuItemButton = styled.button`
   ${({ theme, disabled }) => {
     return css`
       &:hover {

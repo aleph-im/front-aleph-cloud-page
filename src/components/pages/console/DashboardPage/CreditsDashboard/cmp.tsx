@@ -21,6 +21,9 @@ import PaymentHistoryPanel from './PaymentHistoryPanel'
 import { useCreditsDashboard } from './hook'
 import { PaymentStatus } from '@/domain/credit'
 import { getDate, formatPaymentAmount } from '@/helpers/utils'
+import { useReportIssueModal } from '@/components/modals/ReportIssueModal'
+import DetailsMenuButton from '@/components/common/DetailsMenuButton'
+import tw from 'twin.macro'
 
 export default function CreditsDashboard() {
   const {
@@ -41,6 +44,8 @@ export default function CreditsDashboard() {
     handleClosePaymentStatusModal,
     handleOpenTopUpModal,
   } = useCreditsDashboard()
+
+  const { handleOpen: handleOpenReportIssue } = useReportIssueModal()
 
   return (
     <section tw="px-0 pb-6 pt-12 lg:pb-5">
@@ -128,6 +133,7 @@ export default function CreditsDashboard() {
               <StyledTable
                 // borderType="none"
                 // rowNoise
+                clickableRows
                 rowKey={(row) => row.id}
                 data={recentHistory}
                 rowProps={(row) => ({
@@ -214,15 +220,20 @@ export default function CreditsDashboard() {
                     align: 'right',
                     render: () => <></>,
                   },
-                  /* TODO: Re-enable when report issue functionality is implemented
                   {
                     label: '',
                     width: '100%',
                     align: 'right',
-                    render: () => {
+                    render: (row) => {
                       return (
                         <DetailsMenuButton
-                          menuItems={[{ label: 'Report issue', href: '/' }]}
+                          menuItems={[
+                            {
+                              label: 'Report issue',
+                              onClick: () =>
+                                handleOpenReportIssue({ payment: row }),
+                            },
+                          ]}
                         />
                       )
                     },
@@ -230,7 +241,6 @@ export default function CreditsDashboard() {
                       css: tw`pl-3!`,
                     }),
                   },
-                  */
                 ]}
               />
             </div>
@@ -245,6 +255,7 @@ export default function CreditsDashboard() {
         payments={history}
         loading={historyLoading}
         onPaymentClick={handleOpenPaymentStatusModal}
+        onReportIssue={handleOpenReportIssue}
       />
 
       {/* Payment Status Modal */}

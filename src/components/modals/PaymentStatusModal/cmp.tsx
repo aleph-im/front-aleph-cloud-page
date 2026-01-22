@@ -17,6 +17,7 @@ import {
 import { getETHExplorerURL, getExplorerURL } from '@/helpers/utils'
 import BorderBox from '@/components/common/BorderBox'
 import { Blockchain } from '@aleph-sdk/core'
+import { useReportIssueModal } from '@/components/modals/ReportIssueModal'
 
 type ProgressStep = {
   key: string
@@ -219,21 +220,20 @@ PaymentStatusModalHeader.displayName = 'PaymentStatusModalHeader'
 // --------------
 
 export const PaymentStatusModalFooter = memo(
-  ({ onClose }: PaymentStatusModalFooterProps) => {
+  ({ payment, onClose }: PaymentStatusModalFooterProps) => {
+    const { handleOpen: handleOpenReportIssue } = useReportIssueModal()
+
     return (
-      <div tw="flex justify-end items-center">
-        {/* TODO: Re-enable when report issue functionality is implemented
+      <div tw="flex justify-between items-center">
         <Button
           variant="textOnly"
           size="sm"
           className="text-base2"
-          onClick={() => {
-            console.log('Report issue for payment:', payment.id)
-          }}
+          onClick={() => handleOpenReportIssue({ payment })}
         >
           Report issue
         </Button>
-        */}
+
         <Button variant="primary" size="md" onClick={onClose}>
           Close
         </Button>

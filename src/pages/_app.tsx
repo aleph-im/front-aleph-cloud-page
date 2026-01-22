@@ -18,6 +18,7 @@ import { useRef } from 'react'
 import Head from 'next/head'
 import '@/config/reown'
 import TopUpCreditsModal from '@/components/modals/TopUpCreditsModal'
+import ReportIssueModal from '@/components/modals/ReportIssueModal'
 
 export default function App({ Component, pageProps }: AppProps) {
   const mainRef = useRef<HTMLDivElement>(null)
@@ -39,6 +40,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <ReownProvider>
         <AppStateProvider>
           <NotificationProvider max={10} timeout={2000}>
+            <ReportIssueModal />
             <TopUpCreditsModal />
             <Viewport>
               <Sidebar />
