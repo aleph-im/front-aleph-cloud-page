@@ -8,7 +8,7 @@ import {
   ReportIssueMetadata,
 } from './types'
 
-const REPORT_ISSUE_ENDPOINT = 'https://n8n.aleph.im/webhook-test/report-issue'
+const REPORT_ISSUE_ENDPOINT = 'https://n8n.aleph.im/webhook/report-issue'
 
 export function useReportIssueModal(): UseReportIssueModalReturn {
   const [state, dispatch] = useAppState()

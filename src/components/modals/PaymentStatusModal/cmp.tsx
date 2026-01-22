@@ -229,7 +229,7 @@ export const PaymentStatusModalFooter = memo(
           variant="textOnly"
           size="sm"
           className="text-base2"
-          onClick={() => handleOpenReportIssue({ paymentId: payment.id })}
+          onClick={() => handleOpenReportIssue({ payment })}
         >
           Report issue
         </Button>

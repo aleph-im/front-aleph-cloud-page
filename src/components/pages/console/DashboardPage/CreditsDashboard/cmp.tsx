@@ -231,7 +231,7 @@ export default function CreditsDashboard() {
                             {
                               label: 'Report issue',
                               onClick: () =>
-                                handleOpenReportIssue({ paymentId: row.id }),
+                                handleOpenReportIssue({ payment: row }),
                             },
                           ]}
                         />

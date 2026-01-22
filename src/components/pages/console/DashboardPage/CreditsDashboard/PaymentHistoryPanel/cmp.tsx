@@ -169,7 +169,7 @@ export const PaymentHistoryPanel = ({
                       menuItems={[
                         {
                           label: 'Report issue',
-                          onClick: () => onReportIssue({ paymentId: row.id }),
+                          onClick: () => onReportIssue({ payment: row }),
                         },
                       ]}
                     />
