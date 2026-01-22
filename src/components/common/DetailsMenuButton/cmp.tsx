@@ -23,7 +23,13 @@ export const DetailsMenuButton = ({ menuItems }: DetailsMenuButtonProps) => {
   const [open, setOpen] = useState(false)
   const tooltipRef: RefObject<HTMLButtonElement> = useRef(null)
 
-  const handleClick = useCallback(() => setOpen(!open), [open, setOpen])
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setOpen(!open)
+    },
+    [open, setOpen],
+  )
   const handleClose = useCallback(() => setOpen(false), [setOpen])
 
   // Handle click outside of the tooltip to close it
@@ -56,7 +62,10 @@ export const DetailsMenuButton = ({ menuItems }: DetailsMenuButtonProps) => {
         onClose={handleClose}
         variant={2}
         content={
-          <div tw="flex flex-col min-w-[9.25rem]">
+          <div
+            tw="flex flex-col min-w-[9.25rem]"
+            onClick={(e) => e.stopPropagation()}
+          >
             {menuItems.map((item) =>
               item.href ? (
                 <Link key={item.label} href={item.href} tw="py-2 px-3">

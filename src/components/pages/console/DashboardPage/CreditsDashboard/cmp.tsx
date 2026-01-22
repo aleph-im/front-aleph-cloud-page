@@ -133,6 +133,7 @@ export default function CreditsDashboard() {
               <StyledTable
                 // borderType="none"
                 // rowNoise
+                clickableRows
                 rowKey={(row) => row.id}
                 data={recentHistory}
                 rowProps={(row) => ({

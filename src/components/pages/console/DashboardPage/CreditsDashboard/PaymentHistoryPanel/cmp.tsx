@@ -73,6 +73,7 @@ export const PaymentHistoryPanel = ({
         {/* Payments Table */}
         <div tw="overflow-x-auto">
           <StyledTable
+            clickableRows
             rowKey={(row) => row.id}
             data={filteredPayments}
             rowProps={(row) => ({
