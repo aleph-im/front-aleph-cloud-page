@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { useNotification } from '@aleph-front/core'
 import { useAppState } from '@/contexts/appState'
 import { openReportIssueModal, closeReportIssueModal } from '@/store/ui'
 import {
@@ -41,6 +42,7 @@ export function useReportIssueModalForm(
 ): UseReportIssueModalFormReturn {
   const [state] = useAppState()
   const { account } = state.connection
+  const noti = useNotification()
 
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -81,17 +83,43 @@ export function useReportIssueModalForm(
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to submit report: ${response.statusText}`)
+        const genericErrorMessage =
+          'Failed to submit report. An unexpected error happened. Try again later.'
+
+        if (response.status === 400) {
+          const data = await response.json()
+          throw new Error(data?.message || genericErrorMessage)
+        }
+
+        throw new Error(genericErrorMessage)
       }
+
+      const data = await response.json()
+
+      noti?.add({
+        variant: 'success',
+        title: 'Report submitted',
+        text: data?.message || 'Report submitted successfully',
+      })
 
       setMessage('')
       onClose?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit report')
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Failed to submit report. An unexpected error happened. Try again later.'
+      setError(errorMessage)
+
+      noti?.add({
+        variant: 'error',
+        title: 'Error',
+        text: errorMessage,
+      })
     } finally {
       setIsSubmitting(false)
     }
-  }, [account?.address, message, metadata, onClose])
+  }, [account?.address, message, metadata, onClose, noti])
 
   return {
     message,

@@ -1,6 +1,7 @@
 import React, { memo } from 'react'
 import { Button, Modal, TextArea, TextGradient } from '@aleph-front/core'
 import { useReportIssueModal, useReportIssueModalForm } from './hook'
+import ExternalLink from '@/components/common/ExternalLink'
 
 export const ReportIssueModal = () => {
   const { isOpen, metadata, handleClose } = useReportIssueModal()
@@ -70,9 +71,19 @@ const ReportIssueModalContent = memo(
           tw="min-h-[8rem]"
         />
         {error && (
-          <p className="tp-body3 text-error" tw="m-0">
-            {error}
-          </p>
+          <div tw="flex flex-col gap-2">
+            <p className="tp-body3 text-error" tw="m-0">
+              {error}
+            </p>
+            <p className="tp-body3" tw="m-0">
+              You can also report the issue via{' '}
+              <ExternalLink
+                text="Telegram"
+                href="https://t.me/+fJ09WBP2KUA4MTg0"
+                color="main0"
+              />
+            </p>
+          </div>
         )}
       </div>
     )
