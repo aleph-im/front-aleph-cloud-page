@@ -62,7 +62,7 @@ interface ReportIssueModalContentProps {
 const ReportIssueModalContent = memo(
   ({ message, setMessage, error }: ReportIssueModalContentProps) => {
     return (
-      <div tw="flex flex-col gap-4">
+      <div tw="flex flex-col gap-4 m-4">
         <TextArea
           name="message"
           value={message}
