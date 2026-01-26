@@ -204,10 +204,7 @@ const TopUpCreditsModalContent = memo(
               </StyledReceiveAmount>
             </StyledReceiveBox>
             {showInsufficientWarning && minimumCreditsNeeded && (
-              <div
-                className="tp-body2 fs-12"
-                tw="mt-2 p-3 bg-error/10 text-error rounded"
-              >
+              <div className="tp-body2 fs-12 text-error" tw="mt-2 p-3 rounded">
                 <Icon name="exclamation-triangle" tw="mr-2" />
                 Minimum {formatCredits(minimumCreditsNeeded)} required for this
                 operation. Please increase the amount.
