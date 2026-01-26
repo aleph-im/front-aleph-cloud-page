@@ -5,7 +5,7 @@ import { Text } from '@/components/pages/console/common'
 import { useFormatPayment } from './hook'
 import Skeleton from '../../Skeleton'
 import IconText from '../../IconText'
-import { ellipseAddress } from '@/helpers/utils'
+import { ellipseAddress, formatCredits } from '@/helpers/utils'
 import InfoTitle from '../InfoTitle'
 
 /**
@@ -42,7 +42,15 @@ const PaymentCard = ({ paymentData }: { paymentData: PaymentData }) => {
             </div>
           </div>
           <p className="text-base2 fs-18" tw="font-bold">
-            {totalSpent ? totalSpent : <Skeleton width="5rem" />}
+            {totalSpent ? (
+              isCredit ? (
+                formatCredits(Number(totalSpent))
+              ) : (
+                totalSpent
+              )
+            ) : (
+              <Skeleton width="5rem" />
+            )}
           </p>
         </div>
 

@@ -350,7 +350,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // Calculate minimum balance needed for 24 hours of runtime
   const minimumBalanceNeeded = useMemo(() => {
     if (!cost?.cost?.cost) return 0
-    return cost.cost.cost * 24 // 24 hours minimum
+    return Math.ceil(cost.cost.cost * 24) // 24 hours minimum, ceiled to integer
   }, [cost?.cost?.cost])
 
   // Check if user has enough balance for at least 24 hours

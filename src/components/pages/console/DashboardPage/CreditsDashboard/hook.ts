@@ -22,6 +22,7 @@ import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook
 import { useAppState } from '@/contexts/appState'
 import { clearFocusedPayment } from '@/store/ui'
 import { CreditPaymentHistoryItem } from '@/domain/credit'
+import { formatCredits } from '@/helpers/utils'
 
 export type UseCreditsDashboardReturn = {
   // Balance & costs
@@ -91,7 +92,7 @@ export function useCreditsDashboard(): UseCreditsDashboardReturn {
       noti?.add({
         variant: 'success',
         title: 'Purchase complete',
-        text: `Your balance has been credited with ~${payment.credits} credits.`,
+        text: `Your balance has been credited with ~${formatCredits(payment.credits)}.`,
       })
     },
     [noti],

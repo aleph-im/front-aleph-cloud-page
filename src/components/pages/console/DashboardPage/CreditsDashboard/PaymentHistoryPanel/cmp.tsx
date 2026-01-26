@@ -4,7 +4,7 @@ import { SidePanel } from '@/components/common/SidePanel/cmp'
 import { StyledTable } from '@/components/common/EntityTable/styles'
 import { PaymentStatus } from '@/domain/credit'
 import { PaymentHistoryPanelProps } from './types'
-import { formatPaymentAmount, getDate } from '@/helpers/utils'
+import { formatPaymentAmount, getDate, formatCredits } from '@/helpers/utils'
 
 export const PaymentHistoryPanel = ({
   isOpen,
@@ -147,7 +147,7 @@ export const PaymentHistoryPanel = ({
                 align: 'left',
                 sortable: true,
                 width: '8rem',
-                render: (row) => `~${row.credits}`,
+                render: (row) => `~${formatCredits(row.credits)}`,
               },
               {
                 label: '',

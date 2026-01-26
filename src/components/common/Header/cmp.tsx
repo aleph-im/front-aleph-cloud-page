@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   AccountPicker,
@@ -16,6 +16,7 @@ import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
 import { useSettings } from '@/hooks/common/useSettings'
 import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook'
+import { formatCredits } from '@/helpers/utils'
 
 const CustomLink = (props: RenderLinkProps) => {
   return props.route.children ? <span {...props} /> : <Link {...props} />
@@ -165,6 +166,15 @@ export const Header = () => {
   const ensName = useEnsNameLookup(accountAddress)
   const { handleOpen } = useTopUpCreditsModal()
 
+  // Format credits as USD for display
+  const formattedCredits = useMemo(
+    () =>
+      accountCreditBalance !== undefined
+        ? formatCredits(accountCreditBalance)
+        : undefined,
+    [accountCreditBalance],
+  )
+
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
@@ -184,7 +194,7 @@ export const Header = () => {
                 accountAddress={accountAddress}
                 accountBalance={accountBalance}
                 showCredits
-                accountCredits={accountCreditBalance}
+                accountCredits={formattedCredits}
                 blockchains={blockchains}
                 networks={networks}
                 selectedNetwork={selectedNetwork}
@@ -213,7 +223,7 @@ export const Header = () => {
             accountAddress={accountAddress}
             accountBalance={accountBalance}
             showCredits
-            accountCredits={accountCreditBalance}
+            accountCredits={formattedCredits}
             blockchains={blockchains}
             networks={networks}
             selectedNetwork={selectedNetwork}

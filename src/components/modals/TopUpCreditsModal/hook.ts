@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState } from 'react'
+import { useCallback, useMemo, useEffect, useState, useRef } from 'react'
 import { useDebounceState, useLocalRequest } from '@aleph-front/core'
 import { useForm } from '@/hooks/common/useForm'
 import { useController, useWatch } from 'react-hook-form'
@@ -12,6 +12,7 @@ import {
   TopUpCreditsFormData,
   topUpCreditsSchema,
   TokenEstimationResponse,
+  PaymentCurrency,
 } from '@/helpers/schemas/credit'
 import { useCreditManager } from '@/hooks/common/useManager/useCreditManager'
 import {
@@ -63,37 +64,53 @@ export function useTopUpCreditsModalForm({
   const [appState, dispatch] = useAppState()
   const creditManager = useCreditManager()
   const { next, stop } = useCheckoutNotification({})
-  const [initialAmount, setInitialAmount] = useState(defaultValues.amount)
+  const [calculatedAmount, setCalculatedAmount] = useState(defaultValues.amount)
   const [isCalculatingInitialAmount, setIsCalculatingInitialAmount] =
     useState(false)
+  // Track if user has manually changed the amount
+  const [hasManuallyChangedAmount, setHasManuallyChangedAmount] =
+    useState(false)
+  // Track the last currency used for calculation to detect changes
+  const lastCalculatedCurrencyRef = useRef<PaymentCurrency>(
+    defaultValues.currency,
+  )
+
+  // Calculate token amount for a given currency based on minimum credit requirement
+  const calculateTokenAmountForCurrency = useCallback(
+    async (currency: PaymentCurrency): Promise<number> => {
+      if (!creditManager || !appState.ui.topUpCreditsMinimumBalance) {
+        return defaultValues.amount
+      }
+
+      const minimumCreditsNeeded = appState.ui.topUpCreditsMinimumBalance
+
+      const estimation = await creditManager.getCreditToTokenEstimation(
+        minimumCreditsNeeded,
+        defaultValues.chain,
+        currency,
+      )
+
+      // Round up and ensure minimum of 100
+      return Math.max(Math.ceil(estimation.tokenAmountInUnits), 100)
+    },
+    [creditManager, appState.ui.topUpCreditsMinimumBalance],
+  )
 
   // Calculate initial token amount based on minimum credit requirement
   useEffect(() => {
     const calculateInitialAmount = async () => {
       if (!creditManager || !appState.ui.topUpCreditsMinimumBalance) {
-        setInitialAmount(defaultValues.amount)
+        setCalculatedAmount(defaultValues.amount)
         return
       }
 
       setIsCalculatingInitialAmount(true)
       try {
-        // Calculate the required token amount for the minimum credits needed
-        const minimumCreditsNeeded = appState.ui.topUpCreditsMinimumBalance
-
-        const estimation = await creditManager.getCreditToTokenEstimation(
-          minimumCreditsNeeded,
-          defaultValues.chain,
+        const finalAmount = await calculateTokenAmountForCurrency(
           defaultValues.currency,
         )
-
-        // Convert token amount from wei to whole tokens
-        // tokenAmount is in wei (18 decimals), convert to whole tokens
-        const tokenAmountInWei = BigInt(estimation.tokenAmount)
-        const tokensNeeded = Number(tokenAmountInWei / BigInt(10 ** 18))
-
-        // Round up and ensure minimum of 100
-        const finalAmount = Math.max(Math.ceil(tokensNeeded), 100)
-        setInitialAmount(finalAmount)
+        setCalculatedAmount(finalAmount)
+        lastCalculatedCurrencyRef.current = defaultValues.currency
       } catch (error) {
         console.error('Error calculating initial token amount:', error)
         // Fallback to a conservative estimate if API fails
@@ -101,14 +118,18 @@ export function useTopUpCreditsModalForm({
           Math.ceil(appState.ui.topUpCreditsMinimumBalance),
           100,
         )
-        setInitialAmount(fallbackAmount)
+        setCalculatedAmount(fallbackAmount)
       } finally {
         setIsCalculatingInitialAmount(false)
       }
     }
 
     calculateInitialAmount()
-  }, [creditManager, appState.ui.topUpCreditsMinimumBalance])
+  }, [
+    creditManager,
+    appState.ui.topUpCreditsMinimumBalance,
+    calculateTokenAmountForCurrency,
+  ])
 
   const onSubmit = useCallback(
     async (state: TopUpCreditsFormData) => {
@@ -156,16 +177,18 @@ export function useTopUpCreditsModalForm({
   } = useForm({
     defaultValues: {
       ...defaultValues,
-      amount: initialAmount,
+      amount: calculatedAmount,
     },
     onSubmit,
     resolver: zodResolver(topUpCreditsSchema),
   })
 
-  // Update form value when initial amount is calculated
+  // Update form value when calculated amount changes (only if user hasn't manually changed it)
   useEffect(() => {
-    setValue('amount', initialAmount)
-  }, [initialAmount, setValue])
+    if (!hasManuallyChangedAmount) {
+      setValue('amount', calculatedAmount)
+    }
+  }, [calculatedAmount, setValue, hasManuallyChangedAmount])
 
   // @note: don't use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as TopUpCreditsFormData
@@ -180,8 +203,53 @@ export function useTopUpCreditsModalForm({
     name: 'currency',
   })
 
+  // Wrap amount onChange to track manual changes
+  const handleAmountChange = useCallback(
+    (value: number) => {
+      setHasManuallyChangedAmount(true)
+      amountCtrl.field.onChange(value)
+    },
+    [amountCtrl.field],
+  )
+
+  // Recalculate token amount when currency changes (only if user hasn't manually changed amount)
+  useEffect(() => {
+    const recalculateForCurrency = async () => {
+      // Only recalculate if there's a minimum balance requirement and user hasn't manually changed
+      if (
+        !appState.ui.topUpCreditsMinimumBalance ||
+        hasManuallyChangedAmount ||
+        values.currency === lastCalculatedCurrencyRef.current
+      ) {
+        return
+      }
+
+      setIsCalculatingInitialAmount(true)
+      try {
+        const newAmount = await calculateTokenAmountForCurrency(values.currency)
+        setCalculatedAmount(newAmount)
+        setValue('amount', newAmount)
+        lastCalculatedCurrencyRef.current = values.currency
+      } catch (error) {
+        console.error('Error recalculating token amount for currency:', error)
+      } finally {
+        setIsCalculatingInitialAmount(false)
+      }
+    }
+
+    recalculateForCurrency()
+  }, [
+    values.currency,
+    hasManuallyChangedAmount,
+    appState.ui.topUpCreditsMinimumBalance,
+    calculateTokenAmountForCurrency,
+    setValue,
+  ])
+
   const resetForm = useCallback(() => {
     reset(defaultValues)
+    setHasManuallyChangedAmount(false)
+    lastCalculatedCurrencyRef.current = defaultValues.currency
   }, [reset])
 
   const debouncedAmount = useDebounceState(values.amount, 500)
@@ -215,6 +283,37 @@ export function useTopUpCreditsModalForm({
     return estimation?.creditAmount || 0
   }, [estimation])
 
+  // Check if the current amount meets the minimum credits requirement
+  const minimumCreditsNeeded = appState.ui.topUpCreditsMinimumBalance
+  const hasMinimumRequirement = !!minimumCreditsNeeded
+
+  // Determine if the estimated credits are insufficient for the minimum requirement
+  const isInsufficientForMinimum = useMemo(() => {
+    if (!hasMinimumRequirement || !estimation) return false
+    // Compare estimated credits (totalBalance) with minimum requirement
+    return totalBalance < minimumCreditsNeeded
+  }, [hasMinimumRequirement, estimation, totalBalance, minimumCreditsNeeded])
+
+  // Show warning only if user has manually changed amount and it's insufficient
+  const showInsufficientWarning = useMemo(() => {
+    return hasManuallyChangedAmount && isInsufficientForMinimum
+  }, [hasManuallyChangedAmount, isInsufficientForMinimum])
+
+  // Disable submit if amount is insufficient for the minimum requirement
+  const isSubmitDisabled = useMemo(() => {
+    return (
+      !values.amount ||
+      values.amount < 100 ||
+      isSubmitLoading ||
+      (hasMinimumRequirement && isInsufficientForMinimum)
+    )
+  }, [
+    values.amount,
+    isSubmitLoading,
+    hasMinimumRequirement,
+    isInsufficientForMinimum,
+  ])
+
   return {
     values,
     control,
@@ -222,11 +321,15 @@ export function useTopUpCreditsModalForm({
     currencyCtrl,
     errors,
     handleSubmit,
+    handleAmountChange,
     resetForm,
     bonus,
     totalBalance,
     isLoadingEstimation,
     isSubmitLoading,
     isCalculatingInitialAmount,
+    minimumCreditsNeeded,
+    showInsufficientWarning,
+    isSubmitDisabled,
   }
 }

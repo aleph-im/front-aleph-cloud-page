@@ -2,7 +2,7 @@ import React, { memo } from 'react'
 import { StyledPrice } from './styles'
 import { PriceProps } from './types'
 import { Logo } from '@aleph-front/core'
-import { humanReadableCurrency } from '@/helpers/utils'
+import { humanReadableCurrency, formatCredits } from '@/helpers/utils'
 import Skeleton from '@/components/common/Skeleton'
 
 export const Price = ({
@@ -23,7 +23,7 @@ export const Price = ({
 
   return (
     <StyledPrice {...rest}>
-      {humanReadableCurrency(value)}
+      {type === 'credit' ? formatCredits(value) : humanReadableCurrency(value)}
       {type === 'token' && (
         <Logo color="currentColor" img="aleph" size={iconSize} />
       )}

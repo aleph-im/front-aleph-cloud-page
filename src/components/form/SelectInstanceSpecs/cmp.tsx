@@ -46,7 +46,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         sortBy: (row: SpecsDetail) => row.price,
         render: (row: SpecsDetail) => (
           <span tw="flex items-center justify-end gap-1">
-            <Price value={row.price} duration={'h'} />
+            <Price type="credit" value={row.price} duration={'h'} />
           </span>
         ),
       },

@@ -1,4 +1,4 @@
-import { ellipseAddress, humanReadableCurrency } from '@/helpers/utils'
+import { ellipseAddress, formatCredits } from '@/helpers/utils'
 import { Label, StyledHoldingSummaryLine } from './styles'
 import { CheckoutSummaryProps } from './types'
 import { memo } from 'react'
@@ -195,7 +195,7 @@ export const CheckoutSummary = ({
                 <StyledHoldingSummaryLine $isHeader className="tp-body3 fs-12">
                   <div>AVAILABLE CREDITS</div>
                   <div>CURRENT WALLET {ellipseAddress(address)}</div>
-                  <div>{humanReadableCurrency(unlockedAmount)}</div>
+                  <div>{formatCredits(unlockedAmount)}</div>
                 </StyledHoldingSummaryLine>
                 {nftVoucherBalance > 0 && (
                   <StyledHoldingSummaryLine

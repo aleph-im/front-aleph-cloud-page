@@ -5,6 +5,7 @@ import { blockchains } from '@/domain/connect'
 import { communityWalletAddress } from '@/helpers/constants'
 import { useCopyToClipboardAndNotify, useLocalRequest } from '@aleph-front/core'
 import { getApiServer } from '@/helpers/server'
+import { formatCredits } from '@/helpers/utils'
 
 // Helper to convert seconds into days, hours, minutes, and seconds
 function getTimeComponents(totalSeconds: number) {
@@ -134,6 +135,10 @@ export function useFormatPayment(
 
     const dailyRate = Math.round(cost * 24)
 
+    // Format as USD for credit payments, raw number for stream (ALEPH tokens)
+    if (isCredit) {
+      return `~${formatCredits(dailyRate)}/day`
+    }
     return `~${dailyRate}/day`
   }, [cost, isCredit, isStream])
 

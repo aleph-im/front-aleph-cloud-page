@@ -20,7 +20,7 @@ import PaymentStatusModal, {
 import PaymentHistoryPanel from './PaymentHistoryPanel'
 import { useCreditsDashboard } from './hook'
 import { PaymentStatus } from '@/domain/credit'
-import { getDate, formatPaymentAmount } from '@/helpers/utils'
+import { getDate, formatPaymentAmount, formatCredits } from '@/helpers/utils'
 
 export default function CreditsDashboard() {
   const {
@@ -70,7 +70,9 @@ export default function CreditsDashboard() {
                   >
                     <p className="tp-info text-base2">AVAILABLE</p>
                     {accountCreditBalance !== undefined ? (
-                      <p className="text-main0 tp-h7">{accountCreditBalance}</p>
+                      <p className="text-main0 tp-h7">
+                        {formatCredits(accountCreditBalance)}
+                      </p>
                     ) : (
                       <Skeleton width="3rem" height="1.5rem" />
                     )}
@@ -206,7 +208,7 @@ export default function CreditsDashboard() {
                     align: 'left',
                     sortable: true,
                     width: '8rem',
-                    render: (row) => `~${row.credits}`,
+                    render: (row) => `~${formatCredits(row.credits)}`,
                   },
                   {
                     label: '',

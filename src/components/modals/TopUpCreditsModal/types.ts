@@ -20,10 +20,14 @@ export type UseTopUpCreditsModalFormReturn = {
   currencyCtrl: UseControllerReturn<TopUpCreditsFormData, 'currency'>
   errors: FieldErrors<TopUpCreditsFormData>
   handleSubmit: (e: FormEvent) => Promise<void>
+  handleAmountChange: (value: number) => void
   resetForm: () => void
   bonus: number
   totalBalance: number
   isLoadingEstimation: boolean
   isSubmitLoading: boolean
   isCalculatingInitialAmount: boolean
+  minimumCreditsNeeded?: number
+  showInsufficientWarning: boolean
+  isSubmitDisabled: boolean
 }

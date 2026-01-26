@@ -224,6 +224,35 @@ export const humanReadableCurrency = (value?: number, decimals = 2) => {
   else return prefix + (absValue / 10 ** 9).toFixed(decimals) + 'B'
 }
 
+/**
+ * Formats credits as USD currency (divides by 100 and adds $ symbol)
+ * Credits are stored as cents, so 100 credits = $1.00
+ *
+ * @param credits The credit amount (in cents)
+ * @param decimals Number of decimal places to show (default 2)
+ * @returns Formatted string like "$1.00" or "$1.5K" for large amounts
+ */
+export const formatCredits = (credits?: number, decimals = 2): string => {
+  if (credits === undefined || credits === null) return '$0.00'
+  if (credits === 0) return '$0.00'
+  if (!Number.isFinite(credits)) return '-'
+
+  const dollars = credits / 100
+  const isNegative = dollars < 0
+  const absValue = Math.abs(dollars)
+  const prefix = isNegative ? '-$' : '$'
+
+  if (absValue < 1_000) {
+    return prefix + absValue.toFixed(decimals)
+  } else if (absValue < 10 ** 6) {
+    return prefix + (absValue / 1_000).toFixed(decimals) + 'K'
+  } else if (absValue < 10 ** 9) {
+    return prefix + (absValue / 10 ** 6).toFixed(decimals) + 'M'
+  } else {
+    return prefix + (absValue / 10 ** 9).toFixed(decimals) + 'B'
+  }
+}
+
 const messageTypeWhitelist = new Set(Object.values(MessageType))
 
 /**

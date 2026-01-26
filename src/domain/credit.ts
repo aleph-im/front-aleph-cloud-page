@@ -310,7 +310,22 @@ export class CreditManager {
         throw new Error(`API error: ${response.status} ${response.statusText}`)
       }
 
-      return response.json()
+      const data = await response.json()
+
+      // Convert token amount from wei (18 decimals) to whole units, ceiling up
+      const tokenAmountInWei = BigInt(data.tokenAmount)
+      const divisor = BigInt(10 ** 18)
+      const quotient = tokenAmountInWei / divisor
+      const remainder = tokenAmountInWei % divisor
+      // Ceil up: add 1 if there's any remainder
+      const tokenAmountInUnits = Number(
+        remainder > 0n ? quotient + 1n : quotient,
+      )
+
+      return {
+        ...data,
+        tokenAmountInUnits,
+      }
     } catch (error) {
       console.error('Error fetching credit to token estimation:', error)
       throw new Error('Failed to fetch credit to token estimation')

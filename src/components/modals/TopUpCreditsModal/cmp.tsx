@@ -24,6 +24,7 @@ import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 import Skeleton from '@/components/common/Skeleton'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { useCreditPaymentHistory } from '@/hooks/common/useCreditPaymentHistory'
+import { formatCredits } from '@/helpers/utils'
 
 export type TopUpCreditsModalProps = Omit<
   UseTopUpCreditsModalFormProps,
@@ -37,12 +38,16 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
     handleSubmit,
     errors,
     amountCtrl,
+    handleAmountChange,
     currencyCtrl,
     bonus,
     totalBalance,
     values,
     isLoadingEstimation,
     isSubmitLoading,
+    minimumCreditsNeeded,
+    showInsufficientWarning,
+    isSubmitDisabled,
   } = useTopUpCreditsModalForm({ onSuccess, refetchPaymentHistory })
 
   return (
@@ -58,19 +63,20 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
             handleSubmit,
             errors,
             amountCtrl,
+            handleAmountChange,
             currencyCtrl,
             bonus,
             totalBalance,
             values,
             isLoadingEstimation,
             isSubmitLoading,
+            minimumCreditsNeeded,
+            showInsufficientWarning,
           }}
         />
       }
       footer={
-        <TopUpCreditsModalFooter
-          {...{ values, handleSubmit, isSubmitLoading }}
-        />
+        <TopUpCreditsModalFooter {...{ handleSubmit, isSubmitDisabled }} />
       }
     />
   )
@@ -87,12 +93,15 @@ type TopUpCreditsModalContentProps = Pick<
   | 'handleSubmit'
   | 'errors'
   | 'amountCtrl'
+  | 'handleAmountChange'
   | 'currencyCtrl'
   | 'bonus'
   | 'totalBalance'
   | 'values'
   | 'isLoadingEstimation'
   | 'isSubmitLoading'
+  | 'minimumCreditsNeeded'
+  | 'showInsufficientWarning'
 >
 
 const TopUpCreditsModalContent = memo(
@@ -100,12 +109,15 @@ const TopUpCreditsModalContent = memo(
     handleSubmit,
     errors,
     amountCtrl,
+    handleAmountChange,
     currencyCtrl,
     bonus,
     totalBalance,
     values,
     isLoadingEstimation,
     isSubmitLoading,
+    minimumCreditsNeeded,
+    showInsufficientWarning,
   }: TopUpCreditsModalContentProps) => {
     return (
       <Form onSubmit={handleSubmit} errors={errors}>
@@ -137,6 +149,9 @@ const TopUpCreditsModalContent = memo(
                 </StyledDollarSymbol>
                 <StyledAmountInput
                   {...amountCtrl.field}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleAmountChange(Number(e.target.value))
+                  }
                   type="number"
                   placeholder="100"
                   min={100}
@@ -147,7 +162,7 @@ const TopUpCreditsModalContent = memo(
                 {isLoadingEstimation ? (
                   <Skeleton width="8rem" height="1em" color="main0" />
                 ) : (
-                  <>~ ${bonus} bonus</>
+                  <>~ {formatCredits(bonus)} bonus</>
                 )}
               </StyledBonusText>
             </StyledSendBox>
@@ -184,10 +199,20 @@ const TopUpCreditsModalContent = memo(
                 {isLoadingEstimation ? (
                   <Skeleton width="14rem" height="1em" color="main0" />
                 ) : (
-                  <>~ ${totalBalance} balance</>
+                  <>~ {formatCredits(totalBalance)} balance</>
                 )}
               </StyledReceiveAmount>
             </StyledReceiveBox>
+            {showInsufficientWarning && minimumCreditsNeeded && (
+              <div
+                className="tp-body2 fs-12"
+                tw="mt-2 p-3 bg-error/10 text-error rounded"
+              >
+                <Icon name="exclamation-triangle" tw="mr-2" />
+                Minimum {formatCredits(minimumCreditsNeeded)} required for this
+                operation. Please increase the amount.
+              </div>
+            )}
           </div>
           <div>
             <TextGradient type="h7" forwardedAs="h2" tw="mb-4">
@@ -274,21 +299,18 @@ TopUpCreditsModalHeader.displayName = 'TopUpCreditsModalHeader'
 
 type TopUpCreditsModalFooterProps = Pick<
   UseTopUpCreditsModalFormReturn,
-  'handleSubmit' | 'values' | 'isSubmitLoading'
+  'handleSubmit' | 'isSubmitDisabled'
 >
 
 const TopUpCreditsModalFooter = memo(
-  ({ values, handleSubmit, isSubmitLoading }: TopUpCreditsModalFooterProps) => {
+  ({ handleSubmit, isSubmitDisabled }: TopUpCreditsModalFooterProps) => {
     return (
       <div tw="flex gap-4 justify-center">
-        {/* <Button type="button" variant="secondary" onClick={handleClose}>
-        Cancel
-      </Button> */}
         <Button
           type="submit"
           variant="primary"
           size="md"
-          disabled={!values.amount || values.amount < 100 || isSubmitLoading}
+          disabled={isSubmitDisabled}
           onClick={handleSubmit}
         >
           Confirm & Add Balance <Icon name="arrow-right" />

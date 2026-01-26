@@ -52,6 +52,7 @@ export type CreditEstimationRequest = {
 
 export type CreditEstimationResponse = {
   tokenAmount: string
+  tokenAmountInUnits: number // Token amount converted from wei to whole units
   tokenSymbol: string
   creditAmount: number
   creditBonusAmount: number
