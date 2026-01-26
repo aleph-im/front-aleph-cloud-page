@@ -11,7 +11,7 @@
     "lint:fix": "next lint --fix"
   },
   "dependencies": {
-    "@aleph-front/core": "^1.35.0",
+    "@aleph-front/core": "^1.35.3",
     "@aleph-sdk/account": "^1.2.0",
     "@aleph-sdk/avalanche": "^1.5.0",
     "@aleph-sdk/base": "^1.5.0",
@@ -26,7 +26,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
     "@hookform/resolvers": "^3.1.1",
     "@reown/appkit": "^1.7.18",
-    "@reown/appkit-adapter-ethers5": "^1.7.18",
+    "@reown/appkiat-adapter-ethers5": "^1.7.18",
     "@reown/appkit-adapter-solana": "^1.7.18",
     "@solana/web3.js": "^1.95.3",
     "@superfluid-finance/sdk-core": "^0.6.12",
