@@ -248,6 +248,8 @@ export type UseAddInstanceSystemVolumeProps = {
 
 export type UseAddInstanceSystemVolumeReturn = {
   sizeCtrl: UseControllerReturn<any, any>
+  sizeValue: number | undefined
+  sizeHandleChange: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
 export function useAddInstanceSystemVolumeProps({
@@ -257,12 +259,10 @@ export function useAddInstanceSystemVolumeProps({
   const sizeCtrl = useController({
     control,
     name: `systemVolume.size`,
-    defaultValue,
+    defaultValue: defaultValue?.size,
   })
 
-  const { value, onChange } = sizeCtrl.field
-
-  sizeCtrl.field.onChange = useCallback(
+  const sizeHandleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const val = Number(e.target.value)
       const size = convertByteUnits(val, {
@@ -270,19 +270,25 @@ export function useAddInstanceSystemVolumeProps({
         to: 'MiB',
         displayUnit: false,
       })
-      onChange(size)
+      sizeCtrl.field.onChange(size)
     },
-    [onChange],
+    [sizeCtrl.field],
   )
 
-  sizeCtrl.field.value = useMemo(() => {
-    return value
-      ? convertByteUnits(value, { from: 'MiB', to: 'GiB', displayUnit: false })
+  const sizeValue = useMemo(() => {
+    return sizeCtrl.field.value
+      ? convertByteUnits(sizeCtrl.field.value, {
+          from: 'MiB',
+          to: 'GiB',
+          displayUnit: false,
+        })
       : undefined
-  }, [value])
+  }, [sizeCtrl.field.value])
 
   return {
     sizeCtrl,
+    sizeValue,
+    sizeHandleChange,
   }
 }
 

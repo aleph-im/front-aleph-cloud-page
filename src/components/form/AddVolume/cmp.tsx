@@ -217,7 +217,8 @@ AddPersistentVolume.displayName = 'AddPersistentVolume'
 // -------------------------------------------------
 
 export const InstanceSystemVolume = memo((props: InstanceSystemVolumeProps) => {
-  const { sizeCtrl } = useAddInstanceSystemVolumeProps(props)
+  const { sizeCtrl, sizeValue, sizeHandleChange } =
+    useAddInstanceSystemVolumeProps(props)
 
   return (
     <>
@@ -251,6 +252,8 @@ export const InstanceSystemVolume = memo((props: InstanceSystemVolumeProps) => {
           <TextInput
             {...sizeCtrl.field}
             {...sizeCtrl.fieldState}
+            value={sizeValue}
+            onChange={sizeHandleChange}
             name="system_volume_size"
             required
             type="number"

@@ -5,6 +5,8 @@ import { StyledTable } from '@/components/common/EntityTable/styles'
 import { PaymentStatus } from '@/domain/credit'
 import { PaymentHistoryPanelProps } from './types'
 import { formatPaymentAmount, getDate, formatCredits } from '@/helpers/utils'
+import DetailsMenuButton from '@/components/common/DetailsMenuButton'
+import tw from 'twin.macro'
 
 export const PaymentHistoryPanel = ({
   isOpen,
@@ -12,6 +14,7 @@ export const PaymentHistoryPanel = ({
   payments,
   loading,
   onPaymentClick,
+  onReportIssue,
 }: PaymentHistoryPanelProps) => {
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -70,6 +73,7 @@ export const PaymentHistoryPanel = ({
         {/* Payments Table */}
         <div tw="overflow-x-auto">
           <StyledTable
+            clickableRows
             rowKey={(row) => row.id}
             data={filteredPayments}
             rowProps={(row) => ({
@@ -155,15 +159,19 @@ export const PaymentHistoryPanel = ({
                 align: 'right',
                 render: () => <></>,
               },
-              /* TODO: Re-enable when report issue functionality is implemented
               {
                 label: '',
                 width: '100%',
                 align: 'right',
-                render: () => {
+                render: (row) => {
                   return (
                     <DetailsMenuButton
-                      menuItems={[{ label: 'Report issue', href: '/' }]}
+                      menuItems={[
+                        {
+                          label: 'Report issue',
+                          onClick: () => onReportIssue({ payment: row }),
+                        },
+                      ]}
                     />
                   )
                 },
@@ -171,7 +179,6 @@ export const PaymentHistoryPanel = ({
                   css: tw`pl-3!`,
                 }),
               },
-              */
             ]}
           />
         </div>

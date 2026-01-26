@@ -1,4 +1,5 @@
 import { StoreReducer } from './store'
+import { ReportIssueMetadata } from '@/components/modals/ReportIssueModal/types'
 
 export type UIState = {
   isTopUpCreditsModalOpen: boolean
@@ -6,12 +7,16 @@ export type UIState = {
   // The txHash of the payment currently focused for auto-tracking UI
   // When null, no auto-focus - user has dismissed or interacted with another payment
   focusedPaymentTxHash: string | null
+  isReportIssueModalOpen: boolean
+  reportIssueMetadata?: ReportIssueMetadata
 }
 
 export const initialUIState: UIState = {
   isTopUpCreditsModalOpen: false,
   topUpCreditsMinimumBalance: undefined,
   focusedPaymentTxHash: null,
+  isReportIssueModalOpen: false,
+  reportIssueMetadata: undefined,
 }
 
 export enum UIActionType {
@@ -19,6 +24,8 @@ export enum UIActionType {
   CLOSE_TOP_UP_CREDITS_MODAL = 'CLOSE_TOP_UP_CREDITS_MODAL',
   SET_FOCUSED_PAYMENT_TX_HASH = 'SET_FOCUSED_PAYMENT_TX_HASH',
   CLEAR_FOCUSED_PAYMENT = 'CLEAR_FOCUSED_PAYMENT',
+  OPEN_REPORT_ISSUE_MODAL = 'OPEN_REPORT_ISSUE_MODAL',
+  CLOSE_REPORT_ISSUE_MODAL = 'CLOSE_REPORT_ISSUE_MODAL',
 }
 
 export type OpenTopUpCreditsModalAction = {
@@ -45,11 +52,25 @@ export type ClearFocusedPaymentAction = {
   payload: undefined
 }
 
+export type OpenReportIssueModalAction = {
+  type: UIActionType.OPEN_REPORT_ISSUE_MODAL
+  payload: {
+    metadata?: ReportIssueMetadata
+  }
+}
+
+export type CloseReportIssueModalAction = {
+  type: UIActionType.CLOSE_REPORT_ISSUE_MODAL
+  payload: undefined
+}
+
 export type UIAction =
   | OpenTopUpCreditsModalAction
   | CloseTopUpCreditsModalAction
   | SetFocusedPaymentTxHashAction
   | ClearFocusedPaymentAction
+  | OpenReportIssueModalAction
+  | CloseReportIssueModalAction
 
 export type UIReducer = StoreReducer<UIState, UIAction>
 
@@ -83,6 +104,22 @@ export function getUIReducer(): UIReducer {
         return {
           ...state,
           focusedPaymentTxHash: null,
+        }
+      }
+
+      case UIActionType.OPEN_REPORT_ISSUE_MODAL: {
+        return {
+          ...state,
+          isReportIssueModalOpen: true,
+          reportIssueMetadata: action.payload.metadata,
+        }
+      }
+
+      case UIActionType.CLOSE_REPORT_ISSUE_MODAL: {
+        return {
+          ...state,
+          isReportIssueModalOpen: false,
+          reportIssueMetadata: undefined,
         }
       }
 
@@ -126,6 +163,24 @@ export function setFocusedPaymentTxHash(
 export function clearFocusedPayment(): ClearFocusedPaymentAction {
   return {
     type: UIActionType.CLEAR_FOCUSED_PAYMENT,
+    payload: undefined,
+  }
+}
+
+export function openReportIssueModal(
+  metadata?: ReportIssueMetadata,
+): OpenReportIssueModalAction {
+  return {
+    type: UIActionType.OPEN_REPORT_ISSUE_MODAL,
+    payload: {
+      metadata,
+    },
+  }
+}
+
+export function closeReportIssueModal(): CloseReportIssueModalAction {
+  return {
+    type: UIActionType.CLOSE_REPORT_ISSUE_MODAL,
     payload: undefined,
   }
 }
