@@ -222,12 +222,17 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   }
 
   async download(volumeOrId: string | Volume): Promise<void> {
-    volumeOrId = typeof volumeOrId === 'string' ? volumeOrId : volumeOrId.id
+    const volumeId =
+      typeof volumeOrId === 'string'
+        ? volumeOrId
+        : volumeOrId.item_type === 'ipfs'
+          ? volumeOrId.id
+          : volumeOrId.item_hash
 
-    const req = await fetch(`${programStorageURL}${volumeOrId}`)
+    const req = await fetch(`${programStorageURL}${volumeId}`)
     const blob = await req.blob()
 
-    return downloadBlob(blob, `Volume_${volumeOrId.slice(-12)}.sqsh`)
+    return downloadBlob(blob, `Volume_${volumeId.slice(-12)}.sqsh`)
   }
 
   async getAddSteps(
