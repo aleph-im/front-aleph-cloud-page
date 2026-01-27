@@ -113,12 +113,35 @@ export const PaymentStatusModalContent = ({
     return `${txHash.slice(0, 20)}...${txHash.slice(-20)}`
   }
 
+  const isCompleted = payment.status === PaymentStatus.Completed
+  const isFailed = payment.status === PaymentStatus.Failed
+  const isCancelled = payment.status === PaymentStatus.Cancelled
+
   const showWarning =
-    payment.status !== PaymentStatus.Completed &&
+    !isCompleted &&
+    !isFailed &&
+    !isCancelled &&
     Date.now() > payment.createdAt + 1000 * 60 * 5
 
   return (
     <>
+      {isCompleted && (
+        <BorderBox $color="main0" tw="my-4" className="tp-body1">
+          Your credits have been successfully added to your account and are
+          ready to use.
+        </BorderBox>
+      )}
+      {isFailed && (
+        <BorderBox $color="error" tw="my-4" className="tp-body1">
+          The payment could not be processed. Please try again or contact
+          support if the issue persists.
+        </BorderBox>
+      )}
+      {isCancelled && (
+        <BorderBox $color="warning" tw="my-4" className="tp-body1">
+          This payment was cancelled. No credits were added to your account.
+        </BorderBox>
+      )}
       {showWarning && (
         <BorderBox $color="warning" tw="my-4" className="tp-body1">
           The selected payment provider is taking longer than usual to confirm
@@ -166,7 +189,7 @@ export const PaymentStatusModalContent = ({
                   </a>
                 </StyledProgressDescription>
               )}
-              {step.key === 'purchase' && payment.txHash && (
+              {step.key === 'processing' && payment.txHash && (
                 <StyledProgressDescription>
                   <a
                     href={getETHExplorerURL({ hash: payment.txHash })}
@@ -199,17 +222,30 @@ export default memo(PaymentStatusModalContent)
 export const PaymentStatusModalHeader = memo(
   ({ payment }: PaymentStatusModalHeaderProps) => {
     const isCompleted = payment.status === PaymentStatus.Completed
+    const isFailed = payment.status === PaymentStatus.Failed
+    const isCancelled = payment.status === PaymentStatus.Cancelled
+
+    const getTitle = () => {
+      if (isCompleted) return 'Purchase complete'
+      if (isFailed) return 'Purchase failed'
+      if (isCancelled) return 'Purchase cancelled'
+      return 'Purchase in progress'
+    }
+
+    const getDescription = () => {
+      if (isCompleted) return 'The transaction has been completed processing.'
+      if (isFailed)
+        return 'The transaction could not be completed. Please try again.'
+      if (isCancelled) return 'The transaction was cancelled.'
+      return 'The transaction is being processed at the moment'
+    }
 
     return (
       <div>
         <TextGradient type="h6" forwardedAs="h2" tw="mb-2">
-          {isCompleted ? 'Purchase complete' : 'Purchase in progress'}
+          {getTitle()}
         </TextGradient>
-        <p tw="m-0">
-          {isCompleted
-            ? 'The transaction has been completed processing.'
-            : 'The transaction is being processed at the moment'}
-        </p>
+        <p tw="m-0">{getDescription()}</p>
       </div>
     )
   },
