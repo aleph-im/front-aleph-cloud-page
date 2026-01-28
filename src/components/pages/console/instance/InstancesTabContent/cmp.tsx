@@ -12,7 +12,7 @@ import {
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Instance } from '@/domain/instance'
-import InstanceRowActions from '../InstanceRowActions'
+import { InstanceRowActionsContainer } from '../InstanceRowActions'
 import InstanceStatusCell from '../InstanceStatusCell'
 import InstanceSSHKeysCell from '../InstanceSSHKeysCell'
 import InstanceDomainsCell from '../InstanceDomainsCell'
@@ -264,32 +264,14 @@ export const InstancesTabContent = React.memo(
           label: '',
           width: '100%',
           align: 'right' as const,
-          render: (row: Instance) => {
-            const rowStatus = statusMap[row.id]
-            const hasTriedFetching = !statusLoading && rowStatus !== undefined
-            const calculatedStatus = calculateExecutableStatus(
-              hasTriedFetching,
-              rowStatus?.data,
-              EntityType.Instance,
-            )
-            const isRunning =
-              calculatedStatus === 'running' || calculatedStatus === 'v1'
-            const isStopped =
-              calculatedStatus === 'stopped' ||
-              calculatedStatus === 'not-allocated'
-
-            return (
-              <InstanceRowActions
-                onStop={() => handleManage(row)}
-                onStart={() => handleManage(row)}
-                onReboot={() => handleManage(row)}
-                onDelete={() => handleManage(row)}
-                stopDisabled={!isRunning}
-                startDisabled={!isStopped}
-                rebootDisabled={!isRunning}
-              />
-            )
-          },
+          render: (row: Instance) => (
+            <InstanceRowActionsContainer
+              instance={row}
+              status={statusMap[row.id]?.data}
+              statusLoading={statusLoading}
+              onManage={() => handleManage(row)}
+            />
+          ),
           cellProps: () => ({
             css: tw`pl-3!`,
           }),
