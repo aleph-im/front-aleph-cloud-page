@@ -73,10 +73,12 @@ export function useExecutableActions({
   const isPAYG = executable?.payment?.type === PaymentType.superfluid
   const executableId = executable?.id
 
-  const { status, calculatedStatus } = useExecutableStatus({
-    executable,
-    manager,
-  })
+  const { status, calculatedStatus, triggerBoostPolling } = useExecutableStatus(
+    {
+      executable,
+      manager,
+    },
+  )
 
   // ----------------------------
 
@@ -150,6 +152,7 @@ export function useExecutableActions({
     async (
       operation: ExecutableOperations,
       setLoading?: (loading: boolean) => void,
+      expectedStatuses?: ExecutableCalculatedStatus[],
     ) => {
       try {
         if (!manager) throw Err.ConnectYourWallet
@@ -163,17 +166,21 @@ export function useExecutableActions({
           operation,
           vmId: executableId,
         })
+
+        triggerBoostPolling({
+          expectedStatuses,
+          onComplete: () => setLoading?.(false),
+        })
       } catch (e) {
+        setLoading?.(false)
         noti?.add({
           variant: 'error',
           title: 'Error',
           text: (e as Error)?.message,
         })
-      } finally {
-        setLoading?.(false)
       }
     },
-    [manager, nodeUrl, noti, executableId],
+    [manager, nodeUrl, noti, executableId, triggerBoostPolling],
   )
 
   const handleStart = useCallback(async () => {
@@ -201,14 +208,18 @@ export function useExecutableActions({
       if (isPAYG) {
         await manager.notifyCRNAllocation(crn, executable.id)
       }
+
+      triggerBoostPolling({
+        expectedStatuses: ['running'],
+        onComplete: () => setStartLoading(false),
+      })
     } catch (e) {
+      setStartLoading(false)
       noti?.add({
         variant: 'error',
         title: 'Error',
         text: (e as Error)?.message,
       })
-    } finally {
-      setStartLoading(false)
     }
   }, [
     crn,
@@ -218,6 +229,7 @@ export function useExecutableActions({
     noti,
     checkNetworkCompatibility,
     account,
+    triggerBoostPolling,
   ])
 
   const isAllocated = !!status?.ipv6Parsed
@@ -268,7 +280,8 @@ export function useExecutableActions({
   }, [executable])
 
   const handleStop = useCallback(
-    () => handleSendOperation('stop', setStopLoading),
+    () =>
+      handleSendOperation('stop', setStopLoading, ['stopped', 'not-allocated']),
     [handleSendOperation],
   )
 
