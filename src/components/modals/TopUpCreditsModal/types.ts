@@ -21,7 +21,6 @@ export type UseTopUpCreditsModalFormReturn = {
   errors: FieldErrors<TopUpCreditsFormData>
   handleSubmit: (e: FormEvent) => Promise<void>
   handleAmountChange: (value: number) => void
-  resetForm: () => void
   bonus: number
   totalBalance: number
   isLoadingEstimation: boolean

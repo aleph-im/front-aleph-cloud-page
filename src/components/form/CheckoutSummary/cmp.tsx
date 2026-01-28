@@ -1,10 +1,11 @@
 import { ellipseAddress, formatCredits } from '@/helpers/utils'
 import { Label, StyledHoldingSummaryLine } from './styles'
+import BorderBox from '@/components/common/BorderBox'
 import { CheckoutSummaryProps } from './types'
 import { memo } from 'react'
 import React from 'react'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
-import { TextGradient } from '@aleph-front/core'
+import { Button, Icon, TextGradient } from '@aleph-front/core'
 import CheckoutSummaryFooter from '../CheckoutSummaryFooter'
 import { useConnection } from '@/hooks/common/useConnection'
 import { Blockchain } from '@aleph-sdk/core'
@@ -159,6 +160,8 @@ export const CheckoutSummary = ({
   button: buttonNode,
   footerButton = buttonNode,
   mainRef,
+  minimumBalanceNeeded,
+  insufficientFunds,
 }: CheckoutSummaryProps) => {
   const { blockchain } = useConnection({
     triggerOnMount: false,
@@ -227,6 +230,7 @@ export const CheckoutSummary = ({
                             type="credit"
                             value={line.cost}
                             duration="h"
+                            decimals={4}
                             className="tp-body3"
                             loading={cost.loading}
                           />
@@ -277,6 +281,7 @@ export const CheckoutSummary = ({
                         type="credit"
                         value={cost?.cost?.cost}
                         duration="h"
+                        decimals={4}
                         loading={cost.loading}
                       />
                     </span>
@@ -284,19 +289,47 @@ export const CheckoutSummary = ({
                 </StyledHoldingSummaryLine>
                 <StyledHoldingSummaryLine>
                   <div></div>
-                  <div className="text-main0 tp-body2">Min. required</div>
+                  <div className="text-main0 tp-body2">Min. required (24h)</div>
                   <div>
                     <span className="text-main0 tp-body3">
                       <Price
                         type="credit"
-                        value={
-                          cost?.cost?.cost ? cost.cost.cost * 24 : undefined
-                        }
+                        value={minimumBalanceNeeded}
                         loading={cost.loading}
                       />
                     </span>
                   </div>
                 </StyledHoldingSummaryLine>
+
+                {insufficientFunds?.hasInsufficientFunds && (
+                  <BorderBox $color="error" tw="mt-4">
+                    <div tw="flex flex-col gap-3">
+                      <p className="tp-body1 fs-16">
+                        Your balance is too low to deploy this resource. You
+                        need a minimum of{' '}
+                        <strong>
+                          {formatCredits(
+                            insufficientFunds.minimumBalanceNeeded,
+                          )}
+                        </strong>{' '}
+                        to run for 24 hours.
+                      </p>
+                      <div>
+                        <Button
+                          type="button"
+                          kind="default"
+                          variant="textOnly"
+                          size="md"
+                          color="main0"
+                          onClick={insufficientFunds.onTopUpClick}
+                        >
+                          Top up credits
+                          <Icon name="arrow-right" tw="ml-2" />
+                        </Button>
+                      </div>
+                    </div>
+                  </BorderBox>
+                )}
               </div>
             </div>
 

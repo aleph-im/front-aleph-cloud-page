@@ -47,6 +47,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     manuallySelectCRNDisabledMessage,
     createInstanceDisabled,
     createInstanceButtonTitle,
+    minimumBalanceNeeded,
+    insufficientFundsInfo,
     values,
     control,
     errors,
@@ -312,6 +314,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           cost={cost}
           unlockedAmount={accountCreditBalance}
           mainRef={mainRef}
+          minimumBalanceNeeded={minimumBalanceNeeded}
+          insufficientFunds={insufficientFundsInfo}
           description={
             <>
               Aleph Cloud runs on a <strong>credit-based system</strong>,
@@ -323,20 +327,15 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           }
           button={
             <CheckoutButton
-              disabled={
-                createInstanceDisabled &&
-                createInstanceButtonTitle !== 'Add balance'
-              }
+              disabled={createInstanceDisabled}
               title={createInstanceButtonTitle}
               isFooter={false}
-              shouldRequestTermsAndConditions={
-                shouldRequestTermsAndConditions &&
-                createInstanceButtonTitle !== 'Add balance'
-              }
+              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement
               }
               handleSubmit={handleSubmit}
+              insufficientFunds={insufficientFundsInfo}
             />
           }
         />

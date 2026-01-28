@@ -1,5 +1,6 @@
 import { EntityType } from '@/helpers/constants'
 import { UseEntityCostReturn } from '@/hooks/common/useEntityCost'
+import { InsufficientFundsInfo } from '@/hooks/common/useInsufficientFunds'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
@@ -23,6 +24,8 @@ export type CheckoutSummaryProps = {
   description?: ReactNode
   mainRef?: RefObject<HTMLElement>
   control?: Control
+  minimumBalanceNeeded?: number
+  insufficientFunds?: InsufficientFundsInfo
 }
 
 export type CheckoutSummarySpecsLineProps = {

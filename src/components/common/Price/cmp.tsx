@@ -11,6 +11,7 @@ export const Price = ({
   duration,
   iconSize = '0.75em',
   loading = false,
+  decimals = 2,
   ...rest
 }: PriceProps) => {
   if (loading) {
@@ -23,7 +24,9 @@ export const Price = ({
 
   return (
     <StyledPrice {...rest}>
-      {type === 'credit' ? formatCredits(value) : humanReadableCurrency(value)}
+      {type === 'credit'
+        ? formatCredits(value, decimals)
+        : humanReadableCurrency(value)}
       {type === 'token' && (
         <Logo color="currentColor" img="aleph" size={iconSize} />
       )}

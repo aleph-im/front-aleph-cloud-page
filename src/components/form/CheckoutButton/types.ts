@@ -1,4 +1,5 @@
 import { TooltipProps } from '@aleph-front/core'
+import { InsufficientFundsInfo } from '@/hooks/common/useInsufficientFunds'
 import { FormEvent } from 'react'
 
 export type CheckoutButtonProps = {
@@ -9,4 +10,5 @@ export type CheckoutButtonProps = {
   shouldRequestTermsAndConditions?: boolean
   handleRequestTermsAndConditionsAgreement?: () => void
   handleSubmit: (e: FormEvent) => Promise<void>
+  insufficientFunds?: InsufficientFundsInfo
 }

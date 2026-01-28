@@ -57,7 +57,10 @@ import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceM
 import { GpuInstanceManager } from '@/domain/gpuInstance'
 import usePrevious from '@/hooks/common/usePrevious'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
-import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook'
+import {
+  useInsufficientFunds,
+  InsufficientFundsInfo,
+} from '@/hooks/common/useInsufficientFunds'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -81,6 +84,8 @@ export type UseNewGpuInstancePageReturn = {
   manuallySelectCRNDisabledMessage?: TooltipProps['content']
   createInstanceDisabled: boolean
   createInstanceButtonTitle: string
+  minimumBalanceNeeded: number
+  insufficientFundsInfo?: InsufficientFundsInfo
   values: any
   control: Control<any>
   errors: FieldErrors<NewGpuInstanceFormState>
@@ -114,8 +119,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   } = useConnection({
     triggerOnMount: false,
   })
-
-  const { handleOpen: handleOpenTopUpModal } = useTopUpCreditsModal()
 
   const router = useRouter()
   const { crn: queryCRN, gpu: queryGPU } = router.query
@@ -347,22 +350,16 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     accountCreditBalance,
   })
 
-  // Calculate minimum balance needed for 24 hours of runtime
-  const minimumBalanceNeeded = useMemo(() => {
-    if (!cost?.cost?.cost) return 0
-    return Math.ceil(cost.cost.cost * 24) // 24 hours minimum, ceiled to integer
-  }, [cost?.cost?.cost])
-
-  // Check if user has enough balance for at least 24 hours
-  const hasEnoughBalanceForOneDay = useMemo(() => {
-    return accountCreditBalance >= minimumBalanceNeeded
-  }, [accountCreditBalance, minimumBalanceNeeded])
-
-  // Calculate the amount needed to top up (if insufficient)
-  const topUpAmount = useMemo(() => {
-    if (hasEnoughBalanceForOneDay) return 0
-    return minimumBalanceNeeded - accountCreditBalance
-  }, [hasEnoughBalanceForOneDay, minimumBalanceNeeded, accountCreditBalance])
+  // Insufficient funds handling (24-hour minimum balance check)
+  const {
+    isDisabledDueToInsufficientFunds,
+    minimumBalanceNeeded,
+    insufficientFundsInfo,
+  } = useInsufficientFunds({
+    cost,
+    accountCreditBalance,
+    isConnected: !!account,
+  })
 
   // Checks if user can afford with current balance (4 hours as before)
   const hasEnoughBalance = useMemo(() => {
@@ -374,15 +371,17 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   const createInstanceButtonTitle: UseNewGpuInstancePageReturn['createInstanceButtonTitle'] =
     useMemo(() => {
       if (!account) return 'Connect'
-      if (!hasEnoughBalanceForOneDay) return 'Add balance'
       if (!hasEnoughBalance) return 'Insufficient Credits'
 
       return 'Create instance'
-    }, [account, hasEnoughBalanceForOneDay, hasEnoughBalance])
+    }, [account, hasEnoughBalance])
 
   const createInstanceDisabled = useMemo(() => {
-    return createInstanceButtonTitle !== 'Create instance'
-  }, [createInstanceButtonTitle])
+    if (!account) return true
+    if (isDisabledDueToInsufficientFunds) return true
+    if (!hasEnoughBalance) return true
+    return false
+  }, [account, isDisabledDueToInsufficientFunds, hasEnoughBalance])
 
   // -------------------------
   // Handlers
@@ -440,22 +439,12 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     router.push('.')
   }
 
-  // Handle submit - either create instance or open top-up modal
+  // Handle submit
   const handleFormSubmit = useCallback(
     (e: FormEvent) => {
-      if (createInstanceButtonTitle === 'Add balance') {
-        e.preventDefault()
-        handleOpenTopUpModal(topUpAmount)
-        return Promise.resolve()
-      }
       return handleSubmit(e)
     },
-    [
-      createInstanceButtonTitle,
-      handleOpenTopUpModal,
-      topUpAmount,
-      handleSubmit,
-    ],
+    [handleSubmit],
   )
 
   // -------------------------
@@ -487,6 +476,8 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     blockchainName,
     createInstanceDisabled,
     createInstanceButtonTitle,
+    minimumBalanceNeeded,
+    insufficientFundsInfo,
     manuallySelectCRNDisabled,
     manuallySelectCRNDisabledMessage,
     values: formValues,

@@ -9,4 +9,5 @@ export type PriceProps = HTMLAttributes<HTMLSpanElement> & {
   duration?: StreamDurationUnit
   iconSize?: string
   loading?: boolean
+  decimals?: number
 }

@@ -65,8 +65,11 @@ export function useTopUpCreditsModalForm({
   const creditManager = useCreditManager()
   const { next, stop } = useCheckoutNotification({})
   const [calculatedAmount, setCalculatedAmount] = useState(defaultValues.amount)
-  const [isCalculatingInitialAmount, setIsCalculatingInitialAmount] =
-    useState(false)
+  // Start as true when there's a minimum balance requirement to prevent
+  // showing errors before the proper amount is calculated
+  const [isCalculatingInitialAmount, setIsCalculatingInitialAmount] = useState(
+    !!appState.ui.topUpCreditsMinimumBalance,
+  )
   // Track if user has manually changed the amount
   const [hasManuallyChangedAmount, setHasManuallyChangedAmount] =
     useState(false)
@@ -249,8 +252,23 @@ export function useTopUpCreditsModalForm({
   const resetForm = useCallback(() => {
     reset(defaultValues)
     setHasManuallyChangedAmount(false)
+    setCalculatedAmount(defaultValues.amount)
+    // Reset calculating state to true if there's a minimum balance requirement
+    // so the calculation runs again when modal reopens
+    setIsCalculatingInitialAmount(!!appState.ui.topUpCreditsMinimumBalance)
     lastCalculatedCurrencyRef.current = defaultValues.currency
-  }, [reset])
+  }, [reset, appState.ui.topUpCreditsMinimumBalance])
+
+  // Reset form when modal opens
+  const isModalOpen = appState.ui.isTopUpCreditsModalOpen
+  const prevIsModalOpenRef = useRef(isModalOpen)
+  useEffect(() => {
+    // Reset only when modal transitions from closed to open
+    if (isModalOpen && !prevIsModalOpenRef.current) {
+      resetForm()
+    }
+    prevIsModalOpenRef.current = isModalOpen
+  }, [isModalOpen, resetForm])
 
   const debouncedAmount = useDebounceState(values.amount, 500)
 
@@ -289,10 +307,18 @@ export function useTopUpCreditsModalForm({
 
   // Determine if the estimated credits are insufficient for the minimum requirement
   const isInsufficientForMinimum = useMemo(() => {
+    // Don't show as insufficient while we're still calculating the proper amount
+    if (isCalculatingInitialAmount) return false
     if (!hasMinimumRequirement || !estimation) return false
     // Compare estimated credits (totalBalance) with minimum requirement
     return totalBalance < minimumCreditsNeeded
-  }, [hasMinimumRequirement, estimation, totalBalance, minimumCreditsNeeded])
+  }, [
+    isCalculatingInitialAmount,
+    hasMinimumRequirement,
+    estimation,
+    totalBalance,
+    minimumCreditsNeeded,
+  ])
 
   // Show warning only if user has manually changed amount and it's insufficient
   const showInsufficientWarning = useMemo(() => {
@@ -305,11 +331,13 @@ export function useTopUpCreditsModalForm({
       !values.amount ||
       values.amount < 100 ||
       isSubmitLoading ||
+      isCalculatingInitialAmount ||
       (hasMinimumRequirement && isInsufficientForMinimum)
     )
   }, [
     values.amount,
     isSubmitLoading,
+    isCalculatingInitialAmount,
     hasMinimumRequirement,
     isInsufficientForMinimum,
   ])
@@ -322,7 +350,6 @@ export function useTopUpCreditsModalForm({
     errors,
     handleSubmit,
     handleAmountChange,
-    resetForm,
     bonus,
     totalBalance,
     isLoadingEstimation,

@@ -38,7 +38,12 @@ export const CheckoutSummaryFooter = ({
               <div>
                 <div tw="flex items-center justify-center gap-2 whitespace-nowrap">
                   <span className="text-main0 fs-24 tp-body3">
-                    <Price type="credit" value={totalCost} loading={loading} />
+                    <Price
+                      type="credit"
+                      value={totalCost}
+                      loading={loading}
+                      decimals={4}
+                    />
                   </span>
                   <span className="tp-body2" tw="mt-1">
                     Credits / h
