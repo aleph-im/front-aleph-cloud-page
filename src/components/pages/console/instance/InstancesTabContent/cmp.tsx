@@ -222,13 +222,11 @@ export const InstancesTabContent = React.memo(
         },
         {
           label: 'Cores',
-          align: 'right' as const,
           sortable: true,
           render: (row: Instance) => row?.resources?.vcpus || 0,
         },
         {
           label: 'RAM',
-          align: 'right' as const,
           sortable: true,
           render: (row: Instance) =>
             convertByteUnits(row?.resources?.memory || 0, {
@@ -239,23 +237,20 @@ export const InstancesTabContent = React.memo(
         },
         {
           label: 'HDD',
-          align: 'right' as const,
           sortable: true,
           render: (row: Instance) => humanReadableSize(row.size, 'MiB'),
         },
         {
-          label: 'Volume',
-          align: 'center' as const,
+          label: 'SSH',
           render: (row: Instance) => (
-            <InstanceVolumesCell
-              volumes={getInstanceVolumes(row)}
-              onVolumeClick={handleVolumeClick}
+            <InstanceSSHKeysCell
+              sshKeys={getInstanceSSHKeys(row)}
+              onSSHKeyClick={handleSSHKeyClick}
             />
           ),
         },
         {
-          label: 'Domain',
-          align: 'center' as const,
+          label: 'Domains',
           render: (row: Instance) => (
             <InstanceDomainsCell
               domains={getInstanceDomains(row)}
@@ -264,12 +259,11 @@ export const InstancesTabContent = React.memo(
           ),
         },
         {
-          label: 'SSH',
-          align: 'center' as const,
+          label: 'Volumes',
           render: (row: Instance) => (
-            <InstanceSSHKeysCell
-              sshKeys={getInstanceSSHKeys(row)}
-              onSSHKeyClick={handleSSHKeyClick}
+            <InstanceVolumesCell
+              volumes={getInstanceVolumes(row)}
+              onVolumeClick={handleVolumeClick}
             />
           ),
         },
