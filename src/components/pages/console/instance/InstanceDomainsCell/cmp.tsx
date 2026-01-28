@@ -11,7 +11,6 @@ import {
 } from '@aleph-front/core'
 import { Portal } from '@/components/common/Portal'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
-import InfoTitle from '@/components/common/entityData/InfoTitle'
 
 export const InstanceDomainsCell = ({
   domains,
@@ -93,7 +92,7 @@ export const InstanceDomainsCell = ({
                     size="1.5rem"
                   />
                   <div>
-                    <InfoTitle>DOMAIN</InfoTitle>
+                    <div className="tp-info text-base2 fs-12">DOMAIN</div>
                     <div className="tp-body1 fs-12">{domain.name}</div>
                   </div>
                 </DomainRow>
