@@ -288,7 +288,7 @@ export class CreditManager {
     const estimationRequest: CreditEstimationRequest = {
       blockchain: chain,
       token: currency,
-      creditAmount,
+      creditAmount: Math.ceil(creditAmount),
     }
 
     try {

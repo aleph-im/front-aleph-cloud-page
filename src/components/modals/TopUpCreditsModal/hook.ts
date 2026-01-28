@@ -99,41 +99,6 @@ export function useTopUpCreditsModalForm({
     [creditManager, appState.ui.topUpCreditsMinimumBalance],
   )
 
-  // Calculate initial token amount based on minimum credit requirement
-  useEffect(() => {
-    const calculateInitialAmount = async () => {
-      if (!creditManager || !appState.ui.topUpCreditsMinimumBalance) {
-        setCalculatedAmount(defaultValues.amount)
-        return
-      }
-
-      setIsCalculatingInitialAmount(true)
-      try {
-        const finalAmount = await calculateTokenAmountForCurrency(
-          defaultValues.currency,
-        )
-        setCalculatedAmount(finalAmount)
-        lastCalculatedCurrencyRef.current = defaultValues.currency
-      } catch (error) {
-        console.error('Error calculating initial token amount:', error)
-        // Fallback to a conservative estimate if API fails
-        const fallbackAmount = Math.max(
-          Math.ceil(appState.ui.topUpCreditsMinimumBalance),
-          100,
-        )
-        setCalculatedAmount(fallbackAmount)
-      } finally {
-        setIsCalculatingInitialAmount(false)
-      }
-    }
-
-    calculateInitialAmount()
-  }, [
-    creditManager,
-    appState.ui.topUpCreditsMinimumBalance,
-    calculateTokenAmountForCurrency,
-  ])
-
   const onSubmit = useCallback(
     async (state: TopUpCreditsFormData) => {
       if (!creditManager) throw Err.ConnectYourWallet
@@ -252,23 +217,54 @@ export function useTopUpCreditsModalForm({
   const resetForm = useCallback(() => {
     reset(defaultValues)
     setHasManuallyChangedAmount(false)
-    setCalculatedAmount(defaultValues.amount)
-    // Reset calculating state to true if there's a minimum balance requirement
-    // so the calculation runs again when modal reopens
-    setIsCalculatingInitialAmount(!!appState.ui.topUpCreditsMinimumBalance)
     lastCalculatedCurrencyRef.current = defaultValues.currency
-  }, [reset, appState.ui.topUpCreditsMinimumBalance])
+  }, [reset])
 
-  // Reset form when modal opens
+  // Reset form and recalculate amount when modal opens
   const isModalOpen = appState.ui.isTopUpCreditsModalOpen
   const prevIsModalOpenRef = useRef(isModalOpen)
   useEffect(() => {
-    // Reset only when modal transitions from closed to open
-    if (isModalOpen && !prevIsModalOpenRef.current) {
-      resetForm()
+    // Only run when modal transitions from closed to open
+    if (!isModalOpen || prevIsModalOpenRef.current) {
+      prevIsModalOpenRef.current = isModalOpen
+      return
     }
     prevIsModalOpenRef.current = isModalOpen
-  }, [isModalOpen, resetForm])
+
+    resetForm()
+
+    // Calculate the proper token amount for minimum credit requirement
+    const calculateAmount = async () => {
+      if (!creditManager || !appState.ui.topUpCreditsMinimumBalance) {
+        setCalculatedAmount(defaultValues.amount)
+        setIsCalculatingInitialAmount(false)
+        return
+      }
+
+      setIsCalculatingInitialAmount(true)
+      try {
+        const finalAmount = await calculateTokenAmountForCurrency(
+          defaultValues.currency,
+        )
+        setCalculatedAmount(finalAmount)
+        setValue('amount', finalAmount)
+      } catch (error) {
+        console.error('Error calculating initial token amount:', error)
+        setCalculatedAmount(defaultValues.amount)
+      } finally {
+        setIsCalculatingInitialAmount(false)
+      }
+    }
+
+    calculateAmount()
+  }, [
+    isModalOpen,
+    resetForm,
+    creditManager,
+    appState.ui.topUpCreditsMinimumBalance,
+    calculateTokenAmountForCurrency,
+    setValue,
+  ])
 
   const debouncedAmount = useDebounceState(values.amount, 500)
 
