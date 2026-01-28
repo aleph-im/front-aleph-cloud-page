@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Executable,
   ExecutableCalculatedStatus,
@@ -33,16 +33,14 @@ export function useExecutableStatus({
     )
   }, [hasTriedFetchingStatus, status, executable?.type])
 
-  const shouldFetchStatus = useCallback(
-    () => calculatedStatus !== 'running',
-    [calculatedStatus],
-  )
+  // Use ref to access current status in interval without triggering re-renders
+  const calculatedStatusRef = useRef(calculatedStatus)
+  calculatedStatusRef.current = calculatedStatus
 
   // Status fetch request - Retries fetch every 10 seconds until status is running
   useEffect(() => {
     if (!manager) return
     if (!executable) return
-    if (!shouldFetchStatus()) return
 
     async function request() {
       if (!manager) return
@@ -50,18 +48,23 @@ export function useExecutableStatus({
 
       try {
         const fetchedStatus = await manager.checkStatus(executable)
-
         setStatus(fetchedStatus)
       } finally {
         setHasTriedFetchingStatus(true)
       }
     }
 
-    if (shouldFetchStatus()) request()
+    // Initial request on mount
+    request()
 
-    const id = setInterval(request, 10 * 1000)
+    // Poll every 10 seconds, skip if already running
+    const id = setInterval(() => {
+      if (calculatedStatusRef.current === 'running') return
+      request()
+    }, 10 * 1000)
+
     return () => clearInterval(id)
-  }, [shouldFetchStatus, status, executable, manager])
+  }, [executable, manager])
 
   return { status, calculatedStatus }
 }
