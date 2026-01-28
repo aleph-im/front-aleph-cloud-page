@@ -1,5 +1,10 @@
 export type InstanceRowActionsProps = {
-  onManage: () => void
+  onStop: () => void
+  onStart: () => void
+  onReboot: () => void
   onDelete: () => void
-  disabled?: boolean
+  stopDisabled?: boolean
+  startDisabled?: boolean
+  rebootDisabled?: boolean
+  deleteDisabled?: boolean
 }

@@ -140,13 +140,6 @@ export const InstancesTabContent = React.memo(
       [isNonCredit, router],
     )
 
-    const handleDelete = useCallback(
-      (instance: Instance) => {
-        router.push(`/console/computing/instance/${instance.id}`)
-      },
-      [router],
-    )
-
     const handleSSHKeyClick = useCallback((sshKey: SSHKey) => {
       setSidePanel({
         isOpen: true,
@@ -280,13 +273,34 @@ export const InstancesTabContent = React.memo(
           label: '',
           width: '100%',
           align: 'right' as const,
-          render: (row: Instance) => (
-            <InstanceRowActions
-              onManage={() => handleManage(row)}
-              onDelete={() => handleDelete(row)}
-              disabled={!isNonCredit(row)}
-            />
-          ),
+          render: (row: Instance) => {
+            const rowStatus = statusMap[row.id]
+            const hasTriedFetching = !statusLoading && rowStatus !== undefined
+            const calculatedStatus = calculateExecutableStatus(
+              hasTriedFetching,
+              rowStatus?.data,
+              EntityType.Instance,
+            )
+            const isRunning =
+              calculatedStatus === 'running' || calculatedStatus === 'v1'
+            const isStopped =
+              calculatedStatus === 'stopped' ||
+              calculatedStatus === 'not-allocated'
+            const isCreditInstance = !isNonCredit(row)
+
+            return (
+              <InstanceRowActions
+                onStop={() => handleManage(row)}
+                onStart={() => handleManage(row)}
+                onReboot={() => handleManage(row)}
+                onDelete={() => handleManage(row)}
+                stopDisabled={!isRunning || isCreditInstance}
+                startDisabled={!isStopped || isCreditInstance}
+                rebootDisabled={!isRunning || isCreditInstance}
+                deleteDisabled={isCreditInstance}
+              />
+            )
+          },
           cellProps: () => ({
             css: tw`pl-3!`,
           }),
@@ -302,7 +316,6 @@ export const InstancesTabContent = React.memo(
         getInstanceSSHKeys,
         handleSSHKeyClick,
         handleManage,
-        handleDelete,
         isNonCredit,
       ],
     )
