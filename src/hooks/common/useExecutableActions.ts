@@ -74,10 +74,12 @@ export function useExecutableActions({
   const isCredit = executable?.payment?.type === PaymentType.credit
   const executableId = executable?.id
 
-  const { status, calculatedStatus } = useExecutableStatus({
-    executable,
-    manager,
-  })
+  const { status, calculatedStatus, triggerBoostPolling } = useExecutableStatus(
+    {
+      executable,
+      manager,
+    },
+  )
 
   // ----------------------------
 
@@ -151,6 +153,7 @@ export function useExecutableActions({
     async (
       operation: ExecutableOperations,
       setLoading?: (loading: boolean) => void,
+      expectedStatuses?: ExecutableCalculatedStatus[],
     ) => {
       try {
         if (!manager) throw Err.ConnectYourWallet
@@ -164,17 +167,21 @@ export function useExecutableActions({
           operation,
           vmId: executableId,
         })
+
+        triggerBoostPolling({
+          expectedStatuses,
+          onComplete: () => setLoading?.(false),
+        })
       } catch (e) {
+        setLoading?.(false)
         noti?.add({
           variant: 'error',
           title: 'Error',
           text: (e as Error)?.message,
         })
-      } finally {
-        setLoading?.(false)
       }
     },
-    [manager, nodeUrl, noti, executableId],
+    [manager, nodeUrl, noti, executableId, triggerBoostPolling],
   )
 
   const handleStart = useCallback(async () => {
@@ -202,14 +209,18 @@ export function useExecutableActions({
         if (isPAYG) {
           await manager.notifyCRNAllocation(crn, executable.id)
         }
+
+        triggerBoostPolling({
+          expectedStatuses: ['running'],
+          onComplete: () => setStartLoading(false),
+        })
       } catch (e) {
+        setStartLoading(false)
         noti?.add({
           variant: 'error',
           title: 'Error',
           text: (e as Error)?.message,
         })
-      } finally {
-        setStartLoading(false)
       }
     } else if (!isCredit) {
       throw Err.StreamNotSupported
@@ -226,16 +237,20 @@ export function useExecutableActions({
 
         if (!crn) throw Err.InvalidCRNAddress
 
-        // For PAYG, notify CRN
+        // For Credit, notify CRN
         await manager.notifyCRNAllocation(crn, executable.id)
+
+        triggerBoostPolling({
+          expectedStatuses: ['running'],
+          onComplete: () => setStartLoading(false),
+        })
       } catch (e) {
+        setStartLoading(false)
         noti?.add({
           variant: 'error',
           title: 'Error',
           text: (e as Error)?.message,
         })
-      } finally {
-        setStartLoading(false)
       }
     }
   }, [
@@ -247,6 +262,7 @@ export function useExecutableActions({
     account,
     crn,
     noti,
+    triggerBoostPolling,
   ])
 
   const isAllocated = !!status?.ipv6Parsed
@@ -297,7 +313,8 @@ export function useExecutableActions({
   }, [executable])
 
   const handleStop = useCallback(
-    () => handleSendOperation('stop', setStopLoading),
+    () =>
+      handleSendOperation('stop', setStopLoading, ['stopped', 'not-allocated']),
     [handleSendOperation],
   )
 

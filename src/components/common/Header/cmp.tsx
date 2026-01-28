@@ -4,6 +4,7 @@ import {
   AccountPicker,
   Button,
   Icon,
+  Logo,
   RenderLinkProps,
   TextInput,
 } from '@aleph-front/core'
@@ -215,6 +216,11 @@ export const Header = () => {
             ),
             logoHref: websiteUrl,
             logoTarget: '_blank',
+            logo: (
+              <Link href="/">
+                <Logo img="aleph" text="Aleph Cloud" byAleph={false} />
+              </Link>
+            ),
           }}
         />
         <StyledNavbarDesktop $breakpoint={breakpoint}>
