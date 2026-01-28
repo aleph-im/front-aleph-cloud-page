@@ -1,10 +1,9 @@
 import React, { memo } from 'react'
-import { Switch } from '@aleph-front/core'
+import { Switch, Tooltip } from '@aleph-front/core'
 import { SelectPaymentMethodProps } from './types'
 import { useSelectPaymentMethod } from '@/hooks/form/useSelectPaymentMethod'
 import { StyledLabel } from './styles'
 import { PaymentMethod } from '@/helpers/constants'
-import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
 
 export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
   const {
@@ -51,7 +50,7 @@ export const SelectPaymentMethod = (props: SelectPaymentMethodProps) => {
         </StyledLabel>
       </div>
       {disabledStreamTooltip && (
-        <ResponsiveTooltip
+        <Tooltip
           my="bottom-left"
           at="top-left"
           targetRef={switchRef as React.RefObject<HTMLButtonElement>}

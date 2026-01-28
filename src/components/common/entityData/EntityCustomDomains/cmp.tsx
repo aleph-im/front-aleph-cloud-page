@@ -1,11 +1,16 @@
 import React, { memo, useRef } from 'react'
-import { Icon, NoisyContainer, ObjectImg, Spinner } from '@aleph-front/core'
+import {
+  Icon,
+  NoisyContainer,
+  ObjectImg,
+  Spinner,
+  Tooltip,
+} from '@aleph-front/core'
 import Skeleton from '../../Skeleton'
 import { DisabledText, Text } from '@/components/pages/console/common'
 import RelatedEntityCard from '../RelatedEntityCard'
 import { EntityCustomDomainsProps } from './types'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
-import ResponsiveTooltip from '../../ResponsiveTooltip'
 import InfoTitle from '../InfoTitle'
 import FunctionalButton from '../../FunctionalButton'
 
@@ -45,7 +50,7 @@ const DomainCard = ({
                 <div ref={warningIconRef}>
                   <Icon size="md" name="warning" color="warning" />
                 </div>
-                <ResponsiveTooltip
+                <Tooltip
                   my={'bottom-right'}
                   at={'top-center'}
                   targetRef={warningIconRef}

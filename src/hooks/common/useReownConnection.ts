@@ -88,7 +88,10 @@ export const useReownConnection = () => {
           }
 
           // Fetch balance
-          const balance = await getAccountBalance(account, PaymentMethod.Hold)
+          const { balance, creditBalance } = await getAccountBalance(
+            account,
+            PaymentMethod.Hold,
+          )
 
           // Update Redux store
           dispatch(
@@ -97,6 +100,7 @@ export const useReownConnection = () => {
               provider: ProviderId.Reown,
               blockchain: blockchainId,
               balance,
+              creditBalance,
             }),
           )
 

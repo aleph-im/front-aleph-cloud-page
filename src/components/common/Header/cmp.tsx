@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   AccountPicker,
@@ -11,11 +11,13 @@ import {
 import { StyledHeader, StyledNavbarDesktop, StyledNavbarMobile } from './styles'
 import { useHeader } from '@/components/common/Header/hook'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
-import { websiteUrl } from '@/helpers/constants'
+import { NAVIGATION_URLS, websiteUrl } from '@/helpers/constants'
 import { blockchains } from '@/domain/connect'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
 import { useSettings } from '@/hooks/common/useSettings'
+import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook'
+import { formatCredits } from '@/helpers/utils'
 
 const CustomLink = (props: RenderLinkProps) => {
   return props.route.children ? <span {...props} /> : <Link {...props} />
@@ -153,7 +155,7 @@ export const Header = () => {
     networks,
     accountAddress,
     accountBalance,
-    accountVouchers,
+    accountCreditBalance,
     rewards,
     selectedNetwork,
     handleToggle,
@@ -163,6 +165,16 @@ export const Header = () => {
   } = useHeader()
 
   const ensName = useEnsNameLookup(accountAddress)
+  const { handleOpen } = useTopUpCreditsModal()
+
+  // Format credits as USD for display
+  const formattedCredits = useMemo(
+    () =>
+      accountCreditBalance !== undefined
+        ? formatCredits(accountCreditBalance)
+        : undefined,
+    [accountCreditBalance],
+  )
 
   return (
     <>
@@ -182,7 +194,8 @@ export const Header = () => {
                 isMobile
                 accountAddress={accountAddress}
                 accountBalance={accountBalance}
-                accountVouchers={accountVouchers}
+                showCredits
+                accountCredits={formattedCredits}
                 blockchains={blockchains}
                 networks={networks}
                 selectedNetwork={selectedNetwork}
@@ -192,7 +205,11 @@ export const Header = () => {
                 handleConnect={handleConnect}
                 handleDisconnect={handleDisconnect}
                 handleSwitchNetwork={handleSwitchNetwork}
-                showCredits={false}
+                handleTopUpClick={handleOpen}
+                externalUrl={{
+                  text: 'Legacy console',
+                  url: NAVIGATION_URLS.legacyConsole.home,
+                }}
                 showSettings
                 Link={CustomLinkMemo}
               />
@@ -211,7 +228,8 @@ export const Header = () => {
           <AccountPicker
             accountAddress={accountAddress}
             accountBalance={accountBalance}
-            accountVouchers={accountVouchers}
+            showCredits
+            accountCredits={formattedCredits}
             blockchains={blockchains}
             networks={networks}
             selectedNetwork={selectedNetwork}
@@ -221,7 +239,11 @@ export const Header = () => {
             handleConnect={handleConnect}
             handleDisconnect={handleDisconnect}
             handleSwitchNetwork={handleSwitchNetwork}
-            showCredits={false}
+            handleTopUpClick={handleOpen}
+            externalUrl={{
+              text: 'Legacy console',
+              url: NAVIGATION_URLS.legacyConsole.home,
+            }}
             showSettings
             Link={CustomLinkMemo}
           />

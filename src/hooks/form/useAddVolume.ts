@@ -8,13 +8,19 @@ export type NewVolumeStandaloneField = {
   file?: File
 }
 
+export type ExistingVolumeStandaloneField = {
+  volumeType: VolumeType.Existing
+  mountPath?: string
+  refHash?: string
+  useLatest?: boolean
+}
+
 export type NewVolumeField = NewVolumeStandaloneField & {
   mountPath: string
   useLatest: boolean
 }
 
-export type ExistingVolumeField = {
-  volumeType: VolumeType.Existing
+export type ExistingVolumeField = ExistingVolumeStandaloneField & {
   mountPath: string
   refHash: string
   useLatest: boolean
@@ -31,8 +37,8 @@ export type InstanceSystemVolumeField = {
   size: number
 }
 
-export const defaultVolume: NewVolumeStandaloneField = {
-  volumeType: VolumeType.New,
+export const defaultVolume: ExistingVolumeStandaloneField = {
+  volumeType: VolumeType.Existing,
 }
 
 export type VolumeField =
@@ -319,7 +325,7 @@ export function useAddVolume({
   const volumeTypeCtrl = useController({
     control,
     name: `${n}.volumeType`,
-    defaultValue: VolumeType.New,
+    defaultValue: VolumeType.Existing,
   })
 
   const handleRemove = useCallback(() => {

@@ -1,13 +1,11 @@
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import { EntityType } from '@/helpers/constants'
 import { UseEntityCostReturn } from '@/hooks/common/useEntityCost'
+import { InsufficientFundsInfo } from '@/hooks/common/useInsufficientFunds'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { WebsiteFolderField } from '@/hooks/form/useAddWebsiteFolder'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
-import {
-  StreamDurationField,
-  StreamDurationUnit,
-} from '@/hooks/form/useSelectStreamDuration'
+import { StreamDurationUnit } from '@/hooks/form/useSelectStreamDuration'
 import { ReactNode, RefObject } from 'react'
 import { Control } from 'react-hook-form'
 
@@ -21,17 +19,13 @@ export type CheckoutSummaryProps = {
   // volume?: VolumeField
   // volumes?: VolumeField[]
   // domains?: DomainField[]
-  paymentMethod: PaymentMethod
   button?: ReactNode
   footerButton?: ReactNode
   description?: ReactNode
   mainRef?: RefObject<HTMLElement>
   control?: Control
-  receiverAddress?: string
-  streamDuration?: StreamDurationField
-  disablePaymentMethod?: boolean
-  disabledStreamTooltip?: ReactNode
-  onSwitchPaymentMethod?: (e: PaymentMethod) => void
+  minimumBalanceNeeded?: number
+  insufficientFunds?: InsufficientFundsInfo
 }
 
 export type CheckoutSummarySpecsLineProps = {

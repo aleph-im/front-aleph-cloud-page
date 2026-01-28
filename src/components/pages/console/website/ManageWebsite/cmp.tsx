@@ -10,7 +10,7 @@ import {
   TextGradient,
   useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
-import { EntityTypeName, NAVIGATION_URLS } from '@/helpers/constants'
+import { EntityTypeName } from '@/helpers/constants'
 import { useManageWebsite } from './hook'
 import { humanReadableSize } from '@/helpers/utils'
 import { Text, Separator } from '../../common'
@@ -20,7 +20,6 @@ import { WebsiteFrameworks } from '@/domain/website'
 import { getDate, cidV0Tov1 } from '@/helpers/utils'
 import UpdateWebsiteFolder from '@/components/form/UpdateWebsiteFolder'
 import { Volume } from '@/domain/volume'
-import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
 import BackButtonSection from '@/components/common/BackButtonSection'
 
@@ -372,14 +371,14 @@ export function ManageWebsite() {
             <UpdateWebsiteFolder control={state.control} />
           </NoisyContainer>
 
-          <div tw="mt-20 text-center">
+          {/* <div tw="mt-20 text-center">
             <ButtonLink
               variant="primary"
               href={NAVIGATION_URLS.console.web3Hosting.website.new}
             >
               Create new website
             </ButtonLink>
-          </div>
+          </div> */}
         </CenteredContainer>
       </section>
     </>

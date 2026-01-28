@@ -32,6 +32,8 @@ export type EntityCardProps = {
   dashboardPath?: string
   createPath?: string
   createTarget?: HTMLAttributeAnchorTarget
+  createDisabled?: boolean
+  createDisabledMessage?: ReactNode
   introductionButtonText?: string
   information: InformationProps
   storage?: number

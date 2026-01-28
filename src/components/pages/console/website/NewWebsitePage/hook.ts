@@ -39,12 +39,12 @@ export type NewWebsiteFormState = NameAndTagsField &
 
 export const defaultValues: Partial<NewWebsiteFormState> = {
   ...defaultNameAndTags,
-  paymentMethod: PaymentMethod.Hold,
+  paymentMethod: PaymentMethod.Credit,
 }
 
 export type UseNewWebsitePagePageReturn = {
   address: string
-  accountBalance: number
+  accountCreditBalance: number
   isCreateButtonDisabled: boolean
   values: any
   control: Control<any>
@@ -57,7 +57,8 @@ export type UseNewWebsitePagePageReturn = {
 export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
-  const { account, balance: accountBalance = 0 } = appState.connection
+  const { account, creditBalance: accountCreditBalance = 0 } =
+    appState.connection
 
   const manager = useWebsiteManager()
   const { next, stop } = useCheckoutNotification({})
@@ -69,7 +70,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
       // @todo: Refactor this
       const payment: WebsitePayment = {
         chain: BlockchainId.ETH,
-        type: PaymentMethod.Hold,
+        type: PaymentMethod.Credit,
       }
 
       const website = {
@@ -139,7 +140,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
 
   const { isCreateButtonDisabled } = useCanAfford({
     cost,
-    accountBalance,
+    accountCreditBalance,
   })
 
   const handleBack = () => {
@@ -154,7 +155,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
 
   return {
     address: account?.address || '',
-    accountBalance,
+    accountCreditBalance,
     isCreateButtonDisabled,
     values,
     control,

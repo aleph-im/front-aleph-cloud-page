@@ -30,7 +30,7 @@ export const defaultValues: NewVolumeFormState = {
 
 export type UseNewVolumePageReturn = {
   address: string
-  accountBalance: number
+  accountCreditBalance: number
   isCreateButtonDisabled: boolean
   values: any
   control: Control<any>
@@ -43,7 +43,8 @@ export type UseNewVolumePageReturn = {
 export function useNewVolumePage(): UseNewVolumePageReturn {
   const router = useRouter()
   const [appState, dispatch] = useAppState()
-  const { account, balance: accountBalance = 0 } = appState.connection
+  const { account, creditBalance: accountCreditBalance = 0 } =
+    appState.connection
 
   const manager = useVolumeManager()
   const { next, stop } = useCheckoutNotification({})
@@ -109,7 +110,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
 
   const { isCreateButtonDisabled } = useCanAfford({
     cost,
-    accountBalance,
+    accountCreditBalance,
   })
 
   const handleBack = () => {
@@ -118,7 +119,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
 
   return {
     address: account?.address || '',
-    accountBalance,
+    accountCreditBalance,
     isCreateButtonDisabled,
     values,
     control,

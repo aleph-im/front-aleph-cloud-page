@@ -1,6 +1,6 @@
-import { memo } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@aleph-front/core'
+import { Button, Tooltip } from '@aleph-front/core'
 import { ButtonLinkProps } from './types'
 
 /**
@@ -14,9 +14,19 @@ export const ButtonLink = ({
   kind = 'default',
   size = 'md',
   disabled,
+  disabledMessage,
+  tooltipPosition,
   children,
   ...rest
 }: ButtonLinkProps) => {
+  const targetRef = useRef<HTMLButtonElement>(null)
+
+  // Wait until after client-side hydration to show tooltip
+  const [renderTooltip, setRenderTooltip] = useState(false)
+  useEffect(() => {
+    setRenderTooltip(true)
+  }, [])
+
   const buttonNode = (
     <Button
       {...{
@@ -26,6 +36,7 @@ export const ButtonLink = ({
         kind,
         size,
         disabled,
+        ref: targetRef,
         ...rest,
       }}
     >
@@ -38,7 +49,17 @@ export const ButtonLink = ({
       {buttonNode}
     </Link>
   ) : (
-    buttonNode
+    <span>
+      {buttonNode}
+      {renderTooltip && disabledMessage && (
+        <Tooltip
+          my={tooltipPosition?.my || 'bottom-center'}
+          at={tooltipPosition?.at || 'top-right'}
+          targetRef={targetRef}
+          content={disabledMessage}
+        />
+      )}
+    </span>
   )
 }
 ButtonLink.displayName = 'ButtonLink'

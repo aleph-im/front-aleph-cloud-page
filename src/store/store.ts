@@ -14,6 +14,8 @@ import { CCN, CRN, NodeLastVersions } from '@/domain/node'
 import { RequestState, getRequestReducer } from './request'
 import { RewardsResponse } from '@/domain/stake'
 import { FilterState, getFilterReducer } from './filter'
+import { UIState, getUIReducer } from './ui'
+import { CreditPaymentHistoryItem } from '@/domain/credit'
 import { AccountPermissions } from '@/domain/permissions'
 
 export type StoreSubstate = Record<string, unknown>
@@ -89,6 +91,12 @@ export type StoreState = {
 
   // Filtering
   filter: FilterState
+
+  // UI state
+  ui: UIState
+
+  // Credit payments
+  creditPayment: EntityState<CreditPaymentHistoryItem>
 }
 
 export const storeReducer = mergeReducers<StoreState>({
@@ -130,6 +138,15 @@ export const storeReducer = mergeReducers<StoreState>({
 
   // Filtering
   filter: getFilterReducer(),
+
+  // UI state
+  ui: getUIReducer(),
+
+  // Credit payments
+  creditPayment: getEntityReducer<CreditPaymentHistoryItem>(
+    'creditPayment',
+    'id',
+  ),
 })
 
 export const storeInitialState: StoreState = getInitialState(storeReducer)

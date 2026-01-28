@@ -185,6 +185,11 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content:
         'By signing this, you confirm the deletion of your port forwarding configuration.',
     },
+    creditTransaction: {
+      title: 'Sign Credit Payment Transaction',
+      content:
+        'By signing this transaction, you confirm the payment for your credit top-up. This will transfer the specified amount from your wallet.',
+    },
     permissions: {
       title: 'Sign Permissions Creation',
       content:

@@ -8,6 +8,7 @@ import EntityTable from '@/components/common/EntityTable'
 import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 import { Program } from '@/domain/program'
+import ExternalLink from '@/components/common/ExternalLink'
 
 export const FunctionsTabContent = React.memo(
   ({ data }: FunctionsTabContentProps) => {
@@ -30,10 +31,26 @@ export const FunctionsTabContent = React.memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 data={data}
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 rowProps={(row) => ({
+                  // css: row.confirmed ? '' : tw`opacity-60`,
+                  css: tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
-                  css: row.confirmed ? '' : tw`opacity-60`,
                 })}
+                rowTooltip={() => {
+                  return (
+                    <p>
+                      To manage this function, go to the{' '}
+                      <ExternalLink
+                        text="Legacy console App."
+                        color="main0"
+                        href={
+                          NAVIGATION_URLS.legacyConsole.computing.instances.home
+                        }
+                      />
+                    </p>
+                  )
+                }}
                 clickableRows
                 columns={[
                   {
@@ -90,6 +107,7 @@ export const FunctionsTabContent = React.memo(
                         kind="functional"
                         variant="secondary"
                         onClick={() => handleRowClick(row)}
+                        disabled
                       >
                         <Icon name="angle-right" size="lg" />
                       </Button>
@@ -101,14 +119,14 @@ export const FunctionsTabContent = React.memo(
                 ]}
               />
             </div>
-            <div tw="mt-20 text-center">
+            {/* <div tw="mt-20 text-center">
               <ButtonLink
                 variant="primary"
                 href={NAVIGATION_URLS.console.computing.functions.new}
               >
                 Create function
               </ButtonLink>
-            </div>
+            </div> */}
           </>
         ) : (
           <div tw="mt-10 text-center">
