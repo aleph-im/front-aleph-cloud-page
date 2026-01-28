@@ -11,7 +11,6 @@ import {
 } from '@aleph-front/core'
 import { Portal } from '@/components/common/Portal'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
-import InfoTitle from '@/components/common/entityData/InfoTitle'
 
 export const InstanceSSHKeysCell = ({
   sshKeys,
@@ -98,7 +97,7 @@ export const InstanceSSHKeysCell = ({
                         size="1.5rem"
                       />
                       <div>
-                        <InfoTitle>SSH KEY</InfoTitle>
+                        <div className="tp-info text-base2 fs-12">SSH KEY</div>
                         <div className="tp-body1 fs-12">
                           {sshKey.label || 'Unnamed key'}
                         </div>

@@ -11,7 +11,6 @@ import {
 } from '@aleph-front/core'
 import { Portal } from '@/components/common/Portal'
 import { EntityType, EntityTypeObject } from '@/helpers/constants'
-import InfoTitle from '@/components/common/entityData/InfoTitle'
 import { humanReadableSize } from '@/helpers/utils'
 
 export const InstanceVolumesCell = ({
@@ -102,7 +101,9 @@ export const InstanceVolumesCell = ({
                   >
                     <ObjectImg id="Object16" color="base2" size="1.5rem" />
                     <div>
-                      <InfoTitle>{volume.mount}</InfoTitle>
+                      <div className="tp-info text-base2 fs-12">
+                        {volume.mount}
+                      </div>
                       <div className="tp-body1 fs-12">
                         {getVolumeSize(volume)}
                       </div>
