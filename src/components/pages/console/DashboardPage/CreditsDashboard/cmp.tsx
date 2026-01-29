@@ -53,7 +53,7 @@ export default function CreditsDashboard() {
       <SectionTitle>
         <span tw="flex items-center">
           Balance
-          {historyLoading && <Spinner size="1.5em" color='main0'/>}
+          {historyLoading && <Spinner size="1.5em" color="main0" />}
         </span>
       </SectionTitle>
       <ToggleDashboard
