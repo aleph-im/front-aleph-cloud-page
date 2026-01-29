@@ -15,6 +15,63 @@ import {
 } from '@/helpers/schemas/credit'
 import { withRetry } from '@/helpers/utils'
 
+// Token ID enum for type safety
+export enum TokenId {
+  ALEPH = 'ALEPH',
+  USDC = 'USDC',
+}
+
+// Token decimal precision map
+export const TOKEN_DECIMALS: Record<TokenId, number> = {
+  [TokenId.ALEPH]: 18,
+  [TokenId.USDC]: 6,
+}
+
+// Credit system constants
+export const CREDITS_PER_USD = 1_000_000
+
+/**
+ * Get the decimal precision for a token
+ */
+export function getTokenDecimals(token: TokenId | string): number {
+  return TOKEN_DECIMALS[token as TokenId] ?? 18
+}
+
+/**
+ * Get the decimal multiplier for a token (e.g., 10^18 for ALEPH, 10^6 for USDC)
+ */
+export function getTokenMultiplier(token: TokenId | string): BN {
+  const decimals = getTokenDecimals(token)
+  return new BN('1'.padEnd(decimals + 1, '0'))
+}
+
+/**
+ * Convert a token amount to its smallest unit (e.g., 1 USDC -> 1000000)
+ */
+export function toTokenSmallestUnit(
+  amount: number | string,
+  token: TokenId | string,
+): string {
+  return new BN(amount.toString()).mul(getTokenMultiplier(token)).toString()
+}
+
+/**
+ * Convert from smallest unit back to token amount (e.g., 1000000 -> 1 USDC)
+ * Uses ceiling rounding to ensure sufficient token amount
+ */
+export function fromTokenSmallestUnit(
+  amount: string | number,
+  token: TokenId | string,
+): number {
+  const decimals = getTokenDecimals(token)
+  const divisor = BigInt(10 ** decimals)
+  const amountBigInt = BigInt(amount.toString())
+  const quotient = amountBigInt / divisor
+  const remainder = amountBigInt % divisor
+  // Ceiling: add 1 if there's any remainder
+  return Number(remainder > 0n ? quotient + 1n : quotient)
+}
+
 // const ALEPH_CREDIT_API_URL = 'http://localhost:8080/api/v0'
 const ALEPH_CREDIT_API_URL = 'https://credit.aleph.im/api/v0'
 const ALEPH_CREDIT_PAYMENT_ENDPOINT = `${ALEPH_CREDIT_API_URL}/payment`
@@ -242,10 +299,8 @@ export class CreditManager {
     const blockchain = data.chain
     const token = data.currency
 
-    // Convert amount to 18-decimal precision string using BN
-    const amount = new BN(data.amount.toString())
-      .mul(new BN('1000000000000000000'))
-      .toString()
+    // Convert amount to smallest unit based on token decimals
+    const amount = toTokenSmallestUnit(data.amount, token)
 
     const estimationRequest: TokenEstimationRequest = {
       blockchain,
@@ -312,14 +367,10 @@ export class CreditManager {
 
       const data = await response.json()
 
-      // Convert token amount from wei (18 decimals) to whole units, ceiling up
-      const tokenAmountInWei = BigInt(data.tokenAmount)
-      const divisor = BigInt(10 ** 18)
-      const quotient = tokenAmountInWei / divisor
-      const remainder = tokenAmountInWei % divisor
-      // Ceil up: add 1 if there's any remainder
-      const tokenAmountInUnits = Number(
-        remainder > 0n ? quotient + 1n : quotient,
+      // Convert token amount from smallest unit to whole units
+      const tokenAmountInUnits = fromTokenSmallestUnit(
+        data.tokenAmount,
+        currency,
       )
 
       return {
