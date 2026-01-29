@@ -5,6 +5,7 @@ import {
   Modal,
   NoisyContainer,
   ObjectImg,
+  Spinner,
   TextGradient,
 } from '@aleph-front/core'
 
@@ -49,7 +50,12 @@ export default function CreditsDashboard() {
 
   return (
     <section tw="px-0 pb-6 pt-12 lg:pb-5">
-      <SectionTitle>Balance</SectionTitle>
+      <SectionTitle>
+        <span tw="flex items-center">
+          Balance
+          {historyLoading && <Spinner size="1.5em" color='main0'/>}
+        </span>
+      </SectionTitle>
       <ToggleDashboard
         open={creditsDashboardOpen}
         setOpen={setCreditsDashboardOpen}
@@ -115,138 +121,141 @@ export default function CreditsDashboard() {
             </div>
           </NoisyContainer>
 
-          <div>
-            <div tw="flex gap-6 items-center">
-              <TextGradient as="h3" type="h7">
-                Purchases
-              </TextGradient>
+          {recentHistory.length > 0 && (
+            <div>
+              <div tw="flex gap-6 items-center">
+                <TextGradient as="h3" type="h7">
+                  Purchases
+                </TextGradient>
 
-              <Button
-                variant="textOnly"
-                size="sm"
-                tw="mb-7!"
-                onClick={() => setIsHistoryPanelOpen(true)}
-                disabled={!isConnected}
-              >
-                History <Icon name="chevron-square-right" tw="ml-1" />
-              </Button>
-            </div>
-            <div tw="overflow-x-auto">
-              <StyledTable
-                // borderType="none"
-                // rowNoise
-                clickableRows
-                rowKey={(row) => row.id}
-                data={recentHistory}
-                rowProps={(row) => ({
-                  onClick: () => handleOpenPaymentStatusModal(row),
-                })}
-                columns={[
-                  {
-                    label: 'STATUS',
-                    align: 'left',
-                    sortable: true,
-                    width: '1rem',
-                    render: (row) => {
-                      let color = 'warning'
+                <Button
+                  variant="textOnly"
+                  size="sm"
+                  tw="mb-7!"
+                  onClick={() => setIsHistoryPanelOpen(true)}
+                  disabled={!isConnected}
+                >
+                  History <Icon name="chevron-square-right" tw="ml-1" />
+                </Button>
+              </div>
+              <div tw="overflow-x-auto">
+                <StyledTable
+                  // borderType="none"
+                  // rowNoise
+                  clickableRows
+                  rowKey={(row) => row.id}
+                  data={recentHistory}
+                  rowProps={(row) => ({
+                    onClick: () => handleOpenPaymentStatusModal(row),
+                  })}
+                  columns={[
+                    {
+                      label: 'STATUS',
+                      align: 'left',
+                      sortable: true,
+                      width: '1rem',
+                      render: (row) => {
+                        let color = 'warning'
 
-                      switch (row.status) {
-                        case PaymentStatus.Completed:
-                          color = 'success'
-                          break
-                        case PaymentStatus.Cancelled:
-                        case PaymentStatus.Failed:
-                          color = 'error'
-                          break
-                        default:
-                          color = 'warning'
-                          break
-                      }
+                        switch (row.status) {
+                          case PaymentStatus.Completed:
+                            color = 'success'
+                            break
+                          case PaymentStatus.Cancelled:
+                          case PaymentStatus.Failed:
+                            color = 'error'
+                            break
+                          default:
+                            color = 'warning'
+                            break
+                        }
 
-                      return (
-                        <div tw="relative h-6 w-6">
-                          <Icon
-                            name="circle"
-                            gradient={color}
-                            tw="absolute top-0 left-0"
-                            size="24px"
-                          ></Icon>
-                          <Icon
-                            name="circle"
-                            color="base0"
-                            tw="absolute top-[1.5px] left-[1.5px]"
-                            size="21px"
-                          />
-                          <Icon
-                            name="alien-8bit"
-                            gradient={color}
-                            tw="absolute top-[4px] left-[3px]"
-                            size="16px"
-                          />
-                        </div>
-                      )
+                        return (
+                          <div tw="relative h-6 w-6">
+                            <Icon
+                              name="circle"
+                              gradient={color}
+                              tw="absolute top-0 left-0"
+                              size="24px"
+                            ></Icon>
+                            <Icon
+                              name="circle"
+                              color="base0"
+                              tw="absolute top-[1.5px] left-[1.5px]"
+                              size="21px"
+                            />
+                            <Icon
+                              name="alien-8bit"
+                              gradient={color}
+                              tw="absolute top-[4px] left-[3px]"
+                              size="16px"
+                            />
+                          </div>
+                        )
+                      },
                     },
-                  },
-                  {
-                    label: 'DATE',
-                    align: 'left',
-                    sortable: true,
-                    width: '10rem',
-                    render: (row) =>
-                      row.createdAt && getDate(row.createdAt / 1000),
-                  },
-                  {
-                    label: 'AMOUNT',
-                    align: 'left',
-                    sortable: true,
-                    width: '8rem',
-                    render: (row) => formatPaymentAmount(row.amount, row.asset),
-                  },
-                  {
-                    label: 'ASSET',
-                    align: 'left',
-                    sortable: true,
-                    width: '6rem',
-                    render: (row) => row.asset,
-                  },
-                  {
-                    label: 'CREDITS',
-                    align: 'left',
-                    sortable: true,
-                    width: '8rem',
-                    render: (row) => `~${formatCredits(row.credits)}`,
-                  },
-                  {
-                    label: '',
-                    width: '100%',
-                    align: 'right',
-                    render: () => <></>,
-                  },
-                  {
-                    label: '',
-                    width: '100%',
-                    align: 'right',
-                    render: (row) => {
-                      return (
-                        <DetailsMenuButton
-                          menuItems={[
-                            {
-                              label: 'Report issue',
-                              onClick: () =>
-                                handleOpenReportIssue({ payment: row }),
-                            },
-                          ]}
-                        />
-                      )
+                    {
+                      label: 'DATE',
+                      align: 'left',
+                      sortable: true,
+                      width: '10rem',
+                      render: (row) =>
+                        row.createdAt && getDate(row.createdAt / 1000),
                     },
-                    cellProps: () => ({
-                      css: tw`pl-3!`,
-                    }),
-                  },
-                ]}
-              />
+                    {
+                      label: 'AMOUNT',
+                      align: 'left',
+                      sortable: true,
+                      width: '8rem',
+                      render: (row) =>
+                        formatPaymentAmount(row.amount, row.asset),
+                    },
+                    {
+                      label: 'ASSET',
+                      align: 'left',
+                      sortable: true,
+                      width: '6rem',
+                      render: (row) => row.asset,
+                    },
+                    {
+                      label: 'CREDITS',
+                      align: 'left',
+                      sortable: true,
+                      width: '8rem',
+                      render: (row) => `~${formatCredits(row.credits)}`,
+                    },
+                    {
+                      label: '',
+                      width: '100%',
+                      align: 'right',
+                      render: () => <></>,
+                    },
+                    {
+                      label: '',
+                      width: '100%',
+                      align: 'right',
+                      render: (row) => {
+                        return (
+                          <DetailsMenuButton
+                            menuItems={[
+                              {
+                                label: 'Report issue',
+                                onClick: () =>
+                                  handleOpenReportIssue({ payment: row }),
+                              },
+                            ]}
+                          />
+                        )
+                      },
+                      cellProps: () => ({
+                        css: tw`pl-3!`,
+                      }),
+                    },
+                  ]}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </ToggleDashboard>
 
