@@ -187,7 +187,7 @@ export function useInstanceRowActions({
     if (!instance) throw Err.InstanceNotFound
 
     try {
-      const instanceNetwork = instance.chain || instance.payment?.chain
+      const instanceNetwork = instance.payment?.chain
       const incompatibleNetwork = checkNetworkCompatibility(instanceNetwork)
 
       if (incompatibleNetwork) {
