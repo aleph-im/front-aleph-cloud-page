@@ -13,6 +13,7 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
+import { fetchAllPages } from '@/helpers/pagination'
 
 export type AddSSHKey = {
   key: string
@@ -43,14 +44,24 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
   async getAll(): Promise<SSHKey[]> {
     if (!this.account) return []
 
+    const { address } = this.account
+
     try {
-      const response = await this.sdkClient.getPosts({
-        addresses: [this.account.address],
-        types: this.type,
-        channels: [this.channel],
+      const posts = await fetchAllPages(async (page, pageSize) => {
+        const response = await this.sdkClient.getPosts({
+          addresses: [address],
+          types: this.type,
+          channels: [this.channel],
+          page,
+          pagination: pageSize,
+        })
+        return {
+          items: response.posts,
+          hasMore: response.posts.length === pageSize,
+        }
       })
 
-      return this.parsePosts(response.posts)
+      return this.parsePosts(posts)
     } catch (err) {
       return []
     }

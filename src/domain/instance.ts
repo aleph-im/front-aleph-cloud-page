@@ -50,6 +50,7 @@ import { CostManager, CostSummary } from './cost'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { BlockchainId } from './connect'
 import { mockAccount } from './account'
+import { fetchAllPages } from '@/helpers/pagination'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -126,14 +127,24 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   async getAll(): Promise<T[]> {
     if (!this.account) return []
 
+    const { address } = this.account
+
     try {
-      const response = await this.sdkClient.getMessages({
-        addresses: [this.account.address],
-        messageTypes: [MessageType.instance],
-        channels: [this.channel],
+      const messages = await fetchAllPages(async (page, pageSize) => {
+        const response = await this.sdkClient.getMessages({
+          addresses: [address],
+          messageTypes: [MessageType.instance],
+          channels: [this.channel],
+          page,
+          pagination: pageSize,
+        })
+        return {
+          items: response.messages,
+          hasMore: response.messages.length === pageSize,
+        }
       })
 
-      return await this.parseMessages(response.messages)
+      return await this.parseMessages(messages)
     } catch (err) {
       return []
     }
