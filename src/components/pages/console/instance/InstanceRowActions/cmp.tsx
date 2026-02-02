@@ -27,6 +27,7 @@ export const InstanceRowActions = ({
   startDisabled,
   rebootDisabled,
   deleteDisabled,
+  disabled = false,
 }: InstanceRowActionsProps) => {
   const [showActions, setShowActions] = React.useState(false)
 
@@ -65,7 +66,8 @@ export const InstanceRowActions = ({
     <span onClick={(e) => e.stopPropagation()}>
       <RowActionsButton
         ref={actionsButtonRef}
-        onClick={() => setShowActions(!showActions)}
+        onClick={() => !disabled && setShowActions(!showActions)}
+        disabled={disabled}
       >
         <Icon name="ellipsis" />
       </RowActionsButton>

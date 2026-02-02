@@ -8,4 +8,5 @@ export type InstanceRowActionsProps = {
   startDisabled?: boolean
   rebootDisabled?: boolean
   deleteDisabled?: boolean
+  disabled?: boolean
 }

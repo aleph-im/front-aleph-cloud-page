@@ -248,6 +248,7 @@ export const InstancesTabContent = React.memo(
             <InstanceSSHKeysCell
               sshKeys={getInstanceSSHKeys(row)}
               onSSHKeyClick={handleSSHKeyClick}
+              disabled={!isNonCredit(row)}
             />
           ),
         },

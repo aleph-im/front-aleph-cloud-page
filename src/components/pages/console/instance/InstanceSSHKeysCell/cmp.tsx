@@ -15,6 +15,7 @@ import { EntityType, EntityTypeObject } from '@/helpers/constants'
 export const InstanceSSHKeysCell = ({
   sshKeys,
   onSSHKeyClick,
+  disabled = false,
 }: InstanceSSHKeysCellProps) => {
   const [showDropdown, setShowDropdown] = React.useState(false)
 
@@ -68,7 +69,8 @@ export const InstanceSSHKeysCell = ({
     <span onClick={(e) => e.stopPropagation()}>
       <SSHKeysButton
         ref={buttonRef}
-        onClick={() => setShowDropdown(!showDropdown)}
+        onClick={() => !disabled && setShowDropdown(!showDropdown)}
+        disabled={disabled}
       >
         <ObjectImg
           id={EntityTypeObject[EntityType.SSHKey]}

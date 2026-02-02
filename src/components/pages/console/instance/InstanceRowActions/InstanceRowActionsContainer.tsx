@@ -49,6 +49,7 @@ export const InstanceRowActionsContainer = ({
       startDisabled={disabled || startDisabled}
       rebootDisabled={disabled || rebootDisabled}
       deleteDisabled={disabled || deleteDisabled}
+      disabled={disabled}
     />
   )
 }
