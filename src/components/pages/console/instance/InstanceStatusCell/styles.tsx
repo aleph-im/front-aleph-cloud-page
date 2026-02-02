@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components'
 import tw from 'twin.macro'
 
-export type StatusIconVariant = 'success' | 'warning' | 'error'
+export type StatusIconVariant = 'success' | 'warning' | 'error' | 'loading'
 
 export const StyledStatusIcon = styled.div<{ $variant: StatusIconVariant }>`
   ${tw`flex items-center justify-center rounded-full`}
@@ -13,6 +13,7 @@ export const StyledStatusIcon = styled.div<{ $variant: StatusIconVariant }>`
       success: theme.color.success,
       warning: theme.color.warning,
       error: theme.color.error,
+      loading: theme.color.main0,
     }
 
     const color = colors[$variant]

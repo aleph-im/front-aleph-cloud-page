@@ -14,7 +14,7 @@ export const InstanceStatusCell = ({
   const statusVariant: StatusIconVariant = useMemo(() => {
     switch (calculatedStatus) {
       case 'loading':
-        return 'warning'
+        return 'loading'
       case 'v1':
         return 'success'
       case 'not-allocated':
@@ -66,14 +66,24 @@ export const InstanceStatusCell = ({
     }
   }, [calculatedStatus])
 
+  const spinnerColor = useMemo(() => {
+    const colorMap: Record<StatusIconVariant, string> = {
+      success: theme.color.success,
+      warning: theme.color.warning,
+      error: theme.color.error,
+      loading: theme.color.main0,
+    }
+    return colorMap[statusVariant]
+  }, [statusVariant, theme])
+
+  // Label component doesn't support 'loading' variant, map it to 'warning'
+  const labelVariant = statusVariant === 'loading' ? 'info' : statusVariant
+
   if (variant === 'icon') {
     return (
       <StyledStatusIcon $variant={statusVariant} title={text}>
         {showSpinner ? (
-          <RotatingLines
-            strokeColor={theme.color[statusVariant]}
-            width="1rem"
-          />
+          <RotatingLines strokeColor={spinnerColor} width="1rem" />
         ) : (
           <Icon name="alien-8bit" size="1.2rem" />
         )}
@@ -82,11 +92,11 @@ export const InstanceStatusCell = ({
   }
 
   return (
-    <Label kind="secondary" variant={statusVariant}>
+    <Label kind="secondary" variant={labelVariant}>
       <div tw="flex items-center justify-center gap-2">
-        <Icon name="alien-8bit" className={`text-${statusVariant}`} size="xs" />
+        <Icon name="alien-8bit" className={`text-${labelVariant}`} size="xs" />
         <span tw="whitespace-nowrap">{text}</span>
-        {showSpinner || true&& (
+        {showSpinner && (
           <RotatingLines strokeColor={theme.color.base2} width=".6rem" />
         )}
       </div>
