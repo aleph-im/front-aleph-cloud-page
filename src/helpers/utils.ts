@@ -23,6 +23,7 @@ import { Account } from '@aleph-sdk/account'
 import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { blockchains } from '@/domain/connect'
+import { CREDITS_PER_USD, TokenId, getTokenDecimals } from '@/domain/credit'
 import BN from 'bn.js'
 
 /**
@@ -225,10 +226,10 @@ export const humanReadableCurrency = (value?: number, decimals = 2) => {
 }
 
 /**
- * Formats credits as USD currency (divides by 100 and adds $ symbol)
- * Credits are stored as cents, so 100 credits = $1.00
+ * Formats credits as USD currency
+ * 1,000,000 credits = $1.00
  *
- * @param credits The credit amount (in cents)
+ * @param credits The credit amount
  * @param decimals Number of decimal places to show (default 2)
  * @returns Formatted string like "$1.00" or "$1.5K" for large amounts
  */
@@ -237,7 +238,7 @@ export const formatCredits = (credits?: number, decimals = 2): string => {
   if (credits === 0) return '$0.00'
   if (!Number.isFinite(credits)) return '-'
 
-  const dollars = credits / 100
+  const dollars = credits / CREDITS_PER_USD
   const isNegative = dollars < 0
   const absValue = Math.abs(dollars)
   const prefix = isNegative ? '-$' : '$'
@@ -872,35 +873,37 @@ export async function withRetry<T>(
 
 /**
  * Formats payment amounts for display, handling token decimal conversion
- * ALEPH and USDC tokens have 18 decimals that need to be converted to human-readable format
- * Uses BN.js for precise decimal handling, reversing the conversion done in getTokenToCreditsEstimation
+ * Uses BN.js for precise decimal handling, reversing the conversion done in
+ * getTokenToCreditsEstimation. Token decimals: ALEPH = 18, USDC = 6
  *
- * @param amount - The raw amount from the API (with 18 decimals for ALEPH/USDC)
+ * @param amount - The raw amount from the API (in smallest unit)
  * @param asset - The asset type (ALEPH, USDC, etc.)
- * @param decimals - Number of decimal places to show (default: 6)
+ * @param displayDecimals - Number of decimal places to show (default: 6)
  * @returns Formatted amount string
  */
 export function formatPaymentAmount(
   amount: number | string,
   asset: string,
-  decimals = 6,
+  displayDecimals = 6,
 ): string {
   if (!amount || amount === 0) return '0'
 
-  // ALEPH and USDC have 18 decimals
-  const isTokenWith18Decimals = ['ALEPH', 'USDC'].includes(asset.toUpperCase())
+  // Get token decimals from constant map
+  const tokenDecimals = getTokenDecimals(asset)
+  const isKnownToken = asset.toUpperCase() in TokenId
 
-  if (isTokenWith18Decimals) {
-    // Convert from 18-decimal precision back to regular number using BN
-    // This reverses: amount.mul(new BN('1000000000000000000'))
+  if (isKnownToken) {
+    // Convert from smallest unit back to regular number using BN
     const amountBN = new BN(amount.toString())
-    const divisor = new BN('1000000000000000000') // 10^18
+    const divisor = new BN('1'.padEnd(tokenDecimals + 1, '0'))
     const convertedAmount = amountBN.div(divisor)
 
     // Handle remainder for decimal places
     const remainder = amountBN.mod(divisor)
-    const decimalPart = remainder.toString().padStart(18, '0')
-    const trimmedDecimal = decimalPart.substring(0, decimals).replace(/0+$/, '')
+    const decimalPart = remainder.toString().padStart(tokenDecimals, '0')
+    const trimmedDecimal = decimalPart
+      .substring(0, displayDecimals)
+      .replace(/0+$/, '')
 
     const wholePart = convertedAmount.toString()
     return trimmedDecimal ? `${wholePart}.${trimmedDecimal}` : wholePart
@@ -908,5 +911,5 @@ export function formatPaymentAmount(
 
   // For other assets, format as is
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
-  return numAmount.toFixed(decimals).replace(/\.?0+$/, '')
+  return numAmount.toFixed(displayDecimals).replace(/\.?0+$/, '')
 }
