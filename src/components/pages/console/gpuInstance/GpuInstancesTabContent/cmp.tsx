@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
+import { PaymentType } from '@aleph-sdk/message'
 import { GpuInstancesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import {
@@ -11,15 +12,24 @@ import {
 import EntityTable from '@/components/common/EntityTable'
 import { Button, Icon } from '@aleph-front/core'
 import { GpuInstance } from '@/domain/gpuInstance'
+import ExternalLink from '@/components/common/ExternalLink'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const GpuInstancesTabContent = React.memo(
   ({ data }: GpuInstancesTabContentProps) => {
     const router = useRouter()
+
+    const isNonCredit = useCallback((row: GpuInstance) => {
+      return row.payment?.type !== PaymentType.credit
+    }, [])
+
     const handleRowClick = useCallback(
       (gpuInstance: GpuInstance) => {
+        if (!isNonCredit(gpuInstance)) return
+
         router.push(`/console/computing/gpu-instance/${gpuInstance.id}`)
       },
-      [router],
+      [isNonCredit, router],
     )
     return (
       <>
@@ -30,7 +40,26 @@ export const GpuInstancesTabContent = React.memo(
                 borderType="none"
                 rowNoise
                 rowKey={(row) => row.id}
-                rowProps={(row) => ({ onClick: () => handleRowClick(row) })}
+                rowProps={(row) => ({
+                  css: isNonCredit(row)
+                    ? ''
+                    : tw`opacity-40 cursor-not-allowed!`,
+                  onClick: () => handleRowClick(row),
+                })}
+                rowTooltip={(row) => {
+                  if (isNonCredit(row)) return null
+
+                  return (
+                    <p>
+                      To manage this GPU instance, go to the{' '}
+                      <ExternalLink
+                        text="Credits console App."
+                        color="main0"
+                        href={NAVIGATION_URLS.creditConsole.computing.gpus.home}
+                      />
+                    </p>
+                  )
+                }}
                 clickableRows
                 data={data}
                 columns={[
@@ -73,15 +102,20 @@ export const GpuInstancesTabContent = React.memo(
                   {
                     label: '',
                     align: 'right',
-                    render: (row) => (
-                      <Button
-                        kind="functional"
-                        variant="secondary"
-                        onClick={() => handleRowClick(row)}
-                      >
-                        <Icon name="angle-right" size="lg" />
-                      </Button>
-                    ),
+                    render: (row) => {
+                      const disabled = !isNonCredit(row)
+
+                      return (
+                        <Button
+                          kind="functional"
+                          variant="secondary"
+                          onClick={() => handleRowClick(row)}
+                          disabled={disabled}
+                        >
+                          <Icon name="angle-right" size="lg" />
+                        </Button>
+                      )
+                    },
                     cellProps: () => ({
                       css: tw`pl-3!`,
                     }),
