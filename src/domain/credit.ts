@@ -13,7 +13,8 @@ import {
   CreditEstimationRequest,
   CreditEstimationResponse,
 } from '@/helpers/schemas/credit'
-import { withRetry } from '@/helpers/utils'
+import { sleep, withRetry } from '@/helpers/utils'
+import { DEFAULT_PAGE_SIZE, DEFAULT_DELAY_MS } from '@/helpers/pagination'
 
 // Token ID enum for type safety
 export enum TokenId {
@@ -389,47 +390,67 @@ export class CreditManager {
       throw new Error('Account is required for payment history')
     }
 
+    const { address } = this.account
+
     try {
-      const response = await fetch(
-        `${ALEPH_CREDIT_PAYMENT_ENDPOINT}?address=${this.account.address}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
+      const allPayments: CreditPaymentHistoryItem[] = []
+      let page = 1
+      let hasMore = true
+
+      while (hasMore) {
+        const response = await fetch(
+          `${ALEPH_CREDIT_PAYMENT_ENDPOINT}?address=${address}&page=${page}&pagination=${DEFAULT_PAGE_SIZE}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        },
-      )
+        )
 
-      if (!response.ok) {
-        const error = await response.json().catch((e) => e)
+        if (!response.ok) {
+          const error = await response.json().catch((e) => e)
 
-        if (error.description) {
-          throw new Error(`${error.description}`)
+          if (error.description) {
+            throw new Error(`${error.description}`)
+          }
+
+          throw new Error(
+            `API error: ${response.status} ${response.statusText}`,
+          )
         }
 
-        throw new Error(`API error: ${response.status} ${response.statusText}`)
+        const result = await response.json()
+        const payments = result.data || []
+
+        const mappedPayments = payments.map((payment: any) => ({
+          id: payment.id,
+          chain: payment.chain,
+          status: payment.status,
+          createdAt: payment.created_at,
+          updatedAt: payment.updated_at,
+          amount: payment.in_amount,
+          asset: payment.in_currency,
+          credits: payment.prices.credit_amount,
+          bonus: payment.prices.credit_bonus_amount,
+          price: payment.prices.credit_price_aleph,
+          provider: payment.provider_id,
+          paymentMethod: payment.payment_method,
+          txHash: payment.tx_hash,
+          itemHash: payment.item_hash,
+        }))
+
+        allPayments.push(...mappedPayments)
+
+        if (payments.length < DEFAULT_PAGE_SIZE) {
+          hasMore = false
+        } else {
+          page++
+          await sleep(DEFAULT_DELAY_MS)
+        }
       }
 
-      const payments = await response.json()
-
-      console.log('payments', payments)
-
-      return payments.map((payment: any) => ({
-        id: payment.id,
-        chain: payment.chain,
-        status: payment.status,
-        createdAt: payment.created_at,
-        updatedAt: payment.updated_at,
-        amount: payment.in_amount,
-        asset: payment.in_currency,
-        credits: payment.prices.credit_amount,
-        bonus: payment.prices.credit_bonus_amount,
-        price: payment.prices.credit_price_aleph,
-        provider: payment.provider_id,
-        paymentMethod: payment.payment_method,
-        txHash: payment.tx_hash,
-        itemHash: payment.item_hash,
-      }))
+      return allPayments
     } catch (error) {
       console.error('Error fetching credit payment history:', error)
       throw new Error('Failed to fetch payment history')
