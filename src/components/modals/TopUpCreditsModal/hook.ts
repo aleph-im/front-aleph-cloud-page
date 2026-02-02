@@ -307,22 +307,12 @@ export function useTopUpCreditsModalForm({
     return estimation?.creditAmount || 0
   }, [estimation])
 
-  // Calculate base credits (excluding bonus) for minimum validation
-  const baseCredits = useMemo(() => {
-    if (!estimation) return 0
-    return estimation.creditAmount - estimation.creditBonusAmount
-  }, [estimation])
-
-  // Check if base credits are below the minimum (excluding bonus)
+  // Check if total credits (including bonus) are below the minimum
+  // For ALEPH payments with bonus, users can meet the minimum with fewer tokens
   const isBelowMinimumCredits = useMemo(() => {
     if (!estimation || isCalculatingInitialAmount) return false
-    return baseCredits < minimumCreditsNeeded
-  }, [
-    estimation,
-    isCalculatingInitialAmount,
-    baseCredits,
-    minimumCreditsNeeded,
-  ])
+    return estimation.creditAmount < minimumCreditsNeeded
+  }, [estimation, isCalculatingInitialAmount, minimumCreditsNeeded])
 
   // Show warning only if user has manually changed amount and it's insufficient
   const showInsufficientWarning = useMemo(() => {
