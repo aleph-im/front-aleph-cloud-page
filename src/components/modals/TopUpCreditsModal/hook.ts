@@ -15,6 +15,7 @@ import {
   PaymentCurrency,
 } from '@/helpers/schemas/credit'
 import { useCreditManager } from '@/hooks/common/useManager/useCreditManager'
+import { MIN_CREDITS_TOPUP } from '@/domain/credit'
 import {
   UseTopUpCreditsModalFormProps,
   UseTopUpCreditsModalFormReturn,
@@ -77,26 +78,33 @@ export function useTopUpCreditsModalForm({
   const lastCalculatedCurrencyRef = useRef<PaymentCurrency>(
     defaultValues.currency,
   )
+  // Track the minimum token amount for the current currency
+  const [minimumTokenAmount, setMinimumTokenAmount] = useState<number>(0)
 
-  // Calculate token amount for a given currency based on minimum credit requirement
-  const calculateTokenAmountForCurrency = useCallback(
-    async (currency: PaymentCurrency): Promise<number> => {
-      if (!creditManager || !appState.ui.topUpCreditsMinimumBalance) {
-        return defaultValues.amount
-      }
+  // The minimum credits needed (passed value or default, but always at least MIN_CREDITS_TOPUP)
+  const minimumCreditsNeeded = Math.max(
+    appState.ui.topUpCreditsMinimumBalance || MIN_CREDITS_TOPUP,
+    MIN_CREDITS_TOPUP,
+  )
 
-      const minimumCreditsNeeded = appState.ui.topUpCreditsMinimumBalance
+  // Calculate token amount for a given currency based on credit requirement
+  const calculateTokenAmountForCredits = useCallback(
+    async (
+      currency: PaymentCurrency,
+      creditsNeeded: number,
+    ): Promise<number> => {
+      if (!creditManager) return defaultValues.amount
 
       const estimation = await creditManager.getCreditToTokenEstimation(
-        minimumCreditsNeeded,
+        creditsNeeded,
         defaultValues.chain,
         currency,
       )
 
-      // Round up and ensure minimum of 100
-      return Math.max(Math.ceil(estimation.tokenAmountInUnits), 100)
+      // Round up to ensure we meet the minimum credits
+      return Math.ceil(estimation.tokenAmountInUnits)
     },
-    [creditManager, appState.ui.topUpCreditsMinimumBalance],
+    [creditManager],
   )
 
   const onSubmit = useCallback(
@@ -180,37 +188,37 @@ export function useTopUpCreditsModalForm({
     [amountCtrl.field],
   )
 
-  // Recalculate token amount when currency changes (only if user hasn't manually changed amount)
+  // Recalculate token amount when currency changes (if user hasn't manually changed amount)
   useEffect(() => {
-    const recalculateForCurrency = async () => {
-      // Only recalculate if there's a minimum balance requirement and user hasn't manually changed
-      if (
-        !appState.ui.topUpCreditsMinimumBalance ||
-        hasManuallyChangedAmount ||
-        values.currency === lastCalculatedCurrencyRef.current
-      ) {
-        return
-      }
+    const updateForCurrency = async () => {
+      if (!creditManager) return
+      if (hasManuallyChangedAmount) return
+      if (values.currency === lastCalculatedCurrencyRef.current) return
 
       setIsCalculatingInitialAmount(true)
       try {
-        const newAmount = await calculateTokenAmountForCurrency(values.currency)
+        const newAmount = await calculateTokenAmountForCredits(
+          values.currency,
+          minimumCreditsNeeded,
+        )
         setCalculatedAmount(newAmount)
+        setMinimumTokenAmount(newAmount)
         setValue('amount', newAmount)
         lastCalculatedCurrencyRef.current = values.currency
       } catch (error) {
-        console.error('Error recalculating token amount for currency:', error)
+        console.error('Error updating amounts for currency:', error)
       } finally {
         setIsCalculatingInitialAmount(false)
       }
     }
 
-    recalculateForCurrency()
+    updateForCurrency()
   }, [
+    creditManager,
     values.currency,
     hasManuallyChangedAmount,
-    appState.ui.topUpCreditsMinimumBalance,
-    calculateTokenAmountForCurrency,
+    minimumCreditsNeeded,
+    calculateTokenAmountForCredits,
     setValue,
   ])
 
@@ -235,7 +243,7 @@ export function useTopUpCreditsModalForm({
 
     // Calculate the proper token amount for minimum credit requirement
     const calculateAmount = async () => {
-      if (!creditManager || !appState.ui.topUpCreditsMinimumBalance) {
+      if (!creditManager) {
         setCalculatedAmount(defaultValues.amount)
         setIsCalculatingInitialAmount(false)
         return
@@ -243,10 +251,12 @@ export function useTopUpCreditsModalForm({
 
       setIsCalculatingInitialAmount(true)
       try {
-        const finalAmount = await calculateTokenAmountForCurrency(
+        const finalAmount = await calculateTokenAmountForCredits(
           defaultValues.currency,
+          minimumCreditsNeeded,
         )
         setCalculatedAmount(finalAmount)
+        setMinimumTokenAmount(finalAmount)
         setValue('amount', finalAmount)
       } catch (error) {
         console.error('Error calculating initial token amount:', error)
@@ -261,8 +271,8 @@ export function useTopUpCreditsModalForm({
     isModalOpen,
     resetForm,
     creditManager,
-    appState.ui.topUpCreditsMinimumBalance,
-    calculateTokenAmountForCurrency,
+    minimumCreditsNeeded,
+    calculateTokenAmountForCredits,
     setValue,
   ])
 
@@ -270,7 +280,7 @@ export function useTopUpCreditsModalForm({
 
   const { data: estimation, loading: isLoadingEstimation } = useLocalRequest({
     doRequest: async (): Promise<TokenEstimationResponse | null> => {
-      if (!creditManager || !debouncedAmount || debouncedAmount < 100)
+      if (!creditManager || !debouncedAmount || debouncedAmount <= 0)
         return null
 
       return await creditManager.getTokenToCreditsEstimation(values)
@@ -297,45 +307,42 @@ export function useTopUpCreditsModalForm({
     return estimation?.creditAmount || 0
   }, [estimation])
 
-  // Check if the current amount meets the minimum credits requirement
-  const minimumCreditsNeeded = appState.ui.topUpCreditsMinimumBalance
-  const hasMinimumRequirement = !!minimumCreditsNeeded
+  // Calculate base credits (excluding bonus) for minimum validation
+  const baseCredits = useMemo(() => {
+    if (!estimation) return 0
+    return estimation.creditAmount - estimation.creditBonusAmount
+  }, [estimation])
 
-  // Determine if the estimated credits are insufficient for the minimum requirement
-  const isInsufficientForMinimum = useMemo(() => {
-    // Don't show as insufficient while we're still calculating the proper amount
-    if (isCalculatingInitialAmount) return false
-    if (!hasMinimumRequirement || !estimation) return false
-    // Compare estimated credits (totalBalance) with minimum requirement
-    return totalBalance < minimumCreditsNeeded
+  // Check if base credits are below the minimum (excluding bonus)
+  const isBelowMinimumCredits = useMemo(() => {
+    if (!estimation || isCalculatingInitialAmount) return false
+    return baseCredits < minimumCreditsNeeded
   }, [
-    isCalculatingInitialAmount,
-    hasMinimumRequirement,
     estimation,
-    totalBalance,
+    isCalculatingInitialAmount,
+    baseCredits,
     minimumCreditsNeeded,
   ])
 
   // Show warning only if user has manually changed amount and it's insufficient
   const showInsufficientWarning = useMemo(() => {
-    return hasManuallyChangedAmount && isInsufficientForMinimum
-  }, [hasManuallyChangedAmount, isInsufficientForMinimum])
+    return hasManuallyChangedAmount && isBelowMinimumCredits
+  }, [hasManuallyChangedAmount, isBelowMinimumCredits])
 
   // Disable submit if amount is insufficient for the minimum requirement
   const isSubmitDisabled = useMemo(() => {
     return (
       !values.amount ||
-      values.amount < 100 ||
+      values.amount <= 0 ||
       isSubmitLoading ||
       isCalculatingInitialAmount ||
-      (hasMinimumRequirement && isInsufficientForMinimum)
+      isBelowMinimumCredits
     )
   }, [
     values.amount,
     isSubmitLoading,
     isCalculatingInitialAmount,
-    hasMinimumRequirement,
-    isInsufficientForMinimum,
+    isBelowMinimumCredits,
   ])
 
   return {
@@ -352,6 +359,8 @@ export function useTopUpCreditsModalForm({
     isSubmitLoading,
     isCalculatingInitialAmount,
     minimumCreditsNeeded,
+    minimumTokenAmount,
+    isBelowMinimumCredits,
     showInsufficientWarning,
     isSubmitDisabled,
   }

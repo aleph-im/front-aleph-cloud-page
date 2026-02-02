@@ -30,6 +30,7 @@ export const TOKEN_DECIMALS: Record<TokenId, number> = {
 
 // Credit system constants
 export const CREDITS_PER_USD = 1_000_000
+export const MIN_CREDITS_TOPUP = 1_000_000 // Minimum $1 worth of credits
 
 /**
  * Get the decimal precision for a token

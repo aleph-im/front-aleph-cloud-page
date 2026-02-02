@@ -27,6 +27,8 @@ export type UseTopUpCreditsModalFormReturn = {
   isSubmitLoading: boolean
   isCalculatingInitialAmount: boolean
   minimumCreditsNeeded?: number
+  minimumTokenAmount: number
+  isBelowMinimumCredits: boolean
   showInsufficientWarning: boolean
   isSubmitDisabled: boolean
 }

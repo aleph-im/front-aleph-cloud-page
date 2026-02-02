@@ -46,6 +46,8 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
     isLoadingEstimation,
     isSubmitLoading,
     minimumCreditsNeeded,
+    minimumTokenAmount,
+    isBelowMinimumCredits,
     showInsufficientWarning,
     isSubmitDisabled,
   } = useTopUpCreditsModalForm({ onSuccess, refetchPaymentHistory })
@@ -71,6 +73,8 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
             isLoadingEstimation,
             isSubmitLoading,
             minimumCreditsNeeded,
+            minimumTokenAmount,
+            isBelowMinimumCredits,
             showInsufficientWarning,
           }}
         />
@@ -101,6 +105,8 @@ type TopUpCreditsModalContentProps = Pick<
   | 'isLoadingEstimation'
   | 'isSubmitLoading'
   | 'minimumCreditsNeeded'
+  | 'minimumTokenAmount'
+  | 'isBelowMinimumCredits'
   | 'showInsufficientWarning'
 >
 
@@ -117,6 +123,8 @@ const TopUpCreditsModalContent = memo(
     isLoadingEstimation,
     isSubmitLoading,
     minimumCreditsNeeded,
+    minimumTokenAmount,
+    isBelowMinimumCredits,
     showInsufficientWarning,
   }: TopUpCreditsModalContentProps) => {
     return (
@@ -153,8 +161,8 @@ const TopUpCreditsModalContent = memo(
                     handleAmountChange(Number(e.target.value))
                   }
                   type="number"
-                  placeholder="100"
-                  min={100}
+                  placeholder={minimumTokenAmount.toString() || '100'}
+                  min={1}
                   step={1}
                 />
               </StyledAmountInputWrapper>
@@ -208,6 +216,15 @@ const TopUpCreditsModalContent = memo(
                 <Icon name="exclamation-triangle" tw="mr-2" />
                 Minimum {formatCredits(minimumCreditsNeeded)} required for this
                 operation. Please increase the amount.
+              </div>
+            )}
+            {isBelowMinimumCredits && !showInsufficientWarning && (
+              <div className="tp-body2 fs-12 text-error" tw="mt-2 p-3 rounded">
+                <Icon name="exclamation-triangle" tw="mr-2" />
+                Minimum top-up is $1. Please enter at least {
+                  minimumTokenAmount
+                }{' '}
+                {values.currency}.
               </div>
             )}
           </div>

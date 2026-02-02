@@ -15,7 +15,6 @@ export const topUpCreditsSchema = z.object({
       invalid_type_error: 'Amount must be a number',
     })
     .positive('Amount must be greater than 0')
-    .min(100, 'Amount cannot be less than 100')
     .max(100000, 'Amount cannot exceed 100,000'),
   chain: paymentChainSchema,
   provider: paymentProviderSchema,
