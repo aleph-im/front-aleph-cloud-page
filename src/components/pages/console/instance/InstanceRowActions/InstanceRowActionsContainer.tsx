@@ -4,6 +4,7 @@ import { useInstanceManager } from '@/hooks/common/useManager/useInstanceManager
 import { useInstanceRowActions } from './useInstanceRowActions'
 import InstanceRowActions from './cmp'
 import { ExecutableStatus } from '@/domain/executable'
+import { BoostPollingOptions } from '@/hooks/common/useRequestEntity/useRequestExecutableStatus'
 
 export type InstanceRowActionsContainerProps = {
   instance: Instance
@@ -11,6 +12,7 @@ export type InstanceRowActionsContainerProps = {
   statusLoading?: boolean
   onManage: () => void
   disabled?: boolean
+  triggerBoostPolling?: (options: BoostPollingOptions) => void
 }
 
 export const InstanceRowActionsContainer = ({
@@ -19,6 +21,7 @@ export const InstanceRowActionsContainer = ({
   statusLoading,
   onManage,
   disabled = false,
+  triggerBoostPolling,
 }: InstanceRowActionsContainerProps) => {
   const manager = useInstanceManager()
 
@@ -36,6 +39,7 @@ export const InstanceRowActionsContainer = ({
     manager,
     status,
     statusLoading,
+    triggerBoostPolling,
   })
 
   return (

@@ -53,10 +53,14 @@ export const InstancesTabContent = React.memo(
     }, [])
 
     // Fetch status for all instances
-    const { status: statusMap, loading: statusLoading } =
-      useRequestExecutableStatus({
-        entities: data,
-      })
+    const {
+      status: statusMap,
+      loading: statusLoading,
+      enforcedStatuses,
+      triggerBoostPolling,
+    } = useRequestExecutableStatus({
+      entities: data,
+    })
 
     // Fetch all SSH keys
     const { entities: sshKeys } = useRequestSSHKeys()
@@ -197,9 +201,12 @@ export const InstancesTabContent = React.memo(
               rowStatus?.data,
               EntityType.Instance,
             )
+            // Use enforced status if set (during action button polling)
+            const displayStatus = enforcedStatuses[row.id] || calculatedStatus
+
             return (
               <InstanceStatusCell
-                calculatedStatus={calculatedStatus}
+                calculatedStatus={displayStatus}
                 variant="icon"
               />
             )
@@ -286,6 +293,7 @@ export const InstancesTabContent = React.memo(
               statusLoading={statusLoading}
               onManage={() => handleManage(row)}
               disabled={!isNonCredit(row)}
+              triggerBoostPolling={triggerBoostPolling}
             />
           ),
           cellProps: () => ({
@@ -296,6 +304,8 @@ export const InstancesTabContent = React.memo(
       [
         statusMap,
         statusLoading,
+        enforcedStatuses,
+        triggerBoostPolling,
         getInstanceVolumes,
         handleVolumeClick,
         getInstanceDomains,

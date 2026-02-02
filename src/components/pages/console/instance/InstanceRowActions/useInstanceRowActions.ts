@@ -22,12 +22,14 @@ import { isAccountPAYGCompatible } from '@/domain/account'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 import { calculateExecutableStatus } from '@/helpers/executableStatus'
+import { BoostPollingOptions } from '@/hooks/common/useRequestEntity/useRequestExecutableStatus'
 
 export type UseInstanceRowActionsProps = {
   instance: Instance
   manager?: InstanceManager
   status?: ExecutableStatus
   statusLoading?: boolean
+  triggerBoostPolling?: (options: BoostPollingOptions) => void
 }
 
 export type UseInstanceRowActionsReturn = {
@@ -47,6 +49,7 @@ export function useInstanceRowActions({
   manager,
   status,
   statusLoading,
+  triggerBoostPolling,
 }: UseInstanceRowActionsProps): UseInstanceRowActionsReturn {
   const isPAYG = instance?.payment?.type === PaymentType.superfluid
   const router = useRouter()
@@ -113,6 +116,13 @@ export function useInstanceRowActions({
         title: 'Stop requested',
         text: 'The instance is being stopped',
       })
+
+      // Trigger boost polling with enforced "stopping" status
+      triggerBoostPolling?.({
+        entityId: instance.id,
+        enforcedStatus: 'stopping',
+        expectedStatuses: ['stopped'],
+      })
     } catch (e) {
       noti?.add({
         variant: 'error',
@@ -120,7 +130,7 @@ export function useInstanceRowActions({
         text: (e as Error)?.message,
       })
     }
-  }, [sendOperation, noti])
+  }, [sendOperation, noti, triggerBoostPolling, instance?.id])
 
   const handleStart = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet
@@ -156,6 +166,13 @@ export function useInstanceRowActions({
         title: 'Start requested',
         text: 'The instance is being started',
       })
+
+      // Trigger boost polling with enforced "starting" status
+      triggerBoostPolling?.({
+        entityId: instance.id,
+        enforcedStatus: 'starting',
+        expectedStatuses: ['running'],
+      })
     } catch (e) {
       noti?.add({
         variant: 'error',
@@ -163,7 +180,15 @@ export function useInstanceRowActions({
         text: (e as Error)?.message,
       })
     }
-  }, [manager, instance, isPAYG, checkNetworkCompatibility, account, noti])
+  }, [
+    manager,
+    instance,
+    isPAYG,
+    checkNetworkCompatibility,
+    account,
+    noti,
+    triggerBoostPolling,
+  ])
 
   const handleReboot = useCallback(async () => {
     try {
@@ -173,6 +198,13 @@ export function useInstanceRowActions({
         title: 'Reboot requested',
         text: 'The instance is being rebooted',
       })
+
+      // Trigger boost polling with enforced "rebooting" status
+      // Rebooting doesn't have a specific expected status, so we let it poll until max
+      triggerBoostPolling?.({
+        entityId: instance.id,
+        enforcedStatus: 'rebooting',
+      })
     } catch (e) {
       noti?.add({
         variant: 'error',
@@ -180,7 +212,7 @@ export function useInstanceRowActions({
         text: (e as Error)?.message,
       })
     }
-  }, [sendOperation, noti])
+  }, [sendOperation, noti, triggerBoostPolling, instance?.id])
 
   const handleDelete = useCallback(async () => {
     if (!manager) throw Err.ConnectYourWallet

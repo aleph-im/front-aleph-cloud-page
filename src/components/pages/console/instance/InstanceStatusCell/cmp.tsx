@@ -14,6 +14,8 @@ export const InstanceStatusCell = ({
   const statusVariant: StatusIconVariant = useMemo(() => {
     switch (calculatedStatus) {
       case 'loading':
+      case 'starting':
+      case 'rebooting':
         return 'loading'
       case 'v1':
         return 'success'
@@ -48,6 +50,10 @@ export const InstanceStatusCell = ({
         return 'Running'
       case 'preparing':
         return 'Preparing'
+      case 'starting':
+        return 'Starting'
+      case 'rebooting':
+        return 'Rebooting'
       default:
         return 'Unknown'
     }
@@ -56,10 +62,10 @@ export const InstanceStatusCell = ({
   const showSpinner = useMemo(() => {
     switch (calculatedStatus) {
       case 'loading':
-        return true
       case 'stopping':
-        return true
       case 'preparing':
+      case 'starting':
+      case 'rebooting':
         return true
       default:
         return false
