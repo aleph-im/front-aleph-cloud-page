@@ -93,8 +93,11 @@ export function useExecutableStatus({
     (options?: BoostPollingOptions) => {
       if (!manager || !executable) return
 
-      const { enforcedStatus: newEnforcedStatus, expectedStatuses, onComplete } =
-        options || {}
+      const {
+        enforcedStatus: newEnforcedStatus,
+        expectedStatuses,
+        onComplete,
+      } = options || {}
 
       if (boostIntervalRef.current) {
         clearInterval(boostIntervalRef.current)
