@@ -197,7 +197,7 @@ export const InstancesTabContent = React.memo(
               rowStatus?.data,
               EntityType.Instance,
             )
-            return <InstanceStatusCell calculatedStatus={calculatedStatus} />
+            return <InstanceStatusCell calculatedStatus={calculatedStatus} variant='icon'/>
           },
         },
         {

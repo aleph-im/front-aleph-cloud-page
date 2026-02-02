@@ -3,13 +3,15 @@ import { Icon, Label } from '@aleph-front/core'
 import { InstanceStatusCellProps } from './types'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
+import { StyledStatusIcon, StatusIconVariant } from './styles'
 
 export const InstanceStatusCell = ({
   calculatedStatus,
+  variant = 'badge',
 }: InstanceStatusCellProps) => {
   const theme = useTheme()
 
-  const labelVariant = useMemo(() => {
+  const statusVariant: StatusIconVariant = useMemo(() => {
     switch (calculatedStatus) {
       case 'loading':
         return 'warning'
@@ -64,12 +66,27 @@ export const InstanceStatusCell = ({
     }
   }, [calculatedStatus])
 
+  if (variant === 'icon') {
+    return (
+      <StyledStatusIcon $variant={statusVariant} title={text}>
+        {showSpinner ? (
+          <RotatingLines
+            strokeColor={theme.color[statusVariant]}
+            width="1rem"
+          />
+        ) : (
+          <Icon name="alien-8bit" size="1.2rem" />
+        )}
+      </StyledStatusIcon>
+    )
+  }
+
   return (
-    <Label kind="secondary" variant={labelVariant}>
+    <Label kind="secondary" variant={statusVariant}>
       <div tw="flex items-center justify-center gap-2">
-        <Icon name="alien-8bit" className={`text-${labelVariant}`} size="xs" />
+        <Icon name="alien-8bit" className={`text-${statusVariant}`} size="xs" />
         <span tw="whitespace-nowrap">{text}</span>
-        {showSpinner && (
+        {showSpinner || true&& (
           <RotatingLines strokeColor={theme.color.base2} width=".6rem" />
         )}
       </div>
