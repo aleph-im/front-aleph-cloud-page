@@ -1,13 +1,40 @@
 import Head from 'next/head'
-import { CenteredContainer } from '@/components/common/CenteredContainer'
-import ButtonLink from '@/components/common/ButtonLink'
-import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
-import BackButtonSection from '@/components/common/BackButtonSection'
 import { useManageDomain } from './hook'
-import DomainDetail from '@/components/common/DomainDetail'
+import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
+import DomainEntityDetails from '@/components/common/entityData/DomainEntityDetails'
+import DomainLinkedResource from '@/components/common/entityData/DomainLinkedResource'
+import DomainNameSection from '@/components/common/entityData/DomainNameSection'
+import DomainDnsConfiguration from '@/components/common/entityData/DomainDnsConfiguration'
+import DomainManageHeader from '@/components/common/entityData/DomainManageHeader'
 
 export default function ManageDomain() {
-  const { domainId, handleBack } = useManageDomain()
+  const {
+    // Basic data
+    domain,
+    name,
+
+    // Status
+    status,
+
+    // Linked resource
+    refEntity,
+    account,
+
+    // Action handlers
+    handleDelete,
+    deleteDisabled,
+    deleteLoading,
+    handleUpdate,
+    updateDisabled,
+    handleRetry,
+    handleSaveName,
+
+    // Copy handlers
+    handleCopyRef,
+
+    // Navigation
+    handleBack,
+  } = useManageDomain()
 
   return (
     <>
@@ -18,21 +45,49 @@ export default function ManageDomain() {
           content="Manage your domain settings on Aleph Cloud"
         />
       </Head>
-      <BackButtonSection handleBack={handleBack} />
-      <section tw="px-0 pt-20 pb-6 md:py-10">
-        <CenteredContainer>
-          <DomainDetail domainId={domainId} showDelete />
-
-          <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/console/settings/domain/new">
-              Add new domain
-            </ButtonLink>
-          </div>
-        </CenteredContainer>
-        <CenteredContainer>
-          <HoldTokenDisclaimer />
-        </CenteredContainer>
-      </section>
+      <DomainManageHeader
+        domain={domain}
+        name={name}
+        status={status}
+        // Update action
+        updateDisabled={updateDisabled}
+        onUpdate={handleUpdate}
+        // Delete action
+        deleteDisabled={deleteDisabled}
+        deleteLoading={deleteLoading}
+        onDelete={handleDelete}
+        // Go back action
+        onBack={handleBack}
+      />
+      <EntityDataColumns
+        leftColumnElements={[
+          <DomainEntityDetails
+            key="domain-details"
+            domain={domain}
+            onCopyRef={handleCopyRef}
+          />,
+          <DomainLinkedResource
+            key="domain-linked"
+            domain={domain}
+            refEntity={refEntity}
+          />,
+        ]}
+        rightColumnElements={[
+          <DomainNameSection
+            key="domain-name"
+            domain={domain}
+            status={status}
+            onSave={handleSaveName}
+          />,
+          <DomainDnsConfiguration
+            key="domain-dns"
+            domain={domain}
+            status={status}
+            account={account}
+            onRetry={handleRetry}
+          />,
+        ]}
+      />
     </>
   )
 }

@@ -116,6 +116,29 @@ export class DomainManager extends AggregateManager<
     return super.add(addDomain)
   }
 
+  async updateName(domain: Domain, newName: string): Promise<Domain> {
+    const content = this.buildAggregateItemContent({
+      name: newName,
+      target: domain.target,
+      ref: domain.ref,
+    })
+
+    return super.update(domain.name, newName, content)
+  }
+
+  async *updateNameSteps(
+    domain: Domain,
+    newName: string,
+  ): AsyncGenerator<void, Domain, void> {
+    const content = this.buildAggregateItemContent({
+      name: newName,
+      target: domain.target,
+      ref: domain.ref,
+    })
+
+    return yield* super.updateSteps(domain.name, newName, content)
+  }
+
   async add(
     domains: AddDomain | AddDomain[],
     onCollision?: DomainCollisionType,
