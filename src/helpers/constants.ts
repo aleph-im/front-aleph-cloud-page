@@ -327,6 +327,19 @@ export const NAVIGATION_URLS = {
   error: {
     notFound: '/404',
   },
+  creditConsole: {
+    computing: {
+      instances: {
+        home: 'https://credits.app.aleph.im/console/computing/instance',
+      },
+      gpus: {
+        home: 'https://credits.app.aleph.im/console/computing/gpu-instance',
+      },
+      confidentials: {
+        home: 'https://credits.app.aleph.im/console/computing/confidential',
+      },
+    },
+  },
   explorer: { home: 'https://explorer.aleph.im' },
   swap: { home: 'https://swap.aleph.cloud' },
   docs: {

@@ -1,6 +1,7 @@
 import React, { memo, useCallback } from 'react'
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
+import { PaymentType } from '@aleph-sdk/message'
 import { ConfidentialsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import {
@@ -9,7 +10,6 @@ import {
   humanReadableSize,
 } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { PaymentType } from '@aleph-sdk/message'
 import { Button, Icon } from '@aleph-front/core'
 import { Confidential } from '@/domain/confidential'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -37,6 +37,7 @@ export const ConfidentialsTabContent = memo(
     }, [])
 
     const router = useRouter()
+
     const handleRowClick = useCallback(
       (confidential: Confidential) => {
         if (!isCredit(confidential)) return
