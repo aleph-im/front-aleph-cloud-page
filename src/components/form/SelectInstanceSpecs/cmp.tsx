@@ -94,6 +94,9 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
                   <Icon name="check" size="lg" />
                 </Button>
               )}
+              {row.specs.cpu === 4 && row.specs.ram === 8192 && (
+                <span className="spotlight-label">Best for OpenClaw 🦞</span>
+              )}
             </>
           )
         },
@@ -203,12 +206,20 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
 
   const { onChange, ref } = specsCtrl.field
 
+  const isSpotlightRow = useCallback(
+    (row: SpecsDetail) => row.specs.cpu === 4 && row.specs.ram === 8192,
+    [],
+  )
+
   const handleRowProps = useCallback(
     (row: SpecsDetail, rowIndex: number) => ({
       tabIndex: row.specs.disabled ? -1 : 0,
       className: `${row.specs.disabled ? '_disabled' : ''} ${
         row.isActive ? '_active' : ''
-      }`,
+      } ${isSpotlightRow(row) ? '_spotlight' : ''}`,
+      style: isSpotlightRow(row)
+        ? { position: 'relative' as const }
+        : undefined,
       ref: rowIndex === 0 ? ref : undefined,
       onClick: () => {
         if (row.specs.disabled) return
@@ -222,7 +233,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         onChange(row.specs)
       },
     }),
-    [onChange, ref],
+    [onChange, ref, isSpotlightRow],
   )
 
   return (
@@ -230,7 +241,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
       <TextGradient forwardedAs="h3" type="h7" tw="mb-6">
         Available resources
       </TextGradient>
-      <div tw="max-w-full overflow-y-hidden overflow-x-auto">
+      <div tw="max-w-full overflow-x-auto" style={{ padding: '1.5rem' }}>
         <Table
           borderType="none"
           rowNoise
