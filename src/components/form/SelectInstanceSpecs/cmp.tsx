@@ -33,7 +33,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         render: (row: SpecsDetail) => (
           <>
             {`${row.specs.cpu} x86 64bit`}
-            {row.specs.cpu === 4 && row.specs.ram === 8192 && (
+            {row.specs.cpu === 2 && row.specs.ram === 4096 && (
               <span className="spotlight-label">Best for OpenClaw 🦞</span>
             )}
           </>
@@ -211,7 +211,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { onChange, ref } = specsCtrl.field
 
   const isSpotlightRow = useCallback(
-    (row: SpecsDetail) => row.specs.cpu === 4 && row.specs.ram === 8192,
+    (row: SpecsDetail) => row.specs.cpu === 2 && row.specs.ram === 4096,
     [],
   )
 
