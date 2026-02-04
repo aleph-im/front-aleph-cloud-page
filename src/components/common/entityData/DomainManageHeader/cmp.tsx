@@ -45,8 +45,6 @@ export const DomainManageHeader = ({
           <div className="tp-h7 fs-18" tw="uppercase">
             {domain ? name : <Skeleton width="20rem" />}
           </div>
-
-
         </div>
         <div tw="flex-1 flex flex-wrap md:flex-nowrap justify-end items-center gap-4">
           <Tooltip content="Update Domain" my="bottom-center" at="top-center">
