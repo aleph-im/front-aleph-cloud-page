@@ -30,6 +30,7 @@ export type UseDomainDetailReturn = {
   handleUpdate: () => void
   disabledUpdate: boolean
   handleRetry: () => void
+  handleSaveName: (newName: string) => Promise<void>
   handleCopyHash: () => void
   handleCopyRef: () => void
 }
@@ -132,6 +133,53 @@ export function useDomainDetail({
     } catch (e) {}
   }, [domain, manager, router])
 
+  const handleSaveName = useCallback(
+    async (newName: string) => {
+      if (!manager) throw Err.ConnectYourWallet
+      if (!domain) throw Err.DomainNotFound
+
+      const iSteps = await manager.getUpdateSteps(
+        domain.name,
+        newName,
+        manager.buildAggregateItemContent({
+          name: newName,
+          target: domain.target,
+          ref: domain.ref,
+        }),
+      )
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
+
+      try {
+        const steps = manager.updateNameSteps(domain, newName)
+        while (true) {
+          const { done } = await steps.next()
+          if (done) break
+          await next(nSteps)
+        }
+
+        dispatchDeleteEntity(domain.id)
+      } catch (e) {
+        console.error(e)
+
+        const text = (e as Error).message
+        const cause = (e as Error)?.cause as string | Error | undefined
+        const detail = typeof cause === 'string' ? cause : cause?.message
+
+        noti?.add({
+          variant: 'error',
+          title: 'Error',
+          text,
+          detail,
+        })
+
+        throw e
+      } finally {
+        await stop()
+      }
+    },
+    [manager, domain, next, stop, noti, dispatchDeleteEntity],
+  )
+
   const handleCopyHash = useCopyToClipboardAndNotify(refEntity?.id || '')
   const handleCopyRef = useCopyToClipboardAndNotify(domain?.ref || '')
 
@@ -145,6 +193,7 @@ export function useDomainDetail({
     handleUpdate,
     disabledUpdate,
     handleRetry,
+    handleSaveName,
     handleCopyHash,
     handleCopyRef,
   }
