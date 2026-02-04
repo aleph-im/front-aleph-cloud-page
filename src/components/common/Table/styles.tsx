@@ -107,7 +107,6 @@ export const StyledTable = styled(Table<any>).attrs(
           }
 
           &._spotlight {
-            position: relative;
             box-shadow: 0px 4px 24px ${theme.color.main0}26;
             border-radius: 0.5rem;
 
@@ -118,6 +117,7 @@ export const StyledTable = styled(Table<any>).attrs(
             }
 
             td:first-child {
+              position: relative;
               border-radius: 0.5rem 0 0 0.5rem;
               box-shadow:
                 inset 4px 0 0 0 ${theme.color.purple4},

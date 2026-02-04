@@ -21,8 +21,13 @@ import { useGpuPricingType } from '@/hooks/common/useGpuPricingType'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
-  const { specsCtrl, options, type, isPersistent } =
-    useSelectInstanceSpecs(props)
+  const {
+    specsCtrl,
+    options,
+    type,
+    isPersistent,
+    showOpenClawSpotlight = false,
+  } = useSelectInstanceSpecs(props)
 
   const columns = useMemo(() => {
     const cols = [
@@ -30,7 +35,16 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         label: 'Cores',
         sortable: true,
         sortBy: (row: SpecsDetail) => row.specs.cpu,
-        render: (row: SpecsDetail) => `${row.specs.cpu} x86 64bit`,
+        render: (row: SpecsDetail) => (
+          <>
+            {`${row.specs.cpu} x86 64bit`}
+            {showOpenClawSpotlight &&
+              row.specs.cpu === 2 &&
+              row.specs.ram === 4096 && (
+                <span className="spotlight-label">Best for OpenClaw 🦞</span>
+              )}
+          </>
+        ),
       },
       {
         label: 'RAM',
@@ -96,9 +110,6 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
                   <Icon name="check" size="lg" />
                 </Button>
               )}
-              {row.specs.cpu === 4 && row.specs.ram === 8192 && (
-                <span className="spotlight-label">Best for OpenClaw 🦞</span>
-              )}
             </>
           )
         },
@@ -118,7 +129,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     }
 
     return cols
-  }, [type])
+  }, [type, showOpenClawSpotlight])
 
   // ------------------------------------------
 
@@ -206,8 +217,9 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { onChange, ref } = specsCtrl.field
 
   const isSpotlightRow = useCallback(
-    (row: SpecsDetail) => row.specs.cpu === 4 && row.specs.ram === 8192,
-    [],
+    (row: SpecsDetail) =>
+      showOpenClawSpotlight && row.specs.cpu === 2 && row.specs.ram === 4096,
+    [showOpenClawSpotlight],
   )
 
   const handleRowProps = useCallback(
@@ -216,9 +228,6 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
       className: `${row.specs.disabled ? '_disabled' : ''} ${
         row.isActive ? '_active' : ''
       } ${isSpotlightRow(row) ? '_spotlight' : ''}`,
-      style: isSpotlightRow(row)
-        ? { position: 'relative' as const }
-        : undefined,
       ref: rowIndex === 0 ? ref : undefined,
       onClick: () => {
         if (row.specs.disabled) return

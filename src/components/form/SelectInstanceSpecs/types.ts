@@ -13,6 +13,7 @@ export type SelectInstanceSpecsProps = {
   isPersistent?: boolean
   nodeSpecs?: CRNSpecs
   children?: ReactNode
+  showOpenClawSpotlight?: boolean
 }
 
 export type SpecsDetail = {

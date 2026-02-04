@@ -42,6 +42,7 @@ export type UseSelectInstanceSpecsReturn = {
   type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
   isPersistent: boolean
   nodeSpecs?: CRNSpecs
+  showOpenClawSpotlight?: boolean
 }
 
 export function useSelectInstanceSpecs({

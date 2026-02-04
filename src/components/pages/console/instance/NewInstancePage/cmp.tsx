@@ -206,6 +206,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 type={EntityType.Instance}
                 isPersistent
                 nodeSpecs={nodeSpecs}
+                showOpenClawSpotlight
               >
                 {!node && (
                   <div tw="mt-6 text-center">
