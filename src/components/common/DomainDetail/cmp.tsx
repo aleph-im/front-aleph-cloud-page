@@ -55,7 +55,7 @@ export const DomainDetail = ({ domainId }: DomainDetailProps) => {
         {/* Remove Domain Section */}
         <div>
           <div className="tp-h7 fs-24" tw="uppercase mb-2">
-            DANGER ZONE
+            REMOVE LINK
           </div>
           <NoisyContainer>
             <div tw="flex items-center justify-between">
@@ -81,34 +81,37 @@ export const DomainDetail = ({ domainId }: DomainDetailProps) => {
         open={showDeleteModal}
         onClose={handleCancelDelete}
         width="34rem"
-        header={<TextGradient type="h6">Remove Domain</TextGradient>}
+        header={<TextGradient type="h6">Delete</TextGradient>}
         content={
           <div tw="mb-8">
-            <p className="tp-body">
-              Are you sure you want to remove this domain?
+            <p className="tp-body text-base2">
+              This will remove the linked domain <span className="tp-body3">{domain?.name}</span>
             </p>
-            <p className="tp-body">This action cannot be undone.</p>
+            <p className="tp-body2 text-error">
+              This action cannot be undone.
+            </p>
           </div>
         }
         footer={
           <div tw="w-full flex justify-between">
             <Button
               type="button"
-              variant="secondary"
+              kind="functional"
+              variant="error"
+              size="md"
+              onClick={handleConfirmDelete}
+            >
+              Delete
+              <Icon name="trash" tw="ml-2.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              kind='functional'
               size="md"
               onClick={handleCancelDelete}
             >
               Keep
-            </Button>
-            <Button
-              type="button"
-              color="error"
-              kind="functional"
-              variant="warning"
-              size="md"
-              onClick={handleConfirmDelete}
-            >
-              Remove Domain
             </Button>
           </div>
         }
