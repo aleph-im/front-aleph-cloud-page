@@ -21,6 +21,7 @@ import { useGpuPricingType } from '@/hooks/common/useGpuPricingType'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
+  const { showOpenClawSpotlight = false } = props
   const { specsCtrl, options, type, isPersistent, paymentMethod } =
     useSelectInstanceSpecs(props)
 
@@ -33,9 +34,11 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         render: (row: SpecsDetail) => (
           <>
             {`${row.specs.cpu} x86 64bit`}
-            {row.specs.cpu === 2 && row.specs.ram === 4096 && (
-              <span className="spotlight-label">Best for OpenClaw 🦞</span>
-            )}
+            {showOpenClawSpotlight &&
+              row.specs.cpu === 2 &&
+              row.specs.ram === 4096 && (
+                <span className="spotlight-label">Best for OpenClaw 🦞</span>
+              )}
           </>
         ),
       },
@@ -120,7 +123,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     }
 
     return cols
-  }, [paymentMethod, type])
+  }, [paymentMethod, type, showOpenClawSpotlight])
 
   // ------------------------------------------
 
@@ -211,8 +214,9 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
   const { onChange, ref } = specsCtrl.field
 
   const isSpotlightRow = useCallback(
-    (row: SpecsDetail) => row.specs.cpu === 2 && row.specs.ram === 4096,
-    [],
+    (row: SpecsDetail) =>
+      showOpenClawSpotlight && row.specs.cpu === 2 && row.specs.ram === 4096,
+    [showOpenClawSpotlight],
   )
 
   const handleRowProps = useCallback(

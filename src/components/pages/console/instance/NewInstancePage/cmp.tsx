@@ -289,6 +289,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 isPersistent
                 paymentMethod={values.paymentMethod}
                 nodeSpecs={nodeSpecs}
+                showOpenClawSpotlight
               >
                 {values.paymentMethod !== PaymentMethod.Stream ? (
                   <div tw="mt-6">

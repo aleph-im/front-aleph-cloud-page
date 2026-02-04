@@ -14,6 +14,7 @@ export type SelectInstanceSpecsProps = {
   paymentMethod?: PaymentMethod
   nodeSpecs?: CRNSpecs
   children?: ReactNode
+  showOpenClawSpotlight?: boolean
 }
 
 export type SpecsDetail = {
