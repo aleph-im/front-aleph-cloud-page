@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import {
+  ExistingVolumeStandaloneField,
   InstanceSystemVolumeField,
-  NewVolumeField,
   VolumeField,
   defaultVolume as defaultStandaloneVolume,
 } from './useAddVolume'
@@ -22,7 +22,7 @@ export type UseAddVolumesReturn = {
   handleRemove: (index?: number) => void
 }
 
-export const defaultVolume: NewVolumeField = {
+export const defaultVolume: ExistingVolumeStandaloneField = {
   ...defaultStandaloneVolume,
   mountPath: '',
   useLatest: false,

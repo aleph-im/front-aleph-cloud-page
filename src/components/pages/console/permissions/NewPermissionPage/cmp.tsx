@@ -6,7 +6,7 @@ import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { useNewPermissionPage, UseNewPermissionPageReturn } from './hook'
 import Form from '@/components/form/Form'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import { PageProps } from '@/types/types'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import BorderBox from '@/components/common/BorderBox'
@@ -88,7 +88,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         )}
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={1}>Recipient</SectionTitle>
+            <CompositeSectionTitle number={1}>Recipient</CompositeSectionTitle>
 
             <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
               <NoisyContainer>
@@ -114,7 +114,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={2}>Permissions</SectionTitle>
+            <CompositeSectionTitle number={2}>
+              Permissions
+            </CompositeSectionTitle>
             <p className="tp-body1">
               Select what this account may do and revoke access at any time.
             </p>

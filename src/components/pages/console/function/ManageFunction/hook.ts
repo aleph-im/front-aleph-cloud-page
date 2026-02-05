@@ -11,6 +11,7 @@ import {
 import { ellipseAddress } from '@/helpers/utils'
 import useDownloadLogs from '@/hooks/common/useDownloadLogs'
 import {
+  CreditPaymentData,
   HoldingPaymentData,
   PaymentData,
 } from '@/components/common/entityData/EntityPayment/types'
@@ -204,17 +205,35 @@ export function useManageFunction(): ManageFunction {
             startTime: program.time,
             blockchain: program.payment.chain,
             loading,
+            itemHash: program.id,
           } as HoldingPaymentData,
+        ]
+      case PaymentType.credit:
+        return [
+          {
+            cost,
+            paymentType: PaymentType.credit,
+            runningTime,
+            startTime: program.time,
+            blockchain: program.payment.chain,
+            loading,
+            itemHash: program.id,
+          } as CreditPaymentData,
         ]
       default:
         return [
           {
+            cost,
             paymentType: PaymentType.hold,
+            runningTime,
+            startTime: program?.time,
+            blockchain: program?.payment?.chain,
             loading: true,
-          } as PaymentData,
+            itemHash: program?.id,
+          } as HoldingPaymentData,
         ]
     }
-  }, [cost, program?.payment, runningTime, program?.time, loading])
+  }, [cost, program?.payment, program?.id, runningTime, program?.time, loading])
 
   const handleDownload = useCallback(async () => {
     if (!programManager) throw Err.ConnectYourWallet

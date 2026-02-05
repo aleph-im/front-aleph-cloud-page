@@ -1,13 +1,14 @@
 import Head from 'next/head'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import {
   BulletItem,
   BulletList,
   Button,
   FileInput,
   Icon,
+  Tooltip,
   useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -19,7 +20,6 @@ import {
 } from './styles'
 import IconText from '@/components/common/IconText'
 import { useNewConfidentialPage } from './hook'
-import ResponsiveTooltip from '@/components/common/ResponsiveTooltip'
 import NewEntityTab from '@/components/common/NewEntityTab'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 
@@ -97,7 +97,11 @@ export default function NewConfidentialPage() {
       <section tw="px-0 pt-20 md:pt-10 pb-5">
         <CenteredContainer>
           <ToggleContainer
-            toggleTitle={<SectionTitle number={0}>Requirements</SectionTitle>}
+            toggleTitle={
+              <CompositeSectionTitle number={0}>
+                Requirements
+              </CompositeSectionTitle>
+            }
           >
             <div tw="flex flex-wrap gap-x-24 gap-y-7">
               <div>
@@ -153,9 +157,9 @@ export default function NewConfidentialPage() {
         <CenteredContainer>
           <ToggleContainer
             toggleTitle={
-              <SectionTitle number={1}>
+              <CompositeSectionTitle number={1}>
                 Create encrypted disk image
-              </SectionTitle>
+              </CompositeSectionTitle>
             }
           >
             <div tw="flex flex-col gap-6">
@@ -294,9 +298,9 @@ export default function NewConfidentialPage() {
         <CenteredContainer>
           <ToggleContainer
             toggleTitle={
-              <SectionTitle number={2}>
+              <CompositeSectionTitle number={2}>
                 Upload encrypted disk image
-              </SectionTitle>
+              </CompositeSectionTitle>
             }
           >
             <div tw="flex flex-col gap-6">
@@ -335,7 +339,7 @@ export default function NewConfidentialPage() {
                       </Button>
                     </div>
                     {disabledUploadEncryptedDiskImage && (
-                      <ResponsiveTooltip
+                      <Tooltip
                         my="bottom-left"
                         at="top-right"
                         targetRef={uploadEncryptedDiskImageButtonRef}
@@ -369,7 +373,9 @@ export default function NewConfidentialPage() {
         <CenteredContainer>
           <ToggleContainer
             toggleTitle={
-              <SectionTitle number={3}>Create TEE Instance</SectionTitle>
+              <CompositeSectionTitle number={3}>
+                Create TEE Instance
+              </CompositeSectionTitle>
             }
           >
             <div tw="flex flex-col gap-6">

@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { Button, TextGradient } from '@aleph-front/core'
+import { TextGradient } from '@aleph-front/core'
 import { EntityType, EntityDomainType } from '@/helpers/constants'
 import { useNewFunctionPage } from './hook'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
@@ -16,15 +16,17 @@ import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import SelectCustomFunctionRuntime from '@/components/form/SelectCustomFunctionRuntime'
 import NewEntityTab from '@/components/common/NewEntityTab'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import { PageProps } from '@/types/types'
 import BackButtonSection from '@/components/common/BackButtonSection'
+import CheckoutButton from '@/components/form/CheckoutButton'
 
 export default function NewFunctionPage({ mainRef }: PageProps) {
   const {
     address,
-    accountBalance,
-    isCreateButtonDisabled,
+    accountCreditBalance,
+    createFunctionDisabled,
+    createFunctionButtonTitle,
     values,
     control,
     errors,
@@ -51,7 +53,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="1">Code to execute</SectionTitle>
+            <CompositeSectionTitle number="1">
+              Code to execute
+            </CompositeSectionTitle>
             <p>
               If your code has any dependencies, you can upload them separately
               in the volume section below to ensure a faster creation.
@@ -61,7 +65,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 py-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="2">Type of scheduling</SectionTitle>
+            <CompositeSectionTitle number="2">
+              Type of scheduling
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Configure if this program should be running continuously,
               persistent, or only on-demand in response to a user request or an
@@ -72,7 +78,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 py-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="3">Select an instance size</SectionTitle>
+            <CompositeSectionTitle number="3">
+              Select an instance size
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Select the hardware resources allocated to your functions,
               ensuring optimal performance and efficient resource usage tailored
@@ -88,7 +96,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 py-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="4">Name and tags</SectionTitle>
+            <CompositeSectionTitle number="4">
+              Name and tags
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Organize and identify your functions more effectively by assigning
               a unique name, obtaining a hash reference, and defining multiple
@@ -101,9 +111,9 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
 
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="5">
+            <CompositeSectionTitle number="5">
               Advanced Configuration Options
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Customize your function with our Advanced Configuration Options.
               Add volumes and custom domains to meet your specific needs.
@@ -164,8 +174,7 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
           control={control}
           address={address}
           cost={cost}
-          unlockedAmount={accountBalance}
-          paymentMethod={values.paymentMethod}
+          unlockedAmount={accountCreditBalance}
           mainRef={mainRef}
           description={
             <>
@@ -175,18 +184,12 @@ export default function NewFunctionPage({ mainRef }: PageProps) {
             </>
           }
           button={
-            <Button
-              type="submit"
-              color="main0"
-              kind="default"
-              size="lg"
-              variant="primary"
-              disabled={isCreateButtonDisabled}
-              // @note: handleSubmit is needed on the floating footer to trigger form submit (transcluded to body)
-              onClick={handleSubmit}
-            >
-              Create function
-            </Button>
+            <CheckoutButton
+              disabled={createFunctionDisabled}
+              title={createFunctionButtonTitle}
+              isFooter={false}
+              handleSubmit={handleSubmit}
+            />
           }
         />
       </Form>

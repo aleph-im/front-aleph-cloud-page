@@ -1,5 +1,10 @@
 import { Account } from '@aleph-sdk/account'
-import { MessageCostLine, MessageType, StoreContent } from '@aleph-sdk/message'
+import {
+  MessageCostLine,
+  MessageType,
+  PaymentType,
+  StoreContent,
+} from '@aleph-sdk/message'
 import Err from '@/helpers/errors'
 import {
   EntityType,
@@ -28,6 +33,7 @@ import {
 } from '@aleph-sdk/client'
 import { CostLine, CostSummary } from './cost'
 import { mockAccount } from './account'
+import { Blockchain } from '@aleph-sdk/core'
 
 export const mockVolumeRef =
   'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe'
@@ -322,7 +328,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   async getCost(props: VolumeCostProps): Promise<VolumeCost> {
     let totalCost = Number.POSITIVE_INFINITY
 
-    const { volume, paymentMethod = PaymentMethod.Hold } = props
+    const { volume, paymentMethod = PaymentMethod.Credit } = props
 
     const emptyCost = {
       paymentMethod,
@@ -342,6 +348,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     const costs = await this.sdkClient.storeClient.getEstimatedCost({
       account,
       fileObject: newVolume.file,
+      payment: { chain: Blockchain.ETH, type: PaymentType.credit },
     })
 
     totalCost = Number(costs.cost)
@@ -369,7 +376,9 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       cost:
         paymentMethod === PaymentMethod.Hold
           ? +line.cost_hold
-          : +line.cost_stream,
+          : paymentMethod === PaymentMethod.Stream
+            ? +line.cost_stream
+            : +line.cost_credit,
     }))
   }
 }

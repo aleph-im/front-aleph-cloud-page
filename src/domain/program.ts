@@ -39,6 +39,7 @@ import Err from '@/helpers/errors'
 import { NodeManager } from './node'
 import { CostSummary } from './cost'
 import { mockAccount } from './account'
+import { fetchAllPages } from '@/helpers/pagination'
 
 export const mockProgramRef =
   '79f19811f8e843f37ff7535f634b89504da3d8f03e1f0af109d1791cf6add7af'
@@ -121,14 +122,24 @@ export class ProgramManager
   async getAll(): Promise<Program[]> {
     if (!this.account) return []
 
+    const { address } = this.account
+
     try {
-      const response = await this.sdkClient.getMessages({
-        addresses: [this.account.address],
-        messageTypes: [MessageType.program],
-        channels: [this.channel],
+      const messages = await fetchAllPages(async (page, pageSize) => {
+        const response = await this.sdkClient.getMessages({
+          addresses: [address],
+          messageTypes: [MessageType.program],
+          channels: [this.channel],
+          page,
+          pagination: pageSize,
+        })
+        return {
+          items: response.messages,
+          hasMore: response.messages.length === pageSize,
+        }
       })
 
-      return await this.parseMessages(response.messages)
+      return await this.parseMessages(messages)
     } catch (err) {
       return []
     }
@@ -271,7 +282,7 @@ export class ProgramManager
 
   async getCost(newProgram: ProgramCostProps): Promise<ProgramCost> {
     let totalCost = Number.POSITIVE_INFINITY
-    const paymentMethod = newProgram.payment?.type || PaymentMethod.Hold
+    const paymentMethod = newProgram.payment?.type || PaymentMethod.Credit
 
     const parsedProgram: ProgramPublishConfiguration =
       await this.parseProgramForCostEstimation(newProgram)

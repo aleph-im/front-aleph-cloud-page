@@ -17,19 +17,19 @@ import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const InstancesTabContent = React.memo(
   ({ data }: InstancesTabContentProps) => {
-    const router = useRouter()
-
-    const isNonCredit = useCallback((row: Instance) => {
-      return row.payment?.type !== PaymentType.credit
+    const isCredit = useCallback((row: Instance) => {
+      return row.payment?.type === PaymentType.credit
     }, [])
+
+    const router = useRouter()
 
     const handleRowClick = useCallback(
       (instance: Instance) => {
-        if (!isNonCredit(instance)) return
+        if (!isCredit(instance)) return
 
         router.push(`/console/computing/instance/${instance.id}`)
       },
-      [isNonCredit, router],
+      [isCredit, router],
     )
 
     return (
@@ -42,22 +42,20 @@ export const InstancesTabContent = React.memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 rowProps={(row) => ({
-                  css: isNonCredit(row)
-                    ? ''
-                    : tw`opacity-40 cursor-not-allowed!`,
+                  css: isCredit(row) ? '' : tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}
                 rowTooltip={(row) => {
-                  if (isNonCredit(row)) return null
+                  if (isCredit(row)) return null
 
                   return (
                     <p>
                       To manage this instance, go to the{' '}
                       <ExternalLink
-                        text="Credits console App."
+                        text="Legacy console App."
                         color="main0"
                         href={
-                          NAVIGATION_URLS.creditConsole.computing.instances.home
+                          NAVIGATION_URLS.legacyConsole.computing.instances.home
                         }
                       />
                     </p>
@@ -91,7 +89,7 @@ export const InstancesTabContent = React.memo(
                       }),
                   },
                   {
-                    label: 'HDD',
+                    label: 'date',
                     align: 'right',
                     sortable: true,
                     render: (row) => humanReadableSize(row.size, 'MiB'),
@@ -106,7 +104,7 @@ export const InstancesTabContent = React.memo(
                     label: '',
                     align: 'right',
                     render: (row) => {
-                      const disabled = !isNonCredit(row)
+                      const disabled = !isCredit(row)
 
                       return (
                         <Button

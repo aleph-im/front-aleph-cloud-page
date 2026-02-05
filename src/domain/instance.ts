@@ -37,12 +37,8 @@ import { DomainField } from '@/hooks/form/useAddDomains'
 import { DomainManager } from './domain'
 import { EntityManager } from './types'
 import { ForwardedPortsManager } from './forwardedPorts'
-import {
-  instanceSchema,
-  instanceStreamSchema,
-} from '@/helpers/schemas/instance'
+import { instanceSchema } from '@/helpers/schemas/instance'
 import { NameAndTagsField } from '@/hooks/form/useAddNameAndTags'
-import { getHours } from '@/hooks/form/useSelectStreamDuration'
 import { CRNSpecs, NodeManager } from './node'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import {
@@ -54,6 +50,7 @@ import { CostManager, CostSummary } from './cost'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { BlockchainId } from './connect'
 import { mockAccount } from './account'
+import { fetchAllPages } from '@/helpers/pagination'
 
 export type AddInstance = Omit<
   InstancePublishConfiguration,
@@ -111,7 +108,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   implements EntityManager<T, AddInstance>
 {
   static addSchema = instanceSchema
-  static addStreamSchema = instanceStreamSchema
 
   constructor(
     protected account: Account | undefined,
@@ -131,14 +127,24 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   async getAll(): Promise<T[]> {
     if (!this.account) return []
 
+    const { address } = this.account
+
     try {
-      const response = await this.sdkClient.getMessages({
-        addresses: [this.account.address],
-        messageTypes: [MessageType.instance],
-        channels: [this.channel],
+      const messages = await fetchAllPages(async (page, pageSize) => {
+        const response = await this.sdkClient.getMessages({
+          addresses: [address],
+          messageTypes: [MessageType.instance],
+          channels: [this.channel],
+          page,
+          pagination: pageSize,
+        })
+        return {
+          items: response.messages,
+          hasMore: response.messages.length === pageSize,
+        }
       })
 
-      return await this.parseMessages(response.messages)
+      return await this.parseMessages(messages)
     } catch (err) {
       return []
     }
@@ -239,6 +245,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
   async *addSteps(
     newInstance: AddInstance,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     account?: SuperfluidAccount,
   ): AsyncGenerator<void, T, void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
@@ -252,13 +259,11 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
       // @note: Send the instance creation message to the network
       yield
+
       const response = await this.sdkClient.createInstance({
         ...instanceMessage,
       })
       const [entity] = await this.parseMessages([response])
-
-      // @note: Create PAYG superfluid flows
-      yield* this.addPAYGStreamSteps(newInstance, account)
 
       // @note: Add the domain link
       yield* this.parseDomainsSteps(entity.id, newInstance.domains)
@@ -457,7 +462,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       | EntityType.GpuInstance = EntityType.Instance,
   ): Promise<InstanceCost> {
     let totalCost = Number.POSITIVE_INFINITY
-    const paymentMethod = newInstance.payment?.type || PaymentMethod.Hold
+    const paymentMethod = newInstance.payment?.type || PaymentMethod.Credit
 
     const parsedInstance: InstancePublishConfiguration =
       await this.parseInstanceForCostEstimation(newInstance)
@@ -571,67 +576,10 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     return instance
   }
 
-  protected async *addPAYGStreamSteps(
-    newInstance: AddInstance,
-    account?: SuperfluidAccount,
-  ): AsyncGenerator<void, void, void> {
-    if (newInstance.payment?.type !== PaymentMethod.Stream) return
-    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
-    if (!account) throw Err.ConnectYourWallet
-
-    const { streamCost, streamDuration, receiver } = newInstance.payment
-
-    const { communityWalletAddress } =
-      await this.costManager.getSettingsAggregate()
-
-    const costByHour = streamCost / getHours(streamDuration)
-    const streamCostByHourToReceiver = this.calculateReceiverFlow(costByHour)
-    const streamCostByHourToCommunity = this.calculateCommunityFlow(costByHour)
-
-    const alephxBalance = await account.getALEPHBalance()
-    const recieverAlephxFlow = await account.getALEPHFlow(receiver)
-    const communityAlephxFlow = await account.getALEPHFlow(
-      communityWalletAddress,
-    )
-
-    const receiverTotalFlow = recieverAlephxFlow.add(streamCostByHourToReceiver)
-    const communityTotalFlow = communityAlephxFlow.add(
-      streamCostByHourToCommunity,
-    )
-
-    if (
-      receiverTotalFlow.greaterThan(100) ||
-      communityTotalFlow.greaterThan(100)
-    )
-      throw Err.MaxFlowRate
-
-    const totalAlephxFlow = recieverAlephxFlow.add(communityAlephxFlow)
-    const usedAlephInDuration = totalAlephxFlow.mul(getHours(streamDuration))
-    const totalRequiredAleph = usedAlephInDuration.add(streamCost)
-
-    if (alephxBalance.lt(totalRequiredAleph))
-      throw Err.InsufficientBalance(
-        totalRequiredAleph.sub(alephxBalance).toNumber(),
-      )
-
-    yield
-
-    // Split the stream cost between the community wallet (20%) and the receiver (80%)
-    await account.increaseALEPHFlow(
-      communityWalletAddress,
-      streamCostByHourToCommunity + EXTRA_WEI,
-    )
-    await account.increaseALEPHFlow(
-      receiver,
-      streamCostByHourToReceiver + EXTRA_WEI,
-    )
-  }
-
   protected async *addPAYGReservationSteps(
     newInstance: AddInstance,
     instanceMessage: InstancePublishConfiguration,
   ): AsyncGenerator<void, void, void> {
-    if (newInstance.payment?.type !== PaymentMethod.Stream) return
     if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
 
     yield
@@ -642,7 +590,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     newInstance: AddInstance,
     entity: InstanceEntity,
   ): AsyncGenerator<void, void, void> {
-    if (newInstance.payment?.type !== PaymentMethod.Stream) return
     if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
 
     yield
@@ -692,9 +639,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
   ): AsyncGenerator<void, InstancePublishConfiguration, void> {
     if (!this.account) throw Err.InvalidAccount
 
-    const schema = !newInstance.node
-      ? InstanceManager.addSchema
-      : InstanceManager.addStreamSchema
+    const schema = InstanceManager.addSchema
 
     newInstance = await schema.parseAsync(newInstance)
 

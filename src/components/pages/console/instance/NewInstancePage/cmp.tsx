@@ -1,5 +1,5 @@
 import React from 'react'
-import { useCallback, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
 import {
@@ -10,7 +10,6 @@ import {
   NodeScore,
   TableColumn,
   NoisyContainer,
-  TooltipProps,
   Checkbox,
   Modal,
 } from '@aleph-front/core'
@@ -23,86 +22,33 @@ import AddSSHKeys from '@/components/form/AddSSHKeys'
 import AddDomains from '@/components/form/AddDomains'
 import AddNameAndTags from '@/components/form/AddNameAndTags'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
-import {
-  EntityDomainType,
-  EntityType,
-  PaymentMethod,
-} from '@/helpers/constants'
+import { EntityDomainType, EntityType } from '@/helpers/constants'
 import { useSettings } from '@/hooks/common/useSettings'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
-import { useNewInstancePage, UseNewInstancePageReturn } from './hook'
+import { useNewInstancePage } from './hook'
 import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
 import NewEntityTab from '@/components/common/NewEntityTab'
 import NodesTable from '@/components/common/NodesTable'
 import SpinnerOverlay from '@/components/common/SpinnerOverlay'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
 import CRNList from '../../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
-import BorderBox from '@/components/common/BorderBox'
 import ExternalLink from '@/components/common/ExternalLink'
-
-const CheckoutButton = React.memo(
-  ({
-    disabled,
-    title = 'Create instance',
-    tooltipContent,
-    isFooter,
-    shouldRequestTermsAndConditions,
-    handleRequestTermsAndConditionsAgreement,
-    handleSubmit,
-  }: {
-    disabled: boolean
-    title?: string
-    tooltipContent?: TooltipProps['content']
-    isFooter: boolean
-    shouldRequestTermsAndConditions?: boolean
-    handleRequestTermsAndConditionsAgreement: UseNewInstancePageReturn['handleRequestTermsAndConditionsAgreement']
-    handleSubmit: UseNewInstancePageReturn['handleSubmit']
-  }) => {
-    const checkoutButtonRef = useRef<HTMLButtonElement>(null)
-
-    return (
-      <ButtonWithInfoTooltip
-        ref={checkoutButtonRef}
-        type={shouldRequestTermsAndConditions ? 'button' : 'submit'}
-        color="main0"
-        kind="default"
-        size="lg"
-        variant="primary"
-        disabled={disabled}
-        tooltipContent={tooltipContent}
-        tooltipPosition={{
-          my: isFooter ? 'bottom-right' : 'bottom-center',
-          at: isFooter ? 'top-right' : 'top-center',
-        }}
-        onClick={
-          shouldRequestTermsAndConditions
-            ? handleRequestTermsAndConditionsAgreement
-            : handleSubmit
-        }
-      >
-        {title}
-      </ButtonWithInfoTooltip>
-    )
-  },
-)
-CheckoutButton.displayName = 'CheckoutButton'
+import CheckoutButton from '@/components/form/CheckoutButton'
 
 export default function NewInstancePage({ mainRef }: PageProps) {
   const {
     address,
-    accountBalance,
-    blockchainName,
-    streamDisabled,
-    disabledStreamDisabledMessage,
+    accountCreditBalance,
     manuallySelectCRNDisabled,
     manuallySelectCRNDisabledMessage,
     createInstanceDisabled,
-    createInstanceDisabledMessage,
     createInstanceButtonTitle,
+    minimumBalanceNeeded,
+    insufficientFundsInfo,
     values,
     control,
     errors,
@@ -127,11 +73,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
   } = useNewInstancePage()
 
   const { apiServer } = useSettings()
-
-  const sectionNumber = useCallback(
-    (n: number) => (values.paymentMethod === PaymentMethod.Stream ? 1 : 0) + n,
-    [values.paymentMethod],
-  )
 
   const columns = useMemo(() => {
     return [
@@ -182,7 +123,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
 
   const nodeData = useMemo(() => (node ? [node] : []), [node])
   const manuallySelectButtonRef = useRef<HTMLButtonElement>(null)
-  const manuallySelectButtonRef2 = useRef<HTMLButtonElement>(null)
 
   return (
     <>
@@ -200,85 +140,63 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <NewEntityTab selected="instance" />
           </CenteredContainer>
         </section>
-        {createInstanceDisabledMessage && (
-          <section tw="px-0 pt-20 pb-6 md:py-10">
-            <CenteredContainer>
-              <BorderBox $color="warning">
-                {createInstanceDisabledMessage}
-              </BorderBox>
-            </CenteredContainer>
-          </section>
-        )}
-        {values.paymentMethod === PaymentMethod.Stream && (
-          <section tw="px-0 pt-20 pb-6 md:py-10">
-            <CenteredContainer>
-              <SectionTitle number={1}>Select your node</SectionTitle>
-              <p>
-                Your instance is set up with your manually selected Compute
-                Resource Node (CRN), operating under the{' '}
-                <Strong>Pay-as-you-go</Strong> payment method on{' '}
-                <Strong>{blockchainName}</Strong>. This setup gives you direct
-                control over your resource allocation and costs, requiring
-                active management of your instance. To adjust your CRN or
-                explore different payment options, you can modify your selection
-                below.
-              </p>
-              <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
-                <NoisyContainer>
-                  <NodesTable
-                    columns={columns}
-                    data={nodeData}
-                    rowProps={() => ({ className: '_active' })}
-                  />
-                  <div tw="mt-6">
-                    {!node && (
-                      <>
-                        <ButtonWithInfoTooltip
-                          ref={manuallySelectButtonRef}
-                          type="button"
-                          kind="functional"
-                          variant="warning"
-                          size="md"
-                          onClick={handleManuallySelectCRN}
-                          disabled={manuallySelectCRNDisabled}
-                          tooltipContent={manuallySelectCRNDisabledMessage}
-                          tooltipPosition={{
-                            my: 'bottom-left',
-                            at: 'center-center',
-                          }}
-                        >
-                          Manually select CRN
-                        </ButtonWithInfoTooltip>
-                      </>
-                    )}
-                  </div>
-                </NoisyContainer>
-              </div>
-            </CenteredContainer>
-          </section>
-        )}
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(1)}>
+            <CompositeSectionTitle number={1}>
+              Select your node
+            </CompositeSectionTitle>
+            <p>
+              Your instance is set up with your manually selected Compute
+              Resource Node (CRN) and powered by{' '}
+              <Strong>Aleph Cloud Credits</Strong>. Credits are pre-purchased
+              using fiat, USDC, or ALEPH and automatically deducted as your
+              instance consumes resources. This setup gives you full control
+              over your node selection, cost, and balance. To adjust your CRN or
+              add more credits, you can update your configuration below.
+            </p>
+            <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
+              <NoisyContainer>
+                <NodesTable
+                  columns={columns}
+                  data={nodeData}
+                  rowProps={() => ({ className: '_active' })}
+                />
+                <div tw="mt-6">
+                  {!node && (
+                    <>
+                      <ButtonWithInfoTooltip
+                        ref={manuallySelectButtonRef}
+                        type="button"
+                        kind="functional"
+                        variant="warning"
+                        size="md"
+                        onClick={handleManuallySelectCRN}
+                        disabled={manuallySelectCRNDisabled}
+                        tooltipContent={manuallySelectCRNDisabledMessage}
+                        tooltipPosition={{
+                          my: 'bottom-left',
+                          at: 'center-center',
+                        }}
+                      >
+                        Manually select CRN
+                      </ButtonWithInfoTooltip>
+                    </>
+                  )}
+                </div>
+              </NoisyContainer>
+            </div>
+          </CenteredContainer>
+        </section>
+        <section tw="px-0 pt-20 pb-6 md:py-10">
+          <CenteredContainer>
+            <CompositeSectionTitle number={2}>
               Select your tier
-            </SectionTitle>
-            {values.paymentMethod === PaymentMethod.Hold ? (
-              <p>
-                Your instance is ready to be configured using our{' '}
-                <Strong>automated CRN selection</Strong>, set to run on{' '}
-                <Strong>{blockchainName}</Strong> with the{' '}
-                <Strong>Holder-tier payment</Strong> method, allowing you
-                seamless access while you hold ALEPH tokens. If you wish to
-                customize your Compute Resource Node (CRN) or use a different
-                payment approach, you can change your selection below.
-              </p>
-            ) : (
-              <p>
-                Please select one of the available instance tiers as a base for
-                your VM. You will be able to customize the volumes further below
-                in the form.
-              </p>
-            )}
+            </CompositeSectionTitle>
+            <p>
+              Please select one of the available instance tiers as a base for
+              your VM. You will be able to customize the volumes further below
+              in the form.
+            </p>
 
             <div tw="px-0 my-6 relative">
               <SpinnerOverlay show={!!node && !nodeSpecs} />
@@ -287,35 +205,13 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 control={control}
                 type={EntityType.Instance}
                 isPersistent
-                paymentMethod={values.paymentMethod}
                 nodeSpecs={nodeSpecs}
                 showOpenClawSpotlight
               >
-                {values.paymentMethod !== PaymentMethod.Stream ? (
-                  <div tw="mt-6">
-                    <ButtonWithInfoTooltip
-                      ref={manuallySelectButtonRef2}
-                      type="button"
-                      kind="functional"
-                      variant="warning"
-                      size="md"
-                      disabled={manuallySelectCRNDisabled}
-                      onClick={handleManuallySelectCRN}
-                      tooltipContent={manuallySelectCRNDisabledMessage}
-                      tooltipPosition={{
-                        my: 'bottom-left',
-                        at: 'center-center',
-                      }}
-                    >
-                      Manually select CRN
-                    </ButtonWithInfoTooltip>
+                {!node && (
+                  <div tw="mt-6 text-center">
+                    First select your node in the previous step
                   </div>
-                ) : (
-                  !node && (
-                    <div tw="mt-6 text-center">
-                      First select your node in the previous step
-                    </div>
-                  )
                 )}
               </SelectInstanceSpecs>
             </div>
@@ -323,9 +219,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(2)}>
+            <CompositeSectionTitle number={3}>
               Choose an image
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p>
               Chose a base image for your VM. It&apos;s the base system that you
               will be able to customize.
@@ -337,9 +233,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(3)}>
+            <CompositeSectionTitle number={4}>
               Configure SSH Key
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p>
               Access your cloud instances securely. Give existing key&apos;s
               below access to this instance or add new keys. Remember, storing
@@ -353,7 +249,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(4)}>Name and tags</SectionTitle>
+            <CompositeSectionTitle number={5}>
+              Name and tags
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Organize and identify your instances more effectively by assigning
               a unique name, obtaining a hash reference, and defining multiple
@@ -368,9 +266,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number={sectionNumber(5)}>
+            <CompositeSectionTitle number={6}>
               Advanced Configuration Options
-            </SectionTitle>
+            </CompositeSectionTitle>
             <p tw="mb-6">
               Customize your instance with our Advanced Configuration Options.
               Add volumes and custom domains to meet your specific needs.
@@ -415,47 +313,30 @@ export default function NewInstancePage({ mainRef }: PageProps) {
           control={control}
           address={address}
           cost={cost}
-          receiverAddress={node?.reward}
-          unlockedAmount={accountBalance}
-          paymentMethod={values.paymentMethod}
-          streamDuration={values.streamDuration}
-          disablePaymentMethod={streamDisabled}
-          disabledStreamTooltip={disabledStreamDisabledMessage}
+          unlockedAmount={accountCreditBalance}
           mainRef={mainRef}
+          minimumBalanceNeeded={minimumBalanceNeeded}
+          insufficientFunds={insufficientFundsInfo}
           description={
             <>
-              You can either leverage the traditional method of holding tokens
-              in your wallet for resource access, or opt for the Pay-As-You-Go
-              (PAYG) system, which allows you to pay precisely for what you use,
-              for the duration you need. The PAYG option includes a token stream
-              feature, enabling real-time payment for resources as you use them.
+              Aleph Cloud runs on a <strong>credit-based system</strong>,
+              designed for flexibility and transparency. You can top up credits
+              with <strong>fiat, USDC, or ALEPH</strong>. Your credits are
+              deducted only as you consume resources, ensuring you pay exactly
+              for what you use.
             </>
           }
-          // Duplicate buttons to have different references for the tooltip on each one
           button={
             <CheckoutButton
               disabled={createInstanceDisabled}
               title={createInstanceButtonTitle}
-              tooltipContent={createInstanceDisabledMessage}
               isFooter={false}
               shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
               handleRequestTermsAndConditionsAgreement={
                 handleRequestTermsAndConditionsAgreement
               }
               handleSubmit={handleSubmit}
-            />
-          }
-          footerButton={
-            <CheckoutButton
-              disabled={createInstanceDisabled}
-              title={createInstanceButtonTitle}
-              tooltipContent={createInstanceDisabledMessage}
-              isFooter={true}
-              shouldRequestTermsAndConditions={shouldRequestTermsAndConditions}
-              handleRequestTermsAndConditionsAgreement={
-                handleRequestTermsAndConditionsAgreement
-              }
-              handleSubmit={handleSubmit}
+              insufficientFunds={insufficientFundsInfo}
             />
           }
         />

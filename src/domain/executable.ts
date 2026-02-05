@@ -43,12 +43,8 @@ import {
 import Err from '@/helpers/errors'
 import { CRN, CRNSpecs, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
-import {
-  convertByteUnits,
-  humanReadableSize,
-  round,
-  sleep,
-} from '@aleph-front/core'
+import { convertByteUnits, humanReadableSize, round } from '@aleph-front/core'
+import { withRetry } from '@/helpers/utils'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import { isBlockchainPAYGCompatible } from './blockchain'
 import { CostLine } from './cost'
@@ -57,6 +53,11 @@ import { BlockchainId } from './connect'
 export type HoldPaymentConfiguration = {
   chain: BlockchainId
   type: PaymentMethod.Hold
+}
+
+export type CreditPaymentConfiguration = {
+  chain: BlockchainId
+  type: PaymentMethod.Credit
 }
 
 export type StreamPaymentConfiguration = {
@@ -71,6 +72,7 @@ export type StreamPaymentConfiguration = {
 export type PaymentConfiguration =
   | HoldPaymentConfiguration
   | StreamPaymentConfiguration
+  | CreditPaymentConfiguration
 
 export type Executable = BaseExecutableContent & {
   type:
@@ -298,7 +300,6 @@ export abstract class ExecutableManager<T extends Executable> {
       const nodes = await this.nodeManager.getAllCRNsSpecs()
 
       // @note: 1) Try to filter the node by the requirements field on the executable message (legacy messages doesn't contain it)
-
       let node = nodes.find(
         (node) => node.hash === executable.requirements?.node?.node_hash,
       )
@@ -308,6 +309,17 @@ export abstract class ExecutableManager<T extends Executable> {
       // @note: 2) Try to filter the node by the stream receiver address (we took the assumption that reward addresses whould be unique in the CRN collection)
 
       node = nodes.find((node) => node.stream_reward === receiver)
+
+      return node
+    }
+
+    if (executable.payment?.type === PaymentType.credit) {
+      const nodes = await this.nodeManager.getAllCRNsSpecs()
+
+      // Try to filter the node by the requirements field on the executable message (legacy messages doesn't contain it)
+      const node = nodes.find(
+        (node) => node.hash === executable.requirements?.node?.node_hash,
+      )
 
       return node
     }
@@ -425,34 +437,36 @@ export abstract class ExecutableManager<T extends Executable> {
   ): Promise<void> {
     if (!node.address) throw Err.InvalidCRNAddress
 
-    let errorMsg = ''
+    const nodeUrl = NodeManager.normalizeUrl(node.address)
 
-    for (let i = 0; i < retry.attemps; i++) {
-      try {
-        const nodeUrl = NodeManager.normalizeUrl(node.address)
+    try {
+      await withRetry(
+        async () => {
+          const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              instance: instanceId,
+            }),
+          })
+          const resp = await req.json()
 
-        const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            instance: instanceId,
-          }),
-        })
-        const resp = await req.json()
-        if (resp.success) return
+          if (resp.success) return
 
-        errorMsg = resp.errors[instanceId]
-      } catch (e) {
-        errorMsg = (e as Error).message
-      } finally {
-        if (!retry.attemps) break
-        await sleep(retry.await)
-      }
+          const errorMsg = resp.errors[instanceId]
+          throw new Error(errorMsg || 'Unknown error occurred')
+        },
+        {
+          attempts: retry.attemps,
+          delay: retry.await,
+        },
+      )
+    } catch (error) {
+      const errorMsg = (error as Error).message
+      throw Err.InstanceStartupFailed(node.hash, errorMsg)
     }
-
-    throw Err.InstanceStartupFailed(node.hash, errorMsg)
   }
 
   async getKeyPair(): Promise<KeyPair> {
@@ -862,7 +876,10 @@ export abstract class ExecutableManager<T extends Executable> {
     } else {
       return {
         chain: payment?.chain || BlockchainId.ETH,
-        type: SDKPaymentType.hold,
+        type:
+          payment?.type === PaymentMethod.Credit
+            ? SDKPaymentType.credit
+            : SDKPaymentType.hold,
       }
     }
   }
@@ -882,6 +899,12 @@ export abstract class ExecutableManager<T extends Executable> {
           receiver: payment.receiver,
         }
       throw Err.StreamNotSupported
+    }
+    if (payment.type === PaymentMethod.Credit) {
+      return {
+        chain: payment.chain,
+        type: SDKPaymentType.credit,
+      }
     }
     return {
       chain: payment.chain,
@@ -921,13 +944,22 @@ export abstract class ExecutableManager<T extends Executable> {
       {} as Record<MessageCostType, MessageCostLine>,
     )
 
-    const paymentMethod =
-      costs.payment_type === PaymentType.hold
-        ? PaymentMethod.Hold
-        : PaymentMethod.Stream
+    let paymentMethod: PaymentMethod
+    let costProp: 'cost_hold' | 'cost_stream' | 'cost_credit'
 
-    const costProp =
-      paymentMethod === PaymentMethod.Hold ? 'cost_hold' : 'cost_stream'
+    switch (costs.payment_type) {
+      case PaymentType.hold:
+        paymentMethod = PaymentMethod.Hold
+        costProp = 'cost_hold'
+        break
+      case PaymentType.superfluid:
+        paymentMethod = PaymentMethod.Stream
+        costProp = 'cost_stream'
+        break
+      default:
+        paymentMethod = PaymentMethod.Credit
+        costProp = 'cost_credit'
+    }
 
     // Execution
 

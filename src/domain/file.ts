@@ -1,6 +1,6 @@
 import { channel, defaultConsoleChannel } from '@/helpers/constants'
 import { apiServer } from '@/helpers/server'
-import { Mutex, convertByteUnits } from '@/helpers/utils'
+import { Mutex, convertByteUnits, sleep } from '@/helpers/utils'
 import { Account } from '@aleph-sdk/account'
 import {
   AlephHttpClient,
@@ -8,6 +8,11 @@ import {
 } from '@aleph-sdk/client'
 import { ItemType, MessageType, StoreMessage } from '@aleph-sdk/message'
 import Err from '@/helpers/errors'
+import {
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_DELAY_MS,
+  fetchAllPages,
+} from '@/helpers/pagination'
 
 export type FileObject = {
   created: string
@@ -294,13 +299,20 @@ export class FileManager {
 
     const { address } = this.account
 
-    const items = await this.sdkClient.getMessages({
-      messageTypes: [MessageType.store],
-      addresses: [address],
-      pagination: 1000,
+    const messages = await fetchAllPages(async (page, pageSize) => {
+      const response = await this.sdkClient.getMessages({
+        messageTypes: [MessageType.store],
+        addresses: [address],
+        page,
+        pagination: pageSize,
+      })
+      return {
+        items: response.messages,
+        hasMore: response.messages.length === pageSize,
+      }
     })
 
-    const files = (items?.messages || []) as StoreMessage[]
+    const files = messages as StoreMessage[]
     const totalSize = files.reduce((ac, cv) => ac + (cv?.content?.size || 0), 0)
 
     return {
@@ -315,16 +327,35 @@ export class FileManager {
     const { address } = this.account
 
     try {
-      // Postgres API
-      const res = await fetch(
-        `${apiServer}/api/v0/addresses/${address}/files?pagination=1000`,
-      )
+      // Postgres API with pagination to avoid large response errors
+      const allFiles: FileObject[] = []
+      let page = 1
+      let hasMore = true
+      let totalSize = 0
 
-      const content = await res.json()
-      const totalSize = content.total_size / 1024 ** 2
-      const files = content.files
+      while (hasMore) {
+        const res = await fetch(
+          `${apiServer}/api/v0/addresses/${address}/files?pagination=${DEFAULT_PAGE_SIZE}&page=${page}`,
+        )
 
-      return { files, totalSize }
+        const content = await res.json()
+        const files = content.files || []
+
+        if (page === 1) {
+          totalSize = content.total_size / 1024 ** 2
+        }
+
+        allFiles.push(...files)
+
+        if (files.length < DEFAULT_PAGE_SIZE) {
+          hasMore = false
+        } else {
+          page++
+          await sleep(DEFAULT_DELAY_MS)
+        }
+      }
+
+      return { files: allFiles, totalSize }
     } catch (error) {
       console.log('Files API is not yet implemented on the node')
     }

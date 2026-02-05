@@ -59,10 +59,12 @@ export type PriceTypeObject = {
     storage: {
       payg: string
       holding: string
+      credit: string
     }
     computeUnit: {
       payg: string
       holding: string
+      credit: string
     }
   }
   tiers: {
@@ -81,6 +83,7 @@ export type PricingAggregate = Record<PriceType, PriceTypeObject>
 
 export type SettingsAggregate = {
   compatibleGpus: GPUDevice[]
+  lastCrnVersion: string
   communityWalletAddress: string
   communityWalletTimestamp: number
 }

@@ -1,5 +1,5 @@
 import { CRNSpecs, ReducedCRNSpecs } from '@/domain/node'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import { EntityType } from '@/helpers/constants'
 import { convertByteUnits } from '@/helpers/utils'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
@@ -15,13 +15,9 @@ export type InstanceSpecsField = ReducedCRNSpecs & {
 export function updateSpecsStorage(
   specs: InstanceSpecsField,
   isPersistent = true,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  paymentMethod: PaymentMethod = PaymentMethod.Hold,
 ): InstanceSpecsField {
   return {
     ...specs,
-    // @todo: Reactivate it for Stream once that it is supported on backend
-    // disabled: paymentMethod !== PaymentMethod.Stream && isPersistent && specs.cpu >= 6,
     disabled: false,
     storage: convertByteUnits(specs.cpu * 2 * (isPersistent ? 10 : 1), {
       from: 'GiB',
@@ -37,7 +33,6 @@ export type UseSelectInstanceSpecsProps = {
   type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
   gpuModel?: string
   isPersistent?: boolean
-  paymentMethod?: PaymentMethod
   nodeSpecs?: CRNSpecs
 }
 
@@ -46,8 +41,8 @@ export type UseSelectInstanceSpecsReturn = {
   options: InstanceSpecsField[]
   type: EntityType.Instance | EntityType.GpuInstance | EntityType.Program
   isPersistent: boolean
-  paymentMethod: PaymentMethod
   nodeSpecs?: CRNSpecs
+  showOpenClawSpotlight?: boolean
 }
 
 export function useSelectInstanceSpecs({
@@ -57,7 +52,6 @@ export function useSelectInstanceSpecs({
   type,
   gpuModel,
   isPersistent = false,
-  paymentMethod = PaymentMethod.Hold,
   nodeSpecs,
   ...rest
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
@@ -68,26 +62,12 @@ export function useSelectInstanceSpecs({
 
   const filterValidNodeSpecs = useCallback(
     (option: Tier) => {
-      if (paymentMethod === PaymentMethod.Hold) return option
+      if (type === EntityType.Program) return true
       if (!nodeSpecs) return false
 
       return nodeManager.validateMinNodeSpecs(option, nodeSpecs)
     },
-    [nodeManager, nodeSpecs, paymentMethod],
-  )
-
-  const disableHighTiersForHolding = useCallback(
-    (option: Tier) => {
-      if (paymentMethod !== PaymentMethod.Hold) return option
-      if (option.cpu <= 4) return option
-
-      return {
-        ...option,
-        disabled: true,
-        disabledReason: 'High tiers are only avaiable for Pay-as-you-go.',
-      }
-    },
-    [paymentMethod],
+    [nodeManager, nodeSpecs, type],
   )
 
   // Process and cache valid voucher configurations
@@ -149,14 +129,8 @@ export function useSelectInstanceSpecs({
   const options = useMemo(() => {
     return defaultTiers
       .filter(filterValidNodeSpecs)
-      .map(disableHighTiersForHolding)
       .map(enableTiersWithVouchers)
-  }, [
-    defaultTiers,
-    filterValidNodeSpecs,
-    disableHighTiersForHolding,
-    enableTiersWithVouchers,
-  ])
+  }, [defaultTiers, filterValidNodeSpecs, enableTiersWithVouchers])
 
   const specsCtrl = useController({
     control,
@@ -184,36 +158,23 @@ export function useSelectInstanceSpecs({
     // 1. No tier is selected yet
     // 2. Current selected tier is disabled
     // 3. Current selected tier is not in the options anymore
-    let shouldAutoSelect = !value || !valueOption || valueOption.disabled
-
-    if (paymentMethod === PaymentMethod.Stream && !shouldAutoSelect) {
-      if (!nodeSpecs) return
-      // Cases when we should auto-select first available tier for PAYG:
-      // 1. Current selected tier is not compatible with the node
-
-      shouldAutoSelect = !nodeManager.validateMinNodeSpecs(value, nodeSpecs)
-    }
+    // 4. Current selected tier is not compatible with the selected node
+    const shouldAutoSelect =
+      !value ||
+      !valueOption ||
+      valueOption.disabled ||
+      (nodeSpecs && !nodeManager.validateMinNodeSpecs(value, nodeSpecs))
 
     if (shouldAutoSelect) {
       const firstAvailableTier = options[0]
-      onChange(
-        updateSpecsStorage(firstAvailableTier, isPersistent, paymentMethod),
-      )
+      onChange(updateSpecsStorage(firstAvailableTier, isPersistent))
     }
-  }, [
-    options,
-    nodeSpecs,
-    paymentMethod,
-    isPersistent,
-    value,
-    onChange,
-    nodeManager,
-  ])
+  }, [options, nodeSpecs, isPersistent, value, onChange, nodeManager])
 
   useEffect(() => {
     if (!value) return
 
-    let updatedSpecs = updateSpecsStorage(value, isPersistent, paymentMethod)
+    let updatedSpecs = updateSpecsStorage(value, isPersistent)
     if (updatedSpecs.storage === value.storage) return
 
     if (updatedSpecs.disabled) {
@@ -221,14 +182,13 @@ export function useSelectInstanceSpecs({
     }
 
     onChange(updatedSpecs)
-  }, [isPersistent, value, onChange, options, paymentMethod])
+  }, [isPersistent, value, onChange, options])
 
   return {
     specsCtrl,
     options,
     type,
     isPersistent,
-    paymentMethod,
     ...rest,
   }
 }

@@ -1,4 +1,3 @@
-import ButtonLink from '@/components/common/ButtonLink'
 import Head from 'next/head'
 import { useManageVolume } from './hook'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
@@ -22,11 +21,11 @@ export default function ManageVolume() {
         <CenteredContainer>
           <VolumeDetail volumeId={volumeId} showDelete />
 
-          <div tw="mt-20 text-center">
+          {/* <div tw="mt-20 text-center">
             <ButtonLink variant="primary" href="/console/storage/volume/new">
               Create new volume
             </ButtonLink>
-          </div>
+          </div> */}
         </CenteredContainer>
       </section>
     </>

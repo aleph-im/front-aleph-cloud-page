@@ -12,7 +12,7 @@ import {
 import { useCallback, useMemo } from 'react'
 import { convertByteUnits } from '@/helpers/utils'
 import { SelectInstanceSpecsProps, SpecsDetail } from './types'
-import { EntityType, PaymentMethod } from '@/helpers/constants'
+import { EntityType } from '@/helpers/constants'
 import Price from '@/components/common/Price'
 import Table from '@/components/common/Table'
 import { PriceType } from '@/domain/cost'
@@ -21,9 +21,13 @@ import { useGpuPricingType } from '@/hooks/common/useGpuPricingType'
 import InfoTooltipButton from '@/components/common/InfoTooltipButton'
 
 export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
-  const { showOpenClawSpotlight = false } = props
-  const { specsCtrl, options, type, isPersistent, paymentMethod } =
-    useSelectInstanceSpecs(props)
+  const {
+    specsCtrl,
+    options,
+    type,
+    isPersistent,
+    showOpenClawSpotlight = false,
+  } = useSelectInstanceSpecs(props)
 
   const columns = useMemo(() => {
     const cols = [
@@ -57,8 +61,10 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
         render: (row: SpecsDetail) => (
           <span tw="flex items-center justify-end gap-1">
             <Price
+              type="credit"
               value={row.price}
-              duration={paymentMethod === PaymentMethod.Hold ? undefined : 'h'}
+              duration={'h'}
+              decimals={4}
             />
           </span>
         ),
@@ -123,7 +129,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     }
 
     return cols
-  }, [paymentMethod, type, showOpenClawSpotlight])
+  }, [type, showOpenClawSpotlight])
 
   // ------------------------------------------
 
@@ -167,10 +173,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
           const pricesAggregate = await costManager.getPricesAggregate()
           const prices = pricesAggregate[priceType]
 
-          const computeUnitPrice =
-            prices.price.computeUnit[
-              paymentMethod === PaymentMethod.Hold ? 'holding' : 'payg'
-            ]
+          const computeUnitPrice = prices.price.computeUnit['credit']
 
           const computeTotalCost = specs.cpu * Number(computeUnitPrice)
 
@@ -184,7 +187,7 @@ export const SelectInstanceSpecs = memo((props: SelectInstanceSpecsProps) => {
     }
 
     load()
-  }, [costManager, options, paymentMethod, priceType])
+  }, [costManager, options, priceType])
 
   const data = useMemo(() => {
     return options.map((specs, i) => {

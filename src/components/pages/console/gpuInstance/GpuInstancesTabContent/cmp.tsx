@@ -17,20 +17,21 @@ import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export const GpuInstancesTabContent = React.memo(
   ({ data }: GpuInstancesTabContentProps) => {
-    const router = useRouter()
-
-    const isNonCredit = useCallback((row: GpuInstance) => {
-      return row.payment?.type !== PaymentType.credit
+    const isCredit = useCallback((row: GpuInstance) => {
+      return row.payment?.type === PaymentType.credit
     }, [])
+
+    const router = useRouter()
 
     const handleRowClick = useCallback(
       (gpuInstance: GpuInstance) => {
-        if (!isNonCredit(gpuInstance)) return
+        if (!isCredit(gpuInstance)) return
 
         router.push(`/console/computing/gpu-instance/${gpuInstance.id}`)
       },
-      [isNonCredit, router],
+      [isCredit, router],
     )
+
     return (
       <>
         {data.length > 0 ? (
@@ -41,21 +42,19 @@ export const GpuInstancesTabContent = React.memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 rowProps={(row) => ({
-                  css: isNonCredit(row)
-                    ? ''
-                    : tw`opacity-40 cursor-not-allowed!`,
+                  css: isCredit(row) ? '' : tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}
                 rowTooltip={(row) => {
-                  if (isNonCredit(row)) return null
+                  if (isCredit(row)) return null
 
                   return (
                     <p>
                       To manage this GPU instance, go to the{' '}
                       <ExternalLink
-                        text="Credits console App."
+                        text="Legacy console App."
                         color="main0"
-                        href={NAVIGATION_URLS.creditConsole.computing.gpus.home}
+                        href={NAVIGATION_URLS.legacyConsole.computing.gpus.home}
                       />
                     </p>
                   )
@@ -103,7 +102,7 @@ export const GpuInstancesTabContent = React.memo(
                     label: '',
                     align: 'right',
                     render: (row) => {
-                      const disabled = !isNonCredit(row)
+                      const disabled = !isCredit(row)
 
                       return (
                         <Button

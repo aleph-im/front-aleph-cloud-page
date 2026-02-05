@@ -32,19 +32,19 @@ CreateConfidentialButton.displayName = 'CreateConfidentialButton'
 
 export const ConfidentialsTabContent = memo(
   ({ data }: ConfidentialsTabContentProps) => {
-    const router = useRouter()
-
-    const isNonCredit = useCallback((row: Confidential) => {
-      return row.payment?.type !== PaymentType.credit
+    const isCredit = useCallback((row: Confidential) => {
+      return row.payment?.type === PaymentType.credit
     }, [])
+
+    const router = useRouter()
 
     const handleRowClick = useCallback(
       (confidential: Confidential) => {
-        if (!isNonCredit(confidential)) return
+        if (!isCredit(confidential)) return
 
         router.push(`/console/computing/confidential/${confidential.id}`)
       },
-      [isNonCredit, router],
+      [isCredit, router],
     )
     return (
       <>
@@ -56,22 +56,20 @@ export const ConfidentialsTabContent = memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 rowProps={(row) => ({
-                  css: isNonCredit(row)
-                    ? ''
-                    : tw`opacity-40 cursor-not-allowed!`,
+                  css: isCredit(row) ? '' : tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}
                 rowTooltip={(row) => {
-                  if (isNonCredit(row)) return null
+                  if (isCredit(row)) return null
 
                   return (
                     <p>
                       To manage this TEE instance, go to the{' '}
                       <ExternalLink
-                        text="Credits console App."
+                        text="Legacy console App."
                         color="main0"
                         href={
-                          NAVIGATION_URLS.creditConsole.computing.confidentials
+                          NAVIGATION_URLS.legacyConsole.computing.confidentials
                             .home
                         }
                       />
@@ -121,7 +119,7 @@ export const ConfidentialsTabContent = memo(
                     label: '',
                     align: 'right',
                     render: (row) => {
-                      const disabled = !isNonCredit(row)
+                      const disabled = !isCredit(row)
 
                       return (
                         <Button

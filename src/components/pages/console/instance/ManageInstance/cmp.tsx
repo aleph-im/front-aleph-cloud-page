@@ -20,6 +20,7 @@ import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import DomainDetail from '@/components/common/DomainDetail'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
+import EntityProxyUrl from '@/components/common/entityData/EntityProxyUrl'
 import NewDomainForm from '@/components/common/NewDomainForm'
 
 /**
@@ -90,6 +91,9 @@ export default function ManageInstance() {
     ports,
     sshForwardedPort,
     handlePortsChange,
+
+    // Credit balance
+    creditBalance,
   } = useManageInstance()
 
   return (
@@ -107,6 +111,8 @@ export default function ManageInstance() {
         type={EntityType.Instance}
         isAllocated={isAllocated}
         calculatedStatus={calculatedStatus}
+        creditBalance={creditBalance}
+        paymentData={paymentData}
         // Start action
         showStart
         startDisabled={startDisabled}
@@ -160,6 +166,10 @@ export default function ManageInstance() {
             key="instance-connection-methods"
             executableStatus={status}
             sshForwardedPort={sshForwardedPort}
+          />,
+          <EntityProxyUrl
+            key="instance-proxy-url"
+            instanceHash={instance?.id}
           />,
           immutableVolumes.length && (
             <EntityLinkedVolumes

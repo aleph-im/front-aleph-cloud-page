@@ -1,12 +1,11 @@
 import React from 'react'
 import Head from 'next/head'
-import { PaymentMethod } from '@/helpers/constants'
 import { useNewVolumePage } from './hook'
 import CheckoutSummary from '@/components/form/CheckoutSummary'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import { AddNewVolume } from '@/components/form/AddVolume'
 import { Form } from '@/components/form/Form'
-import { SectionTitle } from '@/components/common/CompositeTitle'
+import { CompositeSectionTitle } from '@/components/common/CompositeTitle'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { insufficientFundsDisabledMessage } from './disabledMessages'
@@ -15,7 +14,7 @@ export function NewVolumePage() {
   const {
     control,
     address,
-    accountBalance,
+    accountCreditBalance,
     isCreateButtonDisabled,
     errors,
     cost,
@@ -36,15 +35,14 @@ export function NewVolumePage() {
       <Form onSubmit={handleSubmit} errors={errors}>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <SectionTitle number="1">Add volume</SectionTitle>
+            <CompositeSectionTitle number="1">Add volume</CompositeSectionTitle>
             <AddNewVolume control={control} />
           </CenteredContainer>
         </section>
         <CheckoutSummary
           address={address}
           cost={cost}
-          unlockedAmount={accountBalance}
-          paymentMethod={PaymentMethod.Hold}
+          unlockedAmount={accountCreditBalance}
           description={
             <>
               This amount needs to be present in your wallet until the volume is

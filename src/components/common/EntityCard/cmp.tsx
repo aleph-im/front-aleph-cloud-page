@@ -52,6 +52,8 @@ export const EntityCard = ({
   dashboardPath = '#',
   createPath = '#',
   createTarget = '_self',
+  createDisabled = false,
+  createDisabledMessage,
   introductionButtonText,
   subItems = [],
   information,
@@ -159,6 +161,8 @@ export const EntityCard = ({
               size="sm"
               href={createPath}
               target={createTarget}
+              disabled={createDisabled}
+              disabledMessage={createDisabledMessage}
             >
               <Icon name="plus-circle" /> {introductionButtonText}
             </ButtonLink>
@@ -168,6 +172,8 @@ export const EntityCard = ({
   }, [
     createPath,
     createTarget,
+    createDisabled,
+    createDisabledMessage,
     dashboardPath,
     information,
     introductionButtonText,

@@ -17,9 +17,9 @@ import {
 } from '@aleph-front/core'
 import { MessageType } from '@aleph-sdk/message'
 import {
-  RowActionsButton,
-  StyledPortal,
-} from '@/components/pages/console/permissions/PermissionsRowActions/styles'
+  MenuTriggerButton as RowActionsButton,
+  StyledMenuPortal as StyledPortal,
+} from '@/components/common/DetailsMenuButton/styles'
 import StyledTable from '@/components/common/Table'
 import { Portal } from '@/components/common/Portal'
 import SidePanel from '@/components/common/SidePanel'
@@ -285,7 +285,7 @@ export const PermissionsConfiguration = ({
               <div tw="flex justify-between items-center gap-x-4">
                 <div
                   className="tp-body1"
-                  tw="flex-1 flex items-center min-w-12"
+                  tw="flex-1 flex items-center min-w-[3rem]"
                 >
                   Channels:
                   <span

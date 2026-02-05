@@ -8,6 +8,7 @@ import EntityTable from '@/components/common/EntityTable'
 import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 import { Volume } from '@/domain/volume'
+import ExternalLink from '@/components/common/ExternalLink'
 
 export const VolumesTabContent = ({
   data,
@@ -16,6 +17,9 @@ export const VolumesTabContent = ({
   const router = useRouter()
   const handleRowClick = useCallback(
     (volume: Volume) => {
+      // don't allow click until credits support it
+      return
+
       router.push(
         `${NAVIGATION_URLS.console.storage.volumes.home}/${volume.id}`,
       )
@@ -30,10 +34,24 @@ export const VolumesTabContent = ({
           rowNoise
           rowKey={(row) => row.id}
           data={data}
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           rowProps={(row) => ({
+            // css: row.confirmed ? '' : tw`opacity-60`,
+            css: tw`opacity-40 cursor-not-allowed!`,
             onClick: () => handleRowClick(row),
-            css: row.confirmed ? '' : tw`opacity-60`,
           })}
+          rowTooltip={() => {
+            return (
+              <p>
+                To manage this volume, go to the{' '}
+                <ExternalLink
+                  text="Legacy console App."
+                  color="main0"
+                  href={NAVIGATION_URLS.legacyConsole.computing.instances.home}
+                />
+              </p>
+            )
+          }}
           clickableRows
           columns={[
             {
@@ -61,6 +79,7 @@ export const VolumesTabContent = ({
                 <Button
                   kind="functional"
                   variant="secondary"
+                  disabled
                   onClick={() => handleRowClick(row)}
                 >
                   <Icon name="angle-right" size="lg" />

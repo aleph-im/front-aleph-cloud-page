@@ -1,6 +1,5 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import { Button, ButtonProps, TooltipProps } from '@aleph-front/core'
-import ResponsiveTooltip from '../ResponsiveTooltip'
+import { Button, ButtonProps, Tooltip, TooltipProps } from '@aleph-front/core'
 import { InfoIcon } from './styles'
 
 export type ButtonWithInfoTooltipProps = ButtonProps & {
@@ -55,7 +54,7 @@ export const ButtonWithInfoTooltip = forwardRef<
         </Button>
 
         {renderTooltip && disabled && tooltipContent && (
-          <ResponsiveTooltip
+          <Tooltip
             my={tooltipPosition?.my || 'bottom-center'}
             at={tooltipPosition?.at || 'top-center'}
             targetRef={targetRef}

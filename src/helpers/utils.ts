@@ -23,6 +23,8 @@ import { Account } from '@aleph-sdk/account'
 import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { blockchains } from '@/domain/connect'
+import { CREDITS_PER_USD, TokenId, getTokenDecimals } from '@/domain/credit'
+import BN from 'bn.js'
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -57,7 +59,7 @@ export const ellipseAddress = (address: string) => {
  * Get the Aleph balance for a given blockchain address
  *
  * @param address An blockchain address
- * returns The Aleph balance of the address
+ * returns The Aleph Tokens and Credit balance of the address
  */
 export const getAddressBalance = async (address: string) => {
   try {
@@ -66,10 +68,14 @@ export const getAddressBalance = async (address: string) => {
     )
 
     // @note: 404 means the balance is 0, don't throw error in that case
-    if (query.status === 404) return 0
+    if (query.status === 404) return { balance: 0, creditBalance: 0 }
 
-    const { balance } = await query.json()
-    return balance
+    const { balance, credit_balance } = await query.json()
+
+    return {
+      balance: balance as number,
+      creditBalance: credit_balance as number,
+    }
   } catch (error) {
     throw Err.RequestFailed(error)
   }
@@ -79,7 +85,7 @@ export async function getAccountBalance(
   account: Account,
   paymentMethod: PaymentMethod,
 ) {
-  let balance: number
+  let balance = 0
 
   if (paymentMethod === PaymentMethod.Stream && isAccountSupported(account)) {
     try {
@@ -93,12 +99,14 @@ export async function getAccountBalance(
       console.error(e)
       balance = 0
     }
-  } else {
-    // For Hold payment method, fetch balance from pyaleph API
-    balance = await getAddressBalance(account.address)
   }
 
-  return balance
+  const addressBalance = await getAddressBalance(account.address)
+
+  return {
+    balance: balance || addressBalance.balance,
+    creditBalance: addressBalance.creditBalance || 0,
+  }
 }
 
 export function round(num: number, decimals = 2) {
@@ -215,6 +223,35 @@ export const humanReadableCurrency = (value?: number, decimals = 2) => {
   else if (absValue < 10 ** 9)
     return prefix + (absValue / 10 ** 6).toFixed(decimals) + 'M'
   else return prefix + (absValue / 10 ** 9).toFixed(decimals) + 'B'
+}
+
+/**
+ * Formats credits as USD currency
+ * 1,000,000 credits = $1.00
+ *
+ * @param credits The credit amount
+ * @param decimals Number of decimal places to show (default 2)
+ * @returns Formatted string like "$1.00" or "$1.5K" for large amounts
+ */
+export const formatCredits = (credits?: number, decimals = 2): string => {
+  if (credits === undefined || credits === null) return '$0.00'
+  if (credits === 0) return '$0.00'
+  if (!Number.isFinite(credits)) return '-'
+
+  const dollars = credits / CREDITS_PER_USD
+  const isNegative = dollars < 0
+  const absValue = Math.abs(dollars)
+  const prefix = isNegative ? '-$' : '$'
+
+  if (absValue < 1_000) {
+    return prefix + absValue.toFixed(decimals)
+  } else if (absValue < 10 ** 6) {
+    return prefix + (absValue / 1_000).toFixed(decimals) + 'K'
+  } else if (absValue < 10 ** 9) {
+    return prefix + (absValue / 10 ** 6).toFixed(decimals) + 'M'
+  } else {
+    return prefix + (absValue / 10 ** 9).toFixed(decimals) + 'B'
+  }
 }
 
 const messageTypeWhitelist = new Set(Object.values(MessageType))
@@ -653,6 +690,34 @@ export function getVersionNumber(version: string): number {
 }
 
 /**
+ * Compares two semantic version strings to determine if the first version
+ * is greater than or equal to the second version.
+ *
+ * @param version - The version to check (e.g., "1.8.5")
+ * @param minVersion - The minimum required version (e.g., "1.7.2")
+ * @returns true if version >= minVersion, false otherwise
+ *
+ * @example
+ * compareVersion("1.8.5", "1.7.2") // true
+ * compareVersion("1.7.0", "1.7.2") // false
+ * compareVersion("2.0.0", "1.7.2") // true
+ */
+export function compareVersion(version: string, minVersion: string): boolean {
+  const v1Parts = version.split('.').map(Number)
+  const v2Parts = minVersion.split('.').map(Number)
+
+  for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
+    const v1 = v1Parts[i] || 0
+    const v2 = v2Parts[i] || 0
+
+    if (v1 > v2) return true
+    if (v1 < v2) return false
+  }
+
+  return true
+}
+
+/**
  * An util for controlling concurrency (lock / unlock) forcing sequential access
  * to some region of the code
  *
@@ -770,4 +835,81 @@ export async function consumeIterator<S, R>(
   }
 
   return result
+}
+
+export type RetryOptions = {
+  attempts: number
+  delay: number
+}
+
+/**
+ * Generic retry utility that executes an async function with retry logic
+ *
+ * @param fn - The async function to execute with retry logic
+ * @param options - Retry configuration with attempts and delay
+ * @returns Promise that resolves with the function result or rejects with the last error
+ */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  { attempts = 5, delay = 1000 }: RetryOptions = { attempts: 5, delay: 1000 },
+): Promise<T> {
+  let lastError: Error = new Error('Unknown error')
+
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error as Error
+
+      // Don't sleep after the last attempt
+      if (i < attempts - 1) {
+        await sleep(delay)
+      }
+    }
+  }
+
+  throw lastError
+}
+
+/**
+ * Formats payment amounts for display, handling token decimal conversion
+ * Uses BN.js for precise decimal handling, reversing the conversion done in
+ * getTokenToCreditsEstimation. Token decimals: ALEPH = 18, USDC = 6
+ *
+ * @param amount - The raw amount from the API (in smallest unit)
+ * @param asset - The asset type (ALEPH, USDC, etc.)
+ * @param displayDecimals - Number of decimal places to show (default: 6)
+ * @returns Formatted amount string
+ */
+export function formatPaymentAmount(
+  amount: number | string,
+  asset: string,
+  displayDecimals = 6,
+): string {
+  if (!amount || amount === 0) return '0'
+
+  // Get token decimals from constant map
+  const tokenDecimals = getTokenDecimals(asset)
+  const isKnownToken = asset.toUpperCase() in TokenId
+
+  if (isKnownToken) {
+    // Convert from smallest unit back to regular number using BN
+    const amountBN = new BN(amount.toString())
+    const divisor = new BN('1'.padEnd(tokenDecimals + 1, '0'))
+    const convertedAmount = amountBN.div(divisor)
+
+    // Handle remainder for decimal places
+    const remainder = amountBN.mod(divisor)
+    const decimalPart = remainder.toString().padStart(tokenDecimals, '0')
+    const trimmedDecimal = decimalPart
+      .substring(0, displayDecimals)
+      .replace(/0+$/, '')
+
+    const wholePart = convertedAmount.toString()
+    return trimmedDecimal ? `${wholePart}.${trimmedDecimal}` : wholePart
+  }
+
+  // For other assets, format as is
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
+  return numAmount.toFixed(displayDecimals).replace(/\.?0+$/, '')
 }

@@ -1,6 +1,5 @@
 import { FormEvent, useCallback, useMemo } from 'react'
 import { useAppState } from '@/contexts/appState'
-import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
 import { useRouter } from 'next/router'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { VolumeField } from '@/hooks/form/useAddVolume'
@@ -32,6 +31,11 @@ import Err from '@/helpers/errors'
 import { useDefaultTiers } from '@/hooks/common/pricing/useDefaultTiers'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
 import { useConnection } from '@/hooks/common/useConnection'
+import {
+  CreditPaymentConfiguration,
+  PaymentConfiguration,
+} from '@/domain/executable'
+import { BlockchainId } from '@/domain/connect'
 
 export type NewFunctionFormState = NameAndTagsField & {
   code: FunctionCodeField
@@ -48,8 +52,9 @@ export type NewFunctionFormState = NameAndTagsField & {
 
 export type UseNewFunctionPage = {
   address: string
-  accountBalance: number
-  isCreateButtonDisabled: boolean
+  accountCreditBalance: number
+  createFunctionDisabled: boolean
+  createFunctionButtonTitle: string
   values: any
   control: Control<any>
   errors: FieldErrors<NewFunctionFormState>
@@ -64,7 +69,8 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const {
     blockchain,
     account,
-    balance: accountBalance = 0,
+    creditBalance: accountCreditBalance = 0,
+    handleConnect,
   } = useConnection({
     triggerOnMount: false,
   })
@@ -75,13 +81,21 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   const onSubmit = useCallback(
     async (state: NewFunctionFormState) => {
       if (!manager) throw Err.ConnectYourWallet
+      if (!account) throw Err.InvalidAccount
+
+      if (!blockchain) {
+        handleConnect({ blockchain: BlockchainId.BASE })
+        throw Err.InvalidNetwork
+      }
+
+      const payment: CreditPaymentConfiguration = {
+        chain: blockchain,
+        type: PaymentMethod.Credit,
+      }
 
       const program = {
         ...state,
-        payment: {
-          chain: blockchain,
-          type: PaymentMethod.Hold,
-        },
+        payment,
       } as AddProgram
 
       const iSteps = await manager.getAddSteps(program)
@@ -117,7 +131,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         await stop()
       }
     },
-    [blockchain, dispatch, manager, next, router, stop],
+    [account, blockchain, handleConnect, dispatch, manager, next, router, stop],
   )
 
   const { defaultTiers } = useDefaultTiers({ type: EntityType.Program })
@@ -128,7 +142,7 @@ export function useNewFunctionPage(): UseNewFunctionPage {
       code: { ...defaultCode } as FunctionCodeField,
       specs: defaultTiers[0],
       isPersistent: false,
-      paymentMethod: PaymentMethod.Hold,
+      paymentMethod: PaymentMethod.Credit,
     }),
     [defaultTiers],
   )
@@ -137,7 +151,6 @@ export function useNewFunctionPage(): UseNewFunctionPage {
     control,
     handleSubmit,
     formState: { errors },
-    setValue,
   } = useForm({
     defaultValues,
     onSubmit,
@@ -145,6 +158,13 @@ export function useNewFunctionPage(): UseNewFunctionPage {
   })
   // @note: dont use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as NewFunctionFormState
+
+  const payment: PaymentConfiguration = useMemo(() => {
+    return {
+      chain: blockchain,
+      type: PaymentMethod.Credit,
+    } as CreditPaymentConfiguration
+  }, [blockchain])
 
   const costProps: UseProgramCostProps = useMemo(
     () => ({
@@ -156,33 +176,48 @@ export function useNewFunctionPage(): UseNewFunctionPage {
         volumes: values.volumes,
         domains: values.domains,
         paymentMethod: values.paymentMethod,
+        payment,
         code: values.code,
       },
     }),
-    [values],
+    [payment, values],
   )
 
   const cost = useEntityCost(costProps)
 
-  const { isCreateButtonDisabled } = useCanAfford({
+  const { canAfford, isCreateButtonDisabled } = useCanAfford({
     cost,
-    accountBalance,
+    accountCreditBalance,
   })
+
+  // Checks if user can afford with current balance
+  const hasEnoughBalance = useMemo(() => {
+    if (!account) return false
+    if (!isCreateButtonDisabled) return true
+    return canAfford
+  }, [account, canAfford, isCreateButtonDisabled])
+
+  const createFunctionButtonTitle: UseNewFunctionPage['createFunctionButtonTitle'] =
+    useMemo(() => {
+      if (!account) return 'Connect'
+      if (!hasEnoughBalance) return 'Insufficient Credits'
+
+      return 'Create function'
+    }, [account, hasEnoughBalance])
+
+  const createFunctionDisabled = useMemo(() => {
+    return createFunctionButtonTitle !== 'Create function'
+  }, [createFunctionButtonTitle])
 
   const handleBack = () => {
     router.push('.')
   }
 
-  // Sync form payment method with global state
-  useSyncPaymentMethod({
-    formPaymentMethod: values.paymentMethod,
-    setValue,
-  })
-
   return {
     address: account?.address || '',
-    accountBalance,
-    isCreateButtonDisabled,
+    accountCreditBalance,
+    createFunctionDisabled,
+    createFunctionButtonTitle,
     values,
     control,
     errors,

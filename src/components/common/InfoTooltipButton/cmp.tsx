@@ -1,10 +1,9 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { StyledInfoTooltipButton } from './styles'
 import { InfoTooltipButtonProps } from './types'
-import { Icon } from '@aleph-front/core'
+import { Icon, Tooltip } from '@aleph-front/core'
 import tw from 'twin.macro'
 import { TwStyle } from 'twin.macro'
-import ResponsiveTooltip from '../ResponsiveTooltip'
 
 export const InfoTooltipButton = ({
   children,
@@ -61,11 +60,7 @@ export const InfoTooltipButton = ({
         </StyledInfoTooltipButton>
       )}
       {renderTooltip && (
-        <ResponsiveTooltip
-          {...rest}
-          targetRef={targetRef}
-          content={tooltipContent}
-        />
+        <Tooltip {...rest} targetRef={targetRef} content={tooltipContent} />
       )}
     </>
   )

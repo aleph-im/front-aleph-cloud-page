@@ -7,6 +7,7 @@ import {
   useExecutableActions,
 } from '@/hooks/common/useExecutableActions'
 import {
+  CreditPaymentData,
   HoldingPaymentData,
   PaymentData,
   StreamPaymentData,
@@ -209,6 +210,7 @@ export function useManageInstanceEntity<
             startTime: entity.time,
             blockchain: entity.payment.chain,
             loading: loadingPaymentData,
+            itemHash: entity.id,
           } as HoldingPaymentData,
         ]
       case PaymentType.superfluid:
@@ -223,9 +225,22 @@ export function useManageInstanceEntity<
                 blockchain: entity?.payment?.chain,
                 loading: false,
                 receiver: stream.receiver,
+                itemHash: entity.id,
               }) as StreamPaymentData,
           )
         }
+      case PaymentType.credit:
+        return [
+          {
+            cost,
+            paymentType: PaymentType.credit,
+            runningTime,
+            startTime: entity.time,
+            blockchain: entity.payment.chain,
+            loading: loadingPaymentData,
+            itemHash: entity.id,
+          } as CreditPaymentData,
+        ]
       default:
         return [
           {
@@ -237,6 +252,7 @@ export function useManageInstanceEntity<
   }, [
     cost,
     entity?.payment,
+    entity?.id,
     runningTime,
     entity?.time,
     streamDetails?.streams,

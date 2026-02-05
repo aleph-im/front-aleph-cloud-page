@@ -13,7 +13,7 @@ import Form from '@/components/form/Form'
 import { useNewDomainForm } from './hook'
 import { NewDomainFormProps } from './types'
 import { CenteredContainer } from '../CenteredContainer'
-import { SectionTitle } from '../CompositeTitle'
+import { CompositeSectionTitle } from '../CompositeTitle'
 import ExternalLinkButton from '../ExternalLinkButton'
 import ButtonLink from '../ButtonLink'
 import {
@@ -93,7 +93,9 @@ export const NewDomainForm = ({
     <Wrapper>
       <Form onSubmit={handleSubmit} errors={errors}>
         <StyledSection $isEmbedded={isEmbedded}>
-          <SectionTitle number={1}>Custom domain</SectionTitle>
+          <CompositeSectionTitle number={1}>
+            Custom domain
+          </CompositeSectionTitle>
           <p tw="mb-6">
             Assign a user-friendly domain to your website, instance or function
             to not only simplify access to your web3 application but also
@@ -131,7 +133,9 @@ export const NewDomainForm = ({
         </StyledSection>
         {showResourceSelection && (
           <StyledSection $isEmbedded={isEmbedded}>
-            <SectionTitle number={2}>Select Resource</SectionTitle>
+            <CompositeSectionTitle number={2}>
+              Select Resource
+            </CompositeSectionTitle>
             <p tw="mb-6">
               You&apos;ll need to specify the resource your custom domain will
               be associated with. This could either be a website, an instance or

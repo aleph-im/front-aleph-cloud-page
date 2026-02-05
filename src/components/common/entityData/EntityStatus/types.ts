@@ -9,11 +9,13 @@ export type EntityStatusPropsV1 = {
 
 export type EntityStatusPropsV2 = {
   calculatedStatus: ExecutableCalculatedStatus
+  cannotStart?: boolean
   theme: DefaultTheme
 }
 
 export type EntityStatusProps = {
   calculatedStatus: ExecutableCalculatedStatus
+  cannotStart?: boolean
   entity?: Executable
   isAllocated: boolean
   theme: DefaultTheme

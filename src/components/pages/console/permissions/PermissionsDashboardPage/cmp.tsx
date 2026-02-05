@@ -139,7 +139,7 @@ export default function PermissionsDashboardPage({ mainRef }: PageProps) {
           title="Permissions"
           description={
             <>
-              <div className="tp-body2" tw="opacity-85">
+              <div className="tp-body2" tw="opacity-80">
                 Ideal for teams, apps, or automated workloads.
               </div>{' '}
               Empower teammates or connected wallets to spend your credits

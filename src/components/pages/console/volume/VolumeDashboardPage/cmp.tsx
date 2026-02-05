@@ -44,7 +44,7 @@ export default function VolumeDashboardPage() {
               {
                 title: 'Volumes',
                 img: EntityTypeObject[EntityType.Volume],
-                buttonUrl: '/console/storage/volume/new',
+                // buttonUrl: '/console/storage/volume/new',
                 information: {
                   type: 'storage',
                   data: total,
@@ -78,7 +78,7 @@ export default function VolumeDashboardPage() {
           <>
             {!!volumes.length && (
               <CenteredContainer $variant="xl" tw="my-10">
-                <VolumesTabContent data={volumes} />
+                <VolumesTabContent data={volumes} cta={false} />
               </CenteredContainer>
             )}
             <DashboardCardWithSideImage
@@ -87,10 +87,14 @@ export default function VolumeDashboardPage() {
               info="WHAT ARE..."
               title="Volumes"
               description="Create immutable volumes for secure and dependable data storage. Ideal for dependencies and other critical data, ensuring consistency and reliability across your applications"
-              withButton={volumes.length === 0}
-              buttonUrl={NAVIGATION_URLS.console.storage.volumes.new}
-              buttonText="Create new volume"
-              externalLinkUrl={NAVIGATION_URLS.docs.immutableVolumes}
+              // withButton={volumes.length === 0}
+              // buttonUrl={NAVIGATION_URLS.console.storage.volumes.new}
+              // buttonText="Create new volume"
+              // externalLinkUrl={NAVIGATION_URLS.docs.immutableVolumes}
+              externalLinkText="Create on Legacy console"
+              externalLinkUrl={
+                NAVIGATION_URLS.legacyConsole.computing.functions.home
+              }
             />
           </>
         ) : (
