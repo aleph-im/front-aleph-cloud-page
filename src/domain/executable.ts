@@ -111,6 +111,8 @@ export type ExecutableCalculatedStatus =
   | 'stopping'
   | 'running'
   | 'preparing'
+  | 'starting'
+  | 'rebooting'
 
 export type ExecutableStatus = {
   version: 'v1' | 'v2'

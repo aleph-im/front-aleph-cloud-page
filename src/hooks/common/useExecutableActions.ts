@@ -153,6 +153,7 @@ export function useExecutableActions({
       operation: ExecutableOperations,
       setLoading?: (loading: boolean) => void,
       expectedStatuses?: ExecutableCalculatedStatus[],
+      enforcedStatus?: ExecutableCalculatedStatus,
     ) => {
       try {
         if (!manager) throw Err.ConnectYourWallet
@@ -168,6 +169,7 @@ export function useExecutableActions({
         })
 
         triggerBoostPolling({
+          enforcedStatus,
           expectedStatuses,
           onComplete: () => setLoading?.(false),
         })
@@ -210,6 +212,7 @@ export function useExecutableActions({
       }
 
       triggerBoostPolling({
+        enforcedStatus: 'starting',
         expectedStatuses: ['running'],
         onComplete: () => setStartLoading(false),
       })
@@ -281,12 +284,18 @@ export function useExecutableActions({
 
   const handleStop = useCallback(
     () =>
-      handleSendOperation('stop', setStopLoading, ['stopped', 'not-allocated']),
+      handleSendOperation(
+        'stop',
+        setStopLoading,
+        ['stopped', 'not-allocated'],
+        'stopping',
+      ),
     [handleSendOperation],
   )
 
   const handleReboot = useCallback(
-    () => handleSendOperation('reboot', setRebootLoading),
+    () =>
+      handleSendOperation('reboot', setRebootLoading, undefined, 'rebooting'),
     [handleSendOperation],
   )
 
