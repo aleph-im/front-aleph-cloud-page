@@ -27,8 +27,8 @@ export const DomainDnsConfiguration = ({
             ownership and route traffic to this instance.
           </DisabledText>
 
-          <div tw="p-6" className="bg-background">
-            <div tw="flex flex-col gap-3">
+          <div tw="p-6 overflow-hidden" className="bg-background">
+            <div tw="flex flex-col gap-3 break-all">
               {/* CNAME Record */}
               <div tw="flex items-start gap-2">
                 <BulletItem

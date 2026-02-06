@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState } from 'react'
-import { Icon, NoisyContainer } from '@aleph-front/core'
+import { Button, Icon, NoisyContainer } from '@aleph-front/core'
 import { DisabledText, Text } from '@/components/pages/console/common'
 import { EntityCustomDomainsProps } from './types'
 import InfoTitle from '../InfoTitle'
@@ -60,10 +60,12 @@ export const EntityCustomDomains = ({
               />
             )}
             <div>
-              <FunctionalButton onClick={() => setIsAdding((prev) => !prev)}>
-                <Icon name={isAdding ? 'times' : 'globe'} />
-                {isAdding ? 'cancel' : 'add domain'}
-              </FunctionalButton>
+              <Button
+                  variant="secondary"
+                  kind="gradient"
+                  onClick={() => setIsAdding((prev) => !prev)}>
+                {isAdding ? 'Cancel' : 'Add custom domain'}
+              </Button>
             </div>
             {!customDomains.length && !isAdding && (
               <div tw="p-6 flex flex-col gap-2.5" className="bg-background">
@@ -71,16 +73,16 @@ export const EntityCustomDomains = ({
                   <InfoTitle>WARNING</InfoTitle>
                   <div>
                     <Text>
-                      You&apos;ll need to add DNS records at your domain provider
-                      to verify ownership and route traffic to this instance.
-                    </Text>{" "}
+                      You&apos;ll need to add DNS records at your domain
+                      provider to verify ownership and route traffic to this
+                      instance.
+                    </Text>{' '}
                     <DisabledText>
-                      (Changes usually propagate within a few minutes, but may take
-                      longer depending on your provider).
+                      (Changes usually propagate within a few minutes, but may
+                      take longer depending on your provider).
                     </DisabledText>
                   </div>
                 </div>
-
               </div>
             )}
           </div>
