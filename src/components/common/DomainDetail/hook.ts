@@ -88,6 +88,9 @@ export function useDomainDetail({
         await next(nSteps)
       }
 
+      // Wait for backend to propagate the update
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
       dispatchDeleteEntity(domain.id)
 
       if (onDomainUpdate) {
