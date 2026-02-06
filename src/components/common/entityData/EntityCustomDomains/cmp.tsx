@@ -35,9 +35,9 @@ export const EntityCustomDomains = ({
           </div>
         </NoisyContainer>
       ) : (
-        <div tw="flex flex-col gap-4">
-          {customDomains.length > 0 &&
-            customDomains.map(
+        <NoisyContainer>
+          <div tw="flex flex-col gap-4">
+            {customDomains.map(
               (domain) =>
                 domain && (
                   <DomainNameSection
@@ -46,12 +46,12 @@ export const EntityCustomDomains = ({
                     status={domain.status}
                     onConfigure={() => handleCustomDomainClick(domain)}
                     hideTitle
+                    noContainer
                   />
                 ),
             )}
-          {!customDomains.length && !isAdding && (
-            <NoisyContainer>
-              <div tw="flex flex-col gap-2.5">
+            {!customDomains.length && !isAdding && (
+              <div tw="p-6 flex flex-col gap-2.5" className="bg-background">
                 <div>
                   <InfoTitle>INFO</InfoTitle>
                   <Text>
@@ -64,22 +64,23 @@ export const EntityCustomDomains = ({
                   longer depending on your provider).
                 </DisabledText>
               </div>
-            </NoisyContainer>
-          )}
-          {isAdding && (
-            <DomainNameSection
-              defaultEditing
-              onSave={handleCreateDomain}
-              hideTitle
-            />
-          )}
-          <div>
-            <FunctionalButton onClick={() => setIsAdding((prev) => !prev)}>
-              <Icon name={isAdding ? 'times' : 'globe'} />
-              {isAdding ? 'cancel' : 'add domain'}
-            </FunctionalButton>
+            )}
+            {isAdding && (
+              <DomainNameSection
+                defaultEditing
+                onSave={handleCreateDomain}
+                hideTitle
+                noContainer
+              />
+            )}
+            <div>
+              <FunctionalButton onClick={() => setIsAdding((prev) => !prev)}>
+                <Icon name={isAdding ? 'times' : 'globe'} />
+                {isAdding ? 'cancel' : 'add domain'}
+              </FunctionalButton>
+            </div>
           </div>
-        </div>
+        </NoisyContainer>
       )}
     </>
   )

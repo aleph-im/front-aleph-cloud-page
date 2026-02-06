@@ -7,4 +7,5 @@ export type DomainNameSectionProps = {
   onConfigure?: () => void
   hideTitle?: boolean
   defaultEditing?: boolean
+  noContainer?: boolean
 }

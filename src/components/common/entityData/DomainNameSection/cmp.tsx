@@ -18,6 +18,7 @@ export const DomainNameSection = ({
   onConfigure: handleConfigure,
   hideTitle,
   defaultEditing,
+  noContainer,
 }: DomainNameSectionProps) => {
   const [isEditing, setIsEditing] = useState(!!defaultEditing)
   const [editedName, setEditedName] = useState('')
@@ -55,6 +56,87 @@ export const DomainNameSection = ({
     }
   }, [editedName, handleSave, domain])
 
+  const content = (
+    <div tw="p-6 flex flex-col gap-4" className="bg-background">
+      <div tw="flex flex-col gap-4">
+        <div tw="flex items-stretch">
+          <div tw="flex-1">
+            {domain || isEditing ? (
+              <TextInput
+                name="domain-name"
+                value={isEditing ? editedName : domain?.name || ''}
+                disabled={!isEditing || isSaving}
+                placeholder={isEditing ? 'Enter domain name...' : undefined}
+                onChange={(e) => setEditedName(e.target.value)}
+                button={
+                  isEditing ? (
+                    <Button
+                      onClick={handleSaveClick}
+                      disabled={isSaving || !editedName.trim()}
+                    >
+                      Save
+                    </Button>
+                  ) : (
+                    <Button
+                      as="a"
+                      href={`https://${domain?.name}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Icon name="check" />
+                    </Button>
+                  )
+                }
+              />
+            ) : (
+              <TextInput
+                name="domain-name"
+                value=""
+                disabled
+                placeholder="Loading..."
+                button={
+                  <Button disabled>
+                    <Icon name="check" />
+                  </Button>
+                }
+              />
+            )}
+          </div>
+        </div>
+      </div>
+      {domain && (
+        <div tw="flex items-center justify-between">
+          {!isEditing && (
+            <div tw="flex items-center">
+              {status !== undefined ? (
+                <>
+                  <BulletItem
+                    kind={status.status ? 'success' : 'warning'}
+                    title=""
+                  />
+                  <Text tw="font-semibold">
+                    {status.status ? 'Active' : 'Pending DNS'}
+                  </Text>
+                </>
+              ) : (
+                <Text>
+                  <Skeleton width="5rem" />
+                </Text>
+              )}
+            </div>
+          )}
+          {isEditing && <div />}
+          {!isEditing && (
+            <FunctionalButton onClick={handleConfigureClick} disabled={!domain}>
+              <Icon name="edit" />
+              configure
+            </FunctionalButton>
+          )}
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <>
       {!hideTitle && (
@@ -62,91 +144,7 @@ export const DomainNameSection = ({
           DOMAIN
         </div>
       )}
-      <NoisyContainer>
-        <div tw="p-6 flex flex-col gap-4" className="bg-background">
-          <div tw="flex flex-col gap-4">
-            {/* Nested box with background */}
-            {/* <div tw="p-6" className='bg-background'> */}
-            <div tw="flex items-stretch">
-              <div tw="flex-1">
-                {domain || isEditing ? (
-                  <TextInput
-                    name="domain-name"
-                    value={isEditing ? editedName : domain?.name || ''}
-                    disabled={!isEditing || isSaving}
-                    placeholder={isEditing ? 'Enter domain name...' : undefined}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    button={
-                      isEditing ? (
-                        <Button
-                          onClick={handleSaveClick}
-                          disabled={isSaving || !editedName.trim()}
-                        >
-                          Save
-                        </Button>
-                      ) : (
-                        <Button
-                          as="a"
-                          href={`https://${domain?.name}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Icon name="check" />
-                        </Button>
-                      )
-                    }
-                  />
-                ) : (
-                  <TextInput
-                    name="domain-name"
-                    value=""
-                    disabled
-                    placeholder="Loading..."
-                    button={
-                      <Button disabled>
-                        <Icon name="check" />
-                      </Button>
-                    }
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-          {domain && (
-            <div tw="flex items-center justify-between">
-              {!isEditing && (
-                <div tw="flex items-center">
-                  {status !== undefined ? (
-                    <>
-                      <BulletItem
-                        kind={status.status ? 'success' : 'warning'}
-                        title=""
-                      />
-                      <Text tw="font-semibold">
-                        {status.status ? 'Active' : 'Pending DNS'}
-                      </Text>
-                    </>
-                  ) : (
-                    <Text>
-                      <Skeleton width="5rem" />
-                    </Text>
-                  )}
-                </div>
-              )}
-              {isEditing && <div />}
-              {!isEditing && (
-                <FunctionalButton
-                  onClick={handleConfigureClick}
-                  disabled={!domain}
-                >
-                  <Icon name="edit" />
-                  configure
-                </FunctionalButton>
-              )}
-            </div>
-          )}
-        </div>
-      </NoisyContainer>
+      {noContainer ? content : <NoisyContainer>{content}</NoisyContainer>}
     </>
   )
 }
