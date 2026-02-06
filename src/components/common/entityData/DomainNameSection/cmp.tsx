@@ -53,48 +53,52 @@ export const DomainNameSection = ({
         DOMAIN
       </div>
       <NoisyContainer>
-        <div tw="flex flex-col gap-4">
-          <div tw="flex items-stretch">
-            <div tw="flex-1">
-              {domain ? (
-                <TextInput
-                  name="domain-name"
-                  value={isEditing ? editedName : domain.name}
-                  disabled={!isEditing || isSaving}
-                  onChange={(e) => setEditedName(e.target.value)}
-                  button={
-                    isEditing ? (
-                      <Button
-                        onClick={handleSaveClick}
-                        disabled={isSaving || !editedName.trim()}
-                      >
-                        Save
-                      </Button>
-                    ) : (
-                      <Button
-                        as="a"
-                        href={`https://${domain.name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+        <div tw="p-6 flex flex-col gap-4" className='bg-background'>
+          <div tw="flex flex-col gap-4">
+            {/* Nested box with background */}
+            {/* <div tw="p-6" className='bg-background'> */}
+            <div tw="flex items-stretch">
+              <div tw="flex-1">
+                {domain ? (
+                  <TextInput
+                    name="domain-name"
+                    value={isEditing ? editedName : domain.name}
+                    disabled={!isEditing || isSaving}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    button={
+                      isEditing ? (
+                        <Button
+                          onClick={handleSaveClick}
+                          disabled={isSaving || !editedName.trim()}
+                        >
+                          Save
+                        </Button>
+                      ) : (
+                        <Button
+                          as="a"
+                          href={`https://${domain.name}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Icon name="check" />
+                        </Button>
+                      )
+                    }
+                  />
+                ) : (
+                  <TextInput
+                    name="domain-name"
+                    value=""
+                    disabled
+                    placeholder="Loading..."
+                    button={
+                      <Button disabled>
                         <Icon name="check" />
                       </Button>
-                    )
-                  }
-                />
-              ) : (
-                <TextInput
-                  name="domain-name"
-                  value=""
-                  disabled
-                  placeholder="Loading..."
-                  button={
-                    <Button disabled>
-                      <Icon name="check" />
-                    </Button>
-                  }
-                />
-              )}
+                    }
+                  />
+                )}
+              </div>
             </div>
           </div>
           <div tw="flex items-center justify-between">

@@ -27,79 +27,81 @@ export const DomainDnsConfiguration = ({
             ownership and route traffic to this instance.
           </DisabledText>
 
-          <div tw="flex flex-col gap-3 mt-2">
-            {/* CNAME Record */}
-            <div tw="flex items-start gap-2">
-              <BulletItem
-                kind={status.tasks_status.cname ? 'success' : 'warning'}
-                title=""
-              />
-              <div tw="flex flex-col">
-                <Text tw="font-semibold">CNAME</Text>
-                <Text>
-                  <span className="text-main0">{domain.name}</span>
-                  <span tw="mx-2">→</span>
-                  {domain.target === EntityDomainType.Program && (
-                    <span className="text-main0">
-                      {domain.name}.program.public.aleph.sh
-                    </span>
-                  )}
-                  {[
-                    EntityDomainType.Instance,
-                    EntityDomainType.Confidential,
-                  ].includes(domain.target) && (
-                    <span className="text-main0">
-                      {domain.name}.instance.public.aleph.sh
-                    </span>
-                  )}
-                  {domain.target === EntityDomainType.IPFS && (
-                    <span className="text-main0">ipfs.public.aleph.sh</span>
-                  )}
-                </Text>
-              </div>
-            </div>
-
-            {/* DNSLINK CNAME Record (for IPFS) */}
-            {domain.target === EntityDomainType.IPFS && (
+          <div tw="p-6" className='bg-background'>
+            <div tw="flex flex-col gap-3">
+              {/* CNAME Record */}
               <div tw="flex items-start gap-2">
                 <BulletItem
-                  kind={status.tasks_status.delegation ? 'success' : 'warning'}
+                  kind={status.tasks_status.cname ? 'success' : 'warning'}
                   title=""
                 />
                 <div tw="flex flex-col">
                   <Text tw="font-semibold">CNAME</Text>
                   <Text>
-                    <span className="text-main0">_dnslink.{domain.name}</span>
+                    <span className="text-main0">{domain.name}</span>
                     <span tw="mx-2">→</span>
-                    <span className="text-main0">
-                      _dnslink.{domain.name}.static.public.aleph.sh
-                    </span>
+                    {domain.target === EntityDomainType.Program && (
+                      <span className="text-main0">
+                        {domain.name}.program.public.aleph.sh
+                      </span>
+                    )}
+                    {[
+                      EntityDomainType.Instance,
+                      EntityDomainType.Confidential,
+                    ].includes(domain.target) && (
+                      <span className="text-main0">
+                        {domain.name}.instance.public.aleph.sh
+                      </span>
+                    )}
+                    {domain.target === EntityDomainType.IPFS && (
+                      <span className="text-main0">ipfs.public.aleph.sh</span>
+                    )}
                   </Text>
                 </div>
               </div>
-            )}
 
-            {/* TXT Record (ownership proof) */}
-            <div tw="flex items-start gap-2">
-              <BulletItem
-                kind={status.tasks_status.owner_proof ? 'success' : 'warning'}
-                title=""
-              />
-              <div tw="flex flex-col">
-                <Text tw="font-semibold">
-                  TXT <span tw="font-normal">(ownership proof)</span>
-                </Text>
-                <Text>
-                  <span className="text-main0">_control.{domain.name}</span>
-                  <span tw="mx-2">→</span>
-                  <span className="text-main0">{account?.address}</span>
-                </Text>
+              {/* DNSLINK CNAME Record (for IPFS) */}
+              {domain.target === EntityDomainType.IPFS && (
+                <div tw="flex items-start gap-2">
+                  <BulletItem
+                    kind={
+                      status.tasks_status.delegation ? 'success' : 'warning'
+                    }
+                    title=""
+                  />
+                  <div tw="flex flex-col">
+                    <Text tw="font-semibold">CNAME</Text>
+                    <Text>
+                      <span className="text-main0">_dnslink.{domain.name}</span>
+                      <span tw="mx-2">→</span>
+                      <span className="text-main0">
+                        _dnslink.{domain.name}.static.public.aleph.sh
+                      </span>
+                    </Text>
+                  </div>
+                </div>
+              )}
+
+              {/* TXT Record (ownership proof) */}
+              <div tw="flex items-start gap-2">
+                <BulletItem
+                  kind={status.tasks_status.owner_proof ? 'success' : 'warning'}
+                  title=""
+                />
+                <div tw="flex flex-col">
+                  <Text tw="font-semibold">
+                    TXT <span tw="font-normal">(ownership proof)</span>
+                  </Text>
+                  <Text>
+                    <span className="text-main0">_control.{domain.name}</span>
+                    <span tw="mx-2">→</span>
+                    <span className="text-main0">{account?.address}</span>
+                  </Text>
+                </div>
               </div>
             </div>
-          </div>
-
-          {!allConfigured && (
-            <div tw="mt-4">
+            {!allConfigured && (
+            <div tw="mt-10">
               <Button
                 onClick={handleRetry}
                 size="md"
@@ -111,6 +113,9 @@ export const DomainDnsConfiguration = ({
               </Button>
             </div>
           )}
+          </div>
+
+
         </div>
       </NoisyContainer>
     </div>

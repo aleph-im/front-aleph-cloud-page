@@ -52,25 +52,28 @@ export const DomainDetail = ({ domainId }: DomainDetailProps) => {
           onRetry={handleRetry}
         />
 
-        {/* Remove Domain Section */}
+        {/* Remove Link Section */}
         <div>
           <div className="tp-h7 fs-24" tw="uppercase mb-2">
             REMOVE LINK
           </div>
           <NoisyContainer>
-            <div tw="flex items-center justify-between">
-              <span className="tp-body1 fs-18">
-                Remove domain from this instance
-              </span>
-              <Button
-                kind="functional"
-                variant="error"
-                size="md"
-                onClick={handleDeleteClick}
-                disabled={disabledDelete}
-              >
-                <Icon name="trash" />
-              </Button>
+            <div tw="p-6" className='bg-background'>
+
+              <div tw="flex items-center justify-between">
+                <span className="tp-body fs-16">
+                  Remove domain from this instance
+                </span>
+                <Button
+                  kind="functional"
+                  variant="error"
+                  size="sm"
+                  onClick={handleDeleteClick}
+                  disabled={disabledDelete}
+                >
+                  <Icon name="trash-xmark" />
+                </Button>
+              </div>
             </div>
           </NoisyContainer>
         </div>
@@ -85,11 +88,10 @@ export const DomainDetail = ({ domainId }: DomainDetailProps) => {
         content={
           <div tw="mb-8">
             <p className="tp-body text-base2">
-              This will remove the linked domain <span className="tp-body3">{domain?.name}</span>
+              This will remove the linked domain{' '}
+              <span className="tp-body3">{domain?.name}</span>
             </p>
-            <p className="tp-body2 text-error">
-              This action cannot be undone.
-            </p>
+            <p className="tp-body2 text-error">This action cannot be undone.</p>
           </div>
         }
         footer={
@@ -107,7 +109,7 @@ export const DomainDetail = ({ domainId }: DomainDetailProps) => {
             <Button
               type="button"
               variant="primary"
-              kind='functional'
+              kind="functional"
               size="md"
               onClick={handleCancelDelete}
             >
