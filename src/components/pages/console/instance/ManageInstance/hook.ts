@@ -10,6 +10,7 @@ import {
 import { useForwardedPorts } from '@/hooks/common/useForwardedPorts'
 import { getSSHForwardedPort } from '@/components/common/entityData/EntityPortForwarding/utils'
 import { ForwardedPort } from '@/components/common/entityData/EntityPortForwarding/types'
+import { EntityDomainType } from '@/helpers/constants'
 
 export type UseManageInstanceReturn = UseManageInstanceEntityReturn & {
   instance?: Instance
@@ -34,6 +35,7 @@ export function useManageInstance(): UseManageInstanceReturn {
   >({
     entity: instance,
     entityManager: instanceManager,
+    entityDomainType: EntityDomainType.Instance,
   })
 
   const { status } = manageInstanceEntityProps

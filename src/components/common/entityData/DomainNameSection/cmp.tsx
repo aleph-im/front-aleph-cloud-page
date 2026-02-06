@@ -17,8 +17,9 @@ export const DomainNameSection = ({
   onSave: handleSave,
   onConfigure: handleConfigure,
   hideTitle,
+  defaultEditing,
 }: DomainNameSectionProps) => {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(!!defaultEditing)
   const [editedName, setEditedName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
@@ -68,11 +69,12 @@ export const DomainNameSection = ({
             {/* <div tw="p-6" className='bg-background'> */}
             <div tw="flex items-stretch">
               <div tw="flex-1">
-                {domain ? (
+                {domain || isEditing ? (
                   <TextInput
                     name="domain-name"
-                    value={isEditing ? editedName : domain.name}
+                    value={isEditing ? editedName : domain?.name || ''}
                     disabled={!isEditing || isSaving}
+                    placeholder={isEditing ? 'Enter domain name...' : undefined}
                     onChange={(e) => setEditedName(e.target.value)}
                     button={
                       isEditing ? (
@@ -85,7 +87,7 @@ export const DomainNameSection = ({
                       ) : (
                         <Button
                           as="a"
-                          href={`https://${domain.name}`}
+                          href={`https://${domain?.name}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -110,37 +112,39 @@ export const DomainNameSection = ({
               </div>
             </div>
           </div>
-          <div tw="flex items-center justify-between">
-            {!isEditing && (
-              <div tw="flex items-center">
-                {status !== undefined ? (
-                  <>
-                    <BulletItem
-                      kind={status.status ? 'success' : 'warning'}
-                      title=""
-                    />
-                    <Text tw="font-semibold">
-                      {status.status ? 'Active' : 'Pending DNS'}
+          {domain && (
+            <div tw="flex items-center justify-between">
+              {!isEditing && (
+                <div tw="flex items-center">
+                  {status !== undefined ? (
+                    <>
+                      <BulletItem
+                        kind={status.status ? 'success' : 'warning'}
+                        title=""
+                      />
+                      <Text tw="font-semibold">
+                        {status.status ? 'Active' : 'Pending DNS'}
+                      </Text>
+                    </>
+                  ) : (
+                    <Text>
+                      <Skeleton width="5rem" />
                     </Text>
-                  </>
-                ) : (
-                  <Text>
-                    <Skeleton width="5rem" />
-                  </Text>
-                )}
-              </div>
-            )}
-            {isEditing && <div />}
-            {!isEditing && (
-              <FunctionalButton
-                onClick={handleConfigureClick}
-                disabled={!domain}
-              >
-                <Icon name="edit" />
-                configure
-              </FunctionalButton>
-            )}
-          </div>
+                  )}
+                </div>
+              )}
+              {isEditing && <div />}
+              {!isEditing && (
+                <FunctionalButton
+                  onClick={handleConfigureClick}
+                  disabled={!domain}
+                >
+                  <Icon name="edit" />
+                  configure
+                </FunctionalButton>
+              )}
+            </div>
+          )}
         </div>
       </NoisyContainer>
     </>

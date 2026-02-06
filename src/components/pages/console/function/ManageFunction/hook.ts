@@ -4,6 +4,7 @@ import { Program } from '@/domain/program'
 import { useProgramManager } from '@/hooks/common/useManager/useProgramManager'
 import { useRequestPrograms } from '@/hooks/common/useRequestEntity/useRequestPrograms'
 import Err from '@/helpers/errors'
+import { EntityDomainType } from '@/helpers/constants'
 import {
   UseExecutableActionsReturn,
   useExecutableActions,
@@ -28,7 +29,7 @@ import { DomainWithStatus } from '@/components/common/entityData/EntityCustomDom
 type SidePanelContent = {
   title: string
   isOpen: boolean
-  type?: 'volume' | 'domain' | 'newDomain'
+  type?: 'volume' | 'domain'
   selectedVolumeId?: string
   selectedDomain?: Domain
 }
@@ -47,7 +48,7 @@ export type ManageFunction = UseExecutableActionsReturn & {
   customDomains: DomainWithStatus[]
   isLoadingCustomDomains: boolean
   handleCustomDomainClick: (domain: Domain) => void
-  handleAddDomain: () => void
+  createDomain: (name: string) => Promise<void>
   refetchDomains: () => Promise<void>
 
   // UI State
@@ -116,8 +117,10 @@ export function useManageFunction(): ManageFunction {
     customDomains,
     isLoading: isLoadingCustomDomains,
     refetchDomains,
+    createDomain,
   } = useEntityCustomDomains({
     entityId: program?.id,
+    entityType: EntityDomainType.Program,
   })
 
   const handleCustomDomainClick = useCallback((domain: Domain) => {
@@ -126,14 +129,6 @@ export function useManageFunction(): ManageFunction {
       isOpen: true,
       type: 'domain',
       selectedDomain: domain,
-    })
-  }, [])
-
-  const handleAddDomain = useCallback(() => {
-    setSidePanel({
-      title: 'New Custom Domain',
-      isOpen: true,
-      type: 'newDomain',
     })
   }, [])
 
@@ -305,7 +300,7 @@ export function useManageFunction(): ManageFunction {
     customDomains,
     isLoadingCustomDomains,
     handleCustomDomainClick,
-    handleAddDomain,
+    createDomain,
     refetchDomains,
 
     paymentData,

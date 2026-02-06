@@ -1,10 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDomainManager } from './useManager/useDomainManager'
 import { DomainWithStatus } from '@/components/common/entityData/EntityCustomDomains/types'
 import { useRequestDomains } from './useRequestEntity/useRequestDomains'
+import { EntityDomainType } from '@/helpers/constants'
+import {
+  stepsCatalog,
+  useCheckoutNotification,
+} from '@/hooks/form/useCheckoutNotification'
+import { EntityAddAction } from '@/store/entity'
+import { useAppState } from '@/contexts/appState'
 
 export interface UseEntityCustomDomainsProps {
   entityId?: string
+  entityType: EntityDomainType
 }
 
 export interface UseEntityCustomDomainsReturn {
@@ -13,12 +21,16 @@ export interface UseEntityCustomDomainsReturn {
   isLoadingDomains: boolean
   isLoadingDomainStatus: boolean
   refetchDomains: () => Promise<void>
+  createDomain: (name: string) => Promise<void>
 }
 
 export function useEntityCustomDomains({
   entityId,
+  entityType,
 }: UseEntityCustomDomainsProps): UseEntityCustomDomainsReturn {
+  const [, dispatch] = useAppState()
   const domainManager = useDomainManager()
+  const { next, stop } = useCheckoutNotification()
 
   const {
     entities: allDomains,
@@ -69,12 +81,57 @@ export function useEntityCustomDomains({
     return () => clearInterval(intervalId)
   }, [filteredDomains, domainManager])
 
+  const createDomain = useCallback(
+    async (name: string) => {
+      if (!domainManager) throw new Error('Connect your wallet')
+      if (!entityId) throw new Error('Entity ID is required')
+
+      const domainData = {
+        name,
+        target: entityType,
+        ref: entityId,
+      }
+
+      const iSteps = await domainManager.getAddSteps(domainData, 'override')
+      const nSteps = iSteps.map((i) => stepsCatalog[i])
+      const steps = domainManager.addSteps(domainData, 'override')
+
+      try {
+        let accountDomain
+
+        while (!accountDomain) {
+          const { value, done } = await steps.next()
+
+          if (done) {
+            accountDomain = value[0]
+            break
+          }
+
+          await next(nSteps)
+        }
+
+        dispatch(
+          new EntityAddAction({
+            name: 'domain',
+            entities: accountDomain,
+          }),
+        )
+
+        await refetchDomains()
+      } finally {
+        await stop()
+      }
+    },
+    [domainManager, entityId, entityType, next, stop, dispatch, refetchDomains],
+  )
+
   return {
     customDomains: customDomains.length ? customDomains : filteredDomains,
     isLoading: isLoadingDomains || isLoadingDomainStatus,
     isLoadingDomains,
     isLoadingDomainStatus,
     refetchDomains,
+    createDomain,
   }
 }
 

@@ -6,4 +6,5 @@ export type DomainNameSectionProps = {
   onSave?: (newName: string) => Promise<void>
   onConfigure?: () => void
   hideTitle?: boolean
+  defaultEditing?: boolean
 }

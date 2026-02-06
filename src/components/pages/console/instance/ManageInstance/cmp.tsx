@@ -15,13 +15,12 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityConnectionMethods from '@/components/common/entityData/EntityConnectionMethods'
 import EntityHostingCRN from '@/components/common/entityData/EntityHostingCRN'
 import EntitySSHKeys from '@/components/common/entityData/EntitySSHKeys'
-import { EntityDomainType, EntityType } from '@/helpers/constants'
+import { EntityType } from '@/helpers/constants'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
 import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import DomainDetail from '@/components/common/DomainDetail'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
-import NewDomainForm from '@/components/common/NewDomainForm'
 
 /**
  * ManageInstance component - purely presentational
@@ -53,7 +52,7 @@ export default function ManageInstance() {
     customDomains,
     isLoadingCustomDomains,
     handleCustomDomainClick,
-    handleAddDomain,
+    createDomain,
     refetchDomains,
 
     // Payment data
@@ -186,7 +185,7 @@ export default function ManageInstance() {
             isLoadingCustomDomains={isLoadingCustomDomains}
             customDomains={customDomains}
             onCustomDomainClick={handleCustomDomainClick}
-            onAddDomain={handleAddDomain}
+            onCreateDomain={createDomain}
           />,
           <EntityPortForwarding
             key="port-forwarding"
@@ -208,9 +207,7 @@ export default function ManageInstance() {
               ? 'SSH Key'
               : sidePanel.type === 'logs'
                 ? 'Logs'
-                : sidePanel.type === 'newDomain'
-                  ? 'New Custom Domain'
-                  : 'Custom Domain'
+                : 'Custom Domain'
         }
         isOpen={sidePanel.isOpen}
         onClose={closeSidePanel}
@@ -232,12 +229,6 @@ export default function ManageInstance() {
           )
         ) : sidePanel.type === 'logs' ? (
           <EntityLogsContent logs={logs} />
-        ) : sidePanel.type === 'newDomain' ? (
-          <NewDomainForm
-            entityId={instance?.id}
-            entityType={EntityDomainType.Instance}
-            onSuccess={closeSidePanel}
-          />
         ) : (
           <>ERROR</>
         )}

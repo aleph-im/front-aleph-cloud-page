@@ -24,11 +24,12 @@ import { Domain } from '@/domain/domain'
 import { DomainWithStatus } from '@/components/common/entityData/EntityCustomDomains/types'
 import { ExecutableManager } from '@/domain/executable'
 import { useRequestSSHKeys } from '../useRequestEntity/useRequestSSHKeys'
+import { EntityDomainType } from '@/helpers/constants'
 
 // Type for side panel content
 type SidePanelContent = {
   isOpen: boolean
-  type?: 'sshKey' | 'volume' | 'domain' | 'logs' | 'newDomain'
+  type?: 'sshKey' | 'volume' | 'domain' | 'logs'
   selectedDomain?: Domain
   selectedVolume?: any
   selectedSSHKey?: SSHKey
@@ -40,6 +41,7 @@ export type UseManageInstanceEntityProps<
 > = {
   entity?: Entity
   entityManager?: Manager
+  entityDomainType: EntityDomainType
 }
 
 export type UseManageInstanceEntityReturn = UseExecutableActionsReturn & {
@@ -54,7 +56,7 @@ export type UseManageInstanceEntityReturn = UseExecutableActionsReturn & {
   customDomains: DomainWithStatus[]
   isLoadingCustomDomains: boolean
   handleCustomDomainClick: (domain: Domain) => void
-  handleAddDomain: () => void
+  createDomain: (name: string) => Promise<void>
   refetchDomains: () => Promise<void>
 
   // UI state
@@ -80,6 +82,7 @@ export function useManageInstanceEntity<
 >({
   entity,
   entityManager,
+  entityDomainType,
 }: UseManageInstanceEntityProps<
   Entity,
   Manager
@@ -153,8 +156,10 @@ export function useManageInstanceEntity<
     customDomains,
     isLoading: isLoadingCustomDomains,
     refetchDomains,
+    createDomain,
   } = useEntityCustomDomains({
     entityId: entity?.id,
+    entityType: entityDomainType,
   })
 
   const handleCustomDomainClick = useCallback((domain: Domain) => {
@@ -162,13 +167,6 @@ export function useManageInstanceEntity<
       isOpen: true,
       type: 'domain',
       selectedDomain: domain,
-    })
-  }, [])
-
-  const handleAddDomain = useCallback(() => {
-    setSidePanel({
-      isOpen: true,
-      type: 'newDomain',
     })
   }, [])
 
@@ -295,7 +293,7 @@ export function useManageInstanceEntity<
     customDomains,
     isLoadingCustomDomains,
     handleCustomDomainClick,
-    handleAddDomain,
+    createDomain,
     refetchDomains,
     handleBack,
     handleDownloadLogs,

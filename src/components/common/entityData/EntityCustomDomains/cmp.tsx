@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import { Icon, NoisyContainer } from '@aleph-front/core'
 import { DisabledText, Text } from '@/components/pages/console/common'
 import { EntityCustomDomainsProps } from './types'
@@ -11,8 +11,18 @@ export const EntityCustomDomains = ({
   isLoadingCustomDomains,
   customDomains,
   onCustomDomainClick: handleCustomDomainClick,
-  onAddDomain: handleAddDomain,
+  onCreateDomain,
 }: EntityCustomDomainsProps) => {
+  const [isAdding, setIsAdding] = useState(false)
+
+  const handleCreateDomain = useCallback(
+    async (name: string) => {
+      await onCreateDomain(name)
+      setIsAdding(false)
+    },
+    [onCreateDomain],
+  )
+
   return (
     <>
       <div className="tp-h7 fs-24" tw="uppercase mb-2">
@@ -24,45 +34,52 @@ export const EntityCustomDomains = ({
             <Skeleton width="100%" height="2.5rem" />
           </div>
         </NoisyContainer>
-      ) : customDomains.length ? (
-        <div tw="flex flex-col gap-4">
-          {customDomains.map(
-            (domain) =>
-              domain && (
-                <DomainNameSection
-                  key={domain.id}
-                  domain={domain}
-                  status={domain.status}
-                  onConfigure={() => handleCustomDomainClick(domain)}
-                  hideTitle
-                />
-              ),
-          )}
-        </div>
       ) : (
-        <NoisyContainer>
-          <div tw="flex flex-col gap-4">
-            <div>
-              <FunctionalButton onClick={handleAddDomain}>
-                <Icon name="globe" />
-                set custom domain
-              </FunctionalButton>
-            </div>
-            <div tw="flex flex-col gap-2.5">
-              <div>
-                <InfoTitle>INFO</InfoTitle>
-                <Text>
-                  You&apos;ll need to add DNS records at your domain provider to
-                  verify ownership and route traffic to this instance.
-                </Text>
+        <div tw="flex flex-col gap-4">
+          {customDomains.length > 0 &&
+            customDomains.map(
+              (domain) =>
+                domain && (
+                  <DomainNameSection
+                    key={domain.id}
+                    domain={domain}
+                    status={domain.status}
+                    onConfigure={() => handleCustomDomainClick(domain)}
+                    hideTitle
+                  />
+                ),
+            )}
+          {!customDomains.length && !isAdding && (
+            <NoisyContainer>
+              <div tw="flex flex-col gap-2.5">
+                <div>
+                  <InfoTitle>INFO</InfoTitle>
+                  <Text>
+                    You&apos;ll need to add DNS records at your domain provider
+                    to verify ownership and route traffic to this instance.
+                  </Text>
+                </div>
+                <DisabledText>
+                  (Changes usually propagate within a few minutes, but may take
+                  longer depending on your provider).
+                </DisabledText>
               </div>
-              <DisabledText>
-                (Changes usually propagate within a few minutes, but may take
-                longer depending on your provider).
-              </DisabledText>
-            </div>
+            </NoisyContainer>
+          )}
+          {isAdding && (
+            <DomainNameSection
+              defaultEditing
+              onSave={handleCreateDomain}
+              hideTitle
+            />
+          )}
+          <div>
+            <FunctionalButton onClick={() => setIsAdding((prev) => !prev)}>
+              <Icon name={isAdding ? 'times' : 'globe'} />
+              {isAdding ? 'cancel' : 'add domain'}
+            </FunctionalButton>
           </div>
-        </NoisyContainer>
+        </div>
       )}
     </>
   )

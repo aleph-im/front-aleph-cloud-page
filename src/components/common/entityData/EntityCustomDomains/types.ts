@@ -8,5 +8,5 @@ export type EntityCustomDomainsProps = {
   isLoadingCustomDomains: boolean
   customDomains: DomainWithStatus[]
   onCustomDomainClick: (customDomain: Domain) => void
-  onAddDomain: () => void
+  onCreateDomain: (name: string) => Promise<void>
 }

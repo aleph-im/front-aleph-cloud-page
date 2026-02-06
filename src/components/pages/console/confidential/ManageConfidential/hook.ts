@@ -10,6 +10,7 @@ import {
 import { useForwardedPorts } from '@/hooks/common/useForwardedPorts'
 import { getSSHForwardedPort } from '@/components/common/entityData/EntityPortForwarding/utils'
 import { ForwardedPort } from '@/components/common/entityData/EntityPortForwarding/types'
+import { EntityDomainType } from '@/helpers/constants'
 
 export type UseManageGpuInstanceReturn = UseManageInstanceEntityReturn & {
   confidentialInstance?: Confidential
@@ -34,6 +35,7 @@ export function useManageGpuInstance(): UseManageGpuInstanceReturn {
   >({
     entity: confidentialInstance,
     entityManager: confidentialInstanceManager,
+    entityDomainType: EntityDomainType.Confidential,
   })
 
   const { status } = manageInstanceEntityProps
