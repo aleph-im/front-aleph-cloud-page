@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import Head from 'next/head'
 import { useManageGpuInstance } from './hook'
 import ManageEntityHeader from '@/components/common/entityData/ManageEntityHeader'
@@ -49,6 +50,7 @@ export default function ManageConfidential() {
     isLoadingCustomDomains,
     handleCustomDomainClick,
     handleAddDomain,
+    refetchDomains,
 
     // Payment data
     paymentData,
@@ -87,6 +89,11 @@ export default function ManageConfidential() {
     sshForwardedPort,
     handlePortsChange,
   } = useManageGpuInstance()
+
+  const handleDomainUpdate = useCallback(async () => {
+    await refetchDomains()
+    closeSidePanel()
+  }, [refetchDomains, closeSidePanel])
 
   return (
     <>
@@ -221,7 +228,10 @@ export default function ManageConfidential() {
           )
         ) : sidePanel.type === 'domain' ? (
           sidePanel.selectedDomain && (
-            <DomainDetail domainId={sidePanel.selectedDomain.id} />
+            <DomainDetail
+              domainId={sidePanel.selectedDomain.id}
+              onDomainUpdate={handleDomainUpdate}
+            />
           )
         ) : sidePanel.type === 'logs' ? (
           <EntityLogsContent logs={logs} />

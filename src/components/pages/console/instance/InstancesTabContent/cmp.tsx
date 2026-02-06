@@ -66,7 +66,8 @@ export const InstancesTabContent = React.memo(
     const { entities: sshKeys } = useRequestSSHKeys()
 
     // Fetch all domains
-    const { entities: allDomains } = useRequestDomains()
+    const { entities: allDomains, refetch: refetchDomains } =
+      useRequestDomains()
 
     // Fetch all volumes (for enriching immutable volume refs)
     const { entities: allVolumes } = useRequestVolumes()
@@ -175,6 +176,11 @@ export const InstancesTabContent = React.memo(
         isOpen: false,
       }))
     }, [])
+
+    const handleDomainUpdate = useCallback(async () => {
+      await refetchDomains()
+      closeSidePanel()
+    }, [refetchDomains, closeSidePanel])
 
     const getSidePanelTitle = () => {
       switch (sidePanel.type) {
@@ -384,7 +390,10 @@ export const InstancesTabContent = React.memo(
             <SSHKeyDetail sshKeyId={sidePanel.selectedSSHKey.id} />
           )}
           {sidePanel.type === 'domain' && sidePanel.selectedDomain && (
-            <DomainDetail domainId={sidePanel.selectedDomain.id} />
+            <DomainDetail
+              domainId={sidePanel.selectedDomain.id}
+              onDomainUpdate={handleDomainUpdate}
+            />
           )}
           {sidePanel.type === 'volume' && sidePanel.selectedVolume?.id && (
             <VolumeDetail volumeId={sidePanel.selectedVolume.id} />

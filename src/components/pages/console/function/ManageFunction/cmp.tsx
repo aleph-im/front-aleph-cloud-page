@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import Head from 'next/head'
 import { Icon } from '@aleph-front/core'
 import { useManageFunction } from './hook'
@@ -46,6 +47,7 @@ export default function ManageFunction() {
     isLoadingCustomDomains,
     handleCustomDomainClick,
     handleAddDomain,
+    refetchDomains,
 
     // Payment data
     paymentData,
@@ -85,6 +87,11 @@ export default function ManageFunction() {
     // Action handlers
     handleBack,
   } = useManageFunction()
+
+  const handleDomainUpdate = useCallback(async () => {
+    await refetchDomains()
+    closeSidePanel()
+  }, [refetchDomains, closeSidePanel])
 
   return (
     <>
@@ -221,7 +228,10 @@ export default function ManageFunction() {
           )
         ) : sidePanel.type === 'domain' ? (
           sidePanel.selectedDomain && (
-            <DomainDetail domainId={sidePanel.selectedDomain.id} />
+            <DomainDetail
+              domainId={sidePanel.selectedDomain.id}
+              onDomainUpdate={handleDomainUpdate}
+            />
           )
         ) : sidePanel.type === 'newDomain' ? (
           <NewDomainForm

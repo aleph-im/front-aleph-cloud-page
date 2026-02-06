@@ -12,6 +12,7 @@ export interface UseEntityCustomDomainsReturn {
   isLoading: boolean
   isLoadingDomains: boolean
   isLoadingDomainStatus: boolean
+  refetchDomains: () => Promise<void>
 }
 
 export function useEntityCustomDomains({
@@ -19,8 +20,11 @@ export function useEntityCustomDomains({
 }: UseEntityCustomDomainsProps): UseEntityCustomDomainsReturn {
   const domainManager = useDomainManager()
 
-  const { entities: allDomains, loading: isLoadingDomains } =
-    useRequestDomains()
+  const {
+    entities: allDomains,
+    loading: isLoadingDomains,
+    refetch: refetchDomains,
+  } = useRequestDomains()
   const [customDomains, setCustomDomains] = useState<DomainWithStatus[]>([])
   const [isLoadingDomainStatus, setIsLoadingDomainStatus] =
     useState<boolean>(true)
@@ -70,6 +74,7 @@ export function useEntityCustomDomains({
     isLoading: isLoadingDomains || isLoadingDomainStatus,
     isLoadingDomains,
     isLoadingDomainStatus,
+    refetchDomains,
   }
 }
 

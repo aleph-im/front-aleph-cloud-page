@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import Head from 'next/head'
 import { useManageInstance } from './hook'
 import { SidePanel } from '@/components/common/SidePanel/cmp'
@@ -53,6 +54,7 @@ export default function ManageInstance() {
     isLoadingCustomDomains,
     handleCustomDomainClick,
     handleAddDomain,
+    refetchDomains,
 
     // Payment data
     paymentData,
@@ -91,6 +93,11 @@ export default function ManageInstance() {
     sshForwardedPort,
     handlePortsChange,
   } = useManageInstance()
+
+  const handleDomainUpdate = useCallback(async () => {
+    await refetchDomains()
+    closeSidePanel()
+  }, [refetchDomains, closeSidePanel])
 
   return (
     <>
@@ -218,7 +225,10 @@ export default function ManageInstance() {
           )
         ) : sidePanel.type === 'domain' ? (
           sidePanel.selectedDomain && (
-            <DomainDetail domainId={sidePanel.selectedDomain.id} />
+            <DomainDetail
+              domainId={sidePanel.selectedDomain.id}
+              onDomainUpdate={handleDomainUpdate}
+            />
           )
         ) : sidePanel.type === 'logs' ? (
           <EntityLogsContent logs={logs} />

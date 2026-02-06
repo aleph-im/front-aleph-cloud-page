@@ -11,7 +11,10 @@ import {
   TextGradient,
 } from '@aleph-front/core'
 
-export const DomainDetail = ({ domainId }: DomainDetailProps) => {
+export const DomainDetail = ({
+  domainId,
+  onDomainUpdate,
+}: DomainDetailProps) => {
   const {
     domain,
     status,
@@ -20,7 +23,7 @@ export const DomainDetail = ({ domainId }: DomainDetailProps) => {
     handleSaveName,
     handleDelete,
     disabledDelete,
-  } = useDomainDetail({ domainId })
+  } = useDomainDetail({ domainId, onDomainUpdate })
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 

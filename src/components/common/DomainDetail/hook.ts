@@ -37,10 +37,12 @@ export type UseDomainDetailReturn = {
 
 export type UseDomainDetailProps = {
   domainId: string
+  onDomainUpdate?: () => void
 }
 
 export function useDomainDetail({
   domainId,
+  onDomainUpdate,
 }: UseDomainDetailProps): UseDomainDetailReturn {
   const router = useRouter()
   const [
@@ -88,7 +90,11 @@ export function useDomainDetail({
 
       dispatchDeleteEntity(domain.id)
 
-      await router.replace(NAVIGATION_URLS.console.home)
+      if (onDomainUpdate) {
+        onDomainUpdate()
+      } else {
+        await router.replace(NAVIGATION_URLS.console.home)
+      }
     } catch (e) {
       console.error(e)
 
@@ -105,7 +111,16 @@ export function useDomainDetail({
     } finally {
       await stop()
     }
-  }, [dispatchDeleteEntity, manager, domain, next, router, stop, noti])
+  }, [
+    dispatchDeleteEntity,
+    manager,
+    domain,
+    next,
+    router,
+    stop,
+    noti,
+    onDomainUpdate,
+  ])
 
   const disabledUpdate = useMemo(() => !domain, [domain])
   const handleUpdate = useCallback(() => {
@@ -157,7 +172,14 @@ export function useDomainDetail({
           await next(nSteps)
         }
 
+        // Wait for backend to propagate the update
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+
         dispatchDeleteEntity(domain.id)
+
+        if (onDomainUpdate) {
+          onDomainUpdate()
+        }
       } catch (e) {
         console.error(e)
 
@@ -177,7 +199,7 @@ export function useDomainDetail({
         await stop()
       }
     },
-    [manager, domain, next, stop, noti, dispatchDeleteEntity],
+    [manager, domain, next, stop, noti, dispatchDeleteEntity, onDomainUpdate],
   )
 
   const handleCopyHash = useCopyToClipboardAndNotify(refEntity?.id || '')

@@ -48,6 +48,7 @@ export type ManageFunction = UseExecutableActionsReturn & {
   isLoadingCustomDomains: boolean
   handleCustomDomainClick: (domain: Domain) => void
   handleAddDomain: () => void
+  refetchDomains: () => Promise<void>
 
   // UI State
   sliderActiveIndex: number
@@ -111,10 +112,13 @@ export function useManageFunction(): ManageFunction {
   // === CUSTOM DOMAINS ===
 
   // Use the custom hook and override the handleCustomDomainClick function
-  const { customDomains, isLoading: isLoadingCustomDomains } =
-    useEntityCustomDomains({
-      entityId: program?.id,
-    })
+  const {
+    customDomains,
+    isLoading: isLoadingCustomDomains,
+    refetchDomains,
+  } = useEntityCustomDomains({
+    entityId: program?.id,
+  })
 
   const handleCustomDomainClick = useCallback((domain: Domain) => {
     setSidePanel({
@@ -302,6 +306,7 @@ export function useManageFunction(): ManageFunction {
     isLoadingCustomDomains,
     handleCustomDomainClick,
     handleAddDomain,
+    refetchDomains,
 
     paymentData,
 
