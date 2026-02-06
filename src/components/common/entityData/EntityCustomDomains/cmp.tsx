@@ -50,21 +50,7 @@ export const EntityCustomDomains = ({
                   />
                 ),
             )}
-            {!customDomains.length && !isAdding && (
-              <div tw="p-6 flex flex-col gap-2.5" className="bg-background">
-                <div>
-                  <InfoTitle>INFO</InfoTitle>
-                  <Text>
-                    You&apos;ll need to add DNS records at your domain provider
-                    to verify ownership and route traffic to this instance.
-                  </Text>
-                </div>
-                <DisabledText>
-                  (Changes usually propagate within a few minutes, but may take
-                  longer depending on your provider).
-                </DisabledText>
-              </div>
-            )}
+
             {isAdding && (
               <DomainNameSection
                 defaultEditing
@@ -79,6 +65,24 @@ export const EntityCustomDomains = ({
                 {isAdding ? 'cancel' : 'add domain'}
               </FunctionalButton>
             </div>
+            {!customDomains.length && !isAdding && (
+              <div tw="p-6 flex flex-col gap-2.5" className="bg-background">
+                <div tw="flex gap-1.5 flex-col">
+                  <InfoTitle>WARNING</InfoTitle>
+                  <div>
+                    <Text>
+                      You&apos;ll need to add DNS records at your domain provider
+                      to verify ownership and route traffic to this instance.
+                    </Text>{" "}
+                    <DisabledText>
+                      (Changes usually propagate within a few minutes, but may take
+                      longer depending on your provider).
+                    </DisabledText>
+                  </div>
+                </div>
+
+              </div>
+            )}
           </div>
         </NoisyContainer>
       )}
