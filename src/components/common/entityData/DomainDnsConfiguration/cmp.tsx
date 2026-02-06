@@ -27,7 +27,7 @@ export const DomainDnsConfiguration = ({
             ownership and route traffic to this instance.
           </DisabledText>
 
-          <div tw="p-6" className='bg-background'>
+          <div tw="p-6" className="bg-background">
             <div tw="flex flex-col gap-3">
               {/* CNAME Record */}
               <div tw="flex items-start gap-2">
@@ -101,21 +101,19 @@ export const DomainDnsConfiguration = ({
               </div>
             </div>
             {!allConfigured && (
-            <div tw="mt-10">
-              <Button
-                onClick={handleRetry}
-                size="md"
-                variant="secondary"
-                color="main0"
-                kind="default"
-              >
-                Retry verification
-              </Button>
-            </div>
-          )}
+              <div tw="mt-10">
+                <Button
+                  onClick={handleRetry}
+                  size="md"
+                  variant="secondary"
+                  color="main0"
+                  kind="default"
+                >
+                  Retry verification
+                </Button>
+              </div>
+            )}
           </div>
-
-
         </div>
       </NoisyContainer>
     </div>

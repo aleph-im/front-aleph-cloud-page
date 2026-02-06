@@ -15,19 +15,26 @@ export const DomainNameSection = ({
   domain,
   status,
   onSave: handleSave,
+  onConfigure: handleConfigure,
+  hideTitle,
 }: DomainNameSectionProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
   const handleConfigureClick = useCallback(() => {
+    if (handleConfigure) {
+      handleConfigure()
+      return
+    }
     if (domain) {
       setEditedName(domain.name)
       setIsEditing(true)
     }
-  }, [domain])
+  }, [domain, handleConfigure])
 
   const handleSaveClick = useCallback(async () => {
+    if (!handleSave) return
     if (!editedName.trim()) return
 
     // If the name hasn't changed, just exit edit mode
@@ -49,11 +56,13 @@ export const DomainNameSection = ({
 
   return (
     <>
-      <div className="tp-h7 fs-24" tw="uppercase mb-2">
-        DOMAIN
-      </div>
+      {!hideTitle && (
+        <div className="tp-h7 fs-24" tw="uppercase mb-2">
+          DOMAIN
+        </div>
+      )}
       <NoisyContainer>
-        <div tw="p-6 flex flex-col gap-4" className='bg-background'>
+        <div tw="p-6 flex flex-col gap-4" className="bg-background">
           <div tw="flex flex-col gap-4">
             {/* Nested box with background */}
             {/* <div tw="p-6" className='bg-background'> */}

@@ -58,8 +58,7 @@ export const DomainDetail = ({ domainId }: DomainDetailProps) => {
             REMOVE LINK
           </div>
           <NoisyContainer>
-            <div tw="p-6" className='bg-background'>
-
+            <div tw="p-6" className="bg-background">
               <div tw="flex items-center justify-between">
                 <span className="tp-body fs-16">
                   Remove domain from this instance
