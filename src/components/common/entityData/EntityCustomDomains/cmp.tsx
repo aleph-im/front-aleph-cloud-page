@@ -61,9 +61,10 @@ export const EntityCustomDomains = ({
             )}
             <div>
               <Button
-                  variant="secondary"
-                  kind="gradient"
-                  onClick={() => setIsAdding((prev) => !prev)}>
+                variant="secondary"
+                kind="gradient"
+                onClick={() => setIsAdding((prev) => !prev)}
+              >
                 {isAdding ? 'Cancel' : 'Add custom domain'}
               </Button>
             </div>

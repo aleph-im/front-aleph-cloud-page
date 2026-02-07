@@ -15,6 +15,7 @@ import { EntityType, EntityTypeObject } from '@/helpers/constants'
 export const InstanceDomainsCell = ({
   domains,
   onDomainClick,
+  disabled,
 }: InstanceDomainsCellProps) => {
   const [showDropdown, setShowDropdown] = React.useState(false)
 
@@ -49,7 +50,7 @@ export const InstanceDomainsCell = ({
     onDomainClick(domain)
   }
 
-  if (domains.length === 0) {
+  if (domains.length === 0 || disabled) {
     return (
       <DomainsButton disabled>
         <ObjectImg

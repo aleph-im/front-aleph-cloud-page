@@ -276,6 +276,7 @@ export const InstancesTabContent = React.memo(
             <InstanceDomainsCell
               domains={getInstanceDomains(row)}
               onDomainClick={handleDomainClick}
+              disabled={!isNonCredit(row)}
             />
           ),
         },
