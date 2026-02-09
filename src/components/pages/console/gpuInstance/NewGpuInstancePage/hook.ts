@@ -55,7 +55,6 @@ import { BlockchainId, blockchains } from '@/domain/connect'
 import { PaymentConfiguration } from '@/domain/executable'
 import { EVMAccount } from '@aleph-sdk/evm'
 import { TooltipProps } from '@aleph-front/core'
-import { useSchedulerAvailability } from '@/hooks/common/useSchedulerAvailability'
 import {
   useCreateInstanceDisabledMessage,
   DisabledMessageInfo,
@@ -353,19 +352,11 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   const cost = useEntityCost(costProps)
 
   // -------------------------
-  // Scheduler availability check for holder tier
+  // Scheduler availability - GPU instances are PAYG-only, so scheduler check
+  // is not needed. Provide static values for the disabled message hook.
 
-  const {
-    isAvailable: isSchedulerAvailable,
-    reasons: schedulerUnavailableReasons,
-    isLoading: isSchedulerLoading,
-  } = useSchedulerAvailability({
-    vcpus: formValues.specs?.cpu || 0,
-    memory: formValues.specs?.ram || 0,
-    disk: formValues.systemVolume?.size || 0,
-    paymentMethod: formValues.paymentMethod,
-    enabled: !!account,
-  })
+  const isSchedulerAvailable = true
+  const isSchedulerLoading = false
 
   // -------------------------
   // Memos
@@ -382,7 +373,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   }, [blockchain])
 
   const disabledStreamDisabledMessage: UseNewGpuInstancePageReturn['disabledStreamDisabledMessage'] =
-    holderTierNotSupportedMessage()
+    holderTierNotSupportedMessage().tooltipContent
 
   const streamDisabled = true
 
@@ -407,7 +398,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
       blockchainName,
       isSchedulerAvailable,
       isSchedulerLoading,
-      schedulerUnavailableReasons,
     })
 
   const createInstanceButtonTitle: UseNewGpuInstancePageReturn['createInstanceButtonTitle'] =

@@ -207,7 +207,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
               <CreateInstanceDisabledMessage
                 title={createInstanceDisabledMessageInfo.title}
                 description={createInstanceDisabledMessageInfo.description}
-                details={createInstanceDisabledMessageInfo.details}
               />
             </CenteredContainer>
           </section>

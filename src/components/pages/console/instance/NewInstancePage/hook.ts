@@ -362,17 +362,14 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Scheduler availability check for holder tier
 
-  const {
-    isAvailable: isSchedulerAvailable,
-    reasons: schedulerUnavailableReasons,
-    isLoading: isSchedulerLoading,
-  } = useSchedulerAvailability({
-    vcpus: formValues.specs?.cpu || 0,
-    memory: formValues.specs?.ram || 0,
-    disk: formValues.systemVolume?.size || 0,
-    paymentMethod: formValues.paymentMethod,
-    enabled: !!account,
-  })
+  const { isAvailable: isSchedulerAvailable, isLoading: isSchedulerLoading } =
+    useSchedulerAvailability({
+      vcpus: formValues.specs?.cpu || 0,
+      memory: formValues.specs?.ram || 0,
+      disk: formValues.systemVolume?.size || 0,
+      paymentMethod: formValues.paymentMethod,
+      enabled: !!account,
+    })
 
   // -------------------------
   // Memos
@@ -433,7 +430,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       blockchainName,
       isSchedulerAvailable,
       isSchedulerLoading,
-      schedulerUnavailableReasons,
     })
 
   const createInstanceButtonTitle: UseNewInstancePageReturn['createInstanceButtonTitle'] =

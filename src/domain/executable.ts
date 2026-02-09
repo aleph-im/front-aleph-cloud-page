@@ -214,11 +214,20 @@ export abstract class ExecutableManager<T extends Executable> {
 
     try {
       const response = await fetch(url)
-      // 200 OK = schedulable: true, 503 Service Unavailable = schedulable: false
-      // Both return JSON with { schedulable, reasons }
-      return response.json()
-    } catch {
-      // Network error - assume available to not block the user
+
+      // Expected statuses: 200 OK (schedulable) or 503 Service Unavailable (not schedulable)
+      if (response.status === 200 || response.status === 503) {
+        return await response.json()
+      }
+
+      // Unexpected status - log warning and assume available to not block the user
+      console.warn(
+        `Scheduler API returned unexpected status ${response.status}`,
+      )
+      return { schedulable: true, reasons: [] }
+    } catch (error) {
+      // Network error - log and assume available to not block the user
+      console.warn('Scheduler API network error:', error)
       return { schedulable: true, reasons: [] }
     }
   }

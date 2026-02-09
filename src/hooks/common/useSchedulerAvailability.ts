@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDebounceState } from '@aleph-front/core'
 import { PaymentMethod } from '@/helpers/constants'
 import {
@@ -17,7 +17,6 @@ export type UseSchedulerAvailabilityProps = {
 
 export type UseSchedulerAvailabilityReturn = {
   isAvailable: boolean
-  reasons: string[]
   isLoading: boolean
   refetch: () => Promise<SchedulerSimulateResponse>
 }
@@ -34,6 +33,9 @@ export function useSchedulerAvailability({
     schedulable: true,
     reasons: [],
   })
+
+  const requestIdRef = useRef(0)
+  const hasInitialFetchRef = useRef(false)
 
   const shouldCheck = useMemo(
     () => enabled && paymentMethod === PaymentMethod.Hold,
@@ -54,6 +56,8 @@ export function useSchedulerAvailability({
         return { schedulable: true, reasons: [] }
       }
 
+      const currentRequestId = ++requestIdRef.current
+
       setIsLoading(true)
       try {
         const response = await ExecutableManager.checkSchedulerAvailability({
@@ -61,14 +65,33 @@ export function useSchedulerAvailability({
           memory,
           disk,
         })
-        setResult(response)
+
+        if (currentRequestId === requestIdRef.current) {
+          setResult(response)
+        }
+
         return response
       } finally {
-        setIsLoading(false)
+        if (currentRequestId === requestIdRef.current) {
+          setIsLoading(false)
+        }
       }
     }, [vcpus, memory, disk, shouldCheck])
 
+  // Immediate first check on mount (no debounce delay)
   useEffect(() => {
+    if (hasInitialFetchRef.current) return
+    if (!shouldCheck || !vcpus || !memory || !disk) return
+
+    hasInitialFetchRef.current = true
+    fetchAvailability()
+  }, [shouldCheck, vcpus, memory, disk, fetchAvailability])
+
+  // Debounced checks for subsequent param changes
+  useEffect(() => {
+    // Skip if this is the initial fetch (already handled above)
+    if (!hasInitialFetchRef.current) return
+
     if (
       debouncedParamsString !== prevDebouncedParamsString &&
       debouncedParamsString
@@ -85,7 +108,6 @@ export function useSchedulerAvailability({
 
   return {
     isAvailable: result.schedulable,
-    reasons: result.reasons,
     isLoading,
     refetch: fetchAvailability,
   }

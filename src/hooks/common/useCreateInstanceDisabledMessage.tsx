@@ -11,7 +11,6 @@ import { BlockchainId } from '@/domain/connect'
 export type DisabledMessageInfo = {
   title: React.ReactNode
   description: React.ReactNode
-  details?: string[]
 }
 
 export type DisabledMessage = {
@@ -25,7 +24,6 @@ export type DisabledMessage = {
 function createDisabledMessage(
   title: React.ReactNode,
   description: React.ReactNode,
-  details?: string[],
 ): DisabledMessage {
   return {
     tooltipContent: (
@@ -37,7 +35,6 @@ function createDisabledMessage(
     info: {
       title,
       description,
-      details,
     },
   }
 }
@@ -101,27 +98,27 @@ export function unsupportedManualCRNSelectionDisabledMessage(): DisabledMessage 
   )
 }
 
-export function holderTierUnavailableDisabledMessage(
-  reasons?: string[],
-): DisabledMessage {
+export function holderTierUnavailableDisabledMessage(): DisabledMessage {
   return createDisabledMessage(
     'All Holder tier resources are currently in use.',
     <>
       You can try again later or continue with <strong>Pay-As-You-Go</strong>.
     </>,
-    reasons,
+  )
+}
+
+export function schedulerLoadingDisabledMessage(): DisabledMessage {
+  return createDisabledMessage(
+    'Checking availability...',
+    'Please wait while we verify resource availability for the Holder tier.',
   )
 }
 
 // GPU-specific message
-export function holderTierNotSupportedMessage(): TooltipProps['content'] {
-  return (
-    <div>
-      <p className="tp-body3 fs-18 text-base2">Holder Tier not supported</p>
-      <p className="tp-body1 fs-14 text-base2">
-        GPU Instances only support Pay-as-you-go.
-      </p>
-    </div>
+export function holderTierNotSupportedMessage(): DisabledMessage {
+  return createDisabledMessage(
+    'Holder Tier not supported',
+    'GPU Instances only support Pay-as-you-go.',
   )
 }
 
@@ -134,7 +131,6 @@ export type UseCreateInstanceDisabledMessageProps = {
   blockchainName: string
   isSchedulerAvailable: boolean
   isSchedulerLoading: boolean
-  schedulerUnavailableReasons: string[]
 }
 
 export type UseCreateInstanceDisabledMessageReturn = {
@@ -148,7 +144,6 @@ export function useCreateInstanceDisabledMessage({
   blockchainName,
   isSchedulerAvailable,
   isSchedulerLoading,
-  schedulerUnavailableReasons,
 }: UseCreateInstanceDisabledMessageProps): UseCreateInstanceDisabledMessageReturn {
   return useMemo(() => {
     // Checks configuration for PAYG tier
@@ -173,10 +168,16 @@ export function useCreateInstanceDisabledMessage({
       }
 
       // Check scheduler availability for holder tier
-      if (!isSchedulerAvailable && !isSchedulerLoading) {
-        const msg = holderTierUnavailableDisabledMessage(
-          schedulerUnavailableReasons,
-        )
+      if (isSchedulerLoading) {
+        const msg = schedulerLoadingDisabledMessage()
+        return {
+          createInstanceDisabledMessage: msg.tooltipContent,
+          createInstanceDisabledMessageInfo: msg.info,
+        }
+      }
+
+      if (!isSchedulerAvailable) {
+        const msg = holderTierUnavailableDisabledMessage()
         return {
           createInstanceDisabledMessage: msg.tooltipContent,
           createInstanceDisabledMessageInfo: msg.info,
@@ -194,6 +195,5 @@ export function useCreateInstanceDisabledMessage({
     blockchainName,
     isSchedulerAvailable,
     isSchedulerLoading,
-    schedulerUnavailableReasons,
   ])
 }
