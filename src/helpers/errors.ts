@@ -74,4 +74,7 @@ export default {
     new Error(
       `This instance was created on the ${requiredNetwork} network. Please switch to ${requiredNetwork} to manage it.`,
     ),
+  HolderTierUnavailable: new Error(
+    'Holder tier resources are currently unavailable. Please try again later or switch to Pay-as-you-go.',
+  ),
 }

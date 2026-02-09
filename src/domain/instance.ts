@@ -244,6 +244,18 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 
+    // @note: Validate holder tier availability before proceeding
+    if (newInstance.payment?.type === PaymentMethod.Hold) {
+      const availability = await ExecutableManager.checkSchedulerAvailability({
+        vcpus: newInstance.specs.cpu,
+        memory: newInstance.specs.ram,
+        disk: newInstance.systemVolume.size,
+      })
+      if (!availability.schedulable) {
+        throw Err.HolderTierUnavailable
+      }
+    }
+
     try {
       const instanceMessage = yield* this.parseInstanceSteps(newInstance)
 

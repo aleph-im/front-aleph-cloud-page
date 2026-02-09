@@ -191,8 +191,37 @@ export type StreamPaymentDetails = {
   streams: StreamPaymentDetail[]
 }
 
+export type SchedulerSimulateResponse = {
+  schedulable: boolean
+  reasons: string[]
+}
+
+export type SchedulerSimulateParams = {
+  vcpus: number
+  memory: number
+  disk: number
+}
+
 export abstract class ExecutableManager<T extends Executable> {
   protected static cachedPubKeyToken?: AuthPubKeyToken
+  static readonly SCHEDULER_API_URL = 'https://scheduler.api.aleph.sh/api/v0'
+
+  static async checkSchedulerAvailability(
+    params: SchedulerSimulateParams,
+  ): Promise<SchedulerSimulateResponse> {
+    const { vcpus, memory, disk } = params
+    const url = `${this.SCHEDULER_API_URL}/simulate?vcpus=${vcpus}&memory=${memory}&disk=${disk}`
+
+    try {
+      const response = await fetch(url)
+      // 200 OK = schedulable: true, 503 Service Unavailable = schedulable: false
+      // Both return JSON with { schedulable, reasons }
+      return response.json()
+    } catch {
+      // Network error - assume available to not block the user
+      return { schedulable: true, reasons: [] }
+    }
+  }
 
   constructor(
     protected account: Account | undefined,

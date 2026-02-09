@@ -54,13 +54,13 @@ import Err from '@/helpers/errors'
 import { BlockchainId, blockchains } from '@/domain/connect'
 import { PaymentConfiguration } from '@/domain/executable'
 import { EVMAccount } from '@aleph-sdk/evm'
-import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 import { TooltipProps } from '@aleph-front/core'
+import { useSchedulerAvailability } from '@/hooks/common/useSchedulerAvailability'
 import {
-  unsupportedHoldingDisabledMessage,
-  unsupportedStreamDisabledMessage,
+  useCreateInstanceDisabledMessage,
+  DisabledMessageInfo,
   holderTierNotSupportedMessage,
-} from './disabledMessages'
+} from '@/hooks/common/useCreateInstanceDisabledMessage'
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
@@ -93,6 +93,7 @@ export type UseNewGpuInstancePageReturn = {
   blockchainName: string
   createInstanceDisabled: boolean
   createInstanceDisabledMessage?: TooltipProps['content']
+  createInstanceDisabledMessageInfo?: DisabledMessageInfo
   createInstanceButtonTitle?: string
   streamDisabled: boolean
   disabledStreamDisabledMessage?: TooltipProps['content']
@@ -350,6 +351,22 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   )
 
   const cost = useEntityCost(costProps)
+
+  // -------------------------
+  // Scheduler availability check for holder tier
+
+  const {
+    isAvailable: isSchedulerAvailable,
+    reasons: schedulerUnavailableReasons,
+    isLoading: isSchedulerLoading,
+  } = useSchedulerAvailability({
+    vcpus: formValues.specs?.cpu || 0,
+    memory: formValues.specs?.ram || 0,
+    disk: formValues.systemVolume?.size || 0,
+    paymentMethod: formValues.paymentMethod,
+    enabled: !!account,
+  })
+
   // -------------------------
   // Memos
 
@@ -383,20 +400,15 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     return canAfford
   }, [account, canAfford, isCreateButtonDisabled])
 
-  const createInstanceDisabledMessage: UseNewGpuInstancePageReturn['createInstanceDisabledMessage'] =
-    useMemo(() => {
-      // Checks configuration for PAYG tier
-      if (formValues.paymentMethod === PaymentMethod.Stream) {
-        if (!isBlockchainPAYGCompatible(blockchain))
-          return unsupportedStreamDisabledMessage(blockchainName)
-      }
-
-      // Checks configuration for Holder tier
-      if (formValues.paymentMethod === PaymentMethod.Hold) {
-        if (!isBlockchainHoldingCompatible(blockchain))
-          return unsupportedHoldingDisabledMessage(blockchainName)
-      }
-    }, [blockchain, blockchainName, formValues.paymentMethod])
+  const { createInstanceDisabledMessage, createInstanceDisabledMessageInfo } =
+    useCreateInstanceDisabledMessage({
+      paymentMethod: formValues.paymentMethod,
+      blockchain,
+      blockchainName,
+      isSchedulerAvailable,
+      isSchedulerLoading,
+      schedulerUnavailableReasons,
+    })
 
   const createInstanceButtonTitle: UseNewGpuInstancePageReturn['createInstanceButtonTitle'] =
     useMemo(() => {
@@ -511,6 +523,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     blockchainName,
     createInstanceDisabled,
     createInstanceDisabledMessage,
+    createInstanceDisabledMessageInfo,
     createInstanceButtonTitle,
     values: formValues,
     control,

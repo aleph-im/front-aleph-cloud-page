@@ -39,8 +39,8 @@ import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
 import CRNList from '../../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
-import BorderBox from '@/components/common/BorderBox'
 import ExternalLink from '@/components/common/ExternalLink'
+import CreateInstanceDisabledMessage from '@/components/common/CreateInstanceDisabledMessage'
 import { useNewGpuInstancePage, UseNewGpuInstancePageReturn } from './hook'
 
 const CheckoutButton = React.memo(
@@ -99,6 +99,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
     disabledStreamDisabledMessage,
     createInstanceDisabled,
     createInstanceDisabledMessage,
+    createInstanceDisabledMessageInfo,
     createInstanceButtonTitle,
     values,
     control,
@@ -190,12 +191,14 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             <NewEntityTab selected="gpu-instance" />
           </CenteredContainer>
         </section>
-        {createInstanceDisabledMessage && (
+        {createInstanceDisabledMessageInfo && (
           <section tw="px-0 pt-20 pb-6 md:py-10">
             <CenteredContainer>
-              <BorderBox $color="warning">
-                {createInstanceDisabledMessage}
-              </BorderBox>
+              <CreateInstanceDisabledMessage
+                title={createInstanceDisabledMessageInfo.title}
+                description={createInstanceDisabledMessageInfo.description}
+                details={createInstanceDisabledMessageInfo.details}
+              />
             </CenteredContainer>
           </section>
         )}
