@@ -57,15 +57,15 @@ import Err from '@/helpers/errors'
 import { BlockchainId, blockchains } from '@/domain/connect'
 import { PaymentConfiguration } from '@/domain/executable'
 import { EVMAccount } from '@aleph-sdk/evm'
-import { isBlockchainHoldingCompatible } from '@/domain/blockchain'
 import { TooltipProps } from '@aleph-front/core'
+import { useSchedulerAvailability } from '@/hooks/common/useSchedulerAvailability'
 import {
+  useCreateInstanceDisabledMessage,
+  DisabledMessageInfo,
   accountConnectionRequiredDisabledMessage,
-  unsupportedHoldingDisabledMessage,
   unsupportedManualCRNSelectionDisabledMessage,
   unsupportedStreamManualCRNSelectionDisabledMessage,
-  unsupportedStreamDisabledMessage,
-} from './disabledMessages'
+} from '@/hooks/common/useCreateInstanceDisabledMessage'
 import useFetchTermsAndConditions, {
   TermsAndConditions,
 } from '@/hooks/common/useFetchTermsAndConditions'
@@ -98,6 +98,7 @@ export type UseNewInstancePageReturn = {
   manuallySelectCRNDisabledMessage?: TooltipProps['content']
   createInstanceDisabled: boolean
   createInstanceDisabledMessage?: TooltipProps['content']
+  createInstanceDisabledMessageInfo?: DisabledMessageInfo
   createInstanceButtonTitle?: string
   streamDisabled: boolean
   disabledStreamDisabledMessage?: TooltipProps['content']
@@ -359,6 +360,18 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const cost = useEntityCost(costProps)
 
   // -------------------------
+  // Scheduler availability check for holder tier
+
+  const { isAvailable: isSchedulerAvailable, isLoading: isSchedulerLoading } =
+    useSchedulerAvailability({
+      vcpus: formValues.specs?.cpu || 0,
+      memory: formValues.specs?.ram || 0,
+      disk: formValues.systemVolume?.size || 0,
+      paymentMethod: formValues.paymentMethod,
+      enabled: !!account,
+    })
+
+  // -------------------------
   // Memos
 
   const shouldRequestTermsAndConditions = useMemo(() => {
@@ -383,15 +396,15 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       if (!account)
         return accountConnectionRequiredDisabledMessage(
           'manually selecting CRNs',
-        )
+        ).tooltipContent
 
       if (!isAccountPAYGCompatible(account))
         return unsupportedStreamManualCRNSelectionDisabledMessage(
           blockchainName,
-        )
+        ).tooltipContent
 
       if (formValues.paymentMethod === PaymentMethod.Hold)
-        return unsupportedManualCRNSelectionDisabledMessage()
+        return unsupportedManualCRNSelectionDisabledMessage().tooltipContent
     }, [account, blockchainName, formValues.paymentMethod])
 
   const manuallySelectCRNDisabled = useMemo(() => {
@@ -410,20 +423,14 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     return canAfford
   }, [account, canAfford, isCreateButtonDisabled])
 
-  const createInstanceDisabledMessage: UseNewInstancePageReturn['createInstanceDisabledMessage'] =
-    useMemo(() => {
-      // Checks configuration for PAYG tier
-      if (formValues.paymentMethod === PaymentMethod.Stream) {
-        if (!isBlockchainPAYGCompatible(blockchain))
-          return unsupportedStreamDisabledMessage(blockchainName)
-      }
-
-      // Checks configuration for Holder tier
-      if (formValues.paymentMethod === PaymentMethod.Hold) {
-        if (!isBlockchainHoldingCompatible(blockchain))
-          return unsupportedHoldingDisabledMessage(blockchainName)
-      }
-    }, [blockchain, blockchainName, formValues.paymentMethod])
+  const { createInstanceDisabledMessage, createInstanceDisabledMessageInfo } =
+    useCreateInstanceDisabledMessage({
+      paymentMethod: formValues.paymentMethod,
+      blockchain,
+      blockchainName,
+      isSchedulerAvailable,
+      isSchedulerLoading,
+    })
 
   const createInstanceButtonTitle: UseNewInstancePageReturn['createInstanceButtonTitle'] =
     useMemo(() => {
@@ -556,6 +563,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     blockchainName,
     createInstanceDisabled,
     createInstanceDisabledMessage,
+    createInstanceDisabledMessageInfo,
     createInstanceButtonTitle,
     manuallySelectCRNDisabled,
     manuallySelectCRNDisabledMessage,
