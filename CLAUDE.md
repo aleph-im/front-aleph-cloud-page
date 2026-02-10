@@ -166,3 +166,8 @@ Business logic is centralized in domain files:
 - Never commit changes unless you're explicitly told to do so
 - When commiting, don't mention or coauthor claude in the commits
 - Test changes with `npm run build` before pushing
+
+## Branch Structure
+
+- **`main`**: Version without credit payments (only holding tier and pay-as-you-go)
+- **`feat/credits-ui`**: Version with credit system and products payable using credits
