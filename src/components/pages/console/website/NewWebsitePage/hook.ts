@@ -28,6 +28,10 @@ import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
 import { BlockchainId } from '@/domain/connect'
+import {
+  useInsufficientFunds,
+  InsufficientFundsInfo,
+} from '@/hooks/common/useInsufficientFunds'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {
@@ -46,6 +50,8 @@ export type UseNewWebsitePagePageReturn = {
   address: string
   accountCreditBalance: number
   isCreateButtonDisabled: boolean
+  minimumBalanceNeeded: number
+  insufficientFundsInfo?: InsufficientFundsInfo
   values: any
   control: Control<any>
   errors: FieldErrors<NewWebsiteFormState>
@@ -143,6 +149,12 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     accountCreditBalance,
   })
 
+  const { minimumBalanceNeeded, insufficientFundsInfo } = useInsufficientFunds({
+    cost,
+    accountCreditBalance,
+    isConnected: !!account,
+  })
+
   const handleBack = () => {
     router.push('.')
   }
@@ -157,6 +169,8 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     address: account?.address || '',
     accountCreditBalance,
     isCreateButtonDisabled,
+    minimumBalanceNeeded,
+    insufficientFundsInfo,
     values,
     control,
     errors,

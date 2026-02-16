@@ -6,7 +6,13 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
-import { ItemType, MessageType, StoreMessage } from '@aleph-sdk/message'
+import {
+  ItemType,
+  MessageType,
+  PaymentType,
+  StoreMessage,
+} from '@aleph-sdk/message'
+import { Blockchain } from '@aleph-sdk/core'
 import Err from '@/helpers/errors'
 import {
   DEFAULT_PAGE_SIZE,
@@ -203,6 +209,7 @@ export class FileManager {
         name: fileObject.name,
         format: fileObject.type,
       },
+      payment: { chain: Blockchain.ETH, type: PaymentType.credit },
     })
 
     // Create a properly typed object including both message properties and our additional fields

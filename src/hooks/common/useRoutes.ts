@@ -88,7 +88,6 @@ export function useRoutes(): UseRoutesReturn {
                     name: 'Manage your website',
                     href: NAVIGATION_URLS.console.web3Hosting.website.home,
                     icon: 'manageWebsite',
-                    disabled: true,
                   },
                 ],
               },
@@ -99,9 +98,11 @@ export function useRoutes(): UseRoutesReturn {
                 children: [
                   {
                     name: 'Functions',
-                    href: NAVIGATION_URLS.console.computing.functions.home,
+                    href: NAVIGATION_URLS.legacyConsole.computing.functions
+                      .home,
                     icon: 'functions',
-                    disabled: true,
+                    external: true,
+                    target: '_blank',
                   },
                   {
                     name: 'Instances',
@@ -119,7 +120,6 @@ export function useRoutes(): UseRoutesReturn {
                     href: NAVIGATION_URLS.console.computing.confidentials.home,
                     label: '(BETA)',
                     icon: 'confidential',
-                    disabled: true,
                   },
                 ],
               },

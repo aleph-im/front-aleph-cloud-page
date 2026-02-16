@@ -18,7 +18,7 @@ import { Volume, VolumeManager } from './volume'
 import { Domain, DomainManager } from './domain'
 import { getDate, humanReadableSize } from '@/helpers/utils'
 import Err from '@/helpers/errors'
-import { ItemType, MessageCostLine } from '@aleph-sdk/message'
+import { ItemType, MessageCostLine, PaymentType } from '@aleph-sdk/message'
 import { Blockchain } from '@aleph-sdk/core'
 import {
   AlephHttpClient,
@@ -365,6 +365,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         channel: this.channel,
         fileHash: website.cid as string,
         storageEngine: ItemType.ipfs,
+        payment: { chain: Blockchain.ETH, type: PaymentType.credit },
       })
       const volumeEntity = (await this.volumeManager.parseMessages([volume]))[0]
 
@@ -528,6 +529,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
           channel: this.channel,
           fileHash: cid,
           storageEngine: ItemType.ipfs,
+          payment: { chain: Blockchain.ETH, type: PaymentType.credit },
         })
         const volumeEntity = (
           await this.volumeManager.parseMessages([volume])
@@ -634,6 +636,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     const costs = await this.sdkClient.storeClient.getEstimatedCost({
       account,
       fileObject,
+      payment: { chain: Blockchain.ETH, type: PaymentType.credit },
     })
 
     totalCost = Number(costs.cost)

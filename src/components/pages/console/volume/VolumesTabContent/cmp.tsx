@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef, useState, useEffect } from 'react'
+import React, { memo, useCallback } from 'react'
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
 import { PaymentType } from '@aleph-sdk/message'
@@ -6,44 +6,10 @@ import { VolumesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Button, Icon, Tooltip } from '@aleph-front/core'
+import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 import { Volume } from '@/domain/volume'
-
-const LegacyVolumeButton = ({ volume }: { volume: Volume }) => {
-  const [renderTooltip, setRenderTooltip] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setRenderTooltip(true)
-  }, [])
-
-  return (
-    <div ref={containerRef} className="inline-flex relative">
-      <ButtonLink
-        kind="functional"
-        variant="secondary"
-        href={`${NAVIGATION_URLS.legacyConsole.storage.volumes.home}/${volume.id}`}
-        target="_blank"
-      >
-        <Icon name="arrow-up-right-from-square" size="lg" />
-      </ButtonLink>
-      {renderTooltip && (
-        <Tooltip
-          my="bottom-right"
-          at="top-right"
-          targetRef={containerRef}
-          content={
-            <p>
-              This volume was created with holding tier. Click to manage it in
-              the Legacy console App.
-            </p>
-          }
-        />
-      )}
-    </div>
-  )
-}
+import ExternalLink from '@/components/common/ExternalLink'
 
 export const VolumesTabContent = ({
   data,
@@ -77,9 +43,27 @@ export const VolumesTabContent = ({
           rowKey={(row) => row.id}
           data={data}
           rowProps={(row) => ({
-            css: isCredit(row) ? (row.confirmed ? '' : tw`opacity-60`) : '',
+            css: isCredit(row)
+              ? row.confirmed
+                ? ''
+                : tw`opacity-60`
+              : tw`opacity-40 cursor-not-allowed!`,
             onClick: () => handleRowClick(row),
           })}
+          rowTooltip={(row) => {
+            if (isCredit(row)) return null
+
+            return (
+              <p>
+                To manage this volume, go to the{' '}
+                <ExternalLink
+                  text="Legacy console App."
+                  color="main0"
+                  href={NAVIGATION_URLS.legacyConsole.storage.volumes.home}
+                />
+              </p>
+            )
+          }}
           clickableRows
           columns={[
             {
@@ -104,19 +88,18 @@ export const VolumesTabContent = ({
               label: '',
               align: 'right',
               render: (row) => {
-                if (isCredit(row)) {
-                  return (
-                    <Button
-                      kind="functional"
-                      variant="secondary"
-                      onClick={() => handleRowClick(row)}
-                    >
-                      <Icon name="angle-right" size="lg" />
-                    </Button>
-                  )
-                }
+                const disabled = !isCredit(row)
 
-                return <LegacyVolumeButton volume={row} />
+                return (
+                  <Button
+                    kind="functional"
+                    variant="secondary"
+                    onClick={() => handleRowClick(row)}
+                    disabled={disabled}
+                  >
+                    <Icon name="angle-right" size="lg" />
+                  </Button>
+                )
               },
               cellProps: () => ({
                 css: tw`pl-3!`,
