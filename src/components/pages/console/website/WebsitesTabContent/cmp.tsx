@@ -40,12 +40,12 @@ export const WebsitesTabContent = React.memo(
                 rowTooltip={() => {
                   return (
                     <p>
-                      To manage this volume, go to the{' '}
+                      To manage this website, go to the{' '}
                       <ExternalLink
                         text="Legacy console App."
                         color="main0"
                         href={
-                          NAVIGATION_URLS.legacyConsole.computing.instances.home
+                          NAVIGATION_URLS.legacyConsole.web3Hosting.website.home
                         }
                       />
                     </p>

@@ -1,31 +1,73 @@
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useRef, useState, useEffect } from 'react'
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
+import { PaymentType } from '@aleph-sdk/message'
 import { VolumesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
-import { Button, Icon } from '@aleph-front/core'
+import { Button, Icon, Tooltip } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 import { Volume } from '@/domain/volume'
-import ExternalLink from '@/components/common/ExternalLink'
+
+const LegacyVolumeButton = ({ volume }: { volume: Volume }) => {
+  const [renderTooltip, setRenderTooltip] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setRenderTooltip(true)
+  }, [])
+
+  return (
+    <div ref={containerRef} className="inline-flex relative">
+      <ButtonLink
+        kind="functional"
+        variant="secondary"
+        href={`${NAVIGATION_URLS.legacyConsole.storage.volumes.home}/${volume.id}`}
+        target="_blank"
+      >
+        <Icon name="arrow-up-right-from-square" size="lg" />
+      </ButtonLink>
+      {renderTooltip && (
+        <Tooltip
+          my="bottom-right"
+          at="top-right"
+          targetRef={containerRef}
+          content={
+            <p>
+              This volume was created with holding tier. Click to manage it in
+              the Legacy console App.
+            </p>
+          }
+        />
+      )}
+    </div>
+  )
+}
 
 export const VolumesTabContent = ({
   data,
   cta = true,
 }: VolumesTabContentProps) => {
   const router = useRouter()
+
+  const isCredit = useCallback((row: Volume) => {
+    const payment = (row as Volume & { payment?: { type: PaymentType } })
+      .payment
+    return payment?.type === PaymentType.credit
+  }, [])
+
   const handleRowClick = useCallback(
     (volume: Volume) => {
-      // don't allow click until credits support it
-      return
+      if (!isCredit(volume)) return
 
       router.push(
         `${NAVIGATION_URLS.console.storage.volumes.home}/${volume.id}`,
       )
     },
-    [router],
+    [isCredit, router],
   )
+
   return (
     <>
       <div tw="overflow-auto max-w-full">
@@ -34,24 +76,10 @@ export const VolumesTabContent = ({
           rowNoise
           rowKey={(row) => row.id}
           data={data}
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           rowProps={(row) => ({
-            // css: row.confirmed ? '' : tw`opacity-60`,
-            css: tw`opacity-40 cursor-not-allowed!`,
+            css: isCredit(row) ? (row.confirmed ? '' : tw`opacity-60`) : '',
             onClick: () => handleRowClick(row),
           })}
-          rowTooltip={() => {
-            return (
-              <p>
-                To manage this volume, go to the{' '}
-                <ExternalLink
-                  text="Legacy console App."
-                  color="main0"
-                  href={NAVIGATION_URLS.legacyConsole.computing.instances.home}
-                />
-              </p>
-            )
-          }}
           clickableRows
           columns={[
             {
@@ -75,16 +103,21 @@ export const VolumesTabContent = ({
             {
               label: '',
               align: 'right',
-              render: (row) => (
-                <Button
-                  kind="functional"
-                  variant="secondary"
-                  disabled
-                  onClick={() => handleRowClick(row)}
-                >
-                  <Icon name="angle-right" size="lg" />
-                </Button>
-              ),
+              render: (row) => {
+                if (isCredit(row)) {
+                  return (
+                    <Button
+                      kind="functional"
+                      variant="secondary"
+                      onClick={() => handleRowClick(row)}
+                    >
+                      <Icon name="angle-right" size="lg" />
+                    </Button>
+                  )
+                }
+
+                return <LegacyVolumeButton volume={row} />
+              },
               cellProps: () => ({
                 css: tw`pl-3!`,
               }),

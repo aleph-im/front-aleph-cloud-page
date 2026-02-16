@@ -21,17 +21,26 @@ import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
 import { NAVIGATION_URLS } from '@/helpers/constants'
+import {
+  useInsufficientFunds,
+  InsufficientFundsInfo,
+} from '@/hooks/common/useInsufficientFunds'
+import { PaymentType } from '@aleph-sdk/message'
+import { Blockchain } from '@aleph-sdk/core'
 
 export type NewVolumeFormState = NewVolumeStandaloneField
 
 export const defaultValues: NewVolumeFormState = {
   volumeType: VolumeType.New,
+  payment: { chain: Blockchain.ETH, type: PaymentType.credit },
 }
 
 export type UseNewVolumePageReturn = {
   address: string
   accountCreditBalance: number
   isCreateButtonDisabled: boolean
+  minimumBalanceNeeded: number
+  insufficientFundsInfo?: InsufficientFundsInfo
   values: any
   control: Control<any>
   errors: FieldErrors<NewVolumeFormState>
@@ -97,6 +106,7 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
   })
 
   const values = useWatch({ control }) as NewVolumeFormState
+
   const volume = useMemo(() => values, [values])
 
   const costProps: UseVolumeCostProps = useMemo(() => {
@@ -113,6 +123,12 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     accountCreditBalance,
   })
 
+  const { minimumBalanceNeeded, insufficientFundsInfo } = useInsufficientFunds({
+    cost,
+    accountCreditBalance,
+    isConnected: !!account,
+  })
+
   const handleBack = () => {
     router.push(NAVIGATION_URLS.console.storage.home)
   }
@@ -121,6 +137,8 @@ export function useNewVolumePage(): UseNewVolumePageReturn {
     address: account?.address || '',
     accountCreditBalance,
     isCreateButtonDisabled,
+    minimumBalanceNeeded,
+    insufficientFundsInfo,
     values,
     control,
     errors,

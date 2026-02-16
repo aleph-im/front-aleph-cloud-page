@@ -45,7 +45,7 @@ export const FunctionsTabContent = React.memo(
                         text="Legacy console App."
                         color="main0"
                         href={
-                          NAVIGATION_URLS.legacyConsole.computing.instances.home
+                          NAVIGATION_URLS.legacyConsole.computing.functions.home
                         }
                       />
                     </p>

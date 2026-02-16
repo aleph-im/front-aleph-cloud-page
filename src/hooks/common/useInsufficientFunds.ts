@@ -30,11 +30,20 @@ export function useInsufficientFunds({
 }: UseInsufficientFundsProps): UseInsufficientFundsReturn {
   const { handleOpen: handleOpenTopUpModal } = useTopUpCreditsModal()
 
+  // Check if cost is still loading or not yet calculated
+  const isCostReady = useMemo(() => {
+    return (
+      !cost.loading &&
+      cost.cost.cost !== Number.POSITIVE_INFINITY &&
+      cost.cost.cost > 0
+    )
+  }, [cost.loading, cost.cost.cost])
+
   // Calculate minimum balance needed for 24 hours of runtime
   const minimumBalanceNeeded = useMemo(() => {
-    if (!cost?.cost?.cost) return 0
+    if (!isCostReady) return 0
     return cost.cost.cost * 24
-  }, [cost?.cost?.cost])
+  }, [isCostReady, cost.cost.cost])
 
   // Check if user has enough balance for at least 24 hours
   const hasEnoughBalanceForOneDay = useMemo(() => {

@@ -132,7 +132,6 @@ export function useRoutes(): UseRoutesReturn {
                     name: 'Volumes',
                     href: NAVIGATION_URLS.console.storage.home,
                     icon: 'storageSolutions',
-                    disabled: true,
                   },
                 ],
               },

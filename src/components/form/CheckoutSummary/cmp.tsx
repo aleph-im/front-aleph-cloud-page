@@ -230,7 +230,7 @@ export const CheckoutSummary = ({
                             type="credit"
                             value={line.cost}
                             duration="h"
-                            decimals={4}
+                            decimals={8}
                             className="tp-body3"
                             loading={cost.loading}
                           />
@@ -281,7 +281,7 @@ export const CheckoutSummary = ({
                         type="credit"
                         value={cost?.cost?.cost}
                         duration="h"
-                        decimals={4}
+                        decimals={8}
                         loading={cost.loading}
                       />
                     </span>
@@ -295,6 +295,7 @@ export const CheckoutSummary = ({
                       <Price
                         type="credit"
                         value={minimumBalanceNeeded}
+                        decimals={8}
                         loading={cost.loading}
                       />
                     </span>

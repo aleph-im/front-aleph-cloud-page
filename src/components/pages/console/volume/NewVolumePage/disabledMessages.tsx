@@ -20,7 +20,7 @@ function tooltipContent({
 
 export function insufficientFundsDisabledMessage(): TooltipProps['content'] {
   return tooltipContent({
-    title: `Insufficient Funds`,
-    description: `You don't have enough ALEPH tokens in your wallet to create this volume. Please add more tokens to your wallet to continue.`,
+    title: `Insufficient Credits`,
+    description: `You don't have enough credits in your account to create this volume. Please top up your credits to continue.`,
   })
 }

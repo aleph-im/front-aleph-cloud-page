@@ -2,10 +2,12 @@ import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { convertByteUnits, humanReadableSize } from '@/helpers/utils'
 import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
+import { Payment } from '@aleph-sdk/message'
 
 export type NewVolumeStandaloneField = {
   volumeType: VolumeType.New
   file?: File
+  payment?: Payment
 }
 
 export type ExistingVolumeStandaloneField = {

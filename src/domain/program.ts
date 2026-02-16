@@ -405,7 +405,7 @@ export class ProgramManager
     const metadata = this.parseMetadata(name, tags, newProgram.metadata)
     const runtime = this.parseRuntime(newProgram)
     const payment = this.parsePayment(newProgram.payment)
-    const volumes = yield* this.parseVolumesSteps(newProgram.volumes)
+    const volumes = yield* this.parseVolumesSteps(newProgram.volumes, payment)
     const code = await this.parseCode(newProgram.code)
 
     return {

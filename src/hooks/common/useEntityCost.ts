@@ -72,7 +72,17 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
   const websiteManager = useWebsiteManager()
 
   // Create a string representation of the props for change detection only
-  const propsString = useMemo(() => JSON.stringify(props), [props])
+  // Custom replacer to handle File objects which JSON.stringify ignores
+  const propsString = useMemo(
+    () =>
+      JSON.stringify(props, (key, value) => {
+        if (value instanceof File) {
+          return `__FILE__${value.name}__${value.size}__${value.lastModified}`
+        }
+        return value
+      }),
+    [props],
+  )
 
   // Debounce the string representation with a 1000ms (1 second) delay
   const debouncedPropsString = useDebounceState(propsString, 1000)

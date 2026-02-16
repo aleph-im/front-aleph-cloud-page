@@ -788,6 +788,7 @@ export abstract class ExecutableManager<T extends Executable> {
 
   protected async *parseVolumesSteps(
     volumes?: VolumeField | VolumeField[],
+    payment?: Payment,
   ): AsyncGenerator<void, MachineVolume[] | undefined, void> {
     if (!volumes) return
 
@@ -795,7 +796,7 @@ export abstract class ExecutableManager<T extends Executable> {
     if (volumes.length === 0) return
 
     // @note: Create new volumes before and cast them to ExistingVolume type
-    const messages = yield* this.volumeManager.addSteps(volumes)
+    const messages = yield* this.volumeManager.addSteps(volumes, payment)
 
     const parsedVolumes: (AddExistingVolume | AddPersistentVolume)[] =
       await Promise.all(

@@ -16,9 +16,7 @@ export function useEntityProxyUrl(instanceHash?: string) {
     const fetchProxyUrl = async () => {
       setLoading(true)
       try {
-        const res = await fetch(
-          `${PROXY_API_BASE}/api/hash/${instanceHash}`,
-        )
+        const res = await fetch(`${PROXY_API_BASE}/api/hash/${instanceHash}`)
         if (!res.ok) {
           setData(undefined)
           return

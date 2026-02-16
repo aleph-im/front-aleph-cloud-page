@@ -655,7 +655,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const requirements = this.parseRequirements(node)
     const payment = this.parsePayment(newInstance.payment)
     const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
-    const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
+    const volumes = yield* this.parseVolumesSteps(newInstance.volumes, payment)
 
     return {
       account,

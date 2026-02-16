@@ -2,6 +2,7 @@ import { Account } from '@aleph-sdk/account'
 import {
   MessageCostLine,
   MessageType,
+  Payment,
   PaymentType,
   StoreContent,
 } from '@aleph-sdk/message'
@@ -48,6 +49,7 @@ export type AddNewVolume = {
   mountPath?: string
   useLatest?: boolean
   size?: number
+  payment?: Payment
 }
 
 export type AddExistingVolume = {
@@ -180,6 +182,7 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
   async *addSteps(
     volumes: AddVolume | AddVolume[],
+    payment?: Payment,
   ): AsyncGenerator<void, Volume[], void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
@@ -195,10 +198,11 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       // @note: Aggregate all signatures in 1 step
       yield
       const response = await Promise.all(
-        newVolumes.map(async ({ file: fileObject }) =>
+        newVolumes.map(async ({ file: fileObject, payment: volumePayment }) =>
           (this.sdkClient as AuthenticatedAlephHttpClient).createStore({
             channel,
             fileObject,
+            payment: payment || volumePayment,
             // fileHash: 'IPFS_HASH',
             // storageEngine: ItemType.ipfs,
           }),
@@ -345,10 +349,15 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
     const { account = mockAccount } = this
 
+    const sdkPaymentType =
+      paymentMethod === PaymentMethod.Credit
+        ? PaymentType.credit
+        : PaymentType.hold
+
     const costs = await this.sdkClient.storeClient.getEstimatedCost({
       account,
       fileObject: newVolume.file,
-      payment: { chain: Blockchain.ETH, type: PaymentType.credit },
+      payment: { chain: Blockchain.ETH, type: sdkPaymentType },
     })
 
     totalCost = Number(costs.cost)
