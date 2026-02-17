@@ -263,7 +263,6 @@ export type WebsitePayment = {
 
 export type WebsiteCostProps = {
   website?: WebsiteFolderField
-  paymentMethod?: PaymentMethod
 }
 
 export type WebsiteCost = CostSummary
@@ -271,7 +270,6 @@ export type WebsiteCost = CostSummary
 export type AddWebsite = NameAndTagsField &
   WebsiteFrameworkField & {
     website: WebsiteFolderField
-    payment?: WebsitePayment
     domains?: Omit<DomainField, 'ref'>[]
     ens?: string[]
   }
@@ -350,12 +348,18 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   }
 
   async *addSteps(newWebsite: AddWebsite): AsyncGenerator<void, Website, void> {
-    const { website, name, tags, framework, payment, domains, ens } =
+    const { website, name, tags, framework, domains, ens } =
       await this.parseNewWebsite(newWebsite)
 
     try {
       if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
         throw Err.InvalidAccount
+
+      // Hardcode credit payment
+      const creditPayment: WebsitePayment = {
+        chain: Blockchain.ETH,
+        type: PaymentMethod.Credit,
+      }
 
       // Publish volume
       yield
@@ -378,7 +382,7 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
             tags,
             framework,
           },
-          payment,
+          payment: creditPayment,
           version: 1,
           volume_id: volume.item_hash,
           ens,
@@ -618,7 +622,8 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
   async getCost(props: WebsiteCostProps): Promise<WebsiteCost> {
     let totalCost = Number.POSITIVE_INFINITY
 
-    const { website, paymentMethod = PaymentMethod.Credit } = props
+    const { website } = props
+    const paymentMethod = PaymentMethod.Credit
 
     const emptyCost: WebsiteCost = {
       paymentMethod,
@@ -639,7 +644,8 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       payment: { chain: Blockchain.ETH, type: PaymentType.credit },
     })
 
-    totalCost = Number(costs.cost)
+    // API returns cost in credits/sec, convert to credits/hour for credit payments
+    totalCost = this.parseCost(paymentMethod, Number(costs.cost))
 
     const lines = this.getCostLines(fileObject, paymentMethod, costs.detail)
 
@@ -650,22 +656,28 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
     }
   }
 
+  // API returns cost in credits/sec, convert to credits/hour for credit payments
+  protected parseCost(paymentMethod: PaymentMethod, cost: number): number {
+    return paymentMethod === PaymentMethod.Hold ? cost : cost * 3600
+  }
+
   protected getCostLines(
     fileObject: Blob,
     paymentMethod: PaymentMethod,
     costDetailLines: MessageCostLine[],
   ): CostLine[] {
-    fileObject.name
     return costDetailLines.map((line) => ({
       id: 'New website folder',
       name: line.name,
       detail: humanReadableSize(fileObject.size),
-      cost:
+      cost: this.parseCost(
+        paymentMethod,
         paymentMethod === PaymentMethod.Hold
           ? +line.cost_hold
           : paymentMethod === PaymentMethod.Stream
             ? +line.cost_stream
             : +line.cost_credit,
+      ),
     }))
   }
 

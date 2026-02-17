@@ -49,6 +49,7 @@ export type UseEntityCostProps =
 export type UseEntityCostReturn = {
   cost: CostSummary
   loading: boolean
+  error: string | null
 }
 
 export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
@@ -64,6 +65,7 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
 
   const [cost, setCost] = useState<CostSummary>(emptyCost)
   const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
 
   const volumeManager = useVolumeManager()
   const instanceManager = useInstanceManager()
@@ -115,6 +117,7 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
 
       try {
         setLoading(true)
+        setError(null)
         let result: CostSummary = emptyCost
         const { entityType, props } = debouncedProps
 
@@ -140,6 +143,23 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
         setCost(result)
       } catch (e) {
         console.error('Error fetching entity cost:', e)
+
+        // Extract user-friendly error message from ZodError or other errors
+        let errorMessage = 'Unable to calculate cost'
+
+        if (e && typeof e === 'object' && 'issues' in e) {
+          // ZodError - extract the first validation message
+          const issues = (e as any).issues
+          if (Array.isArray(issues) && issues.length > 0) {
+            errorMessage = issues[0].message
+          }
+        } else if (e instanceof Error) {
+          errorMessage = e.message
+        } else if (typeof e === 'string') {
+          errorMessage = e
+        }
+
+        setError(errorMessage)
       } finally {
         setLoading(false)
       }
@@ -158,5 +178,5 @@ export function useEntityCost(props: UseEntityCostProps): UseEntityCostReturn {
 
   const isLoading = loading || isDebouncing
 
-  return { cost, loading: isLoading }
+  return { cost, loading: isLoading, error }
 }

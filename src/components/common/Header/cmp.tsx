@@ -29,8 +29,7 @@ const Settings = () => {
   const preferredServers = [
     'api.aleph.im',
     'api2.aleph.im',
-    'api3.aleph.im',
-    'http://51.159.106.166:4024',
+    'api3.aleph.im'
   ]
 
   const isCustomServer = !preferredServers.includes(apiServerDisplay)

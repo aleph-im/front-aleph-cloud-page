@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { addDomainsSchema, addRestrictedNameAndTagsSchema } from './execution'
 import { WebsiteFrameworkId } from '@/domain/website'
-import { ipfsCIDSchema, paymentMethodSchema, domainNameSchema } from './base'
+import { ipfsCIDSchema, domainNameSchema } from './base'
 
 export const websiteFrameworkSchema = z.enum([
   WebsiteFrameworkId.none,
@@ -40,8 +40,6 @@ export const ensSchema = z.array(domainNameSchema)
 export const websiteSchema = z
   .object({
     framework: websiteFrameworkSchema,
-    paymentMethod: paymentMethodSchema,
-    payment: z.any().optional(),
     website: websiteDataSchema,
     domains: addDomainsSchema.optional(),
     ens: ensSchema.optional(),

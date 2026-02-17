@@ -1,5 +1,6 @@
 import { Account } from '@aleph-sdk/account'
 import {
+  ItemType,
   MessageCostLine,
   MessageType,
   Payment,
@@ -11,6 +12,7 @@ import {
   EntityType,
   PaymentMethod,
   VolumeType,
+  VolumeUploadMode,
   defaultVolumeChannel,
   programStorageURL,
 } from '@/helpers/constants'
@@ -45,11 +47,12 @@ export { VolumeType }
 
 export type AddNewVolume = {
   volumeType: VolumeType.New
+  uploadMode?: VolumeUploadMode
   file?: File
+  cid?: string
   mountPath?: string
   useLatest?: boolean
   size?: number
-  payment?: Payment
 }
 
 export type AddExistingVolume = {
@@ -83,7 +86,9 @@ export type BaseVolume = StoreContent & {
 export type NewVolume = BaseVolume & {
   type: EntityType.Volume
   volumeType: VolumeType.New
+  uploadMode?: VolumeUploadMode
   file?: File
+  cid?: string
   mountPath: string
   useLatest: boolean
   size?: number
@@ -134,6 +139,13 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     return volume.size || 0
   }
 
+  static async getEstimatedVolumeSize(
+    volume: Volume | AddVolume,
+  ): Promise<number> {
+    const size = await this.getVolumeSize(volume)
+    return Math.ceil(size)
+  }
+
   constructor(
     protected account: Account | undefined,
     protected sdkClient: AlephHttpClient | AuthenticatedAlephHttpClient,
@@ -182,32 +194,48 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
   async *addSteps(
     volumes: AddVolume | AddVolume[],
-    payment?: Payment,
   ): AsyncGenerator<void, Volume[], void> {
     if (!(this.sdkClient instanceof AuthenticatedAlephHttpClient))
       throw Err.InvalidAccount
 
     volumes = Array.isArray(volumes) ? volumes : [volumes]
 
-    const newVolumes = await this.parseNewVolumes(volumes)
-    if (newVolumes.length === 0) return []
+    // Separate file-based and IPFS-based volumes
+    const fileVolumes = await this.parseNewVolumes(volumes)
+    const ipfsVolumes = this.parseIPFSVolumes(volumes)
+
+    if (fileVolumes.length === 0 && ipfsVolumes.length === 0) return []
 
     try {
       const { channel } = this
 
+      // Hardcode credit payment as the only valid payment method
+      const creditPayment: Payment = {
+        chain: Blockchain.ETH,
+        type: PaymentType.credit,
+      }
+
       // @note: Aggregate all signatures in 1 step
       yield
-      const response = await Promise.all(
-        newVolumes.map(async ({ file: fileObject, payment: volumePayment }) =>
+      const response = await Promise.all([
+        // File-based volumes (existing behavior)
+        ...fileVolumes.map(async ({ file: fileObject }) =>
           (this.sdkClient as AuthenticatedAlephHttpClient).createStore({
             channel,
             fileObject,
-            payment: payment || volumePayment,
-            // fileHash: 'IPFS_HASH',
-            // storageEngine: ItemType.ipfs,
+            payment: creditPayment,
           }),
         ),
-      )
+        // IPFS-based volumes (pinning via STORE message)
+        ...ipfsVolumes.map(async ({ cid }) =>
+          (this.sdkClient as AuthenticatedAlephHttpClient).createStore({
+            channel,
+            fileHash: cid,
+            storageEngine: ItemType.ipfs,
+            payment: creditPayment,
+          }),
+        ),
+      ])
 
       return await this.parseMessages(response)
     } catch (err) {
@@ -255,10 +283,10 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   ): Promise<CheckoutStepType[]> {
     volumes = Array.isArray(volumes) ? volumes : [volumes]
     const newVolumes = await this.parseNewVolumes(volumes)
+    const ipfsVolumes = this.parseIPFSVolumes(volumes)
 
     // @note: Aggregate all signatures in 1 step
-    // return newVolumes.map(() => 'volume')
-    return newVolumes.length ? ['volume'] : []
+    return newVolumes.length > 0 || ipfsVolumes.length > 0 ? ['volume'] : []
   }
 
   protected async parseNewVolumes(
@@ -266,12 +294,25 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
   ): Promise<Required<AddNewVolume>[]> {
     const newVolumes = volumes.filter(
       (volume: VolumeField): volume is Required<AddNewVolume> =>
-        volume.volumeType === VolumeType.New && !!volume.file,
+        volume.volumeType === VolumeType.New &&
+        volume.uploadMode !== VolumeUploadMode.IPFS &&
+        !!volume.file,
     )
 
     volumes = await VolumeManager.addManySchema.parseAsync(newVolumes)
 
     return newVolumes
+  }
+
+  protected parseIPFSVolumes(volumes: VolumeField[]): { cid: string }[] {
+    return volumes
+      .filter(
+        (v): v is AddNewVolume =>
+          v.volumeType === VolumeType.New &&
+          v.uploadMode === VolumeUploadMode.IPFS &&
+          !!v.cid,
+      )
+      .map(({ cid }) => ({ cid: cid as string }))
   }
 
   // @todo: Type not exported from SDK...
@@ -342,11 +383,6 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
 
     if (!volume) return emptyCost
 
-    const volumes = [volume]
-    const [newVolume] = await this.parseNewVolumes(volumes)
-
-    if (!newVolume || !newVolume.file) return emptyCost
-
     const { account = mockAccount } = this
 
     const sdkPaymentType =
@@ -354,13 +390,41 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
         ? PaymentType.credit
         : PaymentType.hold
 
+    // Handle IPFS upload mode
+    if (volume.volumeType === VolumeType.New) {
+      const newVolume = volume as AddNewVolume
+      if (newVolume.uploadMode === VolumeUploadMode.IPFS && newVolume.file) {
+        const costs = await this.sdkClient.storeClient.getEstimatedCost({
+          account,
+          fileObject: newVolume.file,
+          payment: { chain: Blockchain.ETH, type: sdkPaymentType },
+        })
+
+        return {
+          paymentMethod,
+          cost: this.parseCost(paymentMethod, Number(costs.cost)),
+          lines: this.getIPFSCostLines(
+            newVolume.file,
+            paymentMethod,
+            costs.detail,
+          ),
+        }
+      }
+    }
+
+    // Handle file-based volume
+    const volumes = [volume]
+    const [newVolume] = await this.parseNewVolumes(volumes)
+
+    if (!newVolume || !newVolume.file) return emptyCost
+
     const costs = await this.sdkClient.storeClient.getEstimatedCost({
       account,
       fileObject: newVolume.file,
       payment: { chain: Blockchain.ETH, type: sdkPaymentType },
     })
 
-    totalCost = Number(costs.cost)
+    totalCost = this.parseCost(paymentMethod, Number(costs.cost))
 
     const lines = this.getCostLines(newVolume, paymentMethod, costs.detail)
 
@@ -382,12 +446,39 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       detail: volume?.file?.size
         ? humanReadableSize(volume.file.size)
         : 'Unknown size',
-      cost:
+      cost: this.parseCost(
+        paymentMethod,
         paymentMethod === PaymentMethod.Hold
           ? +line.cost_hold
           : paymentMethod === PaymentMethod.Stream
             ? +line.cost_stream
             : +line.cost_credit,
+      ),
     }))
+  }
+
+  protected getIPFSCostLines(
+    file: File,
+    paymentMethod: PaymentMethod,
+    costDetailLines: MessageCostLine[],
+  ): CostLine[] {
+    return costDetailLines.map((line) => ({
+      id: file.name || 'IPFS Upload',
+      name: line.name,
+      detail: humanReadableSize(file.size),
+      cost: this.parseCost(
+        paymentMethod,
+        paymentMethod === PaymentMethod.Hold
+          ? +line.cost_hold
+          : paymentMethod === PaymentMethod.Stream
+            ? +line.cost_stream
+            : +line.cost_credit,
+      ),
+    }))
+  }
+
+  // API returns cost in credits/sec, convert to credits/hour for credit payments
+  protected parseCost(paymentMethod: PaymentMethod, cost: number): number {
+    return paymentMethod === PaymentMethod.Hold ? cost : cost * 3600
   }
 }

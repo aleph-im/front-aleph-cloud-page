@@ -136,6 +136,11 @@ export enum VolumeType {
   Persistent = 'persistent',
 }
 
+export enum VolumeUploadMode {
+  File = 'file',
+  IPFS = 'ipfs',
+}
+
 export const EntityTypeName: Record<EntityType, string> = {
   [EntityType.Volume]: 'Volume',
   [EntityType.Program]: 'Function',

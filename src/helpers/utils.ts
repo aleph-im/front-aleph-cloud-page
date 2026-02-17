@@ -916,6 +916,66 @@ export async function withRetry<T>(
  * @param displayDecimals - Number of decimal places to show (default: 6)
  * @returns Formatted amount string
  */
+export type UploadWithProgressOptions = {
+  url: string
+  data: FormData
+  onProgress?: (progress: number) => void
+}
+
+/**
+ * Uploads data to a URL using XMLHttpRequest with progress tracking.
+ * Unlike fetch(), this provides real-time upload progress events.
+ *
+ * @param options.url - The URL to upload to
+ * @param options.data - FormData to upload
+ * @param options.onProgress - Callback with progress percentage (0-100)
+ * @returns Promise that resolves with the response text
+ */
+export function uploadWithProgress({
+  url,
+  data,
+  onProgress,
+}: UploadWithProgressOptions): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable && onProgress) {
+        const progress = Math.round((event.loaded / event.total) * 100)
+        onProgress(progress)
+      }
+    })
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(xhr.responseText)
+      } else {
+        const errorMsg = xhr.statusText || `HTTP ${xhr.status}`
+        reject(new Error(`Upload failed: ${errorMsg}`))
+      }
+    })
+
+    xhr.addEventListener('error', () => {
+      reject(
+        new Error(
+          'Upload failed: Network error. Please check your connection and try again.',
+        ),
+      )
+    })
+
+    xhr.addEventListener('abort', () => {
+      reject(new Error('Upload was cancelled'))
+    })
+
+    xhr.addEventListener('timeout', () => {
+      reject(new Error('Upload failed: Request timed out'))
+    })
+
+    xhr.open('POST', url)
+    xhr.send(data)
+  })
+}
+
 export function formatPaymentAmount(
   amount: number | string,
   asset: string,

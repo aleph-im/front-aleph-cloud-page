@@ -100,9 +100,10 @@ export function useRoutes(): UseRoutesReturn {
                     name: 'Functions',
                     href: NAVIGATION_URLS.legacyConsole.computing.functions
                       .home,
-                    icon: 'functions',
+                    icon: 'arrow-up-right-from-square',
                     external: true,
                     target: '_blank',
+                    highlighted: true,
                   },
                   {
                     name: 'Instances',
