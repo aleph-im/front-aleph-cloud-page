@@ -5,21 +5,25 @@ import { WebsitesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
 import { Button, Icon } from '@aleph-front/core'
-import { NAVIGATION_URLS } from '@/helpers/constants'
+import { NAVIGATION_URLS, PaymentMethod } from '@/helpers/constants'
 import { Website } from '@/domain/website'
 import ExternalLink from '@/components/common/ExternalLink'
 
 export const WebsitesTabContent = React.memo(
   ({ data }: WebsitesTabContentProps) => {
     const router = useRouter()
+
+    const isCredit = useCallback((row: Website) => {
+      return row.payment?.type === PaymentMethod.Credit
+    }, [])
+
     const handleRowClick = useCallback(
       (website: Website) => {
-        // don't allow click until credits support it
-        return
+        if (!isCredit(website)) return
 
         router.push(`/console/hosting/website/${website.id}`)
       },
-      [router],
+      [isCredit, router],
     )
     return (
       <>
@@ -31,21 +35,25 @@ export const WebsitesTabContent = React.memo(
                 rowNoise
                 rowKey={(row) => row.id}
                 data={data}
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 rowProps={(row) => ({
-                  // css: row.confirmed ? '' : tw`opacity-60`,
-                  css: tw`opacity-40 cursor-not-allowed!`,
+                  css: isCredit(row)
+                    ? row.confirmed
+                      ? ''
+                      : tw`opacity-60`
+                    : tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}
-                rowTooltip={() => {
+                rowTooltip={(row) => {
+                  if (isCredit(row)) return null
+
                   return (
                     <p>
-                      To manage this volume, go to the{' '}
+                      To manage this website, go to the{' '}
                       <ExternalLink
                         text="Legacy console App."
                         color="main0"
                         href={
-                          NAVIGATION_URLS.legacyConsole.computing.instances.home
+                          NAVIGATION_URLS.legacyConsole.web3Hosting.website.home
                         }
                       />
                     </p>
@@ -83,16 +91,20 @@ export const WebsitesTabContent = React.memo(
                   {
                     label: '',
                     align: 'right',
-                    render: (row) => (
-                      <Button
-                        kind="functional"
-                        variant="secondary"
-                        onClick={() => handleRowClick(row)}
-                        disabled
-                      >
-                        <Icon name="angle-right" size="lg" />
-                      </Button>
-                    ),
+                    render: (row) => {
+                      const disabled = !isCredit(row)
+
+                      return (
+                        <Button
+                          kind="functional"
+                          variant="secondary"
+                          onClick={() => handleRowClick(row)}
+                          disabled={disabled}
+                        >
+                          <Icon name="angle-right" size="lg" />
+                        </Button>
+                      )
+                    },
                     cellProps: () => ({
                       css: tw`pl-3!`,
                     }),
@@ -100,14 +112,14 @@ export const WebsitesTabContent = React.memo(
                 ]}
               />
             </div>
-            {/* <div tw="mt-20 text-center">
+            <div tw="mt-20 text-center">
               <ButtonLink
                 variant="primary"
                 href={NAVIGATION_URLS.console.web3Hosting.website.new}
               >
                 Create website
               </ButtonLink>
-            </div> */}
+            </div>
           </>
         ) : (
           <div tw="mt-10 text-center">

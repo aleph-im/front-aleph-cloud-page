@@ -1,6 +1,7 @@
 import React, { memo, useCallback } from 'react'
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
+import { PaymentType } from '@aleph-sdk/message'
 import { VolumesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
@@ -15,17 +16,24 @@ export const VolumesTabContent = ({
   cta = true,
 }: VolumesTabContentProps) => {
   const router = useRouter()
+
+  const isCredit = useCallback((row: Volume) => {
+    const payment = (row as Volume & { payment?: { type: PaymentType } })
+      .payment
+    return payment?.type === PaymentType.credit
+  }, [])
+
   const handleRowClick = useCallback(
     (volume: Volume) => {
-      // don't allow click until credits support it
-      return
+      if (!isCredit(volume)) return
 
       router.push(
         `${NAVIGATION_URLS.console.storage.volumes.home}/${volume.id}`,
       )
     },
-    [router],
+    [isCredit, router],
   )
+
   return (
     <>
       <div tw="overflow-auto max-w-full">
@@ -34,20 +42,24 @@ export const VolumesTabContent = ({
           rowNoise
           rowKey={(row) => row.id}
           data={data}
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           rowProps={(row) => ({
-            // css: row.confirmed ? '' : tw`opacity-60`,
-            css: tw`opacity-40 cursor-not-allowed!`,
+            css: isCredit(row)
+              ? row.confirmed
+                ? ''
+                : tw`opacity-60`
+              : tw`opacity-40 cursor-not-allowed!`,
             onClick: () => handleRowClick(row),
           })}
-          rowTooltip={() => {
+          rowTooltip={(row) => {
+            if (isCredit(row)) return null
+
             return (
               <p>
                 To manage this volume, go to the{' '}
                 <ExternalLink
                   text="Legacy console App."
                   color="main0"
-                  href={NAVIGATION_URLS.legacyConsole.computing.instances.home}
+                  href={NAVIGATION_URLS.legacyConsole.storage.volumes.home}
                 />
               </p>
             )
@@ -75,16 +87,20 @@ export const VolumesTabContent = ({
             {
               label: '',
               align: 'right',
-              render: (row) => (
-                <Button
-                  kind="functional"
-                  variant="secondary"
-                  disabled
-                  onClick={() => handleRowClick(row)}
-                >
-                  <Icon name="angle-right" size="lg" />
-                </Button>
-              ),
+              render: (row) => {
+                const disabled = !isCredit(row)
+
+                return (
+                  <Button
+                    kind="functional"
+                    variant="secondary"
+                    onClick={() => handleRowClick(row)}
+                    disabled={disabled}
+                  >
+                    <Icon name="angle-right" size="lg" />
+                  </Button>
+                )
+              },
               cellProps: () => ({
                 css: tw`pl-3!`,
               }),

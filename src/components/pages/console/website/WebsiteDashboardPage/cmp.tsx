@@ -44,13 +44,9 @@ export default function WebsiteDashboardPage() {
               info="HOW TO..."
               title="Host your Website!"
               description="Build and deploy your website effortlessly using our web3 hosting solutions. Support for static pages, Next.js, React, and Vue.js ensures you have the flexibility to create the perfect site."
-              // withButton={websites?.length === 0}
-              // buttonUrl={NAVIGATION_URLS.console.web3Hosting.website.new}
-              // buttonText="Deploy your website"
-              externalLinkText="Create on Legacy console"
-              externalLinkUrl={
-                NAVIGATION_URLS.legacyConsole.web3Hosting.website.home
-              }
+              withButton={websites?.length === 0}
+              buttonUrl={NAVIGATION_URLS.console.web3Hosting.website.new}
+              buttonText="Deploy your website"
             />
           </>
         ) : tabId === 'domain' ? (

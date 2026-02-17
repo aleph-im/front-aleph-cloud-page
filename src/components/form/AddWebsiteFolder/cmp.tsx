@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import { Button, NoisyContainer, FileInput } from '@aleph-front/core'
+import { Button, NoisyContainer, FileInput, Spinner } from '@aleph-front/core'
 import { RemoveWebsiteFolderProps, AddWebsiteFolderProps } from './types'
 import { useAddWebsiteFolderProps } from '@/hooks/form/useAddWebsiteFolder'
 import IconText from '@/components/common/IconText'
@@ -26,7 +26,14 @@ RemoveWebsite.displayName = 'RemoveWebsite'
 // -------------------------------------------------
 
 export const AddWebsiteFolder = memo((props: AddWebsiteFolderProps) => {
-  const { folderCtrl, cidCtrl, handleCopyCID } = useAddWebsiteFolderProps(props)
+  const {
+    folderCtrl,
+    cidCtrl,
+    isUploading,
+    uploadProgress,
+    uploadError,
+    handleCopyCID,
+  } = useAddWebsiteFolderProps(props)
 
   return (
     <NoisyContainer>
@@ -37,7 +44,20 @@ export const AddWebsiteFolder = memo((props: AddWebsiteFolderProps) => {
         required
         directory
       />
-      {cidCtrl.field.value && (
+      {isUploading && (
+        <div tw="mt-4 flex items-center gap-3">
+          <Spinner size="3rem" color="main0" />
+          <span className="tp-info text-main0">
+            Uploading to IPFS... {uploadProgress}%
+          </span>
+        </div>
+      )}
+      {uploadError && (
+        <div tw="mt-4">
+          <span className="tp-info text-error">Error: {uploadError}</span>
+        </div>
+      )}
+      {cidCtrl.field.value && !isUploading && (
         <div tw="mt-6">
           <div className="tp-info text-main0">IPFS CID (Unpinned)</div>
           <IconText iconName="copy" onClick={handleCopyCID}>

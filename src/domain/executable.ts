@@ -46,7 +46,6 @@ import { subscribeSocketFeed } from '@/helpers/socket'
 import { convertByteUnits, humanReadableSize, round } from '@aleph-front/core'
 import { withRetry } from '@/helpers/utils'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
-import { isBlockchainPAYGCompatible } from './blockchain'
 import { CostLine } from './cost'
 import { BlockchainId } from './connect'
 
@@ -754,7 +753,8 @@ export abstract class ExecutableManager<T extends Executable> {
         switch (volume.volumeType) {
           case VolumeType.New: {
             const vol = volume as NewVolumeField
-            const estimated_size_mib = await VolumeManager.getVolumeSize(volume)
+            const estimated_size_mib =
+              await VolumeManager.getEstimatedVolumeSize(volume)
 
             return {
               ref: mockVolumeRef,
@@ -764,7 +764,8 @@ export abstract class ExecutableManager<T extends Executable> {
             }
           }
           case VolumeType.Existing: {
-            const estimated_size_mib = await VolumeManager.getVolumeSize(volume)
+            const estimated_size_mib =
+              await VolumeManager.getEstimatedVolumeSize(volume)
 
             return {
               ref: volume.refHash || mockVolumeRef,
@@ -803,7 +804,8 @@ export abstract class ExecutableManager<T extends Executable> {
           if (volume.volumeType !== VolumeType.New) return volume
 
           const refHash = messages[i]?.id || mockVolumeRef
-          const estimated_size_mib = await VolumeManager.getVolumeSize(volume)
+          const estimated_size_mib =
+            await VolumeManager.getEstimatedVolumeSize(volume)
 
           return {
             ...volume,
@@ -864,51 +866,19 @@ export abstract class ExecutableManager<T extends Executable> {
     }
   }
 
-  protected parsePaymentForCostEstimation(
-    payment?: PaymentConfiguration,
-  ): Payment {
-    if (payment?.type === PaymentMethod.Stream) {
-      return {
-        chain: payment.chain,
-        type: SDKPaymentType.superfluid,
-        receiver: payment.receiver,
-      }
-    } else {
-      return {
-        chain: payment?.chain || BlockchainId.ETH,
-        type:
-          payment?.type === PaymentMethod.Credit
-            ? SDKPaymentType.credit
-            : SDKPaymentType.hold,
-      }
+  protected parsePaymentForCostEstimation(): Payment {
+    // Hardcode credit payment for cost estimation
+    return {
+      chain: BlockchainId.ETH,
+      type: SDKPaymentType.credit,
     }
   }
 
-  protected parsePayment(payment?: PaymentConfiguration): Payment {
-    if (!payment)
-      return {
-        chain: BlockchainId.ETH,
-        type: SDKPaymentType.hold,
-      }
-    if (payment.type === PaymentMethod.Stream) {
-      if (!payment.receiver) throw Err.ReceivedRequired
-      if (isBlockchainPAYGCompatible(payment.chain))
-        return {
-          chain: payment.chain,
-          type: SDKPaymentType.superfluid,
-          receiver: payment.receiver,
-        }
-      throw Err.StreamNotSupported
-    }
-    if (payment.type === PaymentMethod.Credit) {
-      return {
-        chain: payment.chain,
-        type: SDKPaymentType.credit,
-      }
-    }
+  protected parsePayment(): Payment {
+    // Hardcode credit payment as the only valid payment method
     return {
-      chain: payment.chain,
-      type: SDKPaymentType.hold,
+      chain: BlockchainId.ETH,
+      type: SDKPaymentType.credit,
     }
   }
 

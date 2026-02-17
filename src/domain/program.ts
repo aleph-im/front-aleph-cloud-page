@@ -20,7 +20,7 @@ import {
 import { downloadBlob, getDate, getExplorerURL } from '@/helpers/utils'
 import { MachineVolume, MessageType, StoreMessage } from '@aleph-sdk/message'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
-import { ExecutableManager, PaymentConfiguration } from './executable'
+import { ExecutableManager } from './executable'
 import { VolumeField } from '@/hooks/form/useAddVolume'
 import { CustomFunctionRuntimeField } from './runtime'
 import { FileManager } from './file'
@@ -66,7 +66,6 @@ export type AddProgram = Omit<
     envVars?: EnvVarField[]
     volumes?: VolumeField[]
     domains?: Omit<DomainField, 'ref'>[]
-    payment?: PaymentConfiguration
   }
 
 // @todo: Refactor
@@ -282,7 +281,7 @@ export class ProgramManager
 
   async getCost(newProgram: ProgramCostProps): Promise<ProgramCost> {
     let totalCost = Number.POSITIVE_INFINITY
-    const paymentMethod = newProgram.payment?.type || PaymentMethod.Credit
+    const paymentMethod = PaymentMethod.Credit
 
     const parsedProgram: ProgramPublishConfiguration =
       await this.parseProgramForCostEstimation(newProgram)
@@ -370,7 +369,7 @@ export class ProgramManager
     const vcpus = parsedSpecs?.vcpus
 
     const runtime = this.parseRuntime(newProgram)
-    const payment = this.parsePaymentForCostEstimation(newProgram.payment)
+    const payment = this.parsePaymentForCostEstimation()
     const volumes = await this.parseVolumesForCostEstimation(newProgram.volumes)
     const code = await this.parseCodeForCostEstimation(newProgram.code)
 
@@ -404,7 +403,7 @@ export class ProgramManager
 
     const metadata = this.parseMetadata(name, tags, newProgram.metadata)
     const runtime = this.parseRuntime(newProgram)
-    const payment = this.parsePayment(newProgram.payment)
+    const payment = this.parsePayment()
     const volumes = yield* this.parseVolumesSteps(newProgram.volumes)
     const code = await this.parseCode(newProgram.code)
 

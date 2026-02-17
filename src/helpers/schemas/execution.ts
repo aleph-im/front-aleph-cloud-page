@@ -9,16 +9,28 @@ import {
   requiredVolumeNameSchema,
 } from './base'
 import { domainSchema } from './domain'
-import { newIsolatedVolumeSchema } from './volume'
+import { newFileVolumeBaseSchema, newIPFSVolumeBaseSchema } from './volume'
 
 export const metadataSchema = z.record(requiredStringSchema, z.unknown())
 
 // EXECUTION
 
-export const newVolumeSchema = newIsolatedVolumeSchema.extend({
+// Extend base volume schemas with mount path and useLatest for embedded forms
+export const newFileVolumeSchema = newFileVolumeBaseSchema.extend({
   mountPath: linuxPathSchema,
   useLatest: z.coerce.boolean(),
 })
+
+export const newIPFSVolumeSchema = newIPFSVolumeBaseSchema.extend({
+  mountPath: linuxPathSchema,
+  useLatest: z.coerce.boolean(),
+})
+
+// Combined new volume schema using union
+export const newVolumeSchema = z.union([
+  newFileVolumeSchema,
+  newIPFSVolumeSchema,
+])
 
 export const existingVolumeSchema = z.object({
   volumeType: z.literal(VolumeType.Existing),
@@ -34,8 +46,10 @@ export const persistentVolumeSchema = z.object({
   size: z.number().gt(0),
 })
 
-export const addVolumeSchema = z.discriminatedUnion('volumeType', [
-  newVolumeSchema,
+// Use union since newVolumeSchema contains multiple volume types
+export const addVolumeSchema = z.union([
+  newFileVolumeSchema,
+  newIPFSVolumeSchema,
   existingVolumeSchema,
   persistentVolumeSchema,
 ])

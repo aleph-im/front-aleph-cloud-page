@@ -3,9 +3,8 @@ import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { useWebsiteManager } from '@/hooks/common/useManager/useWebsiteManager'
 import { useAppState } from '@/contexts/appState'
-import { useSyncPaymentMethod } from '@/hooks/common/useSyncPaymentMethod'
-import { AddWebsite, WebsiteManager, WebsitePayment } from '@/domain/website'
-import { EntityType, NAVIGATION_URLS, PaymentMethod } from '@/helpers/constants'
+import { AddWebsite, WebsiteManager } from '@/domain/website'
+import { EntityType, NAVIGATION_URLS } from '@/helpers/constants'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { WebsiteFrameworkField } from '@/hooks/form/useSelectWebsiteFramework'
@@ -27,25 +26,28 @@ import {
 import { EntityAddAction } from '@/store/entity'
 import Err from '@/helpers/errors'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
-import { BlockchainId } from '@/domain/connect'
+import {
+  useInsufficientFunds,
+  InsufficientFundsInfo,
+} from '@/hooks/common/useInsufficientFunds'
 
 export type NewWebsiteFormState = NameAndTagsField &
   WebsiteFrameworkField & {
     website: WebsiteFolderField
     domains?: Omit<DomainField, 'ref'>[]
     ens?: string[]
-    paymentMethod: PaymentMethod
   }
 
 export const defaultValues: Partial<NewWebsiteFormState> = {
   ...defaultNameAndTags,
-  paymentMethod: PaymentMethod.Credit,
 }
 
 export type UseNewWebsitePagePageReturn = {
   address: string
   accountCreditBalance: number
   isCreateButtonDisabled: boolean
+  minimumBalanceNeeded: number
+  insufficientFundsInfo?: InsufficientFundsInfo
   values: any
   control: Control<any>
   errors: FieldErrors<NewWebsiteFormState>
@@ -67,16 +69,7 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     async (state: NewWebsiteFormState) => {
       if (!manager) throw Err.ConnectYourWallet
 
-      // @todo: Refactor this
-      const payment: WebsitePayment = {
-        chain: BlockchainId.ETH,
-        type: PaymentMethod.Credit,
-      }
-
-      const website = {
-        ...state,
-        payment,
-      } as AddWebsite
+      const website = state as AddWebsite
 
       const iSteps = await manager.getAddSteps(website)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
@@ -115,7 +108,6 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     control,
     handleSubmit,
     formState: { errors },
-    setValue,
   } = useForm({
     defaultValues,
     onSubmit,
@@ -129,7 +121,6 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
       entityType: EntityType.Website,
       props: {
         website: values.website,
-        paymentMethod: values.paymentMethod,
         domains: values.domains,
       },
     }),
@@ -143,20 +134,22 @@ export function useNewWebsitePage(): UseNewWebsitePagePageReturn {
     accountCreditBalance,
   })
 
+  const { minimumBalanceNeeded, insufficientFundsInfo } = useInsufficientFunds({
+    cost,
+    accountCreditBalance,
+    isConnected: !!account,
+  })
+
   const handleBack = () => {
     router.push('.')
   }
-
-  // Sync form payment method with global state - special case for nested field
-  useSyncPaymentMethod({
-    formPaymentMethod: values.paymentMethod,
-    setValue,
-  })
 
   return {
     address: account?.address || '',
     accountCreditBalance,
     isCreateButtonDisabled,
+    minimumBalanceNeeded,
+    insufficientFundsInfo,
     values,
     control,
     errors,

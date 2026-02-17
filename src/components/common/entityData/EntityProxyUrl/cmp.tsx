@@ -43,8 +43,8 @@ export const EntityProxyUrl = ({ instanceHash }: EntityProxyUrlProps) => {
             <Text className="fs-12" tw="opacity-60">
               If your instance runs a web server, it&apos;s already accessible
               at this URL. HTTPS traffic is forwarded transparently (L4), so
-              you&apos;ll need to handle TLS certificates on your instance.
-              HTTP traffic (port 80) is also forwarded.
+              you&apos;ll need to handle TLS certificates on your instance. HTTP
+              traffic (port 80) is also forwarded.
             </Text>
           </div>
         </div>

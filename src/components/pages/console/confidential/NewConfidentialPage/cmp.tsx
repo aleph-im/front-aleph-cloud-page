@@ -408,7 +408,7 @@ export default function NewConfidentialPage() {
         <CenteredContainer tw="flex items-center justify-center pt-8">
           <Button
             as="a"
-            href="/computing/confidential"
+            href="/console/computing/confidential"
             animation="icon-to-right-on-hover"
           >
             Check your TEE Instances <Icon name="arrow-right" />

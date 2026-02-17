@@ -42,7 +42,6 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
   const {
     address,
     accountCreditBalance,
-    blockchainName,
     manuallySelectCRNDisabled,
     manuallySelectCRNDisabledMessage,
     createInstanceDisabled,
@@ -141,11 +140,11 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             </CompositeSectionTitle>
             <p>
               Your instance is configured with your manually selected GPU,
-              operating under the <Strong>Pay-as-you-go</Strong> payment method
-              on <Strong>{blockchainName}</Strong>. This setup provides direct
-              control over your resource allocation and costs, requiring active
-              management of your instance. To adjust your GPU or explore
-              different payment options, modify your selection below.
+              operating under the <Strong>credit-based</Strong> payment system.
+              This setup provides direct control over your resource allocation
+              and costs. Your credits are deducted only as you consume
+              resources, ensuring you pay exactly for what you use. To adjust
+              your GPU, modify your selection below.
             </p>
             <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
               <NoisyContainer>

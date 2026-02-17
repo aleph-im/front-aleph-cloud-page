@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FileManager } from '@/domain/file'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 import { ipfsCIDSchema } from '@/helpers/schemas/base'
@@ -22,6 +22,9 @@ export type UseAddWebsiteFolderProps = {
 export type UseAddWebsiteFolderReturn = {
   folderCtrl: UseControllerReturn<any, any>
   cidCtrl: UseControllerReturn<any, any>
+  isUploading: boolean
+  uploadProgress: number
+  uploadError: string | null
   handleRemove?: () => void
   handleCopyCID: () => void
 }
@@ -48,7 +51,12 @@ export function useAddWebsiteFolderProps({
 }: UseAddWebsiteFolderProps): UseAddWebsiteFolderReturn {
   const isStandAlone = index === undefined
   const n = isStandAlone ? name : `${name}.${index}`
-  //const { addFolder } = useIPFS()
+
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const lastUploadedFolderRef = useRef<File[] | null>(null)
+
   const folderCtrl = useController({
     control,
     name: `${n}.folder`,
@@ -61,24 +69,59 @@ export function useAddWebsiteFolderProps({
   })
 
   const { value: folder } = folderCtrl.field
-  const { onChange } = cidCtrl.field
+  const setCid = cidCtrl.field.onChange
 
   useEffect(() => {
-    async function load() {
-      if (!folder) return
+    async function uploadToIPFS() {
+      // If folder is cleared, reset everything
+      if (!folder) {
+        setCid(undefined)
+        setUploadError(null)
+        setUploadProgress(0)
+        lastUploadedFolderRef.current = null
+        return
+      }
 
-      const cid = isCidFile(folder) || (await FileManager.uploadFolder(folder))
-      if (cid) onChange(cid)
+      // Check if it's already a CID file (no upload needed)
+      const existingCid = isCidFile(folder)
+      if (existingCid) {
+        setCid(existingCid)
+        return
+      }
+
+      // Skip if we already uploaded this exact folder
+      if (lastUploadedFolderRef.current === folder) return
+      lastUploadedFolderRef.current = folder
+
+      setIsUploading(true)
+      setUploadProgress(0)
+      setUploadError(null)
+
+      try {
+        const cid = await FileManager.uploadFolder(folder, setUploadProgress)
+        if (cid) {
+          setCid(cid)
+        } else {
+          setUploadError('Failed to get IPFS CID')
+        }
+      } catch (error) {
+        setUploadError(error instanceof Error ? error.message : 'Upload failed')
+      } finally {
+        setIsUploading(false)
+      }
     }
 
-    load()
-  }, [onChange, folder])
+    uploadToIPFS()
+  }, [folder, setCid])
 
   const handleCopyCID = useCopyToClipboardAndNotify(cidCtrl.field.value)
 
   return {
     folderCtrl,
     cidCtrl,
+    isUploading,
+    uploadProgress,
+    uploadError,
     handleRemove,
     handleCopyCID,
   }
