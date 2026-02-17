@@ -26,11 +26,7 @@ const CustomLink = (props: RenderLinkProps) => {
 const Settings = () => {
   const { apiServerDisplay, handleSetApiServer } = useSettings()
 
-  const preferredServers = [
-    'api.aleph.im',
-    'api2.aleph.im',
-    'api3.aleph.im'
-  ]
+  const preferredServers = ['api.aleph.im', 'api2.aleph.im', 'api3.aleph.im']
 
   const isCustomServer = !preferredServers.includes(apiServerDisplay)
   const serverList = isCustomServer
