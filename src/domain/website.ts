@@ -558,7 +558,10 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
       const content: Record<string, any> = {
         [website.id]: {
           metadata: website.metadata,
-          payment: website.payment,
+          payment: website.payment || {
+            chain: Blockchain.ETH,
+            type: PaymentMethod.Credit,
+          },
           version: website.version + 1,
           volume_id: volumeId,
           history: {

@@ -101,7 +101,7 @@ export const AddNewVolume = memo((props: AddNewVolumeProps) => {
             <FileInput
               {...fileCtrl.field}
               {...fileCtrl.fieldState}
-              label={isIPFSMode ? 'Upload file to IPFS' : 'Upload volume file'}
+              label="Upload volume file"
               required
             />
             {isIPFSMode && isUploading && (
