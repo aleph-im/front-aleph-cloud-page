@@ -16,6 +16,7 @@ import { blockchains } from '@/domain/connect'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
 import { useSettings } from '@/hooks/common/useSettings'
+import LegacyBanner from '@/components/common/LegacyBanner'
 
 const CustomLink = (props: RenderLinkProps) => {
   return props.route.children ? <span {...props} /> : <Link {...props} />
@@ -167,6 +168,7 @@ export const Header = () => {
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
+        <LegacyBanner />
         <LoadingProgress breakpoint={breakpoint} />
         <StyledNavbarMobile
           {...{
@@ -227,7 +229,7 @@ export const Header = () => {
           />
         </StyledNavbarDesktop>
       </StyledHeader>
-      <div tw="block flex-auto grow-0 shrink-0 h-[6.5rem] lg:hidden"></div>
+      <div tw="block flex-auto grow-0 shrink-0 h-[9rem] lg:hidden"></div>
       <div tw="block lg:hidden my-6 px-6 lg:px-16">
         <AutoBreadcrumb names={breadcrumbNames} />
       </div>
