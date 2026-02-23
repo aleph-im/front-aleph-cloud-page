@@ -1,12 +1,23 @@
 import { channel, defaultConsoleChannel } from '@/helpers/constants'
 import { apiServer } from '@/helpers/server'
-import { Mutex, convertByteUnits, sleep } from '@/helpers/utils'
+import {
+  Mutex,
+  convertByteUnits,
+  sleep,
+  uploadWithProgress,
+} from '@/helpers/utils'
 import { Account } from '@aleph-sdk/account'
 import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
-import { ItemType, MessageType, StoreMessage } from '@aleph-sdk/message'
+import {
+  ItemType,
+  MessageType,
+  PaymentType,
+  StoreMessage,
+} from '@aleph-sdk/message'
+import { Blockchain } from '@aleph-sdk/core'
 import Err from '@/helpers/errors'
 import {
   DEFAULT_PAGE_SIZE,
@@ -203,6 +214,7 @@ export class FileManager {
         name: fileObject.name,
         format: fileObject.type,
       },
+      payment: { chain: Blockchain.ETH, type: PaymentType.credit },
     })
 
     // Create a properly typed object including both message properties and our additional fields
@@ -219,6 +231,7 @@ export class FileManager {
 
   static async uploadFolder(
     folder: File | File[],
+    onProgress?: (progress: number) => void,
   ): Promise<string | undefined> {
     const files = Array.isArray(folder) ? folder : [folder]
     if (!files.length) throw new Error('Required folder')
@@ -226,16 +239,13 @@ export class FileManager {
     const data = new FormData()
     files.forEach((f) => data.append('file', f))
 
-    const query = await fetch(
-      'https://ipfs.aleph.cloud/api/v0/add?to-files=1',
-      {
-        method: 'POST',
-        body: data,
-      },
-    )
+    const responseText = await uploadWithProgress({
+      url: 'https://ipfs.aleph.cloud/api/v0/add?to-files=1',
+      data,
+      onProgress,
+    })
 
-    if (query.status === 200)
-      return JSON.parse((await query.text()).split('\n').at(-2) ?? '{}')['Hash']
+    return JSON.parse(responseText.split('\n').at(-2) ?? '{}')['Hash']
   }
 
   async downloadFile(fileHash: string): Promise<File> {

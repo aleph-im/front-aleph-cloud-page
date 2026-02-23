@@ -12,146 +12,6 @@ import { Blockchain } from '@aleph-sdk/core'
 import { useNFTVoucherBalance } from '@/hooks/common/useNFTVoucherBalance'
 import Price from '@/components/common/Price'
 
-// const CheckoutSummaryVolumeLine = ({
-//   volume,
-//   cost,
-//   specs,
-//   priceDuration,
-// }: CheckoutSummaryVolumeLineProps) => {
-//   const [size, setSize] = useState<number>(0)
-
-//   useEffect(() => {
-//     async function load() {
-//       const size = await VolumeManager.getVolumeSize(volume)
-//       setSize(size)
-//     }
-
-//     load()
-//   }, [volume])
-
-//   if (!cost) return <></>
-
-//   const hasDiscount = !!cost.discount
-//   const fullDiscount = !cost.cost
-
-//   return (
-//     <StyledHoldingSummaryLine>
-//       <div>
-//         <div>
-//           STORAGE
-//           <Label tw="ml-2">
-//             {volume.volumeType === VolumeType.Persistent
-//               ? 'PERSISTENT'
-//               : 'VOLUME'}
-//           </Label>
-//         </div>
-//       </div>
-//       <div>
-//         <div>{humanReadableSize(size, 'MiB')}</div>
-//       </div>
-//       <div>
-//         <div>
-//           {hasDiscount ? (
-//             <InfoTooltipButton
-//               plain
-//               align="left"
-//               my="bottom-left"
-//               at="bottom-right"
-//               tooltipContent={
-//                 <div tw="text-left">
-//                   <div className="tp-body1 fs-18">
-//                     {fullDiscount ? (
-//                       <>
-//                         The cost displayed for the added storage is{' '}
-//                         <span className="text-main0">
-//                           <Price value={cost.cost} duration={priceDuration} />
-//                         </span>{' '}
-//                         as this resource is already included in your selected
-//                         package at no additional charge.
-//                       </>
-//                     ) : (
-//                       <>
-//                         Good news! The displayed price is lower than usual due
-//                         to a discount of{' '}
-//                         <span className="text-main0">
-//                           <Price
-//                             value={cost.price - cost.cost}
-//                             duration={priceDuration}
-//                           />
-//                         </span>
-//                         {specs && (
-//                           <>
-//                             {` for `}
-//                             <span className="text-main0">
-//                               {convertByteUnits(specs.storage, {
-//                                 from: 'MiB',
-//                                 to: 'GiB',
-//                                 displayUnit: true,
-//                               })}
-//                             </span>{' '}
-//                             included in your package.
-//                           </>
-//                         )}
-//                       </>
-//                     )}
-//                   </div>
-//                 </div>
-//               }
-//             >
-//               <Price value={cost.cost} duration={priceDuration} />
-//             </InfoTooltipButton>
-//           ) : (
-//             <>
-//               <Price value={cost.cost} duration={priceDuration} />
-//             </>
-//           )}
-//         </div>
-//       </div>
-//     </StyledHoldingSummaryLine>
-//   )
-// }
-// CheckoutSummaryVolumeLine.displayName = 'CheckoutSummaryVolumeLine'
-
-// // ------------------------------------------
-
-// const CheckoutSummaryWebsiteLine = ({
-//   website,
-//   cost,
-// }: CheckoutSummaryWebsiteLineProps) => {
-//   const [size, setSize] = useState<number>(0)
-
-//   useEffect(() => {
-//     async function load() {
-//       const size = await WebsiteManager.getWebsiteSize({
-//         website,
-//       } as AddWebsite)
-//       setSize(size)
-//     }
-
-//     load()
-//   }, [website])
-
-//   if (!cost) return <></>
-
-//   return (
-//     <StyledHoldingSummaryLine>
-//       <div>
-//         <div>WEBSITE</div>
-//       </div>
-//       <div>
-//         <div>{humanReadableSize(size, 'MiB')}</div>
-//       </div>
-//       <div>
-//         <Price value={cost} />
-//       </div>
-//     </StyledHoldingSummaryLine>
-//   )
-// }
-// CheckoutSummaryWebsiteLine.displayName = 'CheckoutSummaryWebsiteLine'
-
-// ------------------------------------------
-
-// @todo: Refactor: Split in different components
 export const CheckoutSummary = ({
   address,
   cost,
@@ -230,7 +90,7 @@ export const CheckoutSummary = ({
                             type="credit"
                             value={line.cost}
                             duration="h"
-                            decimals={4}
+                            decimals={6}
                             className="tp-body3"
                             loading={cost.loading}
                           />
@@ -281,7 +141,7 @@ export const CheckoutSummary = ({
                         type="credit"
                         value={cost?.cost?.cost}
                         duration="h"
-                        decimals={4}
+                        decimals={6}
                         loading={cost.loading}
                       />
                     </span>
@@ -295,11 +155,22 @@ export const CheckoutSummary = ({
                       <Price
                         type="credit"
                         value={minimumBalanceNeeded}
+                        decimals={6}
                         loading={cost.loading}
                       />
                     </span>
                   </div>
                 </StyledHoldingSummaryLine>
+
+                {cost.error && (
+                  <BorderBox $color="error" tw="mt-4">
+                    <div tw="flex flex-col gap-3">
+                      <p className="tp-body1 fs-16">
+                        <strong>Validation Error:</strong> {cost.error}
+                      </p>
+                    </div>
+                  </BorderBox>
+                )}
 
                 {insufficientFunds?.hasInsufficientFunds && (
                   <BorderBox $color="error" tw="mt-4">

@@ -9,9 +9,11 @@ import Err from '@/helpers/errors'
 
 export type AggregateContent<T> = Record<string, T | null>
 
-export abstract class AggregateManager<Entity, AddEntity, AggregateItem>
-  implements EntityManager<Entity, AddEntity>
-{
+export abstract class AggregateManager<
+  Entity,
+  AddEntity,
+  AggregateItem,
+> implements EntityManager<Entity, AddEntity> {
   protected abstract addStepType: CheckoutStepType
   protected abstract delStepType: CheckoutStepType
 

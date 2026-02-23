@@ -1,11 +1,25 @@
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { convertByteUnits, humanReadableSize } from '@/helpers/utils'
 import { Volume, VolumeManager, VolumeType } from '@/domain/volume'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
+import { Payment } from '@aleph-sdk/message'
+import { VolumeUploadMode } from '@/helpers/constants'
+import { FileManager } from '@/domain/file'
+import { useCopyToClipboardAndNotify } from '@aleph-front/core'
 
 export type NewVolumeStandaloneField = {
   volumeType: VolumeType.New
+  uploadMode?: VolumeUploadMode
   file?: File
+  cid?: string
+  payment?: Payment
 }
 
 export type ExistingVolumeStandaloneField = {
@@ -60,10 +74,16 @@ export type UseAddNewVolumeProps = UseAddVolumeCommonProps & {
 
 export type UseAddNewVolumeReturn = {
   isStandAlone: boolean
+  uploadModeCtrl: UseControllerReturn<any, any>
+  fileCtrl: UseControllerReturn<any, any>
+  cidCtrl: UseControllerReturn<any, any>
+  isUploading: boolean
+  uploadProgress: number
+  uploadError: string | null
   mountPathCtrl: UseControllerReturn<any, any>
   useLatestCtrl: UseControllerReturn<any, any>
-  fileCtrl: UseControllerReturn<any, any>
   handleRemove?: () => void
+  handleCopyCID: () => void
 }
 export function useAddNewVolumeProps({
   name = '',
@@ -75,10 +95,27 @@ export function useAddNewVolumeProps({
   const isStandAlone = index === undefined
   const n = isStandAlone ? name : `${name}.${index}`
 
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const lastUploadedFileRef = useRef<File | null>(null)
+
+  const uploadModeCtrl = useController({
+    control,
+    name: `${n}.uploadMode`,
+    defaultValue: defaultValue?.uploadMode || VolumeUploadMode.File,
+  })
+
   const fileCtrl = useController({
     control,
     name: `${n}.file`,
     defaultValue: defaultValue?.file,
+  })
+
+  const cidCtrl = useController({
+    control,
+    name: `${n}.cid`,
+    defaultValue: defaultValue?.cid,
   })
 
   const mountPathCtrl = useController({
@@ -93,12 +130,65 @@ export function useAddNewVolumeProps({
     defaultValue: defaultValue?.useLatest,
   })
 
+  const uploadMode = uploadModeCtrl.field.value
+
+  const setCid = cidCtrl.field.onChange
+
+  // Auto-upload file to IPFS when in IPFS mode and file changes
+  useEffect(() => {
+    async function uploadToIPFS() {
+      const file = fileCtrl.field.value
+
+      // If file is cleared, reset everything
+      if (!file) {
+        setCid(undefined)
+        setUploadError(null)
+        setUploadProgress(0)
+        lastUploadedFileRef.current = null
+        return
+      }
+
+      if (uploadMode !== VolumeUploadMode.IPFS) return
+
+      // Skip if we already uploaded this exact file
+      if (lastUploadedFileRef.current === file) return
+      lastUploadedFileRef.current = file
+
+      setIsUploading(true)
+      setUploadProgress(0)
+      setUploadError(null)
+
+      try {
+        const cid = await FileManager.uploadFolder(file, setUploadProgress)
+        if (cid) {
+          setCid(cid)
+        } else {
+          setUploadError('Failed to get IPFS CID')
+        }
+      } catch (error) {
+        setUploadError(error instanceof Error ? error.message : 'Upload failed')
+      } finally {
+        setIsUploading(false)
+      }
+    }
+
+    uploadToIPFS()
+  }, [fileCtrl.field.value, uploadMode, setCid])
+
+  const handleCopyCID = useCopyToClipboardAndNotify(cidCtrl.field.value)
+
   return {
-    isStandAlone: index === undefined,
+    isStandAlone,
+    uploadModeCtrl,
     fileCtrl,
+    cidCtrl,
+    isUploading,
+    uploadProgress,
+    uploadError,
     mountPathCtrl,
     useLatestCtrl,
     handleRemove,
+    handleCopyCID,
   }
 }
 

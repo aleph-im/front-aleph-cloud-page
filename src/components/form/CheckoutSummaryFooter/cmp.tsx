@@ -42,7 +42,7 @@ export const CheckoutSummaryFooter = ({
                       type="credit"
                       value={totalCost}
                       loading={loading}
-                      decimals={4}
+                      decimals={6}
                     />
                   </span>
                   <span className="tp-body2" tw="mt-1">

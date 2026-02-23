@@ -20,7 +20,6 @@ import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { SSHKeyField } from '@/hooks/form/useAddSSHKeys'
 import {
   ExecutableManager,
-  PaymentConfiguration,
   ExecutableStatus,
   StreamPaymentDetails,
   StreamPaymentDetail,
@@ -72,7 +71,6 @@ export type AddInstance = Omit<
     systemVolume: InstanceSystemVolumeField
     envVars?: EnvVarField[]
     domains?: Omit<DomainField, 'ref'>[]
-    payment?: PaymentConfiguration
     requirements?: HostRequirements
     node?: CRNSpecs
   }
@@ -379,16 +377,8 @@ export class InstanceManager<T extends InstanceEntity = Instance>
 
     steps.push('instance')
 
-    if (newInstance.payment?.type === PaymentMethod.Stream) {
-      steps.push('stream')
-    }
-
     // @note: Aggregate all signatures in 1 step
     if (domains.length > 0) steps.push('domain')
-
-    if (newInstance.payment?.type === PaymentMethod.Stream) {
-      steps.push('allocate')
-    }
 
     return steps
   }
@@ -462,7 +452,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
       | EntityType.GpuInstance = EntityType.Instance,
   ): Promise<InstanceCost> {
     let totalCost = Number.POSITIVE_INFINITY
-    const paymentMethod = newInstance.payment?.type || PaymentMethod.Credit
+    const paymentMethod = PaymentMethod.Credit
 
     const parsedInstance: InstancePublishConfiguration =
       await this.parseInstanceForCostEstimation(newInstance)
@@ -608,7 +598,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const rootfs = this.parseRootfs(image, systemVolume)
     const resources = this.parseSpecs(specs)
     const requirements = this.parseRequirements(node)
-    const payment = this.parsePaymentForCostEstimation(newInstance.payment)
+    const payment = this.parsePaymentForCostEstimation()
     const volumes = await this.parseVolumesForCostEstimation(
       newInstance.volumes,
     )
@@ -653,7 +643,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     const resources = this.parseSpecs(specs)
     const metadata = this.parseMetadata(name, tags)
     const requirements = this.parseRequirements(node)
-    const payment = this.parsePayment(newInstance.payment)
+    const payment = this.parsePayment()
     const authorized_keys = yield* this.parseSSHKeysSteps(sshKeys)
     const volumes = yield* this.parseVolumesSteps(newInstance.volumes)
 

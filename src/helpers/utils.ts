@@ -226,6 +226,41 @@ export const humanReadableCurrency = (value?: number, decimals = 2) => {
 }
 
 /**
+ * Formats a number with fixed decimals but ensures at least one significant
+ * digit is shown. If the value is too small for the given decimals, it
+ * increases precision until a significant digit appears.
+ *
+ * @param value The number to format
+ * @param decimals The minimum number of decimal places
+ * @returns Formatted number string
+ */
+const formatWithSignificantFallback = (
+  value: number,
+  decimals: number,
+): string => {
+  if (value === 0) return value.toFixed(decimals)
+
+  const fixedValue = value.toFixed(decimals)
+  // Check if the result shows any significant digits (not just zeros)
+  if (parseFloat(fixedValue) !== 0) {
+    return fixedValue
+  }
+
+  // Value is too small, find first significant digit
+  let currentDecimals = decimals + 1
+  while (currentDecimals <= 20) {
+    const result = value.toFixed(currentDecimals)
+    if (parseFloat(result) !== 0) {
+      return result
+    }
+    currentDecimals++
+  }
+
+  // Fallback to scientific notation for extremely small values
+  return value.toExponential(2)
+}
+
+/**
  * Formats credits as USD currency
  * 1,000,000 credits = $1.00
  *
@@ -244,7 +279,7 @@ export const formatCredits = (credits?: number, decimals = 2): string => {
   const prefix = isNegative ? '-$' : '$'
 
   if (absValue < 1_000) {
-    return prefix + absValue.toFixed(decimals)
+    return prefix + formatWithSignificantFallback(absValue, decimals)
   } else if (absValue < 10 ** 6) {
     return prefix + (absValue / 1_000).toFixed(decimals) + 'K'
   } else if (absValue < 10 ** 9) {
@@ -881,6 +916,66 @@ export async function withRetry<T>(
  * @param displayDecimals - Number of decimal places to show (default: 6)
  * @returns Formatted amount string
  */
+export type UploadWithProgressOptions = {
+  url: string
+  data: FormData
+  onProgress?: (progress: number) => void
+}
+
+/**
+ * Uploads data to a URL using XMLHttpRequest with progress tracking.
+ * Unlike fetch(), this provides real-time upload progress events.
+ *
+ * @param options.url - The URL to upload to
+ * @param options.data - FormData to upload
+ * @param options.onProgress - Callback with progress percentage (0-100)
+ * @returns Promise that resolves with the response text
+ */
+export function uploadWithProgress({
+  url,
+  data,
+  onProgress,
+}: UploadWithProgressOptions): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable && onProgress) {
+        const progress = Math.round((event.loaded / event.total) * 100)
+        onProgress(progress)
+      }
+    })
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(xhr.responseText)
+      } else {
+        const errorMsg = xhr.statusText || `HTTP ${xhr.status}`
+        reject(new Error(`Upload failed: ${errorMsg}`))
+      }
+    })
+
+    xhr.addEventListener('error', () => {
+      reject(
+        new Error(
+          'Upload failed: Network error. Please check your connection and try again.',
+        ),
+      )
+    })
+
+    xhr.addEventListener('abort', () => {
+      reject(new Error('Upload was cancelled'))
+    })
+
+    xhr.addEventListener('timeout', () => {
+      reject(new Error('Upload failed: Request timed out'))
+    })
+
+    xhr.open('POST', url)
+    xhr.send(data)
+  })
+}
+
 export function formatPaymentAmount(
   amount: number | string,
   asset: string,

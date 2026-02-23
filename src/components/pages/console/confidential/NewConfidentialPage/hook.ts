@@ -156,7 +156,7 @@ export function useNewConfidentialPage(): UseNewConfidentialPageReturn {
   }
 
   const createConfidentialInstanceCommand = useMemo(() => {
-    let command = `aleph instance confidential`
+    let command = `aleph instance confidential --payment-type credit`
 
     if (encryptedDiskImageItemHash) {
       command += ` \\ \n    --rootfs ${encryptedDiskImageItemHash}`

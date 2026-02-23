@@ -16,6 +16,8 @@ export function NewVolumePage() {
     address,
     accountCreditBalance,
     isCreateButtonDisabled,
+    minimumBalanceNeeded,
+    insufficientFundsInfo,
     errors,
     cost,
     handleSubmit,
@@ -43,11 +45,15 @@ export function NewVolumePage() {
           address={address}
           cost={cost}
           unlockedAmount={accountCreditBalance}
+          minimumBalanceNeeded={minimumBalanceNeeded}
+          insufficientFunds={insufficientFundsInfo}
           description={
             <>
-              This amount needs to be present in your wallet until the volume is
-              removed. Tokens won &#39;t be locked nor consumed. The volume will
-              be garbage collected once funds are removed from the wallet.
+              Aleph Cloud runs on a <strong>credit-based system</strong>,
+              designed for flexibility and transparency. You can top up credits
+              with <strong>fiat, USDC, or ALEPH</strong>. Your credits are
+              deducted only as you consume resources, ensuring you pay exactly
+              for what you use.
             </>
           }
           button={

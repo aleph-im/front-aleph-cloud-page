@@ -196,20 +196,6 @@ export default function DashboardPage() {
                     img={EntityTypeObject[EntityType.Confidential]}
                     dashboardPath="/console/computing/confidential"
                     createPath="/console/computing/confidential/new"
-                    createDisabled
-                    createDisabledMessage={
-                      <p>
-                        To create a TEE instance, navigate to the{' '}
-                        <ExternalLink
-                          text="Legacy console App."
-                          color="main0"
-                          href={
-                            NAVIGATION_URLS.legacyConsole.computing
-                              .confidentials.home
-                          }
-                        />
-                      </p>
-                    }
                     description="Protect your sensitive workloads with our confidential VMs. Designed for maximum privacy and security, ensuring your data stays safe."
                     introductionButtonText="Create your TEE Instance"
                     information={{
@@ -253,20 +239,6 @@ export default function DashboardPage() {
                     introductionButtonText="Deploy your website"
                     dashboardPath="/console/hosting/website"
                     createPath={NAVIGATION_URLS.console.web3Hosting.website.new}
-                    createDisabled
-                    createDisabledMessage={
-                      <p>
-                        To deploy a Website, navigate to the{' '}
-                        <ExternalLink
-                          text="Legacy console App."
-                          color="main0"
-                          href={
-                            NAVIGATION_URLS.legacyConsole.computing.functions
-                              .home
-                          }
-                        />
-                      </p>
-                    }
                     information={{
                       type: 'amount',
                       data: websitesAggregatedStatus.total,
@@ -304,20 +276,6 @@ export default function DashboardPage() {
                     img={EntityTypeObject[EntityType.Volume]}
                     dashboardPath="/console/storage"
                     createPath="/console/storage/volume/new"
-                    createDisabled
-                    createDisabledMessage={
-                      <p>
-                        To create a new volume, navigate to the{' '}
-                        <ExternalLink
-                          text="Legacy console App."
-                          color="main0"
-                          href={
-                            NAVIGATION_URLS.legacyConsole.computing.functions
-                              .home
-                          }
-                        />
-                      </p>
-                    }
                     description="Secure and reliable immutable volumes for your data storage needs. Ideal for dependency volumes and critical data, ensuring consistency and integrity."
                     introductionButtonText="Create your volume"
                     information={{

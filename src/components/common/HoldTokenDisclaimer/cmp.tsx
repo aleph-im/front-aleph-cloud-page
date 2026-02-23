@@ -3,13 +3,11 @@ import React, { memo } from 'react'
 export const HoldTokenDisclaimer = () => {
   return (
     <p tw="my-24 text-center">
-      Acquire Aleph Cloud tokens for versatile access to resources within a
-      defined duration. These tokens remain in your wallet without being locked
-      or consumed, providing you with flexibility in utilizing Aleph
-      Cloud&apos;s infrastructure. If you choose to remove the tokens from your
-      wallet, the allocated resources will be efficiently reclaimed. Feel free
-      to use or hold the tokens according to your needs, even when not actively
-      using Aleph Cloud&apos;s resources.
+      Aleph Cloud runs on a credit-based system, designed for flexibility and
+      transparency. You can top up credits with fiat, USDC, or ALEPH. Your
+      credits are deducted only as you consume resources, ensuring you pay
+      exactly for what you use. If your credit balance runs out, resources will
+      be automatically reclaimed.
     </p>
   )
 }

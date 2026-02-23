@@ -6,6 +6,8 @@ import {
   Button,
   NoisyContainer,
   FileInput,
+  Radio,
+  Spinner,
 } from '@aleph-front/core'
 import {
   RemoveVolumeProps,
@@ -23,6 +25,8 @@ import {
   useAddInstanceSystemVolumeProps,
 } from '@/hooks/form/useAddVolume'
 import { VolumeType } from '@/domain/volume'
+import { VolumeUploadMode } from '@/helpers/constants'
+import IconText from '@/components/common/IconText'
 
 const RemoveVolume = memo(({ onRemove: handleRemove }: RemoveVolumeProps) => {
   return (
@@ -44,17 +48,53 @@ RemoveVolume.displayName = 'RemoveVolume'
 // -------------------------------------------------
 
 export const AddNewVolume = memo((props: AddNewVolumeProps) => {
-  const { isStandAlone, fileCtrl, mountPathCtrl, useLatestCtrl, handleRemove } =
-    useAddNewVolumeProps(props)
+  const {
+    isStandAlone,
+    uploadModeCtrl,
+    fileCtrl,
+    cidCtrl,
+    isUploading,
+    uploadProgress,
+    uploadError,
+    mountPathCtrl,
+    useLatestCtrl,
+    handleRemove,
+    handleCopyCID,
+  } = useAddNewVolumeProps(props)
+
+  const uploadMode = uploadModeCtrl.field.value
+  const isIPFSMode = uploadMode === VolumeUploadMode.IPFS
 
   return (
     <>
       <p tw="mt-1 mb-6">
-        Create and configure new volumes for your web3 function by either
-        uploading a dependency file or a squashfs volume. Volumes play a crucial
-        role in managing dependencies and providing a volume within your
-        application.
+        Create and configure new volumes for your web3 function by uploading a
+        dependency file or a squashfs volume. Choose to store on Aleph directly
+        or upload to IPFS for decentralized storage.
       </p>
+
+      {/* Upload Mode Radio Group */}
+      <div tw="mb-6">
+        <div tw="flex gap-6">
+          <Radio
+            checked={!isIPFSMode}
+            onChange={() =>
+              uploadModeCtrl.field.onChange(VolumeUploadMode.File)
+            }
+            label="Upload file"
+            name={`${uploadModeCtrl.field.name}-radio`}
+          />
+          <Radio
+            checked={isIPFSMode}
+            onChange={() =>
+              uploadModeCtrl.field.onChange(VolumeUploadMode.IPFS)
+            }
+            label="Upload to IPFS"
+            name={`${uploadModeCtrl.field.name}-radio`}
+          />
+        </div>
+      </div>
+
       <div>
         {isStandAlone ? (
           <NoisyContainer>
@@ -64,25 +104,69 @@ export const AddNewVolume = memo((props: AddNewVolumeProps) => {
               label="Upload volume file"
               required
             />
+            {isIPFSMode && isUploading && (
+              <div tw="mt-4 flex items-center gap-3">
+                <Spinner size="3rem" color="main0" />
+                <span className="tp-info text-main0">
+                  Uploading to IPFS... {uploadProgress}%
+                </span>
+              </div>
+            )}
+            {isIPFSMode && uploadError && (
+              <div tw="mt-4">
+                <span className="tp-info text-error">Error: {uploadError}</span>
+              </div>
+            )}
+            {isIPFSMode && cidCtrl.field.value && !isUploading && (
+              <div tw="mt-4">
+                <div className="tp-info text-main0">
+                  IPFS CID (will be pinned)
+                </div>
+                <IconText iconName="copy" onClick={handleCopyCID}>
+                  {cidCtrl.field.value}
+                </IconText>
+              </div>
+            )}
           </NoisyContainer>
         ) : (
+          /* Embedded (non-standalone) version */
           <div tw="py-4">
             <FileInput {...fileCtrl.field} {...fileCtrl.fieldState} />
+            {isIPFSMode && isUploading && (
+              <div tw="mt-2 flex items-center gap-2">
+                <Spinner size="3rem" color="main0" />
+                <span className="tp-info text-main0">
+                  Uploading... {uploadProgress}%
+                </span>
+              </div>
+            )}
+            {isIPFSMode && uploadError && (
+              <div tw="mt-2">
+                <span className="tp-info text-error">Error: {uploadError}</span>
+              </div>
+            )}
+            {isIPFSMode && cidCtrl.field.value && !isUploading && (
+              <div tw="mt-2">
+                <IconText iconName="copy" onClick={handleCopyCID}>
+                  {cidCtrl.field.value}
+                </IconText>
+              </div>
+            )}
           </div>
         )}
-        {!isStandAlone && (
-          <div tw="mt-4">
-            <TextInput
-              {...mountPathCtrl.field}
-              {...mountPathCtrl.fieldState}
-              required
-              label="Mount"
-              placeholder="/mount/opt"
-            />
-          </div>
-        )}
+
+        {/* Mount path and useLatest - only for embedded forms */}
         {!isStandAlone && (
           <>
+            <div tw="mt-4">
+              <TextInput
+                {...mountPathCtrl.field}
+                {...mountPathCtrl.fieldState}
+                required
+                label="Mount"
+                placeholder="/mount/opt"
+              />
+            </div>
             <div tw="mt-4 py-4">
               <Checkbox
                 {...useLatestCtrl.field}
@@ -286,7 +370,6 @@ export const AddVolume = memo((props: AddVolumeProps) => {
       {
         id: VolumeType.New,
         name: 'New volume',
-        disabled: true,
       },
       {
         id: VolumeType.Existing,
