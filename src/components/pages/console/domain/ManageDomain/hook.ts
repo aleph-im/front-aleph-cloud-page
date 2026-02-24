@@ -11,7 +11,7 @@ export function useManageDomain(): ManageDomain {
   const { hash } = router.query
 
   const handleBack = () => {
-    router.push(NAVIGATION_URLS.console.settings.home)
+    router.push(NAVIGATION_URLS.console.domain.home)
   }
 
   return {
