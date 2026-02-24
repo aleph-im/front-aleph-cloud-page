@@ -168,7 +168,6 @@ export const Header = () => {
   return (
     <>
       <StyledHeader $breakpoint={breakpoint}>
-        <LegacyBanner />
         <LoadingProgress breakpoint={breakpoint} />
         <StyledNavbarMobile
           {...{
@@ -230,6 +229,9 @@ export const Header = () => {
         </StyledNavbarDesktop>
       </StyledHeader>
       <div tw="block flex-auto grow-0 shrink-0 h-[9rem] lg:hidden"></div>
+      <div tw="flex items-center justify-center m-4">
+        <LegacyBanner />
+      </div>
       <div tw="block lg:hidden my-6 px-6 lg:px-16">
         <AutoBreadcrumb names={breadcrumbNames} />
       </div>

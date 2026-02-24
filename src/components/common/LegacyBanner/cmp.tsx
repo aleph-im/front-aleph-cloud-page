@@ -1,22 +1,24 @@
 import { memo } from 'react'
+import BorderBox from '@/components/common/BorderBox'
+import ExternalLink from '@/components/common/ExternalLink'
 
 export const LegacyBanner = () => {
   return (
-    <div tw="w-full bg-yellow-400 py-2.5 px-4 text-center">
-      <p tw="text-black text-sm leading-snug">
-        You can manage existing legacy instances here. Creating new resources
-        and adding balance is available in{' '}
-        <a
-          href="https://credits.app.aleph.im"
-          target="_blank"
-          rel="noopener noreferrer"
-          tw="underline font-bold hover:opacity-75 transition-opacity"
-        >
-          Credits
-        </a>
-        .
+    <BorderBox $color="warning" className="bg-warning">
+      <p className="tp-body1 fs-16 text-base2">
+        You can manage existing legacy instances here.
       </p>
-    </div>
+      <p className="tp-body1 fs-16 text-base2">
+        Creating new resources and adding balance is available in{' '}
+        <ExternalLink
+          href="https://credits.app.aleph.im"
+          text="Credits"
+          color="base2"
+          underline
+          tw="font-bold hover:opacity-75 transition-opacity"
+        />
+      </p>
+    </BorderBox>
   )
 }
 LegacyBanner.displayName = 'LegacyBanner'
