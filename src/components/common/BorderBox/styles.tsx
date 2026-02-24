@@ -6,12 +6,14 @@ export const BorderBox = styled.div<{
 }>`
   ${({ theme, $color = 'main0' }) => {
     const [g0, g1] = theme.gradient[$color]?.colors || [$color, $color]
+    const bgColor = theme.color[$color] || $color
 
     return css`
       ${tw`p-6`}
       border-radius: 1.5rem;
       backdrop-filter: blur(50px);
       color: ${theme.color.text}b3;
+      background-color: ${bgColor}22;
 
       &::before {
         content: '';

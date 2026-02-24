@@ -4,7 +4,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 
 export const LegacyBanner = () => {
   return (
-    <BorderBox $color="warning" className="bg-warning">
+    <BorderBox $color="warning">
       <p className="tp-body1 fs-16 text-base2">
         You can manage existing legacy instances here.
       </p>
