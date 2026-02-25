@@ -278,15 +278,31 @@ export const NAVIGATION_URLS = {
     notFound: '/404',
   },
   creditConsole: {
+    home: 'https://credits.app.aleph.im',
     computing: {
       instances: {
         home: 'https://credits.app.aleph.im/console/computing/instance',
+        new: 'https://credits.app.aleph.im/console/computing/instance/new',
       },
       gpus: {
         home: 'https://credits.app.aleph.im/console/computing/gpu-instance',
+        new: 'https://credits.app.aleph.im/console/computing/gpu-instance/new',
       },
       confidentials: {
         home: 'https://credits.app.aleph.im/console/computing/confidential',
+        new: 'https://credits.app.aleph.im/console/computing/confidential/new',
+      },
+    },
+    storage: {
+      volumes: {
+        home: 'https://credits.app.aleph.im/console/storage/volume',
+        new: 'https://credits.app.aleph.im/console/storage/volume/new',
+      },
+    },
+    hosting: {
+      websites: {
+        home: 'https://credits.app.aleph.im/console/hosting/website',
+        new: 'https://credits.app.aleph.im/console/hosting/website/new',
       },
     },
   },

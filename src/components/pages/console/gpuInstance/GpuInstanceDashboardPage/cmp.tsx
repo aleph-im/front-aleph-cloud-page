@@ -6,6 +6,7 @@ import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import GpuInstancesTabContent from '../GpuInstancesTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
 import { useGpuInstanceDashboardPage } from './hook'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export default function GpuInstanceDashboardPage() {
   const {
@@ -43,8 +44,9 @@ export default function GpuInstanceDashboardPage() {
               title="GPU Instances"
               description="Power your workloads with high-performance GPU computing. Ideal for AI, ML, rendering, and complex simulations. Scale effortlessly and take full control over your GPU resources."
               withButton={gpuInstances?.length === 0}
-              buttonUrl="/console/computing/gpu-instance/new"
+              buttonUrl={NAVIGATION_URLS.creditConsole.computing.gpus.new}
               buttonText="Create a GPU Instance"
+              buttonIsExternal
             />
           </>
         ) : (

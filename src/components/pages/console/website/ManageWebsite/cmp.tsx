@@ -20,9 +20,9 @@ import { WebsiteFrameworks } from '@/domain/website'
 import { getDate, cidV0Tov1 } from '@/helpers/utils'
 import UpdateWebsiteFolder from '@/components/form/UpdateWebsiteFolder'
 import { Volume } from '@/domain/volume'
-import ButtonLink from '@/components/common/ButtonLink'
 import IconText from '@/components/common/IconText'
 import BackButtonSection from '@/components/common/BackButtonSection'
+import DeprecatedResourceBanner from '@/components/common/DeprecatedResourceBanner'
 
 export type WebsiteVolumeProps = {
   version: string
@@ -372,14 +372,10 @@ export function ManageWebsite() {
             <UpdateWebsiteFolder control={state.control} />
           </NoisyContainer>
 
-          <div tw="mt-20 text-center">
-            <ButtonLink
-              variant="primary"
-              href={NAVIGATION_URLS.console.web3Hosting.website.new}
-            >
-              Create new website
-            </ButtonLink>
-          </div>
+          <DeprecatedResourceBanner
+            resourceName="Website"
+            createUrl={NAVIGATION_URLS.creditConsole.hosting.websites.new}
+          />
         </CenteredContainer>
       </section>
     </>

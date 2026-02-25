@@ -13,6 +13,9 @@ type ItemsProps = {
   title?: string
   img?: string
   buttonUrl?: string
+  buttonIsExternal?: boolean
+  buttonDisabled?: boolean
+  buttonTooltip?: string
   information: InformationProps
 }
 

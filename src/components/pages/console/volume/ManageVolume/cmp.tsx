@@ -1,9 +1,10 @@
-import ButtonLink from '@/components/common/ButtonLink'
 import Head from 'next/head'
 import { useManageVolume } from './hook'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import VolumeDetail from '@/components/common/VolumeDetail'
+import DeprecatedResourceBanner from '@/components/common/DeprecatedResourceBanner'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export default function ManageVolume() {
   const { volumeId, handleBack } = useManageVolume()
@@ -21,12 +22,10 @@ export default function ManageVolume() {
       <section tw="px-0 pt-20 pb-6 md:py-10">
         <CenteredContainer>
           <VolumeDetail volumeId={volumeId} showDelete />
-
-          <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/console/storage/volume/new">
-              Create new volume
-            </ButtonLink>
-          </div>
+          <DeprecatedResourceBanner
+            resourceName="Volume"
+            createUrl={NAVIGATION_URLS.creditConsole.storage.volumes.new}
+          />
         </CenteredContainer>
       </section>
     </>

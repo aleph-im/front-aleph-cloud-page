@@ -44,7 +44,11 @@ export default function VolumeDashboardPage() {
               {
                 title: 'Volumes',
                 img: EntityTypeObject[EntityType.Volume],
-                buttonUrl: '/console/storage/volume/new',
+                buttonUrl: NAVIGATION_URLS.creditConsole.storage.volumes.new,
+                buttonIsExternal: true,
+                buttonDisabled: true,
+                buttonTooltip:
+                  'Creating new volumes is now available in the Credits console',
                 information: {
                   type: 'storage',
                   data: total,
@@ -88,8 +92,9 @@ export default function VolumeDashboardPage() {
               title="Volumes"
               description="Create immutable volumes for secure and dependable data storage. Ideal for dependencies and other critical data, ensuring consistency and reliability across your applications"
               withButton={volumes.length === 0}
-              buttonUrl={NAVIGATION_URLS.console.storage.volumes.new}
+              buttonUrl={NAVIGATION_URLS.creditConsole.storage.volumes.new}
               buttonText="Create new volume"
+              buttonIsExternal
               externalLinkUrl={NAVIGATION_URLS.docs.immutableVolumes}
             />
           </>

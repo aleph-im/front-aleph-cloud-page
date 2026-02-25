@@ -112,7 +112,8 @@ export default function DashboardPage() {
                 description="Deploy and manage your websites with ease. Support for static pages, Next.js, React, and Vue.js ensures you can create dynamic and robust web experiences."
                 introductionButtonText="Deploy your website"
                 dashboardPath="/console/hosting/website"
-                createPath={NAVIGATION_URLS.console.web3Hosting.website.new}
+                createPath={NAVIGATION_URLS.creditConsole.hosting.websites.new}
+                createTarget="_blank"
                 information={{
                   type: 'amount',
                   data: websitesAggregatedStatus.total,
@@ -171,7 +172,10 @@ export default function DashboardPage() {
                 description="Deploy and manage VPS with full control. Pick nodes manually or automatically to match your computing environment."
                 introductionButtonText="Create your instance"
                 dashboardPath="/console/computing/instance"
-                createPath="/console/computing/instance/new"
+                createPath={
+                  NAVIGATION_URLS.creditConsole.computing.instances.new
+                }
+                createTarget="_blank"
                 information={{
                   type: 'computing',
                   data: instanceAggregatedStatus.total,
@@ -191,7 +195,8 @@ export default function DashboardPage() {
                 description="Run AI, ML, rendering & simulations on high-performance GPUs. Scale easily with full control over your GPU resources."
                 introductionButtonText="Create your GPU Instance"
                 dashboardPath="/console/computing/gpu-instance"
-                createPath="/console/computing/gpu-instance/new"
+                createPath={NAVIGATION_URLS.creditConsole.computing.gpus.new}
+                createTarget="_blank"
                 information={{
                   type: 'computing',
                   data: gpuInstanceAggregatedStatus.total,
@@ -210,7 +215,10 @@ export default function DashboardPage() {
                 title="TEE instances"
                 img={EntityTypeObject[EntityType.Confidential]}
                 dashboardPath="/console/computing/confidential"
-                createPath="/console/computing/confidential/new"
+                createPath={
+                  NAVIGATION_URLS.creditConsole.computing.confidentials.new
+                }
+                createTarget="_blank"
                 description="Protect your sensitive workloads with our TEE VMs. Designed for maximum privacy and security, ensuring your data stays safe."
                 introductionButtonText="Create your TEE Instance"
                 information={{
@@ -249,7 +257,8 @@ export default function DashboardPage() {
                 title="volumes"
                 img={EntityTypeObject[EntityType.Volume]}
                 dashboardPath="/console/storage"
-                createPath="/console/storage/volume/new"
+                createPath={NAVIGATION_URLS.creditConsole.storage.volumes.new}
+                createTarget="_blank"
                 description="Secure and reliable immutable volumes for your data storage needs. Ideal for dependency volumes and critical data, ensuring consistency and integrity."
                 introductionButtonText="Create your volume"
                 information={{

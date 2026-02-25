@@ -2,12 +2,12 @@ import React, { memo, useCallback } from 'react'
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
 import { VolumesTabContentProps } from './types'
-import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
 import EntityTable from '@/components/common/EntityTable'
 import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 import { Volume } from '@/domain/volume'
+import DeprecatedResourceBanner from '@/components/common/DeprecatedResourceBanner'
 
 export const VolumesTabContent = ({
   data,
@@ -74,14 +74,10 @@ export const VolumesTabContent = ({
         />
       </div>
       {cta && (
-        <div tw="mt-10 text-center">
-          <ButtonLink
-            variant="primary"
-            href={NAVIGATION_URLS.console.storage.volumes.new}
-          >
-            <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new volume
-          </ButtonLink>
-        </div>
+        <DeprecatedResourceBanner
+          resourceName="Volume"
+          createUrl={NAVIGATION_URLS.creditConsole.storage.volumes.new}
+        />
       )}
     </>
   )

@@ -6,6 +6,8 @@ import {
 } from '@aleph-front/core'
 import ButtonLink from '../ButtonLink'
 import ExternalLinkButton from '../ExternalLinkButton'
+import ExternalLink from '../ExternalLink'
+import BorderBox from '../BorderBox'
 import { DashboardCardWithSideImageProps } from './types'
 
 export const DashboardCardWithSideImage = ({
@@ -17,6 +19,7 @@ export const DashboardCardWithSideImage = ({
   withButton = true,
   buttonUrl,
   buttonText,
+  buttonIsExternal = false,
   externalLinkText = 'Learn more',
   externalLinkUrl,
 }: DashboardCardWithSideImageProps) => (
@@ -35,9 +38,26 @@ export const DashboardCardWithSideImage = ({
             </TextGradient>
             <div className="tp-body1">{description}</div>
           </div>
-          {(withButton || externalLinkUrl) && (
-            <div tw="mt-6 flex flex-wrap items-center justify-between gap-6">
-              {withButton && buttonUrl && buttonText && (
+          {buttonIsExternal && buttonUrl && (
+            <BorderBox $color="warning">
+              <p className="tp-body1 fs-16 text-base2">
+                Creating new resources is now available in the new Credits
+                console.
+              </p>
+              <p className="tp-body1 fs-16 text-base2" tw="mt-2">
+                <ExternalLink
+                  href={buttonUrl}
+                  text="Go to Credits console"
+                  color="main0"
+                  tw="font-bold"
+                />
+              </p>
+            </BorderBox>
+          )}
+          {((!buttonIsExternal && withButton && buttonUrl && buttonText) ||
+            externalLinkUrl) && (
+            <div tw="flex flex-wrap items-center justify-between gap-6">
+              {!buttonIsExternal && withButton && buttonUrl && buttonText && (
                 <ButtonLink variant="primary" size="md" href={buttonUrl}>
                   {buttonText}
                 </ButtonLink>

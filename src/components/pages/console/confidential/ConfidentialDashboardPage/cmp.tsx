@@ -33,8 +33,11 @@ export default function ConfidentialDashboardPage() {
               info="WHAT IS A..."
               title="TEE Instance"
               description="Protect your sensitive workloads with our TEE VMs. Designed for maximum privacy and security, ensuring your execution and data stays safe."
-              buttonUrl="/console/computing/confidential/new"
+              buttonUrl={
+                NAVIGATION_URLS.creditConsole.computing.confidentials.new
+              }
               buttonText="Create a TEE Instance"
+              buttonIsExternal
               externalLinkText="Developer docs"
               externalLinkUrl={NAVIGATION_URLS.docs.confidentials}
             />

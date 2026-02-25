@@ -8,6 +8,7 @@ import InstancesTabContent from '../InstancesTabContent'
 import VolumesTabContent from '../../volume/VolumesTabContent'
 import DomainsTabContent from '../../domain/DomainsTabContent'
 import DashboardCardWithSideImage from '@/components/common/DashboardCardWithSideImage'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export default function InstanceDashboardPage() {
   const { tabs, tabId, setTabId, instances, volumes, domains } =
@@ -40,8 +41,9 @@ export default function InstanceDashboardPage() {
               title="Instances"
               description="Launch and control virtual private servers (VPS) with ease. Choose between automatic or manual node selection, and customize your computing environment to meet your specific needs."
               withButton={instances?.length === 0}
-              buttonUrl="/console/computing/instance/new"
+              buttonUrl={NAVIGATION_URLS.creditConsole.computing.instances.new}
               buttonText="Create instance"
+              buttonIsExternal
             />
           </>
         ) : tabId === 'volume' ? (
