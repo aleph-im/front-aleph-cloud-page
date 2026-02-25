@@ -13,6 +13,7 @@ export type UseExecutableStatusProps = {
 }
 
 export type BoostPollingOptions = {
+  enforcedStatus?: ExecutableCalculatedStatus
   expectedStatuses?: ExecutableCalculatedStatus[]
   onComplete?: () => void
 }
@@ -33,19 +34,25 @@ export function useExecutableStatus({
   const [status, setStatus] =
     useState<UseExecutableStatusReturn['status']>(undefined)
   const [hasTriedFetchingStatus, setHasTriedFetchingStatus] = useState(false)
+  const [enforcedStatus, setEnforcedStatus] = useState<
+    ExecutableCalculatedStatus | undefined
+  >(undefined)
 
   const boostIntervalRef = useRef<NodeJS.Timeout>()
   const boostCountRef = useRef(0)
   const isBoostActiveRef = useRef(false)
   const onBoostCompleteRef = useRef<(() => void) | undefined>()
 
-  const calculatedStatus: ExecutableCalculatedStatus = useMemo(() => {
+  const rawCalculatedStatus: ExecutableCalculatedStatus = useMemo(() => {
     return calculateExecutableStatus(
       hasTriedFetchingStatus,
       status,
       executable?.type,
     )
   }, [hasTriedFetchingStatus, status, executable?.type])
+
+  // Use enforced status if set (during action button polling), otherwise use calculated
+  const calculatedStatus = enforcedStatus || rawCalculatedStatus
 
   // Use ref to access current status in interval without triggering re-renders
   const calculatedStatusRef = useRef(calculatedStatus)
@@ -86,10 +93,19 @@ export function useExecutableStatus({
     (options?: BoostPollingOptions) => {
       if (!manager || !executable) return
 
-      const { expectedStatuses, onComplete } = options || {}
+      const {
+        enforcedStatus: newEnforcedStatus,
+        expectedStatuses,
+        onComplete,
+      } = options || {}
 
       if (boostIntervalRef.current) {
         clearInterval(boostIntervalRef.current)
+      }
+
+      // Set the enforced status if provided
+      if (newEnforcedStatus) {
+        setEnforcedStatus(newEnforcedStatus)
       }
 
       boostCountRef.current = 0
@@ -101,6 +117,8 @@ export function useExecutableStatus({
           clearInterval(boostIntervalRef.current)
         }
         isBoostActiveRef.current = false
+        // Clear the enforced status
+        setEnforcedStatus(undefined)
         onBoostCompleteRef.current?.()
         onBoostCompleteRef.current = undefined
       }

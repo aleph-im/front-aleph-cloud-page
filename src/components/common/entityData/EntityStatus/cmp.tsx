@@ -20,13 +20,19 @@ const EntityStatusV2 = ({ theme, calculatedStatus }: EntityStatusPropsV2) => {
         return 'success'
       case 'preparing':
         return 'warning'
+      case 'starting':
+        return 'info'
+      case 'rebooting':
+        return 'info'
+      default:
+        return 'warning'
     }
   }, [calculatedStatus])
 
   const text = useMemo(() => {
     switch (calculatedStatus) {
       case 'not-allocated':
-        return 'NOT ALLLOCATED'
+        return 'NOT ALLOCATED'
       case 'stopped':
         return 'STOPPED'
       case 'stopping':
@@ -35,6 +41,12 @@ const EntityStatusV2 = ({ theme, calculatedStatus }: EntityStatusPropsV2) => {
         return 'RUNNING'
       case 'preparing':
         return 'PREPARING'
+      case 'starting':
+        return 'STARTING'
+      case 'rebooting':
+        return 'REBOOTING'
+      default:
+        return 'UNKNOWN'
     }
   }, [calculatedStatus])
 
@@ -50,6 +62,12 @@ const EntityStatusV2 = ({ theme, calculatedStatus }: EntityStatusPropsV2) => {
         return false
       case 'preparing':
         return true
+      case 'starting':
+        return true
+      case 'rebooting':
+        return true
+      default:
+        return false
     }
   }, [calculatedStatus])
 
