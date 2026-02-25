@@ -153,7 +153,7 @@ export const EntityTypeUrlSection: Record<EntityType, string> = {
   [EntityType.GpuInstance]: 'computing',
   [EntityType.Confidential]: 'computing',
   [EntityType.SSHKey]: 'settings',
-  [EntityType.Domain]: 'settings',
+  [EntityType.Domain]: 'domain',
   [EntityType.Website]: 'hosting',
 }
 
@@ -213,11 +213,11 @@ export const NAVIGATION_URLS = {
         new: '/console/settings/ssh/new',
         detail: (id: string) => `/console/settings/ssh/${id}`,
       },
-      domain: {
-        home: '/console/settings/domain',
-        new: '/console/settings/domain/new',
-        detail: (id: string) => `/console/settings/domain/${id}`,
-      },
+    },
+    domain: {
+      home: '/console/domain',
+      new: '/console/domain/new',
+      detail: (id: string) => `/console/domain/${id}`,
     },
     web3Hosting: {
       home: '/console/hosting',

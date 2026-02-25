@@ -14,11 +14,7 @@ import { Separator, Text } from '@/components/pages/console/common'
 import { ellipseAddress } from '@/helpers/utils'
 import { useDomainDetail } from './hook'
 import { NAVIGATION_URLS } from '@/helpers/constants'
-import {
-  EntityDomainType,
-  EntityDomainTypeName,
-  EntityTypeName,
-} from '@/helpers/constants'
+import { EntityDomainTypeName, EntityTypeName } from '@/helpers/constants'
 import Skeleton from '../Skeleton'
 import Link from 'next/link'
 
@@ -29,8 +25,8 @@ export const DomainDetail = ({
   const {
     domain,
     status,
+    rules,
     refEntity,
-    account,
     handleDelete,
     disabledDelete,
     handleUpdate,
@@ -175,116 +171,47 @@ export const DomainDetail = ({
               </Text>
             </div>
 
-            {domain &&
-              (!status.tasks_status.cname ||
-                !status.tasks_status.owner_proof) && (
-                <>
-                  <div tw="my-5">
-                    <div className="tp-info text-main0">PENDING STEPS</div>
-                    <Text>
-                      <div tw="flex mt-2">
-                        <BulletItem
-                          kind={
-                            status.tasks_status.cname ? 'success' : 'warning'
-                          }
-                          title={''}
-                        />
-                        <div>
-                          Create a CNAME record
-                          <span className="text-main0" tw="mx-2">
-                            {domain.name}
-                          </span>
-                          with value
-                          {domain.target == EntityDomainType.Program && (
-                            <span className="text-main0" tw="mx-2">
-                              {domain.name}.program.public.aleph.sh.
-                            </span>
-                          )}
-                          {[
-                            EntityDomainType.Instance,
-                            EntityDomainType.Confidential,
-                          ].includes(domain.target) && (
-                            <span className="text-main0" tw="mx-2">
-                              {domain.name}.instance.public.aleph.sh.
-                            </span>
-                          )}
-                          {domain.target == EntityDomainType.IPFS && (
-                            <span className="text-main0" tw="mx-2">
-                              ipfs.public.aleph.sh.
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Text>
-                    {domain.target == EntityDomainType.IPFS && (
-                      <Text>
+            {domain && !status.status && rules && rules.length > 0 && (
+              <>
+                <div tw="my-5">
+                  <div className="tp-info text-main0">PENDING STEPS</div>
+                  {rules.map((rule) => {
+                    const isOk = status.tasks_status[rule.name]
+                    return (
+                      <Text key={rule.name}>
                         <div tw="flex mt-2">
                           <BulletItem
-                            kind={
-                              status.tasks_status.delegation
-                                ? 'success'
-                                : 'warning'
-                            }
+                            kind={isOk ? 'success' : 'warning'}
                             title={''}
                           />
-                          <div>
-                            Create a CNAME record
-                            <span className="text-main0" tw="mx-2">
-                              _dnslink.{domain.name}
-                            </span>
-                            with value
-                            <span className="text-main0" tw="mx-2">
-                              _dnslink.{domain.name}.static.public.aleph.sh.
-                            </span>
-                          </div>
+                          <div>{rule.info}</div>
                         </div>
                       </Text>
-                    )}
-                    <Text>
-                      <div tw="flex mt-2">
-                        <BulletItem
-                          kind={
-                            status.tasks_status.owner_proof
-                              ? 'success'
-                              : 'warning'
-                          }
-                          title={''}
-                        />
-                        <div>
-                          Create a TXT owner proof record
-                          <span className="text-main0" tw="mx-2">
-                            _control.{domain.name}
-                          </span>
-                          with value
-                          <span className="text-main0" tw="mx-2">
-                            {account?.address}
-                          </span>
-                        </div>
-                      </div>
-                    </Text>
-                  </div>
+                    )
+                  })}
+                </div>
 
-                  <div tw="my-5">
-                    <div className="tp-info text-main0">FINAL STEP</div>
-                    <Text>
-                      After configuring the domain records you can retry to link
-                      them again here
-                    </Text>
-                  </div>
+                <div tw="my-5">
+                  <div className="tp-info text-main0">FINAL STEP</div>
+                  <Text>
+                    After configuring the domain records you can retry to link
+                    them again here
+                  </Text>
+                </div>
 
-                  <div tw="my-5">
-                    <Button
-                      onClick={handleRetry}
-                      size="md"
-                      variant="secondary"
-                      color="main0"
-                      kind="default"
-                    >
-                      Retry
-                    </Button>
-                  </div>
-                </>
-              )}
+                <div tw="my-5">
+                  <Button
+                    onClick={handleRetry}
+                    size="md"
+                    variant="secondary"
+                    color="main0"
+                    kind="default"
+                  >
+                    Retry
+                  </Button>
+                </div>
+              </>
+            )}
           </>
         )}
 

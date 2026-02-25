@@ -17,12 +17,12 @@ export function useNewDomainPage(): UseNewDomainPageReturn {
 
   const onSuccess = useCallback(
     (domain: Domain) => {
-      router.push(NAVIGATION_URLS.console.settings.domain.detail(domain.id))
+      router.push(NAVIGATION_URLS.console.domain.detail(domain.id))
     },
     [router],
   )
   const handleBack = useCallback(() => {
-    router.push(NAVIGATION_URLS.console.settings.home)
+    router.push(NAVIGATION_URLS.console.domain.home)
   }, [router])
 
   return {

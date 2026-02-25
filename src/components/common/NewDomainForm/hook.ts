@@ -2,8 +2,13 @@ import { FormEvent, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
+import { useDomainRules } from '@/hooks/common/useDomainRules'
+import { useRequestInstances } from '@/hooks/common/useRequestEntity/useRequestInstances'
+import { useRequestPrograms } from '@/hooks/common/useRequestEntity/useRequestPrograms'
+import { useRequestWebsites } from '@/hooks/common/useRequestEntity/useRequestWebsites'
+import { useRequestConfidentials } from '@/hooks/common/useRequestEntity/useRequestConfidentials'
 import { useAppState } from '@/contexts/appState'
-import { DomainManager } from '@/domain/domain'
+import { DomainManager, DomainRule } from '@/domain/domain'
 import { EntityDomainType } from '@/helpers/constants'
 import {
   FieldErrors,
@@ -40,6 +45,7 @@ export type UseNewDomainFormReturn = {
   nameCtrl: UseControllerReturn<NewDomainFormState, 'name'>
   targetCtrl: UseControllerReturn<NewDomainFormState, 'target'>
   refCtrl: UseControllerReturn<NewDomainFormState, 'ref'>
+  rules: DomainRule[] | undefined
   errors: FieldErrors<NewDomainFormState>
   handleSubmit: (e: FormEvent) => Promise<void>
   setTarget: (target: EntityDomainType) => void
@@ -54,16 +60,12 @@ export function useNewDomainForm({
   onSuccess,
 }: NewDomainFormProps): UseNewDomainFormReturn {
   const router = useRouter()
+  const [, dispatch] = useAppState()
 
-  const [
-    {
-      instance: { entities: instances },
-      program: { entities: programs },
-      website: { entities: websites },
-      confidential: { entities: confidentials },
-    },
-    dispatch,
-  ] = useAppState()
+  const { entities: instances } = useRequestInstances()
+  const { entities: programs } = useRequestPrograms()
+  const { entities: websites } = useRequestWebsites()
+  const { entities: confidentials } = useRequestConfidentials()
 
   const manager = useDomainManager()
   const { next, stop } = useCheckoutNotification({})
@@ -237,11 +239,25 @@ export function useNewDomainForm({
     setValue('ref', ref)
   }
 
+  const domainName = nameCtrl.field.value
+  const domainTarget = targetCtrl.field.value
+
+  const partialDomain = useMemo(
+    () =>
+      domainName && domainTarget
+        ? { name: domainName, target: domainTarget }
+        : undefined,
+    [domainName, domainTarget],
+  )
+
+  const rules = useDomainRules(partialDomain)
+
   return {
     entities,
     nameCtrl,
     targetCtrl,
     refCtrl,
+    rules,
     errors,
     handleSubmit,
     setTarget,

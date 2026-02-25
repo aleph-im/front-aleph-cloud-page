@@ -45,13 +45,27 @@ export type Domain = AddDomain & {
 
 export type DomainStatus = {
   status: boolean
-  tasks_status: {
-    cname: boolean
-    delegation: boolean
-    owner_proof: boolean
-  }
+  tasks_status: Record<string, boolean>
   err: string
   help: string
+}
+
+export type DomainDnsRecord = {
+  type: string
+  name: string
+  value: string
+}
+
+export type DomainRule = {
+  name: string
+  dns: DomainDnsRecord
+  info: string
+  on_error: string
+}
+
+export type DomainRulesResponse = {
+  status: boolean
+  rules: DomainRule[]
 }
 
 enum DomainCollision {
@@ -161,6 +175,27 @@ export class DomainManager extends AggregateManager<
     })
     const response = await query.json()
     return response
+  }
+
+  async getRules(
+    domain: Pick<Domain, 'name' | 'target'>,
+  ): Promise<DomainRule[]> {
+    if (!this.account) throw Err.InvalidAccount
+
+    const response = await fetch('https://api.dns.public.aleph.sh/domain/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: domain.name,
+        owner: this.account.address,
+        target:
+          domain.target == EntityDomainType.Confidential
+            ? EntityDomainType.Instance
+            : domain.target,
+      }),
+    })
+    const data: DomainRulesResponse = await response.json()
+    return data.rules
   }
 
   async getAddSteps(
