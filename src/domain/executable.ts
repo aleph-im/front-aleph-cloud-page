@@ -150,6 +150,7 @@ export type ExecutableOperations =
   | 'erase'
   | 'stop'
   | 'update'
+  | 'reinstall'
 
 export type KeyPair = {
   publicKey: JsonWebKey
