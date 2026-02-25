@@ -102,17 +102,31 @@ export const GpuInstancesTabContent = React.memo(
                     label: '',
                     align: 'right',
                     render: (row) => {
-                      const disabled = !isCredit(row)
+                      if (isCredit(row)) {
+                        return (
+                          <Button
+                            kind="functional"
+                            variant="secondary"
+                            onClick={() => handleRowClick(row)}
+                          >
+                            <Icon name="angle-right" size="lg" />
+                          </Button>
+                        )
+                      }
 
                       return (
-                        <Button
-                          kind="functional"
-                          variant="secondary"
-                          onClick={() => handleRowClick(row)}
-                          disabled={disabled}
+                        <a
+                          href={NAVIGATION_URLS.legacyConsole.computing.gpus.detail(
+                            row.id,
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          <Icon name="angle-right" size="lg" />
-                        </Button>
+                          <Button kind="functional" variant="secondary">
+                            <Icon name="external-link" size="lg" />
+                          </Button>
+                        </a>
                       )
                     },
                     cellProps: () => ({

@@ -226,6 +226,8 @@ export const NAVIGATION_URLS = {
       website: {
         home: `${LEGACY_CONSOLE_DOMAIN}/hosting/website`,
         new: `${LEGACY_CONSOLE_DOMAIN}/hosting/website/new`,
+        detail: (id: string) =>
+          `${LEGACY_CONSOLE_DOMAIN}/hosting/website/${id}`,
       },
     },
     computing: {
@@ -233,18 +235,26 @@ export const NAVIGATION_URLS = {
       functions: {
         home: `${LEGACY_CONSOLE_DOMAIN}/computing/function`,
         new: `${LEGACY_CONSOLE_DOMAIN}/computing/function/new`,
+        detail: (id: string) =>
+          `${LEGACY_CONSOLE_DOMAIN}/computing/function/${id}`,
       },
       instances: {
         home: `${LEGACY_CONSOLE_DOMAIN}/computing/instance`,
         new: `${LEGACY_CONSOLE_DOMAIN}/computing/instance/new`,
+        detail: (id: string) =>
+          `${LEGACY_CONSOLE_DOMAIN}/computing/instance/${id}`,
       },
       gpus: {
         home: `${LEGACY_CONSOLE_DOMAIN}/computing/gpu-instance`,
         new: `${LEGACY_CONSOLE_DOMAIN}/computing/gpu-instance/new`,
+        detail: (id: string) =>
+          `${LEGACY_CONSOLE_DOMAIN}/computing/gpu-instance/${id}`,
       },
       confidentials: {
         home: `${LEGACY_CONSOLE_DOMAIN}/computing/confidential`,
         new: `${LEGACY_CONSOLE_DOMAIN}/computing/confidential/new`,
+        detail: (id: string) =>
+          `${LEGACY_CONSOLE_DOMAIN}/computing/confidential/${id}`,
       },
     },
     storage: {
@@ -252,6 +262,7 @@ export const NAVIGATION_URLS = {
       volumes: {
         home: `${LEGACY_CONSOLE_DOMAIN}/storage/volume`,
         new: `${LEGACY_CONSOLE_DOMAIN}/storage/volume/new`,
+        detail: (id: string) => `${LEGACY_CONSOLE_DOMAIN}/storage/volume/${id}`,
       },
     },
   },
