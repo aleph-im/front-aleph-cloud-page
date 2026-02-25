@@ -5,6 +5,7 @@ import HoldTokenDisclaimer from '@/components/common/HoldTokenDisclaimer'
 import BackButtonSection from '@/components/common/BackButtonSection'
 import { useManageDomain } from './hook'
 import DomainDetail from '@/components/common/DomainDetail'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export default function ManageDomain() {
   const { domainId, handleBack } = useManageDomain()
@@ -24,7 +25,10 @@ export default function ManageDomain() {
           <DomainDetail domainId={domainId} showDelete />
 
           <div tw="mt-20 text-center">
-            <ButtonLink variant="primary" href="/console/settings/domain/new">
+            <ButtonLink
+              variant="primary"
+              href={NAVIGATION_URLS.console.domain.new}
+            >
               Add new domain
             </ButtonLink>
           </div>
