@@ -6,14 +6,14 @@ export const BorderBox = styled.div<{
 }>`
   ${({ theme, $color = 'main0' }) => {
     const [g0, g1] = theme.gradient[$color]?.colors || [$color, $color]
+    const bgColor = theme.color[$color] || $color
 
     return css`
       ${tw`p-6`}
       border-radius: 1.5rem;
       backdrop-filter: blur(50px);
       color: ${theme.color.text}b3;
-
-      background: linear-gradient(90deg, ${g0}1a 0%, ${g1}1a 100%);
+      background-color: ${bgColor}22;
 
       &::before {
         content: '';
@@ -35,7 +35,6 @@ export const BorderBox = styled.div<{
         -webkit-mask-composite: exclude;
         mask-composite: exclude;
         -webkit-mask-composite: xor;
-
         background-image: linear-gradient(90deg, ${g0} 0%, ${g1} 100%);
       }
     `
