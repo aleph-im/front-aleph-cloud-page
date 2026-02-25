@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useMemo, useState } from 'react'
 import {
+  BulletItem,
   Button,
   Dropdown,
   DropdownOption,
@@ -21,6 +22,7 @@ import {
   EntityDomainTypeName,
   NAVIGATION_URLS,
 } from '@/helpers/constants'
+import { Text } from '@/components/pages/console/common'
 import { StyledSection } from './styles'
 
 export const NewDomainForm = ({
@@ -36,6 +38,7 @@ export const NewDomainForm = ({
     nameCtrl,
     targetCtrl,
     refCtrl,
+    rules,
     errors,
     handleSubmit,
     setTarget,
@@ -86,6 +89,7 @@ export const NewDomainForm = ({
     }
   }
 
+  const isUpdate = !!name
   const isEmbedded = variant === 'embedded'
   const Wrapper = isEmbedded ? React.Fragment : CenteredContainer
 
@@ -126,7 +130,7 @@ export const NewDomainForm = ({
                 size="md"
                 variant="primary"
               >
-                Create domain
+                {isUpdate ? 'Update domain' : 'Create domain'}
               </Button>
             </div>
           )}
@@ -268,6 +272,23 @@ export const NewDomainForm = ({
                 <></>
               )}
             </div>
+            {rules && rules.length > 0 && (
+              <NoisyContainer tw="mt-6">
+                <div className="tp-info text-main0">DNS CONFIGURATION</div>
+                <p tw="mt-2 mb-4">
+                  Configure these DNS records before creating the domain for
+                  instant detection:
+                </p>
+                {rules.map((rule) => (
+                  <Text key={rule.name}>
+                    <div tw="flex mt-2">
+                      <BulletItem kind="warning" title="" />
+                      <div>{rule.info}</div>
+                    </div>
+                  </Text>
+                ))}
+              </NoisyContainer>
+            )}
             <div tw="mt-10 text-center z-0">
               <Button
                 type="submit"
@@ -276,7 +297,7 @@ export const NewDomainForm = ({
                 size="md"
                 variant="primary"
               >
-                Create domain
+                {isUpdate ? 'Update domain' : 'Create domain'}
               </Button>
             </div>
           </StyledSection>

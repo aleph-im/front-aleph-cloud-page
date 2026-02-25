@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useCopyToClipboardAndNotify } from '@aleph-front/core'
-import { Domain, DomainStatus } from '@/domain/domain'
+import { Domain, DomainRule, DomainStatus } from '@/domain/domain'
 import { useDomainManager } from '@/hooks/common/useManager/useDomainManager'
 import { useAppState } from '@/contexts/appState'
 import { useRequestDomains } from '@/hooks/common/useRequestEntity/useRequestDomains'
@@ -18,11 +18,13 @@ import { Account } from '@aleph-sdk/account'
 import { Confidential } from '@/domain/confidential'
 import { useHashToEntity } from '@/hooks/common/useHashToEntity'
 import { useDomainStatus } from '@/hooks/common/useDomainStatus'
+import { useDomainRules } from '@/hooks/common/useDomainRules'
 import { NAVIGATION_URLS } from '@/helpers/constants'
 
 export type UseDomainDetailReturn = {
   domain?: Domain
   status?: DomainStatus
+  rules?: DomainRule[]
   refEntity?: Program | Instance | Volume | Confidential
   account?: Account
   handleDelete: () => void
@@ -63,6 +65,7 @@ export function useDomainDetail({
     | undefined
 
   const status = useDomainStatus(domain)
+  const rules = useDomainRules(domain)
 
   const manager = useDomainManager()
   const { next, stop, noti } = useCheckoutNotification({})
@@ -87,7 +90,7 @@ export function useDomainDetail({
 
       dispatchDeleteEntity(domain.id)
 
-      await router.replace(NAVIGATION_URLS.console.home)
+      await router.replace(NAVIGATION_URLS.console.domain.home)
     } catch (e) {
       console.error(e)
 
@@ -116,9 +119,7 @@ export function useDomainDetail({
       ref: domain.ref,
     })
 
-    router.push(
-      `${NAVIGATION_URLS.console.settings.domain.new}/?${params.toString()}`,
-    )
+    router.push(`${NAVIGATION_URLS.console.domain.new}/?${params.toString()}`)
   }, [router, domain])
 
   const handleRetry = useCallback(async () => {
@@ -138,6 +139,7 @@ export function useDomainDetail({
   return {
     domain,
     status,
+    rules,
     refEntity,
     account,
     handleDelete,

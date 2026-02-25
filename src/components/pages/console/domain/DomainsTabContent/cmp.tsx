@@ -1,14 +1,19 @@
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useMemo, useState } from 'react'
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
 import { DomainsTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
-import { Button, Icon } from '@aleph-front/core'
+import { BulletItem, Button, Icon } from '@aleph-front/core'
 import IconText from '@/components/common/IconText'
 import { Text } from '../../common'
-import { EntityDomainType, EntityDomainTypeName } from '@/helpers/constants'
+import {
+  EntityDomainType,
+  EntityDomainTypeName,
+  NAVIGATION_URLS,
+} from '@/helpers/constants'
 import { useDomainsEntityNames } from '@/hooks/common/useDomainsEntityNames'
+import { useDomainStatuses } from '@/hooks/common/useDomainStatuses'
 import { Domain } from '@/domain/domain'
 
 export const DomainsTabContent = ({
@@ -18,11 +23,20 @@ export const DomainsTabContent = ({
   const router = useRouter()
   const handleRowClick = useCallback(
     (domain: Domain) => {
-      router.push(`/console/settings/domain/${domain.id}`)
+      router.push(NAVIGATION_URLS.console.domain.detail(domain.id))
     },
     [router],
   )
   const entityNames = useDomainsEntityNames(data)
+  const statuses = useDomainStatuses(data)
+
+  const pageSize = 10
+  const [page, setPage] = useState(0)
+  const pageCount = Math.ceil(data.length / pageSize)
+  const pageData = useMemo(
+    () => data.slice(page * pageSize, (page + 1) * pageSize),
+    [data, page],
+  )
 
   return (
     <>
@@ -31,7 +45,7 @@ export const DomainsTabContent = ({
           borderType="none"
           rowNoise
           rowKey={(row) => row.id}
-          data={data}
+          data={pageData}
           rowProps={(row) => ({
             onClick: () => handleRowClick(row),
             css: row.confirmed ? '' : tw`opacity-60`,
@@ -42,17 +56,32 @@ export const DomainsTabContent = ({
               label: 'Name',
               width: '50%',
               sortable: true,
-              render: (row) => (
-                <a
-                  href={`https://${row.name}`}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                >
-                  <IconText iconName="square-up-right">
-                    <Text tw="not-italic! font-bold!">{row.name}</Text>
-                  </IconText>
-                </a>
-              ),
+              render: (row) => {
+                const status = statuses.get(row.id)
+                return (
+                  <div tw="flex items-center gap-2">
+                    <BulletItem
+                      kind={
+                        status === undefined
+                          ? 'warning'
+                          : status.status
+                            ? 'success'
+                            : 'warning'
+                      }
+                      title=""
+                    />
+                    <a
+                      href={`https://${row.name}`}
+                      target="_blank"
+                      referrerPolicy="no-referrer"
+                    >
+                      <IconText iconName="square-up-right">
+                        <Text tw="not-italic! font-bold!">{row.name}</Text>
+                      </IconText>
+                    </a>
+                  </div>
+                )
+              },
             },
             {
               label: 'Target',
@@ -93,9 +122,37 @@ export const DomainsTabContent = ({
           ]}
         />
       </div>
+      {pageCount > 1 && (
+        <div tw="flex items-center justify-center gap-4 mt-6">
+          <Button
+            kind="functional"
+            variant="secondary"
+            size="md"
+            disabled={page === 0}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            <Icon name="angle-left" size="lg" />
+          </Button>
+          <span className="tp-body2">
+            {page + 1} / {pageCount}
+          </span>
+          <Button
+            kind="functional"
+            variant="secondary"
+            size="md"
+            disabled={page >= pageCount - 1}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            <Icon name="angle-right" size="lg" />
+          </Button>
+        </div>
+      )}
       {cta && (
         <div tw="mt-10 text-center">
-          <ButtonLink variant="primary" href="/console/settings/domain/new">
+          <ButtonLink
+            variant="primary"
+            href={NAVIGATION_URLS.console.domain.new}
+          >
             <Icon name="plus-circle" size="lg" tw="mr-1" /> Create new domain
           </ButtonLink>
         </div>

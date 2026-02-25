@@ -137,6 +137,18 @@ export function useRoutes(): UseRoutesReturn {
                 ],
               },
               {
+                name: 'DNS',
+                href: NAVIGATION_URLS.console.domain.home,
+                icon: 'manageWebsite',
+                children: [
+                  {
+                    name: 'Domains',
+                    href: NAVIGATION_URLS.console.domain.home,
+                    icon: 'manageWebsite',
+                  },
+                ],
+              },
+              {
                 name: 'Tools',
                 href: '#',
                 icon: 'console',
