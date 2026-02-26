@@ -5,7 +5,12 @@ import {
   useRequestCRNSpecs,
 } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { useNodeManager } from '@/hooks/common/useManager/useNodeManager'
-import { CRNSpecs, StreamNotSupportedIssue } from '@/domain/node'
+import {
+  CRNSpecs,
+  NodeManager,
+  ReducedCRNSpecs,
+  StreamNotSupportedIssue,
+} from '@/domain/node'
 import {
   DropdownProps,
   useDebounceState,
@@ -35,6 +40,7 @@ export type UseCRNListProps = {
   selected?: CRNSpecs
   onSelectedChange: (selected: CRNSpecs) => void
   enableGpu?: boolean
+  filterBySpecs?: ReducedCRNSpecs
 }
 
 export type UseCRNListReturn = UseCRNListProps &
@@ -42,6 +48,7 @@ export type UseCRNListReturn = UseCRNListProps &
   UseRequestCRNSpecsReturn & {
     nodesIssues?: StreamSupportedIssues
     filteredNodes?: CRNSpecs[]
+    totalCompatibleNodes: number
     filterOptions: CRNListFilterOptions
     loadItemsDisabled: boolean
     handleLoadItems: () => Promise<void>
@@ -59,7 +66,7 @@ export type UseCRNListReturn = UseCRNListProps &
   }
 
 export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
-  const { enableGpu } = props
+  const { enableGpu, filterBySpecs } = props
 
   const nodeManager = useNodeManager()
   const costManager = useCostManager()
@@ -274,6 +281,13 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
   const filteredNodes = useMemo(() => {
     try {
       return validCreditNodes?.filter((node) => {
+        // Filter by tier specs if provided (only show nodes compatible with selected tier)
+        if (filterBySpecs) {
+          if (!NodeManager.validateMinNodeSpecs(filterBySpecs, node)) {
+            return false
+          }
+        }
+
         if (gpuFilter) {
           if (node.selectedGpu?.model !== gpuFilter) return false
         }
@@ -297,7 +311,14 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     } finally {
       setIsLoadingList(false)
     }
-  }, [gpuFilter, cpuFilter, hddFilter, ramFilter, validCreditNodes])
+  }, [
+    filterBySpecs,
+    gpuFilter,
+    cpuFilter,
+    hddFilter,
+    ramFilter,
+    validCreditNodes,
+  ])
 
   const sortedNodes = useMemo(() => {
     if (!filteredNodes) return
@@ -355,6 +376,9 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     resetDeps: [baseFilteredNodes],
   })
 
+  // Total number of nodes compatible with the filter specs (before pagination)
+  const totalCompatibleNodes = sortedFilteredNodes?.length || 0
+
   return {
     ...props,
     lastVersion,
@@ -362,6 +386,7 @@ export function useCRNList(props: UseCRNListProps): UseCRNListReturn {
     loading,
     nodesIssues,
     filteredNodes: paginatedSortedFilteredNodes,
+    totalCompatibleNodes,
     filterOptions,
     loadItemsDisabled,
     handleLoadItems,

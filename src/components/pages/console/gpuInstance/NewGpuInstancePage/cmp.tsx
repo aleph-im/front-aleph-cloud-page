@@ -11,6 +11,7 @@ import {
   NoisyContainer,
   Checkbox,
   Modal,
+  Icon,
 } from '@aleph-front/core'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { CRNSpecs } from '@/domain/node'
@@ -60,6 +61,8 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
     setSelectedNode,
     termsAndConditions,
     shouldRequestTermsAndConditions,
+    aggregatedSpecs,
+    compatibleNodesCount,
     handleManuallySelectCRN,
     handleSelectNode,
     handleSubmit,
@@ -135,55 +138,60 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={1}>
-              Selected GPU
-            </CompositeSectionTitle>
+            <CompositeSectionTitle number={1}>Select GPU</CompositeSectionTitle>
             <p>
-              Your instance is configured with your manually selected GPU,
-              operating under the <Strong>credit-based</Strong> payment system.
-              This setup provides direct control over your resource allocation
-              and costs. Your credits are deducted only as you consume
-              resources, ensuring you pay exactly for what you use. To adjust
-              your GPU, modify your selection below.
+              Select a GPU for your instance. This will determine the available
+              tiers and configuration options. Operating under the{' '}
+              <Strong>credit-based</Strong> payment system, your credits are
+              deducted only as you consume resources, ensuring you pay exactly
+              for what you use.
             </p>
             <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
               <NoisyContainer>
-                <NodesTable
-                  columns={columns}
-                  data={nodeData}
-                  rowProps={() => ({ className: '_active' })}
-                />
-                <div tw="mt-6">
-                  {!node && (
-                    <>
-                      <ButtonWithInfoTooltip
-                        ref={manuallySelectButtonRef}
-                        type="button"
-                        kind="functional"
-                        variant="warning"
-                        size="md"
-                        disabled={manuallySelectCRNDisabled}
-                        tooltipContent={manuallySelectCRNDisabledMessage}
-                        onClick={handleManuallySelectCRN}
-                      >
-                        Manually select GPU
-                      </ButtonWithInfoTooltip>
-                    </>
-                  )}
-                </div>
+                {node ? (
+                  <>
+                    <NodesTable
+                      columns={columns}
+                      data={nodeData}
+                      rowProps={() => ({ className: '_active' })}
+                    />
+                    <div tw="mt-4 flex items-center gap-2 opacity-60">
+                      <Icon name="info-circle" size="sm" />
+                      <span className="tp-body3">
+                        Auto-selected best CRN with this GPU (
+                        {compatibleNodesCount} compatible nodes)
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div tw="p-6 text-center">
+                    <p tw="mb-4 opacity-60">No GPU selected yet</p>
+                    <ButtonWithInfoTooltip
+                      ref={manuallySelectButtonRef}
+                      type="button"
+                      kind="functional"
+                      variant="warning"
+                      size="md"
+                      disabled={manuallySelectCRNDisabled}
+                      tooltipContent={manuallySelectCRNDisabledMessage}
+                      onClick={handleManuallySelectCRN}
+                    >
+                      Select GPU
+                    </ButtonWithInfoTooltip>
+                  </div>
+                )}
               </NoisyContainer>
             </div>
           </CenteredContainer>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={1}>
+            <CompositeSectionTitle number={2}>
               Select your tier
             </CompositeSectionTitle>
             <p>
               Please select one of the available instance tiers as a base for
-              your VM. You will be able to customize the volumes further below
-              in the form.
+              your VM. Tiers are filtered based on your selected GPU.
             </p>
 
             <div tw="px-0 my-6 relative">
@@ -195,10 +203,11 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
                 gpuModel={node?.selectedGpu?.model}
                 isPersistent
                 nodeSpecs={nodeSpecs}
+                aggregatedSpecs={aggregatedSpecs}
               >
                 {!node && (
                   <div tw="mt-6 text-center">
-                    First select your node in the previous step
+                    First select your GPU in the previous step
                   </div>
                 )}
               </SelectInstanceSpecs>
@@ -207,7 +216,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={2}>
+            <CompositeSectionTitle number={3}>
               Choose an image
             </CompositeSectionTitle>
             <p>
@@ -221,7 +230,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={3}>
+            <CompositeSectionTitle number={4}>
               Configure SSH Key
             </CompositeSectionTitle>
             <p>
@@ -237,7 +246,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={4}>
+            <CompositeSectionTitle number={5}>
               Name and tags
             </CompositeSectionTitle>
             <p tw="mb-6">
@@ -254,13 +263,13 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={5}>
+            <CompositeSectionTitle number={6}>
               Advanced Configuration Options
             </CompositeSectionTitle>
             <p tw="mb-6">
               Customize your GPU Instance with our Advanced Configuration
-              Options. Add volumes and custom domains to meet your specific
-              needs.
+              Options. Add volumes, custom domains, or select a specific CRN
+              node.
             </p>
             <div tw="px-0 my-6">
               <div tw="mb-4">
@@ -292,6 +301,27 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
                     control={control}
                     entityType={EntityDomainType.Instance}
                   />
+                </SwitchToggleContainer>
+              </div>
+              <div tw="mb-4">
+                <SwitchToggleContainer label="Custom Node Selection">
+                  <TextGradient forwardedAs="h2" type="h6" color="main0">
+                    CRN Node Selection
+                  </TextGradient>
+                  <p tw="mb-6">
+                    By default, the best performing CRN node with your selected
+                    GPU is automatically chosen. You can manually select a
+                    different node with the same GPU below if needed.
+                  </p>
+                  {node && (
+                    <NoisyContainer>
+                      <NodesTable
+                        columns={columns}
+                        data={nodeData}
+                        rowProps={() => ({ className: '_active' })}
+                      />
+                    </NoisyContainer>
+                  )}
                 </SwitchToggleContainer>
               </div>
             </div>
@@ -338,11 +368,30 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         width="80rem"
         header=""
         content={
-          <CRNList
-            enableGpu
-            selected={selectedNode}
-            onSelectedChange={setSelectedNode}
-          />
+          <>
+            {node?.selectedGpu?.model && (
+              <NoisyContainer tw="mb-6 p-4">
+                <div tw="flex items-start gap-3">
+                  <Icon
+                    name="warning"
+                    tw="text-orange-500 flex-shrink-0 mt-0.5"
+                  />
+                  <p className="tp-body2">
+                    The node list below is filtered to show only{' '}
+                    <Strong>{compatibleNodesCount}</Strong> nodes with{' '}
+                    <Strong>{node.selectedGpu.model}</Strong> GPU compatible
+                    with your selected tier.
+                  </p>
+                </div>
+              </NoisyContainer>
+            )}
+            <CRNList
+              enableGpu
+              selected={selectedNode}
+              onSelectedChange={setSelectedNode}
+              filterBySpecs={values.specs}
+            />
+          </>
         }
         footer={
           <div tw="w-full flex justify-end">
@@ -373,7 +422,7 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             <div tw="flex items-center gap-4 max-w-md mb-8">
               <Checkbox
                 onChange={handleCheckTermsAndConditions}
-                checked={values.termsAndConditions}
+                checked={!!values.termsAndConditions}
               />
               <div className="tp-body">
                 I have read, understood, and agree to the{' '}
