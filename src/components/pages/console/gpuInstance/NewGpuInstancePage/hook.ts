@@ -1,12 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import {
-  FormEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import Router, { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import {
@@ -61,6 +54,11 @@ import {
   useInsufficientFunds,
   InsufficientFundsInfo,
 } from '@/hooks/common/useInsufficientFunds'
+import {
+  useAggregatedNodeSpecs,
+  AggregatedNodeSpecs,
+} from '@/hooks/common/useAggregatedNodeSpecs'
+import { useAutoSelectNode } from '@/hooks/common/useAutoSelectNode'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -86,7 +84,7 @@ export type UseNewGpuInstancePageReturn = {
   createInstanceButtonTitle: string
   minimumBalanceNeeded: number
   insufficientFundsInfo?: InsufficientFundsInfo
-  values: any
+  values: NewGpuInstanceFormState
   control: Control<any>
   errors: FieldErrors<NewGpuInstanceFormState>
   cost: UseEntityCostReturn
@@ -98,6 +96,9 @@ export type UseNewGpuInstancePageReturn = {
   setSelectedNode: (node?: CRNSpecs) => void
   termsAndConditions?: TermsAndConditions
   shouldRequestTermsAndConditions: boolean
+  aggregatedSpecs?: AggregatedNodeSpecs
+  compatibleNodesCount: number
+  manualNodeOverride: boolean
   handleManuallySelectCRN: () => void
   handleSelectNode: () => void
   handleRequestTermsAndConditionsAgreement: () => void
@@ -121,62 +122,46 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   })
 
   const router = useRouter()
-  const { crn: queryCRN, gpu: queryGPU } = router.query
 
-  const nodeRef = useRef<CRNSpecs | undefined>(undefined)
   const [selectedNode, setSelectedNode] = useState<CRNSpecs>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
+  const [manualNodeOverride, setManualNodeOverride] = useState(false)
+  const [manuallySelectedNode, setManuallySelectedNode] = useState<CRNSpecs>()
 
   // -------------------------
-  // Request CRNs specs
+  // Request CRNs specs and aggregated specs
 
   const { specs } = useRequestCRNSpecs()
-
-  // @note: Set node depending on CRN
-  const node: CRNSpecs | undefined = useMemo(() => {
-    if (!specs) return
-    if (!queryCRN || !queryGPU) return nodeRef.current
-    if (typeof queryCRN !== 'string' || typeof queryGPU !== 'string')
-      return nodeRef.current
-
-    if (selectedNode) {
-      nodeRef.current = selectedNode
-    } else {
-      const gpuDevice = specs[queryCRN]?.data?.compatible_available_gpus?.find(
-        (gpu) => gpu.model === queryGPU,
-      )
-
-      if (gpuDevice && specs[queryCRN]?.data) {
-        // Create a copy with all the required properties to satisfy type constraints
-        const nodeData = { ...specs[queryCRN].data } as CRNSpecs
-        nodeRef.current = { ...nodeData, selectedGpu: gpuDevice }
-      }
-    }
-
-    return nodeRef.current
-  }, [queryCRN, queryGPU, selectedNode, specs])
-
-  const nodeSpecs = useMemo(() => {
-    if (!node) return
-    if (!specs) return
-
-    return specs[node.hash]?.data
-  }, [specs, node])
+  const { aggregatedSpecs, validNodes } = useAggregatedNodeSpecs()
 
   // -------------------------
-  // Terms and conditions
+  // Tiers - use the selected GPU model to filter tiers
 
-  const { termsAndConditions } = useFetchTermsAndConditions({
-    termsAndConditionsMessageHash: node?.terms_and_conditions,
-  })
-
-  // -------------------------
-  // Tiers
+  const gpuModel = useMemo(() => {
+    if (manuallySelectedNode?.selectedGpu?.model)
+      return manuallySelectedNode.selectedGpu.model
+    return selectedNode?.selectedGpu?.model
+  }, [manuallySelectedNode, selectedNode])
 
   const { defaultTiers } = useDefaultTiers({
     type: EntityType.GpuInstance,
-    gpuModel: selectedNode?.selectedGpu?.model,
+    gpuModel,
   })
+
+  // -------------------------
+  // Setup form
+
+  const defaultValues: Partial<NewGpuInstanceFormState> = useMemo(
+    () => ({
+      ...defaultNameAndTags,
+      image: defaultInstanceImage,
+      specs: defaultTiers[0],
+      systemVolume: { size: defaultTiers[0]?.storage },
+      paymentMethod: PaymentMethod.Credit,
+      termsAndConditions: undefined,
+    }),
+    [defaultTiers],
+  )
 
   // -------------------------
   // Checkout flow
@@ -185,10 +170,12 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
-    async (state: NewGpuInstanceFormState) => {
+    async (state: NewGpuInstanceFormState, node: CRNSpecs | undefined) => {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
       if (!node) throw Err.InvalidNode
+
+      const nodeSpecs = specs[node.hash]?.data
       if (!nodeSpecs) throw Err.InvalidCRNSpecs
 
       const [minSpecs] = defaultTiers
@@ -245,8 +232,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     [
       manager,
       account,
-      node,
-      nodeSpecs,
+      specs,
       defaultTiers,
       blockchain,
       handleConnect,
@@ -256,21 +242,6 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     ],
   )
 
-  // -------------------------
-  // Setup form
-
-  const defaultValues: Partial<NewGpuInstanceFormState> = useMemo(
-    () => ({
-      ...defaultNameAndTags,
-      image: defaultInstanceImage,
-      specs: defaultTiers[0],
-      systemVolume: { size: defaultTiers[0]?.storage },
-      paymentMethod: PaymentMethod.Credit,
-      termsAndConditions: undefined,
-    }),
-    [defaultTiers],
-  )
-
   const {
     control,
     handleSubmit,
@@ -278,12 +249,44 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     setValue,
   } = useForm({
     defaultValues,
-    onSubmit,
+    onSubmit: (state: NewGpuInstanceFormState) => onSubmit(state, node),
     resolver: zodResolver(GpuInstanceManager.addSchema),
     readyDeps: [],
   })
 
   const formValues = useWatch({ control }) as NewGpuInstanceFormState
+
+  // -------------------------
+  // Auto-select node based on selected tier and GPU model
+
+  const { autoSelectedNode, compatibleNodes } = useAutoSelectNode({
+    selectedSpecs: formValues.specs,
+    validNodes,
+    gpuModel,
+    enabled: !manualNodeOverride && !!gpuModel,
+  })
+
+  // Final node: manual override takes precedence over auto-selected
+  const node: CRNSpecs | undefined = useMemo(() => {
+    if (manualNodeOverride && manuallySelectedNode) {
+      return manuallySelectedNode
+    }
+    return autoSelectedNode
+  }, [manualNodeOverride, manuallySelectedNode, autoSelectedNode])
+
+  const nodeSpecs = useMemo(() => {
+    if (!node) return
+    if (!specs) return
+
+    return specs[node.hash]?.data
+  }, [specs, node])
+
+  // -------------------------
+  // Terms and conditions
+
+  const { termsAndConditions } = useFetchTermsAndConditions({
+    termsAndConditionsMessageHash: node?.terms_and_conditions,
+  })
 
   // -------------------------
 
@@ -391,23 +394,10 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
 
     if (!selectedNode) return
 
-    const { crn: queryCRN, gpu: queryGPU, ...rest } = router.query
-    if (
-      queryCRN === selectedNode.hash &&
-      queryGPU === selectedNode.selectedGpu?.model
-    )
-      return
-
-    Router.replace({
-      query: selectedNode
-        ? {
-            ...rest,
-            crn: selectedNode.hash,
-            gpu: selectedNode.selectedGpu?.model,
-          }
-        : rest,
-    })
-  }, [router.query, selectedNode])
+    // Set manual override and the selected node
+    setManualNodeOverride(true)
+    setManuallySelectedNode(selectedNode)
+  }, [selectedNode])
 
   const handleManuallySelectCRN = useCallback(() => {
     setSelectedModal('node-list')
@@ -470,6 +460,21 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     setValue('nodeSpecs', nodeSpecs)
   }, [nodeSpecs, setValue])
 
+  // @note: Reset manual override when tier changes (user needs to re-select node)
+  const prevSpecs = usePrevious(formValues.specs)
+  useEffect(() => {
+    if (!formValues.specs || !prevSpecs) return
+
+    // If tier changed, reset manual override so auto-select kicks in
+    if (
+      formValues.specs.cpu !== prevSpecs.cpu ||
+      formValues.specs.ram !== prevSpecs.ram
+    ) {
+      setManualNodeOverride(false)
+      setManuallySelectedNode(undefined)
+    }
+  }, [formValues.specs, prevSpecs])
+
   return {
     address,
     accountCreditBalance,
@@ -492,6 +497,9 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     setSelectedNode,
     termsAndConditions,
     shouldRequestTermsAndConditions,
+    aggregatedSpecs,
+    compatibleNodesCount: compatibleNodes.length,
+    manualNodeOverride,
     handleManuallySelectCRN,
     handleSelectNode,
     handleSubmit: handleFormSubmit,
