@@ -166,31 +166,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 aggregatedSpecs={aggregatedSpecs}
                 showOpenClawSpotlight
               />
-
-              {/* Auto-selected node info */}
-              {node && (
-                <NoisyContainer tw="mt-6">
-                  <div tw="flex items-center gap-4">
-                    <Icon name="server" size="lg" tw="opacity-60" />
-                    <div tw="flex-1">
-                      <p className="tp-body2" tw="opacity-60 mb-1">
-                        Auto-selected CRN ({compatibleNodesCount} compatible
-                        nodes)
-                      </p>
-                      <div tw="flex items-center gap-4">
-                        <NodeName
-                          hash={node.hash}
-                          name={node.name}
-                          picture={node.picture}
-                          ImageCmp={Image}
-                          apiServer={apiServer}
-                        />
-                        <NodeScore score={node.score} />
-                      </div>
-                    </div>
-                  </div>
-                </NoisyContainer>
-              )}
             </div>
           </CenteredContainer>
         </section>
@@ -361,49 +336,51 @@ export default function NewInstancePage({ mainRef }: PageProps) {
       </Form>
 
       {/* Node List Modal */}
-      <Modal
-        open={selectedModal === 'node-list'}
-        onClose={handleCloseModal}
-        width="80rem"
-        header=""
-        content={
-          <>
-            <NoisyContainer tw="mb-6 p-4">
-              <div tw="flex items-start gap-3">
-                <Icon
-                  name="warning"
-                  tw="text-orange-500 flex-shrink-0 mt-0.5"
-                />
-                <p className="tp-body2">
-                  The node list below is filtered to show only{' '}
-                  <Strong>{compatibleNodesCount}</Strong> nodes compatible with
-                  your selected tier. To see other nodes, change your tier
-                  selection.
-                </p>
-              </div>
-            </NoisyContainer>
-            <CRNList
-              selected={selectedNode}
-              onSelectedChange={setSelectedNode}
-              filterBySpecs={values.specs}
-            />
-          </>
-        }
-        footer={
-          <div tw="w-full flex justify-end">
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={handleSelectNode}
-              disabled={!selectedNode}
-              tw="ml-auto!"
-            >
-              Continue
-            </Button>
-          </div>
-        }
-      />
+      {selectedModal === 'node-list' && (
+        <Modal
+          open
+          onClose={handleCloseModal}
+          width="80rem"
+          header=""
+          content={
+            <>
+              <NoisyContainer tw="mb-6 p-4">
+                <div tw="flex items-start gap-3">
+                  <Icon
+                    name="warning"
+                    tw="text-orange-500 flex-shrink-0 mt-0.5"
+                  />
+                  <p className="tp-body2">
+                    The node list below is filtered to show only{' '}
+                    <Strong>{compatibleNodesCount}</Strong> nodes compatible
+                    with your selected tier. To see other nodes, change your
+                    tier selection.
+                  </p>
+                </div>
+              </NoisyContainer>
+              <CRNList
+                selected={selectedNode}
+                onSelectedChange={setSelectedNode}
+                filterBySpecs={values.specs}
+              />
+            </>
+          }
+          footer={
+            <div tw="w-full flex justify-end">
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleSelectNode}
+                disabled={!selectedNode}
+                tw="ml-auto!"
+              >
+                Continue
+              </Button>
+            </div>
+          }
+        />
+      )}
 
       {/* Terms and Conditions Modal */}
       <Modal

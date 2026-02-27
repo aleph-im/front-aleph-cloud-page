@@ -35,6 +35,7 @@ import { PageProps } from '@/types/types'
 import Strong from '@/components/common/Strong'
 import CRNList from '../../../../common/CRNList'
 import BackButtonSection from '@/components/common/BackButtonSection'
+import BorderBox from '@/components/common/BorderBox'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useNewGpuInstancePage } from './hook'
 import CheckoutButton from '@/components/form/CheckoutButton'
@@ -148,21 +149,29 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
             </p>
             <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
               <NoisyContainer>
-                {node ? (
-                  <>
-                    <NodesTable
-                      columns={columns}
-                      data={nodeData}
-                      rowProps={() => ({ className: '_active' })}
-                    />
-                    <div tw="mt-4 flex items-center gap-2 opacity-60">
-                      <Icon name="info-circle" size="sm" />
-                      <span className="tp-body3">
-                        Auto-selected best CRN with this GPU (
-                        {compatibleNodesCount} compatible nodes)
-                      </span>
+                {node?.selectedGpu ? (
+                  <div tw="flex items-center justify-between p-2">
+                    <div tw="flex items-center gap-4">
+                      <Icon name="cube" size="lg" tw="opacity-60" />
+                      <div>
+                        <p className="tp-body2" tw="opacity-60 mb-1">
+                          Selected GPU
+                        </p>
+                        <p className="tp-body1 font-bold">
+                          {node.selectedGpu.model}
+                        </p>
+                      </div>
                     </div>
-                  </>
+                    <Button
+                      type="button"
+                      kind="functional"
+                      size="md"
+                      variant="warning"
+                      onClick={handleManuallySelectCRN}
+                    >
+                      Change GPU
+                    </Button>
+                  </div>
                 ) : (
                   <div tw="p-6 text-center">
                     <p tw="mb-4 opacity-60">No GPU selected yet</p>
@@ -369,21 +378,18 @@ export default function NewGpuInstancePage({ mainRef }: PageProps) {
         header=""
         content={
           <>
-            {node?.selectedGpu?.model && (
-              <NoisyContainer tw="mb-6 p-4">
+            {node?.selectedGpu?.model && values.specs && (
+              <BorderBox $color="warning" tw="mb-6">
                 <div tw="flex items-start gap-3">
-                  <Icon
-                    name="warning"
-                    tw="text-orange-500 flex-shrink-0 mt-0.5"
-                  />
-                  <p className="tp-body2">
+                  <Icon name="warning" tw="flex-shrink-0 mt-0.5" />
+                  <p className="tp-body1">
                     The node list below is filtered to show only{' '}
                     <Strong>{compatibleNodesCount}</Strong> nodes with{' '}
                     <Strong>{node.selectedGpu.model}</Strong> GPU compatible
                     with your selected tier.
                   </p>
                 </div>
-              </NoisyContainer>
+              </BorderBox>
             )}
             <CRNList
               enableGpu

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { CRNSpecs, NodeManager, ReducedCRNSpecs } from '@/domain/node'
+import { useStableValue } from './useStableValue'
 
 export type UseAutoSelectNodeProps = {
   selectedSpecs: ReducedCRNSpecs | undefined
@@ -20,7 +21,7 @@ export function useAutoSelectNode({
   enabled = true,
 }: UseAutoSelectNodeProps): UseAutoSelectNodeReturn {
   // Filter nodes that can support the selected tier
-  const compatibleNodes = useMemo(() => {
+  const filteredNodes = useMemo(() => {
     if (!selectedSpecs) return []
     if (!validNodes.length) return []
 
@@ -52,13 +53,19 @@ export function useAutoSelectNode({
     return nodes.sort((a, b) => (b.score || 0) - (a.score || 0))
   }, [selectedSpecs, validNodes, gpuModel])
 
-  // Auto-select the highest-scoring compatible node
-  const autoSelectedNode = useMemo(() => {
+  // Stabilize compatibleNodes to prevent infinite loops
+  const compatibleNodesKey = filteredNodes.map((n) => n.hash).join(',')
+  const compatibleNodes = useStableValue(filteredNodes, compatibleNodesKey)
+
+  // Compute the auto-selected node
+  const selectedNode = useMemo(() => {
     if (!enabled) return undefined
     if (compatibleNodes.length === 0) return undefined
-
     return compatibleNodes[0]
   }, [enabled, compatibleNodes])
+
+  // Stabilize autoSelectedNode to prevent infinite loops
+  const autoSelectedNode = useStableValue(selectedNode, selectedNode?.hash)
 
   return {
     autoSelectedNode,

@@ -1,11 +1,12 @@
 import { CRNSpecs, ReducedCRNSpecs } from '@/domain/node'
 import { EntityType } from '@/helpers/constants'
 import { convertByteUnits } from '@/helpers/utils'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 import { Tier, useDefaultTiers } from '../common/pricing/useDefaultTiers'
 import { useAccountVouchers } from '../common/useAccountVouchers'
 import { AggregatedNodeSpecs } from '../common/useAggregatedNodeSpecs'
+import { useStableValue } from '../common/useStableValue'
 
 export type InstanceSpecsField = ReducedCRNSpecs & {
   disabled?: boolean
@@ -140,11 +141,17 @@ export function useSelectInstanceSpecs({
     [validVoucherConfigs],
   )
 
-  const options = useMemo(() => {
+  const filteredOptions = useMemo(() => {
     return defaultTiers
       .filter(filterValidAggregatedSpecs)
       .map(enableTiersWithVouchers)
   }, [defaultTiers, filterValidAggregatedSpecs, enableTiersWithVouchers])
+
+  // Stabilize options to prevent infinite loops - only update when actual tier values change
+  const optionsKey = filteredOptions
+    .map((o) => `${o.cpu}-${o.ram}-${o.storage}-${o.disabled}`)
+    .join('|')
+  const options = useStableValue(filteredOptions, optionsKey)
 
   const specsCtrl = useController({
     control,
@@ -155,8 +162,16 @@ export function useSelectInstanceSpecs({
   const { value, onChange } = specsCtrl.field
 
   // Auto select first available tier when options change
+  // Use a ref to track if we've already selected to prevent loops
+  const hasAutoSelectedRef = useRef(false)
+  const prevOptionsKeyRef = useRef(optionsKey)
+
   useEffect(() => {
     if (!options.length) return
+
+    // Only auto-select when options actually change (not on every render)
+    const optionsChanged = prevOptionsKeyRef.current !== optionsKey
+    prevOptionsKeyRef.current = optionsKey
 
     // Find the matching option for the current value
     const valueOption = !value
@@ -171,14 +186,19 @@ export function useSelectInstanceSpecs({
     // General cases when we should auto-select first available tier:
     // 1. No tier is selected yet
     // 2. Current selected tier is disabled
-    // 3. Current selected tier is not in the options anymore
-    const shouldAutoSelect = !value || !valueOption || valueOption.disabled
+    // 3. Current selected tier is not in the options anymore AND options changed
+    const shouldAutoSelect =
+      !value || valueOption?.disabled || (!valueOption && optionsChanged)
 
-    if (shouldAutoSelect) {
+    // Prevent re-selecting if we already selected and value hasn't changed
+    if (shouldAutoSelect && (!hasAutoSelectedRef.current || optionsChanged)) {
       const firstAvailableTier = options[0]
-      onChange(updateSpecsStorage(firstAvailableTier, isPersistent))
+      if (firstAvailableTier) {
+        hasAutoSelectedRef.current = true
+        onChange(updateSpecsStorage(firstAvailableTier, isPersistent))
+      }
     }
-  }, [options, isPersistent, value, onChange])
+  }, [options, optionsKey, isPersistent, value, onChange])
 
   useEffect(() => {
     if (!value) return

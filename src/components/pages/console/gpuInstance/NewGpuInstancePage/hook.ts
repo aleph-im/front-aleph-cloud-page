@@ -59,6 +59,7 @@ import {
   AggregatedNodeSpecs,
 } from '@/hooks/common/useAggregatedNodeSpecs'
 import { useAutoSelectNode } from '@/hooks/common/useAutoSelectNode'
+import { useStableValue } from '@/hooks/common/useStableValue'
 
 export type NewGpuInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -259,8 +260,14 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   // -------------------------
   // Auto-select node based on selected tier and GPU model
 
+  // Stabilize specs to prevent infinite loops from object reference changes
+  const specsKey = formValues.specs
+    ? `${formValues.specs.cpu}-${formValues.specs.ram}-${formValues.specs.storage}`
+    : ''
+  const stableSpecs = useStableValue(formValues.specs, specsKey)
+
   const { autoSelectedNode, compatibleNodes } = useAutoSelectNode({
-    selectedSpecs: formValues.specs,
+    selectedSpecs: stableSpecs,
     validNodes,
     gpuModel,
     enabled: !manualNodeOverride && !!gpuModel,
@@ -455,10 +462,11 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     setValue('systemVolume.size', newSize)
   }, [storage, prevStorage, setValue, systemVolumeSize])
 
-  // @note: Set nodeSpecs
+  // @note: Set nodeSpecs (only when the hash changes to avoid infinite loops)
+  const stableNodeSpecs = useStableValue(nodeSpecs, nodeSpecs?.hash)
   useEffect(() => {
-    setValue('nodeSpecs', nodeSpecs)
-  }, [nodeSpecs, setValue])
+    setValue('nodeSpecs', stableNodeSpecs)
+  }, [stableNodeSpecs, setValue])
 
   // @note: Reset manual override when tier changes (user needs to re-select node)
   const prevSpecs = usePrevious(formValues.specs)

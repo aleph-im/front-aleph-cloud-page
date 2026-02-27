@@ -4,6 +4,7 @@ import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCR
 import { useCostManager } from './useManager/useCostManager'
 import { useLocalRequest } from '@aleph-front/core'
 import { compareVersion } from '@/helpers/utils'
+import { useStableValue } from './useStableValue'
 
 export type AggregatedNodeSpecs = {
   maxCpu: number
@@ -46,7 +47,7 @@ export function useAggregatedNodeSpecs(): UseAggregatedNodeSpecsReturn {
   }, [crnSpecs])
 
   // Filter valid nodes (IPV6 check, version requirements)
-  const validNodes = useMemo(() => {
+  const filteredNodes = useMemo(() => {
     if (!settingsAggregate?.lastCrnVersion) return []
 
     const minVersion = settingsAggregate.lastCrnVersion
@@ -74,6 +75,10 @@ export function useAggregatedNodeSpecs(): UseAggregatedNodeSpecsReturn {
       return true
     })
   }, [allNodes, settingsAggregate])
+
+  // Stabilize validNodes to prevent infinite loops - only update when node hashes change
+  const validNodesKey = filteredNodes.map((n) => n.hash).join(',')
+  const validNodes = useStableValue(filteredNodes, validNodesKey)
 
   // Compute aggregated (max) specs across all valid nodes
   const aggregatedSpecs = useMemo(() => {

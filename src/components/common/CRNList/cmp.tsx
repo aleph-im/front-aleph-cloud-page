@@ -20,6 +20,7 @@ import SpinnerOverlay from '@/components/common/SpinnerOverlay'
 import { RotatingLines } from 'react-loader-spinner'
 import { useTheme } from 'styled-components'
 import { CRNItem, CRNListProps } from './types'
+import BorderBox from '@/components/common/BorderBox'
 
 export default function CRNList(props: CRNListProps) {
   const {
@@ -29,6 +30,7 @@ export default function CRNList(props: CRNListProps) {
     specs,
     nodesIssues,
     filteredNodes,
+    totalCompatibleNodes,
     filterOptions,
     loading,
     loadItemsDisabled,
@@ -325,6 +327,18 @@ export default function CRNList(props: CRNListProps) {
         tw="min-h-[20rem] h-full overflow-auto"
         ref={infiniteScrollContainerRef}
       >
+        {!loading && totalCompatibleNodes === 0 && (
+          <BorderBox $color="warning" tw="mb-6">
+            <div tw="flex items-start gap-3">
+              <Icon name="warning" tw="flex-shrink-0 mt-0.5" />
+              <p className="tp-body1">
+                {enableGpu
+                  ? 'No GPU nodes are currently available in the network. Please try again later or contact support if this issue persists.'
+                  : 'No compatible nodes are currently available in the network. Please try again later or adjust your tier selection.'}
+              </p>
+            </div>
+          </BorderBox>
+        )}
         <NodesTable
           {...{
             columns,
