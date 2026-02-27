@@ -1,11 +1,12 @@
 import { CRNSpecs, ReducedCRNSpecs } from '@/domain/node'
 import { EntityType } from '@/helpers/constants'
 import { convertByteUnits } from '@/helpers/utils'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Control, UseControllerReturn, useController } from 'react-hook-form'
 import { Tier, useDefaultTiers } from '../common/pricing/useDefaultTiers'
 import { useAccountVouchers } from '../common/useAccountVouchers'
-import { useNodeManager } from '../common/useManager/useNodeManager'
+import { AggregatedNodeSpecs } from '../common/useAggregatedNodeSpecs'
+import { useStableValue } from '../common/useStableValue'
 
 export type InstanceSpecsField = ReducedCRNSpecs & {
   disabled?: boolean
@@ -34,6 +35,7 @@ export type UseSelectInstanceSpecsProps = {
   gpuModel?: string
   isPersistent?: boolean
   nodeSpecs?: CRNSpecs
+  aggregatedSpecs?: AggregatedNodeSpecs
 }
 
 export type UseSelectInstanceSpecsReturn = {
@@ -52,22 +54,35 @@ export function useSelectInstanceSpecs({
   type,
   gpuModel,
   isPersistent = false,
-  nodeSpecs,
+  aggregatedSpecs,
   ...rest
 }: UseSelectInstanceSpecsProps): UseSelectInstanceSpecsReturn {
-  const nodeManager = useNodeManager()
-
   const { defaultTiers } = useDefaultTiers({ type, gpuModel })
   const { vouchers } = useAccountVouchers()
 
-  const filterValidNodeSpecs = useCallback(
+  // Filter tiers based on aggregated specs (union of all available nodes)
+  // This allows users to see all tiers that ANY node can support
+  const filterValidAggregatedSpecs = useCallback(
     (option: Tier) => {
       if (type === EntityType.Program) return true
-      if (!nodeSpecs) return false
 
-      return nodeManager.validateMinNodeSpecs(option, nodeSpecs)
+      // If we have aggregated specs, use them to filter tiers
+      if (aggregatedSpecs) {
+        const ramMB = option.ram
+        const storageMB = option.storage
+
+        return (
+          option.cpu <= aggregatedSpecs.maxCpu &&
+          ramMB <= aggregatedSpecs.maxRamKB / 1024 &&
+          storageMB <= aggregatedSpecs.maxDiskKB / 1024
+        )
+      }
+
+      // Fallback: if no aggregated specs yet, show all tiers
+      // (loading state - tiers will be filtered once specs load)
+      return true
     },
-    [nodeManager, nodeSpecs, type],
+    [aggregatedSpecs, type],
   )
 
   // Process and cache valid voucher configurations
@@ -126,11 +141,17 @@ export function useSelectInstanceSpecs({
     [validVoucherConfigs],
   )
 
-  const options = useMemo(() => {
+  const filteredOptions = useMemo(() => {
     return defaultTiers
-      .filter(filterValidNodeSpecs)
+      .filter(filterValidAggregatedSpecs)
       .map(enableTiersWithVouchers)
-  }, [defaultTiers, filterValidNodeSpecs, enableTiersWithVouchers])
+  }, [defaultTiers, filterValidAggregatedSpecs, enableTiersWithVouchers])
+
+  // Stabilize options to prevent infinite loops - only update when actual tier values change
+  const optionsKey = filteredOptions
+    .map((o) => `${o.cpu}-${o.ram}-${o.storage}-${o.disabled}`)
+    .join('|')
+  const options = useStableValue(filteredOptions, optionsKey)
 
   const specsCtrl = useController({
     control,
@@ -140,9 +161,17 @@ export function useSelectInstanceSpecs({
 
   const { value, onChange } = specsCtrl.field
 
-  // Auto select first available tier
+  // Auto select first available tier when options change
+  // Use a ref to track if we've already selected to prevent loops
+  const hasAutoSelectedRef = useRef(false)
+  const prevOptionsKeyRef = useRef(optionsKey)
+
   useEffect(() => {
     if (!options.length) return
+
+    // Only auto-select when options actually change (not on every render)
+    const optionsChanged = prevOptionsKeyRef.current !== optionsKey
+    prevOptionsKeyRef.current = optionsKey
 
     // Find the matching option for the current value
     const valueOption = !value
@@ -157,19 +186,19 @@ export function useSelectInstanceSpecs({
     // General cases when we should auto-select first available tier:
     // 1. No tier is selected yet
     // 2. Current selected tier is disabled
-    // 3. Current selected tier is not in the options anymore
-    // 4. Current selected tier is not compatible with the selected node
+    // 3. Current selected tier is not in the options anymore AND options changed
     const shouldAutoSelect =
-      !value ||
-      !valueOption ||
-      valueOption.disabled ||
-      (nodeSpecs && !nodeManager.validateMinNodeSpecs(value, nodeSpecs))
+      !value || valueOption?.disabled || (!valueOption && optionsChanged)
 
-    if (shouldAutoSelect) {
+    // Prevent re-selecting if we already selected and value hasn't changed
+    if (shouldAutoSelect && (!hasAutoSelectedRef.current || optionsChanged)) {
       const firstAvailableTier = options[0]
-      onChange(updateSpecsStorage(firstAvailableTier, isPersistent))
+      if (firstAvailableTier) {
+        hasAutoSelectedRef.current = true
+        onChange(updateSpecsStorage(firstAvailableTier, isPersistent))
+      }
     }
-  }, [options, nodeSpecs, isPersistent, value, onChange, nodeManager])
+  }, [options, optionsKey, isPersistent, value, onChange])
 
   useEffect(() => {
     if (!value) return

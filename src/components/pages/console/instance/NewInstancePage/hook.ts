@@ -1,12 +1,5 @@
 import { useAppState } from '@/contexts/appState'
-import {
-  FormEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import Router, { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import {
@@ -34,7 +27,6 @@ import {
   UseEntityCostReturn,
   UseInstanceCostProps,
 } from '@/hooks/common/useEntityCost'
-import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
 import { CRNSpecs, NodeLastVersions, NodeManager } from '@/domain/node'
 import {
   stepsCatalog,
@@ -61,6 +53,13 @@ import {
   useInsufficientFunds,
   InsufficientFundsInfo,
 } from '@/hooks/common/useInsufficientFunds'
+import {
+  useAggregatedNodeSpecs,
+  AggregatedNodeSpecs,
+} from '@/hooks/common/useAggregatedNodeSpecs'
+import { useAutoSelectNode } from '@/hooks/common/useAutoSelectNode'
+import { useRequestCRNSpecs } from '@/hooks/common/useRequestEntity/useRequestCRNSpecs'
+import { useStableValue } from '@/hooks/common/useStableValue'
 
 export type NewInstanceFormState = NameAndTagsField & {
   image: InstanceImageField
@@ -85,7 +84,7 @@ export type UseNewInstancePageReturn = {
   createInstanceButtonTitle: string
   minimumBalanceNeeded: number
   insufficientFundsInfo?: InsufficientFundsInfo
-  values: any
+  values: NewInstanceFormState
   control: Control<any>
   errors: FieldErrors<NewInstanceFormState>
   cost: UseEntityCostReturn
@@ -98,6 +97,9 @@ export type UseNewInstancePageReturn = {
   setSelectedNode: (hash?: CRNSpecs) => void
   termsAndConditions?: TermsAndConditions
   shouldRequestTermsAndConditions: boolean
+  aggregatedSpecs?: AggregatedNodeSpecs
+  compatibleNodesCount: number
+  manualNodeOverride: boolean
   handleManuallySelectCRN: () => void
   handleSelectNode: () => void
   handleRequestTermsAndConditionsAgreement: () => void
@@ -121,45 +123,37 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   })
 
   const router = useRouter()
-  const { crn: queryCRN } = router.query
 
-  const nodeRef = useRef<CRNSpecs | undefined>(undefined)
   const [selectedNode, setSelectedNode] = useState<CRNSpecs>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
+  const [manualNodeOverride, setManualNodeOverride] = useState(false)
+  const [manuallySelectedNode, setManuallySelectedNode] = useState<CRNSpecs>()
 
   // -------------------------
-  // Request CRNs specs
+  // Request CRNs specs and aggregated specs
   const { specs } = useRequestCRNSpecs()
   const { lastVersion } = useRequestCRNLastVersion()
-
-  // @note: Set node depending on CRN
-  const node: CRNSpecs | undefined = useMemo(() => {
-    if (!specs) return
-    if (!queryCRN) return nodeRef.current
-    if (typeof queryCRN !== 'string') return nodeRef.current
-
-    nodeRef.current = specs[queryCRN]?.data as CRNSpecs
-    return nodeRef.current
-  }, [specs, queryCRN])
-
-  const nodeSpecs = useMemo(() => {
-    if (!node) return
-    if (!specs) return
-
-    return specs[node.hash]?.data
-  }, [specs, node])
-
-  // -------------------------
-  // Terms and conditions
-
-  const { termsAndConditions } = useFetchTermsAndConditions({
-    termsAndConditionsMessageHash: node?.terms_and_conditions,
-  })
+  const { aggregatedSpecs, validNodes } = useAggregatedNodeSpecs()
 
   // -------------------------
   // Tiers
 
   const { defaultTiers } = useDefaultTiers({ type: EntityType.Instance })
+
+  // -------------------------
+  // Setup form
+
+  const defaultValues: Partial<NewInstanceFormState> = useMemo(
+    () => ({
+      ...defaultNameAndTags,
+      image: defaultInstanceImage,
+      specs: defaultTiers[0],
+      systemVolume: { size: defaultTiers[0]?.storage },
+      paymentMethod: PaymentMethod.Credit,
+      termsAndConditions: undefined,
+    }),
+    [defaultTiers],
+  )
 
   // -------------------------
   // Checkout flow
@@ -168,10 +162,12 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const { next, stop } = useCheckoutNotification({})
 
   const onSubmit = useCallback(
-    async (state: NewInstanceFormState) => {
+    async (state: NewInstanceFormState, node: CRNSpecs | undefined) => {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
       if (!node) throw Err.InvalidNode
+
+      const nodeSpecs = specs[node.hash]?.data
       if (!nodeSpecs) throw Err.InvalidCRNSpecs
 
       const [minSpecs] = defaultTiers
@@ -230,8 +226,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     [
       manager,
       account,
-      node,
-      nodeSpecs,
+      specs,
       defaultTiers,
       blockchain,
       handleConnect,
@@ -241,21 +236,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     ],
   )
 
-  // -------------------------
-  // Setup form
-
-  const defaultValues: Partial<NewInstanceFormState> = useMemo(
-    () => ({
-      ...defaultNameAndTags,
-      image: defaultInstanceImage,
-      specs: defaultTiers[0],
-      systemVolume: { size: defaultTiers[0]?.storage },
-      paymentMethod: PaymentMethod.Credit,
-      termsAndConditions: undefined,
-    }),
-    [defaultTiers],
-  )
-
   const {
     control,
     handleSubmit,
@@ -263,7 +243,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setValue,
   } = useForm({
     defaultValues,
-    onSubmit,
+    onSubmit: (state: NewInstanceFormState) => onSubmit(state, node),
     resolver: zodResolver(InstanceManager.addSchema),
     readyDeps: [],
   })
@@ -271,8 +251,45 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const formValues = useWatch({ control }) as NewInstanceFormState
 
   // -------------------------
+  // Auto-select node based on selected tier
 
-  const { storage } = formValues.specs
+  // Stabilize specs to prevent infinite loops from object reference changes
+  const specsKey = formValues.specs
+    ? `${formValues.specs.cpu}-${formValues.specs.ram}-${formValues.specs.storage}`
+    : ''
+  const stableSpecs = useStableValue(formValues.specs, specsKey)
+
+  const { autoSelectedNode, compatibleNodes } = useAutoSelectNode({
+    selectedSpecs: stableSpecs,
+    validNodes,
+    enabled: !manualNodeOverride,
+  })
+
+  // Final node: manual override takes precedence over auto-selected
+  const node: CRNSpecs | undefined = useMemo(() => {
+    if (manualNodeOverride && manuallySelectedNode) {
+      return manuallySelectedNode
+    }
+    return autoSelectedNode
+  }, [manualNodeOverride, manuallySelectedNode, autoSelectedNode])
+
+  const nodeSpecs = useMemo(() => {
+    if (!node) return
+    if (!specs) return
+
+    return specs[node.hash]?.data
+  }, [specs, node])
+
+  // -------------------------
+  // Terms and conditions
+
+  const { termsAndConditions } = useFetchTermsAndConditions({
+    termsAndConditionsMessageHash: node?.terms_and_conditions,
+  })
+
+  // -------------------------
+
+  const { storage } = formValues.specs || {}
   const { size: systemVolumeSize } = formValues.systemVolume
 
   const payment: PaymentConfiguration = useMemo(() => {
@@ -373,15 +390,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
     if (!selectedNode) return
 
-    const { hash: selectedNodeHash } = selectedNode
-    const { crn: queryCRN, ...rest } = router.query
-
-    if (queryCRN === selectedNodeHash) return
-
-    Router.replace({
-      query: selectedNode ? { ...rest, crn: selectedNodeHash } : rest,
-    })
-  }, [router.query, selectedNode])
+    // Set manual override and the selected node
+    setManualNodeOverride(true)
+    setManuallySelectedNode(selectedNode)
+  }, [selectedNode])
 
   const handleManuallySelectCRN = useCallback(() => {
     setSelectedModal('node-list')
@@ -424,18 +436,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // -------------------------
   // Effects
 
-  // @note: Updates url depending on payment method
-  useEffect(() => {
-    if (!node) return
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { crn, ...rest } = Router.query
-
-    Router.replace({
-      query: { ...rest, crn: node.hash },
-    })
-  }, [node])
-
   const prevStorage = usePrevious(storage)
 
   // @note: Change default System fake volume size when the specs changes
@@ -451,10 +451,26 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setValue('systemVolume.size', newSize)
   }, [storage, prevStorage, setValue, systemVolumeSize])
 
-  // @note: Set nodeSpecs
+  // @note: Set nodeSpecs (only when the hash changes to avoid infinite loops)
+  const stableNodeSpecs = useStableValue(nodeSpecs, nodeSpecs?.hash)
   useEffect(() => {
-    setValue('nodeSpecs', nodeSpecs)
-  }, [nodeSpecs, setValue])
+    setValue('nodeSpecs', stableNodeSpecs)
+  }, [stableNodeSpecs, setValue])
+
+  // @note: Reset manual override when tier changes (user needs to re-select node)
+  const prevSpecs = usePrevious(formValues.specs)
+  useEffect(() => {
+    if (!formValues.specs || !prevSpecs) return
+
+    // If tier changed, reset manual override so auto-select kicks in
+    if (
+      formValues.specs.cpu !== prevSpecs.cpu ||
+      formValues.specs.ram !== prevSpecs.ram
+    ) {
+      setManualNodeOverride(false)
+      setManuallySelectedNode(undefined)
+    }
+  }, [formValues.specs, prevSpecs])
 
   return {
     address,
@@ -478,6 +494,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setSelectedNode,
     termsAndConditions,
     shouldRequestTermsAndConditions,
+    aggregatedSpecs,
+    compatibleNodesCount: compatibleNodes.length,
+    manualNodeOverride,
     handleManuallySelectCRN,
     handleSelectNode,
     handleSubmit: handleFormSubmit,
