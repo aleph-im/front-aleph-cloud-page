@@ -323,7 +323,7 @@ export const NAVIGATION_URLS = {
     },
   },
   social: {
-    telegram: 'https://t.me/alephim/119590',
+    telegram: 'https://t.me/alephcloud',
     x: 'https://x.com/aleph_im',
     blog: 'https://www.aleph.cloud/blog',
   },
