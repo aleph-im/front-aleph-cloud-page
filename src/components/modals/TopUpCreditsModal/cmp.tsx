@@ -1,5 +1,6 @@
 import React, { memo } from 'react'
-import { Button, Icon, Label, Modal, TextGradient } from '@aleph-front/core'
+import { Icon, Label, Modal, TextGradient } from '@aleph-front/core'
+import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { Form } from '@/components/form/Form'
 import { useTopUpCreditsModal, useTopUpCreditsModalForm } from './hook'
 import {
@@ -50,6 +51,8 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
     isBelowMinimumCredits,
     showInsufficientWarning,
     isSubmitDisabled,
+    isEthereumNetwork,
+    getEthereumNetworkTooltip,
   } = useTopUpCreditsModalForm({ onSuccess, refetchPaymentHistory })
 
   return (
@@ -80,7 +83,14 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
         />
       }
       footer={
-        <TopUpCreditsModalFooter {...{ handleSubmit, isSubmitDisabled }} />
+        <TopUpCreditsModalFooter
+          {...{
+            handleSubmit,
+            isSubmitDisabled,
+            isEthereumNetwork,
+            getEthereumNetworkTooltip,
+          }}
+        />
       }
     />
   )
@@ -313,22 +323,30 @@ TopUpCreditsModalHeader.displayName = 'TopUpCreditsModalHeader'
 
 type TopUpCreditsModalFooterProps = Pick<
   UseTopUpCreditsModalFormReturn,
-  'handleSubmit' | 'isSubmitDisabled'
+  | 'handleSubmit'
+  | 'isSubmitDisabled'
+  | 'isEthereumNetwork'
+  | 'getEthereumNetworkTooltip'
 >
 
 const TopUpCreditsModalFooter = memo(
-  ({ handleSubmit, isSubmitDisabled }: TopUpCreditsModalFooterProps) => {
+  ({
+    handleSubmit,
+    isSubmitDisabled,
+    getEthereumNetworkTooltip,
+  }: TopUpCreditsModalFooterProps) => {
     return (
       <div tw="flex gap-4 justify-center">
-        <Button
+        <ButtonWithInfoTooltip
           type="submit"
           variant="primary"
           size="md"
           disabled={isSubmitDisabled}
           onClick={handleSubmit}
+          tooltipContent={getEthereumNetworkTooltip()}
         >
           Confirm & Add Balance <Icon name="arrow-right" />
-        </Button>
+        </ButtonWithInfoTooltip>
       </div>
     )
   },
