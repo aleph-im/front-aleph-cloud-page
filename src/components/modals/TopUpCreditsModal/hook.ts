@@ -16,6 +16,7 @@ import {
 } from '@/helpers/schemas/credit'
 import { useCreditManager } from '@/hooks/common/useManager/useCreditManager'
 import { MIN_CREDITS_TOPUP } from '@/domain/credit'
+import { useEthereumNetwork } from '@/hooks/common/useEthereumNetwork'
 import {
   UseTopUpCreditsModalFormProps,
   UseTopUpCreditsModalFormReturn,
@@ -64,6 +65,7 @@ export function useTopUpCreditsModalForm({
 }: UseTopUpCreditsModalFormProps = {}): UseTopUpCreditsModalFormReturn {
   const [appState, dispatch] = useAppState()
   const creditManager = useCreditManager()
+  const { isEthereumNetwork, getEthereumNetworkTooltip } = useEthereumNetwork()
   const { next, stop } = useCheckoutNotification({})
   const [calculatedAmount, setCalculatedAmount] = useState(defaultValues.amount)
   // Start as true when there's a minimum balance requirement to prevent
@@ -110,6 +112,7 @@ export function useTopUpCreditsModalForm({
   const onSubmit = useCallback(
     async (state: TopUpCreditsFormData) => {
       if (!creditManager) throw Err.ConnectYourWallet
+      if (!isEthereumNetwork) throw Err.InvalidNetwork
 
       const iSteps = await creditManager.getAddSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
@@ -140,7 +143,15 @@ export function useTopUpCreditsModalForm({
         await stop()
       }
     },
-    [creditManager, next, stop, onSuccess, refetchPaymentHistory, dispatch],
+    [
+      creditManager,
+      isEthereumNetwork,
+      next,
+      stop,
+      onSuccess,
+      refetchPaymentHistory,
+      dispatch,
+    ],
   )
 
   const {
@@ -326,13 +337,15 @@ export function useTopUpCreditsModalForm({
       values.amount <= 0 ||
       isSubmitLoading ||
       isCalculatingInitialAmount ||
-      isBelowMinimumCredits
+      isBelowMinimumCredits ||
+      !isEthereumNetwork
     )
   }, [
     values.amount,
     isSubmitLoading,
     isCalculatingInitialAmount,
     isBelowMinimumCredits,
+    isEthereumNetwork,
   ])
 
   return {
@@ -353,5 +366,7 @@ export function useTopUpCreditsModalForm({
     isBelowMinimumCredits,
     showInsufficientWarning,
     isSubmitDisabled,
+    isEthereumNetwork,
+    getEthereumNetworkTooltip,
   }
 }

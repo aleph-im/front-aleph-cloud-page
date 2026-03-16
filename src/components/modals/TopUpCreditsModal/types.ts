@@ -1,6 +1,7 @@
 import { FormEvent } from 'react'
 import { Control, FieldErrors, UseControllerReturn } from 'react-hook-form'
 import { TopUpCreditsFormData } from '@/helpers/schemas/credit'
+import { TooltipProps } from '@aleph-front/core'
 
 export type UseTopUpCreditsModalReturn = {
   isOpen: boolean
@@ -31,4 +32,6 @@ export type UseTopUpCreditsModalFormReturn = {
   isBelowMinimumCredits: boolean
   showInsufficientWarning: boolean
   isSubmitDisabled: boolean
+  isEthereumNetwork: boolean
+  getEthereumNetworkTooltip: () => TooltipProps['content']
 }
