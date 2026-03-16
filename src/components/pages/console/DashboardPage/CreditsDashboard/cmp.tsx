@@ -2,7 +2,6 @@ import React from 'react'
 import {
   Button,
   Icon,
-  Modal,
   NoisyContainer,
   ObjectImg,
   Spinner,
@@ -14,10 +13,6 @@ import { StyledTable } from '@/components/common/EntityTable/styles'
 
 import ToggleDashboard from '@/components/common/ToggleDashboard'
 import Skeleton from '@/components/common/Skeleton'
-import PaymentStatusModal, {
-  PaymentStatusModalHeader,
-  PaymentStatusModalFooter,
-} from '@/components/modals/PaymentStatusModal'
 import PaymentHistoryPanel from './PaymentHistoryPanel'
 import { useCreditsDashboard } from './hook'
 import { PaymentStatus } from '@/domain/credit'
@@ -39,10 +34,7 @@ export default function CreditsDashboard() {
     recentHistory,
     isHistoryPanelOpen,
     setIsHistoryPanelOpen,
-    displayedPayment,
-    shouldModalBeOpen,
     handleOpenPaymentStatusModal,
-    handleClosePaymentStatusModal,
     handleOpenTopUpModal,
   } = useCreditsDashboard()
 
@@ -267,29 +259,6 @@ export default function CreditsDashboard() {
         loading={historyLoading}
         onPaymentClick={handleOpenPaymentStatusModal}
         onReportIssue={handleOpenReportIssue}
-      />
-
-      {/* Payment Status Modal */}
-      <Modal
-        open={shouldModalBeOpen}
-        onClose={handleClosePaymentStatusModal}
-        width="40rem"
-        header={
-          displayedPayment && (
-            <PaymentStatusModalHeader payment={displayedPayment} />
-          )
-        }
-        content={
-          displayedPayment && <PaymentStatusModal payment={displayedPayment} />
-        }
-        footer={
-          displayedPayment && (
-            <PaymentStatusModalFooter
-              payment={displayedPayment}
-              onClose={handleClosePaymentStatusModal}
-            />
-          )
-        }
       />
     </section>
   )

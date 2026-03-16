@@ -167,6 +167,7 @@ export function useTopUpCreditsModalForm({
       amount: calculatedAmount,
     },
     onSubmit,
+    onSuccess: () => null,
     resolver: zodResolver(topUpCreditsSchema),
   })
 

@@ -1,5 +1,6 @@
 import React, { memo } from 'react'
-import { Button, Icon, Spinner, TextGradient } from '@aleph-front/core'
+import { Button, Icon, Modal, Spinner, TextGradient } from '@aleph-front/core'
+import { usePaymentStatusModal } from './hook'
 import { ALEPH_CREDIT_SENDER, PaymentStatus } from '@/domain/credit'
 import {
   PaymentStatusModalContentProps,
@@ -279,3 +280,35 @@ export const PaymentStatusModalFooter = memo(
 )
 
 PaymentStatusModalFooter.displayName = 'PaymentStatusModalFooter'
+
+// --------------
+
+export const GlobalPaymentStatusModal = () => {
+  const { isOpen, displayedPayment, handleClose } = usePaymentStatusModal()
+  return (
+    <Modal
+      open={isOpen}
+      onClose={handleClose}
+      width="40rem"
+      header={
+        displayedPayment && (
+          <PaymentStatusModalHeader payment={displayedPayment} />
+        )
+      }
+      content={
+        displayedPayment && (
+          <PaymentStatusModalContent payment={displayedPayment} />
+        )
+      }
+      footer={
+        displayedPayment && (
+          <PaymentStatusModalFooter
+            payment={displayedPayment}
+            onClose={handleClose}
+          />
+        )
+      }
+    />
+  )
+}
+GlobalPaymentStatusModal.displayName = 'GlobalPaymentStatusModal'
