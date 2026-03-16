@@ -19,6 +19,13 @@ import Head from 'next/head'
 import '@/config/reown'
 import TopUpCreditsModal from '@/components/modals/TopUpCreditsModal'
 import ReportIssueModal from '@/components/modals/ReportIssueModal'
+import { GlobalPaymentStatusModal } from '@/components/modals/PaymentStatusModal'
+import { useGlobalPaymentTracking } from '@/hooks/common/useGlobalPaymentTracking'
+
+function GlobalEffects() {
+  useGlobalPaymentTracking()
+  return null
+}
 
 export default function App({ Component, pageProps }: AppProps) {
   const mainRef = useRef<HTMLDivElement>(null)
@@ -40,8 +47,10 @@ export default function App({ Component, pageProps }: AppProps) {
       <ReownProvider>
         <AppStateProvider>
           <NotificationProvider max={10} timeout={2000}>
+            <GlobalEffects />
             <ReportIssueModal />
             <TopUpCreditsModal />
+            <GlobalPaymentStatusModal />
             <Viewport>
               <Sidebar />
               <Main ref={mainRef}>

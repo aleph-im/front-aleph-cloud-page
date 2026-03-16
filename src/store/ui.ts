@@ -7,6 +7,7 @@ export type UIState = {
   // The txHash of the payment currently focused for auto-tracking UI
   // When null, no auto-focus - user has dismissed or interacted with another payment
   focusedPaymentTxHash: string | null
+  isPaymentStatusModalOpen: boolean
   isReportIssueModalOpen: boolean
   reportIssueMetadata?: ReportIssueMetadata
 }
@@ -15,6 +16,7 @@ export const initialUIState: UIState = {
   isTopUpCreditsModalOpen: false,
   topUpCreditsMinimumBalance: undefined,
   focusedPaymentTxHash: null,
+  isPaymentStatusModalOpen: false,
   isReportIssueModalOpen: false,
   reportIssueMetadata: undefined,
 }
@@ -24,6 +26,8 @@ export enum UIActionType {
   CLOSE_TOP_UP_CREDITS_MODAL = 'CLOSE_TOP_UP_CREDITS_MODAL',
   SET_FOCUSED_PAYMENT_TX_HASH = 'SET_FOCUSED_PAYMENT_TX_HASH',
   CLEAR_FOCUSED_PAYMENT = 'CLEAR_FOCUSED_PAYMENT',
+  OPEN_PAYMENT_STATUS_MODAL = 'OPEN_PAYMENT_STATUS_MODAL',
+  CLOSE_PAYMENT_STATUS_MODAL = 'CLOSE_PAYMENT_STATUS_MODAL',
   OPEN_REPORT_ISSUE_MODAL = 'OPEN_REPORT_ISSUE_MODAL',
   CLOSE_REPORT_ISSUE_MODAL = 'CLOSE_REPORT_ISSUE_MODAL',
 }
@@ -52,6 +56,16 @@ export type ClearFocusedPaymentAction = {
   payload: undefined
 }
 
+export type OpenPaymentStatusModalAction = {
+  type: UIActionType.OPEN_PAYMENT_STATUS_MODAL
+  payload: undefined
+}
+
+export type ClosePaymentStatusModalAction = {
+  type: UIActionType.CLOSE_PAYMENT_STATUS_MODAL
+  payload: undefined
+}
+
 export type OpenReportIssueModalAction = {
   type: UIActionType.OPEN_REPORT_ISSUE_MODAL
   payload: {
@@ -69,6 +83,8 @@ export type UIAction =
   | CloseTopUpCreditsModalAction
   | SetFocusedPaymentTxHashAction
   | ClearFocusedPaymentAction
+  | OpenPaymentStatusModalAction
+  | ClosePaymentStatusModalAction
   | OpenReportIssueModalAction
   | CloseReportIssueModalAction
 
@@ -104,6 +120,20 @@ export function getUIReducer(): UIReducer {
         return {
           ...state,
           focusedPaymentTxHash: null,
+        }
+      }
+
+      case UIActionType.OPEN_PAYMENT_STATUS_MODAL: {
+        return {
+          ...state,
+          isPaymentStatusModalOpen: true,
+        }
+      }
+
+      case UIActionType.CLOSE_PAYMENT_STATUS_MODAL: {
+        return {
+          ...state,
+          isPaymentStatusModalOpen: false,
         }
       }
 
@@ -163,6 +193,20 @@ export function setFocusedPaymentTxHash(
 export function clearFocusedPayment(): ClearFocusedPaymentAction {
   return {
     type: UIActionType.CLEAR_FOCUSED_PAYMENT,
+    payload: undefined,
+  }
+}
+
+export function openPaymentStatusModal(): OpenPaymentStatusModalAction {
+  return {
+    type: UIActionType.OPEN_PAYMENT_STATUS_MODAL,
+    payload: undefined,
+  }
+}
+
+export function closePaymentStatusModal(): ClosePaymentStatusModalAction {
+  return {
+    type: UIActionType.CLOSE_PAYMENT_STATUS_MODAL,
     payload: undefined,
   }
 }
