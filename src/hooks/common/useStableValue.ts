@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react'
+import { useRef } from 'react'
 
 /**
  * Returns a stable reference to a value that only updates when the cache key changes.
@@ -14,11 +14,12 @@ export function useStableValue<T>(
   cacheKey: string | number | undefined,
 ): T {
   const valueRef = useRef<T>(value)
+  const keyRef = useRef(cacheKey)
 
-  useMemo(() => {
+  if (keyRef.current !== cacheKey) {
+    keyRef.current = cacheKey
     valueRef.current = value
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cacheKey])
+  }
 
   return valueRef.current
 }

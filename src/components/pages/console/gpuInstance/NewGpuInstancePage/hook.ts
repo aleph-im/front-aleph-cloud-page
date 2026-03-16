@@ -266,7 +266,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     : ''
   const stableSpecs = useStableValue(formValues.specs, specsKey)
 
-  const { autoSelectedNode, compatibleNodes } = useAutoSelectNode({
+  const { autoSelectedNode, compatibleNodesCount } = useAutoSelectNode({
     selectedSpecs: stableSpecs,
     validNodes,
     gpuModel,
@@ -506,7 +506,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
     termsAndConditions,
     shouldRequestTermsAndConditions,
     aggregatedSpecs,
-    compatibleNodesCount: compatibleNodes.length,
+    compatibleNodesCount,
     manualNodeOverride,
     handleManuallySelectCRN,
     handleSelectNode,

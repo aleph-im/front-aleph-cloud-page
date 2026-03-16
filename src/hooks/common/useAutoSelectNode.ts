@@ -12,6 +12,7 @@ export type UseAutoSelectNodeProps = {
 export type UseAutoSelectNodeReturn = {
   autoSelectedNode: CRNSpecs | undefined
   compatibleNodes: CRNSpecs[]
+  compatibleNodesCount: number
 }
 
 export function useAutoSelectNode({
@@ -57,6 +58,12 @@ export function useAutoSelectNode({
   const compatibleNodesKey = filteredNodes.map((n) => n.hash).join(',')
   const compatibleNodes = useStableValue(filteredNodes, compatibleNodesKey)
 
+  // Count distinct nodes (not GPU-node pairs, which may be duplicated via flatMap)
+  const compatibleNodesCount = useMemo(
+    () => new Set(filteredNodes.map((n) => n.hash)).size,
+    [filteredNodes],
+  )
+
   // Compute the auto-selected node
   const selectedNode = useMemo(() => {
     if (!enabled) return undefined
@@ -70,5 +77,6 @@ export function useAutoSelectNode({
   return {
     autoSelectedNode,
     compatibleNodes,
+    compatibleNodesCount,
   }
 }

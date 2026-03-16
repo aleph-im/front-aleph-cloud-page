@@ -259,7 +259,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     : ''
   const stableSpecs = useStableValue(formValues.specs, specsKey)
 
-  const { autoSelectedNode, compatibleNodes } = useAutoSelectNode({
+  const { autoSelectedNode, compatibleNodesCount } = useAutoSelectNode({
     selectedSpecs: stableSpecs,
     validNodes,
     enabled: !manualNodeOverride,
@@ -495,7 +495,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     termsAndConditions,
     shouldRequestTermsAndConditions,
     aggregatedSpecs,
-    compatibleNodesCount: compatibleNodes.length,
+    compatibleNodesCount,
     manualNodeOverride,
     handleManuallySelectCRN,
     handleSelectNode,
