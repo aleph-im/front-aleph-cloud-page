@@ -12,6 +12,7 @@ import {
   NoisyContainer,
   Checkbox,
   Modal,
+  Icon,
 } from '@aleph-front/core'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { CRNSpecs } from '@/domain/node'
@@ -62,6 +63,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     setSelectedNode,
     termsAndConditions,
     shouldRequestTermsAndConditions,
+    aggregatedSpecs,
+    compatibleNodesCount,
     handleManuallySelectCRN,
     handleSelectNode,
     handleSubmit,
@@ -143,83 +146,57 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
             <CompositeSectionTitle number={1}>
-              Select your node
-            </CompositeSectionTitle>
-            <p>
-              Your instance is set up with your manually selected Compute
-              Resource Node (CRN) and powered by{' '}
-              <Strong>Aleph Cloud Credits</Strong>. Credits are pre-purchased
-              using fiat, USDC, or ALEPH and automatically deducted as your
-              instance consumes resources. This setup gives you full control
-              over your node selection, cost, and balance. To adjust your CRN or
-              add more credits, you can update your configuration below.
-            </p>
-            <div tw="px-0 mt-12 mb-6 min-h-[6rem] relative">
-              <NoisyContainer>
-                <NodesTable
-                  columns={columns}
-                  data={nodeData}
-                  rowProps={() => ({ className: '_active' })}
-                />
-                <div tw="mt-6">
-                  {!node && (
-                    <>
-                      <ButtonWithInfoTooltip
-                        ref={manuallySelectButtonRef}
-                        type="button"
-                        kind="functional"
-                        variant="warning"
-                        size="md"
-                        onClick={handleManuallySelectCRN}
-                        disabled={manuallySelectCRNDisabled}
-                        tooltipContent={manuallySelectCRNDisabledMessage}
-                        tooltipPosition={{
-                          my: 'bottom-left',
-                          at: 'center-center',
-                        }}
-                      >
-                        Manually select CRN
-                      </ButtonWithInfoTooltip>
-                    </>
-                  )}
-                </div>
-              </NoisyContainer>
-            </div>
-          </CenteredContainer>
-        </section>
-        <section tw="px-0 pt-20 pb-6 md:py-10">
-          <CenteredContainer>
-            <CompositeSectionTitle number={2}>
               Select your tier
             </CompositeSectionTitle>
             <p>
               Please select one of the available instance tiers as a base for
-              your VM. You will be able to customize the volumes further below
-              in the form.
+              your VM. A compatible CRN node will be automatically selected for
+              you based on your tier choice. You can customize the node
+              selection in the advanced options below.
             </p>
 
             <div tw="px-0 my-6 relative">
-              <SpinnerOverlay show={!!node && !nodeSpecs} />
+              <SpinnerOverlay show={!aggregatedSpecs} />
               <SelectInstanceSpecs
                 name="specs"
                 control={control}
                 type={EntityType.Instance}
                 isPersistent
                 nodeSpecs={nodeSpecs}
+                aggregatedSpecs={aggregatedSpecs}
                 showOpenClawSpotlight
-              >
-                {!node && (
-                  <div tw="mt-6 text-center">
-                    First select your node in the previous step
+              />
+
+              {/* Auto-selected node info */}
+              {node && (
+                <NoisyContainer tw="mt-6">
+                  <div tw="flex items-center gap-4">
+                    <Icon name="server" size="lg" tw="opacity-60" />
+                    <div tw="flex-1">
+                      <p className="tp-body2" tw="opacity-60 mb-1">
+                        Auto-selected CRN ({compatibleNodesCount} compatible
+                        nodes)
+                      </p>
+                      <div tw="flex items-center gap-4">
+                        <NodeName
+                          hash={node.hash}
+                          name={node.name}
+                          picture={node.picture}
+                          ImageCmp={Image}
+                          apiServer={apiServer}
+                        />
+                        <NodeScore score={node.score} />
+                      </div>
+                    </div>
                   </div>
-                )}
-              </SelectInstanceSpecs>
+                </NoisyContainer>
+              )}
             </div>
           </CenteredContainer>
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={3}>
+            <CompositeSectionTitle number={2}>
               Choose an image
             </CompositeSectionTitle>
             <p>
@@ -233,7 +210,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={4}>
+            <CompositeSectionTitle number={3}>
               Configure SSH Key
             </CompositeSectionTitle>
             <p>
@@ -249,7 +226,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={5}>
+            <CompositeSectionTitle number={4}>
               Name and tags
             </CompositeSectionTitle>
             <p tw="mb-6">
@@ -266,12 +243,12 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         </section>
         <section tw="px-0 pt-20 pb-6 md:py-10">
           <CenteredContainer>
-            <CompositeSectionTitle number={6}>
+            <CompositeSectionTitle number={5}>
               Advanced Configuration Options
             </CompositeSectionTitle>
             <p tw="mb-6">
               Customize your instance with our Advanced Configuration Options.
-              Add volumes and custom domains to meet your specific needs.
+              Add volumes, custom domains, or select a specific CRN node.
             </p>
             <div tw="px-0 my-6">
               <div tw="mb-4">
@@ -303,6 +280,47 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                     control={control}
                     entityType={EntityDomainType.Instance}
                   />
+                </SwitchToggleContainer>
+              </div>
+              <div tw="mb-4">
+                <SwitchToggleContainer label="Custom Node Selection">
+                  <TextGradient forwardedAs="h2" type="h6" color="main0">
+                    CRN Node Selection
+                  </TextGradient>
+                  <p tw="mb-6">
+                    By default, the best performing CRN node compatible with
+                    your selected tier is automatically chosen. You can manually
+                    select a different node below if needed.
+                  </p>
+                  <div tw="px-0 mb-6 min-h-[6rem] relative">
+                    <NoisyContainer>
+                      <NodesTable
+                        columns={columns}
+                        data={nodeData}
+                        rowProps={() => ({ className: '_active' })}
+                      />
+                      <div tw="mt-6">
+                        {!node && (
+                          <ButtonWithInfoTooltip
+                            ref={manuallySelectButtonRef}
+                            type="button"
+                            kind="functional"
+                            variant="warning"
+                            size="md"
+                            onClick={handleManuallySelectCRN}
+                            disabled={manuallySelectCRNDisabled}
+                            tooltipContent={manuallySelectCRNDisabledMessage}
+                            tooltipPosition={{
+                              my: 'bottom-left',
+                              at: 'center-center',
+                            }}
+                          >
+                            Manually select CRN
+                          </ButtonWithInfoTooltip>
+                        )}
+                      </div>
+                    </NoisyContainer>
+                  </div>
                 </SwitchToggleContainer>
               </div>
             </div>
@@ -349,7 +367,27 @@ export default function NewInstancePage({ mainRef }: PageProps) {
         width="80rem"
         header=""
         content={
-          <CRNList selected={selectedNode} onSelectedChange={setSelectedNode} />
+          <>
+            <NoisyContainer tw="mb-6 p-4">
+              <div tw="flex items-start gap-3">
+                <Icon
+                  name="warning"
+                  tw="text-orange-500 flex-shrink-0 mt-0.5"
+                />
+                <p className="tp-body2">
+                  The node list below is filtered to show only{' '}
+                  <Strong>{compatibleNodesCount}</Strong> nodes compatible with
+                  your selected tier. To see other nodes, change your tier
+                  selection.
+                </p>
+              </div>
+            </NoisyContainer>
+            <CRNList
+              selected={selectedNode}
+              onSelectedChange={setSelectedNode}
+              filterBySpecs={values.specs}
+            />
+          </>
         }
         footer={
           <div tw="w-full flex justify-end">
@@ -380,7 +418,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             <div tw="flex items-center gap-4 max-w-md mb-8">
               <Checkbox
                 onChange={handleCheckTermsAndConditions}
-                checked={values.termsAndConditions}
+                checked={!!values.termsAndConditions}
               />
               <div className="tp-body">
                 I have read, understood, and agree to the{' '}

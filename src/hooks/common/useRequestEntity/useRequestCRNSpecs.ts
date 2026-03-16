@@ -53,17 +53,17 @@ export function useRequestCRNSpecs(
       const loadAllSpecs = async () => {
         const crnSpecs = await nodeManager.getAllCRNsSpecs()
 
+        // Batch all specs into a single state update to prevent infinite loops
+        const newSpecs: Record<string, RequestState<CRNSpecs>> = {}
         crnSpecs.forEach((spec) => {
-          setSpecs((prev) => ({
-            ...prev,
-            [spec.hash]: {
-              data: spec,
-              loading: false,
-              error: undefined,
-            },
-          }))
+          newSpecs[spec.hash] = {
+            data: spec,
+            loading: false,
+            error: undefined,
+          }
         })
 
+        setSpecs((prev) => ({ ...prev, ...newSpecs }))
         setLoading(false)
       }
 

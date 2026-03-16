@@ -1,4 +1,8 @@
-import { CRNSpecs, StreamNotSupportedIssue } from '@/domain/node'
+import {
+  CRNSpecs,
+  ReducedCRNSpecs,
+  StreamNotSupportedIssue,
+} from '@/domain/node'
 
 export type CRNItem = CRNSpecs & {
   isActive: boolean
@@ -11,4 +15,5 @@ export type CRNListProps = {
   enableGpu?: boolean
   selected?: CRNSpecs
   onSelectedChange: (selected: CRNSpecs) => void
+  filterBySpecs?: ReducedCRNSpecs
 }

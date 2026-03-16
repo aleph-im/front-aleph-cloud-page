@@ -3,6 +3,7 @@ import { EntityType } from '@/helpers/constants'
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { CRNSpecs } from '@/domain/node'
 import { ReactNode } from 'react'
+import { AggregatedNodeSpecs } from '@/hooks/common/useAggregatedNodeSpecs'
 
 export type SelectInstanceSpecsProps = {
   name?: string
@@ -12,6 +13,7 @@ export type SelectInstanceSpecsProps = {
   gpuModel?: string
   isPersistent?: boolean
   nodeSpecs?: CRNSpecs
+  aggregatedSpecs?: AggregatedNodeSpecs
   children?: ReactNode
   showOpenClawSpotlight?: boolean
 }
