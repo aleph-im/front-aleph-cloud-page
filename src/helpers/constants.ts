@@ -206,7 +206,9 @@ export enum WebsiteFrameworkId {
 
 export const EXTRA_WEI = 3600 / 10 ** 18
 
-const LEGACY_CONSOLE_DOMAIN = 'https://app.aleph.cloud/console'
+const LEGACY_CONSOLE_DOMAIN = 'https://legacy.aleph.cloud/console'
+const BASE_CONSOLE_DOMAIN = 'https://app.aleph.cloud/console'
+
 export const NAVIGATION_URLS = {
   legacyConsole: {
     home: `${LEGACY_CONSOLE_DOMAIN}`,
@@ -346,13 +348,13 @@ export const NAVIGATION_URLS = {
   creditConsole: {
     computing: {
       instances: {
-        home: 'https://credits.app.aleph.im/console/computing/instance',
+        home: `${BASE_CONSOLE_DOMAIN}/computing/instance`,
       },
       gpus: {
-        home: 'https://credits.app.aleph.im/console/computing/gpu-instance',
+        home: `${BASE_CONSOLE_DOMAIN}/computing/gpu-instance`,
       },
       confidentials: {
-        home: 'https://credits.app.aleph.im/console/computing/confidential',
+        home: `${BASE_CONSOLE_DOMAIN}/computing/confidential`,
       },
     },
   },
