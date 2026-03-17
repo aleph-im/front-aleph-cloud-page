@@ -198,6 +198,7 @@ export enum WebsiteFrameworkId {
 }
 
 export const EXTRA_WEI = 3600 / 10 ** 18
+export const CREDITS_BASE_URL = 'https://app.aleph.cloud'
 
 export const NAVIGATION_URLS = {
   console: {
@@ -278,31 +279,31 @@ export const NAVIGATION_URLS = {
     notFound: '/404',
   },
   creditConsole: {
-    home: 'https://credits.app.aleph.im',
+    home: `${CREDITS_BASE_URL}`,
     computing: {
       instances: {
-        home: 'https://credits.app.aleph.im/console/computing/instance',
-        new: 'https://credits.app.aleph.im/console/computing/instance/new',
+        home: `${CREDITS_BASE_URL}/console/computing/instance`,
+        new: `${CREDITS_BASE_URL}/console/computing/instance/new`,
       },
       gpus: {
-        home: 'https://credits.app.aleph.im/console/computing/gpu-instance',
-        new: 'https://credits.app.aleph.im/console/computing/gpu-instance/new',
+        home: `${CREDITS_BASE_URL}/console/computing/gpu-instance`,
+        new: `${CREDITS_BASE_URL}/console/computing/gpu-instance/new`,
       },
       confidentials: {
-        home: 'https://credits.app.aleph.im/console/computing/confidential',
-        new: 'https://credits.app.aleph.im/console/computing/confidential/new',
+        home: `${CREDITS_BASE_URL}/console/computing/confidential`,
+        new: `${CREDITS_BASE_URL}/console/computing/confidential/new`,
       },
     },
     storage: {
       volumes: {
-        home: 'https://credits.app.aleph.im/console/storage/volume',
-        new: 'https://credits.app.aleph.im/console/storage/volume/new',
+        home: `${CREDITS_BASE_URL}/console/storage/volume`,
+        new: `${CREDITS_BASE_URL}/console/storage/volume/new`,
       },
     },
     hosting: {
       websites: {
-        home: 'https://credits.app.aleph.im/console/hosting/website',
-        new: 'https://credits.app.aleph.im/console/hosting/website/new',
+        home: `${CREDITS_BASE_URL}/console/hosting/website`,
+        new: `${CREDITS_BASE_URL}/console/hosting/website/new`,
       },
     },
   },

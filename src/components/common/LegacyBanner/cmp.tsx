@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import BorderBox from '@/components/common/BorderBox'
 import ExternalLink from '@/components/common/ExternalLink'
+import { CREDITS_BASE_URL } from '@/helpers/constants'
 
 export const LegacyBanner = () => {
   return (
@@ -11,7 +12,7 @@ export const LegacyBanner = () => {
       <p className="tp-body1 fs-16 text-base2">
         Creating new resources and adding balance is available in{' '}
         <ExternalLink
-          href="https://credits.app.aleph.im"
+          href={CREDITS_BASE_URL}
           text="Credits"
           color="base2"
           underline
