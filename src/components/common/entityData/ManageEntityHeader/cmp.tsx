@@ -1,5 +1,5 @@
-import React, { memo } from 'react'
-import { Button, Icon, Tooltip } from '@aleph-front/core'
+import React, { memo, useCallback, useState } from 'react'
+import { Button, Icon, Modal, Tooltip } from '@aleph-front/core'
 import { ManageEntityHeaderProps } from './types'
 import BackButton from '../../BackButton'
 import { useTheme } from 'styled-components'
@@ -42,10 +42,22 @@ export const ManageEntityHeader = ({
   downloadDisabled,
   downloadLoading = false,
   onDownload: handleDownload,
+  // Reinstall action
+  showReinstall = false,
+  reinstallDisabled,
+  reinstallLoading = false,
+  onReinstall: handleReinstall,
   // Go back action
   onBack: handleBack,
 }: ManageEntityHeaderProps) => {
   const theme = useTheme()
+
+  const [showConfirmReinstall, setShowConfirmReinstall] = useState(false)
+
+  const handleConfirmReinstall = useCallback(() => {
+    setShowConfirmReinstall(false)
+    handleReinstall?.()
+  }, [handleReinstall])
 
   return (
     <section tw="px-12 py-0! md:pt-10! pb-6">
@@ -191,8 +203,66 @@ export const ManageEntityHeader = ({
               </Button>
             </Tooltip>
           )}
+
+          {showReinstall && (
+            <Tooltip
+              content={`Reinstall ${type}`}
+              my="bottom-center"
+              at="top-center"
+            >
+              <Button
+                kind="functional"
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowConfirmReinstall(true)}
+                disabled={reinstallDisabled || reinstallLoading}
+              >
+                {reinstallLoading ? (
+                  <RotatingLines
+                    strokeColor={theme.color.base2}
+                    width=".8rem"
+                  />
+                ) : (
+                  <Icon name="arrow-rotate-right" />
+                )}
+              </Button>
+            </Tooltip>
+          )}
         </div>
       </div>
+      {showConfirmReinstall && <Modal
+        open={showConfirmReinstall}
+        title="Reinstall Instance"
+        width="30rem"
+        onClose={() => setShowConfirmReinstall(false)}
+        closeOnClickOutside
+        content={
+          <p>
+            This will restore the instance to its original state. All persistent
+            volumes will be erased. This action cannot be undone.
+          </p>
+        }
+        footer={
+          <div tw="flex gap-4 justify-end">
+            <Button
+              variant="secondary"
+              size="md"
+              kind="default"
+              onClick={() => setShowConfirmReinstall(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              kind="default"
+              onClick={handleConfirmReinstall}
+            >
+              Reinstall
+            </Button>
+          </div>
+        }
+      />}
     </section>
   )
 }
