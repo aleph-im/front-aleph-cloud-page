@@ -4,7 +4,9 @@ import { CreditPaymentHistoryItem } from '@/domain/credit'
 export type UseCreditsDashboardPageReturn = {
   // Connection
   isConnected: boolean
+  accountAddress?: string
   accountCreditBalance?: number
+  knownCrnHashes: Set<string>
 
   // Costs
   costsSummary?: CostsSummary

@@ -6,6 +6,7 @@ import ToggleDashboard from '@/components/common/ToggleDashboard'
 import { SectionTitle } from '@/components/common/CompositeTitle'
 import { useAccountEntities } from '@/hooks/common/useAccountEntities'
 import { formatCredits } from '@/helpers/utils'
+import { NAVIGATION_URLS } from '@/helpers/constants'
 import { StyledScrollableTableContainer } from '../styles'
 import { ServiceCostsProps } from './types'
 
@@ -27,36 +28,46 @@ const ServiceCosts = ({
     useAccountEntities()
 
   const entityMap = useMemo(() => {
-    const map = new Map<string, { name: string; type: string }>()
+    const map = new Map<
+      string,
+      { name: string; type: string; detailPath: string }
+    >()
 
     instances.forEach((e) =>
       map.set(e.id, {
         name: (e.metadata?.name as string) || e.id.slice(0, 8),
         type: 'Instance',
+        detailPath: NAVIGATION_URLS.console.computing.instances.detail(e.id),
       }),
     )
     gpuInstances.forEach((e) =>
       map.set(e.id, {
         name: (e.metadata?.name as string) || e.id.slice(0, 8),
         type: 'GPU',
+        detailPath: NAVIGATION_URLS.console.computing.gpus.detail(e.id),
       }),
     )
     confidentials.forEach((e) =>
       map.set(e.id, {
         name: (e.metadata?.name as string) || e.id.slice(0, 8),
         type: 'Confidential',
+        detailPath: NAVIGATION_URLS.console.computing.confidentials.detail(
+          e.id,
+        ),
       }),
     )
     volumes.forEach((e) =>
       map.set(e.id, {
         name: (e.metadata?.name as string) || e.id.slice(0, 8),
         type: 'Volume',
+        detailPath: NAVIGATION_URLS.console.storage.volumes.detail(e.id),
       }),
     )
     websites.forEach((e) =>
       map.set(e.id, {
         name: (e.metadata?.name as string) || e.id.slice(0, 8),
         type: 'Website',
+        detailPath: NAVIGATION_URLS.console.web3Hosting.website.detail(e.id),
       }),
     )
 
@@ -66,13 +77,17 @@ const ServiceCosts = ({
   const enrichedResources = useMemo(() => {
     return costsResources.map((r) => {
       const entity = entityMap.get(r.item_hash)
-      const costPerHour = parseFloat(r.cost_credit)
+      // cost_credit is in credits per second
+      const costPerSecond = parseFloat(r.cost_credit)
+      const costPerHour = costPerSecond * 3600
+      const costPerDay = costPerSecond * 3600 * 24
       return {
         ...r,
         resourceName: entity?.name || r.item_hash.slice(0, 12),
         resourceType: entity?.type || 'Unknown',
+        detailPath: entity?.detailPath,
         costPerHour,
-        costPerDay: costPerHour * 24,
+        costPerDay,
         isActive: !!entity,
       }
     })
@@ -106,21 +121,35 @@ const ServiceCosts = ({
                 data={enrichedResources}
                 columns={[
                   {
+                    label: 'STATUS',
+                    align: 'left',
+                    sortable: true,
+                    width: '1rem',
+                    render: (row) => (
+                      <Icon
+                        name="circle"
+                        gradient={row.isActive ? 'success' : 'warning'}
+                        size="10px"
+                      />
+                    ),
+                  },
+                  {
                     label: 'RESOURCE',
                     align: 'left',
                     sortable: true,
-                    render: (row) => (
-                      <a
-                        href={`https://explorer.aleph.im/address/ETH/${row.owner}/message/POST/${row.item_hash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        tw="flex items-center gap-1"
-                        className="text-main0"
-                      >
-                        {row.resourceName}
-                        <Icon name="external-link-square-alt" size="10px" />
-                      </a>
-                    ),
+                    render: (row) =>
+                      row.detailPath ? (
+                        <a
+                          href={row.detailPath}
+                          tw="flex items-center gap-1"
+                          className="text-main0"
+                        >
+                          {row.resourceName}
+                          <Icon name="angle-right" size="10px" />
+                        </a>
+                      ) : (
+                        <span>{row.resourceName}</span>
+                      ),
                   },
                   {
                     label: 'TYPE',
@@ -129,34 +158,32 @@ const ServiceCosts = ({
                     render: (row) => row.resourceType,
                   },
                   {
-                    label: 'CONSUMED',
+                    label: 'TOTAL SPENT',
                     align: 'right',
                     sortable: true,
-                    render: (row) => formatCredits(row.consumed_credits),
+                    render: (row) => (
+                      <span style={{ color: '#ef4444' }}>
+                        {formatCredits(row.consumed_credits)}
+                      </span>
+                    ),
                   },
                   {
                     label: 'COST/HR',
                     align: 'right',
                     sortable: true,
-                    render: (row) => formatCredits(row.costPerHour * 1_000_000),
+                    render: (row) => formatCredits(row.costPerHour),
                   },
                   {
                     label: 'COST/DAY',
                     align: 'right',
                     sortable: true,
-                    render: (row) => formatCredits(row.costPerDay * 1_000_000),
+                    render: (row) => formatCredits(row.costPerDay),
                   },
                   {
-                    label: 'STATUS',
-                    align: 'center',
-                    sortable: true,
-                    render: (row) => (
-                      <Icon
-                        name="circle"
-                        gradient={row.isActive ? 'success' : 'warning'}
-                        size="10px"
-                      />
-                    ),
+                    label: '',
+                    align: 'left' as const,
+                    width: '100%',
+                    render: () => null,
                   },
                 ]}
               />

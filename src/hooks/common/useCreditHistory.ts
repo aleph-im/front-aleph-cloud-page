@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAppState } from '@/contexts/appState'
 import { getApiServer } from '@/helpers/server'
+import { formatCredits } from '@/helpers/utils'
 
 export type CreditHistoryEntry = {
   amount: number
@@ -89,6 +90,14 @@ export function useCreditHistory(): UseCreditHistoryReturn {
       const url = `${apiServer}/api/v0/addresses/${account.address}/credit_history?${params}`
 
       const response = await fetch(url)
+
+      // 404 means no entries for this filter - clear data
+      if (response.status === 404) {
+        setEntries([])
+        setTotalEntries(0)
+        return
+      }
+
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
       }
@@ -116,6 +125,7 @@ export function useCreditHistory(): UseCreditHistoryReturn {
     return entries.filter((entry) => {
       const fields = [
         String(entry.amount),
+        formatCredits(entry.amount),
         entry.origin,
         entry.origin_ref,
         entry.tx_hash,
@@ -127,6 +137,7 @@ export function useCreditHistory(): UseCreditHistoryReturn {
         entry.message_timestamp,
         entry.price,
         entry.expiration_date,
+        entry.bonus_amount != null ? String(entry.bonus_amount) : null,
       ]
       return fields.some((f) => f && f.toLowerCase().includes(query))
     })

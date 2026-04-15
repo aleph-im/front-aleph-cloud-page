@@ -12,6 +12,11 @@ import { useReportIssueModal } from '@/components/modals/ReportIssueModal'
 import { StyledSectionHeader, StyledScrollableTableContainer } from '../styles'
 import { RecentPurchasesProps } from './types'
 
+const ellipseHash = (hash: string | null) => {
+  if (!hash) return '-'
+  return `${hash.slice(0, 6)}...${hash.slice(-4)}`
+}
+
 const EmptyTablePlaceholder = ({ message }: { message: string }) => (
   <NoisyContainer tw="text-center py-8">
     <Icon name="info-circle" color="base2" size="lg" tw="mb-3" />
@@ -102,33 +107,28 @@ const RecentPurchases = ({
                     },
                   },
                   {
-                    label: 'DATE',
-                    align: 'left',
+                    label: 'AMOUNT PAID',
+                    align: 'right',
                     sortable: true,
-                    render: (row) =>
-                      row.createdAt && getDate(row.createdAt / 1000),
+                    render: (row) => (
+                      <span style={{ color: '#ef4444' }}>
+                        {formatPaymentAmount(row.amount, row.asset)} {row.asset}
+                      </span>
+                    ),
                   },
                   {
-                    label: 'AMOUNT',
-                    align: 'left',
+                    label: 'CREDITS RECEIVED',
+                    align: 'right',
                     sortable: true,
-                    render: (row) => formatPaymentAmount(row.amount, row.asset),
-                  },
-                  {
-                    label: 'ASSET',
-                    align: 'left',
-                    sortable: true,
-                    render: (row) => row.asset,
-                  },
-                  {
-                    label: 'CREDITS',
-                    align: 'left',
-                    sortable: true,
-                    render: (row) => `~${formatCredits(row.credits)}`,
+                    render: (row) => (
+                      <span style={{ color: '#22c55e' }}>
+                        ~{formatCredits(row.credits)}
+                      </span>
+                    ),
                   },
                   {
                     label: 'TX',
-                    align: 'right',
+                    align: 'left',
                     render: (row) => {
                       const url = row.txHash
                         ? getETHExplorerURL({ hash: row.txHash })
@@ -139,15 +139,27 @@ const RecentPurchases = ({
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
+                          tw="flex items-center gap-1"
+                          className="text-main0"
                         >
-                          <Icon
-                            name="external-link-square-alt"
-                            size="14px"
-                            color="purple4"
-                          />
+                          {ellipseHash(row.txHash)}
+                          <Icon name="external-link-square-alt" size="10px" />
                         </a>
                       ) : null
                     },
+                  },
+                  {
+                    label: 'DATE',
+                    align: 'right',
+                    sortable: true,
+                    render: (row) =>
+                      row.createdAt && getDate(row.createdAt / 1000),
+                  },
+                  {
+                    label: '',
+                    align: 'left' as const,
+                    width: '100%',
+                    render: () => null,
                   },
                 ]}
               />

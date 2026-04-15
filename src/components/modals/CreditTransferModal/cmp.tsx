@@ -177,15 +177,16 @@ const CreditTransferModal = () => {
             </div>
           ))}
 
-          <div tw="text-left">
+          <div tw="text-center">
             <Button
               type="button"
-              kind="functional"
+              color="main0"
+              kind="gradient"
               variant="secondary"
               size="md"
               onClick={handleAddRecipient}
             >
-              <Icon name="plus-circle" tw="mr-1" /> Add recipient
+              Add recipient <Icon name="plus-circle" />
             </Button>
           </div>
 

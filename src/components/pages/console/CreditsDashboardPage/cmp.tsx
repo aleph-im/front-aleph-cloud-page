@@ -7,11 +7,14 @@ import CreditStatsHeader from './CreditStatsHeader'
 import RecentPurchases from './RecentPurchases'
 import CreditHistory from './CreditHistory'
 import ServiceCosts from './ServiceCosts'
+import ExpiringBalances from './ExpiringBalances'
 
 export default function CreditsDashboardPage() {
   const {
     isConnected,
+    accountAddress,
     accountCreditBalance,
+    knownCrnHashes,
     costsSummary,
     costsResources,
     costsLoading,
@@ -50,6 +53,8 @@ export default function CreditsDashboardPage() {
 
         <CreditHistory
           isConnected={isConnected}
+          accountAddress={accountAddress}
+          knownCrnHashes={knownCrnHashes}
           handleOpenTransferModal={handleOpenTransferModal}
         />
 
@@ -58,6 +63,8 @@ export default function CreditsDashboardPage() {
           costsResources={costsResources}
           costsLoading={costsLoading}
         />
+
+        <ExpiringBalances isConnected={isConnected} />
       </CenteredContainer>
     </>
   )

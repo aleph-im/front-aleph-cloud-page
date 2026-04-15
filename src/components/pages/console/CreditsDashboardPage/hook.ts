@@ -5,6 +5,7 @@ import { useTopUpCreditsModal } from '@/components/modals/TopUpCreditsModal/hook
 import { usePaymentStatusModal } from '@/components/modals/PaymentStatusModal/hook'
 import { useCreditTransferModal } from '@/components/modals/CreditTransferModal/hook'
 import { useServiceCosts } from '@/hooks/common/useServiceCosts'
+import { useAppState } from '@/contexts/appState'
 import { UseCreditsDashboardPageReturn } from './types'
 
 export function useCreditsDashboardPage(): UseCreditsDashboardPageReturn {
@@ -12,7 +13,19 @@ export function useCreditsDashboardPage(): UseCreditsDashboardPageReturn {
     triggerOnMount: false,
   })
 
+  const [state] = useAppState()
+  const crnNodes =
+    state.crns && 'entities' in state.crns ? state.crns.entities : undefined
+
   const isConnected = useMemo(() => !!account, [account])
+
+  const knownCrnHashes = useMemo(() => {
+    const set = new Set<string>()
+    if (crnNodes) {
+      crnNodes.forEach((node) => set.add(node.hash))
+    }
+    return set
+  }, [crnNodes])
 
   // Costs data
   const {
@@ -33,7 +46,9 @@ export function useCreditsDashboardPage(): UseCreditsDashboardPageReturn {
 
   return {
     isConnected,
+    accountAddress: account?.address,
     accountCreditBalance,
+    knownCrnHashes,
     costsSummary,
     costsResources,
     costsLoading,

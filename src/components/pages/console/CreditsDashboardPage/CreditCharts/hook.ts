@@ -4,12 +4,14 @@ import { useAccountEntities } from '@/hooks/common/useAccountEntities'
 import { CostsResource } from '@/hooks/common/useServiceCosts'
 import { CreditHistoryEntry } from '@/hooks/common/useCreditHistory'
 import { getApiServer } from '@/helpers/server'
+import { formatCredits } from '@/helpers/utils'
 import { DailyChartData } from './types'
 
 const CHART_GRADIENT_KEYS = ['main0', 'main1', 'info', 'success', 'warning']
 
 export type PieChartEntry = {
   label: string
+  displayLabel?: string
   value: number
   gradient?: string
   color?: string
@@ -60,18 +62,30 @@ export function useCreditCharts(
     }))
   }, [costsResources, entityTypeMap])
 
-  // Pie chart: expense share by resource
+  // Pie chart: expense share aggregated by resource type
+  // Uses daily cost rate (credits/second * 86400) for all resources consistently
   const expenseSharePieData = useMemo(() => {
-    return costsResources
-      .filter((r) => r.consumed_credits > 0)
-      .sort((a, b) => b.consumed_credits - a.consumed_credits)
-      .slice(0, 8)
-      .map((r, i) => {
-        const type = entityTypeMap.get(r.item_hash) || 'Unknown'
-        const shortHash = r.item_hash.slice(0, 8)
+    const typeCostPerDay: Record<string, number> = {}
+
+    costsResources.forEach((r) => {
+      const costPerDay = parseFloat(r.cost_credit) * 3600 * 24
+      if (costPerDay <= 0) return
+
+      const type = entityTypeMap.get(r.item_hash) || 'Other'
+      typeCostPerDay[type] = (typeCostPerDay[type] || 0) + costPerDay
+    })
+
+    const total = Object.values(typeCostPerDay).reduce((s, v) => s + v, 0)
+    if (total <= 0) return []
+
+    return Object.entries(typeCostPerDay)
+      .sort(([, a], [, b]) => b - a)
+      .map(([type, dailyCost], i) => {
+        const pct = ((dailyCost / total) * 100).toFixed(1)
         return {
-          label: `${type} (${shortHash})`,
-          value: r.consumed_credits,
+          label: type,
+          displayLabel: `${type} - ${formatCredits(dailyCost)}/day (${pct}%)`,
+          value: dailyCost,
           gradient: CHART_GRADIENT_KEYS[i % CHART_GRADIENT_KEYS.length],
         }
       })

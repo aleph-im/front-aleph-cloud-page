@@ -13,24 +13,16 @@ import {
 import { StyledTable } from '@/components/common/EntityTable/styles'
 import ToggleDashboard from '@/components/common/ToggleDashboard'
 import { SectionTitle } from '@/components/common/CompositeTitle'
-import { useCreditHistory } from '@/hooks/common/useCreditHistory'
+import {
+  useCreditHistory,
+  CreditHistoryEntry,
+} from '@/hooks/common/useCreditHistory'
+import { ALEPH_CREDIT_SENDER } from '@/domain/credit'
 import { formatCredits, getDate } from '@/helpers/utils'
 import { StyledSectionHeader, StyledScrollableTableContainer } from '../styles'
 import { CreditHistoryProps } from './types'
 
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  credit_expense: 'Expense',
-  token_transfer: 'Purchase',
-  credit_transfer: 'Transfer',
-}
-
-const PAYMENT_METHOD_COLORS: Record<string, string> = {
-  credit_expense: 'error',
-  token_transfer: 'success',
-  credit_transfer: 'info',
-}
-
-type TabId = 'all' | 'credit_expense' | 'token_transfer' | 'credit_transfer'
+type TabId = 'all' | 'credit_transfer' | 'credit_expense' | 'token_transfer'
 
 const EmptyTablePlaceholder = ({
   message,
@@ -50,16 +42,327 @@ const EmptyTablePlaceholder = ({
   </NoisyContainer>
 )
 
+const ellipseHash = (hash: string | null | undefined) => {
+  if (!hash || hash === 'None') return '-'
+  return `${hash.slice(0, 6)}...${hash.slice(-4)}`
+}
+
+// Proper Aleph Explorer URL: /address/{chain}/{sender}/message/{type}/{hash}
+const alephExplorerUrl = (hash: string, sender: string, msgType = 'POST') =>
+  `https://explorer.aleph.im/address/ETH/${sender}/message/${msgType}/${hash}`
+
+const HashLink = ({
+  hash,
+  href,
+}: {
+  hash: string | null | undefined
+  href?: string
+}) => {
+  if (!hash || hash === 'None') return <span>-</span>
+  const url = href || '#'
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      tw="flex items-center gap-1"
+      className="text-main0"
+    >
+      {ellipseHash(hash)}
+      <Icon name="external-link-square-alt" size="10px" />
+    </a>
+  )
+}
+
+const EtherscanLink = ({ hash }: { hash: string | null | undefined }) => {
+  if (!hash || hash === 'None') return <span>-</span>
+  return <HashLink hash={hash} href={`https://etherscan.io/tx/${hash}`} />
+}
+
+const AddressLink = ({ address }: { address: string | null | undefined }) => {
+  if (!address || address === 'None') return <span>-</span>
+  return (
+    <HashLink
+      hash={address}
+      href={`https://explorer.aleph.im/address/ETH/${address}`}
+    />
+  )
+}
+
+const AmountCell = ({ amount }: { amount: number }) => (
+  <span style={{ color: amount < 0 ? '#ef4444' : '#22c55e' }}>
+    {formatCredits(amount)}
+  </span>
+)
+
+// --- Column definitions per tab ---
+
+const allColumns = () => [
+  {
+    label: 'TYPE',
+    align: 'left' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) => {
+      const labels: Record<string, string> = {
+        credit_expense: 'Expense',
+        token_transfer: 'Purchase',
+        credit_transfer: 'Transfer',
+      }
+      const colors: Record<string, string> = {
+        credit_expense: 'error',
+        token_transfer: 'success',
+        credit_transfer: 'info',
+      }
+      return (
+        <span tw="flex items-center gap-1.5">
+          <Icon
+            name="circle"
+            gradient={colors[row.payment_method] || 'base2'}
+            size="8px"
+          />
+          {labels[row.payment_method] || row.payment_method}
+        </span>
+      )
+    },
+  },
+  {
+    label: 'AMOUNT',
+    align: 'right' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) => <AmountCell amount={row.amount} />,
+  },
+  {
+    label: 'DATE',
+    align: 'right' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) =>
+      getDate(new Date(row.message_timestamp).getTime() / 1000),
+  },
+  {
+    label: '',
+    align: 'left' as const,
+    width: '100%',
+    render: () => null,
+  },
+]
+
+// Expenses:
+// For VMs: origin = resource (INSTANCE msg), tx_hash = CRN node hash
+// For volumes: origin_ref = resource (STORE msg), no CRN
+const expenseColumns = (
+  accountAddress?: string,
+  knownCrnHashes?: Set<string>,
+) => [
+  {
+    label: 'AMOUNT',
+    align: 'right' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) => <AmountCell amount={row.amount} />,
+  },
+  {
+    label: 'RESOURCE',
+    align: 'left' as const,
+    render: (row: CreditHistoryEntry) => {
+      const isVolume = !row.tx_hash || row.tx_hash === 'None'
+      if (isVolume) {
+        return row.origin_ref && row.origin_ref !== 'None' ? (
+          <HashLink
+            hash={row.origin_ref}
+            href={alephExplorerUrl(
+              row.origin_ref,
+              accountAddress || '',
+              'STORE',
+            )}
+          />
+        ) : (
+          <span>-</span>
+        )
+      }
+      return row.origin && row.origin !== 'None' ? (
+        <HashLink
+          hash={row.origin}
+          href={alephExplorerUrl(row.origin, accountAddress || '', 'INSTANCE')}
+        />
+      ) : (
+        <span>-</span>
+      )
+    },
+  },
+  {
+    label: 'CRN NODE',
+    align: 'left' as const,
+    render: (row: CreditHistoryEntry) => {
+      const isVolume = !row.tx_hash || row.tx_hash === 'None'
+      if (isVolume) return <span>-</span>
+      if (!row.tx_hash || row.tx_hash === 'None') return <span>-</span>
+
+      // If the CRN is in the app state, link in-app
+      const isKnown = knownCrnHashes?.has(row.tx_hash)
+      if (isKnown) {
+        return (
+          <a
+            href={`/account/earn/crn/${row.tx_hash}`}
+            tw="flex items-center gap-1"
+            className="text-main0"
+          >
+            {ellipseHash(row.tx_hash)}
+            <Icon name="angle-right" size="10px" />
+          </a>
+        )
+      }
+
+      // Otherwise link to explorer
+      return (
+        <HashLink
+          hash={row.tx_hash}
+          href={`https://explorer.aleph.im/address/ETH/${row.tx_hash}`}
+        />
+      )
+    },
+  },
+  {
+    label: 'DATE',
+    align: 'right' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) =>
+      getDate(new Date(row.message_timestamp).getTime() / 1000),
+  },
+  {
+    label: '',
+    align: 'left' as const,
+    width: '100%',
+    render: () => null,
+  },
+]
+
+const transferColumns = (accountAddress?: string) => [
+  {
+    label: 'AMOUNT',
+    align: 'right' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) => <AmountCell amount={row.amount} />,
+  },
+  {
+    label: 'SENDER',
+    align: 'left' as const,
+    render: (row: CreditHistoryEntry) => {
+      const sender = row.amount >= 0 ? row.origin : accountAddress || 'You'
+      return sender === accountAddress ? (
+        <span className="text-base2">You</span>
+      ) : (
+        <AddressLink address={sender} />
+      )
+    },
+  },
+  {
+    label: 'RECEIVER',
+    align: 'left' as const,
+    render: (row: CreditHistoryEntry) => {
+      const receiver = row.amount < 0 ? row.origin : accountAddress || 'You'
+      return receiver === accountAddress ? (
+        <span className="text-base2">You</span>
+      ) : (
+        <AddressLink address={receiver} />
+      )
+    },
+  },
+  {
+    label: 'EXPIRATION',
+    align: 'right' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) =>
+      row.expiration_date
+        ? getDate(new Date(row.expiration_date).getTime() / 1000)
+        : 'None',
+  },
+  {
+    label: 'DATE',
+    align: 'right' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) =>
+      getDate(new Date(row.message_timestamp).getTime() / 1000),
+  },
+  {
+    label: '',
+    align: 'left' as const,
+    width: '100%',
+    render: () => null,
+  },
+]
+
+const purchaseColumns = () => [
+  {
+    label: 'AMOUNT',
+    align: 'right' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) => (
+      <span style={{ color: '#22c55e' }}>{formatCredits(row.amount)}</span>
+    ),
+  },
+  {
+    label: 'BONUS',
+    align: 'right' as const,
+    render: (row: CreditHistoryEntry) =>
+      row.bonus_amount ? (
+        <span style={{ color: '#22c55e' }}>
+          +{formatCredits(row.bonus_amount)}
+        </span>
+      ) : (
+        '-'
+      ),
+  },
+  {
+    label: 'PRICE/CREDIT',
+    align: 'right' as const,
+    render: (row: CreditHistoryEntry) =>
+      row.price ? `$${parseFloat(row.price).toFixed(6)}` : '-',
+  },
+  {
+    label: 'PAYMENT TX',
+    align: 'left' as const,
+    render: (row: CreditHistoryEntry) => <EtherscanLink hash={row.tx_hash} />,
+  },
+  {
+    label: 'PAYMENT MSG',
+    align: 'left' as const,
+    render: (row: CreditHistoryEntry) =>
+      row.origin_ref && row.origin_ref !== 'None' ? (
+        <HashLink
+          hash={row.origin_ref}
+          href={alephExplorerUrl(row.origin_ref, ALEPH_CREDIT_SENDER, 'POST')}
+        />
+      ) : (
+        <span>-</span>
+      ),
+  },
+  {
+    label: 'DATE',
+    align: 'right' as const,
+    sortable: true,
+    render: (row: CreditHistoryEntry) =>
+      getDate(new Date(row.message_timestamp).getTime() / 1000),
+  },
+  {
+    label: '',
+    align: 'left' as const,
+    width: '100%',
+    render: () => null,
+  },
+]
+
+// --- Main component ---
+
 const CreditHistory = ({
   isConnected,
+  accountAddress,
+  knownCrnHashes,
   handleOpenTransferModal,
 }: CreditHistoryProps) => {
   const [open, setOpen] = useState(true)
   const [selectedTab, setSelectedTab] = useState<TabId>('all')
 
-  const [showExpenses, setShowExpenses] = useState(false)
-  const [showPurchases, setShowPurchases] = useState(true)
-  const [showTransfers, setShowTransfers] = useState(true)
+  const [showIncoming, setShowIncoming] = useState(true)
+  const [showOutgoing, setShowOutgoing] = useState(true)
 
   const {
     filteredEntries,
@@ -74,9 +377,9 @@ const CreditHistory = ({
   const tabs: TabsProps['tabs'] = useMemo(
     () => [
       { id: 'all', name: 'All' },
+      { id: 'credit_transfer', name: 'Transfers' },
       { id: 'credit_expense', name: 'Expenses' },
       { id: 'token_transfer', name: 'Purchases' },
-      { id: 'credit_transfer', name: 'Transfers' },
     ],
     [],
   )
@@ -103,30 +406,39 @@ const CreditHistory = ({
     [filters, setFilters],
   )
 
-  const displayEntries = useMemo(() => {
-    if (selectedTab !== 'all') return filteredEntries
+  const showDirectionFilter =
+    selectedTab === 'all' || selectedTab === 'credit_transfer'
 
-    return filteredEntries.filter((entry) => {
-      if (entry.payment_method === 'credit_expense' && !showExpenses)
-        return false
-      if (entry.payment_method === 'token_transfer' && !showPurchases)
-        return false
-      if (entry.payment_method === 'credit_transfer' && !showTransfers)
-        return false
-      return true
-    })
-  }, [filteredEntries, selectedTab, showExpenses, showPurchases, showTransfers])
+  const displayEntries = useMemo(() => {
+    let entries = filteredEntries
+
+    if (showDirectionFilter) {
+      entries = entries.filter((entry) => {
+        if (entry.amount >= 0 && !showIncoming) return false
+        if (entry.amount < 0 && !showOutgoing) return false
+        return true
+      })
+    }
+
+    return entries
+  }, [filteredEntries, showDirectionFilter, showIncoming, showOutgoing])
 
   const hasActiveFilters =
     !!filters.search ||
-    !!filters.payment_method ||
-    (selectedTab === 'all' &&
-      (!showExpenses || !showPurchases || !showTransfers))
+    (showDirectionFilter && (!showIncoming || !showOutgoing))
 
-  const ellipseHash = (hash: string | null) => {
-    if (!hash) return '-'
-    return `${hash.slice(0, 6)}...${hash.slice(-4)}`
-  }
+  const columns = useMemo(() => {
+    switch (selectedTab) {
+      case 'credit_expense':
+        return expenseColumns(accountAddress, knownCrnHashes)
+      case 'credit_transfer':
+        return transferColumns(accountAddress)
+      case 'token_transfer':
+        return purchaseColumns()
+      default:
+        return allColumns()
+    }
+  }, [selectedTab, accountAddress, knownCrnHashes])
 
   return (
     <section tw="px-0 pb-6 pt-6 lg:pb-5">
@@ -171,30 +483,8 @@ const CreditHistory = ({
           />
         </div>
 
-        {/* Search + Checkboxes */}
+        {/* Search + Direction checkboxes */}
         <div tw="flex flex-wrap gap-3 mb-4 items-center">
-          {selectedTab === 'all' && (
-            <>
-              <Checkbox
-                label="Expenses"
-                checked={showExpenses}
-                onChange={() => setShowExpenses(!showExpenses)}
-                size="sm"
-              />
-              <Checkbox
-                label="Purchases"
-                checked={showPurchases}
-                onChange={() => setShowPurchases(!showPurchases)}
-                size="sm"
-              />
-              <Checkbox
-                label="Transfers"
-                checked={showTransfers}
-                onChange={() => setShowTransfers(!showTransfers)}
-                size="sm"
-              />
-            </>
-          )}
           <div tw="flex-1 min-w-[12rem]">
             <TextInput
               name="credit-history-search"
@@ -203,6 +493,24 @@ const CreditHistory = ({
               onChange={handleSearchChange}
             />
           </div>
+          {showDirectionFilter && (
+            <div tw="flex gap-2 items-center">
+              <Checkbox
+                label="In"
+                checked={showIncoming}
+                onChange={() => setShowIncoming(!showIncoming)}
+                size="xs"
+                css="gap: 0.25rem; font-size: 0.75rem;"
+              />
+              <Checkbox
+                label="Out"
+                checked={showOutgoing}
+                onChange={() => setShowOutgoing(!showOutgoing)}
+                size="xs"
+                css="gap: 0.25rem; font-size: 0.75rem;"
+              />
+            </div>
+          )}
         </div>
 
         {/* Table */}
@@ -211,90 +519,7 @@ const CreditHistory = ({
             <StyledTable
               rowKey={(row) => `${page}-${row.credit_ref}-${row.credit_index}`}
               data={displayEntries}
-              columns={[
-                {
-                  label: 'DATE',
-                  align: 'left',
-                  sortable: true,
-                  render: (row) =>
-                    getDate(new Date(row.message_timestamp).getTime() / 1000),
-                },
-                {
-                  label: 'TYPE',
-                  align: 'left',
-                  sortable: true,
-                  render: (row) => {
-                    const label =
-                      PAYMENT_METHOD_LABELS[row.payment_method] ||
-                      row.payment_method
-                    const color =
-                      PAYMENT_METHOD_COLORS[row.payment_method] || 'base2'
-                    return (
-                      <span tw="flex items-center gap-1.5">
-                        <Icon name="circle" gradient={color} size="8px" />
-                        {label}
-                      </span>
-                    )
-                  },
-                },
-                {
-                  label: 'AMOUNT',
-                  align: 'right',
-                  sortable: true,
-                  render: (row) => {
-                    const isNegative = row.amount < 0
-                    return (
-                      <span
-                        style={{
-                          color: isNegative ? '#ef4444' : '#22c55e',
-                        }}
-                      >
-                        {formatCredits(row.amount)}
-                      </span>
-                    )
-                  },
-                },
-                {
-                  label: 'ORIGIN',
-                  align: 'left',
-                  render: (row) => (
-                    <a
-                      href={`https://explorer.aleph.im/address/ETH/${row.origin}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      tw="flex items-center gap-1"
-                      className="text-main0"
-                    >
-                      {ellipseHash(row.origin)}
-                      <Icon name="external-link-square-alt" size="10px" />
-                    </a>
-                  ),
-                },
-                {
-                  label: 'TX HASH',
-                  align: 'left',
-                  render: (row) =>
-                    row.tx_hash ? (
-                      <a
-                        href={`https://etherscan.io/tx/${row.tx_hash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        tw="flex items-center gap-1"
-                        className="text-main0"
-                      >
-                        {ellipseHash(row.tx_hash)}
-                        <Icon name="external-link-square-alt" size="10px" />
-                      </a>
-                    ) : (
-                      '-'
-                    ),
-                },
-                {
-                  label: 'PROVIDER',
-                  align: 'left',
-                  render: (row) => row.provider,
-                },
-              ]}
+              columns={columns}
             />
           </StyledScrollableTableContainer>
         ) : (
