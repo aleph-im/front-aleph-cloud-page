@@ -130,7 +130,17 @@ export default function CreditsDashboard() {
                   History <Icon name="chevron-square-right" tw="ml-1" />
                 </Button>
               </div>
-              <div tw="overflow-x-auto">
+              <div
+                tw="overflow-x-auto"
+                style={{ maxHeight: '28rem', overflowY: 'auto' }}
+                css={`
+                  table thead {
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
+                  }
+                `}
+              >
                 <StyledTable
                   // borderType="none"
                   // rowNoise

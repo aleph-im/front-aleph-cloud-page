@@ -10,6 +10,9 @@ export type UIState = {
   isPaymentStatusModalOpen: boolean
   isReportIssueModalOpen: boolean
   reportIssueMetadata?: ReportIssueMetadata
+  isCreditTransferModalOpen: boolean
+  isTransferStatusModalOpen: boolean
+  transferStatusItemHash?: string
 }
 
 export const initialUIState: UIState = {
@@ -19,6 +22,9 @@ export const initialUIState: UIState = {
   isPaymentStatusModalOpen: false,
   isReportIssueModalOpen: false,
   reportIssueMetadata: undefined,
+  isCreditTransferModalOpen: false,
+  isTransferStatusModalOpen: false,
+  transferStatusItemHash: undefined,
 }
 
 export enum UIActionType {
@@ -30,6 +36,10 @@ export enum UIActionType {
   CLOSE_PAYMENT_STATUS_MODAL = 'CLOSE_PAYMENT_STATUS_MODAL',
   OPEN_REPORT_ISSUE_MODAL = 'OPEN_REPORT_ISSUE_MODAL',
   CLOSE_REPORT_ISSUE_MODAL = 'CLOSE_REPORT_ISSUE_MODAL',
+  OPEN_CREDIT_TRANSFER_MODAL = 'OPEN_CREDIT_TRANSFER_MODAL',
+  CLOSE_CREDIT_TRANSFER_MODAL = 'CLOSE_CREDIT_TRANSFER_MODAL',
+  OPEN_TRANSFER_STATUS_MODAL = 'OPEN_TRANSFER_STATUS_MODAL',
+  CLOSE_TRANSFER_STATUS_MODAL = 'CLOSE_TRANSFER_STATUS_MODAL',
 }
 
 export type OpenTopUpCreditsModalAction = {
@@ -78,6 +88,28 @@ export type CloseReportIssueModalAction = {
   payload: undefined
 }
 
+export type OpenCreditTransferModalAction = {
+  type: UIActionType.OPEN_CREDIT_TRANSFER_MODAL
+  payload: undefined
+}
+
+export type CloseCreditTransferModalAction = {
+  type: UIActionType.CLOSE_CREDIT_TRANSFER_MODAL
+  payload: undefined
+}
+
+export type OpenTransferStatusModalAction = {
+  type: UIActionType.OPEN_TRANSFER_STATUS_MODAL
+  payload: {
+    itemHash: string
+  }
+}
+
+export type CloseTransferStatusModalAction = {
+  type: UIActionType.CLOSE_TRANSFER_STATUS_MODAL
+  payload: undefined
+}
+
 export type UIAction =
   | OpenTopUpCreditsModalAction
   | CloseTopUpCreditsModalAction
@@ -87,6 +119,10 @@ export type UIAction =
   | ClosePaymentStatusModalAction
   | OpenReportIssueModalAction
   | CloseReportIssueModalAction
+  | OpenCreditTransferModalAction
+  | CloseCreditTransferModalAction
+  | OpenTransferStatusModalAction
+  | CloseTransferStatusModalAction
 
 export type UIReducer = StoreReducer<UIState, UIAction>
 
@@ -150,6 +186,36 @@ export function getUIReducer(): UIReducer {
           ...state,
           isReportIssueModalOpen: false,
           reportIssueMetadata: undefined,
+        }
+      }
+
+      case UIActionType.OPEN_CREDIT_TRANSFER_MODAL: {
+        return {
+          ...state,
+          isCreditTransferModalOpen: true,
+        }
+      }
+
+      case UIActionType.CLOSE_CREDIT_TRANSFER_MODAL: {
+        return {
+          ...state,
+          isCreditTransferModalOpen: false,
+        }
+      }
+
+      case UIActionType.OPEN_TRANSFER_STATUS_MODAL: {
+        return {
+          ...state,
+          isTransferStatusModalOpen: true,
+          transferStatusItemHash: action.payload.itemHash,
+        }
+      }
+
+      case UIActionType.CLOSE_TRANSFER_STATUS_MODAL: {
+        return {
+          ...state,
+          isTransferStatusModalOpen: false,
+          transferStatusItemHash: undefined,
         }
       }
 
@@ -225,6 +291,36 @@ export function openReportIssueModal(
 export function closeReportIssueModal(): CloseReportIssueModalAction {
   return {
     type: UIActionType.CLOSE_REPORT_ISSUE_MODAL,
+    payload: undefined,
+  }
+}
+
+export function openCreditTransferModal(): OpenCreditTransferModalAction {
+  return {
+    type: UIActionType.OPEN_CREDIT_TRANSFER_MODAL,
+    payload: undefined,
+  }
+}
+
+export function closeCreditTransferModal(): CloseCreditTransferModalAction {
+  return {
+    type: UIActionType.CLOSE_CREDIT_TRANSFER_MODAL,
+    payload: undefined,
+  }
+}
+
+export function openTransferStatusModal(
+  itemHash: string,
+): OpenTransferStatusModalAction {
+  return {
+    type: UIActionType.OPEN_TRANSFER_STATUS_MODAL,
+    payload: { itemHash },
+  }
+}
+
+export function closeTransferStatusModal(): CloseTransferStatusModalAction {
+  return {
+    type: UIActionType.CLOSE_TRANSFER_STATUS_MODAL,
     payload: undefined,
   }
 }

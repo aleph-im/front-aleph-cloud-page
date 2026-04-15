@@ -70,6 +70,11 @@ export function useRoutes(): UseRoutesReturn {
                 icon: 'dashboard',
               },
               {
+                name: 'Credits',
+                href: NAVIGATION_URLS.console.credits.home,
+                icon: 'credit-card',
+              },
+              {
                 name: 'Permissions',
                 href: NAVIGATION_URLS.console.permissions.home,
                 icon: 'permissions',
