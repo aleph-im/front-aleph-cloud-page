@@ -58,6 +58,7 @@ const PAGE_SIZE = 50
 export function useCreditHistory(): UseCreditHistoryReturn {
   const [state] = useAppState()
   const { account } = state.connection
+  const { creditDataRefreshTrigger } = state.ui
 
   const [entries, setEntries] = useState<CreditHistoryEntry[]>([])
   const [loading, setLoading] = useState(false)
@@ -115,7 +116,7 @@ export function useCreditHistory(): UseCreditHistoryReturn {
 
   useEffect(() => {
     fetchHistory()
-  }, [fetchHistory])
+  }, [fetchHistory, creditDataRefreshTrigger])
 
   // Client-side search across all fields
   const searchFilteredEntries = useMemo(() => {

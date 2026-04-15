@@ -145,7 +145,9 @@ const RecentPurchases = ({
                           {ellipseHash(row.txHash)}
                           <Icon name="external-link-square-alt" size="10px" />
                         </a>
-                      ) : null
+                      ) : (
+                        <span>-</span>
+                      )
                     },
                   },
                   {

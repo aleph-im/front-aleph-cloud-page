@@ -13,6 +13,7 @@ export type UIState = {
   isCreditTransferModalOpen: boolean
   isTransferStatusModalOpen: boolean
   transferStatusItemHash?: string
+  creditDataRefreshTrigger: number
 }
 
 export const initialUIState: UIState = {
@@ -25,6 +26,7 @@ export const initialUIState: UIState = {
   isCreditTransferModalOpen: false,
   isTransferStatusModalOpen: false,
   transferStatusItemHash: undefined,
+  creditDataRefreshTrigger: 0,
 }
 
 export enum UIActionType {
@@ -36,6 +38,7 @@ export enum UIActionType {
   CLOSE_PAYMENT_STATUS_MODAL = 'CLOSE_PAYMENT_STATUS_MODAL',
   OPEN_REPORT_ISSUE_MODAL = 'OPEN_REPORT_ISSUE_MODAL',
   CLOSE_REPORT_ISSUE_MODAL = 'CLOSE_REPORT_ISSUE_MODAL',
+  TRIGGER_CREDIT_DATA_REFRESH = 'TRIGGER_CREDIT_DATA_REFRESH',
   OPEN_CREDIT_TRANSFER_MODAL = 'OPEN_CREDIT_TRANSFER_MODAL',
   CLOSE_CREDIT_TRANSFER_MODAL = 'CLOSE_CREDIT_TRANSFER_MODAL',
   OPEN_TRANSFER_STATUS_MODAL = 'OPEN_TRANSFER_STATUS_MODAL',
@@ -88,6 +91,11 @@ export type CloseReportIssueModalAction = {
   payload: undefined
 }
 
+export type TriggerCreditDataRefreshAction = {
+  type: UIActionType.TRIGGER_CREDIT_DATA_REFRESH
+  payload: undefined
+}
+
 export type OpenCreditTransferModalAction = {
   type: UIActionType.OPEN_CREDIT_TRANSFER_MODAL
   payload: undefined
@@ -119,6 +127,7 @@ export type UIAction =
   | ClosePaymentStatusModalAction
   | OpenReportIssueModalAction
   | CloseReportIssueModalAction
+  | TriggerCreditDataRefreshAction
   | OpenCreditTransferModalAction
   | CloseCreditTransferModalAction
   | OpenTransferStatusModalAction
@@ -186,6 +195,13 @@ export function getUIReducer(): UIReducer {
           ...state,
           isReportIssueModalOpen: false,
           reportIssueMetadata: undefined,
+        }
+      }
+
+      case UIActionType.TRIGGER_CREDIT_DATA_REFRESH: {
+        return {
+          ...state,
+          creditDataRefreshTrigger: state.creditDataRefreshTrigger + 1,
         }
       }
 
@@ -291,6 +307,13 @@ export function openReportIssueModal(
 export function closeReportIssueModal(): CloseReportIssueModalAction {
   return {
     type: UIActionType.CLOSE_REPORT_ISSUE_MODAL,
+    payload: undefined,
+  }
+}
+
+export function triggerCreditDataRefresh(): TriggerCreditDataRefreshAction {
+  return {
+    type: UIActionType.TRIGGER_CREDIT_DATA_REFRESH,
     payload: undefined,
   }
 }

@@ -190,6 +190,11 @@ export const stepsCatalog: Record<CheckoutStepType, CheckoutNotificationStep> =
       content:
         'By signing this transaction, you confirm the payment for your credit top-up. This will transfer the specified amount from your wallet.',
     },
+    creditTransfer: {
+      title: 'Sign Credit Transfer',
+      content:
+        'By signing this message, you confirm the transfer of credits to the specified recipient(s). This action cannot be undone.',
+    },
     permissions: {
       title: 'Sign Permissions Creation',
       content:

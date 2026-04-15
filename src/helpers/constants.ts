@@ -90,6 +90,7 @@ type CheckoutAddStepType =
   | 'allocate'
   | 'portForwarding'
   | 'creditTransaction'
+  | 'creditTransfer'
   | 'permissions'
 
 type CheckoutDelStepType =

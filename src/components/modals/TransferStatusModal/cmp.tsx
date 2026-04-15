@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react'
 import 'twin.macro'
 import { Button, Icon, Modal, Spinner, TextGradient } from '@aleph-front/core'
 import { useAppState } from '@/contexts/appState'
-import { closeTransferStatusModal } from '@/store/ui'
+import { closeTransferStatusModal, triggerCreditDataRefresh } from '@/store/ui'
 import {
   useTransferStatus,
   TransferStatus,
@@ -14,6 +14,7 @@ import {
   StyledProgressStepIcon,
   StyledProgressContent,
   StyledProgressTitle,
+  StyledProgressDescription,
 } from '@/components/modals/PaymentStatusModal/styles'
 
 const stepDefinitions = [
@@ -22,12 +23,15 @@ const stepDefinitions = [
     pendingLabel: 'Submit transfer',
     currentLabel: 'Submitting transfer',
     completedLabel: 'Transfer submitted',
+    description:
+      'Signing and sending the transfer message to the Aleph network.',
   },
   {
     key: 'processed',
     pendingLabel: 'Process transfer',
     currentLabel: 'Processing transfer',
     completedLabel: 'Transfer processed',
+    description: 'The network is verifying and processing the credit transfer.',
   },
 ]
 
@@ -57,6 +61,7 @@ const getProgressSteps = (status: TransferStatus) => {
 const TransferStatusModal = () => {
   const [state, dispatch] = useAppState()
   const { isTransferStatusModalOpen: isOpen, transferStatusItemHash } = state.ui
+  const accountAddress = state.connection.account?.address
 
   const { status, startPolling, stopPolling } = useTransferStatus()
 
@@ -68,6 +73,13 @@ const TransferStatusModal = () => {
       stopPolling()
     }
   }, [isOpen, transferStatusItemHash, startPolling, stopPolling])
+
+  // Refresh all credit data when transfer is processed
+  useEffect(() => {
+    if (status === 'processed') {
+      dispatch(triggerCreditDataRefresh())
+    }
+  }, [status, dispatch])
 
   const handleClose = useCallback(() => {
     stopPolling()
@@ -145,28 +157,27 @@ const TransferStatusModal = () => {
                         ? step.currentLabel
                         : step.pendingLabel}
                   </StyledProgressTitle>
+                  {step.key === 'sent' && transferStatusItemHash && (
+                    <StyledProgressDescription>
+                      <a
+                        href={`https://explorer.aleph.im/address/ETH/${accountAddress}/message/POST/${transferStatusItemHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        tw="inline-flex items-center gap-2"
+                      >
+                        {formatHash(transferStatusItemHash)}
+                        <Icon
+                          name="external-link-square-alt"
+                          size="12px"
+                          color="purple4"
+                        />
+                      </a>
+                    </StyledProgressDescription>
+                  )}
                 </StyledProgressContent>
               </StyledProgressStep>
             ))}
           </StyledProgressContainer>
-          {transferStatusItemHash && (
-            <div tw="mt-4">
-              <a
-                href={`https://explorer.aleph.im/address/ETH/${transferStatusItemHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                tw="flex items-center gap-2"
-                className="text-main0 tp-body3"
-              >
-                {formatHash(transferStatusItemHash)}
-                <Icon
-                  name="external-link-square-alt"
-                  size="12px"
-                  color="purple4"
-                />
-              </a>
-            </div>
-          )}
         </>
       }
       footer={

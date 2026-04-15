@@ -273,7 +273,7 @@ const transferColumns = (accountAddress?: string) => [
     render: (row: CreditHistoryEntry) =>
       row.expiration_date
         ? getDate(new Date(row.expiration_date).getTime() / 1000)
-        : 'None',
+        : '-',
   },
   {
     label: 'DATE',

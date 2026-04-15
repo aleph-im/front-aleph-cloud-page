@@ -42,6 +42,7 @@ export type UseServiceCostsReturn = {
 export function useServiceCosts(): UseServiceCostsReturn {
   const [state] = useAppState()
   const { account } = state.connection
+  const { creditDataRefreshTrigger } = state.ui
 
   const [summary, setSummary] = useState<CostsSummary | undefined>()
   const [resources, setResources] = useState<CostsResource[]>([])
@@ -76,7 +77,7 @@ export function useServiceCosts(): UseServiceCostsReturn {
 
   useEffect(() => {
     fetchCosts()
-  }, [fetchCosts])
+  }, [fetchCosts, creditDataRefreshTrigger])
 
   return {
     summary,

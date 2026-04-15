@@ -15,6 +15,7 @@ export function useCreditPaymentHistory(): UseCreditPaymentHistoryReturn {
   const creditManager = useCreditManager()
   const [state] = useAppState()
   const { account } = state.connection
+  const { creditDataRefreshTrigger } = state.ui
 
   const fetchPayments = useCallback(async (): Promise<
     CreditPaymentHistoryItem[]
@@ -38,7 +39,7 @@ export function useCreditPaymentHistory(): UseCreditPaymentHistoryReturn {
     onSuccess: () => null,
     flushData: false,
     triggerOnMount: !!account,
-    triggerDeps: [creditManager, account],
+    triggerDeps: [creditManager, account, creditDataRefreshTrigger],
     cacheStrategy: 'overwrite',
   })
 
