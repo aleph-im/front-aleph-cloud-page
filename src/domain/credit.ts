@@ -108,12 +108,14 @@ export type PaymentRequest = {
 }
 
 export type PrivyOnrampPaymentRequest = {
+  id?: string // omitted on first POST (backend generates), required on second POST
   provider: 'PRIVY'
   chain: PaymentChain
   address: string // SA — primary identity / credit recipient
   saddress: string // EOA — secondary, stored for reverse-lookup
   currency: 'USDC'
   amount: number
+  txHash?: string // omitted on first POST, set on second POST to advance to TRANSFERED
 }
 
 /**
@@ -221,15 +223,27 @@ export class CreditManager {
   async updatePrivyPaymentTxHash(
     paymentId: string,
     txHash: string,
+    sa: string,
+    eoa: string,
+    amount: number,
+    chain: PaymentChain = 'ethereum',
   ): Promise<void> {
-    const response = await fetch(
-      `${ALEPH_CREDIT_PAYMENT_ENDPOINT}/${paymentId}`,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ txHash }),
-      },
-    )
+    const body: PrivyOnrampPaymentRequest = {
+      id: paymentId,
+      provider: 'PRIVY',
+      chain,
+      address: sa,
+      saddress: eoa,
+      currency: 'USDC',
+      amount,
+      txHash,
+    }
+
+    const response = await fetch(ALEPH_CREDIT_PAYMENT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
 
     if (!response.ok) {
       const error = await response.json().catch((e) => e)
