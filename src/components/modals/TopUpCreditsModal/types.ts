@@ -34,4 +34,10 @@ export type UseTopUpCreditsModalFormReturn = {
   isSubmitDisabled: boolean
   isEthereumNetwork: boolean
   getEthereumNetworkTooltip: () => TooltipProps['content']
+  // True when the connected user is on Privy and a smart-wallet client is
+  // ready — the top-up will be executed as a sponsored ERC-4337 user op.
+  isGasSponsored: boolean
+  smartWalletAddress?: string
+  isPrivyConnection: boolean
+  isOnrampProcessing: boolean
 }

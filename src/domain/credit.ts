@@ -2,6 +2,7 @@ import { Account } from '@aleph-sdk/account'
 import { ETHAccount } from '@aleph-sdk/ethereum'
 import { v4 as uuidv4 } from 'uuid'
 import BN from 'bn.js'
+import type { SmartWalletClientType } from '@privy-io/react-auth/smart-wallets'
 import { CheckoutStepType } from '@/helpers/constants'
 import {
   TopUpCreditsFormData,
@@ -100,6 +101,29 @@ export type PaymentRequest = {
   currency: PaymentCurrency
   amount: number
   txHash?: string
+  // Smart-wallet contract address when the user op is executed by a Privy
+  // smart wallet. Backend uses this to verify the ERC-20 Transfer event rather
+  // than the tx `from`/`nonce` (which belong to the bundler).
+  senderAddress?: string
+}
+
+export type PrivyOnrampPaymentRequest = {
+  provider: 'PRIVY'
+  chain: PaymentChain
+  address: string // SA — primary identity / credit recipient
+  saddress: string // EOA — secondary, stored for reverse-lookup
+  currency: 'USDC'
+  amount: number
+}
+
+/**
+ * Options passed into CreditManager.addSteps when the caller wants to use a
+ * Privy smart wallet + paymaster for the on-chain transfer. Omit to use the
+ * legacy EOA eth_sendTransaction path.
+ */
+export type CreditTopUpOptions = {
+  smartWalletClient?: SmartWalletClientType
+  senderAddress?: string
 }
 
 export type PaymentResponse = {
@@ -165,8 +189,59 @@ export class CreditManager {
     return ['creditTransaction']
   }
 
+  async createPrivyOnrampPayment(
+    sa: string,
+    eoa: string,
+    amount: number,
+    chain: PaymentChain = 'ethereum',
+  ): Promise<{ id: string }> {
+    const body: PrivyOnrampPaymentRequest = {
+      provider: 'PRIVY',
+      chain,
+      address: sa,
+      saddress: eoa,
+      currency: 'USDC',
+      amount,
+    }
+
+    const response = await fetch(ALEPH_CREDIT_PAYMENT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch((e) => e)
+      throw new Error(error?.description ?? `API error: ${response.status}`)
+    }
+
+    return response.json()
+  }
+
+  async updatePrivyPaymentTxHash(
+    paymentId: string,
+    txHash: string,
+  ): Promise<void> {
+    const response = await fetch(
+      `${ALEPH_CREDIT_PAYMENT_ENDPOINT}/${paymentId}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ txHash }),
+      },
+    )
+
+    if (!response.ok) {
+      const error = await response.json().catch((e) => e)
+      throw new Error(
+        error?.description ?? `Failed to update payment: ${response.status}`,
+      )
+    }
+  }
+
   async *addSteps(
     data: TopUpCreditsFormData,
+    options: CreditTopUpOptions = {},
   ): AsyncGenerator<void, string, unknown> {
     if (!this.account) {
       throw new Error('Account is required for credit payments')
@@ -178,14 +253,31 @@ export class CreditManager {
       )
     }
 
+    const useSmartWallet =
+      !!options.smartWalletClient && !!options.senderAddress
+
     const paymentId = uuidv4()
 
-    const paymentResponse = await this.createPaymentRequest(data, paymentId)
+    const paymentResponse = await this.createPaymentRequest(
+      data,
+      paymentId,
+      useSmartWallet ? options.senderAddress : undefined,
+    )
 
     yield
-    const txHash = await this.sendTransaction(paymentResponse.config.tx)
+    const txHash = useSmartWallet
+      ? await this.sendSmartWalletTransaction(
+          paymentResponse.config.tx,
+          options.smartWalletClient as SmartWalletClientType,
+        )
+      : await this.sendTransaction(paymentResponse.config.tx)
 
-    await this.updateTransactionHash(data, paymentId, txHash)
+    await this.updateTransactionHash(
+      data,
+      paymentId,
+      txHash,
+      useSmartWallet ? options.senderAddress : undefined,
+    )
 
     return txHash
   }
@@ -194,6 +286,7 @@ export class CreditManager {
     data: TopUpCreditsFormData,
     paymentId: string,
     txHash?: string,
+    senderAddress?: string,
   ): Promise<PaymentResponse | void> {
     if (!this.account) {
       throw new Error('Account is required for payment requests')
@@ -207,6 +300,7 @@ export class CreditManager {
       currency: data.currency,
       amount: data.amount,
       ...(txHash && { txHash }),
+      ...(senderAddress && { senderAddress }),
     }
 
     const fetchOperation = async () => {
@@ -247,11 +341,41 @@ export class CreditManager {
   private async createPaymentRequest(
     data: TopUpCreditsFormData,
     paymentId: string,
+    senderAddress?: string,
   ): Promise<PaymentResponse> {
     return this.upsertPaymentRequest(
       data,
       paymentId,
+      undefined,
+      senderAddress,
     ) as Promise<PaymentResponse>
+  }
+
+  /**
+   * Sends the payment transaction via a Privy smart wallet. The paymaster /
+   * bundler is configured in the Privy Dashboard (gas policy); if the policy
+   * allows this tx the user pays no gas.
+   *
+   * We ignore the backend's unsigned-tx `from`/`nonce`/`gasPrice`/`gasLimit`
+   * — they target EOAs. Only `to`, `value`, `data` (and `chainId` implicitly,
+   * via the connected chain) are meaningful for the UserOp.
+   */
+  private async sendSmartWalletTransaction(
+    txData: PaymentResponse['config']['tx'],
+    smartWalletClient: SmartWalletClientType,
+  ): Promise<string> {
+    try {
+      const txHash = await smartWalletClient.sendTransaction({
+        to: txData.to as `0x${string}`,
+        value: BigInt(txData.value ?? '0'),
+        data: (txData.data ?? '0x') as `0x${string}`,
+      })
+      return txHash
+    } catch (error) {
+      throw new Error(
+        `Sponsored transaction failed: ${(error as any)?.message || 'Unknown error'}`,
+      )
+    }
   }
 
   private async sendTransaction(
@@ -290,8 +414,9 @@ export class CreditManager {
     data: TopUpCreditsFormData,
     paymentId: string,
     txHash: string,
+    senderAddress?: string,
   ): Promise<void> {
-    await this.upsertPaymentRequest(data, paymentId, txHash)
+    await this.upsertPaymentRequest(data, paymentId, txHash, senderAddress)
   }
 
   // Token estimation functionality

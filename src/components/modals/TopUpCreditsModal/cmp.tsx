@@ -1,5 +1,12 @@
 import React, { memo } from 'react'
-import { Icon, Label, Modal, TextGradient } from '@aleph-front/core'
+import {
+  Icon,
+  Label,
+  Modal,
+  TextGradient,
+  useCopyToClipboardAndNotify,
+} from '@aleph-front/core'
+import { blockchains, BlockchainId } from '@/domain/connect'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { Form } from '@/components/form/Form'
 import { useTopUpCreditsModal, useTopUpCreditsModalForm } from './hook'
@@ -53,6 +60,9 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
     isSubmitDisabled,
     isEthereumNetwork,
     getEthereumNetworkTooltip,
+    isGasSponsored,
+    smartWalletAddress,
+    isPrivyConnection,
   } = useTopUpCreditsModalForm({ onSuccess, refetchPaymentHistory })
 
   return (
@@ -79,6 +89,9 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
             minimumTokenAmount,
             isBelowMinimumCredits,
             showInsufficientWarning,
+            isGasSponsored,
+            smartWalletAddress,
+            isPrivyConnection,
           }}
         />
       }
@@ -102,6 +115,50 @@ export default memo(TopUpCreditsModal)
 
 // --------
 
+const SmartWalletBanner = memo(({ address }: { address: string }) => {
+  const handleCopy = useCopyToClipboardAndNotify(address)
+  const explorerUrl = `${blockchains[BlockchainId.ETH].explorerUrl}address/${address}`
+  const short = `${address.slice(0, 6)}…${address.slice(-4)}`
+
+  return (
+    <div
+      tw="flex items-start gap-3 p-3 rounded"
+      className="bg-main0/10 text-main0 tp-body2 fs-12"
+    >
+      <Icon name="bolt" tw="mt-1 shrink-0" />
+      <div tw="flex-1 min-w-0">
+        <div className="tp-body2 fs-14">Gas sponsored by Aleph</div>
+        <div tw="opacity-80 mt-1">
+          Your top-up runs through your smart wallet — no ETH needed.
+        </div>
+        <div tw="flex items-center gap-2 mt-2">
+          <span className="tp-body3">{short}</span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            tw="opacity-60 hover:opacity-100 transition-opacity"
+            title="Copy smart wallet address"
+          >
+            <Icon name="copy" size="sm" />
+          </button>
+          <a
+            href={explorerUrl}
+            target="_blank"
+            rel="noreferrer"
+            tw="opacity-60 hover:opacity-100 transition-opacity"
+            title="View on Etherscan"
+          >
+            <Icon name="square-up-right" size="sm" />
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+})
+SmartWalletBanner.displayName = 'SmartWalletBanner'
+
+// --------
+
 type TopUpCreditsModalContentProps = Pick<
   UseTopUpCreditsModalFormReturn,
   | 'handleSubmit'
@@ -118,6 +175,9 @@ type TopUpCreditsModalContentProps = Pick<
   | 'minimumTokenAmount'
   | 'isBelowMinimumCredits'
   | 'showInsufficientWarning'
+  | 'isGasSponsored'
+  | 'smartWalletAddress'
+  | 'isPrivyConnection'
 >
 
 const TopUpCreditsModalContent = memo(
@@ -136,11 +196,17 @@ const TopUpCreditsModalContent = memo(
     minimumTokenAmount,
     isBelowMinimumCredits,
     showInsufficientWarning,
+    isGasSponsored,
+    smartWalletAddress,
+    isPrivyConnection,
   }: TopUpCreditsModalContentProps) => {
     return (
       <Form onSubmit={handleSubmit} errors={errors}>
         {/* {JSON.stringify(values, null, 2)} */}
         <div tw="flex flex-col gap-6">
+          {isGasSponsored && smartWalletAddress && (
+            <SmartWalletBanner address={smartWalletAddress} />
+          )}
           <div>
             <StyledSendTitle>
               <TextGradient type="h7" forwardedAs="h2" tw="mb-0">
@@ -286,7 +352,7 @@ const TopUpCreditsModalContent = memo(
                 }
               />
               <StyledRadio
-                disabled
+                disabled={!isPrivyConnection}
                 value="CARD"
                 label={
                   (

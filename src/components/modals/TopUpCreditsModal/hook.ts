@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useEffect, useState, useRef } from 'react'
 import { useDebounceState, useLocalRequest } from '@aleph-front/core'
+import { useSmartWallets } from '@privy-io/react-auth/smart-wallets'
+import { useFundWallet } from '@privy-io/react-auth'
 import { useForm } from '@/hooks/common/useForm'
 import { useController, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,6 +19,8 @@ import {
 import { useCreditManager } from '@/hooks/common/useManager/useCreditManager'
 import { MIN_CREDITS_TOPUP } from '@/domain/credit'
 import { useEthereumNetwork } from '@/hooks/common/useEthereumNetwork'
+import { ProviderId } from '@/domain/connect'
+import { resolveOnrampRecipient, privyDefaultChain } from '@/config/privy'
 import {
   UseTopUpCreditsModalFormProps,
   UseTopUpCreditsModalFormReturn,
@@ -67,6 +71,22 @@ export function useTopUpCreditsModalForm({
   const creditManager = useCreditManager()
   const { isEthereumNetwork, getEthereumNetworkTooltip } = useEthereumNetwork()
   const { next, stop } = useCheckoutNotification({})
+
+  const { client: smartWalletClient } = useSmartWallets()
+  const isPrivyConnection = appState.connection.provider === ProviderId.Privy
+  const smartWalletAddress = appState.connection.smartWalletAddress
+  const isGasSponsored =
+    isPrivyConnection && !!smartWalletClient && !!smartWalletAddress
+  const [isOnrampProcessing, setIsOnrampProcessing] = useState(false)
+
+  const { fundWallet } = useFundWallet({
+    onUserExited: useCallback(() => {
+      setIsOnrampProcessing(true)
+      dispatch(closeTopUpCreditsModal())
+      refetchPaymentHistory?.()
+    }, [dispatch, refetchPaymentHistory]),
+  })
+
   const [calculatedAmount, setCalculatedAmount] = useState(defaultValues.amount)
   // Start as true when there's a minimum balance requirement to prevent
   // showing errors before the proper amount is calculated
@@ -117,7 +137,12 @@ export function useTopUpCreditsModalForm({
       const iSteps = await creditManager.getAddSteps(state)
       const nSteps = iSteps.map((i) => stepsCatalog[i])
 
-      const steps = creditManager.addSteps(state)
+      const steps = creditManager.addSteps(
+        state,
+        isGasSponsored
+          ? { smartWalletClient, senderAddress: smartWalletAddress }
+          : undefined,
+      )
 
       try {
         let transactionHash
@@ -151,6 +176,9 @@ export function useTopUpCreditsModalForm({
       onSuccess,
       refetchPaymentHistory,
       dispatch,
+      isGasSponsored,
+      smartWalletClient,
+      smartWalletAddress,
     ],
   )
 
@@ -349,13 +377,47 @@ export function useTopUpCreditsModalForm({
     isEthereumNetwork,
   ])
 
+  const handleCardSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!creditManager) throw Err.ConnectYourWallet
+      const sa = smartWalletAddress
+      const eoa = appState.connection.account?.address
+      if (!sa || !eoa) throw Err.ConnectYourWallet
+
+      await creditManager.createPrivyOnrampPayment(sa, eoa, values.amount)
+      const recipient = resolveOnrampRecipient(eoa, sa)
+      await fundWallet(recipient, {
+        chain: privyDefaultChain,
+        asset: 'USDC',
+        amount: String(values.amount),
+      })
+      // onUserExited handles modal close + processing state
+    },
+    [
+      creditManager,
+      smartWalletAddress,
+      appState.connection.account?.address,
+      values.amount,
+      fundWallet,
+    ],
+  )
+
+  const unifiedHandleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      if (values.currency === 'CARD') return handleCardSubmit(e)
+      return handleSubmit(e)
+    },
+    [values.currency, handleCardSubmit, handleSubmit],
+  )
+
   return {
     values,
     control,
     amountCtrl,
     currencyCtrl,
     errors,
-    handleSubmit,
+    handleSubmit: unifiedHandleSubmit,
     handleAmountChange,
     bonus,
     totalBalance,
@@ -369,5 +431,9 @@ export function useTopUpCreditsModalForm({
     isSubmitDisabled,
     isEthereumNetwork,
     getEthereumNetworkTooltip,
+    isGasSponsored,
+    smartWalletAddress,
+    isPrivyConnection,
+    isOnrampProcessing,
   }
 }

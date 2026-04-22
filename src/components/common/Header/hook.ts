@@ -13,14 +13,19 @@ import {
 } from '../../../hooks/common/useBreadcrumbNames'
 import { UseRoutesReturn, useRoutes } from '../../../hooks/common/useRoutes'
 import { useConnection } from '../../../hooks/common/useConnection'
+import { usePrivyConnection } from '../../../hooks/common/usePrivyConnection'
 import { BlockchainId, ProviderId, blockchains } from '@/domain/connect'
+import { PRIVY_APP_ID } from '@/config/privy'
 import { usePaymentMethod } from '../../../hooks/common/usePaymentMethod'
 import { useAccountRewards as useNodeRewards } from '../../../hooks/common/node/useRewards'
+import { selectDisplayAddress } from '@/store/connection'
 
 export type UseHeaderReturn = Pick<UseRoutesReturn, 'routes'> & {
-  accountAddress?: string
+  accountAddress?: string // SA for Privy users, EOA otherwise
+  eoaAddress?: string // raw EOA — only shown in Settings panel
   accountBalance?: number
   accountCreditBalance?: number
+  blockchain?: BlockchainId
   networks: Network[]
   pathname: string
   breadcrumbNames: UseBreadcrumbNamesReturn['names']
@@ -43,8 +48,12 @@ export function useHeader(): UseHeaderReturn {
     creditBalance: accountCreditBalance,
   } = state.connection
 
+  const displayAddress = selectDisplayAddress(state.connection)
+
   const { handleConnect: connect, handleDisconnect: disconnect } =
     useConnection({ triggerOnMount: true })
+
+  const { handleConnect: connectPrivy } = usePrivyConnection()
 
   usePaymentMethod({ triggerOnMount: true })
 
@@ -68,17 +77,35 @@ export function useHeader(): UseHeaderReturn {
 
   // --------------------
 
-  const wallets: Wallet[] = useMemo(
-    () => [
-      {
-        id: ProviderId.Reown,
-        name: 'Wallet Connect',
-        icon: 'walletConnect',
-        color: 'main0',
-      },
-    ],
+  const reownWallet: Wallet = useMemo(
+    () => ({
+      id: ProviderId.Reown,
+      name: 'Wallet Connect',
+      icon: 'walletConnect',
+      color: 'main0',
+    }),
     [],
   )
+
+  const privyWallet: Wallet = useMemo(
+    () => ({
+      id: ProviderId.Privy,
+      name: 'Sign in with email',
+      icon: 'envelope',
+      color: 'main0',
+    }),
+    [],
+  )
+
+  // Privy is EVM-only; on EVM networks we list it first so the Privy-first
+  // goal holds, with Wallet Connect as the fallback. Solana stays on Reown
+  // because Privy's smart wallets preset is EVM-only today.
+  const evmWallets: Wallet[] = useMemo(
+    () => (PRIVY_APP_ID ? [privyWallet, reownWallet] : [reownWallet]),
+    [privyWallet, reownWallet],
+  )
+
+  const solWallets: Wallet[] = useMemo(() => [reownWallet], [reownWallet])
 
   const networks: Network[] = useMemo(
     () => [
@@ -86,28 +113,28 @@ export function useHeader(): UseHeaderReturn {
         id: BlockchainId.ETH,
         icon: 'ethereum',
         name: 'Ethereum',
-        wallets: wallets,
+        wallets: evmWallets,
       },
       {
         id: BlockchainId.AVAX,
         icon: 'avalanche',
         name: 'Avalanche',
-        wallets: wallets,
+        wallets: evmWallets,
       },
       {
         id: BlockchainId.BASE,
         icon: 'base',
         name: 'Base',
-        wallets: wallets,
+        wallets: evmWallets,
       },
       {
         id: BlockchainId.SOL,
         icon: 'solana',
         name: 'Solana',
-        wallets: wallets,
+        wallets: solWallets,
       },
     ],
-    [wallets],
+    [evmWallets, solWallets],
   )
 
   // --------------------
@@ -116,9 +143,14 @@ export function useHeader(): UseHeaderReturn {
     async (wallet: Wallet, network: Network) => {
       const blockchain = (network as any).id as BlockchainId
 
+      if (wallet.id === ProviderId.Privy) {
+        await connectPrivy()
+        return
+      }
+
       connect({ blockchain })
     },
-    [connect],
+    [connect, connectPrivy],
   )
 
   const handleSwitchNetwork = useCallback(
@@ -178,9 +210,11 @@ export function useHeader(): UseHeaderReturn {
   }, [pendingDays, userRewards])
 
   return {
-    accountAddress: account?.address,
+    accountAddress: displayAddress,
+    eoaAddress: account?.address,
     accountBalance,
     accountCreditBalance,
+    blockchain,
     networks,
     pathname,
     routes,
