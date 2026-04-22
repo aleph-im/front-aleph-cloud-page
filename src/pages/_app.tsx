@@ -20,6 +20,8 @@ import '@/config/reown'
 import TopUpCreditsModal from '@/components/modals/TopUpCreditsModal'
 import ReportIssueModal from '@/components/modals/ReportIssueModal'
 import { GlobalPaymentStatusModal } from '@/components/modals/PaymentStatusModal'
+import CreditTransferModal from '@/components/modals/CreditTransferModal'
+import TransferStatusModal from '@/components/modals/TransferStatusModal'
 import { useGlobalPaymentTracking } from '@/hooks/common/useGlobalPaymentTracking'
 
 function GlobalEffects() {
@@ -51,6 +53,8 @@ export default function App({ Component, pageProps }: AppProps) {
             <ReportIssueModal />
             <TopUpCreditsModal />
             <GlobalPaymentStatusModal />
+            <CreditTransferModal />
+            <TransferStatusModal />
             <Viewport>
               <Sidebar />
               <Main ref={mainRef}>

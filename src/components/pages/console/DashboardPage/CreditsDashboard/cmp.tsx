@@ -23,12 +23,12 @@ import tw from 'twin.macro'
 
 export default function CreditsDashboard() {
   const {
-    runRateDays,
+    runRate,
     creditsDashboardOpen,
     setCreditsDashboardOpen,
     isConnected,
     accountCreditBalance,
-    isCalculatingCosts,
+    costsLoading,
     history,
     historyLoading,
     recentHistory,
@@ -84,16 +84,42 @@ export default function CreditsDashboard() {
                     className="bg-base1"
                     tw="flex flex-col items-start justify-between px-3 py-2 min-w-[6.875rem] min-h-[3.8125rem]"
                   >
-                    <p className="tp-info text-base2">RUN-RATE</p>
-                    {isCalculatingCosts ? (
+                    <p className="tp-info text-base2">ESTIMATED RUN TIME</p>
+                    {costsLoading ? (
                       <Skeleton width="4rem" height="1.5rem" />
-                    ) : (
-                      <div tw="flex items-end gap-0.5">
-                        <p className="text-main0 tp-h7">{runRateDays || '∞'}</p>
-                        <p className="text-main0 tp-info" tw="mb-1 ml-1">
-                          {runRateDays === 1 ? 'DAY' : 'DAYS'}
-                        </p>
+                    ) : runRate ? (
+                      <div tw="flex items-end gap-1.5">
+                        {runRate.years > 0 && (
+                          <div tw="flex items-end gap-0.5">
+                            <p className="text-main0 tp-h7">{runRate.years}</p>
+                            <p className="text-main0 tp-info" tw="mb-1">
+                              {runRate.years === 1 ? 'Y' : 'Y'}
+                            </p>
+                          </div>
+                        )}
+                        {(runRate.years > 0 || runRate.months > 0) && (
+                          <div tw="flex items-end gap-0.5">
+                            <p className="text-main0 tp-h7">{runRate.months}</p>
+                            <p className="text-main0 tp-info" tw="mb-1">
+                              M
+                            </p>
+                          </div>
+                        )}
+                        <div tw="flex items-end gap-0.5">
+                          <p className="text-main0 tp-h7">{runRate.days}</p>
+                          <p className="text-main0 tp-info" tw="mb-1">
+                            D
+                          </p>
+                        </div>
+                        <div tw="flex items-end gap-0.5">
+                          <p className="text-main0 tp-h7">{runRate.hours}</p>
+                          <p className="text-main0 tp-info" tw="mb-1">
+                            H
+                          </p>
+                        </div>
                       </div>
+                    ) : (
+                      <p className="text-main0 tp-h7">∞</p>
                     )}
                   </div>
                 </div>
@@ -130,7 +156,17 @@ export default function CreditsDashboard() {
                   History <Icon name="chevron-square-right" tw="ml-1" />
                 </Button>
               </div>
-              <div tw="overflow-x-auto">
+              <div
+                tw="overflow-x-auto"
+                style={{ maxHeight: '28rem', overflowY: 'auto' }}
+                css={`
+                  table thead {
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
+                  }
+                `}
+              >
                 <StyledTable
                   // borderType="none"
                   // rowNoise

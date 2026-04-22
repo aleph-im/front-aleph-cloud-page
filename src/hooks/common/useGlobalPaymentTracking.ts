@@ -3,9 +3,12 @@ import { useNotification } from '@aleph-front/core'
 import { usePaymentTracking } from '@/hooks/common/usePaymentTracking'
 import { CreditPaymentHistoryItem } from '@/domain/credit'
 import { formatCredits } from '@/helpers/utils'
+import { useAppState } from '@/contexts/appState'
+import { triggerCreditDataRefresh } from '@/store/ui'
 
 export function useGlobalPaymentTracking() {
   const noti = useNotification()
+  const [, dispatch] = useAppState()
 
   const handlePaymentCompleted = useCallback(
     (payment: CreditPaymentHistoryItem) => {
@@ -14,8 +17,11 @@ export function useGlobalPaymentTracking() {
         title: 'Purchase complete',
         text: `Your balance has been credited with ~${formatCredits(payment.credits)}.`,
       })
+
+      // Refresh all credit-related data (history, costs, etc.)
+      dispatch(triggerCreditDataRefresh())
     },
-    [noti],
+    [noti, dispatch],
   )
 
   return usePaymentTracking({ onPaymentCompleted: handlePaymentCompleted })

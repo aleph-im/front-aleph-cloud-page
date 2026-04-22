@@ -31,6 +31,7 @@ const defaultNames = {
   [NAVIGATION_URLS.console.web3Hosting.website.home]: 'WEB3 HOSTING / WEBSITES',
   [`${NAVIGATION_URLS.console.web3Hosting.website.home}/[hash]`]: '-',
   [NAVIGATION_URLS.console.web3Hosting.website.new]: 'SETUP NEW WEBSITE',
+  [NAVIGATION_URLS.console.credits.home]: 'CREDITS',
   [NAVIGATION_URLS.account.home]: 'ACCOUNT',
   [NAVIGATION_URLS.account.earn.home]: 'EARN',
   [NAVIGATION_URLS.account.earn.staking]: 'STAKING',

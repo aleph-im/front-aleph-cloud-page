@@ -31,6 +31,7 @@ export function usePaymentMethod({
 }: UsePaymentMethodProps = {}): UsePaymentMethodReturn {
   const [state, dispatch] = useAppState()
   const { paymentMethod, account } = state.connection
+  const { creditDataRefreshTrigger } = state.ui
   const router = useRouter()
   const { pathname } = router
 
@@ -79,6 +80,12 @@ export function usePaymentMethod({
     if (!account) return
     fetchBalance()
   }, [account, paymentMethod, fetchBalance, triggerOnMount])
+
+  // Refetch balance when credit data refresh is triggered
+  useEffect(() => {
+    if (!creditDataRefreshTrigger || !account) return
+    fetchBalance()
+  }, [creditDataRefreshTrigger, account, fetchBalance])
 
   return {
     paymentMethod,

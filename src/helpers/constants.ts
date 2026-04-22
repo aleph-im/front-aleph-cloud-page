@@ -90,6 +90,7 @@ type CheckoutAddStepType =
   | 'allocate'
   | 'portForwarding'
   | 'creditTransaction'
+  | 'creditTransfer'
   | 'permissions'
 
 type CheckoutDelStepType =
@@ -325,6 +326,9 @@ export const NAVIGATION_URLS = {
         new: '/console/storage/volume/new',
         detail: (id: string) => `/console/storage/volume/${id}`,
       },
+    },
+    credits: {
+      home: '/console/credits',
     },
   },
   account: {
