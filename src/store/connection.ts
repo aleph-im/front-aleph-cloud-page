@@ -10,6 +10,9 @@ export type ConnectionState = {
   blockchain?: BlockchainId
   provider?: ProviderId
   paymentMethod: PaymentMethod
+  // Privy smart-wallet contract address controlled by the connected EOA.
+  // Only set when provider === ProviderId.Privy; sender of sponsored credit top-ups.
+  smartWalletAddress?: string
 }
 
 export const initialState: ConnectionState = {
@@ -57,6 +60,7 @@ export class ConnectionUpdateAction {
       blockchain: BlockchainId
       balance?: number
       creditBalance?: number
+      smartWalletAddress?: string
     },
   ) {}
 }
@@ -148,4 +152,12 @@ export function getConnectionReducer(): ConnectionReducer {
       }
     }
   }
+}
+
+export function selectDisplayAddress(
+  connection: ConnectionState,
+): string | undefined {
+  if (connection.provider === ProviderId.Privy && connection.smartWalletAddress)
+    return connection.smartWalletAddress
+  return connection.account?.address
 }
