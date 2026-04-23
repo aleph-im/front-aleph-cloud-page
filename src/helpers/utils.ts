@@ -22,9 +22,25 @@ import Err from './errors'
 import { Account } from '@aleph-sdk/account'
 import { createFromEVMAccount, isAccountSupported } from '@aleph-sdk/superfluid'
 import { EVMAccount } from '@aleph-sdk/evm'
-import { blockchains } from '@/domain/connect'
+import { BlockchainId, blockchains } from '@/domain/connect'
 import { CREDITS_PER_USD, TokenId, getTokenDecimals } from '@/domain/credit'
 import BN from 'bn.js'
+import { ethers, providers } from 'ethers'
+
+const USDC_CONTRACT_ADDRESSES: Partial<Record<BlockchainId, string>> = {
+  [BlockchainId.ETH]: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  [BlockchainId.AVAX]: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6',
+  [BlockchainId.BASE]: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+}
+
+const ERC20_BALANCE_ABI = ['function balanceOf(address) view returns (uint256)']
+
+export type OnChainBalances = {
+  balance: number
+  creditBalance: number
+  ethBalance: number
+  usdcBalance: number
+}
 
 /**
  * Takes a string and returns a shortened version of it, with the first 6 and last 4 characters separated by '...'
@@ -107,6 +123,42 @@ export async function getAccountBalance(
     balance: balance || addressBalance.balance,
     creditBalance: addressBalance.creditBalance || 0,
   }
+}
+
+export async function fetchOnChainBalances(
+  address: string,
+  blockchain: BlockchainId,
+): Promise<OnChainBalances> {
+  const rpcUrl = blockchains[blockchain]?.rpcUrl
+
+  const [alephResult, ethResult, usdcResult] = await Promise.allSettled([
+    getAddressBalance(address),
+    (async () => {
+      if (!rpcUrl) return 0
+      const provider = new providers.JsonRpcProvider(rpcUrl)
+      const raw = await provider.getBalance(address)
+      return Number(ethers.utils.formatEther(raw))
+    })(),
+    (async () => {
+      const usdcAddress = USDC_CONTRACT_ADDRESSES[blockchain]
+      if (!rpcUrl || !usdcAddress) return 0
+      const provider = new providers.JsonRpcProvider(rpcUrl)
+      const contract = new ethers.Contract(
+        usdcAddress,
+        ERC20_BALANCE_ABI,
+        provider,
+      )
+      const raw: ethers.BigNumber = await contract.balanceOf(address)
+      return raw.toNumber() / 1e6
+    })(),
+  ])
+
+  const { balance = 0, creditBalance = 0 } =
+    alephResult.status === 'fulfilled' ? alephResult.value : {}
+  const ethBalance = ethResult.status === 'fulfilled' ? ethResult.value : 0
+  const usdcBalance = usdcResult.status === 'fulfilled' ? usdcResult.value : 0
+
+  return { balance, creditBalance, ethBalance, usdcBalance }
 }
 
 export function round(num: number, decimals = 2) {

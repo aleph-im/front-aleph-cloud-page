@@ -13,6 +13,7 @@ import Viewport from '@/components/common/Viewport'
 import Sidebar from '@/components/common/Sidebar'
 import { AppStateProvider } from '@/contexts/appState'
 import { ReownProvider } from '@/contexts/reownContext'
+import { PrivyProviders } from '@/contexts/privyContext'
 import useResetScroll from '@/hooks/common/useResetScroll'
 import { useRef } from 'react'
 import Head from 'next/head'
@@ -46,33 +47,35 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <GlobalStyles />
       <GlobalStylesOverride />
-      <ReownProvider>
-        <AppStateProvider>
-          <NotificationProvider max={10} timeout={2000}>
-            <GlobalEffects />
-            <ReportIssueModal />
-            <TopUpCreditsModal />
-            <GlobalPaymentStatusModal />
-            <CreditTransferModal />
-            <TransferStatusModal />
-            <Viewport>
-              <Sidebar />
-              <Main ref={mainRef}>
-                <Header />
-                <Content ref={contentRef}>
-                  <Component
-                    {...{
-                      ...pageProps,
-                      mainRef,
-                      contentRef,
-                    }}
-                  />
-                </Content>
-              </Main>
-            </Viewport>
-          </NotificationProvider>
-        </AppStateProvider>
-      </ReownProvider>
+      <PrivyProviders>
+        <ReownProvider>
+          <AppStateProvider>
+            <NotificationProvider max={10} timeout={2000}>
+              <GlobalEffects />
+              <ReportIssueModal />
+              <TopUpCreditsModal />
+              <GlobalPaymentStatusModal />
+              <CreditTransferModal />
+              <TransferStatusModal />
+              <Viewport>
+                <Sidebar />
+                <Main ref={mainRef}>
+                  <Header />
+                  <Content ref={contentRef}>
+                    <Component
+                      {...{
+                        ...pageProps,
+                        mainRef,
+                        contentRef,
+                      }}
+                    />
+                  </Content>
+                </Main>
+              </Viewport>
+            </NotificationProvider>
+          </AppStateProvider>
+        </ReownProvider>
+      </PrivyProviders>
     </ThemeProvider>
   )
 }

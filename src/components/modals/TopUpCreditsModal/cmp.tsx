@@ -1,12 +1,5 @@
 import React, { memo } from 'react'
-import {
-  Icon,
-  Label,
-  Modal,
-  TextGradient,
-  useCopyToClipboardAndNotify,
-} from '@aleph-front/core'
-import { blockchains, BlockchainId } from '@/domain/connect'
+import { Icon, Label, Modal, TextGradient } from '@aleph-front/core'
 import ButtonWithInfoTooltip from '@/components/common/ButtonWithInfoTooltip'
 import { Form } from '@/components/form/Form'
 import { useTopUpCreditsModal, useTopUpCreditsModalForm } from './hook'
@@ -61,8 +54,14 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
     isEthereumNetwork,
     getEthereumNetworkTooltip,
     isGasSponsored,
-    smartWalletAddress,
     isPrivyConnection,
+    alephEnabled,
+    ethEnabled,
+    usdcEnabled,
+    alephDisabledReason,
+    ethDisabledReason,
+    usdcDisabledReason,
+    cardDisabledReason,
   } = useTopUpCreditsModalForm({ onSuccess, refetchPaymentHistory })
 
   return (
@@ -89,9 +88,14 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
             minimumTokenAmount,
             isBelowMinimumCredits,
             showInsufficientWarning,
-            isGasSponsored,
-            smartWalletAddress,
             isPrivyConnection,
+            alephEnabled,
+            ethEnabled,
+            usdcEnabled,
+            alephDisabledReason,
+            ethDisabledReason,
+            usdcDisabledReason,
+            cardDisabledReason,
           }}
         />
       }
@@ -102,6 +106,7 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
             isSubmitDisabled,
             isEthereumNetwork,
             getEthereumNetworkTooltip,
+            isGasSponsored,
           }}
         />
       }
@@ -112,50 +117,6 @@ export const TopUpCreditsModal = ({ onSuccess }: TopUpCreditsModalProps) => {
 TopUpCreditsModal.displayName = 'TopUpCreditsModal'
 
 export default memo(TopUpCreditsModal)
-
-// --------
-
-const SmartWalletBanner = memo(({ address }: { address: string }) => {
-  const handleCopy = useCopyToClipboardAndNotify(address)
-  const explorerUrl = `${blockchains[BlockchainId.ETH].explorerUrl}address/${address}`
-  const short = `${address.slice(0, 6)}…${address.slice(-4)}`
-
-  return (
-    <div
-      tw="flex items-start gap-3 p-3 rounded"
-      className="bg-main0/10 text-main0 tp-body2 fs-12"
-    >
-      <Icon name="bolt" tw="mt-1 shrink-0" />
-      <div tw="flex-1 min-w-0">
-        <div className="tp-body2 fs-14">Gas sponsored by Aleph</div>
-        <div tw="opacity-80 mt-1">
-          Your top-up runs through your smart wallet — no ETH needed.
-        </div>
-        <div tw="flex items-center gap-2 mt-2">
-          <span className="tp-body3">{short}</span>
-          <button
-            type="button"
-            onClick={handleCopy}
-            tw="opacity-60 hover:opacity-100 transition-opacity"
-            title="Copy smart wallet address"
-          >
-            <Icon name="copy" size="sm" />
-          </button>
-          <a
-            href={explorerUrl}
-            target="_blank"
-            rel="noreferrer"
-            tw="opacity-60 hover:opacity-100 transition-opacity"
-            title="View on Etherscan"
-          >
-            <Icon name="square-up-right" size="sm" />
-          </a>
-        </div>
-      </div>
-    </div>
-  )
-})
-SmartWalletBanner.displayName = 'SmartWalletBanner'
 
 // --------
 
@@ -175,9 +136,14 @@ type TopUpCreditsModalContentProps = Pick<
   | 'minimumTokenAmount'
   | 'isBelowMinimumCredits'
   | 'showInsufficientWarning'
-  | 'isGasSponsored'
-  | 'smartWalletAddress'
   | 'isPrivyConnection'
+  | 'alephEnabled'
+  | 'ethEnabled'
+  | 'usdcEnabled'
+  | 'alephDisabledReason'
+  | 'ethDisabledReason'
+  | 'usdcDisabledReason'
+  | 'cardDisabledReason'
 >
 
 const TopUpCreditsModalContent = memo(
@@ -196,17 +162,19 @@ const TopUpCreditsModalContent = memo(
     minimumTokenAmount,
     isBelowMinimumCredits,
     showInsufficientWarning,
-    isGasSponsored,
-    smartWalletAddress,
     isPrivyConnection,
+    alephEnabled,
+    ethEnabled,
+    usdcEnabled,
+    alephDisabledReason,
+    ethDisabledReason,
+    usdcDisabledReason,
+    cardDisabledReason,
   }: TopUpCreditsModalContentProps) => {
     return (
       <Form onSubmit={handleSubmit} errors={errors}>
         {/* {JSON.stringify(values, null, 2)} */}
         <div tw="flex flex-col gap-6">
-          {isGasSponsored && smartWalletAddress && (
-            <SmartWalletBanner address={smartWalletAddress} />
-          )}
           <div>
             <StyledSendTitle>
               <TextGradient type="h7" forwardedAs="h2" tw="mb-0">
@@ -227,6 +195,8 @@ const TopUpCreditsModalContent = memo(
                     <Icon prefix="custom" name="aleph" size="100%" />
                   ) : values.currency === 'USDC' ? (
                     <Icon prefix="custom" name="usdc" size="100%" />
+                  ) : values.currency === 'ETH' ? (
+                    'Ξ'
                   ) : (
                     '$'
                   )}
@@ -315,6 +285,7 @@ const TopUpCreditsModalContent = memo(
               direction="column"
             >
               <StyledRadio
+                disabled={!alephEnabled}
                 value="ALEPH"
                 label={
                   (
@@ -327,6 +298,15 @@ const TopUpCreditsModalContent = memo(
                           size="100%"
                           className="text-main0"
                         />
+                        {!alephEnabled && alephDisabledReason && (
+                          <InfoTooltipButton
+                            plain
+                            my="top-left"
+                            at="top-right"
+                            iconSize=".75rem"
+                            tooltipContent={alephDisabledReason}
+                          />
+                        )}
                       </span>
                       <Label kind="primary" variant="success">
                         +20% extra balance
@@ -336,6 +316,27 @@ const TopUpCreditsModalContent = memo(
                 }
               />
               <StyledRadio
+                disabled={!ethEnabled}
+                value="ETH"
+                label={
+                  (
+                    <span tw="flex gap-4 justify-start items-center">
+                      ETH
+                      {!ethEnabled && ethDisabledReason && (
+                        <InfoTooltipButton
+                          plain
+                          my="top-left"
+                          at="top-right"
+                          iconSize=".75rem"
+                          tooltipContent={ethDisabledReason}
+                        />
+                      )}
+                    </span>
+                  ) as unknown as string
+                }
+              />
+              <StyledRadio
+                disabled={!usdcEnabled}
                 value="USDC"
                 label={
                   (
@@ -347,6 +348,15 @@ const TopUpCreditsModalContent = memo(
                         size="100%"
                         className="text-main0"
                       />
+                      {!usdcEnabled && usdcDisabledReason && (
+                        <InfoTooltipButton
+                          plain
+                          my="top-left"
+                          at="top-right"
+                          iconSize=".75rem"
+                          tooltipContent={usdcDisabledReason}
+                        />
+                      )}
                     </span>
                   ) as unknown as string
                 }
@@ -358,6 +368,15 @@ const TopUpCreditsModalContent = memo(
                   (
                     <span tw="flex gap-4 justify-start items-center">
                       Credit Card / SEPA <PaymentMethodLogos />
+                      {!isPrivyConnection && cardDisabledReason && (
+                        <InfoTooltipButton
+                          plain
+                          my="top-left"
+                          at="top-right"
+                          iconSize=".75rem"
+                          tooltipContent={cardDisabledReason}
+                        />
+                      )}
                     </span>
                   ) as unknown as string
                 }
@@ -393,6 +412,7 @@ type TopUpCreditsModalFooterProps = Pick<
   | 'isSubmitDisabled'
   | 'isEthereumNetwork'
   | 'getEthereumNetworkTooltip'
+  | 'isGasSponsored'
 >
 
 const TopUpCreditsModalFooter = memo(
@@ -400,9 +420,10 @@ const TopUpCreditsModalFooter = memo(
     handleSubmit,
     isSubmitDisabled,
     getEthereumNetworkTooltip,
+    isGasSponsored,
   }: TopUpCreditsModalFooterProps) => {
     return (
-      <div tw="flex gap-4 justify-center">
+      <div tw="flex flex-col items-center gap-2">
         <ButtonWithInfoTooltip
           type="submit"
           variant="primary"
@@ -413,6 +434,12 @@ const TopUpCreditsModalFooter = memo(
         >
           Confirm & Add Balance <Icon name="arrow-right" />
         </ButtonWithInfoTooltip>
+        {isGasSponsored && (
+          <p className="tp-body3 fs-12 text-main0" tw="m-0">
+            <Icon name="bolt" size="sm" tw="mr-1" />
+            Gas sponsored by Aleph — no ETH needed
+          </p>
+        )}
       </div>
     )
   },

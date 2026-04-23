@@ -211,7 +211,7 @@ export function useHeader(): UseHeaderReturn {
 
   return {
     accountAddress: displayAddress,
-    eoaAddress: account?.address,
+    eoaAddress: state.connection.eoaAddress,
     accountBalance,
     accountCreditBalance,
     blockchain,

@@ -24,7 +24,9 @@ export const PaymentHistoryPanel = ({
       if (!searchQuery) return true
       const query = searchQuery.toLowerCase()
       return (
-        payment.credits.toString().includes(query) ||
+        (payment.credits !== null ? payment.credits.toString() : '').includes(
+          query,
+        ) ||
         payment.asset.toLowerCase().includes(query) ||
         payment.amount.toString().includes(query)
       )
@@ -151,7 +153,8 @@ export const PaymentHistoryPanel = ({
                 align: 'left',
                 sortable: true,
                 width: '8rem',
-                render: (row) => `~${formatCredits(row.credits)}`,
+                render: (row) =>
+                  row.credits !== null ? `~${formatCredits(row.credits)}` : '-',
               },
               {
                 label: '',

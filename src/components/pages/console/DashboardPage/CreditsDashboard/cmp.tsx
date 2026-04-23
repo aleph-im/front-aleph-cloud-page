@@ -250,7 +250,10 @@ export default function CreditsDashboard() {
                       align: 'left',
                       sortable: true,
                       width: '8rem',
-                      render: (row) => `~${formatCredits(row.credits)}`,
+                      render: (row) =>
+                        row.credits !== null
+                          ? `~${formatCredits(row.credits)}`
+                          : '-',
                     },
                     {
                       label: '',

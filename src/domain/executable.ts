@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer'
+import { getStoredToken, setStoredToken } from '@/domain/session/authTokenStore'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   BaseExecutableContent,
@@ -488,7 +489,7 @@ export abstract class ExecutableManager<T extends Executable> {
   ): Promise<AuthPubKeyToken> {
     if (!this.account) throw Err.InvalidAccount
 
-    // @todo: Improve this by caching on local storage
+    const { address } = this.account
     const { cachedPubKeyToken } = ExecutableManager
 
     if (cachedPubKeyToken) {
@@ -505,10 +506,21 @@ export abstract class ExecutableManager<T extends Executable> {
       }
     }
 
+    // Check sessionStorage before prompting the wallet — survives page refreshes
+    const stored = getStoredToken(address)
+    if (stored) {
+      const { payload } = stored.pubKeyHeader
+      const parsedPayload = Buffer.from(payload, 'hex').toString('utf-8')
+      const { chain } = JSON.parse(parsedPayload)
+      if (chain === this.account.getChain()) {
+        ExecutableManager.cachedPubKeyToken = stored
+        return stored
+      }
+    }
+
     keyPair = keyPair || (await this.getKeyPair())
 
     const { publicKey, createdAt } = keyPair
-    const { address } = this.account
 
     // @todo: Quickfix that should be moved to the backend
     const expires = new Date(createdAt + KEYPAIR_TTL).toISOString()
@@ -558,6 +570,7 @@ export abstract class ExecutableManager<T extends Executable> {
     }
 
     ExecutableManager.cachedPubKeyToken = pubKeyToken
+    setStoredToken(address, pubKeyToken)
 
     return pubKeyToken
   }

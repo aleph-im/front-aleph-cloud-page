@@ -20,25 +20,27 @@ import { useCreditManager } from '@/hooks/common/useManager/useCreditManager'
 import { MIN_CREDITS_TOPUP } from '@/domain/credit'
 import { useEthereumNetwork } from '@/hooks/common/useEthereumNetwork'
 import { ProviderId } from '@/domain/connect'
-import { resolveOnrampRecipient, privyDefaultChain } from '@/config/privy'
 import {
   UseTopUpCreditsModalFormProps,
   UseTopUpCreditsModalFormReturn,
   UseTopUpCreditsModalReturn,
 } from './types'
-
-export const defaultValues: TopUpCreditsFormData = {
-  amount: 100,
-  currency: 'ALEPH',
-  chain: 'ethereum', // 'ethereum-sepolia',
-  provider: 'WALLET',
-}
 import { useAppState } from '@/contexts/appState'
 import {
   openTopUpCreditsModal,
   closeTopUpCreditsModal,
-  setFocusedPaymentTxHash,
+  setFocusedPaymentId,
 } from '@/store/ui'
+import { useRefreshBalance } from '@/hooks/common/useRefreshBalance'
+
+export const defaultValues: Omit<TopUpCreditsFormData, 'amount'> & {
+  amount?: number
+} = {
+  amount: undefined,
+  currency: 'ALEPH',
+  chain: 'ethereum', // 'ethereum-sepolia',
+  provider: 'WALLET',
+}
 
 export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
   const [state, dispatch] = useAppState()
@@ -63,6 +65,26 @@ export function useTopUpCreditsModal(): UseTopUpCreditsModalReturn {
   }
 }
 
+// CARD is not a token — it settles in USDC. Map it so the estimation API
+// receives a valid token identifier.
+function estimationCurrency(currency: PaymentCurrency): PaymentCurrency {
+  return currency === 'CARD' ? 'USDC' : currency
+}
+
+// Pick the first payment method the user can actually use, given fresh balances.
+function pickFirstEnabledCurrency(
+  balance: number,
+  ethBalance: number,
+  usdcBalance: number,
+  isPrivy: boolean,
+): PaymentCurrency {
+  if (balance > 0) return 'ALEPH'
+  if (ethBalance > 0) return 'ETH'
+  if (usdcBalance > 0) return 'USDC'
+  if (isPrivy) return 'CARD'
+  return 'ALEPH'
+}
+
 export function useTopUpCreditsModalForm({
   onSuccess,
   refetchPaymentHistory,
@@ -79,6 +101,24 @@ export function useTopUpCreditsModalForm({
     isPrivyConnection && !!smartWalletClient && !!smartWalletAddress
   const [isOnrampProcessing, setIsOnrampProcessing] = useState(false)
 
+  const refreshBalance = useRefreshBalance()
+
+  const alephEnabled = (appState.connection.balance ?? 0) > 0
+  const ethEnabled = (appState.connection.ethBalance ?? 0) > 0
+  const usdcEnabled = (appState.connection.usdcBalance ?? 0) > 0
+  const alephDisabledReason = alephEnabled
+    ? undefined
+    : "You don't have any ALEPH in your wallet"
+  const ethDisabledReason = ethEnabled
+    ? undefined
+    : "You don't have any ETH in your wallet"
+  const usdcDisabledReason = usdcEnabled
+    ? undefined
+    : "You don't have any USDC in your wallet"
+  const cardDisabledReason = isPrivyConnection
+    ? undefined
+    : 'Card payments require Privy sign-in'
+
   const { fundWallet } = useFundWallet({
     onUserExited: useCallback(() => {
       setIsOnrampProcessing(true)
@@ -87,43 +127,34 @@ export function useTopUpCreditsModalForm({
     }, [dispatch, refetchPaymentHistory]),
   })
 
-  const [calculatedAmount, setCalculatedAmount] = useState(defaultValues.amount)
-  // Start as true when there's a minimum balance requirement to prevent
-  // showing errors before the proper amount is calculated
   const [isCalculatingInitialAmount, setIsCalculatingInitialAmount] = useState(
     !!appState.ui.topUpCreditsMinimumBalance,
   )
-  // Track if user has manually changed the amount
   const [hasManuallyChangedAmount, setHasManuallyChangedAmount] =
     useState(false)
-  // Track the last currency used for calculation to detect changes
   const lastCalculatedCurrencyRef = useRef<PaymentCurrency>(
     defaultValues.currency,
   )
-  // Track the minimum token amount for the current currency
   const [minimumTokenAmount, setMinimumTokenAmount] = useState<number>(0)
 
-  // The minimum credits needed (passed value or default, but always at least MIN_CREDITS_TOPUP)
   const minimumCreditsNeeded = Math.max(
-    appState.ui.topUpCreditsMinimumBalance || MIN_CREDITS_TOPUP,
+    appState.ui.topUpCreditsMinimumBalance ?? 0,
     MIN_CREDITS_TOPUP,
   )
 
-  // Calculate token amount for a given currency based on credit requirement
   const calculateTokenAmountForCredits = useCallback(
     async (
       currency: PaymentCurrency,
       creditsNeeded: number,
     ): Promise<number> => {
-      if (!creditManager) return defaultValues.amount
+      if (!creditManager) return 0
 
       const estimation = await creditManager.getCreditToTokenEstimation(
         creditsNeeded,
         defaultValues.chain,
-        currency,
+        estimationCurrency(currency),
       )
 
-      // Round up to ensure we meet the minimum credits
       return Math.ceil(estimation.tokenAmountInUnits)
     },
     [creditManager],
@@ -159,10 +190,11 @@ export function useTopUpCreditsModalForm({
         }
 
         if (transactionHash) {
+          const { txHash, paymentId } = transactionHash
           dispatch(closeTopUpCreditsModal())
-          dispatch(setFocusedPaymentTxHash(transactionHash))
+          dispatch(setFocusedPaymentId(paymentId))
           refetchPaymentHistory?.()
-          onSuccess?.(transactionHash)
+          onSuccess?.(txHash)
         }
       } finally {
         await stop()
@@ -188,23 +220,15 @@ export function useTopUpCreditsModalForm({
     formState: { errors },
     reset,
     setValue,
+    setError,
+    clearErrors,
     requestState: { loading: isSubmitLoading },
   } = useForm({
-    defaultValues: {
-      ...defaultValues,
-      amount: calculatedAmount,
-    },
+    defaultValues,
     onSubmit,
     onSuccess: async () => undefined,
     resolver: zodResolver(topUpCreditsSchema),
   })
-
-  // Update form value when calculated amount changes (only if user hasn't manually changed it)
-  useEffect(() => {
-    if (!hasManuallyChangedAmount) {
-      setValue('amount', calculatedAmount)
-    }
-  }, [calculatedAmount, setValue, hasManuallyChangedAmount])
 
   // @note: don't use watch, use useWatch instead: https://github.com/react-hook-form/react-hook-form/issues/10753
   const values = useWatch({ control }) as TopUpCreditsFormData
@@ -219,7 +243,6 @@ export function useTopUpCreditsModalForm({
     name: 'currency',
   })
 
-  // Wrap amount onChange to track manual changes
   const handleAmountChange = useCallback(
     (value: number) => {
       setHasManuallyChangedAmount(true)
@@ -228,7 +251,39 @@ export function useTopUpCreditsModalForm({
     [amountCtrl.field],
   )
 
-  // Recalculate token amount when currency changes (if user hasn't manually changed amount)
+  // Validate that the entered amount does not exceed the available wallet balance.
+  useEffect(() => {
+    if (values.currency === 'CARD' || !values.amount || values.amount <= 0) {
+      clearErrors('amount')
+      return
+    }
+
+    const maxBalance =
+      values.currency === 'USDC'
+        ? (appState.connection.usdcBalance ?? 0)
+        : values.currency === 'ETH'
+          ? (appState.connection.ethBalance ?? 0)
+          : (appState.connection.balance ?? 0)
+
+    if (values.amount > maxBalance) {
+      setError('amount', {
+        type: 'manual',
+        message: `Insufficient ${values.currency} balance`,
+      })
+    } else {
+      clearErrors('amount')
+    }
+  }, [
+    values.amount,
+    values.currency,
+    appState.connection.balance,
+    appState.connection.ethBalance,
+    appState.connection.usdcBalance,
+    setError,
+    clearErrors,
+  ])
+
+  // Recalculate token amount when currency changes (unless user has manually set the amount).
   useEffect(() => {
     const updateForCurrency = async () => {
       if (!creditManager) return
@@ -241,7 +296,6 @@ export function useTopUpCreditsModalForm({
           values.currency,
           minimumCreditsNeeded,
         )
-        setCalculatedAmount(newAmount)
         setMinimumTokenAmount(newAmount)
         setValue('amount', newAmount)
         lastCalculatedCurrencyRef.current = values.currency
@@ -268,11 +322,17 @@ export function useTopUpCreditsModalForm({
     lastCalculatedCurrencyRef.current = defaultValues.currency
   }, [reset])
 
-  // Reset form and recalculate amount when modal opens
+  // Reset and recalculate when modal opens. Balance is refreshed first so the
+  // auto-selected currency reflects the user's actual wallet state.
   const isModalOpen = appState.ui.isTopUpCreditsModalOpen
+  const isPrivyConnectionRef = useRef(isPrivyConnection)
+  useEffect(() => {
+    isPrivyConnectionRef.current = isPrivyConnection
+  }, [isPrivyConnection])
+
   const prevIsModalOpenRef = useRef(isModalOpen)
   useEffect(() => {
-    // Only run when modal transitions from closed to open
+    // Only run when modal transitions from closed → open
     if (!isModalOpen || prevIsModalOpenRef.current) {
       prevIsModalOpenRef.current = isModalOpen
       return
@@ -281,10 +341,21 @@ export function useTopUpCreditsModalForm({
 
     resetForm()
 
-    // Calculate the proper token amount for minimum credit requirement
-    const calculateAmount = async () => {
+    const init = async () => {
+      const freshBalances = await refreshBalance()
+      const firstEnabled: PaymentCurrency = freshBalances
+        ? pickFirstEnabledCurrency(
+            freshBalances.balance,
+            freshBalances.ethBalance,
+            freshBalances.usdcBalance,
+            isPrivyConnectionRef.current,
+          )
+        : defaultValues.currency
+
+      setValue('currency', firstEnabled)
+      lastCalculatedCurrencyRef.current = firstEnabled
+
       if (!creditManager) {
-        setCalculatedAmount(defaultValues.amount)
         setIsCalculatingInitialAmount(false)
         return
       }
@@ -292,24 +363,23 @@ export function useTopUpCreditsModalForm({
       setIsCalculatingInitialAmount(true)
       try {
         const finalAmount = await calculateTokenAmountForCredits(
-          defaultValues.currency,
+          firstEnabled,
           minimumCreditsNeeded,
         )
-        setCalculatedAmount(finalAmount)
         setMinimumTokenAmount(finalAmount)
         setValue('amount', finalAmount)
       } catch (error) {
         console.error('Error calculating initial token amount:', error)
-        setCalculatedAmount(defaultValues.amount)
       } finally {
         setIsCalculatingInitialAmount(false)
       }
     }
 
-    calculateAmount()
+    init()
   }, [
     isModalOpen,
     resetForm,
+    refreshBalance,
     creditManager,
     minimumCreditsNeeded,
     calculateTokenAmountForCredits,
@@ -323,7 +393,10 @@ export function useTopUpCreditsModalForm({
       if (!creditManager || !debouncedAmount || debouncedAmount <= 0)
         return null
 
-      return await creditManager.getTokenToCreditsEstimation(values)
+      return await creditManager.getTokenToCreditsEstimation({
+        ...values,
+        currency: estimationCurrency(values.currency),
+      })
     },
     onSuccess: () => null,
     onError: (error) => {
@@ -339,27 +412,23 @@ export function useTopUpCreditsModalForm({
     ],
   })
 
-  const bonus = useMemo(() => {
-    return estimation?.creditBonusAmount || 0
-  }, [estimation])
+  const bonus = estimation?.creditBonusAmount || 0
+  const totalBalance = estimation?.creditAmount || 0
 
-  const totalBalance = useMemo(() => {
-    return estimation?.creditAmount || 0
-  }, [estimation])
-
-  // Check if total credits (including bonus) are below the minimum
-  // For ALEPH payments with bonus, users can meet the minimum with fewer tokens
   const isBelowMinimumCredits = useMemo(() => {
-    if (!estimation || isCalculatingInitialAmount) return false
+    if (!estimation || isCalculatingInitialAmount || isLoadingEstimation)
+      return false
     return estimation.creditAmount < minimumCreditsNeeded
-  }, [estimation, isCalculatingInitialAmount, minimumCreditsNeeded])
+  }, [
+    estimation,
+    isCalculatingInitialAmount,
+    isLoadingEstimation,
+    minimumCreditsNeeded,
+  ])
 
-  // Show warning only if user has manually changed amount and it's insufficient
-  const showInsufficientWarning = useMemo(() => {
-    return hasManuallyChangedAmount && isBelowMinimumCredits
-  }, [hasManuallyChangedAmount, isBelowMinimumCredits])
+  const showInsufficientWarning =
+    hasManuallyChangedAmount && isBelowMinimumCredits
 
-  // Disable submit if amount is insufficient for the minimum requirement
   const isSubmitDisabled = useMemo(() => {
     return (
       !values.amount ||
@@ -367,7 +436,8 @@ export function useTopUpCreditsModalForm({
       isSubmitLoading ||
       isCalculatingInitialAmount ||
       isBelowMinimumCredits ||
-      !isEthereumNetwork
+      !isEthereumNetwork ||
+      !!errors.amount
     )
   }, [
     values.amount,
@@ -375,29 +445,37 @@ export function useTopUpCreditsModalForm({
     isCalculatingInitialAmount,
     isBelowMinimumCredits,
     isEthereumNetwork,
+    errors.amount,
   ])
 
   const handleCardSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
       if (!creditManager) throw Err.ConnectYourWallet
-      const sa = smartWalletAddress
-      const eoa = appState.connection.account?.address
-      if (!sa || !eoa) throw Err.ConnectYourWallet
+      const sa = appState.connection.account?.address
+      const eoa = appState.connection.eoaAddress
+      if (!sa || !eoa || !values.amount) throw Err.ConnectYourWallet
 
-      await creditManager.createPrivyOnrampPayment(sa, eoa, values.amount)
-      const recipient = resolveOnrampRecipient(eoa, sa)
-      await fundWallet(recipient, {
-        chain: privyDefaultChain,
-        asset: 'USDC',
-        amount: String(values.amount),
+      const { config } = await creditManager.createPrivyOnrampPayment(
+        sa,
+        eoa,
+        values.amount,
+      )
+
+      // Force MoonPay widget — bypasses Privy's method-selection screen so the
+      // user cannot accidentally do a wallet-to-wallet transfer.
+      await fundWallet(config.address, {
+        provider: 'moonpay',
+        config: {
+          quoteCurrencyAmount: Number(config.amount),
+        },
       })
       // onUserExited handles modal close + processing state
     },
     [
       creditManager,
-      smartWalletAddress,
-      appState.connection.account?.address,
+      appState.connection.account,
+      appState.connection.eoaAddress,
       values.amount,
       fundWallet,
     ],
@@ -432,8 +510,14 @@ export function useTopUpCreditsModalForm({
     isEthereumNetwork,
     getEthereumNetworkTooltip,
     isGasSponsored,
-    smartWalletAddress,
     isPrivyConnection,
     isOnrampProcessing,
+    alephEnabled,
+    ethEnabled,
+    usdcEnabled,
+    alephDisabledReason,
+    ethDisabledReason,
+    usdcDisabledReason,
+    cardDisabledReason,
   }
 }

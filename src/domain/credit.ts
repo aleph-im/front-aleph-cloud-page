@@ -20,12 +20,14 @@ import { DEFAULT_PAGE_SIZE, DEFAULT_DELAY_MS } from '@/helpers/pagination'
 // Token ID enum for type safety
 export enum TokenId {
   ALEPH = 'ALEPH',
+  ETH = 'ETH',
   USDC = 'USDC',
 }
 
 // Token decimal precision map
 export const TOKEN_DECIMALS: Record<TokenId, number> = {
   [TokenId.ALEPH]: 18,
+  [TokenId.ETH]: 18,
   [TokenId.USDC]: 6,
 }
 
@@ -118,6 +120,17 @@ export type PrivyOnrampPaymentRequest = {
   txHash?: string // omitted on first POST, set on second POST to advance to TRANSFERED
 }
 
+export type PrivyOnrampPaymentResponse = {
+  id: string
+  config: {
+    address: string
+    chainId: number
+    asset: string
+    assetAddress: string
+    amount: string
+  }
+}
+
 /**
  * Options passed into CreditManager.addSteps when the caller wants to use a
  * Privy smart wallet + paymaster for the on-chain transfer. Omit to use the
@@ -158,13 +171,13 @@ export type CreditPaymentHistoryItem = {
   updatedAt: number
   amount: number
   asset: string
-  credits: number
-  bonus: number
-  price: number
+  credits: number | null
+  bonus: number | null
+  price: number | null
   provider: string
   paymentMethod: string
   txHash?: string
-  itemHash: string
+  itemHash: string | null
 }
 
 export class CreditManager {
@@ -196,7 +209,7 @@ export class CreditManager {
     eoa: string,
     amount: number,
     chain: PaymentChain = 'ethereum',
-  ): Promise<{ id: string }> {
+  ): Promise<PrivyOnrampPaymentResponse> {
     const body: PrivyOnrampPaymentRequest = {
       provider: 'PRIVY',
       chain,
@@ -256,7 +269,7 @@ export class CreditManager {
   async *addSteps(
     data: TopUpCreditsFormData,
     options: CreditTopUpOptions = {},
-  ): AsyncGenerator<void, string, unknown> {
+  ): AsyncGenerator<void, { txHash: string; paymentId: string }, unknown> {
     if (!this.account) {
       throw new Error('Account is required for credit payments')
     }
@@ -293,7 +306,7 @@ export class CreditManager {
       useSmartWallet ? options.senderAddress : undefined,
     )
 
-    return txHash
+    return { txHash, paymentId }
   }
 
   private async upsertPaymentRequest(
@@ -571,13 +584,13 @@ export class CreditManager {
           updatedAt: payment.updated_at,
           amount: payment.in_amount,
           asset: payment.in_currency,
-          credits: payment.prices.credit_amount,
-          bonus: payment.prices.credit_bonus_amount,
-          price: payment.prices.credit_price_aleph,
+          credits: payment.prices?.credit_amount ?? null,
+          bonus: payment.prices?.credit_bonus_amount ?? null,
+          price: payment.prices?.credit_price_aleph ?? null,
           provider: payment.provider_id,
           paymentMethod: payment.payment_method,
-          txHash: payment.tx_hash,
-          itemHash: payment.item_hash,
+          txHash: payment.tx_hash ?? undefined,
+          itemHash: payment.item_hash ?? null,
         }))
 
         allPayments.push(...mappedPayments)

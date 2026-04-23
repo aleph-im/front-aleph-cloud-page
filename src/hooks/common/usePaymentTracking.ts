@@ -21,7 +21,7 @@ export function usePaymentTracking({
   onPaymentCompleted,
 }: UsePaymentTrackingProps = {}): UsePaymentTrackingReturn {
   const creditManager = useCreditManager()
-  const { refreshBalance } = useRefreshBalance()
+  const refreshBalance = useRefreshBalance()
   const [state, dispatch] = useAppState()
 
   const storePayments = useMemo(

@@ -6,7 +6,9 @@ import {
 } from '@/store/connection'
 import { useAppState } from '@/contexts/appState'
 import { useReownConnection } from './useReownConnection'
+import { usePrivyConnection } from './usePrivyConnection'
 import { BlockchainId, ProviderId } from '@/domain/connect'
+import { clearStoredToken } from '@/domain/session/authTokenStore'
 
 export type UseConnectionProps = {
   triggerOnMount?: boolean
@@ -26,7 +28,7 @@ export const useConnection = ({
   triggerOnMount,
 }: UseConnectionProps = {}): UseConnectionReturn => {
   const [state, dispatch] = useAppState()
-  const { blockchain } = state.connection
+  const { blockchain, provider: activeProvider } = state.connection
 
   const {
     handleConnect: openReownModal,
@@ -34,6 +36,11 @@ export const useConnection = ({
     handleSwitchNetwork,
     reown,
   } = useReownConnection()
+
+  // Mount Privy sync alongside Reown. The hook no-ops when Privy is not
+  // configured, and its sync effect only dispatches when Privy is the active
+  // provider so it never fights with Reown over the store.
+  const { handleDisconnect: disconnectPrivy } = usePrivyConnection()
 
   /**
    * Opens Reown modal for wallet connection
@@ -56,13 +63,30 @@ export const useConnection = ({
   )
 
   /**
-   * Disconnects wallet
+   * Disconnects wallet via the active provider.
+   * The provider-specific hook clears its own auth state; we then emit a
+   * ConnectionDisconnectAction so the store's connection slice resets.
    */
   const handleDisconnect = useCallback(async () => {
-    await disconnectReown()
+    // Clear persisted auth token for the current account before disconnecting
+    const address = state.connection.account?.address
+    if (address) clearStoredToken(address)
 
+    if (activeProvider === ProviderId.Privy) {
+      await disconnectPrivy()
+      dispatch(new ConnectionDisconnectAction({ provider: ProviderId.Privy }))
+      return
+    }
+
+    await disconnectReown()
     dispatch(new ConnectionDisconnectAction({ provider: ProviderId.Reown }))
-  }, [disconnectReown, dispatch])
+  }, [
+    activeProvider,
+    state.connection.account?.address,
+    disconnectReown,
+    disconnectPrivy,
+    dispatch,
+  ])
 
   /**
    * Auto-connect on mount if wallet was previously connected

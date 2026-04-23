@@ -7,12 +7,17 @@ export type ConnectionState = {
   account?: Account
   balance?: number
   creditBalance?: number
+  ethBalance?: number
+  usdcBalance?: number
   blockchain?: BlockchainId
   provider?: ProviderId
   paymentMethod: PaymentMethod
   // Privy smart-wallet contract address controlled by the connected EOA.
   // Only set when provider === ProviderId.Privy; sender of sponsored credit top-ups.
   smartWalletAddress?: string
+  // EOA address for Privy users — surfaced in header settings panel only.
+  // Undefined for Reown users (their signing address is already their main address).
+  eoaAddress?: string
 }
 
 export const initialState: ConnectionState = {
@@ -29,6 +34,7 @@ export enum ConnectionActionType {
   CONNECTION_UPDATE = 'CONNECTION_UPDATE',
   CONNECTION_SET_BALANCE = 'CONNECTION_SET_BALANCE',
   CONNECTION_SET_PAYMENT_METHOD = 'CONNECTION_SET_PAYMENT_METHOD',
+  CONNECTION_REFRESH_BALANCES = 'CONNECTION_REFRESH_BALANCES',
 }
 
 export class ConnectionConnectAction {
@@ -61,6 +67,7 @@ export class ConnectionUpdateAction {
       balance?: number
       creditBalance?: number
       smartWalletAddress?: string
+      eoaAddress?: string
     },
   ) {}
 }
@@ -84,12 +91,25 @@ export class ConnectionSetPaymentMethodAction {
   ) {}
 }
 
+export class ConnectionRefreshBalancesAction {
+  readonly type = ConnectionActionType.CONNECTION_REFRESH_BALANCES
+  constructor(
+    public payload: {
+      balance: number
+      creditBalance: number
+      ethBalance: number
+      usdcBalance: number
+    },
+  ) {}
+}
+
 export type ConnectionAction =
   | ConnectionConnectAction
   | ConnectionDisconnectAction
   | ConnectionUpdateAction
   | ConnectionSetBalanceAction
   | ConnectionSetPaymentMethodAction
+  | ConnectionRefreshBalancesAction
 
 export type ConnectionReducer = StoreReducer<ConnectionState, ConnectionAction>
 
@@ -141,6 +161,13 @@ export function getConnectionReducer(): ConnectionReducer {
       }
 
       case ConnectionActionType.CONNECTION_SET_PAYMENT_METHOD: {
+        return {
+          ...state,
+          ...action.payload,
+        }
+      }
+
+      case ConnectionActionType.CONNECTION_REFRESH_BALANCES: {
         return {
           ...state,
           ...action.payload,

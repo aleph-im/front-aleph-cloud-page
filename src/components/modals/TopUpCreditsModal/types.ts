@@ -37,7 +37,13 @@ export type UseTopUpCreditsModalFormReturn = {
   // True when the connected user is on Privy and a smart-wallet client is
   // ready — the top-up will be executed as a sponsored ERC-4337 user op.
   isGasSponsored: boolean
-  smartWalletAddress?: string
   isPrivyConnection: boolean
   isOnrampProcessing: boolean
+  alephEnabled: boolean
+  ethEnabled: boolean
+  usdcEnabled: boolean
+  alephDisabledReason?: string
+  ethDisabledReason?: string
+  usdcDisabledReason?: string
+  cardDisabledReason?: string
 }

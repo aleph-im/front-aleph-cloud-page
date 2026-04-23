@@ -15,7 +15,10 @@ export function useGlobalPaymentTracking() {
       noti?.add({
         variant: 'success',
         title: 'Purchase complete',
-        text: `Your balance has been credited with ~${formatCredits(payment.credits)}.`,
+        text:
+          payment.credits !== null
+            ? `Your balance has been credited with ~${formatCredits(payment.credits)}.`
+            : 'Your balance has been credited.',
       })
 
       // Refresh all credit-related data (history, costs, etc.)

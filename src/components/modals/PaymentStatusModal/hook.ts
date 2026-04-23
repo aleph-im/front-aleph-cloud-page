@@ -4,7 +4,7 @@ import {
   openPaymentStatusModal,
   closePaymentStatusModal,
   clearFocusedPayment,
-  setFocusedPaymentTxHash,
+  setFocusedPaymentId,
 } from '@/store/ui'
 import { useCreditPaymentHistory } from '@/hooks/common/useCreditPaymentHistory'
 import { CreditPaymentHistoryItem } from '@/domain/credit'
@@ -18,12 +18,12 @@ export type UsePaymentStatusModalReturn = {
 
 export function usePaymentStatusModal(): UsePaymentStatusModalReturn {
   const [appState, dispatch] = useAppState()
-  const { focusedPaymentTxHash, isPaymentStatusModalOpen } = appState.ui
+  const { focusedPaymentId, isPaymentStatusModalOpen } = appState.ui
 
   const { history } = useCreditPaymentHistory()
 
-  const focusedPayment = focusedPaymentTxHash
-    ? (history.find((p) => p.txHash === focusedPaymentTxHash) ?? null)
+  const focusedPayment = focusedPaymentId
+    ? (history.find((p) => p.id === focusedPaymentId) ?? null)
     : null
 
   const prevFocusedPaymentRef = useRef<CreditPaymentHistoryItem | null>(null)
@@ -45,9 +45,7 @@ export function usePaymentStatusModal(): UsePaymentStatusModalReturn {
 
   const handleOpen = useCallback(
     (payment: CreditPaymentHistoryItem) => {
-      if (payment.txHash) {
-        dispatch(setFocusedPaymentTxHash(payment.txHash))
-      }
+      dispatch(setFocusedPaymentId(payment.id))
       dispatch(openPaymentStatusModal())
     },
     [dispatch],

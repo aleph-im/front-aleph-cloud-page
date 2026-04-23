@@ -4,9 +4,7 @@ import { ReportIssueMetadata } from '@/components/modals/ReportIssueModal/types'
 export type UIState = {
   isTopUpCreditsModalOpen: boolean
   topUpCreditsMinimumBalance?: number
-  // The txHash of the payment currently focused for auto-tracking UI
-  // When null, no auto-focus - user has dismissed or interacted with another payment
-  focusedPaymentTxHash: string | null
+  focusedPaymentId: string | null
   isPaymentStatusModalOpen: boolean
   isReportIssueModalOpen: boolean
   reportIssueMetadata?: ReportIssueMetadata
@@ -19,7 +17,7 @@ export type UIState = {
 export const initialUIState: UIState = {
   isTopUpCreditsModalOpen: false,
   topUpCreditsMinimumBalance: undefined,
-  focusedPaymentTxHash: null,
+  focusedPaymentId: null,
   isPaymentStatusModalOpen: false,
   isReportIssueModalOpen: false,
   reportIssueMetadata: undefined,
@@ -32,7 +30,7 @@ export const initialUIState: UIState = {
 export enum UIActionType {
   OPEN_TOP_UP_CREDITS_MODAL = 'OPEN_TOP_UP_CREDITS_MODAL',
   CLOSE_TOP_UP_CREDITS_MODAL = 'CLOSE_TOP_UP_CREDITS_MODAL',
-  SET_FOCUSED_PAYMENT_TX_HASH = 'SET_FOCUSED_PAYMENT_TX_HASH',
+  SET_FOCUSED_PAYMENT_ID = 'SET_FOCUSED_PAYMENT_ID',
   CLEAR_FOCUSED_PAYMENT = 'CLEAR_FOCUSED_PAYMENT',
   OPEN_PAYMENT_STATUS_MODAL = 'OPEN_PAYMENT_STATUS_MODAL',
   CLOSE_PAYMENT_STATUS_MODAL = 'CLOSE_PAYMENT_STATUS_MODAL',
@@ -57,10 +55,10 @@ export type CloseTopUpCreditsModalAction = {
   payload: undefined
 }
 
-export type SetFocusedPaymentTxHashAction = {
-  type: UIActionType.SET_FOCUSED_PAYMENT_TX_HASH
+export type SetFocusedPaymentIdAction = {
+  type: UIActionType.SET_FOCUSED_PAYMENT_ID
   payload: {
-    txHash: string
+    paymentId: string
   }
 }
 
@@ -121,7 +119,7 @@ export type CloseTransferStatusModalAction = {
 export type UIAction =
   | OpenTopUpCreditsModalAction
   | CloseTopUpCreditsModalAction
-  | SetFocusedPaymentTxHashAction
+  | SetFocusedPaymentIdAction
   | ClearFocusedPaymentAction
   | OpenPaymentStatusModalAction
   | ClosePaymentStatusModalAction
@@ -154,17 +152,17 @@ export function getUIReducer(): UIReducer {
         }
       }
 
-      case UIActionType.SET_FOCUSED_PAYMENT_TX_HASH: {
+      case UIActionType.SET_FOCUSED_PAYMENT_ID: {
         return {
           ...state,
-          focusedPaymentTxHash: action.payload.txHash,
+          focusedPaymentId: action.payload.paymentId,
         }
       }
 
       case UIActionType.CLEAR_FOCUSED_PAYMENT: {
         return {
           ...state,
-          focusedPaymentTxHash: null,
+          focusedPaymentId: null,
         }
       }
 
@@ -261,13 +259,13 @@ export function closeTopUpCreditsModal(): CloseTopUpCreditsModalAction {
   }
 }
 
-export function setFocusedPaymentTxHash(
-  txHash: string,
-): SetFocusedPaymentTxHashAction {
+export function setFocusedPaymentId(
+  paymentId: string,
+): SetFocusedPaymentIdAction {
   return {
-    type: UIActionType.SET_FOCUSED_PAYMENT_TX_HASH,
+    type: UIActionType.SET_FOCUSED_PAYMENT_ID,
     payload: {
-      txHash,
+      paymentId,
     },
   }
 }

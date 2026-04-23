@@ -10,6 +10,7 @@ export { BlockchainId }
 // Provider types
 export enum ProviderId {
   Reown = 'reown',
+  Privy = 'privy',
 }
 
 export type Provider = {
@@ -21,6 +22,10 @@ export const providers: Record<ProviderId, Provider> = {
   [ProviderId.Reown]: {
     id: ProviderId.Reown,
     name: 'Reown',
+  },
+  [ProviderId.Privy]: {
+    id: ProviderId.Privy,
+    name: 'Privy',
   },
 }
 

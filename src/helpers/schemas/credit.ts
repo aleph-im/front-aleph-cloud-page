@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const paymentCurrencySchema = z.enum(['ALEPH', 'USDC', 'CARD'], {
+export const paymentCurrencySchema = z.enum(['ALEPH', 'ETH', 'USDC', 'CARD'], {
   errorMap: () => ({ message: 'Please select a valid payment method' }),
 })
 
@@ -9,13 +9,16 @@ export const paymentChainSchema = z.enum(['ethereum', 'ethereum-sepolia'])
 export const paymentProviderSchema = z.enum(['WALLET'])
 
 export const topUpCreditsSchema = z.object({
-  amount: z.coerce
-    .number({
-      required_error: 'Amount is required',
-      invalid_type_error: 'Amount must be a number',
-    })
-    .positive('Amount must be greater than 0')
-    .max(100000, 'Amount cannot exceed 100,000'),
+  amount: z.preprocess(
+    (val) => (val === undefined || val === '' ? 0 : val),
+    z.coerce
+      .number({
+        required_error: 'Amount is required',
+        invalid_type_error: 'Amount must be a number',
+      })
+      .min(0, 'Amount must be greater than 0')
+      .max(100000, 'Amount cannot exceed 100,000'),
+  ),
   chain: paymentChainSchema,
   provider: paymentProviderSchema,
   currency: paymentCurrencySchema,
