@@ -21,6 +21,8 @@ export const AccountInformation = ({
   rewards,
   accountAddress,
   accountAddressHref,
+  eoaAddress,
+  eoaAddressHref,
   showExternalUrl,
   externalUrl,
   disabledTopUp,
@@ -35,6 +37,15 @@ export const AccountInformation = ({
     () => `${accountAddress?.slice(0, 8)}...${accountAddress?.slice(-6)}`,
     [accountAddress],
   )
+  const displayEoaAddress = useMemo(
+    () =>
+      eoaAddress
+        ? `${eoaAddress.slice(0, 6)}…${eoaAddress.slice(-4)}`
+        : undefined,
+    [eoaAddress],
+  )
+
+  const isSmartAccount = !!eoaAddress
 
   return (
     <>
@@ -64,8 +75,22 @@ export const AccountInformation = ({
         </>
       )}
 
-      <div className="fs-10 tp-info" tw="mb-2">
-        WALLET
+      <div tw="flex items-center justify-between mb-2">
+        <div className="fs-10 tp-info">
+          {isSmartAccount ? 'SMART ACCOUNT' : 'WALLET'}
+        </div>
+        {isSmartAccount && (
+          <span
+            className="fs-10 tp-info text-main0"
+            tw="px-1.5 py-0.5 rounded"
+            style={{
+              background: 'rgba(131,255,168,0.12)',
+              fontWeight: 600,
+            }}
+          >
+            Used on Aleph
+          </span>
+        )}
       </div>
       <div
         className="tp-code1 fs-24 text-main0"
@@ -94,6 +119,34 @@ export const AccountInformation = ({
         </div>
       ) : (
         displayAddress
+      )}
+
+      {isSmartAccount && displayEoaAddress && (
+        <>
+          <StyledLine />
+          <div className="fs-10 tp-info" tw="mb-2">
+            SIGNING WALLET
+          </div>
+          <div tw="flex items-center gap-2">
+            {eoaAddressHref ? (
+              <a
+                href={eoaAddressHref}
+                target="_blank"
+                rel="noreferrer"
+                tw="flex items-center gap-2 italic"
+                className="tp-code1 fs-14 text-base2"
+              >
+                {displayEoaAddress}
+                <Icon size="sm" name="external-link-square-alt" />
+              </a>
+            ) : (
+              <span className="tp-code1 fs-14 text-base2">
+                {displayEoaAddress}
+              </span>
+            )}
+            <CopyToClipboardIcon text={eoaAddress} />
+          </div>
+        </>
       )}
 
       {rewards && (

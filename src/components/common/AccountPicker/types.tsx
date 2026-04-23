@@ -22,6 +22,7 @@ export type AccountPickerProps = {
   showSettings?: boolean
   showExternalUrl?: boolean
   accountAddress?: string
+  accountEoaAddress?: string
   accountCredits?: number | string
   accountBalance?: number
   accountVouchers?: Voucher[]
@@ -45,6 +46,7 @@ export type AccountPickerProps = {
 export type UseAccountPickerProps = Pick<
   AccountPickerProps,
   | 'accountAddress'
+  | 'accountEoaAddress'
   | 'accountCredits'
   | 'accountBalance'
   | 'ensName'
@@ -63,6 +65,7 @@ export type UseAccountPickerReturn = Omit<
   'blockchains'
 > & {
   accountAddressHref: string
+  accountEoaAddressHref?: string
   oneNetwork: boolean
   uniqueWallet: Wallet | null
   isConnected: boolean

@@ -11,6 +11,8 @@ export type AccountInformationProps = {
   Link: LinkComponent
   accountAddress?: string
   accountAddressHref?: string
+  eoaAddress?: string
+  eoaAddressHref?: string
   balance?: number
   showCredits: boolean
   credits?: number | string

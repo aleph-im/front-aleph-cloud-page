@@ -61,9 +61,11 @@ export const AccountPicker = ({
 
     // Account
     accountAddress,
+    accountEoaAddress,
     accountCredits,
     accountBalance,
     accountAddressHref,
+    accountEoaAddressHref,
     isConnected,
     handleConnect,
     handleDisconnect,
@@ -159,6 +161,8 @@ export const AccountPicker = ({
                   rewards={rewards}
                   accountAddress={accountAddress}
                   accountAddressHref={accountAddressHref}
+                  eoaAddress={accountEoaAddress}
+                  eoaAddressHref={accountEoaAddressHref}
                   showCredits={showCredits}
                   credits={accountCredits}
                   balance={accountBalance}
@@ -232,6 +236,8 @@ export const AccountPicker = ({
                   rewards={rewards}
                   accountAddress={accountAddress}
                   accountAddressHref={accountAddressHref}
+                  eoaAddress={accountEoaAddress}
+                  eoaAddressHref={accountEoaAddressHref}
                   showCredits={showCredits}
                   credits={accountCredits}
                   balance={accountBalance}

@@ -14,6 +14,7 @@ export function useAccountPicker({
   handleConnect: handleConnectProp,
   handleDisconnect: handleDisconnectProp,
   accountAddress,
+  accountEoaAddress,
   blockchains,
   networks,
   selectedNetwork,
@@ -200,6 +201,14 @@ export function useAccountPicker({
     [accountAddress, blockchains, selectedNetwork?.id],
   )
 
+  const accountEoaAddressHref = useMemo(
+    () =>
+      accountEoaAddress
+        ? `${blockchains[selectedNetwork?.id || 'ETH'].explorerUrl}address/${accountEoaAddress}`
+        : undefined,
+    [accountEoaAddress, blockchains, selectedNetwork?.id],
+  )
+
   const oneNetwork = useMemo(
     () =>
       networks.length < 2 && networks.some((n) => n.id === selectedNetwork?.id),
@@ -225,7 +234,9 @@ export function useAccountPicker({
 
   return {
     accountAddress,
+    accountEoaAddress,
     accountAddressHref,
+    accountEoaAddressHref,
     networks,
     selectedNetwork,
     oneNetwork,

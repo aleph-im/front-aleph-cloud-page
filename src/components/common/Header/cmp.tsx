@@ -6,14 +6,13 @@ import {
   Logo,
   RenderLinkProps,
   TextInput,
-  useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
 import AccountPicker from '@/components/common/AccountPicker'
 import { StyledHeader, StyledNavbarDesktop, StyledNavbarMobile } from './styles'
 import { useHeader } from '@/components/common/Header/hook'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'
 import { NAVIGATION_URLS, websiteUrl } from '@/helpers/constants'
-import { BlockchainId, blockchains } from '@/domain/connect'
+import { blockchains } from '@/domain/connect'
 import { useEnsNameLookup } from '@/hooks/common/useENSLookup'
 import LoadingProgress from '../LoadingProgres'
 import { useSettings } from '@/hooks/common/useSettings'
@@ -24,54 +23,7 @@ const CustomLink = (props: RenderLinkProps) => {
   return props.route.children ? <span {...props} /> : <Link {...props} />
 }
 
-type EoaRowProps = {
-  address: string
-  explorerUrl: string
-}
-
-const EoaRow = ({ address, explorerUrl }: EoaRowProps) => {
-  const handleCopy = useCopyToClipboardAndNotify(address)
-  const short = `${address.slice(0, 6)}…${address.slice(-4)}`
-
-  return (
-    <div
-      tw="mb-4 pb-4"
-      style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
-    >
-      <p className="tp-body3 text-base2" tw="mb-2">
-        Signing wallet
-      </p>
-      <div tw="flex items-center gap-3">
-        <span className="tp-body3 text-main0">{short}</span>
-        <button
-          type="button"
-          onClick={handleCopy}
-          tw="opacity-60 hover:opacity-100 transition-opacity"
-          title="Copy signing wallet address"
-        >
-          <Icon name="copy" size="sm" />
-        </button>
-        <a
-          href={`${explorerUrl}address/${address}`}
-          target="_blank"
-          rel="noreferrer"
-          tw="opacity-60 hover:opacity-100 transition-opacity"
-          title="View on explorer"
-        >
-          <Icon name="square-up-right" size="sm" />
-        </a>
-      </div>
-    </div>
-  )
-}
-EoaRow.displayName = 'EoaRow'
-
-type SettingsProps = {
-  eoaAddress?: string
-  blockchain?: BlockchainId
-}
-
-const Settings = ({ eoaAddress, blockchain }: SettingsProps) => {
+const Settings = () => {
   const { apiServerDisplay, handleSetApiServer } = useSettings()
 
   const preferredServers = ['api.aleph.im', 'api2.aleph.im', 'api3.aleph.im']
@@ -101,19 +53,11 @@ const Settings = ({ eoaAddress, blockchain }: SettingsProps) => {
     [handleSetApiServer],
   )
 
-  const explorerUrl =
-    (blockchain && blockchains[blockchain]?.explorerUrl) ||
-    blockchains[BlockchainId.ETH].explorerUrl ||
-    'https://etherscan.io/'
-
   return (
     <div tw="w-[18rem]">
       <div tw="w-full h-fit">
         {currentView === 'main' ? (
           <>
-            {eoaAddress && (
-              <EoaRow address={eoaAddress} explorerUrl={explorerUrl} />
-            )}
             <button
               tw="cursor-pointer flex items-center w-full justify-between px-2"
               className="group tp-body3"
@@ -253,6 +197,7 @@ export const Header = () => {
               <AccountPicker
                 isMobile
                 accountAddress={accountAddress}
+                accountEoaAddress={eoaAddress}
                 accountBalance={accountBalance}
                 showCredits
                 accountCredits={formattedCredits}
@@ -261,9 +206,7 @@ export const Header = () => {
                 selectedNetwork={selectedNetwork}
                 rewards={rewards}
                 ensName={ensName}
-                settingsContent={
-                  <Settings eoaAddress={eoaAddress} blockchain={blockchain} />
-                }
+                settingsContent={<Settings />}
                 handleConnect={handleConnect}
                 handleDisconnect={handleDisconnect}
                 handleSwitchNetwork={handleSwitchNetwork}
@@ -297,9 +240,7 @@ export const Header = () => {
             selectedNetwork={selectedNetwork}
             rewards={rewards}
             ensName={ensName}
-            settingsContent={
-              <Settings eoaAddress={eoaAddress} blockchain={blockchain} />
-            }
+            settingsContent={<Settings />}
             handleConnect={handleConnect}
             handleDisconnect={handleDisconnect}
             handleSwitchNetwork={handleSwitchNetwork}
