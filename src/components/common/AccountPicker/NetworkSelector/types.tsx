@@ -6,6 +6,8 @@ export type Network = {
   name: string
   icon: IconName
   wallets: Wallet[]
+  disabled?: boolean
+  disabledTooltip?: string
 }
 
 export type NetworkPickerProps = {

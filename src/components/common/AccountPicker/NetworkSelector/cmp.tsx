@@ -1,6 +1,6 @@
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useRef } from 'react'
 import tw from 'twin.macro'
-import { Col, Row, Button, Icon } from '@aleph-front/core'
+import { Col, Row, Button, Icon, Tooltip } from '@aleph-front/core'
 import { NetworkPickerProps, NetworkSelectorProps } from './types'
 import { useTheme } from 'styled-components'
 
@@ -11,30 +11,41 @@ const NetworkPicker = ({
 }: NetworkPickerProps) => {
   const theme = useTheme()
   const { color, button } = theme.component.walletPicker
+  const triggerRef = useRef<HTMLDivElement>(null)
 
   const handleClick = useCallback(() => {
-    onClick && onClick(network)
+    if (!network.disabled) onClick && onClick(network)
   }, [network, onClick])
 
   return (
     <div tw="text-center min-w-[3.25rem]">
-      <Button
-        onClick={handleClick}
-        disabled={network.wallets.length === 0}
-        size="md"
-        tw="relative"
-        kind={button.kind(isSelected)}
-        color={button.color(isSelected)}
-        variant={button.variant(isSelected)}
-      >
-        {!isSelected && (
-          <div
-            tw="absolute! h-full w-full inset-0 -z-10"
-            className="fx-noise-base"
-          />
-        )}
-        <Icon name={network.icon} size="xl" tw="w-6" prefix="custom" />
-      </Button>
+      <div ref={triggerRef} tw="inline-block">
+        <Button
+          onClick={handleClick}
+          disabled={network.disabled || network.wallets.length === 0}
+          size="md"
+          tw="relative"
+          kind={button.kind(isSelected)}
+          color={button.color(isSelected)}
+          variant={button.variant(isSelected)}
+        >
+          {!isSelected && (
+            <div
+              tw="absolute! h-full w-full inset-0 -z-10"
+              className="fx-noise-base"
+            />
+          )}
+          <Icon name={network.icon} size="xl" tw="w-6" prefix="custom" />
+        </Button>
+      </div>
+      {network.disabled && network.disabledTooltip && (
+        <Tooltip
+          my="bottom-center"
+          at="top-center"
+          targetRef={triggerRef}
+          content={network.disabledTooltip}
+        />
+      )}
       <div
         className="fs-10"
         css={[

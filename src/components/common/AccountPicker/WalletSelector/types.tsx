@@ -7,6 +7,8 @@ export type Wallet = {
   name: string
   icon: WalletIconName
   color?: string
+  disabled?: boolean
+  disabledTooltip?: string
 }
 
 export type WalletSelectorProps = HTMLAttributes<HTMLDivElement> & {

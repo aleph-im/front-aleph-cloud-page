@@ -1,12 +1,12 @@
 import { useRouter } from 'next/router'
 import { useCallback, useState, useMemo } from 'react'
 import { useAppState } from '@/contexts/appState'
+import { BreakpointId } from '@aleph-front/core'
 import {
   AccountPickerProps,
-  BreakpointId,
   Network,
   Wallet,
-} from '@aleph-front/core'
+} from '@/components/common/AccountPicker'
 import {
   UseBreadcrumbNamesReturn,
   useBreadcrumbNames,
@@ -77,6 +77,8 @@ export function useHeader(): UseHeaderReturn {
 
   // --------------------
 
+  const isPrivyConnected = state.connection.provider === ProviderId.Privy
+
   const reownWallet: Wallet = useMemo(
     () => ({
       id: ProviderId.Reown,
@@ -87,15 +89,20 @@ export function useHeader(): UseHeaderReturn {
     [],
   )
 
-  const privyWallet: Wallet = useMemo(
-    () => ({
+  const privyWallet: Wallet = useMemo(() => {
+    const privyRequiresEth =
+      !isPrivyConnected && blockchain !== BlockchainId.ETH
+    return {
       id: ProviderId.Privy,
       name: 'Sign in with email',
       icon: 'envelope',
       color: 'main0',
-    }),
-    [],
-  )
+      disabled: privyRequiresEth,
+      disabledTooltip: privyRequiresEth
+        ? 'Switch to Ethereum to sign in with email'
+        : undefined,
+    }
+  }, [isPrivyConnected, blockchain])
 
   // Privy is EVM-only; on EVM networks we list it first so the Privy-first
   // goal holds, with Wallet Connect as the fallback. Solana stays on Reown
@@ -106,6 +113,9 @@ export function useHeader(): UseHeaderReturn {
   )
 
   const solWallets: Wallet[] = useMemo(() => [reownWallet], [reownWallet])
+
+  const PRIVY_MAINNET_ONLY_TOOLTIP =
+    'Smart wallet only supports Ethereum mainnet'
 
   const networks: Network[] = useMemo(
     () => [
@@ -120,21 +130,33 @@ export function useHeader(): UseHeaderReturn {
         icon: 'avalanche',
         name: 'Avalanche',
         wallets: evmWallets,
+        disabled: isPrivyConnected,
+        disabledTooltip: isPrivyConnected
+          ? PRIVY_MAINNET_ONLY_TOOLTIP
+          : undefined,
       },
       {
         id: BlockchainId.BASE,
         icon: 'base',
         name: 'Base',
         wallets: evmWallets,
+        disabled: isPrivyConnected,
+        disabledTooltip: isPrivyConnected
+          ? PRIVY_MAINNET_ONLY_TOOLTIP
+          : undefined,
       },
       {
         id: BlockchainId.SOL,
         icon: 'solana',
         name: 'Solana',
         wallets: solWallets,
+        disabled: isPrivyConnected,
+        disabledTooltip: isPrivyConnected
+          ? PRIVY_MAINNET_ONLY_TOOLTIP
+          : undefined,
       },
     ],
-    [evmWallets, solWallets],
+    [evmWallets, solWallets, isPrivyConnected],
   )
 
   // --------------------

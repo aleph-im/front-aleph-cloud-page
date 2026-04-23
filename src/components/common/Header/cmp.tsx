@@ -1,7 +1,6 @@
 import { memo, useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
-  AccountPicker,
   Button,
   Icon,
   Logo,
@@ -9,6 +8,7 @@ import {
   TextInput,
   useCopyToClipboardAndNotify,
 } from '@aleph-front/core'
+import AccountPicker from '@/components/common/AccountPicker'
 import { StyledHeader, StyledNavbarDesktop, StyledNavbarMobile } from './styles'
 import { useHeader } from '@/components/common/Header/hook'
 import AutoBreadcrumb from '@/components/common/AutoBreadcrumb'

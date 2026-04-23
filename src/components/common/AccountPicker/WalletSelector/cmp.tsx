@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useRef } from 'react'
 import { Col, Row } from '@aleph-front/core'
 import {
   Wallet,
@@ -7,39 +7,77 @@ import {
   WalletSelectorProps,
 } from './types'
 import WalletIcon from './icons'
-import { Button, ToggleContainer } from '@aleph-front/core'
+import { Button, ToggleContainer, Tooltip } from '@aleph-front/core'
 import { useTheme } from 'styled-components'
+import { Network } from '../NetworkSelector'
+
+type WalletButtonProps = {
+  wallet: Wallet
+  selectedNetwork: Network
+  onConnect: (wallet: Wallet, network: Network) => void
+}
+
+const WalletButton = ({
+  wallet,
+  selectedNetwork,
+  onConnect,
+}: WalletButtonProps) => {
+  const theme = useTheme()
+  const { button2 } = theme.component.walletPicker
+  const triggerRef = useRef<HTMLDivElement>(null)
+
+  return (
+    <div tw="block text-center">
+      <div ref={triggerRef} tw="inline-block">
+        <Button
+          onClick={() => !wallet.disabled && onConnect(wallet, selectedNetwork)}
+          as="button"
+          size="md"
+          kind={button2.kind}
+          variant={button2.variant}
+          color={button2.color}
+          disabled={wallet.disabled}
+        >
+          {wallet.name}
+          <WalletIcon
+            tw="ml-2.5"
+            name={wallet.icon}
+            color={button2.iconColor || wallet.color}
+          />
+        </Button>
+      </div>
+      {wallet.disabled && wallet.disabledTooltip && (
+        <Tooltip
+          my="bottom-center"
+          at="top-center"
+          targetRef={triggerRef}
+          content={wallet.disabledTooltip}
+        />
+      )}
+    </div>
+  )
+}
+WalletButton.displayName = 'WalletButton'
+
+const WalletButtonMemo = memo(WalletButton) as typeof WalletButton
+
+// --------------------------------
 
 const WalletSelectorDisconnected = ({
   selectedNetwork,
   onConnect,
 }: WalletSelectorDisconnectedProps) => {
-  const theme = useTheme()
-  const { button2 } = theme.component.walletPicker
-
   return (
     <div>
       <ToggleContainer open={!!selectedNetwork?.wallets}>
         <Row count={1}>
           {selectedNetwork?.wallets?.map((wallet: Wallet) => (
             <Col key={wallet.name}>
-              <div tw="block text-center">
-                <Button
-                  onClick={() => onConnect(wallet, selectedNetwork)}
-                  as="button"
-                  size="md"
-                  kind={button2.kind}
-                  variant={button2.variant}
-                  color={button2.color}
-                >
-                  {wallet.name}
-                  <WalletIcon
-                    tw="ml-2.5"
-                    name={wallet.icon}
-                    color={button2.iconColor || wallet.color}
-                  />
-                </Button>
-              </div>
+              <WalletButtonMemo
+                wallet={wallet}
+                selectedNetwork={selectedNetwork}
+                onConnect={onConnect}
+              />
             </Col>
           ))}
         </Row>
