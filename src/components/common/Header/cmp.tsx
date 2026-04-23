@@ -232,6 +232,7 @@ export const Header = () => {
           <AutoBreadcrumb names={breadcrumbNames} />
           <AccountPicker
             accountAddress={accountAddress}
+            accountEoaAddress={eoaAddress}
             accountBalance={accountBalance}
             showCredits
             accountCredits={formattedCredits}
