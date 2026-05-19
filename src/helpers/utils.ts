@@ -477,6 +477,7 @@ export async function fetchAndCache<T = unknown, P = unknown>(
   cacheTime: number,
   parse?: (data: T) => P | Promise<P>,
   log = false,
+  signal?: AbortSignal,
 ): Promise<P> {
   const cached = localStorage.getItem(cacheKey)
   const now = Date.now()
@@ -490,7 +491,7 @@ export async function fetchAndCache<T = unknown, P = unknown>(
   }
 
   try {
-    const data = await fetch(url)
+    const data = await fetch(url, { signal })
     let value = await data.json()
 
     if (parse) {

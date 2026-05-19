@@ -100,7 +100,8 @@ export function useExecutableActions({
   const [deleteLoading, setDeleteLoading] = useState(false)
 
   useEffect(() => {
-    let cancelled = false
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10_000)
 
     async function load() {
       setCRN(undefined)
@@ -108,16 +109,25 @@ export function useExecutableActions({
       if (!manager) return
       if (!executable) return
 
-      const node = await manager.getAllocationCRN(executable)
-      if (cancelled) return
+      try {
+        const node = await manager.getAllocationCRN(
+          executable,
+          controller.signal,
+        )
+        if (controller.signal.aborted) return
 
-      setCRN(node)
+        setCRN(node)
+      } catch (e) {
+        if (controller.signal.aborted) return
+        console.warn('Failed to resolve allocation CRN', e)
+      }
     }
 
     load()
 
     return () => {
-      cancelled = true
+      clearTimeout(timeoutId)
+      controller.abort()
     }
   }, [executable, manager])
 
