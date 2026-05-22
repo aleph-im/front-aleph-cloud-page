@@ -33,6 +33,12 @@ export type ManageEntityHeaderProps = {
   rebootLoading?: boolean
   onReboot?: () => void
 
+  // Reinstall action
+  showReinstall?: boolean
+  reinstallDisabled?: boolean
+  reinstallLoading?: boolean
+  onReinstall?: () => void
+
   // Delete action
   showDelete?: boolean
   deleteDisabled?: boolean

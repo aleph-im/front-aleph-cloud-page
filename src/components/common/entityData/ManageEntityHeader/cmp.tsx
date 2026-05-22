@@ -41,6 +41,11 @@ export const ManageEntityHeader = ({
   rebootDisabled,
   rebootLoading = false,
   onReboot: handleReboot,
+  // Reinstall action
+  showReinstall = false,
+  reinstallDisabled,
+  reinstallLoading = false,
+  onReinstall: handleReinstall,
   // Delete action
   showDelete = false,
   deleteDisabled,
@@ -169,6 +174,33 @@ export const ManageEntityHeader = ({
                     />
                   ) : (
                     <Icon name="arrow-rotate-backward" />
+                  )}
+                </Button>
+              </Tooltip>
+            )}
+
+            {showReinstall && (
+              <Tooltip
+                content={`Reinstall ${type}`}
+                my="bottom-center"
+                at="top-center"
+              >
+                <Button
+                  kind="functional"
+                  variant="error"
+                  size="sm"
+                  onClick={handleReinstall}
+                  disabled={
+                    reinstallDisabled || reinstallLoading || cannotStart
+                  }
+                >
+                  {reinstallLoading ? (
+                    <RotatingLines
+                      strokeColor={theme.color.base2}
+                      width=".8rem"
+                    />
+                  ) : (
+                    <Icon name="arrow-rotate-forward" />
                   )}
                 </Button>
               </Tooltip>
