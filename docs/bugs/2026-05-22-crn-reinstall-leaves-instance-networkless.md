@@ -22,7 +22,8 @@ provisioning, not in the API responses.
 - **Instance public IPv6:** `2a01:240:ad00:2503:3:f999:c7db:7841`
 - **SSH port forwarding:** `22 → 24020` (as reported by the CRN status API)
 - **Instance name:** `PLANE-BKP`
-- **Instance hash / vmId:** _(to be filled in by the reporter — known to the account owner)_
+- **Instance hash / vmId:** f999c7db7845a3b01bae860ec9d96ed3400d6a9649af213e2b06201b9f8892cb
+- **Explorer:** https://explorer.aleph.cloud/address/ETH/0xB136a85c95a0ea573793AB9739c7dF8682B87fCa/message/INSTANCE/f999c7db7845a3b01bae860ec9d96ed3400d6a9649af213e2b06201b9f8892cb
 - **Client:** macOS, with working IPv4 and IPv6 connectivity (verified below).
 
 ## Reproduction
