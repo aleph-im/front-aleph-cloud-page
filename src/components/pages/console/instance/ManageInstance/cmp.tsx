@@ -22,6 +22,7 @@ import DomainDetail from '@/components/common/DomainDetail'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
 import EntityProxyUrl from '@/components/common/entityData/EntityProxyUrl'
 import NewDomainForm from '@/components/common/NewDomainForm'
+import ReinstallModal from '@/components/common/ReinstallModal/cmp'
 
 /**
  * ManageInstance component - purely presentational
@@ -73,9 +74,17 @@ export default function ManageInstance() {
     rebootDisabled,
     rebootLoading,
     handleReboot,
+    reinstallDisabled,
+    reinstallLoading,
     deleteDisabled,
     deleteLoading,
     handleDelete,
+
+    // Reinstall modal
+    isReinstallModalOpen,
+    handleOpenReinstallModal,
+    handleCloseReinstallModal,
+    handleConfirmReinstall,
 
     // Side panel
     sidePanel,
@@ -133,6 +142,11 @@ export default function ManageInstance() {
         rebootDisabled={rebootDisabled}
         rebootLoading={rebootLoading}
         onReboot={handleReboot}
+        // Reinstall action
+        showReinstall
+        reinstallDisabled={reinstallDisabled}
+        reinstallLoading={reinstallLoading}
+        onReinstall={handleOpenReinstallModal}
         // Go back action
         onBack={handleBack}
       />
@@ -242,6 +256,13 @@ export default function ManageInstance() {
           <>ERROR</>
         )}
       </SidePanel>
+
+      <ReinstallModal
+        open={isReinstallModalOpen}
+        onClose={handleCloseReinstallModal}
+        onConfirm={handleConfirmReinstall}
+        instanceName={name}
+      />
     </>
   )
 }
