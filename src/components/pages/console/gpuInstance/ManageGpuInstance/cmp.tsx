@@ -22,6 +22,7 @@ import VolumeDetail from '@/components/common/VolumeDetail'
 import SSHKeyDetail from '@/components/common/SSHKeyDetail'
 import DomainDetail from '@/components/common/DomainDetail'
 import NewDomainForm from '@/components/common/NewDomainForm'
+import ReinstallModal from '@/components/common/ReinstallModal/cmp'
 
 export default function ManageGpuInstance() {
   const {
@@ -69,9 +70,17 @@ export default function ManageGpuInstance() {
     rebootDisabled,
     rebootLoading,
     handleReboot,
+    reinstallDisabled,
+    reinstallLoading,
     deleteDisabled,
     deleteLoading,
     handleDelete,
+
+    // Reinstall modal
+    isReinstallModalOpen,
+    handleOpenReinstallModal,
+    handleCloseReinstallModal,
+    handleConfirmReinstall,
 
     // Side panel
     sidePanel,
@@ -124,6 +133,11 @@ export default function ManageGpuInstance() {
         rebootDisabled={rebootDisabled}
         rebootLoading={rebootLoading}
         onReboot={handleReboot}
+        // Reinstall action
+        showReinstall
+        reinstallDisabled={reinstallDisabled}
+        reinstallLoading={reinstallLoading}
+        onReinstall={handleOpenReinstallModal}
         // Go back action
         onBack={handleBack}
       />
@@ -237,6 +251,13 @@ export default function ManageGpuInstance() {
           <>ERROR</>
         )}
       </SidePanel>
+
+      <ReinstallModal
+        open={isReinstallModalOpen}
+        onClose={handleCloseReinstallModal}
+        onConfirm={handleConfirmReinstall}
+        instanceName={name}
+      />
     </>
   )
 }
