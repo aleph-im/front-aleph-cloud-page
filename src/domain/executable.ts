@@ -147,6 +147,7 @@ export type SignedPublicKeyHeader = {
 
 export type ExecutableOperations =
   | 'reboot'
+  | 'reinstall'
   | 'expire'
   | 'erase'
   | 'stop'
