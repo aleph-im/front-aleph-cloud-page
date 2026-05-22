@@ -52,16 +52,19 @@ export type UseExecutableActionsReturn = {
   stopDisabled: boolean
   startDisabled: boolean
   rebootDisabled: boolean
+  reinstallDisabled: boolean
   deleteDisabled: boolean
   logsDisabled: boolean
   stopLoading: boolean
   startLoading: boolean
   rebootLoading: boolean
+  reinstallLoading: boolean
   deleteLoading: boolean
   streamDetails?: StreamPaymentDetails
   handleStop: () => void
   handleStart: () => void
   handleReboot: () => void
+  handleReinstall: () => void
   handleDelete: () => void
 }
 
@@ -98,6 +101,7 @@ export function useExecutableActions({
   const [stopLoading, setStopLoading] = useState(false)
   const [startLoading, setStartLoading] = useState(false)
   const [rebootLoading, setRebootLoading] = useState(false)
+  const [reinstallLoading, setReinstallLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
   useEffect(() => {
@@ -308,6 +312,19 @@ export function useExecutableActions({
     }
   }, [calculatedStatus, crn, isAllocated])
 
+  const reinstallDisabled = useMemo(() => {
+    if (!crn) return true
+
+    switch (calculatedStatus) {
+      case 'v1':
+        return !isAllocated
+      case 'running':
+        return false
+      default:
+        return true
+    }
+  }, [calculatedStatus, crn, isAllocated])
+
   const deleteDisabled = useMemo(() => {
     return !executable
   }, [executable])
@@ -320,6 +337,11 @@ export function useExecutableActions({
 
   const handleReboot = useCallback(
     () => handleSendOperation('reboot', setRebootLoading),
+    [handleSendOperation],
+  )
+
+  const handleReinstall = useCallback(
+    () => handleSendOperation('reinstall', setReinstallLoading),
     [handleSendOperation],
   )
 
@@ -458,15 +480,18 @@ export function useExecutableActions({
     stopDisabled,
     startDisabled,
     rebootDisabled,
+    reinstallDisabled,
     deleteDisabled,
     logsDisabled: !logs,
     stopLoading,
     startLoading,
     rebootLoading,
+    reinstallLoading,
     deleteLoading,
     handleStop,
     handleStart,
     handleReboot,
+    handleReinstall,
     handleDelete,
   }
 }
