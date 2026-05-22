@@ -17,6 +17,10 @@ export type UseManageGpuInstanceReturn = UseManageInstanceEntityReturn & {
   ports: ForwardedPort[]
   sshForwardedPort?: string
   handlePortsChange: (ports: ForwardedPort[]) => void
+  isReinstallModalOpen: boolean
+  handleOpenReinstallModal: () => void
+  handleCloseReinstallModal: () => void
+  handleConfirmReinstall: () => void
 }
 
 export function useManageGpuInstance(): UseManageGpuInstanceReturn {
@@ -62,12 +66,28 @@ export function useManageGpuInstance(): UseManageGpuInstanceReturn {
     setPorts(updatedPorts)
   }
 
+  // Reinstall confirmation modal
+  const { handleReinstall } = manageInstanceEntityProps
+
+  const [isReinstallModalOpen, setIsReinstallModalOpen] = useState(false)
+
+  const handleOpenReinstallModal = () => setIsReinstallModalOpen(true)
+  const handleCloseReinstallModal = () => setIsReinstallModalOpen(false)
+  const handleConfirmReinstall = () => {
+    setIsReinstallModalOpen(false)
+    handleReinstall()
+  }
+
   return {
     gpuInstance,
     gpuInstanceManager,
     ports,
     sshForwardedPort,
     handlePortsChange,
+    isReinstallModalOpen,
+    handleOpenReinstallModal,
+    handleCloseReinstallModal,
+    handleConfirmReinstall,
     ...manageInstanceEntityProps,
   }
 }
