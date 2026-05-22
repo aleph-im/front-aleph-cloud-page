@@ -19,6 +19,10 @@ export type UseManageInstanceReturn = UseManageInstanceEntityReturn & {
   sshForwardedPort?: string
   handlePortsChange: (ports: ForwardedPort[]) => void
   creditBalance?: number
+  isReinstallModalOpen: boolean
+  handleOpenReinstallModal: () => void
+  handleCloseReinstallModal: () => void
+  handleConfirmReinstall: () => void
 }
 
 export function useManageInstance(): UseManageInstanceReturn {
@@ -67,6 +71,18 @@ export function useManageInstance(): UseManageInstanceReturn {
     setPorts(updatedPorts)
   }
 
+  // Reinstall confirmation modal
+  const { handleReinstall } = manageInstanceEntityProps
+
+  const [isReinstallModalOpen, setIsReinstallModalOpen] = useState(false)
+
+  const handleOpenReinstallModal = () => setIsReinstallModalOpen(true)
+  const handleCloseReinstallModal = () => setIsReinstallModalOpen(false)
+  const handleConfirmReinstall = () => {
+    setIsReinstallModalOpen(false)
+    handleReinstall()
+  }
+
   return {
     instance,
     instanceManager,
@@ -74,6 +90,10 @@ export function useManageInstance(): UseManageInstanceReturn {
     sshForwardedPort,
     handlePortsChange,
     creditBalance,
+    isReinstallModalOpen,
+    handleOpenReinstallModal,
+    handleCloseReinstallModal,
+    handleConfirmReinstall,
     ...manageInstanceEntityProps,
   }
 }
