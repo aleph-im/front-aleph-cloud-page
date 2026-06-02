@@ -369,7 +369,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
         channel: this.channel,
         fileHash: website.cid as string,
         storageEngine: ItemType.ipfs,
-        payment: { chain: Blockchain.ETH, type: PaymentType.credit },
       })
       const volumeEntity = (await this.volumeManager.parseMessages([volume]))[0]
 
@@ -533,7 +532,6 @@ export class WebsiteManager implements EntityManager<Website, AddWebsite> {
           channel: this.channel,
           fileHash: cid,
           storageEngine: ItemType.ipfs,
-          payment: { chain: Blockchain.ETH, type: PaymentType.credit },
         })
         const volumeEntity = (
           await this.volumeManager.parseMessages([volume])
