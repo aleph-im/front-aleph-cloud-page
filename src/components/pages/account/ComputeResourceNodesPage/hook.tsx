@@ -131,10 +131,8 @@ export function useComputeResourceNodesPage(
 
   const linkableNodes = useMemo(() => {
     if (!baseFilteredNodes) return
-    return baseFilteredNodes.filter(
-      (node) => nodeManager.isLinkableBy(node, userNode)[0],
-    )
-  }, [baseFilteredNodes, nodeManager, userNode])
+    return baseFilteredNodes.filter((node) => nodeManager.isLinkable(node)[0])
+  }, [baseFilteredNodes, nodeManager])
 
   const isLinkableOnlyDisabled =
     !linkableNodes?.length || selectedTab !== 'nodes'
@@ -146,9 +144,8 @@ export function useComputeResourceNodesPage(
 
   const filteredNodes = useMemo(() => {
     if (!isLinkableOnly) return baseFilteredNodes
-    if (!account) return baseFilteredNodes
     return linkableNodes
-  }, [account, baseFilteredNodes, linkableNodes, isLinkableOnly])
+  }, [baseFilteredNodes, linkableNodes, isLinkableOnly])
 
   // ----------------------------- PAGINATE
 
