@@ -146,7 +146,7 @@ export const ComputeResourceNodesPage = (
                   onTabChange={handleTabChange}
                 />
                 <Checkbox
-                  label="Ready to link"
+                  label="Available to link"
                   checked={isLinkableOnly}
                   onChange={handleLinkableOnlyChange}
                   size="xs"
