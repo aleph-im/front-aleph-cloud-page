@@ -94,25 +94,29 @@ export class StakeManager {
     // @note: Consume socket first step
     await feed.next()
 
-    for await (const data of feed) {
-      if (!data.content) continue
-      if (!data.content.content) continue
+    try {
+      for await (const data of feed) {
+        if (!data.content) continue
+        if (!data.content.content) continue
 
-      const { content, time } = data.content || {}
-      const { status: type, rewards, end_height: lastHeight } = content
+        const { content, time } = data.content || {}
+        const { status: type, rewards, end_height: lastHeight } = content
 
-      if (
-        type === 'calculation' ||
-        (type === 'distribution' &&
-          data.content.content.targets.some(({ success }: any) => success))
-      ) {
-        yield {
-          type,
-          rewards,
-          lastHeight,
-          timestamp: Math.trunc(time * 1000),
+        if (
+          type === 'calculation' ||
+          (type === 'distribution' &&
+            data.content.content.targets.some(({ success }: any) => success))
+        ) {
+          yield {
+            type,
+            rewards,
+            lastHeight,
+            timestamp: Math.trunc(time * 1000),
+          }
         }
       }
+    } catch (error) {
+      console.error('Rewards feed subscription error:', error)
     }
   }
 
