@@ -27,7 +27,7 @@ export const SelectFunctionPersistence = React.memo(
           </RadioGroup>
         </NoisyContainer>
         <div tw="mt-6 text-right">
-          <ExternalLinkButton href="https://docs.aleph.im/computing/#persistent-execution">
+          <ExternalLinkButton href="https://docs.aleph.cloud/devhub/compute-resources/functions/#persistent-execution">
             Learn more
           </ExternalLinkButton>
         </div>

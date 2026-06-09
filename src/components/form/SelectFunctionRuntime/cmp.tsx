@@ -40,7 +40,7 @@ export const SelectFunctionRuntime = React.memo(
           )}
         </NoisyContainer>
         <div tw="mt-6 text-right">
-          <ExternalLinkButton href="https://docs.aleph.im/computing/runtimes">
+          <ExternalLinkButton href="https://docs.aleph.cloud/devhub/sdks-and-tools/aleph-cli/commands/program#supported-runtimes">
             Learn more
           </ExternalLinkButton>
         </div>

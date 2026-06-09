@@ -48,7 +48,7 @@ export const SelectWebsiteFramework = React.memo(
           )}
         </NoisyContainer>
         {/* <div tw="mt-6 text-right">
-          <ExternalLinkButton href="https://docs.aleph.im/">
+          <ExternalLinkButton href="https://docs.aleph.cloud/">
             Learn more
           </ExternalLinkButton>
         </div> */}
