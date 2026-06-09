@@ -27,8 +27,8 @@ const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID as string
 const metadata = {
   name: 'Aleph Cloud',
   description: 'Aleph Cloud: Web3 cloud solution',
-  url: 'https://account.aleph.im',
-  icons: ['https://account.aleph.im/favicon-32x32.png'],
+  url: 'https://app.aleph.cloud',
+  icons: ['https://app.aleph.cloud/favicon-32x32.png'],
 }
 
 // Adapters for different blockchain ecosystems
