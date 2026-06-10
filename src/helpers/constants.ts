@@ -307,7 +307,7 @@ export const NAVIGATION_URLS = {
       },
     },
   },
-  explorer: { home: 'https://explorer.aleph.im' },
+  explorer: { home: 'https://explorer.aleph.cloud' },
   swap: { home: 'https://swap.aleph.cloud' },
   docs: {
     home: 'https://docs.aleph.cloud',

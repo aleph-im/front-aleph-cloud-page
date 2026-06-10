@@ -155,7 +155,7 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     //   type: EntityType.Instance,
     //   id: 'fad1426244885cf5cbb9c0507ad2e023a5ef7d3c6d2866fd61a5447be322b433',
     //   name: 'Gerard Instance detail test',
-    //   url: 'https://explorer.aleph.im/address/ETH/0x5f78199cd833c1dc1735bee4a7416caaE58Facca/message/INSTANCE/fad1426244885cf5cbb9c0507ad2e023a5ef7d3c6d2866fd61a5447be322b433',
+    //   url: 'https://explorer.aleph.cloud/address/ETH/0x5f78199cd833c1dc1735bee4a7416caaE58Facca/message/INSTANCE/fad1426244885cf5cbb9c0507ad2e023a5ef7d3c6d2866fd61a5447be322b433',
     //   date: '2025-02-21 14:50:40',
     //   size: 20480,
     //   confirmed: false,
