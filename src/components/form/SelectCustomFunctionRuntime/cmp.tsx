@@ -18,7 +18,7 @@ export const SelectCustomFunctionRuntime = React.memo(
             placeholder="f6872f58fd38cbc123e9e036861a858...079ff2c123e9e08c123e9e0368fa68e"
           />
           <div tw="mt-6 text-right">
-            <ExternalLinkButton href="https://docs.aleph.im/computing/runtimes">
+            <ExternalLinkButton href="https://docs.aleph.cloud/devhub/sdks-and-tools/aleph-cli/commands/program#supported-runtimes">
               Learn more
             </ExternalLinkButton>
           </div>

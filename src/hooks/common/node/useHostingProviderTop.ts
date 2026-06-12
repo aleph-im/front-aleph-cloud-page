@@ -30,14 +30,16 @@ export function useHostingProviderTop<T extends AlephNode>({
         (_, i) => ({ metricsData: { as_name: `Provider ${i}` } }) as T,
       )
 
-    return safeNodes.reduce(
-      (ac, node) => {
-        const asnName = node.metricsData?.as_name || 'others'
-        ac[asnName] = (ac[asnName] || 0) + 1
-        return ac
-      },
-      { others: 0 } as Record<string, number>,
-    )
+    return safeNodes
+      .filter((node) => node.scoreData?.measurements?.duplicate_ip !== true)
+      .reduce(
+        (ac, node) => {
+          const asnName = node.metricsData?.as_name || 'others'
+          ac[asnName] = (ac[asnName] || 0) + 1
+          return ac
+        },
+        { others: 0 } as Record<string, number>,
+      )
   }, [nodes])
 
   const total = useMemo(

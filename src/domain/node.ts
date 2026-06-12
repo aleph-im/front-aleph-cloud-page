@@ -1,6 +1,7 @@
 import {
   crnListProgramUrl,
   defaultAccountChannel,
+  metricAddress,
   monitorAddress,
   postType,
   scoringAddress,
@@ -113,6 +114,7 @@ export type BaseNodeScoreMeasurements = {
   base_latency_score_p95: number
   node_version_prerelease: number
   nodes_with_identical_asn: number
+  duplicate_ip?: boolean
 }
 
 export type CCNScore = BaseNodeScore & {
@@ -1145,7 +1147,7 @@ export class NodeManager {
   }> {
     const res = await this.sdkClient.getPosts({
       types: 'aleph-network-metrics',
-      addresses: [scoringAddress],
+      addresses: [metricAddress],
       pagination: 1,
       page: 1,
     })
