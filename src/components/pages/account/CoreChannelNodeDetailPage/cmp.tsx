@@ -198,6 +198,15 @@ export const CoreChannelNodeDetailPage = () => {
                     }
                     big
                   />
+                  <Card2Field
+                    name="NODE HASH"
+                    value={
+                      <NodeDetailLink textToCopy={node?.hash}>
+                        {node?.hash && ellipseAddress(node?.hash)}
+                      </NodeDetailLink>
+                    }
+                    big
+                  />
                 </Card2>
                 <Card2 title="ADDITIONAL SETTINGS">
                   <Card2Field
