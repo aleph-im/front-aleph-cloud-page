@@ -15,6 +15,7 @@ import EntityLinkedVolumes from '@/components/common/entityData/EntityLinkedVolu
 import EntityPersistentStorage from '@/components/common/entityData/EntityPersistentStorage'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
+import EntityProxyUrl from '@/components/common/entityData/EntityProxyUrl'
 import { EntityDomainType } from '@/helpers/constants'
 import SidePanel from '@/components/common/SidePanel'
 import VolumeDetail from '@/components/common/VolumeDetail'
@@ -160,6 +161,10 @@ export default function ManageGpuInstance() {
             key="gpuInstance-connection-methods"
             executableStatus={status}
             sshForwardedPort={sshForwardedPort}
+          />,
+          <EntityProxyUrl
+            key="gpuInstance-proxy-url"
+            instanceHash={gpuInstance?.id}
           />,
           immutableVolumes.length && (
             <EntityLinkedVolumes

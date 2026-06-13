@@ -20,6 +20,7 @@ import EntityDataColumns from '@/components/common/entityData/EntityDataColumns'
 import EntityCustomDomains from '@/components/common/entityData/EntityCustomDomains'
 import DomainDetail from '@/components/common/DomainDetail'
 import EntityPortForwarding from '@/components/common/entityData/EntityPortForwarding'
+import EntityProxyUrl from '@/components/common/entityData/EntityProxyUrl'
 import NewDomainForm from '@/components/common/NewDomainForm'
 
 /**
@@ -160,6 +161,10 @@ export default function ManageInstance() {
             key="instance-connection-methods"
             executableStatus={status}
             sshForwardedPort={sshForwardedPort}
+          />,
+          <EntityProxyUrl
+            key="instance-proxy-url"
+            instanceHash={instance?.id}
           />,
           immutableVolumes.length && (
             <EntityLinkedVolumes
