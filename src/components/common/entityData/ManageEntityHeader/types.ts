@@ -38,6 +38,12 @@ export type ManageEntityHeaderProps = {
   downloadLoading?: boolean
   onDownload?: () => void
 
+  // Reinstall action
+  showReinstall?: boolean
+  reinstallDisabled?: boolean
+  reinstallLoading?: boolean
+  onReinstall?: () => void
+
   // Go back action
   onBack: () => void
 }

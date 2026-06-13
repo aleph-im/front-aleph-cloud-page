@@ -53,16 +53,19 @@ export type UseExecutableActionsReturn = {
   startDisabled: boolean
   rebootDisabled: boolean
   deleteDisabled: boolean
+  reinstallDisabled: boolean
   logsDisabled: boolean
   stopLoading: boolean
   startLoading: boolean
   rebootLoading: boolean
   deleteLoading: boolean
+  reinstallLoading: boolean
   streamDetails?: StreamPaymentDetails
   handleStop: () => void
   handleStart: () => void
   handleReboot: () => void
   handleDelete: () => void
+  handleReinstall: () => void
 }
 
 export function useExecutableActions({
@@ -98,6 +101,7 @@ export function useExecutableActions({
   const [startLoading, setStartLoading] = useState(false)
   const [rebootLoading, setRebootLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [reinstallLoading, setReinstallLoading] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -279,6 +283,10 @@ export function useExecutableActions({
     return !executable
   }, [executable])
 
+  const reinstallDisabled = useMemo(() => {
+    return !executable
+  }, [executable])
+
   const handleStop = useCallback(
     () =>
       handleSendOperation('stop', setStopLoading, ['stopped', 'not-allocated']),
@@ -287,6 +295,11 @@ export function useExecutableActions({
 
   const handleReboot = useCallback(
     () => handleSendOperation('reboot', setRebootLoading),
+    [handleSendOperation],
+  )
+
+  const handleReinstall = useCallback(
+    () => handleSendOperation('reinstall', setReinstallLoading, ['running']),
     [handleSendOperation],
   )
 
@@ -426,14 +439,17 @@ export function useExecutableActions({
     startDisabled,
     rebootDisabled,
     deleteDisabled,
+    reinstallDisabled,
     logsDisabled: !logs,
     stopLoading,
     startLoading,
     rebootLoading,
     deleteLoading,
+    reinstallLoading,
     handleStop,
     handleStart,
     handleReboot,
     handleDelete,
+    handleReinstall,
   }
 }

@@ -75,6 +75,9 @@ export default function ManageInstance() {
     deleteDisabled,
     deleteLoading,
     handleDelete,
+    reinstallDisabled,
+    reinstallLoading,
+    handleReinstall,
 
     // Side panel
     sidePanel,
@@ -127,6 +130,11 @@ export default function ManageInstance() {
         rebootDisabled={rebootDisabled}
         rebootLoading={rebootLoading}
         onReboot={handleReboot}
+        // Reinstall action
+        showReinstall
+        reinstallDisabled={reinstallDisabled}
+        reinstallLoading={reinstallLoading}
+        onReinstall={handleReinstall}
         // Go back action
         onBack={handleBack}
       />
