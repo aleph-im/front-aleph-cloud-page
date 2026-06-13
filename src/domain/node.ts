@@ -415,11 +415,16 @@ export class NodeManager {
 
     crns = this.parseResourceNodes(crns)
 
-    crns = await this.parseScores(crns, true)
-    crns = await this.parseMetrics(crns, true)
+    const [scores, metrics] = await Promise.all([
+      this.getScores(),
+      this.getMetrics(),
+    ])
 
-    ccns = await this.parseScores(ccns, false)
-    ccns = await this.parseMetrics(ccns, false)
+    crns = this.applyScores(crns, scores.crn)
+    crns = this.applyMetrics(crns, metrics.crn)
+
+    ccns = this.applyScores(ccns, scores.ccn)
+    ccns = this.applyMetrics(ccns, metrics.ccn)
 
     this.linkChildrenNodes(ccns, crns)
     this.linkParentNodes(crns, ccns)
@@ -455,11 +460,16 @@ export class NodeManager {
 
         crns = this.parseResourceNodes(crns)
 
-        crns = await this.parseScores(crns, true)
-        crns = await this.parseMetrics(crns, true)
+        const [scores, metrics] = await Promise.all([
+          this.getScores(),
+          this.getMetrics(),
+        ])
 
-        ccns = await this.parseScores(ccns, false)
-        ccns = await this.parseMetrics(ccns, false)
+        crns = this.applyScores(crns, scores.crn)
+        crns = this.applyMetrics(crns, metrics.crn)
+
+        ccns = this.applyScores(ccns, scores.ccn)
+        ccns = this.applyMetrics(ccns, metrics.ccn)
 
         this.linkChildrenNodes(ccns, crns)
         this.linkParentNodes(crns, ccns)
@@ -1082,11 +1092,10 @@ export class NodeManager {
     })
   }
 
-  protected async parseScores<T extends AlephNode>(
+  protected applyScores<T extends AlephNode>(
     nodes: T[],
-    isCRN: boolean,
-  ): Promise<T[]> {
-    const scores = isCRN ? await this.getCRNScores() : await this.getCCNScores()
+    scores: (CCNScore | CRNScore)[],
+  ): T[] {
     const scoresMap = new Map(scores.map((score) => [score.node_id, score]))
 
     return nodes.map((node) => {
@@ -1104,14 +1113,10 @@ export class NodeManager {
     })
   }
 
-  protected async parseMetrics<T extends AlephNode>(
+  protected applyMetrics<T extends AlephNode>(
     nodes: T[],
-    isCRN: boolean,
-  ): Promise<T[]> {
-    const metrics = isCRN
-      ? await this.getCRNMetrics()
-      : await this.getCCNMetrics()
-
+    metrics: (CCNMetrics | CRNMetrics)[],
+  ): T[] {
     const metricsMap = new Map(
       metrics.map((metrics) => [metrics.node_id, metrics]),
     )
@@ -1127,51 +1132,32 @@ export class NodeManager {
     })
   }
 
+  // Scores and metrics are single large posts that each carry both ccn and crn
+  // sets. Cache them so the ccn/crn passes and successive feed ticks reuse one
+  // fetch instead of re-downloading the post each time.
   protected async getScores(): Promise<{
     ccn: CCNScore[]
     crn: CRNScore[]
   }> {
-    const res = await this.sdkClient.getPosts({
-      types: 'aleph-scoring-scores',
-      addresses: [scoringAddress],
-      pagination: 1,
-      page: 1,
-    })
-
-    return (res.posts[0]?.content as any)?.scores
+    return fetchAndCache(
+      `${apiServer}/api/v0/posts.json?types=aleph-scoring-scores&addresses=${scoringAddress}&pagination=1&page=1`,
+      'scores',
+      1000 * 60,
+      (content: any) =>
+        content?.posts?.[0]?.content?.scores ?? { ccn: [], crn: [] },
+    )
   }
 
   protected async getMetrics(): Promise<{
     ccn: CCNMetrics[]
     crn: CRNMetrics[]
   }> {
-    const res = await this.sdkClient.getPosts({
-      types: 'aleph-network-metrics',
-      addresses: [metricAddress],
-      pagination: 1,
-      page: 1,
-    })
-
-    return (res.posts[0]?.content as any)?.metrics
-  }
-
-  protected async getCCNScores(): Promise<CCNScore[]> {
-    const res = await this.getScores()
-    return res.ccn
-  }
-
-  protected async getCCNMetrics(): Promise<CCNMetrics[]> {
-    const res = await this.getMetrics()
-    return res.ccn
-  }
-
-  protected async getCRNScores(): Promise<CRNScore[]> {
-    const res = await this.getScores()
-    return res.crn
-  }
-
-  protected async getCRNMetrics(): Promise<CRNMetrics[]> {
-    const res = await this.getMetrics()
-    return res.crn
+    return fetchAndCache(
+      `${apiServer}/api/v0/posts.json?types=aleph-network-metrics&addresses=${metricAddress}&pagination=1&page=1`,
+      'metrics',
+      1000 * 60,
+      (content: any) =>
+        content?.posts?.[0]?.content?.metrics ?? { ccn: [], crn: [] },
+    )
   }
 }

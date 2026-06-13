@@ -198,7 +198,7 @@ export function useComputeResourceNodesPage(
 
   // ----------------------------- NETWORK RESOURCES CHART
 
-  const { specs } = useRequestCRNSpecs({ nodes })
+  const { specs } = useRequestCRNSpecs()
 
   const totalResources = useMemo(() => {
     const resources = Object.values(specs)
@@ -207,7 +207,7 @@ export function useComputeResourceNodesPage(
         ac.cpu += cv.data?.cpu?.count || 0
         ac.ram += (cv.data?.mem?.total_kB || 0) / 1024
         ac.hdd += (cv.data?.disk?.total_kB || 0) / 1024
-        ac.nodes += cv.data ? 1 : 0
+        ac.nodes += cv.data?.cpu ? 1 : 0
         ac.total += 1
 
         return ac
