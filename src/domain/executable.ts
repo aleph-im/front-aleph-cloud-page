@@ -254,8 +254,11 @@ export abstract class ExecutableManager<T extends Executable> {
     account?: Account,
   ): Promise<StreamPaymentDetails | undefined>
 
-  async checkStatus(executable: T): Promise<ExecutableStatus | undefined> {
-    const node = await this.getAllocationCRN(executable)
+  async checkStatus(
+    executable: T,
+    signal?: AbortSignal,
+  ): Promise<ExecutableStatus | undefined> {
+    const node = await this.getAllocationCRN(executable, signal)
     if (!node) return
 
     const { address } = node
@@ -263,7 +266,9 @@ export abstract class ExecutableManager<T extends Executable> {
 
     const nodeUrl = NodeManager.normalizeUrl(address)
 
-    const { version, json: response } = await this.fetchExecutions(nodeUrl)
+    const { version, json: response } = await this.fetchExecutions(nodeUrl, {
+      signal,
+    })
 
     const hash = executable.id
 
@@ -328,12 +333,15 @@ export abstract class ExecutableManager<T extends Executable> {
     }
   }
 
-  async getAllocationCRN(executable: T): Promise<CRNSpecs | undefined> {
+  async getAllocationCRN(
+    executable: T,
+    signal?: AbortSignal,
+  ): Promise<CRNSpecs | undefined> {
     if (executable.payment?.type === PaymentType.superfluid) {
       const { receiver } = executable.payment
       if (!receiver) return
 
-      const nodes = await this.nodeManager.getAllCRNsSpecs()
+      const nodes = await this.nodeManager.getAllCRNsSpecs(signal)
 
       // @note: 1) Try to filter the node by the requirements field on the executable message (legacy messages doesn't contain it)
 
@@ -352,6 +360,7 @@ export abstract class ExecutableManager<T extends Executable> {
 
     const query = await fetch(
       `https://scheduler.api.aleph.sh/api/v0/allocation/${executable.id}`,
+      { signal },
     )
 
     if (query.status === 404) return
@@ -360,7 +369,7 @@ export abstract class ExecutableManager<T extends Executable> {
 
     const { node_id, url } = response.node
 
-    const nodes = await this.nodeManager.getAllCRNsSpecs()
+    const nodes = await this.nodeManager.getAllCRNsSpecs(signal)
 
     // @note: 1) Try to filter the node by node hash
     let node = nodes.find((node) => node.hash === node_id)

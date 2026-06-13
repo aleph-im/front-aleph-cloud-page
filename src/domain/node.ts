@@ -469,7 +469,7 @@ export class NodeManager {
     }
   }
 
-  async getAllCRNsSpecs(): Promise<CRNSpecs[]> {
+  async getAllCRNsSpecs(signal?: AbortSignal): Promise<CRNSpecs[]> {
     try {
       const response = await fetchAndCache(
         crnListProgramUrl,
@@ -491,6 +491,8 @@ export class NodeManager {
             crns: formattedCrns,
           }
         },
+        false,
+        signal,
       )
 
       return response.crns

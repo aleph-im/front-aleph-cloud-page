@@ -25,6 +25,15 @@ export type UseExecutableStatusReturn = {
 
 const BOOST_INTERVAL_MS = 2000
 const BOOST_MAX_REQUESTS = 10
+// Per-request hard ceiling. A hung CRN/scheduler fetch must not leave the
+// badge stuck on LOADING; on timeout we transition to 'not-allocated' and
+// the next poll tick retries.
+const REQUEST_TIMEOUT_MS = 10_000
+
+type InflightRequest = {
+  controller: AbortController
+  supersede: () => void
+}
 
 export function useExecutableStatus({
   executable,
@@ -38,6 +47,7 @@ export function useExecutableStatus({
   const boostCountRef = useRef(0)
   const isBoostActiveRef = useRef(false)
   const onBoostCompleteRef = useRef<(() => void) | undefined>()
+  const inflightRef = useRef<InflightRequest | null>(null)
 
   const calculatedStatus: ExecutableCalculatedStatus = useMemo(() => {
     return calculateExecutableStatus(
@@ -56,16 +66,62 @@ export function useExecutableStatus({
     if (!manager) return
     if (!executable) return
 
+    const cancelInflight = () => {
+      const inflight = inflightRef.current
+      if (!inflight) return
+      inflightRef.current = null
+      inflight.supersede()
+    }
+
     async function request() {
       if (!manager) return
       if (!executable) return
       if (isBoostActiveRef.current) return
 
+      cancelInflight()
+
+      const controller = new AbortController()
+      let superseded = false
+      let timedOut = false
+
+      const inflight: InflightRequest = {
+        controller,
+        supersede: () => {
+          superseded = true
+          controller.abort()
+        },
+      }
+      inflightRef.current = inflight
+
+      const timeoutId = setTimeout(() => {
+        timedOut = true
+        controller.abort()
+      }, REQUEST_TIMEOUT_MS)
+
       try {
-        const fetchedStatus = await manager.checkStatus(executable)
+        const fetchedStatus = await manager.checkStatus(
+          executable,
+          controller.signal,
+        )
+        if (superseded) return
         setStatus(fetchedStatus)
-      } finally {
         setHasTriedFetchingStatus(true)
+      } catch (e) {
+        if (superseded) return
+        if (timedOut) {
+          console.warn(
+            `Executable status fetch timed out after ${REQUEST_TIMEOUT_MS}ms`,
+            executable?.id,
+          )
+        } else {
+          console.warn('Executable status fetch failed', e)
+        }
+        setHasTriedFetchingStatus(true)
+      } finally {
+        clearTimeout(timeoutId)
+        if (inflightRef.current === inflight) {
+          inflightRef.current = null
+        }
       }
     }
 
@@ -78,7 +134,10 @@ export function useExecutableStatus({
       request()
     }, 10 * 1000)
 
-    return () => clearInterval(id)
+    return () => {
+      clearInterval(id)
+      cancelInflight()
+    }
   }, [executable, manager])
 
   // Boost polling - fast polling after action buttons are pressed
@@ -115,8 +174,17 @@ export function useExecutableStatus({
           return
         }
 
+        const controller = new AbortController()
+        const timeoutId = setTimeout(
+          () => controller.abort(),
+          REQUEST_TIMEOUT_MS,
+        )
+
         try {
-          const fetchedStatus = await manager.checkStatus(executable)
+          const fetchedStatus = await manager.checkStatus(
+            executable,
+            controller.signal,
+          )
           setStatus(fetchedStatus)
           setHasTriedFetchingStatus(true)
 
@@ -133,6 +201,8 @@ export function useExecutableStatus({
           }
         } catch {
           // Silently fail on boost requests
+        } finally {
+          clearTimeout(timeoutId)
         }
       }
 
