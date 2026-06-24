@@ -1,8 +1,8 @@
 import React, { memo } from 'react'
 import { SSHKeyDetailProps } from './types'
-import { Button, Icon, Label, NoisyContainer, Tag } from '@aleph-front/core'
-import { RotatingLines } from 'react-loader-spinner'
+import { Button, Icon, NoisyContainer, Tag } from '@aleph-front/core'
 import IconText from '../IconText'
+import MessageStatusLabel from '../MessageStatusLabel'
 import { Separator, Text } from '@/components/pages/console/common'
 import { ellipseAddress, ellipseText } from '@/helpers/utils'
 import { useSSHKeyDetail } from './hook'
@@ -13,7 +13,7 @@ export const SSHKeyDetail = ({
   sshKeyId,
   showDelete = false,
 }: SSHKeyDetailProps) => {
-  const { sshKey, theme, handleCopyKey, handleCopyLabel, handleDelete } =
+  const { sshKey, handleCopyKey, handleCopyLabel, handleDelete } =
     useSSHKeyDetail({ sshKeyId })
 
   return (
@@ -28,22 +28,11 @@ export const SSHKeyDetail = ({
               <Skeleton width="10rem" />
             )}
           </div>
-          <Label
-            kind="secondary"
-            variant={sshKey?.confirmed ? 'success' : 'warning'}
+          <MessageStatusLabel
+            status={sshKey?.status}
+            loading={!sshKey}
             tw="ml-4"
-          >
-            {!sshKey ? (
-              'LOADING'
-            ) : sshKey.confirmed ? (
-              'READY'
-            ) : (
-              <div tw="flex items-center">
-                <div tw="mr-2">CONFIRMING</div>
-                <RotatingLines strokeColor={theme.color.base2} width=".8rem" />
-              </div>
-            )}
-          </Label>
+          />
         </div>
         <div>
           {showDelete && (

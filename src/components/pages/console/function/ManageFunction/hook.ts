@@ -9,6 +9,7 @@ import {
   useExecutableActions,
 } from '@/hooks/common/useExecutableActions'
 import { ellipseAddress } from '@/helpers/utils'
+import { isMessageProcessed } from '@/helpers/messageStatus'
 import useDownloadLogs from '@/hooks/common/useDownloadLogs'
 import {
   CreditPaymentData,
@@ -98,7 +99,10 @@ export function useManageFunction(): ManageFunction {
   const isPersistent = useMemo(() => !!program?.on.persistent, [program])
 
   const isAllocated = useMemo(
-    () => (isPersistent ? executableActions.isAllocated : !!program?.confirmed),
+    () =>
+      isPersistent
+        ? executableActions.isAllocated
+        : isMessageProcessed(program?.status),
     [executableActions, program, isPersistent],
   )
 

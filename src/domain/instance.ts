@@ -1,5 +1,6 @@
 import { Account } from '@aleph-sdk/account'
 import { createFromEVMAccount, SuperfluidAccount } from '@aleph-sdk/superfluid'
+import { EntityMessageStatus } from '@/helpers/messageStatus'
 import {
   HostRequirements,
   InstanceContent,
@@ -83,7 +84,7 @@ export type Instance = InstanceContent & {
   url: string
   date: string
   size: number
-  confirmed?: boolean
+  status?: EntityMessageStatus
 }
 
 export type InstanceCostProps = AddInstance
@@ -685,7 +686,6 @@ export class InstanceManager<T extends InstanceEntity = Instance>
         url: getExplorerURL(message),
         date: getDate(message.time),
         size: message.content.rootfs?.size_mib || 0,
-        confirmed: !!message.confirmed,
       }
     })
   }

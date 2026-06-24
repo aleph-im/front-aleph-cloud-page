@@ -5,6 +5,7 @@ import { PaymentType } from '@aleph-sdk/message'
 import { VolumesTabContentProps } from './types'
 import ButtonLink from '@/components/common/ButtonLink'
 import { ellipseAddress, humanReadableSize } from '@/helpers/utils'
+import { isMessageProcessed } from '@/helpers/messageStatus'
 import EntityTable from '@/components/common/EntityTable'
 import { Button, Icon } from '@aleph-front/core'
 import { NAVIGATION_URLS } from '@/helpers/constants'
@@ -44,7 +45,7 @@ export const VolumesTabContent = ({
           data={data}
           rowProps={(row) => ({
             css: isCredit(row)
-              ? row.confirmed
+              ? isMessageProcessed(row.status)
                 ? ''
                 : tw`opacity-60`
               : tw`opacity-40 cursor-not-allowed!`,

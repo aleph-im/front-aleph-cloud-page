@@ -11,6 +11,7 @@ import { useConfidentialManager } from '@/hooks/common/useManager/useConfidentia
 import { GpuInstance } from '@/domain/gpuInstance'
 import { Confidential } from '@/domain/confidential'
 import { calculateExecutableStatus } from '@/helpers/executableStatus'
+import { isMessageProcessed } from '@/helpers/messageStatus'
 
 export type AmountAggregatedStatus = {
   amount: number
@@ -86,7 +87,11 @@ function calculateComputingAggregatedStatus({
       switch (calculatedStatus) {
         case 'v1':
           const hasIpv6 = !!entitiesStatus[cv.id]?.data?.ipv6Parsed
-          statusKey = hasIpv6 ? 'running' : cv.confirmed ? 'paused' : 'booting'
+          statusKey = hasIpv6
+            ? 'running'
+            : isMessageProcessed(cv.status)
+              ? 'paused'
+              : 'booting'
           break
         case 'running':
         case 'stopping':
