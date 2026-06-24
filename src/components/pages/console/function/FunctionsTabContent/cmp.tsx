@@ -33,7 +33,6 @@ export const FunctionsTabContent = React.memo(
                 data={data}
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 rowProps={(row) => ({
-                  // css: row.confirmed ? '' : tw`opacity-60`,
                   css: tw`opacity-40 cursor-not-allowed!`,
                   onClick: () => handleRowClick(row),
                 })}

@@ -18,5 +18,10 @@ export function useRequestInstances(
   props: UseRequestInstancesProps = {},
 ): UseRequestInstancesReturn {
   const manager = useInstanceManager()
-  return useRequestEntities({ ...props, manager, name: 'instance' })
+  return useRequestEntities({
+    ...props,
+    manager,
+    name: 'instance',
+    withMessageStatus: true,
+  })
 }

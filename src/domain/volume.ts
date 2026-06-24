@@ -1,4 +1,5 @@
 import { Account } from '@aleph-sdk/account'
+import { EntityMessageStatus } from '@/helpers/messageStatus'
 import {
   ItemType,
   MessageCostLine,
@@ -80,7 +81,7 @@ export type BaseVolume = StoreContent & {
   url: string
   date: string
   size?: number
-  confirmed?: boolean
+  status?: EntityMessageStatus
 }
 
 export type NewVolume = BaseVolume & {
@@ -337,7 +338,6 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
       url: getExplorerURL(message),
       date: getDate(message.time),
       size: sizesMap[message.item_hash],
-      confirmed: !!message.confirmed,
     }
   }
 

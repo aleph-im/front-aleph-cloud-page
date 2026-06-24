@@ -18,5 +18,10 @@ export function useRequestSSHKeys(
   props: UseRequestSSHKeysProps = {},
 ): UseRequestSSHKeysReturn {
   const manager = useSSHKeyManager()
-  return useRequestEntities({ ...props, manager, name: 'ssh' })
+  return useRequestEntities({
+    ...props,
+    manager,
+    name: 'ssh',
+    withMessageStatus: true,
+  })
 }

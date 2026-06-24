@@ -1,8 +1,8 @@
 import React, { memo } from 'react'
 import { VolumeDetailProps } from './types'
-import { Button, Icon, Label, NoisyContainer, Tag } from '@aleph-front/core'
-import { RotatingLines } from 'react-loader-spinner'
+import { Button, Icon, NoisyContainer, Tag } from '@aleph-front/core'
 import IconText from '../IconText'
+import MessageStatusLabel from '../MessageStatusLabel'
 import { Separator, Text } from '@/components/pages/console/common'
 import { ellipseAddress, ellipseText, humanReadableSize } from '@/helpers/utils'
 import { useVolumeDetail } from './hook'
@@ -13,7 +13,7 @@ export const VolumeDetail = ({
   volumeId,
   showDelete = false,
 }: VolumeDetailProps) => {
-  const { volume, theme, handleDelete, handleCopyHash, handleDownload } =
+  const { volume, handleDelete, handleCopyHash, handleDownload } =
     useVolumeDetail({ volumeId })
 
   return (
@@ -24,22 +24,11 @@ export const VolumeDetail = ({
           <div className="tp-body2">
             {volume ? ellipseAddress(volume.id) : <Skeleton width="10rem" />}
           </div>
-          <Label
-            kind="secondary"
-            variant={volume?.confirmed ? 'success' : 'warning'}
+          <MessageStatusLabel
+            status={volume?.status}
+            loading={!volume}
             tw="ml-4"
-          >
-            {!volume ? (
-              'LOADING'
-            ) : volume.confirmed ? (
-              'READY'
-            ) : (
-              <div tw="flex items-center">
-                <div tw="mr-2">CONFIRMING</div>
-                <RotatingLines strokeColor={theme.color.base2} width=".8rem" />
-              </div>
-            )}
-          </Label>
+          />
         </div>
         <div tw="flex flex-wrap justify-end gap-2 sm:gap-4">
           <Button

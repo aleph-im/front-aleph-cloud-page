@@ -10,10 +10,8 @@ import {
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
 import { useCopyToClipboardAndNotify } from '@aleph-front/core'
-import { DefaultTheme, useTheme } from 'styled-components'
 
 export type UseVolumeDetailReturn = {
-  theme: DefaultTheme
   volume?: Volume
   handleDownload: () => void
   handleCopyHash: () => void
@@ -27,7 +25,6 @@ export type UseVolumeDetailProps = {
 export function useVolumeDetail({
   volumeId,
 }: UseVolumeDetailProps): UseVolumeDetailReturn {
-  const theme = useTheme()
   const router = useRouter()
   const { dispatchDeleteEntity } = useDispatchDeleteEntityAction({
     entityName: 'volume',
@@ -88,7 +85,6 @@ export function useVolumeDetail({
 
   return {
     volume,
-    theme,
     handleDelete,
     handleDownload,
     handleCopyHash,

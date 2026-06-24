@@ -6,6 +6,7 @@ import {
   EntityStatusPropsV2,
 } from './types'
 import { RotatingLines } from 'react-loader-spinner'
+import { getMessageStatusDisplay } from '@/helpers/messageStatus'
 
 const EntityStatusV2 = ({
   theme,
@@ -81,25 +82,20 @@ const EntityStatusV1 = ({
   isAllocated,
   theme,
 }: EntityStatusPropsV1) => {
-  const labelVariant = useMemo(() => {
-    if (!entity) return 'warning'
-
-    return entity.time < Date.now() - 1000 * 45 && isAllocated
-      ? 'success'
-      : 'warning'
-  }, [entity, isAllocated])
+  // A processed message only means the instance was accepted; it still has to be
+  // created on its host CRN, which `isAllocated` reflects. Until then show
+  // CREATING instead of READY.
+  const { label, variant, spinner } = getMessageStatusDisplay(entity?.status, {
+    ready: isAllocated,
+  })
 
   return (
-    <Label kind="secondary" variant={labelVariant}>
+    <Label kind="secondary" variant={variant}>
       <div tw="flex items-center justify-center gap-2">
-        <Icon name="alien-8bit" className={`text-${labelVariant}`} />
-        {isAllocated ? (
-          'ALLOCATED'
-        ) : (
-          <>
-            <div>{entity ? 'CONFIRMING' : 'LOADING'}</div>
-            <RotatingLines strokeColor={theme.color.base2} width=".8rem" />
-          </>
+        <Icon name="alien-8bit" className={`text-${variant}`} />
+        <div>{label}</div>
+        {spinner && (
+          <RotatingLines strokeColor={theme.color.base2} width=".8rem" />
         )}
       </div>
     </Label>

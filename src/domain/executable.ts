@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer'
+import { EntityMessageStatus } from '@/helpers/messageStatus'
 import { EnvVarField } from '@/hooks/form/useAddEnvVars'
 import {
   BaseExecutableContent,
@@ -86,6 +87,7 @@ export type Executable = BaseExecutableContent & {
   environment?: any
   //@todo: Add `hash` field in NodeRequirements in ts sdk
   requirements?: any
+  status?: EntityMessageStatus
 }
 
 export type ExecutableSchedulerAllocation = {

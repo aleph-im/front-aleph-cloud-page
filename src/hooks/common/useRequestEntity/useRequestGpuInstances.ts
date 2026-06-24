@@ -17,5 +17,10 @@ export function useRequestGpuInstances(
   props: UseRequestGpuInstancesProps = {},
 ): UseRequestGpuInstancesReturn {
   const manager = useGpuInstanceManager()
-  return useRequestEntities({ ...props, manager, name: 'gpuInstance' })
+  return useRequestEntities({
+    ...props,
+    manager,
+    name: 'gpuInstance',
+    withMessageStatus: true,
+  })
 }

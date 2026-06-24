@@ -18,5 +18,10 @@ export function useRequestVolumes(
   props: UseRequestVolumesProps = {},
 ): UseRequestVolumesReturn {
   const manager = useVolumeManager()
-  return useRequestEntities({ ...props, manager, name: 'volume' })
+  return useRequestEntities({
+    ...props,
+    manager,
+    name: 'volume',
+    withMessageStatus: true,
+  })
 }

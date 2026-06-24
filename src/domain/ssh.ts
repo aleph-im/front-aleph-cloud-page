@@ -1,4 +1,5 @@
 import { Account } from '@aleph-sdk/account'
+import { EntityMessageStatus } from '@/helpers/messageStatus'
 import Err from '@/helpers/errors'
 import {
   EntityType,
@@ -27,7 +28,7 @@ export type SSHKey = AddSSHKey & {
   url: string
   size: number
   date: string
-  confirmed?: boolean
+  status?: EntityMessageStatus
 }
 
 export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
@@ -209,7 +210,6 @@ export class SSHKeyManager implements EntityManager<SSHKey, AddSSHKey> {
         to: 'MiB',
       }),
       date: getDate(post.time),
-      confirmed: !!post.confirmed,
     }
   }
 

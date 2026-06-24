@@ -18,5 +18,10 @@ export function useRequestPrograms(
   props: UseRequestProgramsProps = {},
 ): UseRequestProgramsReturn {
   const manager = useProgramManager()
-  return useRequestEntities({ ...props, manager, name: 'program' })
+  return useRequestEntities({
+    ...props,
+    manager,
+    name: 'program',
+    withMessageStatus: true,
+  })
 }

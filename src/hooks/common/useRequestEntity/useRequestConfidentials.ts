@@ -18,5 +18,10 @@ export function useRequestConfidentials(
   props: UseRequestConfidentialsProps = {},
 ): UseRequestConfidentialsReturn {
   const manager = useConfidentialManager()
-  return useRequestEntities({ ...props, manager, name: 'confidential' })
+  return useRequestEntities({
+    ...props,
+    manager,
+    name: 'confidential',
+    withMessageStatus: true,
+  })
 }

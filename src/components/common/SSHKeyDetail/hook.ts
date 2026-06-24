@@ -10,10 +10,7 @@ import {
   stepsCatalog,
   useCheckoutNotification,
 } from '@/hooks/form/useCheckoutNotification'
-import { DefaultTheme, useTheme } from 'styled-components'
-
 export type UseSSHKeyDetailReturn = {
-  theme: DefaultTheme
   sshKey?: SSHKey
   handleCopyLabel: () => void
   handleCopyKey: () => void
@@ -27,7 +24,6 @@ export type UseSSHKeyDetailProps = {
 export function useSSHKeyDetail({
   sshKeyId,
 }: UseSSHKeyDetailProps): UseSSHKeyDetailReturn {
-  const theme = useTheme()
   const router = useRouter()
   const { dispatchDeleteEntity } = useDispatchDeleteEntityAction({
     entityName: 'ssh',
@@ -82,7 +78,6 @@ export function useSSHKeyDetail({
 
   return {
     sshKey,
-    theme,
     handleCopyLabel,
     handleCopyKey,
     handleDelete,

@@ -2,10 +2,7 @@ import {
   CACHE_STRATEGY,
   useAppStoreEntityRequest,
 } from '../useStoreEntitiesRequest'
-import {
-  ConfirmableEntity,
-  useRetryNotConfirmedEntities,
-} from '../useRetryNotConfirmedEntities'
+import { useEntitiesMessageStatus } from '../useEntitiesMessageStatus'
 import { useAppState } from '@/contexts/appState'
 import { EntityManager, ReadOnlyEntityManager } from '@/domain/types'
 import { StoreState } from '@/store/store'
@@ -17,6 +14,12 @@ export type UseRequestEntitiesProps<Entity> = {
   ids?: string | string[]
   triggerOnMount?: boolean
   triggerDeps?: unknown[]
+  /**
+   * Overlay each entity with its aleph message status (Requesting/Ready/…).
+   * Only for message-based resources whose `id` is a message item hash;
+   * aggregate-based entities (domains/websites) should leave this off.
+   */
+  withMessageStatus?: boolean
 }
 
 export type UseRequestEntitiesReturn<Entity> = {
@@ -28,9 +31,7 @@ export type UseRequestEntitiesReturn<Entity> = {
 type RequestType = 'single' | 'multiple' | 'all'
 
 // Helper function to handle single entity requests (string ID)
-const handleSingleEntityRequest = async <
-  Entity extends ConfirmableEntity & { id: string },
->(
+const handleSingleEntityRequest = async <Entity extends { id: string }>(
   manager: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>,
   entityId: string,
   currentState: { entities?: Entity[] },
@@ -53,9 +54,7 @@ const handleSingleEntityRequest = async <
 }
 
 // Helper function to handle multiple entities requests (array IDs)
-const handleMultipleEntitiesRequest = async <
-  Entity extends ConfirmableEntity & { id: string },
->(
+const handleMultipleEntitiesRequest = async <Entity extends { id: string }>(
   manager: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>,
   entityIds: string[],
   currentState: { entities?: Entity[] },
@@ -80,9 +79,7 @@ const handleMultipleEntitiesRequest = async <
 }
 
 // Helper function to handle all entities requests (no IDs specified)
-const handleAllEntitiesRequest = async <
-  Entity extends ConfirmableEntity & { id: string },
->(
+const handleAllEntitiesRequest = async <Entity extends { id: string }>(
   manager: EntityManager<Entity, any> | ReadOnlyEntityManager<Entity>,
   currentState: { entities?: Entity[] },
   force = false,
@@ -96,14 +93,13 @@ const handleAllEntitiesRequest = async <
   return manager.getAll({})
 }
 
-export function useRequestEntities<
-  Entity extends ConfirmableEntity & { id: string },
->({
+export function useRequestEntities<Entity extends { id: string }>({
   name,
   manager,
   ids,
   triggerDeps = [],
   triggerOnMount = true,
+  withMessageStatus = false,
 }: UseRequestEntitiesProps<Entity>): UseRequestEntitiesReturn<Entity> {
   const [state] = useAppState()
   const { account } = state.connection
@@ -126,11 +122,7 @@ export function useRequestEntities<
     }
   }, [requestType])
 
-  const {
-    data: allEntities,
-    loading,
-    request,
-  } = useAppStoreEntityRequest({
+  const { data: allEntities, loading } = useAppStoreEntityRequest({
     name,
     doRequest: async () => {
       if (!manager) return []
@@ -209,14 +201,23 @@ export function useRequestEntities<
     }
   }, [allEntities, requestType, ids])
 
-  useRetryNotConfirmedEntities({
-    entities: filteredEntities,
-    request,
-    triggerOnMount,
-  })
+  // Status polling is gated on `triggerOnMount`: when an entity is loaded lazily
+  // (triggerOnMount: false) it may not be present yet, so there is nothing to
+  // poll until it is. All current `withMessageStatus` callers mount eagerly.
+  const statusMap = useEntitiesMessageStatus(
+    withMessageStatus && triggerOnMount ? filteredEntities : undefined,
+  )
+
+  const entitiesWithStatus = useMemo(() => {
+    if (!filteredEntities || !withMessageStatus) return filteredEntities
+    return filteredEntities.map((entity) => ({
+      ...entity,
+      status: statusMap[entity.id],
+    }))
+  }, [filteredEntities, statusMap, withMessageStatus])
 
   return {
-    entities: filteredEntities,
+    entities: entitiesWithStatus,
     loading,
     refetch: forceRequest,
   }

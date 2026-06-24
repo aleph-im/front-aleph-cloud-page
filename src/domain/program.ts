@@ -1,5 +1,6 @@
 import JSZip from 'jszip'
 import { Account } from '@aleph-sdk/account'
+import { EntityMessageStatus } from '@/helpers/messageStatus'
 import {
   Encoding,
   PaymentType,
@@ -78,7 +79,7 @@ export type Program = Omit<ProgramContent, 'type'> & {
   date: string
   size: number
   refUrl: string
-  confirmed?: boolean
+  status?: EntityMessageStatus
 }
 
 export type ProgramCostProps = AddProgram
@@ -455,7 +456,6 @@ export class ProgramManager
           date: getDate(message.time),
           size,
           refUrl: `/storage/volume/${message.content.code.ref}`,
-          confirmed: !!message.confirmed,
         }
       })
   }

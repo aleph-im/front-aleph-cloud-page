@@ -6,6 +6,7 @@ import ButtonLink from '@/components/common/ButtonLink'
 import EntityTable from '@/components/common/EntityTable'
 import { Button, Icon } from '@aleph-front/core'
 import { ellipseText } from '@/helpers/utils'
+import { isMessageProcessed } from '@/helpers/messageStatus'
 import { SSHKey } from '@/domain/ssh'
 
 export const SSHKeysTabContent = ({ data }: SSHKeysTabContentProps) => {
@@ -26,7 +27,7 @@ export const SSHKeysTabContent = ({ data }: SSHKeysTabContentProps) => {
           data={data}
           rowProps={(row) => ({
             onClick: () => handleRowClick(row),
-            css: row.confirmed ? '' : tw`opacity-60`,
+            css: isMessageProcessed(row.status) ? '' : tw`opacity-60`,
           })}
           clickableRows
           columns={[
