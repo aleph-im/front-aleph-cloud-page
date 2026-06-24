@@ -126,7 +126,9 @@ export async function getMessageStatus(
   itemHash: string,
 ): Promise<EntityMessageStatus | undefined> {
   try {
-    const res = await fetch(`${apiServer}/api/v0/messages/${itemHash}/status`)
+    const res = await fetch(
+      `${apiServer}/api/v0/messages/${encodeURIComponent(itemHash)}/status`,
+    )
     if (!res.ok) return undefined
     const data = await res.json()
     return parseMessageStatus(data?.status)

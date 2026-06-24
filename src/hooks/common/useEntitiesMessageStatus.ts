@@ -44,10 +44,11 @@ export function useEntitiesMessageStatus<E extends { id: string }>(
       for (let i = 0; i < targetIds.length; i += MAX_CONCURRENT_REQUESTS) {
         if (cancelled) return
         const batch = targetIds.slice(i, i + MAX_CONCURRENT_REQUESTS)
-        const batchEntries = await Promise.all(
-          batch.map(async (id) => [id, await getMessageStatus(id)] as const),
+        entries.push(
+          ...(await Promise.all(
+            batch.map(async (id) => [id, await getMessageStatus(id)] as const),
+          )),
         )
-        entries.push(...batchEntries)
       }
       if (cancelled) return
 
