@@ -20,6 +20,28 @@ export type EntityMessageStatus =
   | 'removing'
   | 'removed'
 
+const VALID_STATUSES: ReadonlySet<string> = new Set<EntityMessageStatus>([
+  'pending',
+  'processed',
+  'rejected',
+  'forgotten',
+  'removing',
+  'removed',
+])
+
+/**
+ * Narrows an arbitrary backend value to a known status, returning `undefined`
+ * for anything outside the union (e.g. a status added by a newer backend) so an
+ * unexpected value never reaches the display logic unchecked.
+ */
+export function parseMessageStatus(
+  value: unknown,
+): EntityMessageStatus | undefined {
+  return typeof value === 'string' && VALID_STATUSES.has(value)
+    ? (value as EntityMessageStatus)
+    : undefined
+}
+
 /**
  * Statuses that still change over time, so they should keep being polled.
  * `processed` is intentionally excluded: it only moves to `removing`/`removed`
@@ -72,8 +94,6 @@ export function getMessageStatusDisplay(
   { ready = true }: MessageStatusDisplayOptions = {},
 ): MessageStatusDisplay {
   switch (status) {
-    case undefined:
-      return { label: 'LOADING', variant: 'warning', spinner: true }
     case 'pending':
       return { label: 'REQUESTING', variant: 'warning', spinner: true }
     case 'processed':
@@ -87,6 +107,11 @@ export function getMessageStatusDisplay(
     case 'forgotten':
     case 'removed':
       return { label: 'DELETED', variant: 'error', spinner: false }
+    // `undefined` (not loaded yet) and any unknown/new backend status fall back
+    // to the neutral loading state so a caller destructuring the result never
+    // hits an undefined return.
+    default:
+      return { label: 'LOADING', variant: 'warning', spinner: true }
   }
 }
 
@@ -104,7 +129,7 @@ export async function getMessageStatus(
     const res = await fetch(`${apiServer}/api/v0/messages/${itemHash}/status`)
     if (!res.ok) return undefined
     const data = await res.json()
-    return data?.status as EntityMessageStatus | undefined
+    return parseMessageStatus(data?.status)
   } catch {
     return undefined
   }

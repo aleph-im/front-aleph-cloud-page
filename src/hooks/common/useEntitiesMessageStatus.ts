@@ -7,6 +7,10 @@ import {
 
 const POLL_INTERVAL_MS = 10 * 1000
 
+// Cap simultaneous status requests so an account with many entities doesn't
+// fire dozens of concurrent fetches on load and on every poll tick.
+const MAX_CONCURRENT_REQUESTS = 10
+
 export type EntityMessageStatusMap = Record<string, EntityMessageStatus>
 
 /**
@@ -35,13 +39,26 @@ export function useEntitiesMessageStatus<E extends { id: string }>(
 
     const fetchStatuses = async (targetIds: string[]) => {
       if (!targetIds.length) return
-      const entries = await Promise.all(
-        targetIds.map(async (id) => [id, await getMessageStatus(id)] as const),
-      )
+
+      const entries: (readonly [string, EntityMessageStatus | undefined])[] = []
+      for (let i = 0; i < targetIds.length; i += MAX_CONCURRENT_REQUESTS) {
+        if (cancelled) return
+        const batch = targetIds.slice(i, i + MAX_CONCURRENT_REQUESTS)
+        const batchEntries = await Promise.all(
+          batch.map(async (id) => [id, await getMessageStatus(id)] as const),
+        )
+        entries.push(...batchEntries)
+      }
       if (cancelled) return
 
       setStatuses((prev) => {
-        const next = { ...prev }
+        // Rebuild from the current id set so statuses for entities that were
+        // removed (deleted, account switched) don't linger in the map.
+        const next: EntityMessageStatusMap = {}
+        for (const id of ids) {
+          const status = prev[id]
+          if (status !== undefined) next[id] = status
+        }
         for (const [id, status] of entries) {
           if (status) next[id] = status
         }

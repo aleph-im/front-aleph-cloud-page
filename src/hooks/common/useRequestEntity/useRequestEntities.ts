@@ -201,6 +201,9 @@ export function useRequestEntities<Entity extends { id: string }>({
     }
   }, [allEntities, requestType, ids])
 
+  // Status polling is gated on `triggerOnMount`: when an entity is loaded lazily
+  // (triggerOnMount: false) it may not be present yet, so there is nothing to
+  // poll until it is. All current `withMessageStatus` callers mount eagerly.
   const statusMap = useEntitiesMessageStatus(
     withMessageStatus && triggerOnMount ? filteredEntities : undefined,
   )
