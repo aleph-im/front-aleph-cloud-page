@@ -194,6 +194,11 @@ export type StreamPaymentDetails = {
   streams: StreamPaymentDetail[]
 }
 
+export type ReserveCRNResourcesResult = {
+  reserved: boolean
+  error?: string
+}
+
 export abstract class ExecutableManager<T extends Executable> {
   protected static cachedPubKeyToken?: AuthPubKeyToken
 
@@ -373,32 +378,40 @@ export abstract class ExecutableManager<T extends Executable> {
     }
   }
 
+  /**
+   * Pre-allocates (locks) the requested resources on a CRN by calling its
+   * `/control/reserve_resources` endpoint. The CRN holds the reservation for a
+   * short window, so this doubles as a capacity check before the instance
+   * message is signed: a `reserved` status means the node can fit the specs.
+   *
+   * Returns a result instead of throwing so callers can fall back to another
+   * node when a CRN cannot fit the selected resources. Signature/auth errors
+   * are surfaced via `error` as well.
+   */
   async reserveCRNResources(
     node: CRN,
     instanceConfig: InstancePublishConfiguration,
-  ): Promise<void> {
-    if (!node.address) throw Err.InvalidCRNAddress
-
-    const nodeUrl = NodeManager.normalizeUrl(node.address)
-    const url = new URL(`${nodeUrl}/control/reserve_resources`)
-    const { hostname: domain, pathname: path } = url
-
-    const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
-
-    const signedOperationToken = await this.getAuthOperationToken(
-      keyPair.privateKey,
-      domain,
-      path,
-    )
-
-    const message =
-      await this.sdkClient.instanceClient.getCostComputableMessage(
-        instanceConfig,
-      )
-
-    let errorMsg = ''
+  ): Promise<ReserveCRNResourcesResult> {
+    if (!node.address) return { reserved: false, error: 'Invalid CRN address' }
 
     try {
+      const nodeUrl = NodeManager.normalizeUrl(node.address)
+      const url = new URL(`${nodeUrl}/control/reserve_resources`)
+      const { hostname: domain, pathname: path } = url
+
+      const { keyPair, pubKeyHeader } = await this.getAuthPubKeyToken()
+
+      const signedOperationToken = await this.getAuthOperationToken(
+        keyPair.privateKey,
+        domain,
+        path,
+      )
+
+      const message =
+        await this.sdkClient.instanceClient.getCostComputableMessage(
+          instanceConfig,
+        )
+
       const req = await fetch(url.toString(), {
         method: 'POST',
         headers: {
@@ -412,17 +425,27 @@ export abstract class ExecutableManager<T extends Executable> {
 
       const resp = await req.json()
 
-      /*
-        expires: "2025-03-28 11:21:21.744592+00:00"
-        status: "reserved"
-      */
-      if (resp.status === 'reserved') return
-      // errorMsg = resp.errors[instanceId]
-    } catch (e) {
-      errorMsg = (e as Error).message
-    }
+      // resp on success: { status: 'reserved', expires: '<iso timestamp>' }
+      if (resp.status === 'reserved') return { reserved: true }
 
-    throw Err.InstanceStartupFailed(node.hash, errorMsg)
+      const error =
+        resp.error ||
+        resp.errors?.[node.hash] ||
+        'CRN cannot fit the selected resources'
+
+      return { reserved: false, error }
+    } catch (e) {
+      return { reserved: false, error: (e as Error).message }
+    }
+  }
+
+  /**
+   * Warms the cached wallet-signed pubkey token (one wallet signature). Call
+   * this once before reserving across several candidate nodes so the per-node
+   * reservations reuse the cache instead of prompting the wallet repeatedly.
+   */
+  async ensureAuthToken(): Promise<void> {
+    await this.getAuthPubKeyToken()
   }
 
   async notifyCRNAllocation(

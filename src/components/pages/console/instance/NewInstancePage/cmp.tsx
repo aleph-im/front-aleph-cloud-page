@@ -26,6 +26,7 @@ import CheckoutSummary from '@/components/form/CheckoutSummary'
 import { EntityDomainType, EntityType } from '@/helpers/constants'
 import { useSettings } from '@/hooks/common/useSettings'
 import { CenteredContainer } from '@/components/common/CenteredContainer'
+import { RotatingLines } from 'react-loader-spinner'
 import { useNewInstancePage } from './hook'
 import Form from '@/components/form/Form'
 import SwitchToggleContainer from '@/components/common/SwitchToggleContainer'
@@ -65,6 +66,7 @@ export default function NewInstancePage({ mainRef }: PageProps) {
     shouldRequestTermsAndConditions,
     aggregatedSpecs,
     compatibleNodesCount,
+    reservation,
     handleManuallySelectCRN,
     handleSelectNode,
     handleSubmit,
@@ -204,6 +206,38 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                     >
                       Change CRN
                     </ButtonWithInfoTooltip>
+                  </div>
+                </NoisyContainer>
+              )}
+
+              {/* CRN capacity reservation status */}
+              {reservation.status === 'checking' && (
+                <div tw="mt-4 flex items-center gap-3">
+                  <RotatingLines strokeColor="grey" width="1rem" />
+                  <p className="tp-body2" tw="opacity-70">
+                    Checking CRN capacity for the selected resources…
+                  </p>
+                </div>
+              )}
+              {reservation.status === 'failed' && reservation.error && (
+                <NoisyContainer tw="mt-4">
+                  <div tw="flex items-start gap-3">
+                    <Icon
+                      name="warning"
+                      tw="text-red-500 flex-shrink-0 mt-0.5"
+                    />
+                    <p className="tp-body2">{reservation.error}</p>
+                  </div>
+                </NoisyContainer>
+              )}
+              {reservation.status === 'reserved' && reservation.warning && (
+                <NoisyContainer tw="mt-4">
+                  <div tw="flex items-start gap-3">
+                    <Icon
+                      name="warning"
+                      tw="text-orange-500 flex-shrink-0 mt-0.5"
+                    />
+                    <p className="tp-body2">{reservation.warning}</p>
                   </div>
                 </NoisyContainer>
               )}
