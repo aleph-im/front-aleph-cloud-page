@@ -24,6 +24,7 @@ import {
   ExecutableStatus,
   StreamPaymentDetails,
   StreamPaymentDetail,
+  ReserveCRNResourcesResult,
 } from './executable'
 import {
   InstanceSystemVolumeField,
@@ -574,7 +575,28 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
 
     yield
-    await this.reserveCRNResources(newInstance.node, instanceMessage)
+    const { reserved, error } = await this.reserveCRNResources(
+      newInstance.node,
+      instanceMessage,
+    )
+    if (!reserved)
+      throw Err.InstanceStartupFailed(newInstance.node.hash, error || '')
+  }
+
+  /**
+   * Reserves the resources for `newInstance` on its currently selected CRN as a
+   * pre-flight capacity check, building the publish config from the form values.
+   * Returns whether the node can fit the specs so the caller can fall back to
+   * another node or block the create.
+   */
+  async reserveResourcesForNode(
+    newInstance: AddInstance,
+  ): Promise<ReserveCRNResourcesResult> {
+    if (!newInstance.node?.address)
+      return { reserved: false, error: 'Invalid CRN' }
+
+    const config = await this.parseInstanceForCostEstimation(newInstance)
+    return this.reserveCRNResources(newInstance.node, config)
   }
 
   protected async *addPAYGAllocationSteps(
