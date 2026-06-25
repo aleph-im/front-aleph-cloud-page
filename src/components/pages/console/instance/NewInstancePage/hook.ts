@@ -1,5 +1,12 @@
 import { useAppState } from '@/contexts/appState'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import Router, { useRouter } from 'next/router'
 import { useForm } from '@/hooks/common/useForm'
 import {
@@ -146,6 +153,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const [reservation, setReservation] = useState<CRNReservationState>({
     status: 'idle',
   })
+  // Prevents overlapping reservation requests (concurrent Create clicks).
+  const reservingRef = useRef(false)
+  // Invalidates in-flight reservations when the specs/tier change.
+  const reservationGenRef = useRef(0)
 
   // -------------------------
   // Request CRNs specs and aggregated specs
@@ -325,62 +336,78 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       isManual: boolean,
     ): Promise<CRNSpecs | undefined> => {
       if (!manager) return undefined
+      // Ignore overlapping requests so concurrent clicks don't reserve on
+      // several nodes at once.
+      if (reservingRef.current) return undefined
 
-      setReservation({
-        status: 'checking',
-        nodeHash: preferredNode.hash,
-        specsKey,
-      })
+      reservingRef.current = true
+      // Anything started under a previous generation (e.g. before a tier
+      // change) is stale and must not write state or pin a node.
+      const gen = ++reservationGenRef.current
+      const isStale = () => reservationGenRef.current !== gen
 
-      // One wallet signature, cached for the per-node reservations below.
       try {
-        await manager.ensureAuthToken()
-      } catch (e) {
         setReservation({
-          status: 'failed',
+          status: 'checking',
           nodeHash: preferredNode.hash,
           specsKey,
-          error: (e as Error).message,
         })
-        return undefined
-      }
 
-      const candidates = [
-        preferredNode,
-        ...compatibleNodes.filter((n) => n.hash !== preferredNode.hash),
-      ]
-
-      for (const candidate of candidates) {
-        const { reserved } = await manager.reserveResourcesForNode(
-          buildAddInstance(candidate),
-        )
-        if (!reserved) continue
-
-        const switched = candidate.hash !== preferredNode.hash
-        if (switched) {
-          setManualNodeOverride(true)
-          setManuallySelectedNode(candidate)
+        // One wallet signature, cached for the per-node reservations below.
+        try {
+          await manager.ensureAuthToken()
+        } catch (e) {
+          if (!isStale())
+            setReservation({
+              status: 'failed',
+              nodeHash: preferredNode.hash,
+              specsKey,
+              error: (e as Error).message,
+            })
+          return undefined
         }
 
-        setReservation({
-          status: 'reserved',
-          nodeHash: candidate.hash,
-          specsKey,
-          warning:
-            switched && isManual
-              ? 'The CRN you selected could not fit the selected resources. A compatible node was selected instead — review and create.'
-              : undefined,
-        })
-        return candidate
-      }
+        const candidates = [
+          preferredNode,
+          ...compatibleNodes.filter((n) => n.hash !== preferredNode.hash),
+        ]
 
-      setReservation({
-        status: 'failed',
-        nodeHash: preferredNode.hash,
-        specsKey,
-        error: 'No compatible CRN has enough free resources right now.',
-      })
-      return undefined
+        for (const candidate of candidates) {
+          const { reserved } = await manager.reserveResourcesForNode(
+            buildAddInstance(candidate),
+          )
+          if (isStale()) return undefined
+          if (!reserved) continue
+
+          const switched = candidate.hash !== preferredNode.hash
+          if (switched) {
+            setManualNodeOverride(true)
+            setManuallySelectedNode(candidate)
+          }
+
+          setReservation({
+            status: 'reserved',
+            nodeHash: candidate.hash,
+            specsKey,
+            warning:
+              switched && isManual
+                ? 'The CRN you selected could not fit the selected resources. A compatible node was selected instead — review and create.'
+                : undefined,
+          })
+          return candidate
+        }
+
+        if (!isStale())
+          setReservation({
+            status: 'failed',
+            nodeHash: preferredNode.hash,
+            specsKey,
+            error: 'No compatible CRN has enough free resources right now.',
+          })
+        return undefined
+      } finally {
+        reservingRef.current = false
+      }
     },
     [manager, specsKey, compatibleNodes, buildAddInstance],
   )
@@ -484,8 +511,15 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     if (!account) return true
     if (isDisabledDueToInsufficientFunds) return true
     if (!hasEnoughBalance) return true
+    // Avoid overlapping reservations from repeated clicks.
+    if (reservation.status === 'checking') return true
     return false
-  }, [account, isDisabledDueToInsufficientFunds, hasEnoughBalance])
+  }, [
+    account,
+    isDisabledDueToInsufficientFunds,
+    hasEnoughBalance,
+    reservation.status,
+  ])
 
   // -------------------------
   // Handlers
@@ -522,19 +556,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       : setValue('termsAndConditions', node?.terms_and_conditions)
   }, [formValues.termsAndConditions, node, setValue])
 
-  const handleAcceptTermsAndConditions = useCallback(
-    (e: React.FormEvent) => {
-      handleCloseModal()
-      handleSubmit(e)
-    },
-    [handleCloseModal, handleSubmit],
-  )
-
   const handleBack = () => {
     router.push('.')
   }
 
-  // Handle submit
+  // Handle submit: reserve CRN capacity before signing (see resolveReservation).
   const handleFormSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault()
@@ -564,6 +590,15 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
       resolveReservation,
       handleSubmit,
     ],
+  )
+
+  // T&C-gated nodes must run the same reservation check before signing.
+  const handleAcceptTermsAndConditions = useCallback(
+    (e: React.FormEvent) => {
+      handleCloseModal()
+      handleFormSubmit(e)
+    },
+    [handleCloseModal, handleFormSubmit],
   )
 
   // -------------------------
@@ -603,6 +638,8 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     ) {
       setManualNodeOverride(false)
       setManuallySelectedNode(undefined)
+      // Invalidate any in-flight reservation so its result is discarded.
+      reservationGenRef.current++
       setReservation({ status: 'idle' })
     }
   }, [formValues.specs, prevSpecs])

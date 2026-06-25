@@ -428,9 +428,14 @@ export abstract class ExecutableManager<T extends Executable> {
       // resp on success: { status: 'reserved', expires: '<iso timestamp>' }
       if (resp.status === 'reserved') return { reserved: true }
 
+      // The endpoint's error shape isn't documented, so surface any message it
+      // provides regardless of key, falling back to a generic one.
       const error =
         resp.error ||
-        resp.errors?.[node.hash] ||
+        resp.detail ||
+        (resp.errors && typeof resp.errors === 'object'
+          ? String(Object.values(resp.errors)[0] ?? '')
+          : '') ||
         'CRN cannot fit the selected resources'
 
       return { reserved: false, error }
