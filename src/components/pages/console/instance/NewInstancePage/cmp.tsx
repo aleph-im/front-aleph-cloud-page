@@ -188,6 +188,22 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                         <NodeScore score={node.score} />
                       </div>
                     </div>
+                    <ButtonWithInfoTooltip
+                      ref={manuallySelectButtonRef}
+                      type="button"
+                      kind="functional"
+                      variant="warning"
+                      size="md"
+                      onClick={handleManuallySelectCRN}
+                      disabled={manuallySelectCRNDisabled}
+                      tooltipContent={manuallySelectCRNDisabledMessage}
+                      tooltipPosition={{
+                        my: 'bottom-right',
+                        at: 'top-center',
+                      }}
+                    >
+                      Change CRN
+                    </ButtonWithInfoTooltip>
                   </div>
                 </NoisyContainer>
               )}
