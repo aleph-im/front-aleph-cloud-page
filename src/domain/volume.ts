@@ -4,7 +4,6 @@ import {
   ItemType,
   MessageCostLine,
   MessageType,
-  Payment,
   PaymentType,
   StoreContent,
 } from '@aleph-sdk/message'
@@ -210,12 +209,6 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
     try {
       const { channel } = this
 
-      // Hardcode credit payment as the only valid payment method
-      const creditPayment: Payment = {
-        chain: Blockchain.ETH,
-        type: PaymentType.credit,
-      }
-
       // @note: Aggregate all signatures in 1 step
       yield
       const response = await Promise.all([
@@ -224,7 +217,6 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
           (this.sdkClient as AuthenticatedAlephHttpClient).createStore({
             channel,
             fileObject,
-            payment: creditPayment,
           }),
         ),
         // IPFS-based volumes (pinning via STORE message)
@@ -233,7 +225,6 @@ export class VolumeManager implements EntityManager<Volume, AddVolume> {
             channel,
             fileHash: cid,
             storageEngine: ItemType.ipfs,
-            payment: creditPayment,
           }),
         ),
       ])
