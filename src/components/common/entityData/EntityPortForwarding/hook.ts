@@ -51,7 +51,7 @@ function useCRNNotification(
 
     try {
       const nodeUrl = NodeManager.normalizeUrl(
-        executableStatus.node.address || '',
+        executableStatus.node?.address || '',
       )
       if (!nodeUrl) return
 
@@ -261,7 +261,7 @@ function usePortPolling(
         await notifyCRNUpdate?.()
 
         const nodeUrl = NodeManager.normalizeUrl(
-          executableStatus.node.address || '',
+          executableStatus.node?.address || '',
         )
         if (!nodeUrl) return
 

@@ -152,9 +152,8 @@ export default function NewInstancePage({ mainRef }: PageProps) {
             </CompositeSectionTitle>
             <p>
               Please select one of the available instance tiers as a base for
-              your VM. A compatible CRN node will be automatically selected for
-              you based on your tier choice. You can customize the node
-              selection in the advanced options below.
+              your VM. By default the network assigns a compatible CRN node for
+              you. You can pick a specific node in the advanced options below.
             </p>
 
             <div tw="px-0 my-6 relative">
@@ -168,79 +167,6 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                 aggregatedSpecs={aggregatedSpecs}
                 showOpenClawSpotlight
               />
-
-              {/* Auto-selected node info */}
-              {node && (
-                <NoisyContainer tw="mt-6">
-                  <div tw="flex items-center gap-4">
-                    <Icon name="server" size="lg" tw="opacity-60" />
-                    <div tw="flex-1">
-                      <p className="tp-body2" tw="opacity-60 mb-1">
-                        Auto-selected CRN ({compatibleNodesCount} compatible
-                        nodes)
-                      </p>
-                      <div tw="flex items-center gap-4">
-                        <NodeName
-                          hash={node.hash}
-                          name={node.name}
-                          picture={node.picture}
-                          ImageCmp={Image}
-                          apiServer={apiServer}
-                        />
-                        <NodeScore score={node.score} />
-                      </div>
-                    </div>
-                    <ButtonWithInfoTooltip
-                      ref={manuallySelectButtonRef}
-                      type="button"
-                      kind="functional"
-                      variant="warning"
-                      size="md"
-                      onClick={handleManuallySelectCRN}
-                      disabled={manuallySelectCRNDisabled}
-                      tooltipContent={manuallySelectCRNDisabledMessage}
-                      tooltipPosition={{
-                        my: 'bottom-right',
-                        at: 'top-center',
-                      }}
-                    >
-                      Change CRN
-                    </ButtonWithInfoTooltip>
-                  </div>
-                </NoisyContainer>
-              )}
-
-              {/* CRN capacity reservation status */}
-              {reservation.status === 'checking' && (
-                <div tw="mt-4 flex items-center gap-3">
-                  <RotatingLines strokeColor="grey" width="1rem" />
-                  <p className="tp-body2" tw="opacity-70">
-                    Checking CRN capacity for the selected resources…
-                  </p>
-                </div>
-              )}
-              {reservation.status === 'failed' && reservation.error && (
-                <NoisyContainer tw="mt-4">
-                  <div tw="flex items-start gap-3">
-                    <Icon
-                      name="warning"
-                      tw="text-red-500 flex-shrink-0 mt-0.5"
-                    />
-                    <p className="tp-body2">{reservation.error}</p>
-                  </div>
-                </NoisyContainer>
-              )}
-              {reservation.status === 'reserved' && reservation.warning && (
-                <NoisyContainer tw="mt-4">
-                  <div tw="flex items-start gap-3">
-                    <Icon
-                      name="warning"
-                      tw="text-orange-500 flex-shrink-0 mt-0.5"
-                    />
-                    <p className="tp-body2">{reservation.warning}</p>
-                  </div>
-                </NoisyContainer>
-              )}
             </div>
           </CenteredContainer>
         </section>
@@ -338,9 +264,9 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                     CRN Node Selection
                   </TextGradient>
                   <p tw="mb-6">
-                    By default, the best performing CRN node compatible with
-                    your selected tier is automatically chosen. You can manually
-                    select a different node below if needed.
+                    By default, the network automatically assigns a compatible
+                    CRN node for your selected tier. You can manually select a
+                    specific node below if needed.
                   </p>
                   <div tw="px-0 mb-6 min-h-[6rem] relative">
                     <NoisyContainer>
@@ -369,6 +295,35 @@ export default function NewInstancePage({ mainRef }: PageProps) {
                           </ButtonWithInfoTooltip>
                         )}
                       </div>
+
+                      {/* CRN capacity reservation status */}
+                      {reservation.status === 'checking' && (
+                        <div tw="mt-4 flex items-center gap-3">
+                          <RotatingLines strokeColor="grey" width="1rem" />
+                          <p className="tp-body2" tw="opacity-70">
+                            Checking CRN capacity for the selected resources…
+                          </p>
+                        </div>
+                      )}
+                      {reservation.status === 'failed' && reservation.error && (
+                        <div tw="mt-4 flex items-start gap-3">
+                          <Icon
+                            name="warning"
+                            tw="text-red-500 flex-shrink-0 mt-0.5"
+                          />
+                          <p className="tp-body2">{reservation.error}</p>
+                        </div>
+                      )}
+                      {reservation.status === 'reserved' &&
+                        reservation.warning && (
+                          <div tw="mt-4 flex items-start gap-3">
+                            <Icon
+                              name="warning"
+                              tw="text-orange-500 flex-shrink-0 mt-0.5"
+                            />
+                            <p className="tp-body2">{reservation.warning}</p>
+                          </div>
+                        )}
                     </NoisyContainer>
                   </div>
                 </SwitchToggleContainer>

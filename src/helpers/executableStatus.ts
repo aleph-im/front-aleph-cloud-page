@@ -25,7 +25,23 @@ export function calculateExecutableStatus(
   if (executableType === EntityType.Program) return 'v1'
 
   const latestStatus = getLatestStatusTimestamp(status)
-  if (!latestStatus) return 'not-allocated'
+  if (!latestStatus) {
+    // No runtime info from the CRN yet: fall back to the scheduler view.
+    const schedulerStatus = status?.scheduler?.status
+    if (!schedulerStatus) return 'not-allocated'
+
+    switch (schedulerStatus) {
+      case 'unscheduled':
+      case 'unschedulable':
+      case 'unknown':
+        return 'not-allocated'
+      default:
+        // scheduled / dispatched / migrating / …: the scheduler is placing
+        // (or has placed) the VM but the CRN has not reported runtime status
+        // yet. CRN data takes over as soon as it is available.
+        return 'preparing'
+    }
+  }
 
   switch (latestStatus.latestKey) {
     case 'stoppedAt':

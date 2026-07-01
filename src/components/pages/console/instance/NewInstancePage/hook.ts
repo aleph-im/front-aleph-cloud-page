@@ -120,7 +120,6 @@ export type UseNewInstancePageReturn = {
   shouldRequestTermsAndConditions: boolean
   aggregatedSpecs?: AggregatedNodeSpecs
   compatibleNodesCount: number
-  manualNodeOverride: boolean
   reservation: CRNReservationState
   handleManuallySelectCRN: () => void
   handleSelectNode: () => void
@@ -148,7 +147,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
   const [selectedNode, setSelectedNode] = useState<CRNSpecs>()
   const [selectedModal, setSelectedModal] = useState<Modal>()
-  const [manualNodeOverride, setManualNodeOverride] = useState(false)
   const [manuallySelectedNode, setManuallySelectedNode] = useState<CRNSpecs>()
   const [reservation, setReservation] = useState<CRNReservationState>({
     status: 'idle',
@@ -194,14 +192,17 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     async (state: NewInstanceFormState, node: CRNSpecs | undefined) => {
       if (!manager) throw Err.ConnectYourWallet
       if (!account) throw Err.InvalidAccount
-      if (!node) throw Err.InvalidNode
 
-      const nodeSpecs = specs[node.hash]?.data
-      if (!nodeSpecs) throw Err.InvalidCRNSpecs
+      // A node is only present when manually selected; validate it against the
+      // tier. With no node the network assigns a compatible CRN server-side.
+      if (node) {
+        const nodeSpecs = specs[node.hash]?.data
+        if (!nodeSpecs) throw Err.InvalidCRNSpecs
 
-      const [minSpecs] = defaultTiers
-      const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
-      if (!isValid) throw Err.InvalidCRNSpecs
+        const [minSpecs] = defaultTiers
+        const isValid = NodeManager.validateMinNodeSpecs(minSpecs, nodeSpecs)
+        if (!isValid) throw Err.InvalidCRNSpecs
+      }
 
       if (!blockchain) {
         handleConnect({ blockchain: BlockchainId.BASE })
@@ -288,20 +289,15 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     : ''
   const stableSpecs = useStableValue(formValues.specs, specsKey)
 
-  const { autoSelectedNode, compatibleNodes, compatibleNodesCount } =
-    useAutoSelectNode({
-      selectedSpecs: stableSpecs,
-      validNodes,
-      enabled: !manualNodeOverride,
-    })
+  const { compatibleNodes, compatibleNodesCount } = useAutoSelectNode({
+    selectedSpecs: stableSpecs,
+    validNodes,
+    enabled: false,
+  })
 
-  // Final node: manual override takes precedence over auto-selected
-  const node: CRNSpecs | undefined = useMemo(() => {
-    if (manualNodeOverride && manuallySelectedNode) {
-      return manuallySelectedNode
-    }
-    return autoSelectedNode
-  }, [manualNodeOverride, manuallySelectedNode, autoSelectedNode])
+  // The node is only set when the user manually selects a CRN in the advanced
+  // options; otherwise the network assigns it (no node_hash in the message).
+  const node: CRNSpecs | undefined = manuallySelectedNode
 
   const nodeSpecs = useMemo(() => {
     if (!node) return
@@ -331,10 +327,7 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   // selected node gets switched, surfaces a warning. Returns the node that the
   // CRN actually reserved, or undefined when none has capacity.
   const resolveReservation = useCallback(
-    async (
-      preferredNode: CRNSpecs,
-      isManual: boolean,
-    ): Promise<CRNSpecs | undefined> => {
+    async (preferredNode: CRNSpecs): Promise<CRNSpecs | undefined> => {
       if (!manager) return undefined
       // Ignore overlapping requests so concurrent clicks don't reserve on
       // several nodes at once.
@@ -381,7 +374,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
           const switched = candidate.hash !== preferredNode.hash
           if (switched) {
-            setManualNodeOverride(true)
             setManuallySelectedNode(candidate)
           }
 
@@ -389,10 +381,9 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
             status: 'reserved',
             nodeHash: candidate.hash,
             specsKey,
-            warning:
-              switched && isManual
-                ? 'The CRN you selected could not fit the selected resources. A compatible node was selected instead — review and create.'
-                : undefined,
+            warning: switched
+              ? 'The CRN you selected could not fit the selected resources. A compatible node was selected instead — review and create.'
+              : undefined,
           })
           return candidate
         }
@@ -529,13 +520,11 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
     if (!selectedNode) return
 
-    // Set manual override and the selected node
-    setManualNodeOverride(true)
     setManuallySelectedNode(selectedNode)
 
     // Reserve right away so the user learns immediately if the chosen CRN
     // cannot fit the selected resources.
-    await resolveReservation(selectedNode, true)
+    await resolveReservation(selectedNode)
   }, [selectedNode, resolveReservation])
 
   const handleManuallySelectCRN = useCallback(() => {
@@ -564,7 +553,10 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
   const handleFormSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault()
-      if (!node) return
+
+      // No manually selected CRN → the network assigns the node; nothing to
+      // reserve, create straight away.
+      if (!node) return handleSubmit(e)
 
       // Before signing, make sure the resources are reserved on the current
       // node for the current specs. If they already are, create straight away.
@@ -575,21 +567,14 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
 
       if (reservedForCurrent) return handleSubmit(e)
 
-      const reservedNode = await resolveReservation(node, manualNodeOverride)
+      const reservedNode = await resolveReservation(node)
       if (!reservedNode) return
 
       // Same node reserved → safe to create now. If it was switched, the new
       // node is pinned and the next Create click submits against it.
       if (reservedNode.hash === node.hash) return handleSubmit(e)
     },
-    [
-      node,
-      reservation,
-      specsKey,
-      manualNodeOverride,
-      resolveReservation,
-      handleSubmit,
-    ],
+    [node, reservation, specsKey, resolveReservation, handleSubmit],
   )
 
   // T&C-gated nodes must run the same reservation check before signing.
@@ -625,18 +610,17 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     setValue('nodeSpecs', stableNodeSpecs)
   }, [stableNodeSpecs, setValue])
 
-  // @note: Reset manual override when tier changes (user needs to re-select node)
+  // @note: Reset manual CRN selection when tier changes (user needs to re-select node)
   const prevSpecs = usePrevious(formValues.specs)
   useEffect(() => {
     if (!formValues.specs || !prevSpecs) return
 
-    // If tier changed, reset manual override so auto-select kicks in, and drop
-    // any reservation since it was made for the previous specs.
+    // If tier changed, drop any manual CRN selection and the reservation,
+    // since the reservation was made for the previous specs.
     if (
       formValues.specs.cpu !== prevSpecs.cpu ||
       formValues.specs.ram !== prevSpecs.ram
     ) {
-      setManualNodeOverride(false)
       setManuallySelectedNode(undefined)
       // Invalidate any in-flight reservation so its result is discarded.
       reservationGenRef.current++
@@ -668,7 +652,6 @@ export function useNewInstancePage(): UseNewInstancePageReturn {
     shouldRequestTermsAndConditions,
     aggregatedSpecs,
     compatibleNodesCount,
-    manualNodeOverride,
     reservation,
     handleManuallySelectCRN,
     handleSelectNode,

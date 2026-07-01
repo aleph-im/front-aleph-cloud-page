@@ -603,7 +603,9 @@ export class InstanceManager<T extends InstanceEntity = Instance>
     newInstance: AddInstance,
     entity: InstanceEntity,
   ): AsyncGenerator<void, void, void> {
-    if (!newInstance.node || !newInstance.node.address) throw Err.InvalidNode
+    // No targeted CRN (network-assigned node): nothing to notify, the
+    // scheduler handles allocation.
+    if (!newInstance.node?.address) return
 
     yield
     await this.notifyCRNAllocation(newInstance.node, entity.id, {

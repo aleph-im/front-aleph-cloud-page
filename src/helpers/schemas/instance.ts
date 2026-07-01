@@ -140,23 +140,39 @@ export const instanceBaseSchema = z
   })
   .merge(addNameAndTagsSchema)
 
-export const instanceSchema = instanceBaseSchema
-  .merge(
-    z.object({
-      nodeSpecs: nodeSpecsSchema,
-    }),
-  )
-  .refine(
-    ({ nodeSpecs, specs }) => {
-      return NodeManager.validateMinNodeSpecs(specs, nodeSpecs)
-    },
-    {
-      message: 'Insufficient node specs',
-      path: ['specs'],
-    },
-  )
-  .superRefine(checkMinCRNRequirements)
-  .superRefine(checkMinInstanceSystemVolumeSize)
+// Builds the instance schema with a configurable `nodeSpecs` field so regular
+// and GPU instances can differ only in whether a CRN is required, while sharing
+// the same node-dependent refinements.
+function buildInstanceSchema<T extends z.ZodTypeAny>(nodeSpecsField: T) {
+  return instanceBaseSchema
+    .merge(
+      z.object({
+        nodeSpecs: nodeSpecsField,
+      }),
+    )
+    .refine(
+      ({ nodeSpecs, specs }) => {
+        // No selected CRN (network-assigned node): skip the node-specific specs
+        // check. When a CRN is present, validate it against the tier.
+        if (!nodeSpecs) return true
+        return NodeManager.validateMinNodeSpecs(specs, nodeSpecs)
+      },
+      {
+        message: 'Insufficient node specs',
+        path: ['specs'],
+      },
+    )
+    .superRefine(checkMinCRNRequirements)
+    .superRefine(checkMinInstanceSystemVolumeSize)
+}
+
+// Regular instances: the network assigns a compatible CRN by default, so
+// `nodeSpecs` is only present when the user manually selects a node.
+export const instanceSchema = buildInstanceSchema(nodeSpecsSchema.optional())
+
+// GPU instances: a GPU is bound to a physical CRN, so a node (and its specs) is
+// always required — preserves the pre-existing validation.
+export const gpuInstanceSchema = buildInstanceSchema(nodeSpecsSchema)
 
 // REFINEMENTS
 
@@ -164,6 +180,9 @@ async function checkMinCRNRequirements(
   { nodeSpecs, specs, volumes = [] }: any,
   ctx: RefinementCtx,
 ) {
+  // No manually selected CRN: node capacity is enforced by the network.
+  if (!nodeSpecs) return
+
   let available = nodeSpecs.disk.available_kB / 1024
 
   for (const [i, volume] of Object.entries<any>(volumes)) {

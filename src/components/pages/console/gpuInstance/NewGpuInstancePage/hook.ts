@@ -18,6 +18,7 @@ import {
 import { InstanceSpecsField } from '@/hooks/form/useSelectInstanceSpecs'
 import { DomainField } from '@/hooks/form/useAddDomains'
 import { AddInstance } from '@/domain/instance'
+import { gpuInstanceSchema } from '@/helpers/schemas/instance'
 import { Control, FieldErrors, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { EntityType, NAVIGATION_URLS, PaymentMethod } from '@/helpers/constants'
@@ -47,7 +48,6 @@ import useFetchTermsAndConditions, {
 } from '@/hooks/common/useFetchTermsAndConditions'
 import { useDefaultTiers } from '@/hooks/common/pricing/useDefaultTiers'
 import { useGpuInstanceManager } from '@/hooks/common/useManager/useGpuInstanceManager'
-import { GpuInstanceManager } from '@/domain/gpuInstance'
 import usePrevious from '@/hooks/common/usePrevious'
 import { useCanAfford } from '@/hooks/common/useCanAfford'
 import {
@@ -251,7 +251,7 @@ export function useNewGpuInstancePage(): UseNewGpuInstancePageReturn {
   } = useForm({
     defaultValues,
     onSubmit: (state: NewGpuInstanceFormState) => onSubmit(state, node),
-    resolver: zodResolver(GpuInstanceManager.addSchema),
+    resolver: zodResolver(gpuInstanceSchema),
     readyDeps: [],
   })
 
