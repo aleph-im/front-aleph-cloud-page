@@ -14,6 +14,7 @@ import {
 import {
   ItemType,
   MessageType,
+  Payment,
   PaymentType,
   StoreMessage,
 } from '@aleph-sdk/message'
@@ -195,6 +196,7 @@ export class FileManager {
     storageEngine: Parameters<
       AuthenticatedAlephHttpClient['createStore']
     >[0]['storageEngine'] = ItemType.storage,
+    payment: Payment = { chain: Blockchain.ETH, type: PaymentType.credit },
   ): Promise<
     StoreMessage & { contentItemHash: string; messageItemHash: string }
   > {
@@ -214,7 +216,7 @@ export class FileManager {
         name: fileObject.name,
         format: fileObject.type,
       },
-      payment: { chain: Blockchain.ETH, type: PaymentType.credit },
+      payment,
     })
 
     // Create a properly typed object including both message properties and our additional fields
