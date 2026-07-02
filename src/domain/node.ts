@@ -14,7 +14,13 @@ import {
   AlephHttpClient,
   AuthenticatedAlephHttpClient,
 } from '@aleph-sdk/client'
-import { AggregateMessage, ItemType } from '@aleph-sdk/message'
+import {
+  AggregateMessage,
+  ItemType,
+  Payment,
+  PaymentType,
+} from '@aleph-sdk/message'
+import { Blockchain } from '@aleph-sdk/core'
 import {
   extractValidEthAddress,
   fetchAndCache,
@@ -824,9 +830,16 @@ export class NodeManager {
       details.registration_url = ''
     }
 
+    const holdPayment: Payment = {
+      chain: Blockchain.ETH,
+      type: PaymentType.hold,
+    }
+
     if (details.picture instanceof File) {
       const { contentItemHash } = await this.fileManager.uploadFile(
         details.picture,
+        ItemType.storage,
+        holdPayment,
       )
       details.picture = contentItemHash
     }
@@ -834,6 +847,8 @@ export class NodeManager {
     if (details.banner instanceof File) {
       const { contentItemHash } = await this.fileManager.uploadFile(
         details.banner,
+        ItemType.storage,
+        holdPayment,
       )
       details.banner = contentItemHash
     }
@@ -844,6 +859,8 @@ export class NodeManager {
     ) {
       const { messageItemHash } = await this.fileManager.uploadFile(
         details.terms_and_conditions,
+        ItemType.storage,
+        holdPayment,
       )
       details.terms_and_conditions = messageItemHash
     }
