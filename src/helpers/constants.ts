@@ -23,6 +23,7 @@ export const splTokenAddress = '3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x'
 export const vouchersAddress = '0xB34f25f2c935bCA437C061547eA12851d719dEFb'
 
 export const crnListProgramUrl = 'https://crns-list.aleph.sh/crns.json'
+export const schedulerApiUrl = 'https://rust-scheduler.aleph.im'
 
 export const websiteUrl = 'https://www.aleph.cloud'
 

@@ -49,6 +49,12 @@ import { withRetry } from '@/helpers/utils'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import { CostLine } from './cost'
 import { BlockchainId } from './connect'
+import {
+  fetchSchedulerNode,
+  fetchSchedulerVm,
+  SchedulerVm,
+  SchedulerVmStatus,
+} from './scheduler'
 
 export type HoldPaymentConfiguration = {
   chain: BlockchainId
@@ -115,13 +121,20 @@ export type ExecutableCalculatedStatus =
   | 'running'
   | 'preparing'
 
+export type ExecutableSchedulerStatus = {
+  status: SchedulerVmStatus
+  allocatedAt?: string
+  migrationTarget?: string
+}
+
 export type ExecutableStatus = {
   version: 'v1' | 'v2'
   hash: string
   ipv4: string
   ipv6: string
   ipv6Parsed: string
-  node: CRN
+  node?: CRN
+  scheduler?: ExecutableSchedulerStatus
   // fields added from v2 request
   hostIpv4?: string
   ipv4Parsed?: string
@@ -202,6 +215,14 @@ export type ReserveCRNResourcesResult = {
 export abstract class ExecutableManager<T extends Executable> {
   protected static cachedPubKeyToken?: AuthPubKeyToken
 
+  // Scheduler allocations cached once a node is allocated, so status polling
+  // goes straight to the CRN afterwards. Entries are invalidated when the CRN
+  // stops answering or no longer lists the VM (e.g. after a migration).
+  // Note: cached entries freeze the scheduler status fields (status,
+  // migration_target) as of allocation time; CRN runtime data supersedes them
+  // once available, so do not read live scheduling state from the cache.
+  protected schedulerAllocations = new Map<string, SchedulerVm>()
+
   constructor(
     protected account: Account | undefined,
     protected volumeManager: VolumeManager,
@@ -225,20 +246,54 @@ export abstract class ExecutableManager<T extends Executable> {
   ): Promise<StreamPaymentDetails | undefined>
 
   async checkStatus(executable: T): Promise<ExecutableStatus | undefined> {
-    const node = await this.getAllocationCRN(executable)
-    if (!node) return
+    const schedulerVm = await this.getSchedulerVm(executable.id)
 
-    const { address } = node
-    if (!address) throw Err.InvalidCRNAddress
+    const node = schedulerVm?.allocated_node
+      ? await this.resolveCRNByHash(schedulerVm.allocated_node)
+      : await this.getAllocationCRNLegacy(executable)
 
-    const nodeUrl = NodeManager.normalizeUrl(address)
-
-    const { version, json: response } = await this.fetchExecutions(nodeUrl)
+    const scheduler: ExecutableSchedulerStatus | undefined = schedulerVm
+      ? {
+          status: schedulerVm.status,
+          allocatedAt: schedulerVm.allocated_at || undefined,
+          migrationTarget: schedulerVm.migration_target || undefined,
+        }
+      : undefined
 
     const hash = executable.id
 
+    // No reachable CRN: surface the scheduler view so the UI can show the
+    // scheduling progress (pre-allocation or unknown node).
+    if (!node?.address) {
+      if (!scheduler) return
+
+      return this.buildSchedulerOnlyStatus(hash, node, scheduler)
+    }
+
+    const nodeUrl = NodeManager.normalizeUrl(node.address)
+
+    let version: 'v1' | 'v2'
+    let response: unknown
+
+    try {
+      ;({ version, json: response } = await this.fetchExecutions(nodeUrl))
+    } catch {
+      // CRN unreachable: drop the cached allocation so the next poll
+      // re-resolves via the scheduler (covers migrations).
+      this.invalidateSchedulerAllocation(hash)
+      if (!scheduler) return
+
+      return this.buildSchedulerOnlyStatus(hash, node, scheduler)
+    }
+
     const executionStatus = (response as any)[hash]
-    if (!executionStatus) return
+    if (!executionStatus) {
+      // The allocated CRN no longer lists the VM: re-resolve next poll.
+      this.invalidateSchedulerAllocation(hash)
+      if (!scheduler) return
+
+      return this.buildSchedulerOnlyStatus(hash, node, scheduler)
+    }
 
     const networking = executionStatus['networking']
     if (!networking) return
@@ -253,6 +308,7 @@ export abstract class ExecutableManager<T extends Executable> {
         ipv6,
         ipv6Parsed: this.formatVMIPv6Address(ipv6),
         node,
+        scheduler,
       }
     } else if (version === 'v2') {
       const {
@@ -277,6 +333,7 @@ export abstract class ExecutableManager<T extends Executable> {
       return {
         version: 'v2',
         node,
+        scheduler,
         hash,
         hostIpv4,
         ipv4,
@@ -298,7 +355,85 @@ export abstract class ExecutableManager<T extends Executable> {
     }
   }
 
+  protected buildSchedulerOnlyStatus(
+    hash: string,
+    node: CRN | undefined,
+    scheduler: ExecutableSchedulerStatus,
+  ): ExecutableStatus {
+    return {
+      version: 'v2',
+      hash,
+      ipv4: '',
+      ipv6: '',
+      ipv6Parsed: '',
+      node,
+      scheduler,
+    }
+  }
+
+  protected async getSchedulerVm(
+    vmHash: string,
+  ): Promise<SchedulerVm | undefined> {
+    const cached = this.schedulerAllocations.get(vmHash)
+    if (cached) return cached
+
+    const vm = await fetchSchedulerVm(vmHash)
+    if (vm?.allocated_node) this.schedulerAllocations.set(vmHash, vm)
+
+    return vm
+  }
+
+  protected invalidateSchedulerAllocation(vmHash: string): void {
+    this.schedulerAllocations.delete(vmHash)
+  }
+
+  protected async resolveCRNByHash(nodeHash: string): Promise<CRNSpecs> {
+    const nodes = await this.nodeManager.getAllCRNsSpecs()
+
+    const node = nodes.find((node) => node.hash === nodeHash)
+    if (node) return node
+
+    // CRNs missing from the node collection: the scheduler node record still
+    // carries the address, so status queries and operations keep working.
+    const schedulerNode = await fetchSchedulerNode(nodeHash)
+
+    const { latest: latestVersion } =
+      await this.nodeManager.getLatestCRNVersion()
+
+    return {
+      hash: nodeHash,
+      name: schedulerNode?.name || undefined,
+      owner: schedulerNode?.owner || '',
+      address: schedulerNode?.address || undefined,
+      stream_reward: schedulerNode?.payment_receiver || undefined,
+      reward: '',
+      locked: false,
+      time: 0,
+      score: 0,
+      score_updated: true,
+      decentralization: 0,
+      performance: 0,
+      status: 'linked',
+      parent: null,
+      type: 'compute',
+      version: latestVersion || undefined,
+    }
+  }
+
   async getAllocationCRN(executable: T): Promise<CRNSpecs | undefined> {
+    // Scheduler-first: the scheduler is the source of truth for where a VM
+    // is allocated (covers network-assigned nodes and migrations). The legacy
+    // resolution below remains as fallback for VMs it does not know.
+    const schedulerVm = await this.getSchedulerVm(executable.id)
+    if (schedulerVm?.allocated_node)
+      return this.resolveCRNByHash(schedulerVm.allocated_node)
+
+    return this.getAllocationCRNLegacy(executable)
+  }
+
+  protected async getAllocationCRNLegacy(
+    executable: T,
+  ): Promise<CRNSpecs | undefined> {
     if (executable.payment?.type === PaymentType.superfluid) {
       const { receiver } = executable.payment
       if (!receiver) return
