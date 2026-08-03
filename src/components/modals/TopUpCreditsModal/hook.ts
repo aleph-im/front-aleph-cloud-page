@@ -331,13 +331,15 @@ export function useTopUpCreditsModalForm({
     return hasManuallyChangedAmount && isBelowMinimumCredits
   }, [hasManuallyChangedAmount, isBelowMinimumCredits])
 
-  // Disable submit if amount is insufficient for the minimum requirement
+  // Without an estimation the minimum cannot be checked, so stay disabled
   const isSubmitDisabled = useMemo(() => {
     return (
       !values.amount ||
       values.amount <= 0 ||
       isSubmitLoading ||
       isCalculatingInitialAmount ||
+      isLoadingEstimation ||
+      !estimation ||
       isBelowMinimumCredits ||
       !isEthereumNetwork
     )
@@ -345,6 +347,8 @@ export function useTopUpCreditsModalForm({
     values.amount,
     isSubmitLoading,
     isCalculatingInitialAmount,
+    isLoadingEstimation,
+    estimation,
     isBelowMinimumCredits,
     isEthereumNetwork,
   ])

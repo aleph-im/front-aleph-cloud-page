@@ -1,3 +1,29 @@
+type ApiErrorBody = {
+  description?: string
+  message?: string
+  // Zod errors carry their explanation here, not in `message`
+  issues?: { message?: string }[]
+}
+
+/**
+ * Builds a readable error from a failed API response, falling back to the
+ * status when the body carries no usable message
+ */
+export async function apiResponseError(response: Response): Promise<Error> {
+  const body: ApiErrorBody = await response.json().catch(() => ({}))
+  const message =
+    body.issues
+      ?.map((issue) => issue.message)
+      .filter(Boolean)
+      .join('. ') ||
+    body.description ||
+    body.message
+
+  return new Error(
+    message || `API error: ${response.status} ${response.statusText}`,
+  )
+}
+
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
   ChainNotYetSupported: new Error('Chain is not yet supported'),
