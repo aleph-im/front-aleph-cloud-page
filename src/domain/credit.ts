@@ -293,16 +293,13 @@ export class CreditManager {
     const blockchain = data.chain
     const token = data.currency
 
-    // Convert amount to smallest unit based on token decimals
-    const amount = toTokenSmallestUnit(data.amount, token)
-
-    const estimationRequest: TokenEstimationRequest = {
-      blockchain,
-      token,
-      amount,
-    }
-
     try {
+      const estimationRequest: TokenEstimationRequest = {
+        blockchain,
+        token,
+        amount: toTokenSmallestUnit(data.amount, token),
+      }
+
       const response = await fetch(ALEPH_CREDIT_TOKEN_TO_CREDIT_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -318,7 +315,7 @@ export class CreditManager {
       return response.json()
     } catch (error) {
       console.error('Error fetching token estimation:', error)
-      throw new Error('Failed to fetch token estimation')
+      throw error
     }
   }
 
@@ -361,7 +358,7 @@ export class CreditManager {
       }
     } catch (error) {
       console.error('Error fetching credit to token estimation:', error)
-      throw new Error('Failed to fetch credit to token estimation')
+      throw error
     }
   }
 
