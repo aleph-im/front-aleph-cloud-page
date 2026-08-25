@@ -426,13 +426,19 @@ export const isConfidential = (msg: AnyMessage) =>
   msg.type === MessageType.instance &&
   (msg.content as any)?.environment?.trusted_execution?.firmware.length == 64
 
-export function getEntityTypeFromMessage(msg: AnyMessage): EntityType {
+/**
+ * Returns undefined for message types the console has no entity for
+ * (e.g. V-PROGRAM) instead of throwing, so callers degrade gracefully.
+ */
+export function getEntityTypeFromMessage(
+  msg: AnyMessage,
+): EntityType | undefined {
   if (isVolume(msg)) return EntityType.Volume
   if (isProgram(msg)) return EntityType.Program
   if (isConfidential(msg)) return EntityType.Confidential
   if (isInstance(msg)) return EntityType.Instance
   if (isSSHKey(msg)) return EntityType.SSHKey
-  throw Err.UnknownType
+  return undefined
 }
 
 export function isVolumePersistent(
