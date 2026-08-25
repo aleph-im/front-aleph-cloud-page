@@ -1,7 +1,6 @@
 import { Account } from '@aleph-sdk/account'
 import { ETHAccount } from '@aleph-sdk/ethereum'
 import { v4 as uuidv4 } from 'uuid'
-import BN from 'bn.js'
 import { CheckoutStepType } from '@/helpers/constants'
 import {
   TopUpCreditsFormData,
@@ -13,6 +12,7 @@ import {
   CreditEstimationRequest,
   CreditEstimationResponse,
 } from '@/helpers/schemas/credit'
+import { apiResponseError } from '@/helpers/errors'
 import { sleep, withRetry } from '@/helpers/utils'
 import { DEFAULT_PAGE_SIZE, DEFAULT_DELAY_MS } from '@/helpers/pagination'
 
@@ -40,21 +40,19 @@ export function getTokenDecimals(token: TokenId | string): number {
 }
 
 /**
- * Get the decimal multiplier for a token (e.g., 10^18 for ALEPH, 10^6 for USDC)
- */
-export function getTokenMultiplier(token: TokenId | string): BN {
-  const decimals = getTokenDecimals(token)
-  return new BN('1'.padEnd(decimals + 1, '0'))
-}
-
-/**
- * Convert a token amount to its smallest unit (e.g., 1 USDC -> 1000000)
+ * Convert a token amount to its smallest unit (e.g., 1.5 USDC -> 1500000)
+ * Decimals beyond the token precision are truncated
  */
 export function toTokenSmallestUnit(
   amount: number | string,
   token: TokenId | string,
 ): string {
-  return new BN(amount.toString()).mul(getTokenMultiplier(token)).toString()
+  const decimals = getTokenDecimals(token)
+  const [whole, fraction = ''] = amount.toString().split('.')
+
+  return BigInt(
+    `${whole}${fraction.slice(0, decimals).padEnd(decimals, '0')}`,
+  ).toString()
 }
 
 /**
@@ -219,13 +217,7 @@ export class CreditManager {
       })
 
       if (!response.ok) {
-        const error = await response.json().catch((e) => e)
-
-        if (error.description) {
-          throw new Error(`${error.description}`)
-        }
-
-        throw new Error(`API error: ${response.status} ${response.statusText}`)
+        throw await apiResponseError(response)
       }
 
       return response.json()
@@ -301,16 +293,13 @@ export class CreditManager {
     const blockchain = data.chain
     const token = data.currency
 
-    // Convert amount to smallest unit based on token decimals
-    const amount = toTokenSmallestUnit(data.amount, token)
-
-    const estimationRequest: TokenEstimationRequest = {
-      blockchain,
-      token,
-      amount,
-    }
-
     try {
+      const estimationRequest: TokenEstimationRequest = {
+        blockchain,
+        token,
+        amount: toTokenSmallestUnit(data.amount, token),
+      }
+
       const response = await fetch(ALEPH_CREDIT_TOKEN_TO_CREDIT_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -320,19 +309,13 @@ export class CreditManager {
       })
 
       if (!response.ok) {
-        const error = await response.json().catch((e) => e)
-
-        if (error.description) {
-          throw new Error(`${error.description}`)
-        }
-
-        throw new Error(`API error: ${response.status} ${response.statusText}`)
+        throw await apiResponseError(response)
       }
 
       return response.json()
     } catch (error) {
       console.error('Error fetching token estimation:', error)
-      throw new Error('Failed to fetch token estimation')
+      throw error
     }
   }
 
@@ -358,13 +341,7 @@ export class CreditManager {
       })
 
       if (!response.ok) {
-        const error = await response.json().catch((e) => e)
-
-        if (error.description) {
-          throw new Error(`${error.description}`)
-        }
-
-        throw new Error(`API error: ${response.status} ${response.statusText}`)
+        throw await apiResponseError(response)
       }
 
       const data = await response.json()
@@ -381,7 +358,7 @@ export class CreditManager {
       }
     } catch (error) {
       console.error('Error fetching credit to token estimation:', error)
-      throw new Error('Failed to fetch credit to token estimation')
+      throw error
     }
   }
 
@@ -410,15 +387,7 @@ export class CreditManager {
         )
 
         if (!response.ok) {
-          const error = await response.json().catch((e) => e)
-
-          if (error.description) {
-            throw new Error(`${error.description}`)
-          }
-
-          throw new Error(
-            `API error: ${response.status} ${response.statusText}`,
-          )
+          throw await apiResponseError(response)
         }
 
         const result = await response.json()
