@@ -1141,9 +1141,12 @@ export abstract class ExecutableManager<T extends Executable> {
           detail.type === MessageCostType.EXECUTION_VOLUME_INMUTABLE ||
           detail.type === MessageCostType.EXECUTION_VOLUME_PERSISTENT,
       )
-      .map((detail) => {
+      .flatMap((detail) => {
         const [, mount] = detail.name.split(':')
         const vol = volumesMap[mount]
+        // Cost lines for volumes we cannot map back (e.g. mount-less
+        // verity-bound volumes) are skipped rather than dereferenced.
+        if (!vol) return []
         const size = 'size_mib' in vol ? vol.size_mib : vol.estimated_size_mib
         const label = 'size_mib' in vol ? 'PERSISTENT' : 'VOLUME'
 
