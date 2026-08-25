@@ -1,3 +1,4 @@
+import { MessageType } from '@aleph-sdk/message'
 // ------------------------ @todo: Refactor in domain package --------------------
 
 import { ObjectImgProps } from '@aleph-front/core'
@@ -66,6 +67,16 @@ export const defaultProgramChannel = defaultConsoleChannel
 export const defaultDomainChannel = defaultConsoleChannel
 export const defaultWebsiteChannel = defaultConsoleChannel
 export const defaultConfidentialChannel = defaultConsoleChannel
+
+/**
+ * V-PROGRAM message type (verifiable programs, SEV-SNP confidential VMs).
+ * @todo: replace with MessageType.vProgram once @aleph-sdk/message ships it
+ * (aleph-sdk-ts#227); until then it is cast so it fits MessageType-typed lists.
+ */
+export const V_PROGRAM_MESSAGE_TYPE = 'V-PROGRAM' as unknown as Exclude<
+  MessageType,
+  MessageType.post | MessageType.aggregate
+>
 
 export enum EntityType {
   Volume = 'volume',

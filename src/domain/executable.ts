@@ -1068,9 +1068,12 @@ export abstract class ExecutableManager<T extends Executable> {
 
     // Volumes
 
+    // Verity-bound volumes (V-PROGRAM) have no mount; fall back to ref/index
+    // so they do not all collapse onto a single undefined key.
     const volumesMap = (entityProps.volumes || []).reduce(
-      (ac, cv) => {
-        ac[cv.mount] = cv
+      (ac, cv, i) => {
+        const key = cv.mount || ('ref' in cv ? cv.ref : String(i))
+        ac[key] = cv
         return ac
       },
       {} as Record<string, CostEstimationMachineVolume>,
@@ -1138,9 +1141,12 @@ export abstract class ExecutableManager<T extends Executable> {
           detail.type === MessageCostType.EXECUTION_VOLUME_INMUTABLE ||
           detail.type === MessageCostType.EXECUTION_VOLUME_PERSISTENT,
       )
-      .map((detail) => {
+      .flatMap((detail) => {
         const [, mount] = detail.name.split(':')
         const vol = volumesMap[mount]
+        // Cost lines for volumes we cannot map back (e.g. mount-less
+        // verity-bound volumes) are skipped rather than dereferenced.
+        if (!vol) return []
         const size = 'size_mib' in vol ? vol.size_mib : vol.estimated_size_mib
         const label = 'size_mib' in vol ? 'PERSISTENT' : 'VOLUME'
 
