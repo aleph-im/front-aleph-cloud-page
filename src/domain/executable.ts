@@ -1068,9 +1068,12 @@ export abstract class ExecutableManager<T extends Executable> {
 
     // Volumes
 
+    // Verity-bound volumes (V-PROGRAM) have no mount; fall back to ref/index
+    // so they do not all collapse onto a single undefined key.
     const volumesMap = (entityProps.volumes || []).reduce(
-      (ac, cv) => {
-        ac[cv.mount] = cv
+      (ac, cv, i) => {
+        const key = cv.mount || ('ref' in cv ? cv.ref : String(i))
+        ac[key] = cv
         return ac
       },
       {} as Record<string, CostEstimationMachineVolume>,

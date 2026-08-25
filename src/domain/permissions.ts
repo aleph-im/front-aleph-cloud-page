@@ -6,6 +6,7 @@ import {
 import {
   defaultConsoleChannel,
   defaultPermissionsAggregateKey,
+  V_PROGRAM_MESSAGE_TYPE,
 } from '@/helpers/constants'
 import { CheckoutStepType } from '@/hooks/form/useCheckoutNotification'
 import { AggregateContent, AggregateManager } from './aggregateManager'
@@ -116,6 +117,7 @@ export class PermissionsManager extends AggregateManager<
       MessageType.instance,
       MessageType.program,
       MessageType.store,
+      V_PROGRAM_MESSAGE_TYPE,
       // @todo: should we include the forget message type?
       // MessageType.forget,
     ]

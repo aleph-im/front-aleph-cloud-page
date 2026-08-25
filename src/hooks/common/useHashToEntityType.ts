@@ -40,9 +40,13 @@ export function useHashToEntityType(
     async function fetchMessage(hash: string) {
       if (!manager) return
 
-      const msg = (await manager.get(hash)) as AnyMessage
-      const type = getEntityTypeFromMessage(msg)
-      setType(type)
+      try {
+        const msg = (await manager.get(hash)) as AnyMessage
+        const type = getEntityTypeFromMessage(msg)
+        if (type) setType(type)
+      } catch (err) {
+        console.error(`Could not resolve entity type for ${hash}`, err)
+      }
     }
 
     checkType(hash)

@@ -19,7 +19,7 @@ import {
 import { MessageType } from '@aleph-sdk/message'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRequestPermissions } from '@/hooks/common/useRequestEntity/useRequestPermissions'
-import { NAVIGATION_URLS } from '@/helpers/constants'
+import { NAVIGATION_URLS, V_PROGRAM_MESSAGE_TYPE } from '@/helpers/constants'
 
 export type NewPermissionFormState = {
   address: string
@@ -143,6 +143,7 @@ export function useNewPermissionPage(): UseNewPermissionPageReturn {
           { type: MessageType.instance, authorized: false },
           { type: MessageType.program, authorized: false },
           { type: MessageType.store, authorized: false },
+          { type: V_PROGRAM_MESSAGE_TYPE, authorized: false },
         ],
       },
     }),
