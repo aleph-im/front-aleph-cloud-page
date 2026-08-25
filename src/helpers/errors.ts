@@ -55,7 +55,6 @@ export default {
   DomainNotFound: new Error('Domain not found'),
   InvalidStreamCost: new Error('Invalid stream cost'),
   InvalidNode: new Error('Invalid node'),
-  UnknownType: new Error('Unknown type'),
   ValidationError: new Error('Validation error, check highlighted form fields'),
   FieldError: (field: string, description?: string) =>
     new Error(`Error on field "${field}": ${description}`),

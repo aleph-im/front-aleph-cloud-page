@@ -2,7 +2,11 @@ import { z } from 'zod'
 import { ethereumAddressSchema, requiredStringSchema } from './base'
 import { MessageType } from '@aleph-sdk/message'
 
-const messageTypeSchema = z.nativeEnum(MessageType)
+// V-PROGRAM is accepted as a literal until @aleph-sdk/message ships the enum member
+const messageTypeSchema = z.union([
+  z.nativeEnum(MessageType),
+  z.literal('V-PROGRAM'),
+])
 
 const baseMessageTypePermissionsSchema = z.object({
   type: messageTypeSchema,
