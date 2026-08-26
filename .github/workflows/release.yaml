@@ -1,0 +1,156 @@
+name: Release
+description: Build, push to IPFS and deploy when a GitHub Release is published
+
+# Releases are the single deploy trigger. The tag prefix selects the app:
+#   vX.Y.Z        -> credits app   (must be tagged on main)
+#   legacy-vX.Y.Z -> legacy app    (must be tagged on legacy)
+on:
+  release:
+    types: [published]
+
+jobs:
+  resolve:
+    name: Resolve target app
+    runs-on: ubuntu-22.04
+    outputs:
+      app: ${{ steps.target.outputs.app }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Resolve app and validate tag
+        id: target
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          case "${TAG}" in
+            v[0-9]*.[0-9]*.[0-9]*)
+              APP="${{ vars.DEPLOY_CREDITS_APP }}"
+              BRANCH="main"
+              VERSION="${TAG#v}"
+              ;;
+            legacy-v[0-9]*.[0-9]*.[0-9]*)
+              APP="${{ vars.DEPLOY_APP }}"
+              BRANCH="legacy"
+              VERSION="${TAG#legacy-v}"
+              ;;
+            *)
+              echo "Error: tag '${TAG}' must look like vX.Y.Z (credits) or legacy-vX.Y.Z (legacy)."
+              exit 1
+              ;;
+          esac
+
+          if ! git merge-base --is-ancestor "${SHA}" "origin/${BRANCH}"; then
+            echo "Error: tag '${TAG}' points at ${SHA}, which is not on branch '${BRANCH}'."
+            exit 1
+          fi
+
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "${PKG_VERSION}" != "${VERSION}" ]; then
+            echo "Error: tag '${TAG}' but package.json is at ${PKG_VERSION}. Merge the version bump PR first."
+            exit 1
+          fi
+
+          echo "Tag '${TAG}' (${BRANCH}, v${VERSION}) -> app '${APP}'"
+          echo "app=${APP}" >> $GITHUB_OUTPUT
+
+  build:
+    name: Build & export static site
+    needs: resolve
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build and Export
+        uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
+        with:
+          fa-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+          node-version: 25.1.0
+
+      - name: Upload export as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+          if-no-files-found: error
+          retention-days: 1
+
+  push-to-ipfs:
+    name: Push site to IPFS
+    needs: build
+    runs-on: ubuntu-22.04
+    outputs:
+      cid_v0: ${{ steps.push_to_ipfs.outputs.cid_v0 }}
+      cid_v1: ${{ steps.push_to_ipfs.outputs.cid_v1 }}
+    steps:
+      - name: Download export artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-export
+          path: out
+
+      - name: Push to IPFS
+        id: push_to_ipfs
+        uses: aleph-im/aleph-github-actions/push-to-ipfs@v1.3.1
+        with:
+          upload-dir: out
+
+  deploy-app:
+    name: Deploy to production
+    needs: [resolve, push-to-ipfs]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          pip install -r scripts/deploy/requirements.txt
+        shell: bash
+
+      - name: Deploy to Aleph
+        run: |
+          set -euo pipefail
+          echo "Deploying ${{ needs.push-to-ipfs.outputs.cid_v0 }} to '${{ needs.resolve.outputs.app }}'"
+          python scripts/deploy/client.py \
+            --cid ${{ needs.push-to-ipfs.outputs.cid_v0 }} \
+            --app "${{ needs.resolve.outputs.app }}" \
+            --url ${{ vars.DEPLOY_URL }} \
+            --key ${{ secrets.DEPLOY_PRIVATE_KEY }}
+
+  annotate-release:
+    name: Add CID to release notes
+    needs: [resolve, push-to-ipfs, deploy-app]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Append CID and preview URL to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name }}
+          APP: ${{ needs.resolve.outputs.app }}
+          CID_V0: ${{ needs.push-to-ipfs.outputs.cid_v0 }}
+          CID_V1: ${{ needs.push-to-ipfs.outputs.cid_v1 }}
+        run: |
+          set -euo pipefail
+          BODY=$(gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" --json body --jq .body)
+          printf '%s\n\n---\n**Deployed to:** `%s`\n**IPFS CID:** `%s`\n**Preview:** https://%s.ipfs.aleph.sh\n' \
+            "${BODY}" "${APP}" "${CID_V0}" "${CID_V1}" > body.md
+          gh release edit "${TAG}" --repo "${GITHUB_REPOSITORY}" --notes-file body.md
+          {
+            echo "**Deployed to:** \`${APP}\`"
+            echo "**IPFS CID:** \`${CID_V0}\`"
+            echo "**Preview:** https://${CID_V1}.ipfs.aleph.sh"
+          } >> $GITHUB_STEP_SUMMARY
