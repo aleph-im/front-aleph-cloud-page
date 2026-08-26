@@ -54,8 +54,9 @@ jobs:
             exit 1
           fi
 
+          git fetch --no-tags origin "${BRANCH}"
           if ! git merge-base --is-ancestor "${SHA}" "origin/${BRANCH}"; then
-            echo "Error: tag '${TAG}' points at ${SHA}, which is not on branch '${BRANCH}'."
+            echo "Error: tag '${TAG}' points at ${SHA}, which is not an ancestor of branch '${BRANCH}'."
             exit 1
           fi
 
@@ -164,8 +165,10 @@ jobs:
           CID_V1: ${{ needs.push-to-ipfs.outputs.cid_v1 }}
         run: |
           set -euo pipefail
-          BODY=$(gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" --json body --jq '.body // ""')
-          printf '%s\n\n---\n**Deployed to:** `%s`\n**IPFS CID:** `%s`\n**Preview:** https://%s.ipfs.aleph.sh\n' \
+          # Drop any previous deploy block (re-runs / rollbacks) before appending.
+          BODY=$(gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" --json body --jq '.body // ""' \
+            | sed '/<!-- deploy-info -->/,$d')
+          printf '%s\n<!-- deploy-info -->\n---\n**Deployed to:** `%s`\n**IPFS CID:** `%s`\n**Preview:** https://%s.ipfs.aleph.sh\n' \
             "${BODY}" "${APP}" "${CID_V0}" "${CID_V1}" > body.md
           gh release edit "${TAG}" --repo "${GITHUB_REPOSITORY}" --notes-file body.md
           {
