@@ -29,6 +29,8 @@ jobs:
           DEPLOY_CREDITS_APP: ${{ vars.DEPLOY_CREDITS_APP }}
         run: |
           set -euo pipefail
+          # Pre-release tags (e.g. v1.0.0-rc.1) are deliberately rejected:
+          # every release deploys to production.
           if [[ ! "${TAG}" =~ ^(legacy-)?v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Error: tag '${TAG}' must look like vX.Y.Z (credits) or legacy-vX.Y.Z (legacy)."
             exit 1
@@ -113,6 +115,10 @@ jobs:
     needs: [resolve, push-to-ipfs]
     runs-on: ubuntu-latest
     environment: production
+    # Serialise deploys per app so back-to-back releases land in order.
+    concurrency:
+      group: deploy-${{ needs.resolve.outputs.app }}
+      cancel-in-progress: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -158,7 +164,7 @@ jobs:
           CID_V1: ${{ needs.push-to-ipfs.outputs.cid_v1 }}
         run: |
           set -euo pipefail
-          BODY=$(gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" --json body --jq .body)
+          BODY=$(gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" --json body --jq '.body // ""')
           printf '%s\n\n---\n**Deployed to:** `%s`\n**IPFS CID:** `%s`\n**Preview:** https://%s.ipfs.aleph.sh\n' \
             "${BODY}" "${APP}" "${CID_V0}" "${CID_V1}" > body.md
           gh release edit "${TAG}" --repo "${GITHUB_REPOSITORY}" --notes-file body.md
