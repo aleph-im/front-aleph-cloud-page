@@ -16,7 +16,7 @@ jobs:
       app: ${{ steps.target.outputs.app }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -25,6 +25,8 @@ jobs:
         env:
           TAG: ${{ github.event.release.tag_name }}
           SHA: ${{ github.sha }}
+          DEPLOY_APP: ${{ vars.DEPLOY_APP }}
+          DEPLOY_CREDITS_APP: ${{ vars.DEPLOY_CREDITS_APP }}
         run: |
           set -euo pipefail
           if [[ ! "${TAG}" =~ ^(legacy-)?v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -34,16 +36,21 @@ jobs:
 
           case "${TAG}" in
             legacy-v*)
-              APP="${{ vars.DEPLOY_APP }}"
+              APP="${DEPLOY_APP}"
               BRANCH="legacy"
               VERSION="${TAG#legacy-v}"
               ;;
             v*)
-              APP="${{ vars.DEPLOY_CREDITS_APP }}"
+              APP="${DEPLOY_CREDITS_APP}"
               BRANCH="main"
               VERSION="${TAG#v}"
               ;;
           esac
+
+          if [ -z "${APP}" ]; then
+            echo "Error: deploy app for '${BRANCH}' is not configured (repository variable is empty)."
+            exit 1
+          fi
 
           if ! git merge-base --is-ancestor "${SHA}" "origin/${BRANCH}"; then
             echo "Error: tag '${TAG}' points at ${SHA}, which is not on branch '${BRANCH}'."
@@ -65,7 +72,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build and Export
         uses: aleph-im/aleph-github-actions/build-nextjs-app@v1
@@ -108,7 +115,7 @@ jobs:
     environment: production
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -121,14 +128,19 @@ jobs:
         shell: bash
 
       - name: Deploy to Aleph
+        env:
+          CID: ${{ needs.push-to-ipfs.outputs.cid_v0 }}
+          APP: ${{ needs.resolve.outputs.app }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+          DEPLOY_PRIVATE_KEY: ${{ secrets.DEPLOY_PRIVATE_KEY }}
         run: |
           set -euo pipefail
-          echo "Deploying ${{ needs.push-to-ipfs.outputs.cid_v0 }} to '${{ needs.resolve.outputs.app }}'"
+          echo "Deploying ${CID} to '${APP}'"
           python scripts/deploy/client.py \
-            --cid "${{ needs.push-to-ipfs.outputs.cid_v0 }}" \
-            --app "${{ needs.resolve.outputs.app }}" \
-            --url ${{ vars.DEPLOY_URL }} \
-            --key ${{ secrets.DEPLOY_PRIVATE_KEY }}
+            --cid "${CID}" \
+            --app "${APP}" \
+            --url "${DEPLOY_URL}" \
+            --key "${DEPLOY_PRIVATE_KEY}"
 
   annotate-release:
     name: Add CID to release notes
