@@ -24,14 +24,21 @@ export function useRequestRewardsFeed(): UseRequestRewardsFeedReturn {
     const abort = new Future<void>()
 
     const subscribe = async () => {
-      const lastRewardsDistribution = await manager.getLastRewardsDistribution()
+      const [distribution, calculation] = await Promise.allSettled([
+        manager.getLastRewardsDistribution(),
+        manager.getLastRewardsCalculation(),
+      ])
 
-      setRewards((prev) => {
-        return {
-          lastRewardsDistribution,
-          lastRewardsCalculation: prev?.lastRewardsCalculation,
-        }
-      })
+      setRewards((prev) => ({
+        lastRewardsDistribution:
+          distribution.status === 'fulfilled'
+            ? distribution.value
+            : prev?.lastRewardsDistribution,
+        lastRewardsCalculation:
+          calculation.status === 'fulfilled'
+            ? calculation.value
+            : prev?.lastRewardsCalculation,
+      }))
 
       const iterator = manager.subscribeRewardsFeed(abort.promise)
 

@@ -45,7 +45,7 @@ export class StakeManager {
 
   async getLastRewardsCalculation(): Promise<RewardsResponse> {
     const res = await this.sdkClient.getPosts({
-      types: 'staking-rewards-distribution',
+      types: 'credit-rewards-distribution',
       addresses: [monitorAddress],
       tags: ['calculation'],
       pagination: 1,
@@ -65,7 +65,7 @@ export class StakeManager {
 
   async getLastRewardsDistribution(): Promise<RewardsResponse> {
     const res = await this.sdkClient.getPosts({
-      types: 'staking-rewards-distribution',
+      types: 'credit-rewards-distribution',
       addresses: [senderAddress],
       tags: ['distribution'],
       pagination: 1,
@@ -87,32 +87,36 @@ export class StakeManager {
     abort: Promise<void>,
   ): AsyncGenerator<RewardsResponse> {
     const feed = subscribeSocketFeed<PostMessage<any>>(
-      `${wsServer}/api/ws0/messages?msgType=POST&history=1&contentTypes=staking-rewards-distribution&addresses=${senderAddress},${monitorAddress}`,
+      `${wsServer}/api/ws0/messages?msgType=POST&history=1&contentTypes=credit-rewards-distribution&addresses=${senderAddress},${monitorAddress}`,
       abort,
     )
 
     // @note: Consume socket first step
     await feed.next()
 
-    for await (const data of feed) {
-      if (!data.content) return
-      if (!data.content.content) return
+    try {
+      for await (const data of feed) {
+        if (!data.content) continue
+        if (!data.content.content) continue
 
-      const { content, time } = data.content || {}
-      const { status: type, rewards, end_height: lastHeight } = content
+        const { content, time } = data.content || {}
+        const { status: type, rewards, end_height: lastHeight } = content
 
-      if (
-        type === 'calculation' ||
-        (type === 'distribution' &&
-          data.content.content.targets.some(({ success }: any) => success))
-      ) {
-        yield {
-          type,
-          rewards,
-          lastHeight,
-          timestamp: Math.trunc(time * 1000),
+        if (
+          type === 'calculation' ||
+          (type === 'distribution' &&
+            data.content.content.targets.some(({ success }: any) => success))
+        ) {
+          yield {
+            type,
+            rewards,
+            lastHeight,
+            timestamp: Math.trunc(time * 1000),
+          }
         }
       }
+    } catch (error) {
+      console.error('Rewards feed subscription error:', error)
     }
   }
 
