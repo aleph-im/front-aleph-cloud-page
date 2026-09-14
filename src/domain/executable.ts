@@ -161,6 +161,7 @@ export type SignedPublicKeyHeader = {
 }
 
 export type ExecutableOperations =
+  | 'start'
   | 'reboot'
   | 'expire'
   | 'erase'
@@ -606,21 +607,35 @@ export abstract class ExecutableManager<T extends Executable> {
     try {
       await withRetry(
         async () => {
-          const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              instance: instanceId,
-            }),
+          // Try the authenticated owner start route (aleph-vm 2.1) first.
+          const startResponse = await this.sendPostOperation({
+            hostname: nodeUrl,
+            operation: 'start',
+            vmId: instanceId,
           })
-          const resp = await req.json()
 
-          if (resp.success) return
+          if (startResponse.status === 404) {
+            // The CRN predates aleph-vm 2.1: fall back to the legacy push.
+            const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                instance: instanceId,
+              }),
+            })
+            const resp = await req.json()
 
-          const errorMsg = resp.errors[instanceId]
-          throw new Error(errorMsg || 'Unknown error occurred')
+            if (resp.success) return
+
+            const errorMsg = resp.errors[instanceId]
+            throw new Error(errorMsg || 'Unknown error occurred')
+          }
+
+          if (startResponse.ok) return
+
+          throw new Error(await startResponse.text())
         },
         {
           attempts: retry.attemps,
