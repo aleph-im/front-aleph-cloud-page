@@ -884,6 +884,12 @@ export type RetryOptions = {
 }
 
 /**
+ * Error that withRetry must not swallow: thrown by a retried function to
+ * abort the retry loop immediately (deterministic failures).
+ */
+export class NonRetryableError extends Error {}
+
+/**
  * Generic retry utility that executes an async function with retry logic
  *
  * @param fn - The async function to execute with retry logic
@@ -900,6 +906,7 @@ export async function withRetry<T>(
     try {
       return await fn()
     } catch (error) {
+      if (error instanceof NonRetryableError) throw error
       lastError = error as Error
 
       // Don't sleep after the last attempt

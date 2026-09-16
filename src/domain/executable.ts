@@ -45,7 +45,7 @@ import Err from '@/helpers/errors'
 import { CRN, CRNSpecs, NodeManager } from './node'
 import { subscribeSocketFeed } from '@/helpers/socket'
 import { convertByteUnits, humanReadableSize, round } from '@aleph-front/core'
-import { withRetry } from '@/helpers/utils'
+import { NonRetryableError, withRetry } from '@/helpers/utils'
 import { SuperfluidAccount } from '@aleph-sdk/superfluid'
 import { CostLine } from './cost'
 import { BlockchainId } from './connect'
@@ -161,6 +161,7 @@ export type SignedPublicKeyHeader = {
 }
 
 export type ExecutableOperations =
+  | 'start'
   | 'reboot'
   | 'expire'
   | 'erase'
@@ -606,21 +607,41 @@ export abstract class ExecutableManager<T extends Executable> {
     try {
       await withRetry(
         async () => {
-          const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              instance: instanceId,
-            }),
-          })
-          const resp = await req.json()
+          let startResponse: Response | undefined
+          try {
+            // Try the authenticated owner start route (aleph-vm 2.1) first.
+            startResponse = await this.sendPostOperation({
+              hostname: nodeUrl,
+              operation: 'start',
+              vmId: instanceId,
+            })
+          } catch {
+            // The fetch itself failed: either the node is unreachable, or a
+            // pre-2.1 CRN answered the unknown route with a 404 the browser
+            // cannot read (router-level 404s carry no CORS headers). Fall
+            // back to the legacy push, which surfaces its own error if the
+            // node is actually unreachable.
+            return await this.pushAllocationNotify(nodeUrl, instanceId)
+          }
 
-          if (resp.success) return
+          if (startResponse.status === 404) {
+            // The CRN predates aleph-vm 2.1, or does not hold this VM:
+            // fall back to the legacy notify push.
+            return await this.pushAllocationNotify(nodeUrl, instanceId)
+          }
 
-          const errorMsg = resp.errors[instanceId]
-          throw new Error(errorMsg || 'Unknown error occurred')
+          if (startResponse.ok) return
+
+          if (startResponse.status === 401 || startResponse.status === 403) {
+            // Bad signature or non-owner: retrying cannot change the outcome.
+            throw new NonRetryableError(
+              `HTTP ${startResponse.status}: ${await startResponse.text()}`,
+            )
+          }
+
+          throw new Error(
+            `HTTP ${startResponse.status}: ${await startResponse.text()}`,
+          )
         },
         {
           attempts: retry.attemps,
@@ -631,6 +652,26 @@ export abstract class ExecutableManager<T extends Executable> {
       const errorMsg = (error as Error).message
       throw Err.InstanceStartupFailed(node.hash, errorMsg)
     }
+  }
+
+  private async pushAllocationNotify(
+    nodeUrl: string,
+    instanceId: string,
+  ): Promise<void> {
+    const req = await fetch(`${nodeUrl}/control/allocation/notify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        instance: instanceId,
+      }),
+    })
+    const resp = await req.json()
+
+    if (resp.success) return
+
+    throw new Error(resp.errors[instanceId] || 'Unknown error occurred')
   }
 
   async getKeyPair(): Promise<KeyPair> {
