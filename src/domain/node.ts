@@ -1,7 +1,7 @@
 import {
   crnListProgramUrl,
   defaultAccountChannel,
-  metricAddress,
+  metricAddresses,
   monitorAddress,
   postType,
   scoringAddress,
@@ -802,7 +802,7 @@ export class NodeManager {
 
   protected async fetchAllNodes(): Promise<NodesResponse> {
     return fetchAndCache(
-      `${apiServer}/api/v0/aggregates/0xa1B3bb7d2332383D96b7796B908fB7f7F3c2Be10.json?keys=corechannel&limit=100`,
+      `${apiServer}/api/v0/aggregates/${monitorAddress}.json?keys=corechannel&limit=100`,
       'nodes',
       1000 * 5,
       async (content: any) => {
@@ -1149,9 +1149,11 @@ export class NodeManager {
     })
   }
 
-  // Scores and metrics are single large posts that each carry both ccn and crn
-  // sets. Cache them so the ccn/crn passes and successive feed ticks reuse one
-  // fetch instead of re-downloading the post each time.
+  // Scores come from a single publisher; metrics come from one publisher per
+  // region, so the latest metric post from every source address is fetched and
+  // the ccn/crn sets are merged. Cache the result so the ccn/crn passes and
+  // successive feed ticks reuse one fetch instead of re-downloading the posts
+  // each time.
   protected async getScores(): Promise<{
     ccn: CCNScore[]
     crn: CRNScore[]
@@ -1169,12 +1171,21 @@ export class NodeManager {
     ccn: CCNMetrics[]
     crn: CRNMetrics[]
   }> {
-    return fetchAndCache(
-      `${apiServer}/api/v0/posts.json?types=aleph-network-metrics&addresses=${metricAddress}&pagination=1&page=1`,
-      'metrics',
-      1000 * 60,
-      (content: any) =>
-        content?.posts?.[0]?.content?.metrics ?? { ccn: [], crn: [] },
+    const metrics = await Promise.all(
+      metricAddresses.map((address) =>
+        fetchAndCache(
+          `${apiServer}/api/v0/posts.json?types=aleph-network-metrics&addresses=${address}&pagination=1&page=1`,
+          `metrics-${address}`,
+          1000 * 60,
+          (content: any) =>
+            content?.posts?.[0]?.content?.metrics ?? { ccn: [], crn: [] },
+        ),
+      ),
     )
+
+    return {
+      ccn: metrics.flatMap((metric) => metric.ccn),
+      crn: metrics.flatMap((metric) => metric.crn),
+    }
   }
 }
