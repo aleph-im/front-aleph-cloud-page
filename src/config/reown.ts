@@ -16,7 +16,7 @@
  */
 
 import { createAppKit } from '@reown/appkit/react'
-import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
+import { EthersAdapter } from '@reown/appkit-adapter-ethers'
 import { SolanaAdapter } from '@reown/appkit-adapter-solana/react'
 import { mainnet, avalanche, base, solana } from '@reown/appkit/networks'
 
@@ -32,9 +32,9 @@ const metadata = {
 }
 
 // Adapters for different blockchain ecosystems
-// Ethers5: EVM chains (Ethereum, Avalanche, Base) using ethers.js v5
+// Ethers: EVM chains (Ethereum, Avalanche, Base) using ethers.js v6
 // Solana: Solana chain using @solana/web3.js
-const ethers5Adapter = new Ethers5Adapter()
+const ethersAdapter = new EthersAdapter()
 const solanaAdapter = new SolanaAdapter()
 
 /**
@@ -42,8 +42,8 @@ const solanaAdapter = new SolanaAdapter()
  * Created once at app initialization, used throughout the app via React hooks
  */
 export const appKit = createAppKit({
-  adapters: [ethers5Adapter, solanaAdapter],
-  networks: [mainnet, avalanche, base, solana],
+  adapters: [ethersAdapter, solanaAdapter],
+  networks: [mainnet, avalanche, base, solana] as any,
   projectId,
   metadata,
   features: {

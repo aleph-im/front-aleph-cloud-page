@@ -192,7 +192,7 @@ export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
           throw new Error(`Unsupported chain ID: ${chainId}`)
       }
 
-      await reownSwitchNetwork(network)
+      await reownSwitchNetwork(network as any)
     },
     [reownSwitchNetwork],
   )

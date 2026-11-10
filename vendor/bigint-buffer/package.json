@@ -1,0 +1,11 @@
+{
+  "name": "bigint-buffer",
+  "version": "1.1.6",
+  "description": "Pure JavaScript bigint to buffer conversion",
+  "main": "dist/node.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "license": "Apache-2.0"
+}

@@ -1,6 +1,6 @@
-import { providers } from 'ethers'
+import { JsonRpcProvider } from 'ethers'
 
-const provider = new providers.JsonRpcProvider('https://eth.drpc.org')
+const provider = new JsonRpcProvider('https://eth.drpc.org')
 
 export const EnsNameLookup = async (
   address?: string,

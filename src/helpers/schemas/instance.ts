@@ -145,17 +145,22 @@ export const instanceBaseSchema = z
 // the same node-dependent refinements.
 function buildInstanceSchema<T extends z.ZodTypeAny>(nodeSpecsField: T) {
   return instanceBaseSchema
-    .merge(
-      z.object({
-        nodeSpecs: nodeSpecsField,
-      }),
-    )
+    .extend({
+      nodeSpecs: nodeSpecsField,
+    })
     .refine(
-      ({ nodeSpecs, specs }) => {
+      (data) => {
         // No selected CRN (network-assigned node): skip the node-specific specs
         // check. When a CRN is present, validate it against the tier.
+        const nodeSpecs = (data as typeof data & { nodeSpecs?: z.infer<T> })
+          .nodeSpecs
         if (!nodeSpecs) return true
-        return NodeManager.validateMinNodeSpecs(specs, nodeSpecs)
+        return NodeManager.validateMinNodeSpecs(
+          data.specs,
+          nodeSpecs as unknown as Parameters<
+            typeof NodeManager.validateMinNodeSpecs
+          >[1],
+        )
       },
       {
         message: 'Insufficient node specs',
