@@ -11,10 +11,7 @@ export const paymentProviderSchema = z.enum(['WALLET'])
 export const topUpCreditsSchema = z.object({
   amount: z.coerce
     .number({
-      error: (issue) =>
-        'input' in issue && issue.input === undefined
-          ? 'Amount is required'
-          : 'Amount must be a number',
+      error: 'Amount must be a number',
     })
     .positive('Amount must be greater than 0')
     .max(100000, 'Amount cannot exceed 100,000'),
@@ -59,10 +56,7 @@ export const creditTransferRecipientSchema = z.object({
     .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
   amount: z.coerce
     .number({
-      error: (issue) =>
-        'input' in issue && issue.input === undefined
-          ? 'Amount is required'
-          : 'Amount must be a number',
+      error: 'Amount must be a number',
     })
     .positive('Amount must be greater than $0'),
   expiration: z.string().optional(),
