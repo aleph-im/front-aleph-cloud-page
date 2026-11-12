@@ -4,7 +4,7 @@ export {}
 
 declare global {
   interface Window {
-    ethereum: import('ethers').providers.ExternalProvider
+    ethereum: import('ethers').Eip1193Provider
     phantom: {
       solana: WindowPhantomProvider
     }

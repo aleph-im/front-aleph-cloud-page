@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const paymentCurrencySchema = z.enum(['ALEPH', 'USDC', 'CARD'], {
-  errorMap: () => ({ message: 'Please select a valid payment method' }),
+  error: 'Please select a valid payment method',
 })
 
 export const paymentChainSchema = z.enum(['ethereum', 'ethereum-sepolia'])
@@ -9,13 +9,19 @@ export const paymentChainSchema = z.enum(['ethereum', 'ethereum-sepolia'])
 export const paymentProviderSchema = z.enum(['WALLET'])
 
 export const topUpCreditsSchema = z.object({
-  amount: z.coerce
-    .number({
-      required_error: 'Amount is required',
-      invalid_type_error: 'Amount must be a number',
-    })
-    .positive('Amount must be greater than 0')
-    .max(100000, 'Amount cannot exceed 100,000'),
+  amount: z.preprocess(
+    (value) =>
+      value === '' || value === undefined ? undefined : Number(value),
+    z
+      .number({
+        error: (issue) =>
+          issue.input === undefined
+            ? 'Amount is required'
+            : 'Amount must be a number',
+      })
+      .positive('Amount must be greater than 0')
+      .max(100000, 'Amount cannot exceed 100,000'),
+  ),
   chain: paymentChainSchema,
   provider: paymentProviderSchema,
   currency: paymentCurrencySchema,
@@ -55,12 +61,18 @@ export const creditTransferRecipientSchema = z.object({
     .string()
     .min(1, 'Address is required')
     .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
-  amount: z.coerce
-    .number({
-      required_error: 'Amount is required',
-      invalid_type_error: 'Amount must be a number',
-    })
-    .positive('Amount must be greater than $0'),
+  amount: z.preprocess(
+    (value) =>
+      value === '' || value === undefined ? undefined : Number(value),
+    z
+      .number({
+        error: (issue) =>
+          issue.input === undefined
+            ? 'Amount is required'
+            : 'Amount must be a number',
+      })
+      .positive('Amount must be greater than $0'),
+  ),
   expiration: z.string().optional(),
 })
 

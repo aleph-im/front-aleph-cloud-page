@@ -14,9 +14,12 @@ export const mbPerAleph = 3
 
 export const communityWalletAddress =
   '0x5aBd3258C5492fD378EBC2e0017416E199e5Da56'
-export const scoringAddress = '0x4D52380D3191274a04846c89c069E6C3F2Ed94e4'
-export const metricAddress = '0x4D52380D3191274a04846c89c069E6C3F2Ed94e4'
-export const monitorAddress = '0xa1B3bb7d2332383D96b7796B908fB7f7F3c2Be10'
+export const scoringAddress = '0x6dbc62ED38824BEB3eAd100738a6199ed73e19dC'
+export const metricAddresses = [
+  '0x289670c1703551198cb16b7608fAb4946181D339',
+  '0xDBCED11DFc1b95cb6683a89e6c7beF32Facfc0F6',
+]
+export const monitorAddress = '0xF45f6F13BF2A2Eb6Afa83FCC9e530DcF238b5D74'
 export const senderAddress = '0x3a5CC6aBd06B601f4654035d125F9DD2FC992C25'
 export const erc20Address = '0x27702a26126e0B3702af63Ee09aC4d1A084EF628'
 export const splTokenAddress = '3UCMiSnkcnkPE1pgQ5ggPCBv6dXgVUy16TmMUe1WpG9x'
