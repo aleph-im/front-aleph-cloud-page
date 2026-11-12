@@ -4,6 +4,7 @@ set -euo pipefail
 PROJECT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
 SANDBOX_USER=$(id -un)
 SANDBOX_HOME="/home/$SANDBOX_USER"
+SANDBOX_PATH=${SANDBOX_PATH:-$PATH}
 NPM_CACHE=${SANDBOX_NPM_CACHE:-$HOME/.npm-sandbox}
 mkdir -p "$NPM_CACHE"
 
@@ -39,7 +40,7 @@ mounts=(
   --bind "$NPM_CACHE" "$SANDBOX_HOME/.npm"
   --clearenv
   --setenv HOME "$SANDBOX_HOME"
-  --setenv PATH "/etc/profiles/per-user/$SANDBOX_USER/bin:/run/current-system/sw/bin:/usr/bin:/bin"
+  --setenv PATH "$SANDBOX_PATH"
   --setenv TERM "${TERM:-dumb}"
   --setenv LANG "${LANG:-C.UTF-8}"
   --setenv TMPDIR /tmp
