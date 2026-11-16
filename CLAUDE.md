@@ -8,11 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm run dev          # Start development server (http://localhost:3000)
-npm run build        # Create production build
-npm run export       # Export build to static HTML
-npm run start        # Start production server
+npm run build        # Create static production build in out/
 npm run lint         # Run ESLint
 npm run lint:fix     # Run ESLint with auto-fix
+npm run sandbox:install  # Reproducible npm ci in the bwrap sandbox
+npm run sandbox:build    # Production build in the bwrap sandbox
+npm run sandbox:lint     # ESLint in the bwrap sandbox
 ```
 
 ## Development Requirements

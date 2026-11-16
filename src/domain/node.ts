@@ -1134,9 +1134,13 @@ export class NodeManager {
     nodes: T[],
     metrics: (CCNMetrics | CRNMetrics)[],
   ): T[] {
-    const metricsMap = new Map(
-      metrics.map((metrics) => [metrics.node_id, metrics]),
-    )
+    const metricsMap = new Map<string, CCNMetrics | CRNMetrics>()
+    for (const metric of metrics) {
+      const current = metricsMap.get(metric.node_id)
+      if (!current || metric.measured_at > current.measured_at) {
+        metricsMap.set(metric.node_id, metric)
+      }
+    }
 
     return nodes.map((node) => {
       const metricsData = metricsMap.get(node.hash)
@@ -1149,11 +1153,11 @@ export class NodeManager {
     })
   }
 
-  // Scores come from a single publisher; metrics come from one publisher per
-  // region, so the latest metric post from every source address is fetched and
-  // the ccn/crn sets are merged. Cache the result so the ccn/crn passes and
-  // successive feed ticks reuse one fetch instead of re-downloading the posts
-  // each time.
+  // Scores come from a single publisher; metrics can come from multiple
+  // publishers. Fetch the latest metric post from every source address, merge
+  // the ccn/crn sets, and keep the newest measurement per node. Cache the
+  // result so the ccn/crn passes and successive feed ticks reuse one fetch
+  // instead of re-downloading the posts each time.
   protected async getScores(): Promise<{
     ccn: CCNScore[]
     crn: CRNScore[]
@@ -1171,7 +1175,7 @@ export class NodeManager {
     ccn: CCNMetrics[]
     crn: CRNMetrics[]
   }> {
-    const metrics = await Promise.all(
+    const results = await Promise.allSettled(
       metricAddresses.map((address) =>
         fetchAndCache(
           `${apiServer}/api/v0/posts.json?types=aleph-network-metrics&addresses=${address}&pagination=1&page=1`,
@@ -1182,6 +1186,17 @@ export class NodeManager {
         ),
       ),
     )
+
+    const metrics = results.flatMap((result) =>
+      result.status === 'fulfilled' ? [result.value] : [],
+    )
+    if (metrics.length === 0) {
+      const failure = results.find(
+        (result): result is PromiseRejectedResult =>
+          result.status === 'rejected',
+      )
+      throw failure?.reason ?? new Error('Failed to fetch node metrics')
+    }
 
     return {
       ccn: metrics.flatMap((metric) => metric.ccn),
