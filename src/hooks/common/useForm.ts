@@ -1,6 +1,8 @@
 import { RequestState, useRequestState } from '@aleph-front/core'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  Control,
+  Resolver,
   useForm as useFormLib,
   UseFormReturn as UseFormReturnLib,
   UseFormProps as UseFormPropsLib,
@@ -13,7 +15,8 @@ import Err from '@/helpers/errors'
 export type UseFormProps<
   FormState extends Record<string, any>,
   Response,
-> = UseFormPropsLib<FormState> & {
+> = Omit<UseFormPropsLib<FormState>, 'resolver'> & {
+  resolver?: Resolver<any, any, any>
   onSubmit: (state: FormState) => Promise<Response>
   onSuccess?: (data: Response) => Promise<void>
   onError?: (error: Error) => Promise<void>
@@ -23,7 +26,8 @@ export type UseFormProps<
 export type UseFormReturn<
   FormState extends Record<string, any>,
   Response = void,
-> = Omit<UseFormReturnLib<FormState>, 'handleSubmit'> & {
+> = Omit<UseFormReturnLib<FormState>, 'handleSubmit' | 'control'> & {
+  control: Control<any>
   requestState: RequestState<Response>
   handleSubmit: (e: FormEvent) => Promise<void>
 }
@@ -51,7 +55,7 @@ export function useForm<FormState extends Record<string, any>, Response>({
   readyDeps = [],
   ...props
 }: UseFormProps<FormState, Response>): UseFormReturn<FormState, Response> {
-  const form = useFormLib<FormState>(props)
+  const form = useFormLib<FormState>(props as UseFormPropsLib<FormState>)
 
   useEffect(() => {
     // @todo: add support to other cases
@@ -141,6 +145,7 @@ export function useForm<FormState extends Record<string, any>, Response>({
 
   return {
     ...form,
+    control: form.control as Control<any>,
     requestState,
     handleSubmit,
   }

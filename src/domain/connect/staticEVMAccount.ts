@@ -7,7 +7,7 @@ import {
   RpcId,
 } from '@aleph-sdk/evm'
 import { BlockchainId, blockchains } from './index'
-import { providers } from 'ethers'
+import { JsonRpcProvider } from 'ethers'
 
 // @note: This is a helper class for being able to query blockchain data using
 // an static address different from the one connected on the DAPP
@@ -20,18 +20,16 @@ export class StaticEVMAccount extends EVMAccount {
   ) {
     super(address)
 
-    this.wallet = Object.create(JsonRPCWallet.prototype)
-    this.wallet.connect = async () => undefined
-    this.wallet.getCurrentChainId = async () => this.getChainId()
-
     const { rpcUrls, chainName, chainId } = this.getChainMetadata()
 
-    const provider = new providers.JsonRpcProvider(rpcUrls.at(0), {
+    const provider = new JsonRpcProvider(rpcUrls.at(0), {
       name: chainName,
       chainId: hexToDec(chainId),
     })
 
-    ;(this.wallet as any).provider = provider
+    this.wallet = new JsonRPCWallet(provider, undefined, rpcUrls.at(0))
+    this.wallet.address = this.address
+    this.wallet.connect = async () => undefined
   }
 
   getChainMetadata(): ChainMetadataType {

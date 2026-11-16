@@ -33,7 +33,7 @@ export const websiteDataSchema = z.object({
 
 export { ipfsCIDSchema }
 
-export const historySchema = z.record(ipfsCIDSchema)
+export const historySchema = z.record(z.string(), ipfsCIDSchema)
 
 export const ensSchema = z.array(domainNameSchema)
 

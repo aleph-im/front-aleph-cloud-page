@@ -192,7 +192,9 @@ export const ReownProvider = ({ children }: { children: React.ReactNode }) => {
           throw new Error(`Unsupported chain ID: ${chainId}`)
       }
 
-      await reownSwitchNetwork(network)
+      // Reown's network type comes from a different viem version than the one
+      // pinned in this app; the object is runtime-compatible (see config/reown).
+      await reownSwitchNetwork(network as any)
     },
     [reownSwitchNetwork],
   )
