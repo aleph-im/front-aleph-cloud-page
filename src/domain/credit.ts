@@ -250,25 +250,24 @@ export class CreditManager {
     txData: PaymentResponse['config']['tx'],
   ): Promise<string> {
     try {
-      const wallet = (this.account as any).wallet.provider.provider
+      // ethers v6 BrowserProvider.provider returns the provider itself, not
+      // the underlying EIP-1193 wallet; send() reaches the wallet request.
+      const wallet = (this.account as any).wallet.provider
 
-      if (!wallet) {
+      if (!wallet?.send) {
         throw new Error('No wallet provider available')
       }
 
-      const txHash = await wallet.request({
-        method: 'eth_sendTransaction',
-        params: [
-          {
-            from: txData.from,
-            to: txData.to,
-            gas: `0x${parseInt(txData.gasLimit).toString(16)}`,
-            gasPrice: `0x${parseInt(txData.gasPrice).toString(16)}`,
-            value: txData.value,
-            data: txData.data,
-          },
-        ],
-      })
+      const txHash = await wallet.send('eth_sendTransaction', [
+        {
+          from: txData.from,
+          to: txData.to,
+          gas: `0x${parseInt(txData.gasLimit).toString(16)}`,
+          gasPrice: `0x${parseInt(txData.gasPrice).toString(16)}`,
+          value: txData.value,
+          data: txData.data,
+        },
+      ])
 
       return txHash as string
     } catch (error) {

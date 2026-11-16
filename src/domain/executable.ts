@@ -706,12 +706,15 @@ export abstract class ExecutableManager<T extends Executable> {
 
       signature = Buffer.from(signedMessage.signature).toString('hex')
     } else {
-      const wallet = (this.account as any).wallet.provider.provider
+      // ethers v6 BrowserProvider.provider returns the provider itself, not
+      // the underlying EIP-1193 wallet; send() reaches the wallet request.
+      const wallet = (this.account as any).wallet.provider
 
-      signature = await wallet.request({
-        method: 'personal_sign',
-        params: [payload, address],
-      })
+      if (!wallet?.send) {
+        throw new Error('No wallet provider available')
+      }
+
+      signature = await wallet.send('personal_sign', [payload, address])
     }
 
     const pubKeyToken = {
