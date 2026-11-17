@@ -169,13 +169,13 @@ export function useHeader(): UseHeaderReturn {
   }, [lastDistribution])
 
   const rewards = useMemo(() => {
-    if (!userRewards) return
+    if (!account) return
 
     return {
-      amount: userRewards,
+      amount: userRewards ?? 0,
       days: pendingDays,
     }
-  }, [pendingDays, userRewards])
+  }, [account, pendingDays, userRewards])
 
   return {
     accountAddress: account?.address,
